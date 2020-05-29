@@ -22,7 +22,11 @@ public class SignUpRequest {
   @Email
   private String email;
   
-  private Set<String> role;
+  @NotBlank
+  @Size(min=2, max = 20)
+  private String fullname;
+  
+  private Set<String> roles;
   
   @NotBlank
   @Size(min = 6, max = 120)

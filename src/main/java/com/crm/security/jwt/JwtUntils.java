@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 
 import com.crm.security.services.UserDetailsImpl;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
@@ -26,14 +27,14 @@ public class JwtUntils {
   private String jwtSecret;
   
   @Value("${crm.app.jwtExpirationMs}")
-  private String jwtExpirationMs;
+  private long jwtExpirationMs;
   
-  @SuppressWarnings("deprecation")
   public String generateJwtToken(Authentication authentication) {
     UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-    return Jwts.builder().setSubject((userDetails.getUsername()))
+    return Jwts.builder()
+        .setSubject((userDetails.getUsername()))
         .setIssuedAt(new Date())
-        .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs))
+        .setExpiration(new Date(System.currentTimeMillis() + jwtExpirationMs))
         .signWith(SignatureAlgorithm.HS512, jwtSecret)
         .compact();
   }
@@ -42,10 +43,9 @@ public class JwtUntils {
     return Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token).getBody().getSubject();
   }
   
-  public boolean validateJwtToken(String authToken) {
+  public Claims validateJwtToken(String authToken) {
     try {
-        Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(authToken);
-        return true;
+        return Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(authToken).getBody();
     } catch (SignatureException e) {
         logger.error("Invalid JWT signature: {}", e.getMessage());
     } catch (MalformedJwtException e) {
@@ -57,7 +57,6 @@ public class JwtUntils {
     } catch (IllegalArgumentException e) {
         logger.error("JWT claims string is empty: {}", e.getMessage());
     }
-
-    return false;
-}
+    return null;
+  }
 }

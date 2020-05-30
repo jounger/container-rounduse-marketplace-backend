@@ -1,5 +1,8 @@
 package com.crm.models.mapper;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import com.crm.models.User;
 import com.crm.models.dto.UserDto;
 
@@ -11,7 +14,9 @@ public class UserMapper {
     userDto.setUsername(user.getUsername());
     userDto.setEmail(user.getEmail());
     userDto.setFullname(user.getFullname());
-    userDto.setRoles(user.getRoles());
+    Set<String> roles = new HashSet<>();
+    user.getRoles().forEach(role -> roles.add(role.getName().name()));
+    userDto.setRoles(roles);
     return userDto;
   }
 }

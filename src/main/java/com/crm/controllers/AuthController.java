@@ -8,6 +8,7 @@ import javax.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -62,7 +63,10 @@ public class AuthController {
     response.setFullname(userDetails.getFullname());
     response.setEmail(userDetails.getEmail());
     response.setRoles(roles);
-    return ResponseEntity.ok(response);
+    HttpHeaders responseHeaders = new HttpHeaders();
+    responseHeaders.set("Access-Control-Expose-Headers", "Authorization");
+    responseHeaders.set("Authorization", "Bearer " + jwt);
+    return ResponseEntity.ok().headers(responseHeaders).body(response);
   }
   
   @PostMapping("/signup")

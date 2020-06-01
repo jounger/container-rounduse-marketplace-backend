@@ -1,6 +1,6 @@
 package com.crm.controllers;
 
-import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.validation.Valid;
@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.crm.models.dto.UserDto;
 import com.crm.payload.request.SignInRequest;
 import com.crm.payload.request.SignUpRequest;
 import com.crm.payload.response.JwtResponse;
@@ -52,17 +53,22 @@ public class AuthController {
     SecurityContextHolder.getContext().setAuthentication(authentication);
     String jwt = jwtUntils.generateJwtToken(authentication);
     UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-    List<String> roles = userDetails.getAuthorities().stream()
+    Set<String> roles = userDetails.getAuthorities().stream()
         .map(role -> role.getAuthority())
-        .collect(Collectors.toList());
+        .collect(Collectors.toSet());
     logger.info("JWT: {}", jwt);
+    
+    UserDto userInfo = new UserDto();
+//    userInfo.setId(userDetails.getId());
+    userInfo.setUsername(userDetails.getUsername());
+    userInfo.setFullname(userDetails.getFullname());
+    userInfo.setRoles(roles);
+    userInfo.setEmail(userDetails.getEmail());
+    
     JwtResponse response = new JwtResponse();
-    response.setToken(jwt);
-    response.setId(userDetails.getId());
-    response.setUsername(userDetails.getUsername());
-    response.setFullname(userDetails.getFullname());
-    response.setEmail(userDetails.getEmail());
-    response.setRoles(roles);
+    response.setIdToken(jwt);
+    response.setUserInfo(userInfo);
+    
     HttpHeaders responseHeaders = new HttpHeaders();
     responseHeaders.set("Access-Control-Expose-Headers", "Authorization");
     responseHeaders.set("Authorization", "Bearer " + jwt);

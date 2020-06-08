@@ -72,7 +72,7 @@ public class UserServiceImpl implements UserService {
 
   @Override
   public Page<User> getUsers(PaginationRequest request) {
-    Page<User> pages = userRepository.findAll(PageRequest.of(request.getPageNumber(), request.getPageSize()));
+    Page<User> pages = userRepository.findAll(PageRequest.of(request.getPage(), request.getLimit()));
     return pages;
   }
 

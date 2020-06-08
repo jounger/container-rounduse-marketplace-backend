@@ -45,7 +45,7 @@ public class RoleServiceImpl implements RoleService {
 
   @Override
   public Page<Role> getRoles(PaginationRequest request) {
-    Page<Role> pages = roleRepository.findAll(PageRequest.of(request.getPageNumber(), request.getPageSize()));
+    Page<Role> pages = roleRepository.findAll(PageRequest.of(request.getPage(), request.getLimit()));
     return pages;
   }
 

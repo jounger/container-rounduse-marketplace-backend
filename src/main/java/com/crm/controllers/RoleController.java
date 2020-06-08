@@ -33,8 +33,8 @@ public class RoleController {
   public ResponseEntity<?> getRoles(@Valid @RequestBody PaginationRequest request) {
     Page<Role> pages = roleService.getRoles(request);
     PaginationResponse<Role> response = new PaginationResponse<>();
-    response.setPageNumber(request.getPageNumber());
-    response.setPageSize(request.getPageSize());
+    response.setPageNumber(request.getPage());
+    response.setPageSize(request.getLimit());
     response.setTotalElements(pages.getTotalElements());
     response.setTotalPages(pages.getTotalPages());
     response.setContents(pages.getContent());

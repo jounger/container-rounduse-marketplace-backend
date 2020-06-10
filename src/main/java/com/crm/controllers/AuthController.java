@@ -74,7 +74,7 @@ public class AuthController {
     UserDto userInfo = new UserDto();
 //    userInfo.setId(userDetails.getId());
     userInfo.setUsername(userDetails.getUsername());
-    userInfo.setFullname(userDetails.getFullname());
+    userInfo.setFullname(userDetails.getPhone());
     userInfo.setRoles(roles);
     userInfo.setEmail(userDetails.getEmail());
     
@@ -132,7 +132,7 @@ public class AuthController {
         UserDto userInfo = new UserDto();
   //      userInfo.setId(userDetails.getId());
         userInfo.setUsername(userDetails.getUsername());
-        userInfo.setFullname(userDetails.getFullname());
+        userInfo.setFullname(userDetails.getPhone());
         userInfo.setRoles(roles);
         userInfo.setEmail(userDetails.getEmail());
         

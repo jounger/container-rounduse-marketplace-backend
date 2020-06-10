@@ -33,22 +33,22 @@ public class UserController {
   @Autowired
   private UserService userService;
   
-  @GetMapping("/user")
-  @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN')")
-  public ResponseEntity<?> getUsers(@Valid PaginationRequest request) {
-    logger.info("Page request: {}", request.getPage());
-    Page<User> pages = userService.getUsers(request);
-    PaginationResponse<UserDto> response = new PaginationResponse<>();
-    response.setPageNumber(request.getPage());
-    response.setPageSize(request.getLimit());
-    response.setTotalElements(pages.getTotalElements());
-    response.setTotalPages(pages.getTotalPages());
-    
-    List<User> users = pages.getContent();
-    List<UserDto> usersDto = new ArrayList<>();
-    users.forEach(user -> usersDto.add(UserMapper.toUserDto(user)));
-    response.setContents(usersDto);
-    
-    return ResponseEntity.ok(response);
-  }
+//  @GetMapping("/user")
+//  @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN')")
+//  public ResponseEntity<?> getUsers(@Valid PaginationRequest request) {
+//    logger.info("Page request: {}", request.getPage());
+//    Page<User> pages = userService.getUsers(request);
+//    PaginationResponse<UserDto> response = new PaginationResponse<>();
+//    response.setPageNumber(request.getPage());
+//    response.setPageSize(request.getLimit());
+//    response.setTotalElements(pages.getTotalElements());
+//    response.setTotalPages(pages.getTotalPages());
+//    
+//    List<User> users = pages.getContent();
+//    List<UserDto> usersDto = new ArrayList<>();
+//    users.forEach(user -> usersDto.add(UserMapper.toUserDto(user)));
+//    response.setContents(usersDto);
+//    
+//    return ResponseEntity.ok(response);
+//  }
 }

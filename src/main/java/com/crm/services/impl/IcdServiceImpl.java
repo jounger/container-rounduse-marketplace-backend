@@ -7,7 +7,6 @@ import com.crm.exception.DuplicateRecordException;
 import com.crm.models.Icd;
 import com.crm.payload.request.IcdRequest;
 import com.crm.repository.IcdRepository;
-import com.crm.repository.ShippingLineRepository;
 import com.crm.services.IcdService;
 
 @Service

@@ -1,8 +1,6 @@
 package com.crm.services.impl;
 
-import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,20 +56,21 @@ public class MerchantServiceImpl implements MerchantService{
 //		merchant.setBankAccount(request.getBankAccount());
 		Set<String> rolesString = request.getRoles();
 		Set<Role> roles = new HashSet<>();
-		List<EnumRole> rolesEnum = Arrays.asList(EnumRole.values());
+//		List<EnumRole> rolesEnum = Arrays.asList(EnumRole.values());
 		if (rolesString == null) {
-			Role userRole = roleRepository.findByName(EnumRole.ROLE_FORWARDER)
+			Role userRole = roleRepository.findByName(EnumRole.ROLE_MERCHANT)
 					.orElseThrow(() -> new NotFoundException("Error: Role is not found"));
 			roles.add(userRole);
 		} else {
 			rolesString.forEach(role -> {
-				for (int i = 0; i < rolesEnum.size(); i++) {
-					if (role.equalsIgnoreCase(rolesEnum.get(i).name().split("_")[1])) {
-						Role userRole = roleRepository.findByName(rolesEnum.get(i))
+//				for (int i = 0; i < rolesEnum.size(); i++) {
+//					if (role.equalsIgnoreCase(rolesEnum.get(i).name().split("_")[1])) {
+//						Role userRole = roleRepository.findByName(rolesEnum.get(i))
+			            Role userRole = roleRepository.findByName(role)
 								.orElseThrow(() -> new NotFoundException("Error: Role is not found"));
 						roles.add(userRole);
-					}
-				}
+//					}
+//				}
 			});
 		}
 		merchant.setRoles(roles);

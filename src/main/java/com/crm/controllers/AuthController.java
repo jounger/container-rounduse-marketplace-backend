@@ -31,6 +31,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.crm.models.dto.UserDto;
 import com.crm.payload.request.SignInRequest;
 import com.crm.payload.request.SupplierRequest;
+import com.crm.payload.request.SystemAdminRequest;
 import com.crm.payload.response.JwtResponse;
 import com.crm.payload.response.MessageResponse;
 import com.crm.security.jwt.AuthTokenFilter;
@@ -79,7 +80,8 @@ public class AuthController {
 		userInfo.setPhone(userDetails.getPhone());
 		userInfo.setRoles(roles);
 		userInfo.setEmail(userDetails.getEmail());
-
+		userInfo.setStatus(userDetails.getStatus());
+		
 		JwtResponse response = new JwtResponse();
 		response.setIdToken(jwt);
 		response.setUserInfo(userInfo);

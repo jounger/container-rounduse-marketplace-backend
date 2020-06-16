@@ -24,8 +24,6 @@ public class UserDto {
   
   private String phone;
   
-  private Address address;
-  
   private String status;
   
   private Set<String> roles = new HashSet<>();

@@ -20,6 +20,6 @@ public interface UserService {
   @Query(value = "FROM user u JOIN u.roles r WHERE r.name = :name")
   void getUsersByRoleName(@Param("name") String name);
   
-//  Set<User> getUsersByStatus()
+  void updateInfomation(SignUpRequest request);
   
 }

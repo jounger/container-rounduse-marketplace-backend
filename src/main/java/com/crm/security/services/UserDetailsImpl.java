@@ -9,6 +9,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import com.crm.models.Address;
 import com.crm.models.User;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -25,6 +26,8 @@ public class UserDetailsImpl implements UserDetails {
   private String password;
   private String email;
   private String phone;
+  private Address address;
+  private String status;
   
   private Collection<? extends GrantedAuthority> authorities;
   
@@ -37,6 +40,8 @@ public class UserDetailsImpl implements UserDetails {
         user.getPassword(), 
         user.getEmail(), 
         user.getPhone(), 
+        user.getAddress(),
+        user.getStatus().toString(),
         authorities);
     
   }
@@ -51,6 +56,14 @@ public class UserDetailsImpl implements UserDetails {
   
   public String getPhone() {
     return phone;
+  }
+  
+  public Address getAddress() {
+	  return address;
+  }
+  
+  public String getStatus() {
+	  return status;
   }
   
   @Override

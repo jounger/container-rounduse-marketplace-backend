@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.data.web.SpringDataWebProperties.Pageable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -81,7 +82,12 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public Page<User> getUsers(PaginationRequest request) {
-		Page<User> pages = userRepository.findAll(PageRequest.of(request.getPage(), request.getLimit()));
+		Page<User> pages = null;
+		if(request.getStatus() == null) {
+			pages = userRepository.findAll(PageRequest.of(request.getPage(), request.getLimit()));
+		}else {
+			pages = userRepository.	findByStatus(EnumUserStatus.findByName(request.getStatus()), PageRequest.of(request.getPage(), request.getLimit()))	;	
+		}
 		return pages;
 	}
 
@@ -101,6 +107,13 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public void getUsersByRoleName(String name) {
 		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void updateInfomation(SignUpRequest request) {
+		User user = userRepository.findByUsername(request.getUsername())
+				.orElseThrow(() -> new NotFoundException("User is not found."));
 
 	}
 }

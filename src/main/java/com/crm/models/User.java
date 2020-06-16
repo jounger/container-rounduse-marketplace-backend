@@ -13,6 +13,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import com.crm.enums.EnumUserStatus;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import lombok.AllArgsConstructor;
@@ -31,6 +32,7 @@ import lombok.ToString;
     @UniqueConstraint(columnNames="username"),
     @UniqueConstraint(columnNames="email")
 })
+@Inheritance(strategy = InheritanceType.JOINED)
 @EntityListeners(AuditingEntityListener.class)
 @JsonIgnoreProperties(value = {"createdAt", "updatedAt"}, 
 allowGetters = true)
@@ -48,16 +50,20 @@ public class User {
   private String password;
   
   @NotBlank
+  @Size(min = 10, max = 10)
+  private String phone;
+  
+  @NotBlank
   @Size(min=5, max=50)
   @Email
   private String email;
   
   @NotBlank
   @Size(min=2, max=20)
-  private String fullname;
+  private EnumUserStatus status;
   
   @ManyToMany(fetch = FetchType.EAGER)
-  @JoinTable(name="user_roles",
+  @JoinTable(name="user_role",
     joinColumns = @JoinColumn(name="user_id"),
     inverseJoinColumns = @JoinColumn(name="role_id"))
   private Set<Role> roles = new HashSet<>();
@@ -71,5 +77,9 @@ public class User {
   @Temporal(TemporalType.TIMESTAMP)
   @LastModifiedDate
   private Date updatedAt;
+  
+  @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+  @JoinColumn(name = "address_id")
+  private Address address;
   
 }

@@ -21,7 +21,7 @@ import lombok.ToString;
 @ToString
 @Entity
 @Table(name = "container")
-@PrimaryKeyJoinColumn(name = "container_id")
+@PrimaryKeyJoinColumn(name = "supply_id")
 public class Container extends Supply{
 	
 	@ManyToOne
@@ -42,13 +42,14 @@ public class Container extends Supply{
 	
 	@OneToOne
 	@JoinColumn(name = "address_id")
-	private Address address;
+	private Address returnStation;
 	
 	@ManyToOne
 	@JoinColumn(name = "port_id")
 	private Port port;
 	
-	private int det;
+	private int feeDET;
 	
-	
+	@OneToOne(mappedBy = "container")
+	private ProposalDetail proposalDetail;
 }

@@ -3,6 +3,7 @@ package com.crm.models;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -30,9 +31,10 @@ public class Port {
 	
 	private String name;
 	
-	private String district;
+	@Column(name = "name_code")
+	private String nameCode;
 	
-	private String province;
+	private String address;
 	
 	@OneToMany
 	private Set<Container> containerList = new HashSet<Container>();

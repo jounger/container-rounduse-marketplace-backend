@@ -23,7 +23,7 @@ import lombok.ToString;
 @NoArgsConstructor
 @ToString
 @Entity
-@Table(name = "supplier")
+@Table(name = "Payment")
 public class Payment {
 	
 	@Id @GeneratedValue(strategy = GenerationType.IDENTITY)

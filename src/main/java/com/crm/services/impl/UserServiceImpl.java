@@ -18,9 +18,9 @@ import com.crm.exception.NotFoundException;
 import com.crm.models.Address;
 import com.crm.models.Role;
 import com.crm.models.User;
+import com.crm.payload.request.ChangeUserStatusRequest;
 import com.crm.payload.request.PaginationRequest;
 import com.crm.payload.request.SignUpRequest;
-import com.crm.repository.AddressRepository;
 import com.crm.repository.RoleRepository;
 import com.crm.repository.UserRepository;
 import com.crm.services.UserService;
@@ -33,9 +33,6 @@ public class UserServiceImpl implements UserService {
 
 	@Autowired
 	private RoleRepository roleRepository;
-
-	@Autowired
-	private AddressRepository addressRepository;
 
 	@Autowired
 	private PasswordEncoder passwordEncoder;
@@ -56,7 +53,7 @@ public class UserServiceImpl implements UserService {
 		List<EnumRole> rolesEnum = Arrays.asList(EnumRole.values());
 
 		if (rolesString == null) {
-			Role userRole = roleRepository.findByName(EnumRole.ROLE_STANDARD)
+			Role userRole = roleRepository.findByName(EnumRole.ROLE_OTHER)
 					.orElseThrow(() -> new NotFoundException("Error: Role is not found"));
 			roles.add(userRole);
 		} else {
@@ -88,4 +85,22 @@ public class UserServiceImpl implements UserService {
 		return pages;
 	}
 
+	@Override
+	public void changeStatus(ChangeUserStatusRequest request) {
+
+		User user = userRepository.findByUsername(request.getUsername())
+				.orElseThrow(() -> new NotFoundException("Error: User is not found"));
+		EnumUserStatus status = EnumUserStatus.findByName(request.getStatus());
+		if (status.equals(null)) {
+			throw new NotFoundException("Error: Status is not found");
+		}
+		user.setStatus(status);
+		userRepository.save(user);
+	}
+
+	@Override
+	public void getUsersByRoleName(String name) {
+		// TODO Auto-generated method stub
+
+	}
 }

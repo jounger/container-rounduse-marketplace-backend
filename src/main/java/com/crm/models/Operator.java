@@ -1,7 +1,5 @@
 package com.crm.models;
 
-import java.sql.Date;
-
 import javax.persistence.Entity;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;

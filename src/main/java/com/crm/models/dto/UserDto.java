@@ -3,6 +3,8 @@ package com.crm.models.dto;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.crm.models.Address;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -20,7 +22,11 @@ public class UserDto {
   
   private String email;
   
-  private String fullname;
+  private String phone;
+  
+  private Address address;
+  
+  private String status;
   
   private Set<String> roles = new HashSet<>();
   

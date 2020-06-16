@@ -7,5 +7,5 @@ import com.crm.models.Merchant;
 
 @Repository
 public interface MerchantRepository extends JpaRepository<Merchant, Long>{
-
+	
 }

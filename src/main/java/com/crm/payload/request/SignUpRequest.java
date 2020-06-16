@@ -31,6 +31,8 @@ public class SignUpRequest {
   
   private Set<String> roles;
   
+  private String status;
+  
   @JsonProperty("address")
   private Address address;
   

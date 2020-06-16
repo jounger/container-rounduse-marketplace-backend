@@ -9,6 +9,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -22,13 +23,17 @@ import lombok.ToString;
 @NoArgsConstructor
 @ToString
 @Entity
-@Table(name = "idc")
+@Table(name = "idc", uniqueConstraints = {
+		@UniqueConstraint(columnNames = "name")
+})
 public class Icd {
 	
 	@Id @GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
 	
 	private String name;
+	
+	private String nameCode;
 	
 	private String address;
 	

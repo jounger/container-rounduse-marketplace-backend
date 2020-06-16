@@ -1,6 +1,6 @@
 package com.crm.enums;
 
-public enum ESupplyStatus {
+public enum EnumSupplyStatus {
   CREATE,
   PUBLISHED,
   BIDDING,

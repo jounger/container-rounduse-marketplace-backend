@@ -1,12 +1,8 @@
 package com.crm.payload.request;
 
-import java.sql.Date;
-import java.util.HashSet;
 import java.util.Set;
 
 import com.crm.models.Address;
-import com.crm.models.Category;
-import com.crm.models.Port;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -21,7 +17,7 @@ public class ConsignmentRequest {
   
   private String status;
   
-  private Date packingTime;
+  private String packingTime;
   
   private Address packingStation;
   
@@ -29,19 +25,17 @@ public class ConsignmentRequest {
   
   private String bookingNumber;
   
-  private Date laytime;
+  private String laytime;
   
-  private Date cutOftime;
+  private String cutOftime;
   
   private float payload;
   
-  private String unitOfMeasurement;
+  private float unitOfMeasurement;
   
-  private Set<Category> categories = new HashSet<Category>();
+  private Set<String> categories;
   
-  private boolean FCL;
-  
-  private Port portOfLoading; 
+  private String portOfLoading; 
   
   
 }

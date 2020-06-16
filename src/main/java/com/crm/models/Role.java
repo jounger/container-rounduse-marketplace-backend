@@ -42,10 +42,10 @@ public class Role {
   @Column(length=20)
   private EnumRole name;
   
-  @ManyToMany(mappedBy = "roles")
+  @ManyToMany(mappedBy = "roles", fetch = FetchType.LAZY)
   private Collection<User> userList = new ArrayList<User>();
   
-  @ManyToMany(fetch = FetchType.EAGER)
+  @ManyToMany(fetch = FetchType.LAZY)
   @JoinTable(name = "role_permission",
   			joinColumns = @JoinColumn(name = "role_id"),
   			inverseJoinColumns = @JoinColumn(name = "permission_id"))

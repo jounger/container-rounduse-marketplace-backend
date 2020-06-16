@@ -27,6 +27,9 @@ public class Supplier extends User{
 	@Column(name = "website", length = 50)
 	private String website;
 	
+	@Column(name = "contact_person", length = 100)
+	private String contactPerson;
+	
 	@Column(name = "company_name", length = 100)
 	private String companyName;
 	

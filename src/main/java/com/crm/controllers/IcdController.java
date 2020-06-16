@@ -18,7 +18,6 @@ import com.crm.services.IcdService;
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 @RequestMapping("/api/icd")
-@PreAuthorize("hasRole('FORWARDER')")
 public class IcdController {
 
 	@Autowired

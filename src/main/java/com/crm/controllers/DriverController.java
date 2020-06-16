@@ -29,7 +29,7 @@ private static final Logger logger = LoggerFactory.getLogger(DriverController.cl
 	
 	@PostMapping("/")
 	@PreAuthorize("hasRole('FORWARDER')")
-	public ResponseEntity<?> createShippingLine(@Valid @RequestBody DriverRequest request){		
+	public ResponseEntity<?> createDriver(@Valid @RequestBody DriverRequest request){		
 		logger.info("Driver request: {}", request);
 		driverService.saveDriver(request);
 		

@@ -45,12 +45,15 @@ public class BiddingDocument {
 	@JoinColumn(name = "merchant_id")
 	private Merchant merchant;
 	
+	@OneToMany(mappedBy = "biddingDocument")
+	private BiddingDocumentWinning biddingDocumentWinning;
+	
 	@ManyToOne
 	@JoinColumn(name = "consignment_id")
 	private Consignment consignment;
 	
 	@OneToMany(fetch = FetchType.LAZY ,mappedBy = "biddingDocument")
-	private List<Bid> bidList = new ArrayList<Bid>();
+	private List<Bid> bids = new ArrayList<Bid>();
 	
 	@Column(name = "bid_opening")
 	private LocalDateTime bidOpening;
@@ -58,9 +61,24 @@ public class BiddingDocument {
 	@Column(name = "bid_closing")
 	private LocalDateTime bidClosing;
 	
-	private EnumCurrency currency;
+	@Column(name = "currency_of_payment")
+	private EnumCurrency currencyOfPayment;
 	
-	private String status;
+	@Column(name = "bid_package_price")
+	private float bidPackagePrice;
+	
+	@Column(name = "bit_floor_price")
+	private float bitFloorPrice;
+	
+	@Column(name = "bit_step")
+	private float bitStep;
+	
+	@ManyToOne
+	@JoinColumn(name = "discount_id")
+	private Discount bidDiscountCode;
+	
+	@Column(name = "price_leadership")
+	private float priceLeadership;
 	
 	@Column(name = "created_at", nullable = false, updatable = false)
 	@Temporal(TemporalType.TIMESTAMP)

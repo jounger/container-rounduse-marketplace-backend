@@ -1,6 +1,6 @@
 package com.crm.enums;
 
-public enum EBidStatus {
+public enum EnumBidStatus {
 	PENDING,
 	ACCEPTED,
 	REJECTED,

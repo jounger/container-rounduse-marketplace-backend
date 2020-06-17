@@ -60,7 +60,8 @@ public class Container extends Supply{
 	@JoinColumn(name = "port_id")
 	private Port portOfDelivery;
 	
-	private int feeDET;
+	@Column(name = "free_time")
+	private int freeTime;
 	
 	@OneToOne(mappedBy = "container")
 	private Bid bid;

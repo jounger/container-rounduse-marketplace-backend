@@ -3,7 +3,6 @@ package com.crm.models;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
@@ -26,9 +25,9 @@ import lombok.ToString;
 @PrimaryKeyJoinColumn(name = "user_id")
 public class Forwarder extends Supplier{
 	
-	@OneToMany(mappedBy = "forwarder", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	@OneToMany(mappedBy = "forwarder", fetch = FetchType.LAZY)
 	private Set<Driver> drivers = new HashSet<Driver>();
 	
-	@OneToMany(mappedBy = "forwarder", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	@OneToMany(mappedBy = "forwarder", fetch = FetchType.LAZY)
 	private Set<Bid> bids = new HashSet<Bid>();
 }

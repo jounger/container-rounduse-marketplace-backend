@@ -1,14 +1,13 @@
 package com.crm.models;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.Collection;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 
@@ -53,9 +52,9 @@ public class Supplier extends User{
 	@Column(name = "rating_value")
 	private float ratingValue;
 	
-	@OneToMany(mappedBy = "supplier")
-	private Set<Rating> ratedList = new HashSet<Rating>();
+	@OneToMany(mappedBy = "receiver")
+	private Collection<Rating> receivedRatings = new ArrayList<Rating>();
 	
-	@OneToMany(mappedBy = "ratingSupplier")
-	private Set<Rating> ratingList = new HashSet<Rating>();
+	@OneToMany(mappedBy = "sender")
+	private Collection<Rating> sentRatings = new ArrayList<Rating>();
 }

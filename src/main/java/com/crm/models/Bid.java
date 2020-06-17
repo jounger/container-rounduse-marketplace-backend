@@ -49,14 +49,14 @@ public class Bid {
 	@JoinColumn(name = "bidding_document_id")
 	private BiddingDocument biddingDocument;
 	
-	@OneToOne(mappedBy = "bid")
-	private BiddingDocumentWinning biddingDocumentWinning;
+	@OneToOne(mappedBy = "successfulBid")
+	private NotificationOfAward notificationOfAward;
 	
 	@ManyToOne
 	@JoinColumn(name = "forwarder_id")
 	private Forwarder bidder;
 	
-	@OneToOne
+	@ManyToOne
 	@JoinColumn(name = "container_id")
 	private Container container;
 

@@ -8,6 +8,8 @@ import javax.persistence.EntityListeners;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -38,6 +40,14 @@ public class Feedback {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
 
+	@ManyToOne
+	@JoinColumn(name = "operator_id")
+	private Operator sender;
+	
+	@ManyToOne
+	@JoinColumn(name = "report_id")
+	private Report report;
+	
 	private String message;
 
 	@Column(name = "created_at", nullable = false, updatable = false)

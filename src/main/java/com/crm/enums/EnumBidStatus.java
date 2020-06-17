@@ -5,5 +5,15 @@ public enum EnumBidStatus {
 	ACCEPTED,
 	REJECTED,
 	EXPIRED,
-	CANCELED
+	CANCELED;
+	
+	public static EnumBidStatus findByName(String name) {
+		for(EnumBidStatus status : EnumBidStatus.values()) {
+			if(status.name().equalsIgnoreCase(name)) {
+				return status;
+			}
+		}
+		
+		return null;
+	}
 }

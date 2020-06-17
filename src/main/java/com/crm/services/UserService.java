@@ -1,8 +1,6 @@
    package com.crm.services;
 
 import org.springframework.data.domain.Page;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 
 import com.crm.models.User;
 import com.crm.payload.request.ChangeUserStatusRequest;
@@ -16,10 +14,5 @@ public interface UserService {
   Page<User> getUsers(PaginationRequest request);
   
   void changeStatus(ChangeUserStatusRequest request);
-  
-  @Query(value = "FROM user u JOIN u.roles r WHERE r.name = :name")
-  void getUsersByRoleName(@Param("name") String name);
-  
-  void updateInfomation(SignUpRequest request);
   
 }

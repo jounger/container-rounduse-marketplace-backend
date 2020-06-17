@@ -79,6 +79,7 @@ public class AuthController {
 		userInfo.setPhone(userDetails.getPhone());
 		userInfo.setRoles(roles);
 		userInfo.setEmail(userDetails.getEmail());
+		userInfo.setStatus(userDetails.getStatus());
 
 		JwtResponse response = new JwtResponse();
 		response.setIdToken(jwt);

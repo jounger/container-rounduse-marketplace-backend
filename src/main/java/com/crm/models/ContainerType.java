@@ -25,38 +25,38 @@ import lombok.ToString;
 @Entity
 @Table(name="container_type")
 public class ContainerType {
-	
+
 	@Id	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
-	
+
 	private String name;
-	
+
 	private String description;
-	
+
 	@Column(name = "tare_weight")
 	private float tareWeight;
-	
+
 	@Column(name = "payload_capacity")
 	private float payloadCapacity;
-	
+
 	@Column(name = "cubic_capacity")
 	private float cubicCapacity;
-	
+
 	@Column(name = "internal_length")
 	private float internalLength;
-	
+
 	@Column(name = "internal_weight")
 	private float internalWeight;
-	
+
 	@Column(name = "internal_height")
 	private float internalHeight;
-	
+
 	@Column(name = "door_open_width")
 	private float doorOpeningWidth;
-	
+
 	@Column(name = "door_open_height")
 	private float doorOpeningHeight;
-	
-	@OneToMany
+
+	@OneToMany(mappedBy = "containerType")
 	private Collection<Supply> supplyList = new ArrayList<Supply>();
 }

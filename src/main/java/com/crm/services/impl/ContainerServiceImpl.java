@@ -3,7 +3,7 @@ package com.crm.services.impl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.crm.common.DateTimeConvert;
+import com.crm.common.Tool;
 import com.crm.enums.EnumSupplyStatus;
 import com.crm.exception.DuplicateRecordException;
 import com.crm.exception.NotFoundException;
@@ -54,7 +54,7 @@ public class ContainerServiceImpl implements ContainerService{
 		container.setContainerNumber(request.getContainerNumber());
 		container.setBlNumber(request.getBLNumber());
 		container.setLicensePlate(request.getLicensePlate());
-		container.setEmptyTime(DateTimeConvert.convertToLocalDateTime(request.getEmptyTime()));
+		container.setEmptyTime(Tool.convertToLocalDateTime(request.getEmptyTime()));
 		container.setReturnStation(request.getReturnStation());
 		container.setFreeTime(request.getFeeDET());
 		containerRepository.save(container);

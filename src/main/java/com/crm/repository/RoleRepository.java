@@ -14,12 +14,4 @@ public interface RoleRepository extends JpaRepository<Role, Long> {
 
   Boolean existsByName(String name);
 
-//  @Query(value = "FROM role r WHERE r.name LIKE '%:name%'", nativeQuery = true)
-//  Role findByName(@Param("name") String name);
-
-  Boolean existsByName(String name);
-
-//  @Query(value = "FROM role r WHERE r.name LIKE '%:name%'", nativeQuery = true)
-//  Role findByName(@Param("name") String name);
-
 }

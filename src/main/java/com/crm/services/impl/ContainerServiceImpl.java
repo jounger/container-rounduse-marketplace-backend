@@ -5,7 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
-import com.crm.common.DateTimeConvert;
+import com.crm.common.Tool;
 import com.crm.enums.EnumSupplyStatus;
 import com.crm.exception.NotFoundException;
 import com.crm.models.Address;
@@ -59,8 +59,8 @@ public class ContainerServiceImpl implements ContainerService {
     container.setContainerNumber(request.getContainerNumber());
     container.setBlNumber(request.getBLNumber());
     container.setLicensePlate(request.getLicensePlate());
-    container.setEmptyTime(DateTimeConvert.convertToLocalDateTime(request.getEmptyTime()));
-    container.setPickUpTime(DateTimeConvert.convertToLocalDateTime(request.getPickUpTime()));
+    container.setEmptyTime(Tool.convertToLocalDateTime(request.getEmptyTime()));
+    container.setPickUpTime(Tool.convertToLocalDateTime(request.getPickUpTime()));
 
     Address returnStation = (Address) request.getReturnStation();
     if (returnStation == null) {
@@ -103,8 +103,8 @@ public class ContainerServiceImpl implements ContainerService {
     container.setContainerNumber(request.getContainerNumber());
     container.setBlNumber(request.getBLNumber());
     container.setLicensePlate(request.getLicensePlate());
-    container.setEmptyTime(DateTimeConvert.convertToLocalDateTime(request.getEmptyTime()));
-    container.setPickUpTime(DateTimeConvert.convertToLocalDateTime(request.getPickUpTime()));
+    container.setEmptyTime(Tool.convertToLocalDateTime(request.getEmptyTime()));
+    container.setPickUpTime(Tool.convertToLocalDateTime(request.getPickUpTime()));
 
     Address returnStation = (Address) request.getReturnStation();
     if (returnStation == null) {

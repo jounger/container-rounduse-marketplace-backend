@@ -58,7 +58,7 @@ public class Container extends Supply{
 	
 	@ManyToOne
 	@JoinColumn(name = "port_id")
-	private Port port;
+	private Port portOfDelivery;
 	
 	private int feeDET;
 	

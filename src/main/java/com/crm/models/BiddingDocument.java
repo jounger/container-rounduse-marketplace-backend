@@ -21,6 +21,8 @@ import javax.persistence.TemporalType;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
+import com.crm.enums.EnumCurrency;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -50,11 +52,13 @@ public class BiddingDocument {
 	@OneToMany(fetch = FetchType.LAZY ,mappedBy = "biddingDocument")
 	private List<Bid> bidList = new ArrayList<Bid>();
 	
-	private LocalDateTime bidOpenning;
+	@Column(name = "bid_opening")
+	private LocalDateTime bidOpening;
 	
+	@Column(name = "bid_closing")
 	private LocalDateTime bidClosing;
 	
-	private String currency;
+	private EnumCurrency currency;
 	
 	private String status;
 	

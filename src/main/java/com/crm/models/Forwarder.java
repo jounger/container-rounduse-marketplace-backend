@@ -28,4 +28,7 @@ public class Forwarder extends Supplier{
 	
 	@OneToMany(mappedBy = "forwarder", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 	private Set<Driver> drivers = new HashSet<Driver>();
+	
+	@OneToMany(mappedBy = "forwarder", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	private Set<Bid> bids = new HashSet<Bid>();
 }

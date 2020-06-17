@@ -43,6 +43,10 @@ public class Bid {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
+	
+	@ManyToOne
+	@JoinColumn(name = "forwarder_id")
+	private Forwarder forwarder;
 
 	@Column(name = "opening_time")
 	private LocalDateTime openingTime;

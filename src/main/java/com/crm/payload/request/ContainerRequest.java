@@ -29,9 +29,11 @@ public class ContainerRequest {
 	
 	private String emptyTime;
 	
+	private String pickUpTime;
+	
 	private Address returnStation;
 	
 	private String portName;
 	
-	private int feeDET;
+	private int feeTime;
 }

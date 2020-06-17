@@ -25,20 +25,20 @@ import lombok.ToString;
 @Entity
 @Table(name = "port")
 public class Port {
-	
+
 	@Id @GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
-	
+
 	private String name;
-	
+
 	@Column(name = "name_code")
 	private String nameCode;
-	
+
 	private String address;
-	
+
 	@OneToMany(mappedBy = "portOfDelivery")
 	private Set<Container> containerList = new HashSet<Container>();
-	
+
 	@OneToMany(mappedBy = "port")
 	private Set<Consignment> consignmentList = new HashSet<Consignment>();
 }

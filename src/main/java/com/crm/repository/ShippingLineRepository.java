@@ -9,9 +9,9 @@ import com.crm.models.ShippingLine;
 
 @Repository
 public interface ShippingLineRepository extends JpaRepository<ShippingLine, Long>{
-	
+
 	Boolean existsByCompanyName(String name);
-	
+
 	Optional<ShippingLine> findByCompanyName(String name);
-	
+
 }

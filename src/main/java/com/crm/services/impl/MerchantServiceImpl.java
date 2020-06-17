@@ -24,16 +24,16 @@ public class MerchantServiceImpl implements MerchantService{
 
 	@Autowired
 	private UserRepository userRepository;
-	
+
 	@Autowired
 	private RoleRepository roleRepository;
-	
+
 	@Autowired
 	private MerchantRepository merchantRepository;
-	
+
 	@Autowired
 	private PasswordEncoder passwordEncoder;
-	
+
 	@Override
 	public void saveMerchant(SupplierRequest request) {
 		if (userRepository.existsByUsername(request.getUsername()) || userRepository.existsByEmail(request.getEmail())
@@ -81,9 +81,9 @@ public class MerchantServiceImpl implements MerchantService{
 		}
 		String encoder = passwordEncoder.encode(request.getPassword());
 		merchant.setPassword(encoder);
-		
+
 		merchantRepository.save(merchant);
-		
+
 	}
 
 }

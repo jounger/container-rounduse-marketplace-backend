@@ -1,8 +1,6 @@
 package com.crm.models;
 
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -11,8 +9,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -21,7 +18,6 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import com.crm.enums.EnumReportStatus;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import lombok.AllArgsConstructor;
@@ -36,29 +32,32 @@ import lombok.ToString;
 @NoArgsConstructor
 @ToString
 @Entity
-@Table(name="report")
+@Table(name = "proposal_detail")
 @EntityListeners(AuditingEntityListener.class)
-@JsonIgnoreProperties(value = {"createdAt", "updatedAt"},
+@JsonIgnoreProperties(value = {"createdAt", "updatedAt"}, 
 allowGetters = true)
-public class Report {
+public class ProposalDetail {
 
-	@Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
 
-	@ManyToOne
-	@JoinColumn(name = "supply_id")
-	private Supply supply;
+	@Column(name = "opening_time")
+	private Date openingTime;
 
-	@OneToMany(mappedBy = "report")
-	private Set<Feedback> feedbacks = new HashSet<Feedback>();
+	@Column(name = "closing_time")
+	private Date closingTime;
+	
+	@OneToOne
+	private Container container;
 
-	@ManyToOne
-	@JoinColumn(name = "bidding_document_id")
-	private BiddingDocument report;
+	@Column(name = "date_of_decision")
+	private Date dateOfDecision;
 
-	private String detail;
+	@Column(name = "offer_price")
+	private float offerPrice;
 
-	private EnumReportStatus status;
+	private Boolean acceptance;
 
 	@Column(name = "created_at", nullable = false, updatable = false)
 	@Temporal(TemporalType.TIMESTAMP)
@@ -69,4 +68,8 @@ public class Report {
 	@Temporal(TemporalType.TIMESTAMP)
 	@LastModifiedDate
 	private Date updatedAt;
+
+	@OneToOne
+	@JoinColumn(name = "container_id")
+	private Proposal proposal;
 }

@@ -23,19 +23,19 @@ public class ShippingLineServiceImpl implements ShippingLineService{
 
 	@Autowired
 	private UserRepository userRepository;
-	
+
 	@Autowired
 	private RoleRepository roleRepository;
-	
+
 	@Autowired
 	private ShippingLineRepository shippingLineRepository;
-	
+
 	@Autowired
 	private IcdRepository icdRepository;
-	
+
 	@Autowired
 	private PasswordEncoder passwordEncoder;
-	
+
 	@Override
 	public void saveShippingLine(ShippingLineRequest request) {
 		if (userRepository.existsByUsername(request.getUsername()) || userRepository.existsByEmail(request.getEmail())
@@ -49,7 +49,7 @@ public class ShippingLineServiceImpl implements ShippingLineService{
 		shippingLine.setStatus(EnumUserStatus.APPROVED);
 		shippingLine.setWebsite(request.getWebsite());
 		shippingLine.setCompanyName(request.getName());
-		shippingLine.setShortName(request.getShortName());		
+		shippingLine.setShortName(request.getShortName());
 		Role userRole = roleRepository.findByName("ROLE_SHIPPINGLINE")
 				.orElseThrow(() -> new NotFoundException("Error: Role is not found"));
 		shippingLine.getRoles().add(userRole);

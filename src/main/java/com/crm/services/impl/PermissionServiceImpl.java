@@ -16,7 +16,7 @@ public class PermissionServiceImpl implements PermissionService{
 
 	@Autowired
 	PermissionRepository permissionRepository;
-	
+
 	@Override
 	public void savePermission(PermissionRequest request) {
 //		List<Permission> permissions = permissionRepository.findAll();
@@ -33,12 +33,12 @@ public class PermissionServiceImpl implements PermissionService{
 //	    if(count == 0) {
 //	      throw new NotFoundException("Error: Permission is not in bound");
 //	    }
-		
+
 	}
 
 	@Override
 	public Page<Permission> getPermission(PaginationRequest request) {
-		
+
 		Page<Permission> pages = permissionRepository.findAll(PageRequest.of(request.getPage(), request.getLimit()));
 	    return pages;
 	}

@@ -19,10 +19,10 @@ public class PaginationRequest implements Serializable {
 
   @NotBlank
   private int page;
-  
+
   @NotBlank
   private int limit;
-  
+
   private String status;
-  
+
 }

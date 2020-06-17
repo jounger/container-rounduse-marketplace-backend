@@ -33,13 +33,13 @@ public class Role {
 
   @Id @GeneratedValue(strategy=GenerationType.IDENTITY)
   private Long id;
-  
+
   @Column(length=20)
   private String name;
-  
+
   @ManyToMany(mappedBy = "roles", fetch = FetchType.LAZY)
   private Collection<User> userList = new ArrayList<User>();
-  
+
   @ManyToMany(fetch = FetchType.LAZY)
   @JoinTable(name = "role_permission",
   			joinColumns = @JoinColumn(name = "role_id"),

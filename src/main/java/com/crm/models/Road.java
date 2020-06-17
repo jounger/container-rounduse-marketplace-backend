@@ -8,7 +8,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.ManyToMany;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import lombok.AllArgsConstructor;
@@ -19,23 +19,30 @@ import lombok.ToString;
 
 @Getter
 @Setter
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 @ToString
 @Entity
-@Table(name = "permission")
-public class Permission {
+@Table(name = "road")
+public class Road {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Id @GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
-
-	@Column(length = 20)
-	private String name;
-
-	private String description;
-
-	@ManyToMany(mappedBy = "permissions")
-	private Collection<Role> roles = new ArrayList<Role>();
-
+	
+	private String origin;
+	
+	private String destination;
+	
+	@Column(name = "mean_distance")
+	private float meanDistance;
+	
+	private float duration;
+	
+	@Column(name = "average_velocity")
+	private float averageVelocity;
+	
+	private float cost;
+	
+	@OneToMany(mappedBy = "road")
+	private Collection<Quotation> quatations = new ArrayList<Quotation>();
 }

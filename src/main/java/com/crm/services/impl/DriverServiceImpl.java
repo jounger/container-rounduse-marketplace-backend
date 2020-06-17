@@ -24,16 +24,16 @@ public class DriverServiceImpl implements DriverService{
 
 	@Autowired
 	private DriverRepository driverRepository;
-	
+
 	@Autowired
 	private UserRepository userRepository;
-	
+
 	@Autowired
 	private RoleRepository roleRepository;
-	
+
 	@Autowired
 	private ForwarderRepository forwarderRepository;
-	
+
 	@Override
 	public void saveDriver(DriverRequest request) {
 		if (userRepository.existsByUsername(request.getUsername()) || userRepository.existsByEmail(request.getEmail())
@@ -67,13 +67,13 @@ public class DriverServiceImpl implements DriverService{
 
 	@Override
 	public void updateDriver(DriverRequest request) {
-		
+
 	}
 
 	@Override
 	public void deleteDriver(String username) {
 		driverRepository.deleteByUsername(username);
-		
+
 	}
 
 }

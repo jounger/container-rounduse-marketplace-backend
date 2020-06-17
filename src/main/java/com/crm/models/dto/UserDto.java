@@ -3,6 +3,8 @@ package com.crm.models.dto;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.crm.models.Address;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,15 +17,15 @@ import lombok.Setter;
 public class UserDto {
 
 //  private Long id;
-  
+
   private String username;
-  
+
   private String email;
-  
+
   private String phone;
-  
+
   private String status;
-  
+
   private Set<String> roles = new HashSet<>();
-  
+
 }

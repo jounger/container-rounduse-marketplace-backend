@@ -22,7 +22,7 @@ public class Merchant extends Supplier{
 
 	@OneToMany(mappedBy = "merchant")
 	private Set<Consignment> consignments = new HashSet<Consignment>();
-	
+
 	@OneToMany(mappedBy = "merchant")
 	private Set<BiddingDocument> biddingDocuments = new HashSet<BiddingDocument>();
 }

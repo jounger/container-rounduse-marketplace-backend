@@ -1,7 +1,5 @@
 package com.crm.models;
 
-import java.time.LocalDateTime;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -10,6 +8,8 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+
+import com.crm.enums.EnumRatingValue;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -23,22 +23,21 @@ import lombok.ToString;
 @NoArgsConstructor
 @ToString
 @Entity
-@Table(name = "Payment")
-public class Payment {
-	
-	@Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+@Table(name="rating")
+public class Rating {
+
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
 	
 	@ManyToOne
-	@JoinColumn(name = "account_id")
-	private Account account;
+	@JoinColumn(name = "supplier_id")
+	private Supplier supplier;
 	
-	private String detail;
+	@ManyToOne
+	@JoinColumn(name = "rating_supplier_id")
+	private Supplier ratingSupplier;
 	
-	private float amount;
-	
-	private float paid;
-	
-	@Column(name = "payment_date")
-	private LocalDateTime paymentDate;
+	@Column(name = "rating_value")
+	private EnumRatingValue ratingValue;
 }

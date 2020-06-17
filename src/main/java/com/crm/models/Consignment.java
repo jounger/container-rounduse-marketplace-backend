@@ -1,9 +1,10 @@
 package com.crm.models;
 
-import java.sql.Date;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
@@ -38,19 +39,25 @@ public class Consignment extends Supply{
 				inverseJoinColumns = @JoinColumn(name = "category_id"))
 	private Set<Category> categoryList = new HashSet<Category>();
 	
-	private Date packingTime;
+	@Column(name = "packing_time")
+	private LocalDateTime packingTime;
 	
+	@Column(name = "booking_number")
 	private String bookingNumber;
 	
-	private Date layTime;
+	@Column(name = "lay_time")
+	private LocalDateTime layTime;
 	
-	private Date cutOfTime;
+	@Column(name = "cut_of_time")
+	private LocalDateTime cutOfTime;
 	
+	@Column(name = "payload")
 	private float payload;
 	
+	@Column(name = "unit_of_measurment")
 	private float unitOfMeasurement;
 	
-	private boolean flc;
+	private boolean fcl;
 	
 	@ManyToOne
 	@JoinColumn(name = "address_id")

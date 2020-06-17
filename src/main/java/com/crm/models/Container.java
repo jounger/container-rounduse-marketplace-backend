@@ -1,6 +1,9 @@
 package com.crm.models;
 
-import java.sql.Date;
+
+import java.time.LocalDateTime;
+
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -28,17 +31,26 @@ public class Container extends Supply{
 	@JoinColumn(name = "driver_id")
 	private Driver driver;
 	
+	@Column(name = "container_trailer")
 	private String containerTrailer;
 	
+	@Column(name = "container_tractor")
 	private String containerTractor;
 	
+	@Column(name = "containerNumber")
 	private String containerNumber;
 	
+	@Column(name = "bl_number")
 	private String blNumber;
 	
+	@Column(name = "license_plate")
 	private String licensePlate;
 	
-	private Date emptyTime;
+	@Column(name = "empty_time")
+	private LocalDateTime emptyTime;
+	
+	@Column(name = "pick_up_time")
+	private LocalDateTime pickUpTime;
 	
 	@OneToOne
 	@JoinColumn(name = "address_id")
@@ -46,10 +58,11 @@ public class Container extends Supply{
 	
 	@ManyToOne
 	@JoinColumn(name = "port_id")
-	private Port port;
+	private Port portOfDelivery;
 	
-	private int feeDET;
+	@Column(name = "free_time")
+	private int freeTime;
 	
 	@OneToOne(mappedBy = "container")
-	private ProposalDetail proposalDetail;
+	private Bid bid;
 }

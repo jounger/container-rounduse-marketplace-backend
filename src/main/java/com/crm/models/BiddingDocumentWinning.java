@@ -1,12 +1,13 @@
 package com.crm.models;
 
-import javax.persistence.Column;
+import java.time.LocalDateTime;
+
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
@@ -22,27 +23,21 @@ import lombok.ToString;
 @NoArgsConstructor
 @ToString
 @Entity
-@Table(name = "quotation")
-public class Quotation {
+@Table(name = "bidding_document_winning")
+public class BiddingDocumentWinning {
 	
-	@Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
 	
-	@OneToOne
-	@JoinColumn(name = "quotation")
-	private Proposal proposal;
+	@OneToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "bidding_document_id")
+	private BiddingDocument biddingDocument;
 	
-	@ManyToOne
-	@JoinColumn(name = "quotations")
-	private Road road;
+	@OneToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "bid_id")
+	private Bid bid;
 	
-	@Column(name = "container_type")
-	private String containerType;
+	private LocalDateTime dateOfDecision;
 	
-	private boolean flc;
-	
-	private int vat;
-	
-	@Column(name = "total_cost")
-	private float totalCost;
 }

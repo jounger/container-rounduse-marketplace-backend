@@ -44,6 +44,6 @@ public class ShippingLine extends User{
 				inverseJoinColumns = @JoinColumn(name = "icd_id"))
 	private Collection<Icd> icdList = new ArrayList<Icd>();
 	
-	@OneToMany
+	@OneToMany(mappedBy = "shippingLine")
 	private Set<Consignment> consignmentList = new HashSet<Consignment>();
 }

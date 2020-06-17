@@ -28,11 +28,11 @@ import lombok.ToString;
 @PrimaryKeyJoinColumn(name = "user_id")
 public class Driver extends User{
 	
-	@Column(name = "name", length = 50)
-	private String name;
+	@Column(name = "fullname", length = 50)
+	private String fullname;
 	
-	@Column(name = "license", length = 50)
-	private String license;
+	@Column(name = "driver_license", length = 50)
+	private String driverLicense;
 	
 	@ManyToOne
 	@JoinColumn(name = "forwarder_id")

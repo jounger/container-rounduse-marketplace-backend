@@ -36,9 +36,9 @@ public class Port {
 	
 	private String address;
 	
-	@OneToMany
+	@OneToMany(mappedBy = "portOfDelivery")
 	private Set<Container> containerList = new HashSet<Container>();
 	
-	@OneToMany
+	@OneToMany(mappedBy = "port")
 	private Set<Consignment> consignmentList = new HashSet<Consignment>();
 }

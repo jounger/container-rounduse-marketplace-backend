@@ -1,8 +1,8 @@
-	package com.crm.models;
+package com.crm.models;
 
+import java.time.LocalDateTime;
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -10,10 +10,6 @@ import javax.persistence.EntityListeners;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
@@ -37,37 +33,38 @@ import lombok.ToString;
 @NoArgsConstructor
 @ToString
 @Entity
-@Table(name = "supply")
-@Inheritance(strategy = InheritanceType.JOINED)
+@Table(name = "discount")
 @EntityListeners(AuditingEntityListener.class)
 @JsonIgnoreProperties(value = {"createdAt", "updatedAt"}, 
 allowGetters = true)
-public class Supply {
-	
-	@Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+public class Discount {
+
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
-	
-	@ManyToOne
-	@JoinColumn(name = "shipping_line_id")
-	private ShippingLine shippingLine;
-	
-	@ManyToOne
-	@JoinColumn(name = "container_type_id")
-	private ContainerType containerType;
-	
-	private String status;
-	
+
+	private String code;
+
+	private String detail;
+
+	private float percent;
+
+	@Column(name = "maximum_discount")
+	private float maximumDiscount;
+
+	@Column(name = "expired_date")
+	private LocalDateTime expiredDate;
+
 	@Column(name = "created_at", nullable = false, updatable = false)
 	@Temporal(TemporalType.TIMESTAMP)
 	@CreatedDate
 	private Date createdAt;
-	
+
 	@Column(name = "updated_at", nullable = false)
 	@Temporal(TemporalType.TIMESTAMP)
 	@LastModifiedDate
 	private Date updatedAt;
 	
-	@OneToMany(mappedBy = "supply")
-	private Set<Report> reports = new HashSet<Report>();
-
+	@OneToMany(mappedBy = "bidDiscountCode")
+	private List<BiddingDocument> biddingDocumentList;
 }

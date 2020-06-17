@@ -24,10 +24,10 @@ import lombok.ToString;
 @Table(name = "forwarder")
 @PrimaryKeyJoinColumn(name = "user_id")
 public class Forwarder extends Supplier{
-	
+
 	@OneToMany(mappedBy = "forwarder", fetch = FetchType.LAZY)
 	private Set<Driver> drivers = new HashSet<Driver>();
-	
+
 	@OneToMany(mappedBy = "bidder", fetch = FetchType.LAZY)
 	private Set<Bid> bids = new HashSet<Bid>();
 }

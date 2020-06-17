@@ -18,10 +18,10 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class UserDetailsImpl implements UserDetails {
   private static final long serialVersionUID = 1L;
-  
+
   private Long id;
   private String username;
-  
+
   @JsonIgnore
   private String password;
   private String email;
@@ -30,7 +30,7 @@ public class UserDetailsImpl implements UserDetails {
   private String status;
   
   private Collection<? extends GrantedAuthority> authorities;
-  
+
   public static UserDetailsImpl build(User user) {
     List<GrantedAuthority> authorities = user.getRoles()
         .stream().map(role -> new SimpleGrantedAuthority(role.getName()))
@@ -43,29 +43,29 @@ public class UserDetailsImpl implements UserDetails {
         user.getAddress(),
         user.getStatus().toString(),
         authorities);
-    
+
   }
-  
+
   public Long getId() {
     return id;
   }
-  
+
   public String getEmail() {
     return email;
   }
-  
+
   public String getPhone() {
     return phone;
   }
-  
+
   public Address getAddress() {
 	  return address;
   }
-  
+
   public String getStatus() {
 	  return status;
   }
-  
+
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {
     // TODO Auto-generated method stub
@@ -107,12 +107,12 @@ public class UserDetailsImpl implements UserDetails {
     // TODO Auto-generated method stub
     return true;
   }
-  
+
   @Override
   public boolean equals(Object o) {
     if(this == o)
       return true;
-    if(o == null || getClass() != o.getClass()) 
+    if(o == null || getClass() != o.getClass())
       return false;
     UserDetailsImpl userDetails = (UserDetailsImpl) o;
     return Objects.equals(id, userDetails.id);

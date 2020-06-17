@@ -27,13 +27,13 @@ public class OperatorServiceImpl implements OperatorService{
 
 	@Autowired
 	private PasswordEncoder passwordEncoder;
-	
+
 	@Autowired
 	private OperatorRepository operatorRepository;
-	
+
 	@Override
 	public void saveOperator(OperatorRequest request) {
-		
+
 		if (userRepository.existsByUsername(request.getUsername()) || userRepository.existsByEmail(request.getEmail())
 				|| userRepository.existsByPhone(request.getPhone())) {
 			throw new DuplicateRecordException("Error: User has been existed");
@@ -55,7 +55,7 @@ public class OperatorServiceImpl implements OperatorService{
 		String encoder = passwordEncoder.encode(request.getPassword());
 		operator.setPassword(encoder);
 		operatorRepository.save(operator);
-		
+
 	}
 
 }

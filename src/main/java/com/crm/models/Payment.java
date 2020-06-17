@@ -25,20 +25,20 @@ import lombok.ToString;
 @Entity
 @Table(name = "Payment")
 public class Payment {
-	
+
 	@Id @GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
-	
+
 	@ManyToOne
 	@JoinColumn(name = "account_id")
 	private Account account;
 	
 	private String detail;
-	
+
 	private float amount;
-	
+
 	private float paid;
-	
+
 	@Column(name = "payment_date")
 	private LocalDateTime paymentDate;
 }

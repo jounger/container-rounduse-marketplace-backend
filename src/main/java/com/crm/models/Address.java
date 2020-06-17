@@ -23,13 +23,13 @@ import lombok.ToString;
 @Entity
 @Table(name = "address")
 public class Address {
-	
+
 	@Id @GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
 	
 	@OneToOne(mappedBy = "address", fetch = FetchType.LAZY)
 	private User user;
-	
+
 	@Column(length = 50)
 	private String address;
 	
@@ -37,10 +37,10 @@ public class Address {
 	
 	@Column(length = 50)
 	private String city;
-	
+
 	@Column(length = 50)
 	private String country;
-	
+
 	@Column(length = 6)
 	private String postalCode;
 }

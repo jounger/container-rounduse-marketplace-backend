@@ -29,13 +29,13 @@ public class Permission {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
-	
+
 	@Column(length = 20)
 	private String name;
-	
+
 	private String description;
 	
 	@ManyToMany(mappedBy = "permissions")
 	private Collection<Role> roles = new ArrayList<Role>();
-	
+
 }

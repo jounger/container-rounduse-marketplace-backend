@@ -38,33 +38,33 @@ import lombok.ToString;
 @Entity
 @Table(name="report")
 @EntityListeners(AuditingEntityListener.class)
-@JsonIgnoreProperties(value = {"createdAt", "updatedAt"}, 
+@JsonIgnoreProperties(value = {"createdAt", "updatedAt"},
 allowGetters = true)
 public class Report {
-	
+
 	@Id @GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
-	
+
 	@ManyToOne
 	@JoinColumn(name = "supply_id")
 	private Supply supply;
 	
 	@OneToMany(mappedBy = "report")
 	private Set<Feedback> feedbacks = new HashSet<Feedback>();
-	
+
 	@ManyToOne
 	@JoinColumn(name = "bidding_document_id")
 	private BiddingDocument report;
-	
+
 	private String detail;
-	
+
 	private EnumReportStatus status;
-	
+
 	@Column(name = "created_at", nullable = false, updatable = false)
 	@Temporal(TemporalType.TIMESTAMP)
 	@CreatedDate
 	private Date createdAt;
-	
+
 	@Column(name = "updated_at", nullable = false)
 	@Temporal(TemporalType.TIMESTAMP)
 	@LastModifiedDate

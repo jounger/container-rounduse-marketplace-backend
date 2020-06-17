@@ -30,10 +30,10 @@ public class ForwarderServiceImpl implements ForwarderService{
 
 	@Autowired
 	private PasswordEncoder passwordEncoder;
-	
+
 	@Autowired
 	private ForwarderRepository forwarderRepository;
-	
+
 	@Override
 	public void saveForwarder(SupplierRequest request) {
 		if (userRepository.existsByUsername(request.getUsername()) || userRepository.existsByEmail(request.getEmail())
@@ -81,9 +81,9 @@ public class ForwarderServiceImpl implements ForwarderService{
 		}
 		String encoder = passwordEncoder.encode(request.getPassword());
 		forwarder.setPassword(encoder);
-		
+
 		forwarderRepository.save(forwarder);
-		
+
 	}
 
 }

@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.crm.enums.EnumRole;
 import com.crm.enums.EnumUserStatus;
 import com.crm.exception.DuplicateRecordException;
 import com.crm.exception.NotFoundException;
@@ -49,9 +48,9 @@ public class ShippingLineServiceImpl implements ShippingLineService{
 		shippingLine.setPhone(request.getPhone());
 		shippingLine.setStatus(EnumUserStatus.APPROVED);
 		shippingLine.setWebsite(request.getWebsite());
-		shippingLine.setName(request.getName());
+		shippingLine.setCompanyName(request.getName());
 		shippingLine.setShortName(request.getShortName());		
-		Role userRole = roleRepository.findByName(EnumRole.ROLE_SHIPPINGLINE)
+		Role userRole = roleRepository.findByName("ROLE_SHIPPINGLINE")
 				.orElseThrow(() -> new NotFoundException("Error: Role is not found"));
 		shippingLine.getRoles().add(userRole);
 		Address address = (Address) request.getAddress();

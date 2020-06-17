@@ -23,8 +23,8 @@ import lombok.ToString;
 @NoArgsConstructor
 @ToString
 @Entity
-@Table(name = "bidding_document_winning")
-public class BiddingDocumentWinning {
+@Table(name = "notification_of_award")
+public class NotificationOfAward {
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -36,7 +36,7 @@ public class BiddingDocumentWinning {
 	
 	@OneToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "bid_id")
-	private Bid bid;
+	private Bid successfulBid;
 	
 	private LocalDateTime dateOfDecision;
 	

@@ -33,6 +33,8 @@ public class Address {
 	@Column(length = 50)
 	private String address;
 	
+	private String county;
+	
 	@Column(length = 50)
 	private String city;
 	

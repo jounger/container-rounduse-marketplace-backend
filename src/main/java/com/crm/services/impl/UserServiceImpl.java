@@ -1,18 +1,14 @@
 package com.crm.services.impl;
 
-import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.data.web.SpringDataWebProperties.Pageable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.crm.enums.EnumRole;
 import com.crm.enums.EnumUserStatus;
 import com.crm.exception.DuplicateRecordException;
 import com.crm.exception.NotFoundException;
@@ -51,20 +47,17 @@ public class UserServiceImpl implements UserService {
 		user.setStatus(EnumUserStatus.PENDING);
 		Set<String> rolesString = request.getRoles();
 		Set<Role> roles = new HashSet<>();
-		List<EnumRole> rolesEnum = Arrays.asList(EnumRole.values());
 
 		if (rolesString == null) {
-			Role userRole = roleRepository.findByName(EnumRole.ROLE_OTHER)
+			Role userRole = roleRepository.findByName("ROLE_OTHER")
 					.orElseThrow(() -> new NotFoundException("Error: Role is not found"));
 			roles.add(userRole);
 		} else {
 			rolesString.forEach(role -> {
-				for (int i = 0; i < rolesEnum.size(); i++) {
-					if (role.equalsIgnoreCase(rolesEnum.get(i).name().split("_")[1])) {
-						Role userRole = roleRepository.findByName(rolesEnum.get(i))
-								.orElseThrow(() -> new NotFoundException("Error: Role is not found"));
-						roles.add(userRole);
-					}
+				for (int i = 0; i < rolesString.size(); i++) {
+					Role userRole = roleRepository.findByName(role)
+							.orElseThrow(() -> new NotFoundException("Error: Role is not found"));
+					roles.add(userRole);
 				}
 			});
 		}
@@ -83,10 +76,11 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public Page<User> getUsers(PaginationRequest request) {
 		Page<User> pages = null;
-		if(request.getStatus() == null) {
+		if (request.getStatus() == null) {
 			pages = userRepository.findAll(PageRequest.of(request.getPage(), request.getLimit()));
-		}else {
-			pages = userRepository.	findByStatus(EnumUserStatus.findByName(request.getStatus()), PageRequest.of(request.getPage(), request.getLimit()))	;	
+		} else {
+			pages = userRepository.findByStatus(EnumUserStatus.findByName(request.getStatus()),
+					PageRequest.of(request.getPage(), request.getLimit()));
 		}
 		return pages;
 	}
@@ -102,18 +96,5 @@ public class UserServiceImpl implements UserService {
 		}
 		user.setStatus(status);
 		userRepository.save(user);
-	}
-
-	@Override
-	public void getUsersByRoleName(String name) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void updateInfomation(SignUpRequest request) {
-		User user = userRepository.findByUsername(request.getUsername())
-				.orElseThrow(() -> new NotFoundException("User is not found."));
-
 	}
 }

@@ -9,8 +9,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-import com.crm.enums.EnumRatingValue;
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -31,13 +29,13 @@ public class Rating {
 	private long id;
 	
 	@ManyToOne
-	@JoinColumn(name = "supplier_id")
-	private Supplier supplier;
+	@JoinColumn(name = "sender_supplier_id")
+	private Supplier sender;
 	
 	@ManyToOne
-	@JoinColumn(name = "rating_supplier_id")
-	private Supplier ratingSupplier;
+	@JoinColumn(name = "receiver_supplier_id")
+	private Supplier receiver;
 	
 	@Column(name = "rating_value")
-	private EnumRatingValue ratingValue;
+	private int ratingValue;
 }

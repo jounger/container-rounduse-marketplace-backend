@@ -32,8 +32,8 @@ public class ShippingLine extends User{
 	
 	private String website;
 	
-	@Column(length = 50)
-	private String name;
+	@Column(name = "company_name", length = 50)
+	private String companyName;
 	
 	@Column(name = "short_name", length = 10)
 	private String shortName;

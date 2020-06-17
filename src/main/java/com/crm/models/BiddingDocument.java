@@ -2,6 +2,7 @@ package com.crm.models;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
@@ -14,6 +15,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -45,8 +47,8 @@ public class BiddingDocument {
 	@JoinColumn(name = "merchant_id")
 	private Merchant merchant;
 	
-	@OneToMany(mappedBy = "biddingDocument")
-	private BiddingDocumentWinning biddingDocumentWinning;
+	@OneToOne(mappedBy = "biddingDocument")
+	private NotificationOfAward notificationOfAward;
 	
 	@ManyToOne
 	@JoinColumn(name = "consignment_id")
@@ -54,6 +56,9 @@ public class BiddingDocument {
 	
 	@OneToMany(fetch = FetchType.LAZY ,mappedBy = "biddingDocument")
 	private List<Bid> bids = new ArrayList<Bid>();
+	
+	@OneToMany(mappedBy = "report")
+	private Collection<Report> reports = new ArrayList<Report>();
 	
 	@Column(name = "bid_opening")
 	private LocalDateTime bidOpening;

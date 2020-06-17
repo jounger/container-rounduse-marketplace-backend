@@ -33,7 +33,7 @@ public class UserDetailsImpl implements UserDetails {
   
   public static UserDetailsImpl build(User user) {
     List<GrantedAuthority> authorities = user.getRoles()
-        .stream().map(role -> new SimpleGrantedAuthority(role.getName().name()))
+        .stream().map(role -> new SimpleGrantedAuthority(role.getName()))
         .collect(Collectors.toList());
     return new UserDetailsImpl(user.getId(), 
         user.getUsername(), 

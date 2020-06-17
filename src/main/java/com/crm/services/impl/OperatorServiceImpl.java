@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.crm.enums.EnumRole;
 import com.crm.enums.EnumUserStatus;
 import com.crm.exception.DuplicateRecordException;
 import com.crm.exception.NotFoundException;
@@ -44,7 +43,7 @@ public class OperatorServiceImpl implements OperatorService{
 		operator.setEmail(request.getEmail());
 		operator.setPhone(request.getPhone());
 		operator.setStatus(EnumUserStatus.APPROVED);
-		Role userRole = roleRepository.findByName(EnumRole.ROLE_OPERATOR)
+		Role userRole = roleRepository.findByName("ROLE_OPERATOR")
 				.orElseThrow(() -> new NotFoundException("Error: Role is not found"));
 		operator.getRoles().add(userRole);
 		Address address = (Address) request.getAddress();

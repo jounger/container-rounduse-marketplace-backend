@@ -2,11 +2,14 @@ package com.crm.models;
 
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
@@ -63,6 +66,6 @@ public class Container extends Supply{
 	@Column(name = "free_time")
 	private int freeTime;
 	
-	@OneToOne(mappedBy = "container")
-	private Bid bid;
+	@OneToMany(mappedBy = "container")
+	private Set<Bid> bids = new HashSet<Bid>();
 }

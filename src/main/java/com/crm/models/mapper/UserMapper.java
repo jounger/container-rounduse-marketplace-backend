@@ -16,7 +16,7 @@ public class UserMapper {
     userDto.setPhone(user.getPhone());
     userDto.setStatus(user.getStatus().name());
     Set<String> roles = new HashSet<>();
-    user.getRoles().forEach(role -> roles.add(role.getName().name()));
+    user.getRoles().forEach(role -> roles.add(role.getName()));
     userDto.setRoles(roles);
     return userDto;
   }

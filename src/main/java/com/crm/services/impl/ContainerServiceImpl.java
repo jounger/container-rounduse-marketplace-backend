@@ -8,6 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import com.crm.common.DateTimeConvert;
 import com.crm.enums.EnumSupplyStatus;
 import com.crm.exception.NotFoundException;
 import com.crm.models.Address;
@@ -43,18 +44,16 @@ public class ContainerServiceImpl implements ContainerService {
   @Autowired
   private PortRepository portRepository;
 
-  DateTimeFormatter timeFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-
   @Override
   public void saveContainer(ContainerRequest request) {
     Container container = new Container();
-    ShippingLine shippingLine = shippingLineRepository.findByName(request.getShippingLineName())
+    ShippingLine shippingLine = shippingLineRepository.findByCompanyName(request.getShippingLineName())
         .orElseThrow(() -> new NotFoundException("ERROR: Shipping Line is not found."));
     container.setShippingLine(shippingLine);
     ContainerType containerType = containerTypeRepository.findByName(request.getContainerType())
         .orElseThrow(() -> new NotFoundException("ERROR: Type is not found."));
     container.setContainerType(containerType);
-    container.setStatus(EnumSupplyStatus.CREATE.name());
+    container.setStatus(EnumSupplyStatus.findByName(request.getStatus()));
     Driver driver = driverRepository.findByUsername(request.getDriverUsername())
         .orElseThrow(() -> new NotFoundException("ERROR: Driver is not found."));
     container.setDriver(driver);
@@ -63,10 +62,8 @@ public class ContainerServiceImpl implements ContainerService {
     container.setContainerNumber(request.getContainerNumber());
     container.setBlNumber(request.getBLNumber());
     container.setLicensePlate(request.getLicensePlate());
-    LocalDateTime emptyTime = LocalDateTime.parse(request.getEmptyTime(), timeFormat);
-    container.setEmptyTime(emptyTime);
-    LocalDateTime pickupTime = LocalDateTime.parse(request.getPickUpTime(), timeFormat);
-    container.setPickUpTime(pickupTime);
+    container.setEmptyTime(DateTimeConvert.convertToLocalDateTime(request.getEmptyTime()));
+    container.setPickUpTime(DateTimeConvert.convertToLocalDateTime(request.getPickUpTime()));
 
     Address returnStation = (Address) request.getReturnStation();
     if (returnStation == null) {
@@ -94,13 +91,13 @@ public class ContainerServiceImpl implements ContainerService {
   public void editContainer(Long id, ContainerRequest request) {
     Container container = containerRepository.findById(id)
         .orElseThrow(() -> new NotFoundException("ERROR: Container is not found."));
-    ShippingLine shippingLine = shippingLineRepository.findByName(request.getShippingLineName())
+    ShippingLine shippingLine = shippingLineRepository.findByCompanyName(request.getShippingLineName())
         .orElseThrow(() -> new NotFoundException("ERROR: Shipping Line is not found."));
     container.setShippingLine(shippingLine);
     ContainerType containerType = containerTypeRepository.findByName(request.getContainerType())
         .orElseThrow(() -> new NotFoundException("ERROR: Type is not found."));
     container.setContainerType(containerType);
-    container.setStatus(EnumSupplyStatus.CREATE.name());
+    container.setStatus(EnumSupplyStatus.findByName(request.getStatus()));
     Driver driver = driverRepository.findByUsername(request.getDriverUsername())
         .orElseThrow(() -> new NotFoundException("ERROR: Driver is not found."));
     container.setDriver(driver);
@@ -109,10 +106,8 @@ public class ContainerServiceImpl implements ContainerService {
     container.setContainerNumber(request.getContainerNumber());
     container.setBlNumber(request.getBLNumber());
     container.setLicensePlate(request.getLicensePlate());
-    LocalDateTime emptyTime = LocalDateTime.parse(request.getEmptyTime(), timeFormat);
-    container.setEmptyTime(emptyTime);
-    LocalDateTime pickupTime = LocalDateTime.parse(request.getPickUpTime(), timeFormat);
-    container.setPickUpTime(pickupTime);
+    container.setEmptyTime(DateTimeConvert.convertToLocalDateTime(request.getEmptyTime()));
+    container.setPickUpTime(DateTimeConvert.convertToLocalDateTime(request.getPickUpTime()));
 
     Address returnStation = (Address) request.getReturnStation();
     if (returnStation == null) {

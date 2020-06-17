@@ -1,24 +1,25 @@
 package com.crm.models;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EntityListeners;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.OneToOne;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -32,44 +33,38 @@ import lombok.ToString;
 @NoArgsConstructor
 @ToString
 @Entity
-@Table(name = "proposal_detail")
-@EntityListeners(AuditingEntityListener.class)
-@JsonIgnoreProperties(value = {"createdAt", "updatedAt"}, 
-allowGetters = true)
-public class ProposalDetail {
-
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private long id;
-
-	@Column(name = "opening_time")
-	private Date openingTime;
-
-	@Column(name = "closing_time")
-	private Date closingTime;
+@Table(name = "bidding_document")
+public class BiddingDocument {
 	
-	@OneToOne
-	private Container container;
-
-	@Column(name = "date_of_decision")
-	private Date dateOfDecision;
-
-	@Column(name = "offer_price")
-	private float offerPrice;
-
-	private Boolean acceptance;
-
+	@Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+	private long id;
+	
+	@ManyToOne
+	@JoinColumn(name = "merchant_id")
+	private Merchant merchant;
+	
+	@ManyToOne
+	@JoinColumn(name = "consignment_id")
+	private Consignment consignment;
+	
+	@OneToMany(fetch = FetchType.LAZY ,mappedBy = "biddingDocument")
+	private List<Bid> bidList = new ArrayList<Bid>();
+	
+	private LocalDateTime bidOpenning;
+	
+	private LocalDateTime bidClosing;
+	
+	private String currency;
+	
+	private String status;
+	
 	@Column(name = "created_at", nullable = false, updatable = false)
 	@Temporal(TemporalType.TIMESTAMP)
 	@CreatedDate
 	private Date createdAt;
-
+	
 	@Column(name = "updated_at", nullable = false)
 	@Temporal(TemporalType.TIMESTAMP)
 	@LastModifiedDate
 	private Date updatedAt;
-
-	@OneToOne
-	@JoinColumn(name = "container_id")
-	private Proposal proposal;
 }

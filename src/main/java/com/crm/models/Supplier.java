@@ -44,4 +44,7 @@ public class Supplier extends User{
 	
 	@Column(name = "fax", length = 20)
 	private String fax;
+	
+	@Column(name = "rating_value")
+	private float ratingValue;
 }

@@ -1,6 +1,6 @@
 package com.crm.models;
 
-import java.sql.Date;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -38,13 +38,13 @@ public class Consignment extends Supply{
 				inverseJoinColumns = @JoinColumn(name = "category_id"))
 	private Set<Category> categoryList = new HashSet<Category>();
 	
-	private Date packingTime;
+	private LocalDateTime packingTime;
 	
 	private String bookingNumber;
 	
-	private Date layTime;
+	private LocalDateTime layTime;
 	
-	private Date cutOfTime;
+	private LocalDateTime cutOfTime;
 	
 	private float payload;
 	

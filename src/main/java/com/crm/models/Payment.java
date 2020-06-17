@@ -1,6 +1,6 @@
 package com.crm.models;
 
-import java.sql.Date;
+import java.time.LocalDateTime;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -33,10 +33,6 @@ public class Payment {
 	@JoinColumn(name = "account_id")
 	private Account account;
 	
-	@ManyToOne
-	@JoinColumn(name = "proposal_id")
-	private Proposal proposal;
-	
 	private String detail;
 	
 	private float amount;
@@ -44,5 +40,5 @@ public class Payment {
 	private float paid;
 	
 	@Column(name = "payment_date")
-	private Date paymentDate;
+	private LocalDateTime paymentDate;
 }

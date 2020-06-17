@@ -1,7 +1,5 @@
 package com.crm.payload.request;
 
-import java.sql.Date;
-
 import com.crm.models.Address;
 
 import lombok.Getter;
@@ -29,7 +27,7 @@ public class ContainerRequest {
 	
 	private String licensePlate;
 	
-	private Date emptyTime;
+	private String emptyTime;
 	
 	private Address returnStation;
 	

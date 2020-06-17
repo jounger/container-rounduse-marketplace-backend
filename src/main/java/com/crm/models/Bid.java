@@ -1,10 +1,11 @@
 package com.crm.models;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
+import javax.persistence.EntityListeners;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -17,6 +18,9 @@ import javax.persistence.TemporalType;
 
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -30,34 +34,48 @@ import lombok.ToString;
 @NoArgsConstructor
 @ToString
 @Entity
-@Table(name = "proposal")
-public class Proposal {
-	
-	@Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+@Table(name = "bid")
+@EntityListeners(AuditingEntityListener.class)
+@JsonIgnoreProperties(value = {"createdAt", "updatedAt"}, 
+allowGetters = true)
+public class Bid {
+
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
+
+	@Column(name = "opening_time")
+	private LocalDateTime openingTime;
+
+	@Column(name = "closing_time")
+	private LocalDateTime closingTime;
 	
-	@ManyToOne
-	@JoinColumn(name = "merchant_id")
-	private Merchant merchant;
-	
-	@ManyToOne
-	@JoinColumn(name = "consignment_id")
-	private Consignment consignment;
-	
-	@OneToOne(mappedBy = "proposal",fetch = FetchType.EAGER)
-	private Quotation quotation;
-	
-	private String currency;
-	
-	private String status;
-	
+	@OneToOne
+	@JoinColumn(name = "container_id")
+	private Container container;
+
+	@Column(name = "date_of_decision")
+	private Date dateOfDecision;
+
+	@Column(name = "offer_price")
+	private float offerPrice;
+
+	private Boolean acceptance;
+
 	@Column(name = "created_at", nullable = false, updatable = false)
 	@Temporal(TemporalType.TIMESTAMP)
 	@CreatedDate
 	private Date createdAt;
-	
+
 	@Column(name = "updated_at", nullable = false)
 	@Temporal(TemporalType.TIMESTAMP)
 	@LastModifiedDate
 	private Date updatedAt;
+
+	@ManyToOne
+	@JoinColumn(name = "bidding_document_id")
+	private BiddingDocument biddingDocument;
+	
+	@OneToOne(mappedBy = "bid")
+	private BiddingDocumentWinning biddingDocumentWinning;
 }

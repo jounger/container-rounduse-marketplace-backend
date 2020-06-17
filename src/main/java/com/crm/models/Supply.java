@@ -65,7 +65,7 @@ public class Supply {
 	@Column(name = "updated_at", nullable = false)
 	@Temporal(TemporalType.TIMESTAMP)
 	@LastModifiedDate
-	private Date UpdatedAt;
+	private Date updatedAt;
 	
 	@OneToMany(mappedBy = "supply")
 	private Set<Report> reports = new HashSet<Report>();

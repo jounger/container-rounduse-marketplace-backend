@@ -1,8 +1,5 @@
 package com.crm.services.impl;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -132,7 +129,7 @@ public class ContainerServiceImpl implements ContainerService {
   }
 
   @Override
-  public Container findContainerById(Long id) {
+  public Container getContainerById(Long id) {
     Container container = containerRepository.findById(id)
         .orElseThrow(() -> new NotFoundException("ERROR: Container is not found."));
     return container;

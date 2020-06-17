@@ -16,5 +16,5 @@ public interface ContainerService {
 	  
 	void deleteContainer(Long id);
 	  
-	Container findContainerById(Long id);
+	Container getContainerById(Long id);
 }

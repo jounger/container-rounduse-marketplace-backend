@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.crm.enums.EnumRole;
 import com.crm.enums.EnumUserStatus;
 import com.crm.exception.DuplicateRecordException;
 import com.crm.exception.NotFoundException;
@@ -25,16 +24,16 @@ public class MerchantServiceImpl implements MerchantService{
 
 	@Autowired
 	private UserRepository userRepository;
-	
+
 	@Autowired
 	private RoleRepository roleRepository;
-	
+
 	@Autowired
 	private MerchantRepository merchantRepository;
-	
+
 	@Autowired
 	private PasswordEncoder passwordEncoder;
-	
+
 	@Override
 	public void saveMerchant(SupplierRequest request) {
 		if (userRepository.existsByUsername(request.getUsername()) || userRepository.existsByEmail(request.getEmail())
@@ -58,7 +57,7 @@ public class MerchantServiceImpl implements MerchantService{
 		Set<Role> roles = new HashSet<>();
 //		List<EnumRole> rolesEnum = Arrays.asList(EnumRole.values());
 		if (rolesString == null) {
-			Role userRole = roleRepository.findByName(EnumRole.ROLE_MERCHANT)
+			Role userRole = roleRepository.findByName("ROLE_MERCHANT")
 					.orElseThrow(() -> new NotFoundException("Error: Role is not found"));
 			roles.add(userRole);
 		} else {
@@ -82,9 +81,9 @@ public class MerchantServiceImpl implements MerchantService{
 		}
 		String encoder = passwordEncoder.encode(request.getPassword());
 		merchant.setPassword(encoder);
-		
+
 		merchantRepository.save(merchant);
-		
+
 	}
 
 }

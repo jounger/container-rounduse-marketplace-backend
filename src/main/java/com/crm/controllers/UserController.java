@@ -32,13 +32,13 @@ import com.crm.services.UserService;
 public class UserController {
 
   private static final Logger logger = LoggerFactory.getLogger(UserController.class);
-  
+
   @Autowired
   private UserService userService;
-  
+
   @GetMapping("/")
   @PreAuthorize("hasRole('OPERATOR') or hasRole('ADMIN')")
-  public ResponseEntity<?> getUsers(@Valid PaginationRequest request) {
+  public ResponseEntity<?> getUsers(@Valid @RequestBody PaginationRequest request) {
     logger.info("Page request: {}", request.getPage());
     Page<User> pages = userService.getUsers(request);
     PaginationResponse<UserDto> response = new PaginationResponse<>();
@@ -46,19 +46,19 @@ public class UserController {
     response.setPageSize(request.getLimit());
     response.setTotalElements(pages.getTotalElements());
     response.setTotalPages(pages.getTotalPages());
-    
+
     List<User> users = pages.getContent();
     List<UserDto> usersDto = new ArrayList<>();
     users.forEach(user -> usersDto.add(UserMapper.toUserDto(user)));
     response.setContents(usersDto);
-    
+
     return ResponseEntity.ok(response);
   }
-  
-	
+
+
 	@PutMapping("/status")
 	@PreAuthorize("hasRole('OPERATOR')")
-	public ResponseEntity<?> changeUserStatus(@Valid @RequestBody ChangeUserStatusRequest request){		
+	public ResponseEntity<?> changeUserStatus(@Valid @RequestBody ChangeUserStatusRequest request){
 		userService.changeStatus(request);
 		return ResponseEntity.ok("User's status changed successfully");
 	}

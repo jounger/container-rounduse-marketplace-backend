@@ -68,12 +68,12 @@ public class User {
     inverseJoinColumns = @JoinColumn(name="role_id"))
   private Set<Role> roles = new HashSet<>();
   
-  @Column(nullable = false, updatable = false)
+  @Column(name = "created_at", nullable = false, updatable = false)
   @Temporal(TemporalType.TIMESTAMP)
   @CreatedDate
   private Date createdAt;
   
-  @Column(nullable = false)
+  @Column(name = "updated_at", nullable = false)
   @Temporal(TemporalType.TIMESTAMP)
   @LastModifiedDate
   private Date updatedAt;

@@ -29,21 +29,21 @@ import lombok.ToString;
 @Table(name = "shipping_line")
 @PrimaryKeyJoinColumn(name = "user_id")
 public class ShippingLine extends User{
-	
+
 	private String website;
-	
-	@Column(length = 50)
-	private String name;
-	
+
+	@Column(name = "company_name", length = 50)
+	private String companyName;
+
 	@Column(name = "short_name", length = 10)
 	private String shortName;
-	
+
 	@ManyToMany
-	@JoinTable(name = "shipping_line_icd", 
+	@JoinTable(name = "shipping_line_icd",
 				joinColumns = @JoinColumn(name = "shipping_line_id"),
 				inverseJoinColumns = @JoinColumn(name = "icd_id"))
 	private Collection<Icd> icdList = new ArrayList<Icd>();
-	
-	@OneToMany
+
+	@OneToMany(mappedBy = "shippingLine")
 	private Set<Consignment> consignmentList = new HashSet<Consignment>();
 }

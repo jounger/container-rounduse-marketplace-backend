@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.crm.enums.EnumRole;
 import com.crm.enums.EnumUserStatus;
 import com.crm.exception.DuplicateRecordException;
 import com.crm.exception.NotFoundException;
@@ -31,10 +30,10 @@ public class ForwarderServiceImpl implements ForwarderService{
 
 	@Autowired
 	private PasswordEncoder passwordEncoder;
-	
+
 	@Autowired
 	private ForwarderRepository forwarderRepository;
-	
+
 	@Override
 	public void saveForwarder(SupplierRequest request) {
 		if (userRepository.existsByUsername(request.getUsername()) || userRepository.existsByEmail(request.getEmail())
@@ -58,7 +57,7 @@ public class ForwarderServiceImpl implements ForwarderService{
 		Set<Role> roles = new HashSet<>();
 //		List<EnumRole> rolesEnum = Arrays.asList(EnumRole.values());
 		if (rolesString == null) {
-			Role userRole = roleRepository.findByName(EnumRole.ROLE_FORWARDER)
+			Role userRole = roleRepository.findByName("ROLE_FORWARDER")
 					.orElseThrow(() -> new NotFoundException("Error: Role is not found"));
 			roles.add(userRole);
 		} else {
@@ -82,9 +81,9 @@ public class ForwarderServiceImpl implements ForwarderService{
 		}
 		String encoder = passwordEncoder.encode(request.getPassword());
 		forwarder.setPassword(encoder);
-		
+
 		forwarderRepository.save(forwarder);
-		
+
 	}
 
 }

@@ -1,8 +1,6 @@
-   package com.crm.services;
+package com.crm.services;
 
 import org.springframework.data.domain.Page;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 
 import com.crm.models.User;
 import com.crm.payload.request.ChangeUserStatusRequest;

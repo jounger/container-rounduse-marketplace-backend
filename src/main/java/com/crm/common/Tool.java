@@ -1,5 +1,14 @@
 package com.crm.common;
 
-public class Tool {
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
+public class Tool {
+  
+  public static LocalDateTime convertToLocalDateTime(String date) {
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-ddTHH:mm"); 
+    LocalDateTime dateTime = LocalDateTime.parse(date, formatter);
+    return dateTime;
+  }
+  
 }

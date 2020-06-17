@@ -3,8 +3,6 @@ package com.crm.models.dto;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.crm.models.Address;
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

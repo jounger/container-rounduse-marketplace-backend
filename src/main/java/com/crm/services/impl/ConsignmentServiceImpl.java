@@ -21,6 +21,7 @@ import com.crm.models.Port;
 import com.crm.models.ShippingLine;
 import com.crm.payload.request.ConsignmentRequest;
 import com.crm.payload.request.PaginationRequest;
+import com.crm.repository.AddressRepository;
 import com.crm.repository.CategoryRepository;
 import com.crm.repository.ConsignmentRepository;
 import com.crm.repository.ContainerTypeRepository;
@@ -39,6 +40,9 @@ public class ConsignmentServiceImpl implements ConsignmentService {
 
   @Autowired
   private ContainerTypeRepository containerTypeRepository;
+  
+  @Autowired
+  private AddressRepository addressRepository;
 
   @Autowired
   private CategoryRepository categoryRepository;
@@ -125,12 +129,16 @@ public class ConsignmentServiceImpl implements ConsignmentService {
     LocalDateTime packingTime = Tool.convertToLocalDateTime(request.getPackingTime());
     consignment.setPackingTime(packingTime);
 
-    Address packingStation = (Address) request.getPackingStation();
-    if (packingStation == null) {
-      throw new NotFoundException("Error: PackingStation is not found");
-    } else {
-      consignment.setPackingStation(packingStation);
-    }
+    Address packingStationReq = (Address) request.getPackingStation();
+    Address packingStation = addressRepository.findById(consignment.getPackingStation().getId())
+        .orElseThrow(() -> new NotFoundException("ERROR: Address is not found."));
+    packingStation.setCity(packingStationReq.getCity());
+    packingStation.setStreet(packingStationReq.getStreet());
+    packingStation.setCounty(packingStationReq.getCounty());
+    packingStation.setCountry(packingStationReq.getCountry());
+    packingStation.setPostalCode(packingStationReq.getPostalCode());
+    
+//    consignment.setPackingStation(packingStation);
 
     consignment.setBookingNumber(request.getBookingNumber());
     

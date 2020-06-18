@@ -1,6 +1,8 @@
 package com.crm.models.mapper;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import com.crm.common.Tool;
@@ -24,7 +26,10 @@ public class ConsignmentMapper {
     String packingTime = Tool.convertLocalDateTimeToString(consignment.getPackingTime());
     dto.setPackingTime(packingTime);
     
-//    dto.setPackingStation(consignment.getAddress());
+    Map<String, String> packingStation = new HashMap<>();
+    packingStation = AddressMapper.toAddressDto(consignment.getPackingStation());
+    dto.setPackingStation(packingStation);
+    
     dto.setBookingNumber(consignment.getBookingNumber());
     
     String laytime = Tool.convertLocalDateTimeToString(consignment.getLaytime());

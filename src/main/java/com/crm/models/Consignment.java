@@ -4,14 +4,19 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
+
+import com.crm.enums.EnumUnit;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -27,7 +32,7 @@ import lombok.ToString;
 @Entity
 @Table(name = "consignment")
 @PrimaryKeyJoinColumn(name = "supply_id")
-public class Consignment extends Supply{
+public class Consignment extends Supply {
 
 	@ManyToOne
 	@JoinColumn(name = "merchant_id")
@@ -37,7 +42,7 @@ public class Consignment extends Supply{
 	@JoinTable(name = "consignment_category",
 				joinColumns = @JoinColumn(name = "consignment_id"),
 				inverseJoinColumns = @JoinColumn(name = "category_id"))
-	private Set<Category> categoryList = new HashSet<Category>();
+	private Set<Category> categories = new HashSet<Category>();
 
 	@Column(name = "packing_time")
 	private LocalDateTime packingTime;
@@ -45,8 +50,8 @@ public class Consignment extends Supply{
 	@Column(name = "booking_number")
 	private String bookingNumber;
 
-	@Column(name = "lay_time")
-	private LocalDateTime layTime;
+	@Column(name = "laytime")
+	private LocalDateTime laytime;
 
 	@Column(name = "cut_of_time")
 	private LocalDateTime cutOfTime;
@@ -55,15 +60,15 @@ public class Consignment extends Supply{
 	private float payload;
 
 	@Column(name = "unit_of_measurment")
-	private float unitOfMeasurement;
+	private EnumUnit unitOfMeasurement;
 
 	private boolean fcl;
 
-	@ManyToOne
+	@OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 	@JoinColumn(name = "address_id")
-	private Address address;
+	private Address packingStation;
 
 	@ManyToOne
 	@JoinColumn(name = "port_id")
-	private Port port;
+	private Port portOfLoading;
 }

@@ -7,7 +7,4 @@ import lombok.Setter;
 @Setter
 public class ForwarderRequest extends SupplierRequest{
 	
-	private String contact;
-	
-	private String bankAccount;
 }

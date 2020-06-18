@@ -24,9 +24,8 @@ import lombok.ToString;
 @Table(name="rating")
 public class Rating {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private long id;
+	@Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 	
 	@ManyToOne
 	@JoinColumn(name = "sender_supplier_id")

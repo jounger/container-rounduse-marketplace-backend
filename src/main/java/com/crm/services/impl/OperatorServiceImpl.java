@@ -42,7 +42,7 @@ public class OperatorServiceImpl implements OperatorService{
 		operator.setUsername(request.getUsername());
 		operator.setEmail(request.getEmail());
 		operator.setPhone(request.getPhone());
-		operator.setStatus(EnumUserStatus.APPROVED);
+		operator.setStatus(EnumUserStatus.ACTIVE);
 		Role userRole = roleRepository.findByName("ROLE_OPERATOR")
 				.orElseThrow(() -> new NotFoundException("Error: Role is not found"));
 		operator.getRoles().add(userRole);

@@ -46,7 +46,7 @@ public class ShippingLineServiceImpl implements ShippingLineService{
 		shippingLine.setUsername(request.getUsername());
 		shippingLine.setEmail(request.getEmail());
 		shippingLine.setPhone(request.getPhone());
-		shippingLine.setStatus(EnumUserStatus.APPROVED);
+		shippingLine.setStatus(EnumUserStatus.ACTIVE);
 		shippingLine.setWebsite(request.getWebsite());
 		shippingLine.setCompanyName(request.getCompanyName());
 		shippingLine.setCompanyName(request.getCompanyCode());

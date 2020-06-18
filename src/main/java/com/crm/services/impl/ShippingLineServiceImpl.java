@@ -48,22 +48,20 @@ public class ShippingLineServiceImpl implements ShippingLineService{
 		shippingLine.setPhone(request.getPhone());
 		shippingLine.setStatus(EnumUserStatus.APPROVED);
 		shippingLine.setWebsite(request.getWebsite());
-		shippingLine.setCompanyName(request.getName());
-		shippingLine.setShortName(request.getShortName());
+		shippingLine.setCompanyName(request.getCompanyName());
+		shippingLine.setCompanyName(request.getCompanyCode());
 		Role userRole = roleRepository.findByName("ROLE_SHIPPINGLINE")
 				.orElseThrow(() -> new NotFoundException("Error: Role is not found"));
 		shippingLine.getRoles().add(userRole);
 		Address address = (Address) request.getAddress();
-		if (address == null) {
-			throw new NotFoundException("Error: Address is not found");
-		} else {
+		if (address != null) {
 			shippingLine.setAddress(address);
 		}
 		String encoder = passwordEncoder.encode(request.getPassword());
-		request.getIcdNameList().forEach(icdName -> {
-			Icd icd = icdRepository.findByName(icdName)
+		request.getIcdsName().forEach(icdName -> {
+			Icd icd = icdRepository.findByNameCode(icdName)
 					.orElseThrow(() -> new NotFoundException("ICD is not found."));
-			shippingLine.getIcdList().add(icd);
+			shippingLine.getIcds().add(icd);
 		});
 		shippingLine.setPassword(encoder);
 		shippingLineRepository.save(shippingLine);

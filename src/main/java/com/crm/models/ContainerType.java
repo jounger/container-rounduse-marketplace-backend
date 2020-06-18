@@ -27,8 +27,9 @@ import lombok.ToString;
 public class ContainerType {
 
 	@Id	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private long id;
+	private Long id;
 
+	@Column(unique = true)
 	private String name;
 
 	private String description;
@@ -58,5 +59,5 @@ public class ContainerType {
 	private float doorOpeningHeight;
 
 	@OneToMany(mappedBy = "containerType")
-	private Collection<Supply> supplyList = new ArrayList<Supply>();
+	private Collection<Supply> supplies = new ArrayList<Supply>();
 }

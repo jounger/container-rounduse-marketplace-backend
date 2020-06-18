@@ -7,6 +7,6 @@ import lombok.Setter;
 @Setter
 public class OperatorRequest extends SignUpRequest {
 
-	private String name;
+	private String fullname;
 
 }

@@ -27,7 +27,7 @@ import lombok.ToString;
 public class Payment {
 
 	@Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-	private long id;
+	private Long id;
 
 	@ManyToOne
 	@JoinColumn(name = "account_id")

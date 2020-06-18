@@ -23,9 +23,8 @@ import lombok.ToString;
 @Table(name = "location")
 public class Location {
 	
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private long id;
+	@Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 	
 	@OneToOne
 	@JoinColumn(name = "driver_id")

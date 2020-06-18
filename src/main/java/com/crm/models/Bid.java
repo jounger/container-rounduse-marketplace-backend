@@ -43,7 +43,7 @@ public class Bid {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private long id;
+	private Long id;
 	
 	@ManyToOne
 	@JoinColumn(name = "bidding_document_id")

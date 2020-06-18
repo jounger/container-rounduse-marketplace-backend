@@ -39,10 +39,10 @@ import lombok.ToString;
 allowGetters = true)
 public class Discount {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private long id;
+	@Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
+	@Column(unique = true)
 	private String code;
 
 	private String detail;
@@ -66,5 +66,5 @@ public class Discount {
 	private Date updatedAt;
 	
 	@OneToMany(mappedBy = "bidDiscountCode")
-	private List<BiddingDocument> biddingDocumentList;
+	private List<BiddingDocument> biddingDocuments;
 }

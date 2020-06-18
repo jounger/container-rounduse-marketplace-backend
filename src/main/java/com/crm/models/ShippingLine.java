@@ -45,5 +45,5 @@ public class ShippingLine extends User{
 	private Collection<Icd> icdList = new ArrayList<Icd>();
 
 	@OneToMany(mappedBy = "shippingLine")
-	private Set<Consignment> consignmentList = new HashSet<Consignment>();
+	private Set<Supply> supplyList = new HashSet<Supply>();
 }

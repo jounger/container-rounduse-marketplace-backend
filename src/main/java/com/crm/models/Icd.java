@@ -23,7 +23,7 @@ import lombok.ToString;
 @NoArgsConstructor
 @ToString
 @Entity
-@Table(name = "idc", uniqueConstraints = {
+@Table(name = "icd", uniqueConstraints = {
 		@UniqueConstraint(columnNames = "name")
 })
 public class Icd {

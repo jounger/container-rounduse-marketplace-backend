@@ -26,13 +26,13 @@ import com.crm.services.RoleService;
 @CrossOrigin(origins="*", maxAge=3600)
 @RestController
 @RequestMapping("/api/role")
+@PreAuthorize("hasRole('ADMIN')")
 public class RoleController {
   
   @Autowired
   private RoleService roleService;
   
   @GetMapping("")
-  @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<?> getRoles(@Valid @RequestBody PaginationRequest request) {
     Page<Role> pages = roleService.getRoles(request);
     PaginationResponse<Role> response = new PaginationResponse<>();

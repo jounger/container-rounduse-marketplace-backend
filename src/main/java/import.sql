@@ -1,25 +1,7 @@
-INSERT INTO role (name) VALUES 
-('ROLE_ADMIN'),
-('ROLE_MODERATOR'),
-('ROLE_SHIPPINGLINE'),
-('ROLE_FORWARDER'),
-('ROLE_MERCHANT'),
-('ROLE_DRIVER');
-INSERT INTO address (street, county, city, postal_code, country) VALUES
-('Thach That', 'Son Tay', 'Ha Noi', '000000', 'VietNam'),
-('Thach That', 'Son Tay', 'Ha Noi', '000200', 'VietNam'),
-('Thach That', 'Son Tay', 'Ha Noi', '000300', 'VietNam'),
-('Thach That', 'Son Tay', 'Ha Noi', '000400', 'VietNam'),
-('Thach That', 'Son Tay', 'Ha Noi', '000100', 'VietNam');
-INSERT INTO icd (address, name, name_code) VALUES
-('Thach that son tay ha noi', 'icd1', 'icd1'),
-('Thach that son tay ha noi', 'icd2', 'icd2'),
-('Thach that son tay ha noi', 'icd3', 'icd3'),
-('Thach that son tay ha noi', 'icd4', 'icd4'),
-('Thach that son tay ha noi', 'icd5', 'icd5');
-INSERT INTO port (address, name, name_code) VALUES
-('Thach that son tay ha noi', 'port1', 'port1'),
-('Thach that son tay ha noi', 'port2', 'port2'),
-('Thach that son tay ha noi', 'port3', 'port3'),
-('Thach that son tay ha noi', 'port4', 'port4'),
-('Thach that son tay ha noi', 'port5', 'port5');
+INSERT INTO role (name) VALUES ('ROLE_ADMIN'),('ROLE_MODERATOR'),('ROLE_SHIPPINGLINE'),('ROLE_FORWARDER'),('ROLE_MERCHANT'),('ROLE_DRIVER');
+INSERT INTO address (street, county, city, postal_code, country) VALUES('Thach That', 'Son Tay', 'Ha Noi', '000000', 'VietNam'),('Thach That', 'Son Tay', 'Ha Noi', '000200', 'VietNam'),('Thach That', 'Son Tay', 'Ha Noi', '000300', 'VietNam'),('Thach That', 'Son Tay', 'Ha Noi', '000400', 'VietNam'),('Thach That', 'Son Tay', 'Ha Noi', '000100', 'VietNam');
+INSERT INTO icd (address, name, name_code) VALUES('Thach that son tay ha noi', 'icd1', 'icd1'),('Thach that son tay ha noi', 'icd2', 'icd2'),('Thach that son tay ha noi', 'icd3', 'icd3'),('Thach that son tay ha noi', 'icd4', 'icd4'),('Thach that son tay ha noi', 'icd5', 'icd5');
+INSERT INTO port (address, name, name_code) VALUES('Thach that son tay ha noi', 'port1', 'port1'),('Thach that son tay ha noi', 'port2', 'port2'),('Thach that son tay ha noi', 'port3', 'port3'),('Thach that son tay ha noi', 'port4', 'port4'),('Thach that son tay ha noi', 'port5', 'port5');
+INSERT INTO user (email, created_at, password, phone, status, updated_at, username, address_id) VALUES('admin@gmail.com', CURDATE(), '$2a$10$fKNzue5vXDqZWgzxtuIDWuozd30wiGRXfkzEgnFeUc6MKAIrIyG4i','0909090909','1', CURDATE(), 'admin','1');
+INSERT INTO user_role (user_id, role_id) VALUES('1', '1');
+INSERT INTO container_type (cubic_capacity, description, door_open_height, door_open_width, internal_height, internal_length, internal_weight ,name, payload_capacity, tare_weight) VALUES('11','desciption','11', '11', '11', '11', '11', 'name1', '11', '11');

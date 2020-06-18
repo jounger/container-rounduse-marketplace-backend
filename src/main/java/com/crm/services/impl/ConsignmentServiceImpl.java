@@ -7,6 +7,7 @@ import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.crm.common.Tool;
@@ -183,5 +184,13 @@ public class ConsignmentServiceImpl implements ConsignmentService {
     Consignment consignment = consignmentRepository.findById(id)
         .orElseThrow(() -> new NotFoundException("ERROR: Consignment is not found."));
     return consignment;    
+  }
+
+
+  @Override
+  public Page<Consignment> getConsignmentsByMerchant(Long id, PaginationRequest request) {
+    Pageable pageable = PageRequest.of(request.getPage(), request.getLimit());
+    Page<Consignment> pages = consignmentRepository.findByMerchantId(id, pageable);
+    return pages;
   }
 }

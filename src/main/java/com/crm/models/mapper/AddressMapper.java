@@ -7,16 +7,16 @@ import com.crm.models.Address;
 
 public class AddressMapper {
   
-    public static Map<String, String> toAddressDto(Address address){
+    public static Map<String, String> toAddressHashMap(Address address){
       
-      Map<String, String> addressdto = new HashMap<>();
-      addressdto.put("id", String.valueOf(address.getId()));      
-      addressdto.put("street", address.getStreet());      
-      addressdto.put("county", address.getCounty());      
-      addressdto.put("city", address.getCity()); 
-      addressdto.put("country", address.getCountry());
-      addressdto.put("postalCode", address.getPostalCode());
-      return addressdto;
+      Map<String, String> addressHashMap = new HashMap<>();
+      addressHashMap.put("id", String.valueOf(address.getId()));      
+      addressHashMap.put("street", address.getStreet());      
+      addressHashMap.put("county", address.getCounty());      
+      addressHashMap.put("city", address.getCity()); 
+      addressHashMap.put("country", address.getCountry());
+      addressHashMap.put("postalCode", address.getPostalCode());
+      return addressHashMap;
       
     }
 }

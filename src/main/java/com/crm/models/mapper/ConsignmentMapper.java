@@ -27,7 +27,7 @@ public class ConsignmentMapper {
     dto.setPackingTime(packingTime);
     
     Map<String, String> packingStation = new HashMap<>();
-    packingStation = AddressMapper.toAddressDto(consignment.getPackingStation());
+    packingStation = AddressMapper.toAddressHashMap(consignment.getPackingStation());
     dto.setPackingStation(packingStation);
     
     dto.setBookingNumber(consignment.getBookingNumber());

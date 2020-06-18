@@ -18,4 +18,6 @@ public interface ConsignmentService {
   
   Consignment findConsignmentById(Long id);
   
+  Page<Consignment> getConsignmentsByMerchant(Long id, PaginationRequest request);
+  
 }

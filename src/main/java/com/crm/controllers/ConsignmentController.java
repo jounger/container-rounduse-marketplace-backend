@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -41,7 +42,8 @@ public class ConsignmentController {
   private ConsignmentService consignmentService;
   
   @GetMapping("")
-  public ResponseEntity<?> getListConsignment(@Valid @RequestBody PaginationRequest request) {
+  @PreAuthorize("hasRole('OPERATOR')")
+  public ResponseEntity<?> getConsignments(@Valid @RequestBody PaginationRequest request) {
     
     Page<Consignment> pages = consignmentService.getListConsignment(request);
     PaginationResponse<ConsignmentDto> response = new PaginationResponse<>();
@@ -60,6 +62,7 @@ public class ConsignmentController {
   }
   
   @PostMapping("")
+  @PreAuthorize("hasRole('MERCHANT')")
   public ResponseEntity<?> createConsignment(@Valid @RequestBody ConsignmentRequest request){
     logger.error("Runtime error: {}", request);
     consignmentService.saveConsignment(request);
@@ -68,6 +71,7 @@ public class ConsignmentController {
   
   @Transactional
   @DeleteMapping("")
+  @PreAuthorize("hasRole('MERCHANT')")
   public ResponseEntity<?> removeConsignment(@Valid @RequestBody ConsignmentRequest request){       
     consignmentService.deleteConsignment(request.getId());
     return ResponseEntity.ok(new MessageResponse("Consignment has remove successfully"));
@@ -75,16 +79,38 @@ public class ConsignmentController {
   
   @Transactional
   @PutMapping("")
+  @PreAuthorize("hasRole('MERCHANT')")
   public ResponseEntity<?> editConsignment(@Valid @RequestBody ConsignmentRequest request){
     consignmentService.editConsignment(request);
     return ResponseEntity.ok(new MessageResponse("Consignment has update successfully"));
   }
   
   @GetMapping("/{id}")
+  @PreAuthorize("hasRole('OPERATOR') or hasRole('MERCHANT')")
   public ResponseEntity<?> getConsignment(@PathVariable Long id){
     Consignment consignment = consignmentService.findConsignmentById(id);
     ConsignmentDto consignmentDto = new ConsignmentDto();
     consignmentDto = ConsignmentMapper.toConsignmentDto(consignment);
     return ResponseEntity.ok(consignmentDto);
+  }
+  
+  @GetMapping("/merchant/{id}")
+  @PreAuthorize("hasRole('MERCHANT')")
+  public ResponseEntity<?> getConsignmentsByMerchant(@PathVariable Long id, @Valid @RequestBody PaginationRequest request) {
+    
+    Page<Consignment> pages = consignmentService.getConsignmentsByMerchant(id, request);
+    PaginationResponse<ConsignmentDto> response = new PaginationResponse<>();
+    response.setPageNumber(request.getPage());
+    response.setPageSize(request.getLimit());
+    response.setTotalElements(pages.getTotalElements());
+    response.setTotalPages(pages.getTotalPages());
+    
+    List<Consignment> consignments = pages.getContent();
+    List<ConsignmentDto> consignmentsDto = new ArrayList<>();
+    consignments.forEach(consignment -> consignmentsDto.add(ConsignmentMapper.toConsignmentDto(consignment)));
+    response.setContents(consignmentsDto);
+    
+    return ResponseEntity.ok(response);
+    
   }
 }

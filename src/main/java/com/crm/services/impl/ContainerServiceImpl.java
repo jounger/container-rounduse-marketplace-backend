@@ -44,7 +44,7 @@ public class ContainerServiceImpl implements ContainerService {
   @Override
   public void saveContainer(ContainerRequest request) {
     Container container = new Container();
-    ShippingLine shippingLine = shippingLineRepository.findByCompanyName(request.getShippingLineName())
+    ShippingLine shippingLine = shippingLineRepository.findByCompanyCode(request.getShippingLineName())
         .orElseThrow(() -> new NotFoundException("ERROR: Shipping Line is not found."));
     container.setShippingLine(shippingLine);
     ContainerType containerType = containerTypeRepository.findByName(request.getContainerType())
@@ -69,7 +69,7 @@ public class ContainerServiceImpl implements ContainerService {
       container.setReturnStation(returnStation);
     }
 
-    Port port = portRepository.findByName(request.getPortName())
+    Port port = portRepository.findByNameCode(request.getPortName())
         .orElseThrow(() -> new NotFoundException("ERROR: Port is not found."));
     container.setPortOfDelivery(port);
 
@@ -88,7 +88,7 @@ public class ContainerServiceImpl implements ContainerService {
   public void editContainer(Long id, ContainerRequest request) {
     Container container = containerRepository.findById(id)
         .orElseThrow(() -> new NotFoundException("ERROR: Container is not found."));
-    ShippingLine shippingLine = shippingLineRepository.findByCompanyName(request.getShippingLineName())
+    ShippingLine shippingLine = shippingLineRepository.findByCompanyCode(request.getShippingLineName())
         .orElseThrow(() -> new NotFoundException("ERROR: Shipping Line is not found."));
     container.setShippingLine(shippingLine);
     ContainerType containerType = containerTypeRepository.findByName(request.getContainerType())
@@ -113,7 +113,7 @@ public class ContainerServiceImpl implements ContainerService {
       container.setReturnStation(returnStation);
     }
 
-    Port port = portRepository.findByName(request.getPortName())
+    Port port = portRepository.findByNameCode(request.getPortName())
         .orElseThrow(() -> new NotFoundException("ERROR: Port is not found."));
     container.setPortOfDelivery(port);
 

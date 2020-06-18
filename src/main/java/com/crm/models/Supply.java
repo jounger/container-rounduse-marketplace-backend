@@ -46,7 +46,7 @@ allowGetters = true)
 public class Supply {
 
 	@Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-	private long id;
+	private Long id;
 
 	@ManyToOne
 	@JoinColumn(name = "shipping_line_id")

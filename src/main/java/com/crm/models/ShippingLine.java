@@ -28,22 +28,22 @@ import lombok.ToString;
 @Entity
 @Table(name = "shipping_line")
 @PrimaryKeyJoinColumn(name = "user_id")
-public class ShippingLine extends User{
+public class ShippingLine extends User {
 
 	private String website;
 	
 	@Column(name = "company_name", length = 50)
 	private String companyName;
-	
-	@Column(name = "short_name", length = 10)
-	private String shortName;
+
+	@Column(name = "company_code", length = 10, unique = true)
+	private String companyCode;
 
 	@ManyToMany
 	@JoinTable(name = "shipping_line_icd",
 				joinColumns = @JoinColumn(name = "shipping_line_id"),
 				inverseJoinColumns = @JoinColumn(name = "icd_id"))
-	private Collection<Icd> icdList = new ArrayList<Icd>();
-	
+	private Collection<Icd> icds = new ArrayList<Icd>();
+
 	@OneToMany(mappedBy = "shippingLine")
-	private Set<Consignment> consignmentList = new HashSet<Consignment>();
+	private Set<Supply> supply = new HashSet<>();
 }

@@ -11,7 +11,7 @@ public class SupplierRequest extends SignUpRequest{
 	
 	private String companyName;
 
-	private String shortName;
+	private String companyCode;
 	
 	private String description;
 	

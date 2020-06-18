@@ -31,7 +31,7 @@ import lombok.ToString;
 public class Account {
 
 	@Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-	private long id;
+	private Long id;
 
 	@OneToOne
 	@JoinColumn(name = "supplier_id")

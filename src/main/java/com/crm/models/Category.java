@@ -27,14 +27,14 @@ import lombok.ToString;
 public class Category {
 	
 	@Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-	private long id;
+	private Long id;
 	
-	@Column(length = 20)
+	@Column(length = 20, unique = true)
 	private String name;
 	
 	@Column(length = 100)
 	private String desciption;
 	
-	@ManyToMany(mappedBy = "categoryList")
-	private Collection<Consignment> consignmentList = new ArrayList<Consignment>();
+	@ManyToMany(mappedBy = "categories")
+	private Collection<Consignment> categories = new ArrayList<Consignment>();
 }

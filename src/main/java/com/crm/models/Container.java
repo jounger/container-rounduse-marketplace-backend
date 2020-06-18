@@ -5,8 +5,10 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
@@ -28,7 +30,7 @@ import lombok.ToString;
 @Entity
 @Table(name = "container")
 @PrimaryKeyJoinColumn(name = "supply_id")
-public class Container extends Supply{
+public class Container extends Supply {
 
 	@ManyToOne
 	@JoinColumn(name = "driver_id")
@@ -44,7 +46,7 @@ public class Container extends Supply{
 	@Column(name = "container_tractor")
 	private String containerTractor;
 
-	@Column(name = "containerNumber")
+	@Column(name = "container_number")
 	private String containerNumber;
 
 	@Column(name = "bl_number")
@@ -58,8 +60,8 @@ public class Container extends Supply{
 
 	@Column(name = "pick_up_time")
 	private LocalDateTime pickUpTime;
-	
-	@OneToOne
+
+	@OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 	@JoinColumn(name = "address_id")
 	private Address returnStation;
 

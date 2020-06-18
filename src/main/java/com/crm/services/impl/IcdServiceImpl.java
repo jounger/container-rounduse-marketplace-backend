@@ -18,7 +18,7 @@ public class IcdServiceImpl implements IcdService{
 	@Override
 	public void saveIcd(IcdRequest request) {
 		Icd icd = new Icd();
-		icd.setName(request.getName());
+		icd.setFullname(request.getName());
 		String nameCode = request.getNameCode();
 		if(icdRepository.existsByNameCode(nameCode)) {
 			throw new DuplicateRecordException("ICD name code already existed.");

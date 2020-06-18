@@ -37,11 +37,14 @@ public class Supplier extends User{
 	@Column(name = "company_name", length = 100)
 	private String companyName;
 
-	@Column(name = "short_name", length = 10)
-	private String shortName;
+	@Column(name = "company_code", length = 10, unique = true)
+	private String companyCode;
 
 	@Column(name = "description", length = 100)
-	private String description;
+	private String companyDescription;
+	
+	@Column(name = "company_address", length = 200)
+    private String companyAddress;
 
 	@Column(name = "tin", length = 20)
 	private String tin;

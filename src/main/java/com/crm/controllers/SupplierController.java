@@ -35,7 +35,7 @@ public class SupplierController {
 	private SupplierService supplierService;
 	
 	@PreAuthorize("hasRole('OPERATOR')")
-	@GetMapping("/")
+	@GetMapping("")
 	public ResponseEntity<?> getSuppliers(@Valid @RequestBody PaginationRequest request) {
 		logger.info("Page request: {}", request.getPage());
 		Page<Supplier> pages = supplierService.getSuppliers(request);

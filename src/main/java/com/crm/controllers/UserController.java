@@ -36,7 +36,7 @@ public class UserController {
   @Autowired
   private UserService userService;
 
-  @GetMapping("/")
+  @GetMapping("")
   @PreAuthorize("hasRole('OPERATOR') or hasRole('ADMIN')")
   public ResponseEntity<?> getUsers(@Valid @RequestBody PaginationRequest request) {
     logger.info("Page request: {}", request.getPage());

@@ -1,7 +1,9 @@
 package com.crm.models;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.persistence.Column;
@@ -11,6 +13,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
@@ -59,6 +63,12 @@ public class Report {
 	private String detail;
 
 	private EnumReportStatus status;
+	
+	@ManyToMany
+	@JoinTable(name = "supply_category",
+	joinColumns = @JoinColumn(name = "report_id"),
+	inverseJoinColumns = @JoinColumn(name = "report_category_id"))
+	private List<ReportCategory> categories = new ArrayList<>();
 
 	@Column(name = "created_at", nullable = false, updatable = false)
 	@Temporal(TemporalType.TIMESTAMP)

@@ -10,16 +10,8 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class ConsignmentRequest {
-  
-  @JsonProperty("shipping_line_name")
-  private String shippingLineName;
-  
-  @JsonProperty("container_type")
-  private String containerType;
-  
-  private String status;
-  
+public class ConsignmentRequest extends SupplyRequest{
+ 
   @JsonProperty("packing_time")
   private String packingTime;
   

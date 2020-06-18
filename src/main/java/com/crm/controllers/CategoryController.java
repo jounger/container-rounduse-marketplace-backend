@@ -5,7 +5,6 @@ import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,13 +21,6 @@ public class CategoryController {
   
   @Autowired
   private CategoryService categoryService;
-  
-  @GetMapping("/")
-  public ResponseEntity<?> getListCategory(@Valid @RequestBody CategoryRequest request) {
-    
-    return null;
-    
-  }
   
   @PostMapping("/")
   public ResponseEntity<?> createConsignment(@Valid @RequestBody CategoryRequest request){       

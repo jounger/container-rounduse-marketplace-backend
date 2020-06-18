@@ -1,8 +1,6 @@
 package com.crm.services.impl;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -57,12 +55,12 @@ public class ConsignmentServiceImpl implements ConsignmentService {
   @Override
   public void saveConsignment(ConsignmentRequest request) {
     
-    
     Consignment consignment = new Consignment();
 
     ShippingLine shippingLine = shippingLineRepository.findByCompanyName(request.getShippingLineName())
         .orElseThrow(() -> new NotFoundException("ERROR: Shipping Line is not found."));
     consignment.setShippingLine(shippingLine);
+    
     ContainerType containerType = containerTypeRepository.findByName(request.getContainerType())
         .orElseThrow(() -> new NotFoundException("ERROR: Type is not found."));
     consignment.setContainerType(containerType);
@@ -74,11 +72,7 @@ public class ConsignmentServiceImpl implements ConsignmentService {
 
 
     Address packingStation = (Address) request.getPackingStation();
-    if (packingStation == null) {
-      throw new NotFoundException("Error: PackingStation is not found");
-    } else {
-      consignment.setAddress(packingStation);
-    }
+    consignment.setAddress(packingStation);
 
     consignment.setBookingNumber(request.getBookingNumber());
     
@@ -93,8 +87,8 @@ public class ConsignmentServiceImpl implements ConsignmentService {
     Set<String> categoryListString = request.getCategories();
     Set<Category> listCategory = new HashSet<>();
 
-    categoryListString.forEach(categories -> {
-      Category category = categoryRepository.findByName(categories)
+    categoryListString.forEach(item -> {
+      Category category = categoryRepository.findByName(item)
           .orElseThrow(() -> new NotFoundException("Error: Category is not found"));
       listCategory.add(category);
     });
@@ -111,14 +105,15 @@ public class ConsignmentServiceImpl implements ConsignmentService {
   }
 
   @Override
-  public void editConsignment(Long id , ConsignmentRequest request) {
+  public void editConsignment(ConsignmentRequest request) {
     
-    Consignment consignment = consignmentRepository.findById(id)
+    Consignment consignment = consignmentRepository.findById(request.getId())
         .orElseThrow(() -> new NotFoundException("ERROR: Consignment is not found."));
     
     ShippingLine shippingLine = shippingLineRepository.findByCompanyName(request.getShippingLineName())
         .orElseThrow(() -> new NotFoundException("ERROR: Shipping Line is not found."));
     consignment.setShippingLine(shippingLine);
+    
     ContainerType containerType = containerTypeRepository.findByName(request.getContainerType())
         .orElseThrow(() -> new NotFoundException("ERROR: Type is not found."));
     consignment.setContainerType(containerType);
@@ -160,8 +155,6 @@ public class ConsignmentServiceImpl implements ConsignmentService {
     Port port = portRepository.findByName(request.getPortOfLoading())
         .orElseThrow(() -> new NotFoundException("ERROR: Port is not found."));
     consignment.setPort(port);
-    
-    consignmentRepository.deleteById(id);
     
     consignmentRepository.save(consignment);
     
@@ -169,7 +162,9 @@ public class ConsignmentServiceImpl implements ConsignmentService {
 
   @Override
   public void deleteConsignment(Long id) {
-    consignmentRepository.deleteById(id);
+    Consignment consignment = consignmentRepository.findById(id)
+        .orElseThrow(() -> new NotFoundException("ERROR: Consignment is not found."));
+    consignmentRepository.delete(consignment);
   }
 
   @Override

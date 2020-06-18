@@ -31,7 +31,7 @@ public class Address {
 	private User user;
 
 	@Column(length = 50)
-	private String address;
+	private String street;
 
 	private String county;
 

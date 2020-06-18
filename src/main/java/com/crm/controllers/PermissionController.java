@@ -31,7 +31,7 @@ public class PermissionController {
   @Autowired
   private PermissionService permissionService;
   
-  @GetMapping("/")
+  @GetMapping("")
   @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<?> getPermissions(@Valid @RequestBody PaginationRequest request) {
     Page<Permission> pages = permissionService.getPermission(request);
@@ -56,7 +56,7 @@ public class PermissionController {
     return ResponseEntity.badRequest().body(new MessageResponse("Role has been created successfully"));
   }
   
-  @PutMapping("/")
+  @PutMapping("")
   public ResponseEntity<?> createPermission(@Valid @RequestBody PermissionRequest request) {
     permissionService.savePermission(request);
     return ResponseEntity.badRequest().body(new MessageResponse("Role has been created successfully"));

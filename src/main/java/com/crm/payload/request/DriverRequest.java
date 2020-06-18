@@ -9,9 +9,10 @@ import lombok.Setter;
 @Setter
 public class DriverRequest extends SignUpRequest{
 
-	private String name;
+	private String fullname;
 	
-	private String license;
+	@JsonProperty("driver_license")
+	private String driverLicense;
 	
 	@JsonProperty("forwarder_username")
 	private String forwarderUsername;

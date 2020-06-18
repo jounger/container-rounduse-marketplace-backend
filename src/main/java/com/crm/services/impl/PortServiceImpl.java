@@ -18,11 +18,11 @@ public class PortServiceImpl implements PortService{
 	
 	@Override
 	public void savePort(PortRequest request) {
-		if(portRepository.existsByName(request.getName())) {
+		if(portRepository.existsByNameCode(request.getNameCode())) {
 			throw new DuplicateRecordException("ERROR: Port already exists.");
 		}
 		Port port = new Port();
-		port.setName(request.getName());
+		port.setFullname(request.getFullname());
 		port.setNameCode(request.getNameCode());
 		port.setAddress(request.getAddress());
 		portRepository.save(port);

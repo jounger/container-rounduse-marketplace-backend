@@ -43,7 +43,7 @@ allowGetters = true)
 public class Report {
 
 	@Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-	private long id;
+	private Long id;
 
 	@ManyToOne
 	@JoinColumn(name = "supply_id")

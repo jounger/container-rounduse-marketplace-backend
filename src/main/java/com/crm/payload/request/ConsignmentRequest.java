@@ -29,7 +29,7 @@ public class ConsignmentRequest extends SupplyRequest{
   private float payload;
   
   @JsonProperty("unit_of_measurement")
-  private float unitOfMeasurement;
+  private String unitOfMeasurement;
   
   private Set<String> categories;
   

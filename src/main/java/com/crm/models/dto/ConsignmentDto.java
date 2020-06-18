@@ -25,6 +25,6 @@ public class ConsignmentDto {
   private String laytime;
   private String cutOfTime;
   private float payload;
-  private float unitOfMeasurement;
+  private String unitOfMeasurement;
   private String portOfLoading;
 }

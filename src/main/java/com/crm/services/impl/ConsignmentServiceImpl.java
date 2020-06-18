@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import com.crm.common.Tool;
 import com.crm.enums.EnumSupplyStatus;
+import com.crm.enums.EnumUnit;
 import com.crm.exception.NotFoundException;
 import com.crm.models.Address;
 import com.crm.models.Category;
@@ -57,7 +58,7 @@ public class ConsignmentServiceImpl implements ConsignmentService {
     
     Consignment consignment = new Consignment();
 
-    ShippingLine shippingLine = shippingLineRepository.findByCompanyName(request.getShippingLineName())
+    ShippingLine shippingLine = shippingLineRepository.findByCompanyCode(request.getShippingLineName())
         .orElseThrow(() -> new NotFoundException("ERROR: Shipping Line is not found."));
     consignment.setShippingLine(shippingLine);
     
@@ -72,17 +73,18 @@ public class ConsignmentServiceImpl implements ConsignmentService {
 
 
     Address packingStation = (Address) request.getPackingStation();
-    consignment.setAddress(packingStation);
+    consignment.setPackingStation(packingStation);
 
     consignment.setBookingNumber(request.getBookingNumber());
     
     LocalDateTime layTime = Tool.convertToLocalDateTime(request.getLaytime());
-    consignment.setLayTime(layTime);
+    consignment.setLaytime(layTime);
+    
     LocalDateTime cutOftime = Tool.convertToLocalDateTime(request.getCutOfTime());
     consignment.setCutOfTime(cutOftime);
     
     consignment.setPayload(request.getPayload());
-    consignment.setUnitOfMeasurement(request.getUnitOfMeasurement());
+    consignment.setUnitOfMeasurement(EnumUnit.findByName(request.getUnitOfMeasurement()));
 
     Set<String> categoryListString = request.getCategories();
     Set<Category> listCategory = new HashSet<>();
@@ -92,13 +94,13 @@ public class ConsignmentServiceImpl implements ConsignmentService {
           .orElseThrow(() -> new NotFoundException("Error: Category is not found"));
       listCategory.add(category);
     });
-    consignment.setCategoryList(listCategory);
+    consignment.setCategories(listCategory);
     
     consignment.setFcl(true);
     
-    Port port = portRepository.findByName(request.getPortOfLoading())
+    Port port = portRepository.findByNameCode(request.getPortOfLoading())
         .orElseThrow(() -> new NotFoundException("ERROR: Port is not found."));
-    consignment.setPort(port);
+    consignment.setPortOfLoading(port);
     
     consignmentRepository.save(consignment);
     
@@ -110,7 +112,7 @@ public class ConsignmentServiceImpl implements ConsignmentService {
     Consignment consignment = consignmentRepository.findById(request.getId())
         .orElseThrow(() -> new NotFoundException("ERROR: Consignment is not found."));
     
-    ShippingLine shippingLine = shippingLineRepository.findByCompanyName(request.getShippingLineName())
+    ShippingLine shippingLine = shippingLineRepository.findByCompanyCode(request.getShippingLineName())
         .orElseThrow(() -> new NotFoundException("ERROR: Shipping Line is not found."));
     consignment.setShippingLine(shippingLine);
     
@@ -127,18 +129,19 @@ public class ConsignmentServiceImpl implements ConsignmentService {
     if (packingStation == null) {
       throw new NotFoundException("Error: PackingStation is not found");
     } else {
-      consignment.setAddress(packingStation);
+      consignment.setPackingStation(packingStation);
     }
 
     consignment.setBookingNumber(request.getBookingNumber());
     
     LocalDateTime layTime = Tool.convertToLocalDateTime(request.getLaytime());
-    consignment.setLayTime(layTime);
+    consignment.setLaytime(layTime);
+    
     LocalDateTime cutOftime = Tool.convertToLocalDateTime(request.getCutOfTime());
     consignment.setCutOfTime(cutOftime);
     
     consignment.setPayload(request.getPayload());
-    consignment.setUnitOfMeasurement(request.getUnitOfMeasurement());
+    consignment.setUnitOfMeasurement(EnumUnit.findByName(request.getUnitOfMeasurement()));
 
     Set<String> categoryListString = request.getCategories();
     Set<Category> listCategory = new HashSet<>();
@@ -148,13 +151,13 @@ public class ConsignmentServiceImpl implements ConsignmentService {
           .orElseThrow(() -> new NotFoundException("Error: Category is not found"));
       listCategory.add(category);
     });
-    consignment.setCategoryList(listCategory);
+    consignment.setCategories(listCategory);
     
     consignment.setFcl(true);
     
-    Port port = portRepository.findByName(request.getPortOfLoading())
+    Port port = portRepository.findByNameCode(request.getPortOfLoading())
         .orElseThrow(() -> new NotFoundException("ERROR: Port is not found."));
-    consignment.setPort(port);
+    consignment.setPortOfLoading(port);
     
     consignmentRepository.save(consignment);
     

@@ -13,12 +13,12 @@ public class ConsignmentMapper {
   
   public static ConsignmentDto toConsignmentDto(Consignment consignment) {
     ConsignmentDto dto = new ConsignmentDto();
-    dto.setShippingLine(consignment.getShippingLine().getShortName());
+    dto.setShippingLine(consignment.getShippingLine().getCompanyCode());
     dto.setContainerType(consignment.getContainerType().getName());
     dto.setStatus(consignment.getStatus().name());
 //    dto.setMerchantId(consignment.getMerchant().getId());
     Set<String> categories = new HashSet<>();
-    consignment.getCategoryList().forEach(item -> categories.add(item.getName()));
+    consignment.getCategories().forEach(item -> categories.add(item.getName()));
     dto.setCategoryList(categories);
     
     String packingTime = Tool.convertLocalDateTimeToString(consignment.getPackingTime());
@@ -27,15 +27,15 @@ public class ConsignmentMapper {
 //    dto.setPackingStation(consignment.getAddress());
     dto.setBookingNumber(consignment.getBookingNumber());
     
-    String laytime = Tool.convertLocalDateTimeToString(consignment.getLayTime());
+    String laytime = Tool.convertLocalDateTimeToString(consignment.getLaytime());
     dto.setLaytime(laytime);
     
     String cutOfTime = Tool.convertLocalDateTimeToString(consignment.getCutOfTime());
     dto.setCutOfTime(cutOfTime);
     
     dto.setPayload(consignment.getPayload());
-    dto.setUnitOfMeasurement(consignment.getUnitOfMeasurement());
-    dto.setPortOfLoading(consignment.getPort().getName());
+    dto.setUnitOfMeasurement(consignment.getUnitOfMeasurement().name());
+    dto.setPortOfLoading(consignment.getPortOfLoading().getFullname());
     return dto;
     
   }

@@ -27,7 +27,7 @@ private static final Logger logger = LoggerFactory.getLogger(DriverController.cl
 	@Autowired
 	private DriverService driverService;
 	
-	@PostMapping("/")
+	@PostMapping("")
 	@PreAuthorize("hasRole('FORWARDER')")
 	public ResponseEntity<?> createDriver(@Valid @RequestBody DriverRequest request){		
 		logger.info("Driver request: {}", request);

@@ -22,7 +22,7 @@ public class ShippingLineController {
 	@Autowired
 	private ShippingLineService shippingLineService;
 	
-	@PostMapping("/")
+	@PostMapping("")
 	@PreAuthorize("hasRole('OPERATOR')")
 	public ResponseEntity<?> createShippingLine(@Valid @RequestBody ShippingLineRequest request){		
 		shippingLineService.saveShippingLine(request);

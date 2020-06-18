@@ -28,7 +28,7 @@ import lombok.ToString;
 @Entity
 @Table(name = "container")
 @PrimaryKeyJoinColumn(name = "supply_id")
-public class Container extends Supply{
+public class Container extends Supply {
 
 	@ManyToOne
 	@JoinColumn(name = "driver_id")
@@ -44,7 +44,7 @@ public class Container extends Supply{
 	@Column(name = "container_tractor")
 	private String containerTractor;
 
-	@Column(name = "containerNumber")
+	@Column(name = "container_number")
 	private String containerNumber;
 
 	@Column(name = "bl_number")

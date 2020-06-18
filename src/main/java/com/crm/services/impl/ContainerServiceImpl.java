@@ -41,7 +41,7 @@ public class ContainerServiceImpl implements ContainerService{
 		Container container = new Container();
 		Driver driver = driverRepository.findByUsername(request.getDriverUsername())
 				.orElseThrow(() -> new NotFoundException("ERROR: Driver is not found."));
-		ShippingLine shippingLine = shippingLineRepository.findByCompanyName(request.getShippingLineName())
+		ShippingLine shippingLine = shippingLineRepository.findByCompanyCode(request.getShippingLineName())
 				.orElseThrow(() -> new NotFoundException("ERROR: Shipping Line is not found."));
 		container.setShippingLine(shippingLine);
 		ContainerType containerType = containerTypeRepository.findByName(request.getContainerType())

@@ -3,13 +3,13 @@ package com.crm.models;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -23,20 +23,19 @@ import lombok.ToString;
 @NoArgsConstructor
 @ToString
 @Entity
-@Table(name = "idc", uniqueConstraints = {
-		@UniqueConstraint(columnNames = "name")
-})
+@Table(name = "icd")
 public class Icd {
 	
 	@Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-	private long id;
+	private Long id;
 	
-	private String name;
+	private String fullname;
 	
+	@Column(name = "name_code", unique = true)
 	private String nameCode;
 	
 	private String address;
 	
-	@ManyToMany(mappedBy = "icdList")
-	private Collection<ShippingLine> shippingLineList = new ArrayList<ShippingLine>();
+	@ManyToMany(mappedBy = "icds")
+	private Collection<ShippingLine> shippingLines = new ArrayList<ShippingLine>();
 }

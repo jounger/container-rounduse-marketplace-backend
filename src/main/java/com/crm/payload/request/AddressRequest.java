@@ -7,11 +7,15 @@ public class AddressRequest {
 
 	@NotBlank
 	@Size(min = 2, max = 50)
-	private String address;
+	private String street;
 
 	@NotBlank
 	@Size(min = 2, max = 50)
 	private String city;
+	
+	@NotBlank
+    @Size(min = 2, max = 50)
+    private String county;
 
 	@NotBlank
 	@Size(min = 2, max = 50)

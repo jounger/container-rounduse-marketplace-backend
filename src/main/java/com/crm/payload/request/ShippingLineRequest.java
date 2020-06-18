@@ -13,12 +13,13 @@ public class ShippingLineRequest extends SignUpRequest{
 
 	private String website;
 	
-	private String name;
+	@JsonProperty("company_name")
+	private String companyName;
 	
-	@JsonProperty("short_name")
-	private String shortName;
+	@JsonProperty("company_code")
+	private String companyCode;
 	
-	@JsonProperty("icd_name_list")
-	private Set<String> icdNameList;
+	@JsonProperty("icds_name")
+	private Set<String> icdsName;
 	
 }

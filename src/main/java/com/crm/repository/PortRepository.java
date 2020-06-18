@@ -10,9 +10,7 @@ import com.crm.models.Port;
 @Repository
 public interface PortRepository extends JpaRepository<Port, Long>{
 
-	Optional<Port> findByName(String name);
-	
-	Boolean existsByName(String name);
+	Optional<Port> findByNameCode(String fullname);
 	
 	Boolean existsByNameCode(String nameCode);
 }

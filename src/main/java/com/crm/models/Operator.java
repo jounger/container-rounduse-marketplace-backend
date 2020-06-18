@@ -25,7 +25,7 @@ import lombok.ToString;
 @PrimaryKeyJoinColumn(name = "user_id")
 public class Operator extends User {
 
-	private String name;
+	private String fullname;
 
 	@Column(name = "is_root")
 	private boolean isRoot;

@@ -6,9 +6,5 @@ import lombok.Setter;
 @Getter
 @Setter
 public class MerchantRequest extends SupplierRequest{
-	
-	private String contact;
-	
-	private String bankAccount;
 
 }

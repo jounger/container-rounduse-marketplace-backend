@@ -26,11 +26,10 @@ import lombok.ToString;
 @Table(name = "permission")
 public class Permission {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private long id;
+	@Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
-	@Column(length = 20)
+	@Column(length = 20, unique = true)
 	private String name;
 
 	private String description;

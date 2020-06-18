@@ -47,43 +47,23 @@ public class MerchantServiceImpl implements MerchantService{
 		merchant.setStatus(EnumUserStatus.PENDING);
 		merchant.setWebsite(request.getWebsite());
 		merchant.setCompanyName(request.getCompanyName());
-		merchant.setShortName(request.getShortName());
-		merchant.setDescription(request.getDescription());
+		merchant.setCompanyCode(request.getCompanyCode());
+		merchant.setCompanyDescription(request.getDescription());
 		merchant.setTin(request.getTin());
 		merchant.setFax(request.getFax());
-//		merchant.setContact(request.getContact());
-//		merchant.setBankAccount(request.getBankAccount());
-		Set<String> rolesString = request.getRoles();
 		Set<Role> roles = new HashSet<>();
-//		List<EnumRole> rolesEnum = Arrays.asList(EnumRole.values());
-		if (rolesString == null) {
-			Role userRole = roleRepository.findByName("ROLE_MERCHANT")
-					.orElseThrow(() -> new NotFoundException("Error: Role is not found"));
-			roles.add(userRole);
-		} else {
-			rolesString.forEach(role -> {
-//				for (int i = 0; i < rolesEnum.size(); i++) {
-//					if (role.equalsIgnoreCase(rolesEnum.get(i).name().split("_")[1])) {
-//						Role userRole = roleRepository.findByName(rolesEnum.get(i))
-			            Role userRole = roleRepository.findByName(role)
-								.orElseThrow(() -> new NotFoundException("Error: Role is not found"));
-						roles.add(userRole);
-//					}
-//				}
-			});
-		}
+		Role userRole = roleRepository.findByName("ROLE_MERCHANT")
+            .orElseThrow(() -> new NotFoundException("Error: Role is not found"));
+        roles.add(userRole);
 		merchant.setRoles(roles);
 		Address address = (Address) request.getAddress();
-		if (address == null) {
-			throw new NotFoundException("Error: Address is not found");
-		} else {
+		if (address != null) {
 			merchant.setAddress(address);
 		}
 		String encoder = passwordEncoder.encode(request.getPassword());
 		merchant.setPassword(encoder);
 
 		merchantRepository.save(merchant);
-
 	}
 
 }

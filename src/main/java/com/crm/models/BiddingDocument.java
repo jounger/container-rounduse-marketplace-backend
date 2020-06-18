@@ -41,7 +41,7 @@ import lombok.ToString;
 public class BiddingDocument {
 	
 	@Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-	private long id;
+	private Long id;
 	
 	@ManyToOne
 	@JoinColumn(name = "merchant_id")
@@ -54,7 +54,7 @@ public class BiddingDocument {
 	@JoinColumn(name = "consignment_id")
 	private Consignment consignment;
 	
-	@OneToMany(fetch = FetchType.LAZY ,mappedBy = "biddingDocument")
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "biddingDocument")
 	private List<Bid> bids = new ArrayList<Bid>();
 	
 	@OneToMany(mappedBy = "report")
@@ -72,8 +72,8 @@ public class BiddingDocument {
 	@Column(name = "bid_package_price")
 	private float bidPackagePrice;
 	
-	@Column(name = "bit_floor_price")
-	private float bitFloorPrice;
+	@Column(name = "bid_floor_price")
+	private float bidFloorPrice;
 	
 	@Column(name = "bit_step")
 	private float bitStep;

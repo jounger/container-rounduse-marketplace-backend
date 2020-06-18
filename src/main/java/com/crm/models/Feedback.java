@@ -36,9 +36,8 @@ import lombok.ToString;
 @JsonIgnoreProperties(value = { "createdAt" }, allowGetters = true)
 public class Feedback {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private long id;
+	@Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
 	@ManyToOne
 	@JoinColumn(name = "operator_id")

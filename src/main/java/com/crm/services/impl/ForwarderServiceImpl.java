@@ -47,43 +47,24 @@ public class ForwarderServiceImpl implements ForwarderService{
 		forwarder.setStatus(EnumUserStatus.PENDING);
 		forwarder.setWebsite(request.getWebsite());
 		forwarder.setCompanyName(request.getCompanyName());
-		forwarder.setShortName(request.getShortName());
-		forwarder.setDescription(request.getDescription());
+		forwarder.setCompanyCode(request.getCompanyCode());
+		forwarder.setCompanyDescription(request.getDescription());
 		forwarder.setTin(request.getTin());
 		forwarder.setFax(request.getFax());
-//		forwarder.setContact(request.getContact());
-//		forwarder.setBankAccount(request.getBankAccount());
-		Set<String> rolesString = request.getRoles();
 		Set<Role> roles = new HashSet<>();
-//		List<EnumRole> rolesEnum = Arrays.asList(EnumRole.values());
-		if (rolesString == null) {
-			Role userRole = roleRepository.findByName("ROLE_FORWARDER")
-					.orElseThrow(() -> new NotFoundException("Error: Role is not found"));
-			roles.add(userRole);
-		} else {
-			rolesString.forEach(role -> {
-//				for (int i = 0; i < rolesEnum.size(); i++) {
-//					if (role.equalsIgnoreCase(rolesEnum.get(i).name().split("_")[1])) {
-//						Role userRole = roleRepository.findByName(rolesEnum.get(i))
-			            Role userRole = roleRepository.findByName(role)
-								.orElseThrow(() -> new NotFoundException("Error: Role is not found"));
-						roles.add(userRole);
-//					}
-//				}
-			});
-		}
+		
+		Role userRole = roleRepository.findByName("ROLE_FORWARDER")
+            .orElseThrow(() -> new NotFoundException("Error: Role is not found"));
+        roles.add(userRole);
 		forwarder.setRoles(roles);
 		Address address = (Address) request.getAddress();
-		if (address == null) {
-			throw new NotFoundException("Error: Address is not found");
-		} else {
-			forwarder.setAddress(address);
+		if (address != null) {
+		  forwarder.setAddress(address);
 		}
 		String encoder = passwordEncoder.encode(request.getPassword());
 		forwarder.setPassword(encoder);
 
 		forwarderRepository.save(forwarder);
-
 	}
 
 }

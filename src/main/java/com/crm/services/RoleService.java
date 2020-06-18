@@ -12,4 +12,8 @@ public interface RoleService {
   
   Page<Role> getRoles(PaginationRequest request);
   
+  void deleteRole(long id);
+  
+  void updateRole(long id, RoleRequest request);
+  
 }

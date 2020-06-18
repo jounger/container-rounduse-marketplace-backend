@@ -8,7 +8,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class RoleRequest {
-
+  
   @NotBlank
   private String name;
   

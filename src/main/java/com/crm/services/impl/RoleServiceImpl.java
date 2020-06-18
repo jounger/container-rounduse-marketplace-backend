@@ -5,6 +5,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import com.crm.exception.DuplicateRecordException;
+import com.crm.exception.NotFoundException;
 import com.crm.models.Role;
 import com.crm.payload.request.PaginationRequest;
 import com.crm.payload.request.RoleRequest;
@@ -16,25 +18,16 @@ public class RoleServiceImpl implements RoleService {
 
   @Autowired
   private RoleRepository roleRepository;
-  
+
   @Override
   public void saveRole(RoleRequest request) {
-//    List<EnumRole> rolesEnum = Arrays.asList(EnumRole.values());
-//    int count = 0;
-//    for(int i = 0; i < rolesEnum.size(); i++) {
-//      if(request.getName().equalsIgnoreCase(rolesEnum.get(i).name().split("_")[1])) {
-//        Role role = new Role();
-//        role.setName(rolesEnum.get(i));
-//        if(roleRepository.existsByName(role.getName())) {
-//          throw new DuplicateRecordException("Error: role has been existed");
-//        }
-//        count++;
-//        roleRepository.save(role);
-//      }
-//    }
-//    if(count == 0) {
-//      throw new NotFoundException("Error: Role is not in bound");
-//    }
+    Role role = new Role();
+    if (roleRepository.existsByName(request.getName())) {
+      throw new DuplicateRecordException("Role already exists.");
+    } else {
+      role.setName(request.getName());
+      roleRepository.save(role);
+    }
   }
 
   @Override
@@ -43,5 +36,16 @@ public class RoleServiceImpl implements RoleService {
     return pages;
   }
 
+  @Override
+  public void deleteRole(long id) {
+    Role role = roleRepository.findById(id).orElseThrow(() -> new NotFoundException("Role is not found"));
+    roleRepository.delete(role);
+  }
+
+  @Override
+  public void updateRole(long id, RoleRequest request) {
+    Role role = roleRepository.findById(id).orElseThrow(() -> new NotFoundException("Role is not found"));
+    role.setName(request.getName());
+  }
 
 }

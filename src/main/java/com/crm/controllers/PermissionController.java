@@ -16,26 +16,26 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.crm.models.Role;
+import com.crm.models.Permission;
 import com.crm.payload.request.PaginationRequest;
-import com.crm.payload.request.RoleRequest;
+import com.crm.payload.request.PermissionRequest;
 import com.crm.payload.response.MessageResponse;
 import com.crm.payload.response.PaginationResponse;
-import com.crm.services.RoleService;
+import com.crm.services.PermissionService;
 
 @CrossOrigin(origins="*", maxAge=3600)
 @RestController
-@RequestMapping("/api/role")
-public class RoleController {
-  
+@RequestMapping("/api/permission")
+public class PermissionController {
+
   @Autowired
-  private RoleService roleService;
+  private PermissionService permissionService;
   
   @GetMapping("/")
   @PreAuthorize("hasRole('ADMIN')")
-  public ResponseEntity<?> getRoles(@Valid @RequestBody PaginationRequest request) {
-    Page<Role> pages = roleService.getRoles(request);
-    PaginationResponse<Role> response = new PaginationResponse<>();
+  public ResponseEntity<?> getPermissions(@Valid @RequestBody PaginationRequest request) {
+    Page<Permission> pages = permissionService.getPermission(request);
+    PaginationResponse<Permission> response = new PaginationResponse<>();
     response.setPageNumber(request.getPage());
     response.setPageSize(request.getLimit());
     response.setTotalElements(pages.getTotalElements());
@@ -45,21 +45,20 @@ public class RoleController {
   }
   
   @PostMapping("/{id}")
-  public ResponseEntity<?> updateRole(@PathVariable Long id, @Valid @RequestBody RoleRequest request) {
-    roleService.updateRole(id, request);
+  public ResponseEntity<?> updatePermission(@PathVariable Long id, @Valid @RequestBody PermissionRequest request) {
+    permissionService.updatePermission(id, request);
     return ResponseEntity.badRequest().body(new MessageResponse("Role has been created successfully"));
   }
   
   @DeleteMapping("/{id}")
-  public ResponseEntity<?> deleteRole(@PathVariable Long id) {
-    roleService.deleteRole(id);
+  public ResponseEntity<?> deletePermission(@PathVariable Long id) {
+    permissionService.deletePermission(id);
     return ResponseEntity.badRequest().body(new MessageResponse("Role has been created successfully"));
   }
   
   @PutMapping("/")
-  public ResponseEntity<?> createRole(@Valid @RequestBody RoleRequest request) {
-    roleService.saveRole(request);
+  public ResponseEntity<?> createPermission(@Valid @RequestBody PermissionRequest request) {
+    permissionService.savePermission(request);
     return ResponseEntity.badRequest().body(new MessageResponse("Role has been created successfully"));
   }
-  
 }

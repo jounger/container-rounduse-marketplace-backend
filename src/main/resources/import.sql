@@ -4,7 +4,6 @@ INSERT INTO crm_db.role (name) VALUES ('ROLE_ADMIN'),('ROLE_MODERATOR'),('ROLE_S
 # ADD ADDRESS
 INSERT INTO crm_db.address(city,country,county,postal_code,street) VALUES ('Ha Noi','Viet Nam','Ba Dinh','100000','So 218');
 
-
 # ADD USER
 INSERT INTO crm_db.user (created_at,email,password,phone,status,updated_at,username,address_id) VALUES (CURDATE(),'admin@crm.com','$2a$10$fKNzue5vXDqZWgzxtuIDWuozd30wiGRXfkzEgnFeUc6MKAIrIyG4i','0967390098',1,CURDATE(),'admin','1');
 

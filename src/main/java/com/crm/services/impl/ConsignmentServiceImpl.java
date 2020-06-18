@@ -11,6 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import com.crm.common.Tool;
 import com.crm.enums.EnumSupplyStatus;
 import com.crm.exception.NotFoundException;
 import com.crm.models.Address;
@@ -45,8 +46,6 @@ public class ConsignmentServiceImpl implements ConsignmentService {
   
   @Autowired
   private PortRepository portRepository;
-  
-  DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd"); 
 
   @Override
   public Page<Consignment> getListConsignment(PaginationRequest request) {
@@ -61,16 +60,16 @@ public class ConsignmentServiceImpl implements ConsignmentService {
     
     Consignment consignment = new Consignment();
 
-    ShippingLine shippingLine = shippingLineRepository.findByName(request.getShippingLineName())
+    ShippingLine shippingLine = shippingLineRepository.findByCompanyName(request.getShippingLineName())
         .orElseThrow(() -> new NotFoundException("ERROR: Shipping Line is not found."));
     consignment.setShippingLine(shippingLine);
     ContainerType containerType = containerTypeRepository.findByName(request.getContainerType())
         .orElseThrow(() -> new NotFoundException("ERROR: Type is not found."));
     consignment.setContainerType(containerType);
 
-    consignment.setStatus(EnumSupplyStatus.CREATE.name());
+    consignment.setStatus(EnumSupplyStatus.findByName(request.getStatus()));
 
-    LocalDateTime packingTime = LocalDateTime.parse(request.getPackingTime(), dateFormat);
+    LocalDateTime packingTime = Tool.convertToLocalDateTime(request.getPackingTime());
     consignment.setPackingTime(packingTime);
 
 
@@ -81,13 +80,11 @@ public class ConsignmentServiceImpl implements ConsignmentService {
       consignment.setAddress(packingStation);
     }
 
-//    consignment.setPIC(request.getPIC());
-
     consignment.setBookingNumber(request.getBookingNumber());
     
-    LocalDateTime layTime = LocalDateTime.parse(request.getLaytime(), dateFormat);
+    LocalDateTime layTime = Tool.convertToLocalDateTime(request.getLaytime());
     consignment.setLayTime(layTime);
-    LocalDateTime cutOftime = LocalDateTime.parse(request.getCutOftime(), dateFormat);
+    LocalDateTime cutOftime = Tool.convertToLocalDateTime(request.getCutOfTime());
     consignment.setCutOfTime(cutOftime);
     
     consignment.setPayload(request.getPayload());
@@ -103,7 +100,7 @@ public class ConsignmentServiceImpl implements ConsignmentService {
     });
     consignment.setCategoryList(listCategory);
     
-    consignment.setFlc(true);
+    consignment.setFcl(true);
     
     Port port = portRepository.findByName(request.getPortOfLoading())
         .orElseThrow(() -> new NotFoundException("ERROR: Port is not found."));
@@ -119,18 +116,17 @@ public class ConsignmentServiceImpl implements ConsignmentService {
     Consignment consignment = consignmentRepository.findById(id)
         .orElseThrow(() -> new NotFoundException("ERROR: Consignment is not found."));
     
-    ShippingLine shippingLine = shippingLineRepository.findByName(request.getShippingLineName())
+    ShippingLine shippingLine = shippingLineRepository.findByCompanyName(request.getShippingLineName())
         .orElseThrow(() -> new NotFoundException("ERROR: Shipping Line is not found."));
     consignment.setShippingLine(shippingLine);
     ContainerType containerType = containerTypeRepository.findByName(request.getContainerType())
         .orElseThrow(() -> new NotFoundException("ERROR: Type is not found."));
     consignment.setContainerType(containerType);
 
-    consignment.setStatus(EnumSupplyStatus.CREATE.name());
+    consignment.setStatus(EnumSupplyStatus.findByName(request.getStatus()));
 
-    LocalDateTime packingTime = LocalDateTime.parse(request.getPackingTime(), dateFormat);
+    LocalDateTime packingTime = Tool.convertToLocalDateTime(request.getPackingTime());
     consignment.setPackingTime(packingTime);
-
 
     Address packingStation = (Address) request.getPackingStation();
     if (packingStation == null) {
@@ -139,13 +135,11 @@ public class ConsignmentServiceImpl implements ConsignmentService {
       consignment.setAddress(packingStation);
     }
 
-//    consignment.setPIC(request.getPIC());
-
     consignment.setBookingNumber(request.getBookingNumber());
     
-    LocalDateTime layTime = LocalDateTime.parse(request.getLaytime(), dateFormat);
+    LocalDateTime layTime = Tool.convertToLocalDateTime(request.getLaytime());
     consignment.setLayTime(layTime);
-    LocalDateTime cutOftime = LocalDateTime.parse(request.getCutOftime(), dateFormat);
+    LocalDateTime cutOftime = Tool.convertToLocalDateTime(request.getCutOfTime());
     consignment.setCutOfTime(cutOftime);
     
     consignment.setPayload(request.getPayload());
@@ -161,7 +155,7 @@ public class ConsignmentServiceImpl implements ConsignmentService {
     });
     consignment.setCategoryList(listCategory);
     
-    consignment.setFlc(true);
+    consignment.setFcl(true);
     
     Port port = portRepository.findByName(request.getPortOfLoading())
         .orElseThrow(() -> new NotFoundException("ERROR: Port is not found."));

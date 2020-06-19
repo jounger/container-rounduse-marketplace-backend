@@ -1,16 +1,20 @@
 package com.crm.services.impl;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.crm.common.Tool;
 import com.crm.enums.EnumSupplyStatus;
 import com.crm.exception.NotFoundException;
 import com.crm.models.Address;
+import com.crm.models.Bid;
 import com.crm.models.Container;
 import com.crm.models.ContainerType;
 import com.crm.models.Driver;
@@ -19,6 +23,8 @@ import com.crm.models.Port;
 import com.crm.models.ShippingLine;
 import com.crm.payload.request.ContainerRequest;
 import com.crm.payload.request.PaginationRequest;
+import com.crm.repository.AddressRepository;
+import com.crm.repository.BidRepository;
 import com.crm.repository.ContainerRepository;
 import com.crm.repository.ContainerTypeRepository;
 import com.crm.repository.DriverRepository;
@@ -47,6 +53,12 @@ public class ContainerServiceImpl implements ContainerService {
 
   @Autowired
   private PortRepository portRepository;
+  
+  @Autowired
+  private BidRepository bidRepository;
+  
+  @Autowired
+  private AddressRepository addressRepository;
 
   @Override
   public void saveContainer(ContainerRequest request) {
@@ -87,6 +99,18 @@ public class ContainerServiceImpl implements ContainerService {
     Port port = portRepository.findByNameCode(request.getPortOfDelivery())
         .orElseThrow(() -> new NotFoundException("ERROR: Port is not found."));
     container.setPortOfDelivery(port);
+    
+    Set<Long> bids = request.getBids();
+    Set<Bid> listbids = new HashSet<>();
+    
+    if(bids != null) {
+      bids.forEach(item -> {
+        Bid bid = bidRepository.findById(item)
+            .orElseThrow(() -> new NotFoundException("Error: Bid is not found"));
+        listbids.add(bid);
+      });     
+    }
+    container.setBids(listbids);
 
     container.setFreeTime(request.getFreeTime());
 
@@ -100,8 +124,8 @@ public class ContainerServiceImpl implements ContainerService {
   }
 
   @Override
-  public void editContainer(Long id, ContainerRequest request) {
-    Container container = containerRepository.findById(id)
+  public void editContainer(ContainerRequest request) {
+    Container container = containerRepository.findById(request.getId())
         .orElseThrow(() -> new NotFoundException("ERROR: Container is not found."));
     
     ShippingLine shippingLine = shippingLineRepository.findByCompanyCode(request.getShippingLineName())
@@ -134,8 +158,15 @@ public class ContainerServiceImpl implements ContainerService {
     LocalDateTime pickUpTime = Tool.convertToLocalDateTime(request.getPickUpTime());
     container.setPickUpTime(pickUpTime);
 
-    Address returnStation = (Address) request.getReturnStation();
-    container.setReturnStation(returnStation);
+    Address returnStationReq = (Address) request.getReturnStation();
+    Address returnStation = addressRepository.findById(container.getReturnStation().getId())
+        .orElseThrow(() -> new NotFoundException("ERROR: Address is not found."));
+    returnStation.setCity(returnStationReq.getCity());
+    returnStation.setStreet(returnStationReq.getStreet());
+    returnStation.setCounty(returnStationReq.getCounty());
+    returnStation.setCountry(returnStationReq.getCountry());
+    returnStation.setPostalCode(returnStationReq.getPostalCode());
+//    container.setReturnStation(returnStation);
 
     Port port = portRepository.findByNameCode(request.getPortOfDelivery())
         .orElseThrow(() -> new NotFoundException("ERROR: Port is not found."));
@@ -158,6 +189,13 @@ public class ContainerServiceImpl implements ContainerService {
     Container container = containerRepository.findById(id)
         .orElseThrow(() -> new NotFoundException("ERROR: Container is not found."));
     return container;
+  }
+
+  @Override
+  public Page<Container> getContainersByMerchant(Long id, PaginationRequest request) {
+    Pageable pageable = PageRequest.of(request.getPage(), request.getLimit());
+    Page<Container> pages = containerRepository.findByForwarderId(id, pageable);
+    return pages;
   }
 
 }

@@ -46,5 +46,5 @@ public class ContainerRequest extends SupplyRequest{
     @JsonProperty("free_time")
 	private int freeTime;
     
-    private Set<String> bids;
+    private Set<Long> bids;
 }

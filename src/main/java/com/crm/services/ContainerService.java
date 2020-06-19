@@ -12,9 +12,11 @@ public interface ContainerService {
 	
 	void saveContainer(ContainerRequest request);
 	
-	void editContainer(Long id, ContainerRequest request);
+	void editContainer(ContainerRequest request);
 	  
 	void deleteContainer(Long id);
 	  
 	Container getContainerById(Long id);
+	
+	Page<Container> getContainersByMerchant(Long id, PaginationRequest request);
 }

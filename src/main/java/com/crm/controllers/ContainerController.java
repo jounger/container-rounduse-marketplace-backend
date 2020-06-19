@@ -1,18 +1,27 @@
 package com.crm.controllers;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.crm.models.Container;
+import com.crm.models.dto.ContainerDto;
+import com.crm.models.mapper.ContainerMapper;
 import com.crm.payload.request.ContainerRequest;
 import com.crm.payload.request.PaginationRequest;
 import com.crm.payload.response.MessageResponse;
@@ -27,23 +36,68 @@ public class ContainerController {
   @Autowired
   private ContainerService containerService;
   
-  @GetMapping("/")
+  @GetMapping("")
   public ResponseEntity<?> getContainers(@Valid @RequestBody PaginationRequest request) {
     Page<Container> pages = containerService.getContainers(request);
-    PaginationResponse<Container> response = new PaginationResponse<>();
+    PaginationResponse<ContainerDto> response = new PaginationResponse<>();
     response.setPageNumber(request.getPage());
     response.setPageSize(request.getLimit());
     response.setTotalElements(pages.getTotalElements());
     response.setTotalPages(pages.getTotalPages());
-    response.setContents(pages.getContent());
+    
+    List<Container> containers = pages.getContent();
+    List<ContainerDto> containerDto = new ArrayList<>();
+    containers.forEach(container -> containerDto.add(ContainerMapper.toContainerDto(container)));
+    response.setContents(containerDto);
     
     return ResponseEntity.ok(response);
   }
   
-  @PostMapping("/")
+  @PostMapping("")
   public ResponseEntity<?> createRole(@Valid @RequestBody ContainerRequest request) {
     containerService.saveContainer(request);
     return ResponseEntity.ok(new MessageResponse("Container has been created successfully"));
+  }
+  
+  @GetMapping("/forwarder/{id}")
+  public ResponseEntity<?> getConsignmentsByForwarder(@PathVariable Long id, @Valid @RequestBody PaginationRequest request) {
+    
+    Page<Container> pages = containerService.getContainersByMerchant(id, request);
+    PaginationResponse<ContainerDto> response = new PaginationResponse<>();
+    response.setPageNumber(request.getPage());
+    response.setPageSize(request.getLimit());
+    response.setTotalElements(pages.getTotalElements());
+    response.setTotalPages(pages.getTotalPages());
+    
+    List<Container> containers = pages.getContent();
+    List<ContainerDto> containerDto = new ArrayList<>();
+    containers.forEach(container -> containerDto.add(ContainerMapper.toContainerDto(container)));
+    response.setContents(containerDto);
+    
+    return ResponseEntity.ok(response);
+    
+  }
+  
+  @Transactional
+  @DeleteMapping("")
+  public ResponseEntity<?> removeConsignment(@Valid @RequestBody ContainerRequest request){       
+    containerService.deleteContainer(request.getId());
+    return ResponseEntity.ok(new MessageResponse("Container has remove successfully"));
+  }
+  
+  @Transactional
+  @PutMapping("")
+  public ResponseEntity<?> editConsignment(@Valid @RequestBody ContainerRequest request){
+    containerService.editContainer(request);
+    return ResponseEntity.ok(new MessageResponse("Container has update successfully"));
+  }
+  
+  @GetMapping("/{id}")
+  public ResponseEntity<?> getConsignment(@PathVariable Long id){
+    Container container = containerService.getContainerById(id);
+    ContainerDto containerDto = new ContainerDto();
+    containerDto = ContainerMapper.toContainerDto(container);
+    return ResponseEntity.ok(containerDto);
   }
   
 }

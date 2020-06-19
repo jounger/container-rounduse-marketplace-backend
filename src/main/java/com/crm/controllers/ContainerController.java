@@ -8,6 +8,7 @@ import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -37,6 +38,7 @@ public class ContainerController {
   private ContainerService containerService;
   
   @GetMapping("")
+  @PreAuthorize("hasRole('OPERATOR')")
   public ResponseEntity<?> getContainers(@Valid @RequestBody PaginationRequest request) {
     Page<Container> pages = containerService.getContainers(request);
     PaginationResponse<ContainerDto> response = new PaginationResponse<>();
@@ -54,13 +56,15 @@ public class ContainerController {
   }
   
   @PostMapping("")
-  public ResponseEntity<?> createRole(@Valid @RequestBody ContainerRequest request) {
+  @PreAuthorize("hasRole('FORWARDER')")
+  public ResponseEntity<?> createContainer(@Valid @RequestBody ContainerRequest request) {
     containerService.saveContainer(request);
     return ResponseEntity.ok(new MessageResponse("Container has been created successfully"));
   }
   
   @GetMapping("/forwarder/{id}")
-  public ResponseEntity<?> getConsignmentsByForwarder(@PathVariable Long id, @Valid @RequestBody PaginationRequest request) {
+  @PreAuthorize("hasRole('FORWARDER')")
+  public ResponseEntity<?> getContainersByForwarder(@PathVariable Long id, @Valid @RequestBody PaginationRequest request) {
     
     Page<Container> pages = containerService.getContainersByMerchant(id, request);
     PaginationResponse<ContainerDto> response = new PaginationResponse<>();
@@ -80,20 +84,23 @@ public class ContainerController {
   
   @Transactional
   @DeleteMapping("")
-  public ResponseEntity<?> removeConsignment(@Valid @RequestBody ContainerRequest request){       
+  @PreAuthorize("hasRole('FORWARDER')")
+  public ResponseEntity<?> removeContainer(@Valid @RequestBody ContainerRequest request){       
     containerService.deleteContainer(request.getId());
     return ResponseEntity.ok(new MessageResponse("Container has remove successfully"));
   }
   
   @Transactional
   @PutMapping("")
-  public ResponseEntity<?> editConsignment(@Valid @RequestBody ContainerRequest request){
+  @PreAuthorize("hasRole('FORWARDER')")
+  public ResponseEntity<?> editContainer(@Valid @RequestBody ContainerRequest request){
     containerService.editContainer(request);
     return ResponseEntity.ok(new MessageResponse("Container has update successfully"));
   }
   
   @GetMapping("/{id}")
-  public ResponseEntity<?> getConsignment(@PathVariable Long id){
+  @PreAuthorize("hasRole('OPERATOR') or hasRole('FORWARDER')")
+  public ResponseEntity<?> getContainer(@PathVariable Long id){
     Container container = containerService.getContainerById(id);
     ContainerDto containerDto = new ContainerDto();
     containerDto = ContainerMapper.toContainerDto(container);

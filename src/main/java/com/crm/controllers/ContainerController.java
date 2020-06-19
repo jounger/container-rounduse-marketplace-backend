@@ -38,7 +38,7 @@ public class ContainerController {
   private ContainerService containerService;
   
   @GetMapping("")
-  @PreAuthorize("hasRole('OPERATOR')")
+  @PreAuthorize("hasRole('MODERATOR')")
   public ResponseEntity<?> getContainers(@Valid @RequestBody PaginationRequest request) {
     Page<Container> pages = containerService.getContainers(request);
     PaginationResponse<ContainerDto> response = new PaginationResponse<>();
@@ -99,7 +99,7 @@ public class ContainerController {
   }
   
   @GetMapping("/{id}")
-  @PreAuthorize("hasRole('OPERATOR') or hasRole('FORWARDER')")
+  @PreAuthorize("hasRole('MODERATOR') or hasRole('FORWARDER')")
   public ResponseEntity<?> getContainer(@PathVariable Long id){
     Container container = containerService.getContainerById(id);
     ContainerDto containerDto = new ContainerDto();

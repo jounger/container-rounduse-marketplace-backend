@@ -1,5 +1,7 @@
 package com.crm.payload.request;
 
+import java.util.List;
+
 import javax.validation.constraints.NotBlank;
 
 import lombok.Getter;
@@ -13,5 +15,7 @@ public class RoleRequest {
   
   @NotBlank
   private String name;
+  
+  private List<String> permissions;
   
 }

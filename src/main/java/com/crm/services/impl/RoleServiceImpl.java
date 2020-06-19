@@ -1,5 +1,7 @@
 package com.crm.services.impl;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -7,9 +9,11 @@ import org.springframework.stereotype.Service;
 
 import com.crm.exception.DuplicateRecordException;
 import com.crm.exception.NotFoundException;
+import com.crm.models.Permission;
 import com.crm.models.Role;
 import com.crm.payload.request.PaginationRequest;
 import com.crm.payload.request.RoleRequest;
+import com.crm.repository.PermissionRepository;
 import com.crm.repository.RoleRepository;
 import com.crm.services.RoleService;
 
@@ -18,16 +22,24 @@ public class RoleServiceImpl implements RoleService {
 
   @Autowired
   private RoleRepository roleRepository;
+  
+  @Autowired
+  private PermissionRepository permissionRepository;
 
   @Override
   public void saveRole(RoleRequest request) {
     Role role = new Role();
     if (roleRepository.existsByName(request.getName())) {
       throw new DuplicateRecordException("Role already exists.");
-    } else {
-      role.setName(request.getName());
-      roleRepository.save(role);
     }
+    role.setName(request.getName());
+    List<String> permissionsString = request.getPermissions();
+    permissionsString.forEach(permission -> {
+      Permission rolePermission = permissionRepository.findByName(permission)
+          .orElseThrow(() -> new NotFoundException("Permission is not found."));
+      role.getPermissions().add(rolePermission);
+    });
+    roleRepository.save(role);
   }
 
   @Override
@@ -45,7 +57,14 @@ public class RoleServiceImpl implements RoleService {
   @Override
   public void updateRole(RoleRequest request) {
     Role role = roleRepository.findById(request.getId()).orElseThrow(() -> new NotFoundException("Role is not found"));
+    List<String> permissionsString = request.getPermissions();
+    permissionsString.forEach(permission -> {
+      Permission rolePermission = permissionRepository.findByName(permission)
+          .orElseThrow(() -> new NotFoundException("Permission is not found."));
+      role.getPermissions().add(rolePermission);
+    });
     role.setName(request.getName());
+    roleRepository.save(role);
   }
 
 }

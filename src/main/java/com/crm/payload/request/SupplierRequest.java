@@ -9,11 +9,15 @@ public class SupplierRequest extends SignUpRequest{
 
 	private String website;
 	
+	private String contactPerson;
+	
 	private String companyName;
 
 	private String companyCode;
 	
-	private String description;
+	private String companyDescription;
+	
+	private String companyAddress;
 	
 	private String tin;
 	

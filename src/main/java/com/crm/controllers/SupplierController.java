@@ -21,6 +21,7 @@ import com.crm.models.Supplier;
 import com.crm.models.dto.SupplierDto;
 import com.crm.models.mapper.SupplierMapper;
 import com.crm.payload.request.PaginationRequest;
+import com.crm.payload.request.SupplierRequest;
 import com.crm.payload.response.PaginationResponse;
 import com.crm.services.SupplierService;
 
@@ -38,7 +39,14 @@ public class SupplierController {
 	@GetMapping("")
 	public ResponseEntity<?> getSuppliers(@Valid @RequestBody PaginationRequest request) {
 		logger.info("Page request: {}", request.getPage());
-		Page<Supplier> pages = supplierService.getSuppliers(request);
+		
+		Page<Supplier> pages = null;
+		if(request.getStatus() == null) {
+		  pages = supplierService.getSuppliers(request);
+		}else if(request.getStatus() != null) {
+		  pages = supplierService.getSuppliersByStatus(request);
+		}	
+		
 		PaginationResponse<SupplierDto> response = new PaginationResponse<>();
 		response.setPageNumber(request.getPage());
 		response.setPageSize(request.getLimit());
@@ -52,4 +60,20 @@ public class SupplierController {
 
 		return ResponseEntity.ok(response);
 	}
+	
+	@PreAuthorize("hasRole('OPERATOR') or hasRole('FORWARDER') or hasRole('MERCHANT')")
+    @GetMapping("registration")
+    public ResponseEntity<?> getSupplier(@Valid @RequestBody SupplierRequest request) {
+        Supplier supplier = supplierService.getSupplier(request.getUsername());
+        SupplierDto supplierDto = SupplierMapper.toSupplierDto(supplier);
+        return ResponseEntity.ok(supplierDto);
+    }
+	
+	@PreAuthorize("hasRole('OPERATOR')")
+    @GetMapping("/edit")
+    public ResponseEntity<?> editSupplierStatus(@Valid @RequestBody SupplierRequest request) {
+        Supplier supplier = supplierService.editSupplierStatus(request);
+        SupplierDto supplierDto = SupplierMapper.toSupplierDto(supplier);
+        return ResponseEntity.ok(supplierDto);
+    }
 }

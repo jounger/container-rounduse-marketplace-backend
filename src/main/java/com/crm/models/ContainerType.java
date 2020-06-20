@@ -57,7 +57,7 @@ public class ContainerType {
 
 	@Column(name = "door_open_height")
 	private float doorOpeningHeight;
-
+	
 	@OneToMany(mappedBy = "containerType")
 	private Collection<Supply> supplies = new ArrayList<Supply>();
 }

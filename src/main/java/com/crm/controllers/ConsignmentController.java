@@ -42,7 +42,7 @@ public class ConsignmentController {
   private ConsignmentService consignmentService;
   
   @GetMapping("")
-//  @PreAuthorize("hasRole('MODERATOR')")
+  @PreAuthorize("hasRole('MODERATOR')")
   public ResponseEntity<?> getConsignments(@Valid PaginationRequest request) {
     
     Page<Consignment> pages = consignmentService.getListConsignment(request);

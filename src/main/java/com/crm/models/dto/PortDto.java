@@ -7,14 +7,15 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class IcdDto {
-  private Long id;
+public class PortDto {
 
+  private Long id;
+  
   private String fullname;
 
   @JsonProperty("name_code")
   private String nameCode;
 
   private String address;
-
+  
 }

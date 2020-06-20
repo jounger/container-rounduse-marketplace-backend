@@ -1,7 +1,5 @@
 package com.crm.payload.request;
 
-import java.util.Collection;
-
 import javax.validation.constraints.NotBlank;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -24,8 +22,4 @@ public class IcdRequest {
 	
 	@NotBlank
 	private String address;
-	
-	@NotBlank
-	@JsonProperty("shipping_lines")
-	private Collection<String> shippingLines;
 }

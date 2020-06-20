@@ -10,7 +10,7 @@ public interface IcdService {
 	
 	void saveIcd(IcdRequest request);
 	
-	void editIcd(IcdRequest request);
+	void updateIcd(IcdRequest request);
 	  
 	void deleteIcd(Long id);
 	

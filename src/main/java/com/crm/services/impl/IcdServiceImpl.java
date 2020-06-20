@@ -3,17 +3,14 @@ package com.crm.services.impl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.crm.exception.DuplicateRecordException;
 import com.crm.exception.NotFoundException;
-import com.crm.models.Consignment;
 import com.crm.models.Icd;
 import com.crm.payload.request.IcdRequest;
 import com.crm.payload.request.PaginationRequest;
 import com.crm.repository.IcdRepository;
-import com.crm.repository.ShippingLineRepository;
 import com.crm.services.IcdService;
 
 @Service
@@ -37,7 +34,7 @@ public class IcdServiceImpl implements IcdService{
 	}
 
   @Override
-  public void editIcd(IcdRequest request) {
+  public void updateIcd(IcdRequest request) {
     Icd icd = icdRepository.findById(request.getId())
         .orElseThrow(() -> new NotFoundException("ERROR: Icd is not found."));
     

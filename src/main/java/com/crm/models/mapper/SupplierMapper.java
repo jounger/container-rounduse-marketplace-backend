@@ -12,6 +12,7 @@ public class SupplierMapper {
 
 	public static SupplierDto toSupplierDto(Supplier supplier) {
 		SupplierDto supplierDto = new SupplierDto();
+		supplierDto.setId(supplier.getId());
 		supplierDto.setUsername(supplier.getUsername());
 		
 		Map<String, String> address = new HashMap<>();
@@ -20,9 +21,11 @@ public class SupplierMapper {
 		supplierDto.setEmail(supplier.getEmail());
 		supplierDto.setPhone(supplier.getPhone());
 		supplierDto.setStatus(supplier.getStatus().name());
-		Set<String> roles = new HashSet<>();
-		supplier.getRoles().forEach(role -> roles.add(role.getName()));
-		supplierDto.setRoles(roles);
+		
+		Set<String> supplierRoles = new HashSet<>();
+		supplier.getRoles().forEach(role -> supplierRoles.add(RoleMapper.toRoleDto(role).getName()));
+		supplierDto.setRoles(supplierRoles);
+		
 		supplierDto.setWebsite(supplier.getWebsite());
 		supplierDto.setContactPerson(supplier.getContactPerson());
 		supplierDto.setCompanyName(supplier.getCompanyName());

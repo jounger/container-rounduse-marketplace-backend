@@ -27,7 +27,7 @@ public class OperatorController {
 	@Autowired
 	private OperatorService operatorService;
 	
-	@PostMapping("/")
+	@PostMapping("")
 	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<?> createOperator(@Valid @RequestBody OperatorRequest request){		
 		operatorService.saveOperator(request);

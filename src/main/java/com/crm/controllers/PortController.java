@@ -23,7 +23,7 @@ public class PortController {
 	@Autowired
 	private PortService portService;
 	
-	@PostMapping("/")
+	@PostMapping("")
 	@PreAuthorize("hasRole('OPERATOR')")
 	public ResponseEntity<?> createPort(@Valid @RequestBody PortRequest request){
 		portService.savePort(request);

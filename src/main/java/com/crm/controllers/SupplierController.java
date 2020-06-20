@@ -13,7 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -35,8 +34,8 @@ public class SupplierController {
 	private SupplierService supplierService;
 	
 	@PreAuthorize("hasRole('OPERATOR')")
-	@GetMapping("/")
-	public ResponseEntity<?> getSuppliers(@Valid @RequestBody PaginationRequest request) {
+	@GetMapping("")
+	public ResponseEntity<?> getSuppliers(@Valid PaginationRequest request) {
 		logger.info("Page request: {}", request.getPage());
 		Page<Supplier> pages = supplierService.getSuppliers(request);
 		PaginationResponse<SupplierDto> response = new PaginationResponse<>();

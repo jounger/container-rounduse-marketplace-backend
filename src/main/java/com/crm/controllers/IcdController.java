@@ -23,7 +23,7 @@ public class IcdController {
 	@Autowired
 	private IcdService icdService;
 	
-	@PostMapping("/")
+	@PostMapping("")
 	@PreAuthorize("hasRole('OPERATOR')")
 	public ResponseEntity<?> createIcd(@Valid @RequestBody IcdRequest request){
 		icdService.saveIcd(request);

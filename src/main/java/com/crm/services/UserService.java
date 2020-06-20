@@ -14,5 +14,5 @@ public interface UserService {
   Page<User> getUsers(PaginationRequest request);
 
   void changeStatus(ChangeUserStatusRequest request);
-
+  
 }

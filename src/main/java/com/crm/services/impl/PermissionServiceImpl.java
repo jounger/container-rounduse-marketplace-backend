@@ -33,7 +33,7 @@ public class PermissionServiceImpl implements PermissionService{
 //	    if(count == 0) {
 //	      throw new NotFoundException("Error: Permission is not in bound");
 //	    }
-
+		
 	}
 
 	@Override

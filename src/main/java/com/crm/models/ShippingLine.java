@@ -31,7 +31,7 @@ import lombok.ToString;
 public class ShippingLine extends User {
 
 	private String website;
-
+	
 	@Column(name = "company_name", length = 50)
 	private String companyName;
 

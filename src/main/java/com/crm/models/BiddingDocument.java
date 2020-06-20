@@ -75,8 +75,8 @@ public class BiddingDocument {
 	@Column(name = "bid_floor_price")
 	private float bidFloorPrice;
 	
-	@Column(name = "bit_step")
-	private float bitStep;
+	@Column(name = "bid_step")
+	private float bidStep;
 	
 	@ManyToOne
 	@JoinColumn(name = "discount_id")

@@ -21,7 +21,7 @@ public class BiddingDocumentRequest {
   
   private String bidClosing;
   
-  private String currency;
+  private String currencyOfPayment;
   
   private String bidPackagePrice;
   

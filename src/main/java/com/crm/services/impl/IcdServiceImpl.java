@@ -1,17 +1,15 @@
 package com.crm.services.impl;
 
-import java.util.ArrayList;
-import java.util.Collection;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.crm.exception.DuplicateRecordException;
 import com.crm.exception.NotFoundException;
+import com.crm.models.Consignment;
 import com.crm.models.Icd;
-import com.crm.models.ShippingLine;
 import com.crm.payload.request.IcdRequest;
 import com.crm.payload.request.PaginationRequest;
 import com.crm.repository.IcdRepository;
@@ -23,9 +21,6 @@ public class IcdServiceImpl implements IcdService{
 	
 	@Autowired
 	private IcdRepository icdRepository;
-	
-	@Autowired
-    private ShippingLineRepository shippingLineRepository;
 
 	@Override
 	public void saveIcd(IcdRequest request) {
@@ -37,16 +32,7 @@ public class IcdServiceImpl implements IcdService{
 		}
 		icd.setNameCode(nameCode);
 		icd.setAddress(request.getAddress());
-		
-		Collection<String> shippingLinesString = request.getShippingLines();
-		Collection<ShippingLine> listShippingLines = new ArrayList<ShippingLine>();
-		shippingLinesString.forEach(shippingLines -> {
-		  ShippingLine shippingLine = shippingLineRepository.findByCompanyCode(shippingLines)
-	          .orElseThrow(() -> new NotFoundException("Error: ShippingLine is not found"));
-		  listShippingLines.add(shippingLine);
-	    });
-		icd.setShippingLines(listShippingLines);
-	    
+			    
 		icdRepository.save(icd);
 	}
 
@@ -56,21 +42,8 @@ public class IcdServiceImpl implements IcdService{
         .orElseThrow(() -> new NotFoundException("ERROR: Icd is not found."));
     
     icd.setFullname(request.getFullname());
-    String nameCode = request.getNameCode();
-    if(icdRepository.existsByNameCode(nameCode)) {
-        throw new DuplicateRecordException("ICD name code already existed.");
-    }
-    icd.setNameCode(nameCode);
+    icd.setNameCode(request.getNameCode());
     icd.setAddress(request.getAddress());
-    
-    Collection<String> shippingLinesString = request.getShippingLines();
-    Collection<ShippingLine> listShippingLines = new ArrayList<ShippingLine>();
-    shippingLinesString.forEach(shippingLines -> {
-      ShippingLine shippingLine = shippingLineRepository.findByCompanyCode(shippingLines)
-          .orElseThrow(() -> new NotFoundException("Error: ShippingLine is not found"));
-      listShippingLines.add(shippingLine);
-    });
-    icd.setShippingLines(listShippingLines);
     
     icdRepository.save(icd);
   }

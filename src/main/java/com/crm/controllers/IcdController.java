@@ -20,8 +20,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.crm.models.Consignment;
 import com.crm.models.Icd;
+import com.crm.models.dto.ConsignmentDto;
 import com.crm.models.dto.IcdDto;
+import com.crm.models.mapper.ConsignmentMapper;
 import com.crm.models.mapper.IcdMapper;
 import com.crm.payload.request.IcdRequest;
 import com.crm.payload.request.PaginationRequest;
@@ -39,7 +42,7 @@ public class IcdController {
 
   @GetMapping("")
   @PreAuthorize("hasRole('MODERATOR')")
-  public ResponseEntity<?> getConsignments(@Valid PaginationRequest request) {
+  public ResponseEntity<?> getIcds(@Valid PaginationRequest request) {
 
     Page<Icd> pages = icdService.getIcds(request);
     PaginationResponse<IcdDto> response = new PaginationResponse<>();
@@ -58,7 +61,7 @@ public class IcdController {
   }
 
   @PostMapping("")
-//  @PreAuthorize("hasRole('MODERATOR')")
+  @PreAuthorize("hasRole('MODERATOR')")
   public ResponseEntity<?> createIcd(@Valid @RequestBody IcdRequest request) {
     icdService.saveIcd(request);
     return ResponseEntity.ok(new MessageResponse("ICD created successfully"));
@@ -75,14 +78,14 @@ public class IcdController {
   @Transactional
   @PutMapping("")
   @PreAuthorize("hasRole('MODERATOR')")
-  public ResponseEntity<?> editConsignment(@Valid @RequestBody IcdRequest request){
+  public ResponseEntity<?> UpdateIcd(@Valid @RequestBody IcdRequest request){
     icdService.editIcd(request);
     return ResponseEntity.ok(new MessageResponse("Icd has update successfully"));
   }
   
   @GetMapping("/{id}")
   @PreAuthorize("hasRole('MODERATOR')")
-  public ResponseEntity<?> getConsignment(@PathVariable Long id){
+  public ResponseEntity<?> getIcd(@PathVariable Long id){
     Icd icd = icdService.getIcdById(id);
     IcdDto icdDto = new IcdDto();
     icdDto = IcdMapper.toIcdDto(icd);

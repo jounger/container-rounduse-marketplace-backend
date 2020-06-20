@@ -1,5 +1,7 @@
 package com.crm.payload.request;
 
+import java.util.Collection;
+
 import javax.validation.constraints.NotBlank;
 
 import lombok.Getter;
@@ -10,11 +12,14 @@ import lombok.Setter;
 public class IcdRequest {
 	
 	@NotBlank
-	private String name;
+	private String fullname;
 	
 	@NotBlank
 	private String nameCode;
 	
 	@NotBlank
 	private String address;
+	
+	@NotBlank
+	private Collection<String> shippingLines;
 }

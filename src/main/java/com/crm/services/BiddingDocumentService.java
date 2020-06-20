@@ -8,15 +8,15 @@ import com.crm.models.BiddingDocument;
 import com.crm.payload.request.BiddingDocumentRequest;
 import com.crm.payload.request.PaginationRequest;
 
-public interface BiddingDocumentSerivce {
+public interface BiddingDocumentService {
   
   void saveBiddingDocument(BiddingDocumentRequest request);
   
-  BiddingDocument findBiddingDocument(Long id);
+  BiddingDocument getBiddingDocument(Long id);
   
-  Page<BiddingDocument> findBiddingDocuments(PaginationRequest request);
+  Page<BiddingDocument> getBiddingDocuments(PaginationRequest request);
   
-  Page<BiddingDocument> findBiddingDocumentsByMerchant(Long id, PaginationRequest request);
+  Page<BiddingDocument> getBiddingDocumentsByMerchant(Long id, PaginationRequest request);
   
   void deleteBiddingDocument(Long id);
   

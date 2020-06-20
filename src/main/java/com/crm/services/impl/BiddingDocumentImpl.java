@@ -23,9 +23,9 @@ import com.crm.repository.BiddingDocumentRepository;
 import com.crm.repository.ConsignmentRepository;
 import com.crm.repository.DiscountRepository;
 import com.crm.repository.MerchantRepository;
-import com.crm.services.BiddingDocumentSerivce;
+import com.crm.services.BiddingDocumentService;
 
-public class BiddingDocumentImpl implements BiddingDocumentSerivce {
+public class BiddingDocumentImpl implements BiddingDocumentService {
 
   @Autowired
   private BiddingDocumentRepository biddingDocumentRepository;
@@ -76,7 +76,7 @@ public class BiddingDocumentImpl implements BiddingDocumentSerivce {
   }
 
   @Override
-  public BiddingDocument findBiddingDocument(Long id) {
+  public BiddingDocument getBiddingDocument(Long id) {
     BiddingDocument biddingDocument = new BiddingDocument();
     biddingDocument = biddingDocumentRepository.findById(id)
         .orElseThrow(() -> new NotFoundException("Document bidding is not found."));
@@ -84,17 +84,17 @@ public class BiddingDocumentImpl implements BiddingDocumentSerivce {
   }
 
   @Override
-  public Page<BiddingDocument> findBiddingDocuments(PaginationRequest request) {
+  public Page<BiddingDocument> getBiddingDocuments(PaginationRequest request) {
     Page<BiddingDocument> biddingDocuments = biddingDocumentRepository
         .findAll(PageRequest.of(request.getPage(), request.getLimit()));
     return biddingDocuments;
   }
 
   @Override
-  public Page<BiddingDocument> findBiddingDocumentsByMerchant(Long id, PaginationRequest request) {
+  public Page<BiddingDocument> getBiddingDocumentsByMerchant(Long id, PaginationRequest request) {
     Page<BiddingDocument> biddingDocuments = null;
     if (merchantRepository.existsById(id)) {
-      biddingDocuments = biddingDocumentRepository.findAll(PageRequest.of(request.getPage(), request.getLimit()));
+      biddingDocuments = biddingDocumentRepository.findBiddingDocumentByMerchant(id, PageRequest.of(request.getPage(), request.getLimit()));
     } else {
       throw new NotFoundException("Merchant is not found.");
     }

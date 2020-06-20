@@ -43,7 +43,7 @@ public class ConsignmentController {
   
   @GetMapping("")
   @PreAuthorize("hasRole('OPERATOR')")
-  public ResponseEntity<?> getConsignments(@Valid @RequestBody PaginationRequest request) {
+  public ResponseEntity<?> getConsignments(@Valid PaginationRequest request) {
     
     Page<Consignment> pages = consignmentService.getListConsignment(request);
     PaginationResponse<ConsignmentDto> response = new PaginationResponse<>();
@@ -96,7 +96,7 @@ public class ConsignmentController {
   
   @GetMapping("/merchant/{id}")
   @PreAuthorize("hasRole('MERCHANT')")
-  public ResponseEntity<?> getConsignmentsByMerchant(@PathVariable Long id, @Valid @RequestBody PaginationRequest request) {
+  public ResponseEntity<?> getConsignmentsByMerchant(@PathVariable Long id, @Valid PaginationRequest request) {
     
     Page<Consignment> pages = consignmentService.getConsignmentsByMerchant(id, request);
     PaginationResponse<ConsignmentDto> response = new PaginationResponse<>();

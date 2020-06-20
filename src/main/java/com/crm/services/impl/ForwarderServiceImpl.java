@@ -48,7 +48,8 @@ public class ForwarderServiceImpl implements ForwarderService{
 		forwarder.setWebsite(request.getWebsite());
 		forwarder.setCompanyName(request.getCompanyName());
 		forwarder.setCompanyCode(request.getCompanyCode());
-		forwarder.setCompanyDescription(request.getDescription());
+		forwarder.setCompanyDescription(request.getCompanyDescription());
+		forwarder.setContactPerson(request.getContactPerson());
 		forwarder.setTin(request.getTin());
 		forwarder.setFax(request.getFax());
 		Set<Role> roles = new HashSet<>();

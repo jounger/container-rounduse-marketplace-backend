@@ -48,7 +48,8 @@ public class MerchantServiceImpl implements MerchantService{
 		merchant.setWebsite(request.getWebsite());
 		merchant.setCompanyName(request.getCompanyName());
 		merchant.setCompanyCode(request.getCompanyCode());
-		merchant.setCompanyDescription(request.getDescription());
+		merchant.setCompanyDescription(request.getCompanyDescription());
+		merchant.setContactPerson(request.getContactPerson());
 		merchant.setTin(request.getTin());
 		merchant.setFax(request.getFax());
 		Set<Role> roles = new HashSet<>();

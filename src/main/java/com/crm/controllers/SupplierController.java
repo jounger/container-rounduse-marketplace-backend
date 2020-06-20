@@ -2,7 +2,6 @@ package com.crm.controllers;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import javax.validation.Valid;
 
@@ -10,13 +9,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -24,7 +20,6 @@ import com.crm.models.Supplier;
 import com.crm.models.dto.SupplierDto;
 import com.crm.models.mapper.SupplierMapper;
 import com.crm.payload.request.PaginationRequest;
-import com.crm.payload.request.SupplierRequest;
 import com.crm.payload.response.PaginationResponse;
 import com.crm.services.SupplierService;
 
@@ -38,18 +33,11 @@ public class SupplierController {
 	@Autowired
 	private SupplierService supplierService;
 	
-	@PreAuthorize("hasRole('MODERATOR')")
+	@PreAuthorize("hasRole('OPERATOR')")
 	@GetMapping("")
 	public ResponseEntity<?> getSuppliers(@Valid PaginationRequest request) {
 		logger.info("Page request: {}", request.getPage());
-		
-		Page<Supplier> pages = null;
-		if(request.getStatus() == null) {
-		  pages = supplierService.getSuppliers(request);
-		}else if(request.getStatus() != null) {
-		  pages = supplierService.getSuppliersByStatus(request);
-		}	
-		
+		Page<Supplier> pages = supplierService.getSuppliers(request);
 		PaginationResponse<SupplierDto> response = new PaginationResponse<>();
 		response.setPageNumber(request.getPage());
 		response.setPageSize(request.getLimit());
@@ -63,21 +51,4 @@ public class SupplierController {
 
 		return ResponseEntity.ok(response);
 	}
-	
-	@PreAuthorize("hasRole('MODERATOR') or hasRole('FORWARDER') or hasRole('MERCHANT')")
-    @GetMapping("registration")
-    public ResponseEntity<?> getSupplier(@Valid SupplierRequest request) {
-        Supplier supplier = supplierService.getSupplier(request.getUsername());
-        SupplierDto supplierDto = SupplierMapper.toSupplierDto(supplier);
-        return ResponseEntity.ok(supplierDto);
-    }
-	
-	@PreAuthorize("hasRole('MODERATOR') or hasRole('MERCHANT')")
-    @RequestMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> editSupplier(@RequestBody Map<String, Object> updates, 
-        @PathVariable("id") Long id) {
-        Supplier supplier = supplierService.editSupplier(updates, id);
-        SupplierDto supplierDto = SupplierMapper.toSupplierDto(supplier);
-        return ResponseEntity.ok(supplierDto);
-    }
 }

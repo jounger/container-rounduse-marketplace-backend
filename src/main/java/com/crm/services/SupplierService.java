@@ -1,10 +1,11 @@
 package com.crm.services;
 
+import java.util.Map;
+
 import org.springframework.data.domain.Page;
 
 import com.crm.models.Supplier;
 import com.crm.payload.request.PaginationRequest;
-import com.crm.payload.request.SupplierRequest;
 
 public interface SupplierService {
 
@@ -14,6 +15,6 @@ public interface SupplierService {
 	
 	Page<Supplier> getSuppliersByStatus(PaginationRequest request);
 	
-	Supplier editSupplierStatus(SupplierRequest request);
+	Supplier editSupplier(Map<String, Object> updates, Long id);
 	
 }

@@ -2,6 +2,7 @@ package com.crm.controllers;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import javax.validation.Valid;
 
@@ -9,10 +10,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -35,9 +38,9 @@ public class SupplierController {
 	@Autowired
 	private SupplierService supplierService;
 	
-	@PreAuthorize("hasRole('OPERATOR')")
+	@PreAuthorize("hasRole('MODERATOR')")
 	@GetMapping("")
-	public ResponseEntity<?> getSuppliers(@Valid @RequestBody PaginationRequest request) {
+	public ResponseEntity<?> getSuppliers(@Valid PaginationRequest request) {
 		logger.info("Page request: {}", request.getPage());
 		
 		Page<Supplier> pages = null;
@@ -61,18 +64,19 @@ public class SupplierController {
 		return ResponseEntity.ok(response);
 	}
 	
-	@PreAuthorize("hasRole('OPERATOR') or hasRole('FORWARDER') or hasRole('MERCHANT')")
+	@PreAuthorize("hasRole('MODERATOR') or hasRole('FORWARDER') or hasRole('MERCHANT')")
     @GetMapping("registration")
-    public ResponseEntity<?> getSupplier(@Valid @RequestBody SupplierRequest request) {
+    public ResponseEntity<?> getSupplier(@Valid SupplierRequest request) {
         Supplier supplier = supplierService.getSupplier(request.getUsername());
         SupplierDto supplierDto = SupplierMapper.toSupplierDto(supplier);
         return ResponseEntity.ok(supplierDto);
     }
 	
-	@PreAuthorize("hasRole('OPERATOR')")
-    @GetMapping("/edit")
-    public ResponseEntity<?> editSupplierStatus(@Valid @RequestBody SupplierRequest request) {
-        Supplier supplier = supplierService.editSupplierStatus(request);
+	@PreAuthorize("hasRole('MODERATOR') or hasRole('MERCHANT')")
+    @RequestMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> editSupplier(@RequestBody Map<String, Object> updates, 
+        @PathVariable("id") Long id) {
+        Supplier supplier = supplierService.editSupplier(updates, id);
         SupplierDto supplierDto = SupplierMapper.toSupplierDto(supplier);
         return ResponseEntity.ok(supplierDto);
     }

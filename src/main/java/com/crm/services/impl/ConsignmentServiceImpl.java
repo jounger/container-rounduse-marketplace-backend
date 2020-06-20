@@ -76,7 +76,6 @@ public class ConsignmentServiceImpl implements ConsignmentService {
     LocalDateTime packingTime = Tool.convertToLocalDateTime(request.getPackingTime());
     consignment.setPackingTime(packingTime);
 
-
     Address packingStation = (Address) request.getPackingStation();
     consignment.setPackingStation(packingStation);
 

@@ -18,58 +18,56 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.crm.models.Role;
-import com.crm.models.dto.RoleDto;
-import com.crm.models.mapper.RoleMapper;
+import com.crm.models.Permission;
+import com.crm.models.dto.PermissionDto;
+import com.crm.models.mapper.PermissionMapper;
 import com.crm.payload.request.PaginationRequest;
-import com.crm.payload.request.RoleRequest;
+import com.crm.payload.request.PermissionRequest;
 import com.crm.payload.response.MessageResponse;
 import com.crm.payload.response.PaginationResponse;
-import com.crm.services.RoleService;
+import com.crm.services.PermissionService;
 
 @CrossOrigin(origins="*", maxAge=3600)
 @RestController
-@RequestMapping("/api/role")
-@PreAuthorize("hasRole('ADMIN')")
-public class RoleController {
-  
+@RequestMapping("/api/permission")
+public class PermissionController {
+
   @Autowired
-  private RoleService roleService;
+  private PermissionService permissionService;
   
-  @GetMapping("/role")
+  @GetMapping("")
   @PreAuthorize("hasRole('ADMIN')")
-  public ResponseEntity<?> getRoles(@Valid PaginationRequest request) {
-    Page<Role> pages = roleService.getRoles(request);
-    PaginationResponse<RoleDto> response = new PaginationResponse<>();
+  public ResponseEntity<?> getPermissions(@Valid @RequestBody PaginationRequest request) {
+    Page<Permission> pages = permissionService.getPermission(request);
+    PaginationResponse<PermissionDto> response = new PaginationResponse<>();
     response.setPageNumber(request.getPage());
     response.setPageSize(request.getLimit());
     response.setTotalElements(pages.getTotalElements());
     response.setTotalPages(pages.getTotalPages());
     
-    List<Role> roles = pages.getContent();
-    List<RoleDto> rolesDto = new ArrayList<>();
-    roles.forEach(role -> rolesDto.add(RoleMapper.toRoleDto(role)));
-    response.setContents(rolesDto);
+    List<Permission> permissions = pages.getContent();
+    List<PermissionDto> permissionsDto = new ArrayList<>();
+    permissions.forEach(permission -> permissionsDto.add(PermissionMapper.toPermissionDto(permission)));
+    response.setContents(permissionsDto);
     
     return ResponseEntity.ok(response);
   }
   
   @PutMapping("")
-  public ResponseEntity<?> updateRole(@Valid @RequestBody RoleRequest request) {
-    roleService.updateRole(request);
+  public ResponseEntity<?> updatePermission(@Valid @RequestBody PermissionRequest request) {
+    permissionService.updatePermission(request);
     return ResponseEntity.ok(new MessageResponse("Role has been updated successfully"));
   }
   
   @DeleteMapping("")
-  public ResponseEntity<?> deleteRole(@Valid @RequestBody RoleRequest request) {
-    roleService.deleteRole(request);
+  public ResponseEntity<?> deletePermission(@Valid @RequestBody PermissionRequest request) {
+    permissionService.deletePermission(request);
     return ResponseEntity.ok(new MessageResponse("Role has been deleted successfully"));
   }
   
   @PostMapping("")
-  public ResponseEntity<?> createRole(@Valid @RequestBody RoleRequest request) {
-    roleService.saveRole(request);
+  public ResponseEntity<?> createPermission(@Valid @RequestBody PermissionRequest request) {
+    permissionService.savePermission(request);
     return ResponseEntity.ok(new MessageResponse("Role has been created successfully"));
   }
-  
 }

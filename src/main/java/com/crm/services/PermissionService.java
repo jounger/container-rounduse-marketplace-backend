@@ -11,4 +11,8 @@ public interface PermissionService {
 	void savePermission(PermissionRequest request);
 
 	Page<Permission> getPermission(PaginationRequest request);
+	
+	void deletePermission(PermissionRequest request);
+	
+	void updatePermission(PermissionRequest request);
 }

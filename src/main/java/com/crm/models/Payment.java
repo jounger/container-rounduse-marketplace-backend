@@ -32,7 +32,7 @@ public class Payment {
 	@ManyToOne
 	@JoinColumn(name = "account_id")
 	private Account account;
-
+	
 	private String detail;
 
 	private float amount;

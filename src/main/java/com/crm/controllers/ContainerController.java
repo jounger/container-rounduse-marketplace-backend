@@ -39,7 +39,7 @@ public class ContainerController {
   
   @GetMapping("")
   @PreAuthorize("hasRole('MODERATOR')")
-  public ResponseEntity<?> getContainers(@Valid @RequestBody PaginationRequest request) {
+  public ResponseEntity<?> getContainers(@Valid PaginationRequest request) {
     Page<Container> pages = containerService.getContainers(request);
     PaginationResponse<ContainerDto> response = new PaginationResponse<>();
     response.setPageNumber(request.getPage());
@@ -64,7 +64,7 @@ public class ContainerController {
   
   @GetMapping("/forwarder/{id}")
   @PreAuthorize("hasRole('FORWARDER')")
-  public ResponseEntity<?> getContainersByForwarder(@PathVariable Long id, @Valid @RequestBody PaginationRequest request) {
+  public ResponseEntity<?> getContainersByForwarder(@PathVariable Long id, @Valid PaginationRequest request) {
     
     Page<Container> pages = containerService.getContainersByMerchant(id, request);
     PaginationResponse<ContainerDto> response = new PaginationResponse<>();

@@ -5,6 +5,7 @@ import java.util.Collection;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import com.crm.exception.DuplicateRecordException;
@@ -51,32 +52,47 @@ public class IcdServiceImpl implements IcdService{
 
   @Override
   public void editIcd(IcdRequest request) {
-//    Icd icd = icdRepository.findById(id)
+    Icd icd = icdRepository.findById(request.getId())
+        .orElseThrow(() -> new NotFoundException("ERROR: Icd is not found."));
     
+    icd.setFullname(request.getFullname());
+    String nameCode = request.getNameCode();
+    if(icdRepository.existsByNameCode(nameCode)) {
+        throw new DuplicateRecordException("ICD name code already existed.");
+    }
+    icd.setNameCode(nameCode);
+    icd.setAddress(request.getAddress());
+    
+    Collection<String> shippingLinesString = request.getShippingLines();
+    Collection<ShippingLine> listShippingLines = new ArrayList<ShippingLine>();
+    shippingLinesString.forEach(shippingLines -> {
+      ShippingLine shippingLine = shippingLineRepository.findByCompanyCode(shippingLines)
+          .orElseThrow(() -> new NotFoundException("Error: ShippingLine is not found"));
+      listShippingLines.add(shippingLine);
+    });
+    icd.setShippingLines(listShippingLines);
+    
+    icdRepository.save(icd);
   }
 
   @Override
   public void deleteIcd(Long id) {
-    // TODO Auto-generated method stub
-    
+    Icd icd = icdRepository.findById(id)
+        .orElseThrow(() -> new NotFoundException("ERROR: Icd is not found."));
+    icdRepository.delete(icd);
   }
 
   @Override
   public Page<Icd> getIcds(PaginationRequest request) {
-    // TODO Auto-generated method stub
-    return null;
+    Page<Icd> pages = icdRepository.findAll(PageRequest.of(request.getPage(), request.getLimit()));
+    return pages;
   }
 
   @Override
   public Icd getIcdById(Long id) {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public Page<Icd> getIcdsByMerchant(Long id, PaginationRequest request) {
-    // TODO Auto-generated method stub
-    return null;
+    Icd icd = icdRepository.findById(id)
+        .orElseThrow(() -> new NotFoundException("ERROR: Icd is not found."));
+    return icd;
   }
 
 }

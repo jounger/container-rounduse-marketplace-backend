@@ -17,6 +17,5 @@ public interface IcdService {
 	Page<Icd> getIcds(PaginationRequest request);
 	
 	Icd getIcdById(Long id);
-	  
-	Page<Icd> getIcdsByMerchant(Long id, PaginationRequest request);
+
 }

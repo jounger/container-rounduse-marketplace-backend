@@ -10,6 +10,8 @@ import lombok.Setter;
 @Getter
 @Setter
 public class IcdRequest {
+  
+    private Long id;
 	
 	@NotBlank
 	private String fullname;

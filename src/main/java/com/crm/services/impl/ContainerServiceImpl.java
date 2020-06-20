@@ -180,7 +180,9 @@ public class ContainerServiceImpl implements ContainerService {
 
   @Override
   public void deleteContainer(Long id) {
-    containerRepository.deleteById(id);
+    Container container = containerRepository.findById(id)
+        .orElseThrow(() -> new NotFoundException("ERROR: Container is not found."));
+    containerRepository.delete(container);
 
   }
 

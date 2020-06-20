@@ -28,18 +28,18 @@ public class UserDetailsImpl implements UserDetails {
   private String phone;
   private Address address;
   private String status;
-
+  
   private Collection<? extends GrantedAuthority> authorities;
 
   public static UserDetailsImpl build(User user) {
     List<GrantedAuthority> authorities = user.getRoles()
         .stream().map(role -> new SimpleGrantedAuthority(role.getName()))
         .collect(Collectors.toList());
-    return new UserDetailsImpl(user.getId(),
-        user.getUsername(),
-        user.getPassword(),
-        user.getEmail(),
-        user.getPhone(),
+    return new UserDetailsImpl(user.getId(), 
+        user.getUsername(), 
+        user.getPassword(), 
+        user.getEmail(), 
+        user.getPhone(), 
         user.getAddress(),
         user.getStatus().toString(),
         authorities);

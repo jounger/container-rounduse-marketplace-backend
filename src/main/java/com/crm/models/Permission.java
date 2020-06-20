@@ -33,7 +33,7 @@ public class Permission {
 	private String name;
 
 	private String description;
-
+	
 	@ManyToMany(mappedBy = "permissions")
 	private Collection<Role> roles = new ArrayList<Role>();
 

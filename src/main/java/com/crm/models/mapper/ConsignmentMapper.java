@@ -18,7 +18,8 @@ public class ConsignmentMapper {
     dto.setShippingLine(consignment.getShippingLine().getCompanyCode());
     dto.setContainerType(consignment.getContainerType().getName());
     dto.setStatus(consignment.getStatus().name());
-//    dto.setMerchantId(consignment.getMerchant().getId());
+    dto.setMerchantId(consignment.getMerchant().getId());
+    
     Set<String> categories = new HashSet<>();
     consignment.getCategories().forEach(item -> categories.add(item.getName()));
     dto.setCategoryList(categories);
@@ -26,9 +27,11 @@ public class ConsignmentMapper {
     String packingTime = Tool.convertLocalDateTimeToString(consignment.getPackingTime());
     dto.setPackingTime(packingTime);
     
-    Map<String, String> packingStation = new HashMap<>();
-    packingStation = AddressMapper.toAddressHashMap(consignment.getPackingStation());
-    dto.setPackingStation(packingStation);
+    if(consignment.getPackingStation() != null) {
+      Map<String, String> packingStation = new HashMap<>();
+      packingStation = AddressMapper.toAddressHashMap(consignment.getPackingStation());
+      dto.setPackingStation(packingStation);      
+    }
     
     dto.setBookingNumber(consignment.getBookingNumber());
     

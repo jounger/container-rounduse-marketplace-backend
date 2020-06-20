@@ -55,9 +55,9 @@ public class Supply {
 	@ManyToOne
 	@JoinColumn(name = "container_type_id")
 	private ContainerType containerType;
-
+	
 	private EnumSupplyStatus status;
-
+	
 	@Column(name = "created_at", nullable = false, updatable = false)
 	@Temporal(TemporalType.TIMESTAMP)
 	@CreatedDate
@@ -67,7 +67,7 @@ public class Supply {
 	@Temporal(TemporalType.TIMESTAMP)
 	@LastModifiedDate
 	private Date updatedAt;
-
+	
 	@OneToMany(mappedBy = "supply")
 	private Set<Report> reports = new HashSet<Report>();
 

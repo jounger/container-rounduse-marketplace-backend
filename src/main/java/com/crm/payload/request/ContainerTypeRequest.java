@@ -33,7 +33,7 @@ public class ContainerTypeRequest {
 
 	@NotBlank 
 	@NumberFormat(style = Style.NUMBER)
-	private String internalWeight;
+	private String internalWidth;
 
 	@NotBlank 
 	@NumberFormat(style = Style.NUMBER)

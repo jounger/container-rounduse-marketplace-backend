@@ -30,7 +30,7 @@ public class ContainerTypeServiceImpl implements ContainerTypeService{
 			containerType.setCubicCapacity(Float.parseFloat(request.getCubicCapacity()));
 			containerType.setInternalLength(Float.parseFloat(request.getInternalLength()));
 			containerType.setInternalHeight(Float.parseFloat(request.getInternalHeight()));
-			containerType.setInternalWeight(Float.parseFloat(request.getInternalWeight()));
+			containerType.setInternalWidth(Float.parseFloat(request.getInternalWidth()));
 			containerType.setDoorOpeningHeight(Float.parseFloat(request.getDoorOpeningHeight()));
 			containerType.setDoorOpeningWidth(Float.parseFloat(request.getDoorOpeningWidth()));
 			containerTypeRepository.save(containerType);

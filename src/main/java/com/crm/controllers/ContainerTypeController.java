@@ -23,7 +23,7 @@ public class ContainerTypeController {
 	@Autowired
 	private ContainerTypeService containerTypeService;
 	
-	@PostMapping("containertype")
+	@PostMapping("")
 	@PreAuthorize("hasRole('OPERATOR')")
 	public ResponseEntity<?> createContainerType(@Valid @RequestBody ContainerTypeRequest request){
 		containerTypeService.saveContainerType(request);

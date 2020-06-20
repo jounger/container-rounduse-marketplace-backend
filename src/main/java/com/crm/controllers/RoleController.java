@@ -36,8 +36,9 @@ public class RoleController {
   @Autowired
   private RoleService roleService;
   
-  @GetMapping("")
-  public ResponseEntity<?> getRoles(@Valid @RequestBody PaginationRequest request) {
+  @GetMapping("/role")
+  @PreAuthorize("hasRole('ADMIN')")
+  public ResponseEntity<?> getRoles(@Valid PaginationRequest request) {
     Page<Role> pages = roleService.getRoles(request);
     PaginationResponse<RoleDto> response = new PaginationResponse<>();
     response.setPageNumber(request.getPage());

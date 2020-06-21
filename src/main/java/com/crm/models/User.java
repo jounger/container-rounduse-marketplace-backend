@@ -28,7 +28,7 @@ import lombok.ToString;
 @NoArgsConstructor
 @ToString
 @Entity
-@Table(name="USER", uniqueConstraints = {
+@Table(name="user", uniqueConstraints = {
     @UniqueConstraint(columnNames="username"),
     @UniqueConstraint(columnNames="email")
 })

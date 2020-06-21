@@ -31,7 +31,7 @@ import lombok.ToString;
 public class ShippingLine extends User {
 
 	private String website;
-
+	
 	@Column(name = "company_name", length = 50)
 	private String companyName;
 
@@ -45,5 +45,5 @@ public class ShippingLine extends User {
 	private Collection<Icd> icds = new ArrayList<Icd>();
 
 	@OneToMany(mappedBy = "shippingLine")
-	private Set<Supply> supply = new HashSet<>();
+	private Set<Supply> supplyList = new HashSet<Supply>();
 }

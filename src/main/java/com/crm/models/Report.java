@@ -52,7 +52,7 @@ public class Report {
 	@ManyToOne
 	@JoinColumn(name = "supply_id")
 	private Supply supply;
-
+	
 	@OneToMany(mappedBy = "report")
 	private Set<Feedback> feedbacks = new HashSet<Feedback>();
 

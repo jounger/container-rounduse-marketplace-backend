@@ -33,6 +33,8 @@ public class ConsignmentRequest extends SupplyRequest{
   
   private Set<String> categories;
   
+  private boolean fcl;
+  
   @JsonProperty("port_of_loading")
   private String portOfLoading; 
   

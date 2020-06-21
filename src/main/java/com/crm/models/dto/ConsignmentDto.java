@@ -48,6 +48,8 @@ public class ConsignmentDto {
   @JsonProperty("unit_of_measurement")
   private String unitOfMeasurement;
   
+  private boolean fcl;
+  
   @JsonProperty("port_of_loading")
   private String portOfLoading;
   

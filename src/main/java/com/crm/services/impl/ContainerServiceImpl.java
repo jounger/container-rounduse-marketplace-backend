@@ -61,7 +61,7 @@ public class ContainerServiceImpl implements ContainerService {
   private AddressRepository addressRepository;
 
   @Override
-  public void saveContainer(ContainerRequest request) {
+  public void createContainer(ContainerRequest request) {
     Container container = new Container();
     ShippingLine shippingLine = shippingLineRepository.findByCompanyCode(request.getShippingLineName())
         .orElseThrow(() -> new NotFoundException("ERROR: Shipping Line is not found."));
@@ -124,7 +124,7 @@ public class ContainerServiceImpl implements ContainerService {
   }
 
   @Override
-  public void editContainer(ContainerRequest request) {
+  public void updateContainer(ContainerRequest request) {
     Container container = containerRepository.findById(request.getId())
         .orElseThrow(() -> new NotFoundException("ERROR: Container is not found."));
     
@@ -179,7 +179,7 @@ public class ContainerServiceImpl implements ContainerService {
   }
 
   @Override
-  public void deleteContainer(Long id) {
+  public void removeContainer(Long id) {
     containerRepository.deleteById(id);
 
   }
@@ -192,7 +192,7 @@ public class ContainerServiceImpl implements ContainerService {
   }
 
   @Override
-  public Page<Container> getContainersByMerchant(Long id, PaginationRequest request) {
+  public Page<Container> getContainersByForwarder(Long id, PaginationRequest request) {
     Pageable pageable = PageRequest.of(request.getPage(), request.getLimit());
     Page<Container> pages = containerRepository.findByForwarderId(id, pageable);
     return pages;

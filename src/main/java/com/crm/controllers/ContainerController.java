@@ -55,18 +55,20 @@ public class ContainerController {
     return ResponseEntity.ok(response);
   }
   
-  @PostMapping("")
-  @PreAuthorize("hasRole('FORWARDER')")
-  public ResponseEntity<?> createContainer(@Valid @RequestBody ContainerRequest request) {
-    containerService.saveContainer(request);
-    return ResponseEntity.ok(new MessageResponse("Container has been created successfully"));
+  @GetMapping("/{id}")
+  @PreAuthorize("hasRole('MODERATOR') or hasRole('FORWARDER')")
+  public ResponseEntity<?> getContainer(@PathVariable Long id){
+    Container container = containerService.getContainerById(id);
+    ContainerDto containerDto = new ContainerDto();
+    containerDto = ContainerMapper.toContainerDto(container);
+    return ResponseEntity.ok(containerDto);
   }
   
   @GetMapping("/forwarder/{id}")
   @PreAuthorize("hasRole('FORWARDER')")
   public ResponseEntity<?> getContainersByForwarder(@PathVariable Long id, @Valid PaginationRequest request) {
     
-    Page<Container> pages = containerService.getContainersByMerchant(id, request);
+    Page<Container> pages = containerService.getContainersByForwarder(id, request);
     PaginationResponse<ContainerDto> response = new PaginationResponse<>();
     response.setPageNumber(request.getPage());
     response.setPageSize(request.getLimit());
@@ -82,29 +84,27 @@ public class ContainerController {
     
   }
   
-  @Transactional
-  @DeleteMapping("")
+  @PostMapping("")
   @PreAuthorize("hasRole('FORWARDER')")
-  public ResponseEntity<?> removeContainer(@Valid @RequestBody ContainerRequest request){       
-    containerService.deleteContainer(request.getId());
-    return ResponseEntity.ok(new MessageResponse("Container has remove successfully"));
+  public ResponseEntity<?> createContainer(@Valid @RequestBody ContainerRequest request) {
+    containerService.createContainer(request);
+    return ResponseEntity.ok(new MessageResponse("Container has been created successfully"));
   }
   
   @Transactional
   @PutMapping("")
   @PreAuthorize("hasRole('FORWARDER')")
-  public ResponseEntity<?> editContainer(@Valid @RequestBody ContainerRequest request){
-    containerService.editContainer(request);
+  public ResponseEntity<?> updateContainer(@Valid @RequestBody ContainerRequest request){
+    containerService.updateContainer(request);
     return ResponseEntity.ok(new MessageResponse("Container has update successfully"));
   }
   
-  @GetMapping("/{id}")
-  @PreAuthorize("hasRole('MODERATOR') or hasRole('FORWARDER')")
-  public ResponseEntity<?> getContainer(@PathVariable Long id){
-    Container container = containerService.getContainerById(id);
-    ContainerDto containerDto = new ContainerDto();
-    containerDto = ContainerMapper.toContainerDto(container);
-    return ResponseEntity.ok(containerDto);
+  @Transactional
+  @DeleteMapping("/{id}")
+  @PreAuthorize("hasRole('FORWARDER')")
+  public ResponseEntity<?> removeContainer(@PathVariable Long id){       
+    containerService.removeContainer(id);
+    return ResponseEntity.ok(new MessageResponse("Container has remove successfully"));
   }
-  
+    
 }

@@ -10,7 +10,7 @@ import com.crm.payload.request.PaginationRequest;
 
 public interface BiddingDocumentService {
   
-  void saveBiddingDocument(BiddingDocumentRequest request);
+  void createBiddingDocument(BiddingDocumentRequest request);
   
   BiddingDocument getBiddingDocument(Long id);
   
@@ -18,7 +18,7 @@ public interface BiddingDocumentService {
   
   Page<BiddingDocument> getBiddingDocumentsByMerchant(Long id, PaginationRequest request);
   
-  void deleteBiddingDocument(Long id);
+  void removeBiddingDocument(Long id);
   
   //update full biddingDocument
   BiddingDocument updateBiddingDocument(BiddingDocumentRequest request);

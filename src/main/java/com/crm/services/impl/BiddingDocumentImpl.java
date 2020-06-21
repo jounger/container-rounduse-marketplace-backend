@@ -6,6 +6,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.stereotype.Service;
 
 import com.crm.common.Tool;
 import com.crm.enums.EnumCurrency;
@@ -25,6 +26,7 @@ import com.crm.repository.DiscountRepository;
 import com.crm.repository.MerchantRepository;
 import com.crm.services.BiddingDocumentService;
 
+@Service
 public class BiddingDocumentImpl implements BiddingDocumentService {
 
   @Autowired
@@ -43,7 +45,7 @@ public class BiddingDocumentImpl implements BiddingDocumentService {
   private DiscountRepository discountRepository;
 
   @Override
-  public void saveBiddingDocument(BiddingDocumentRequest request) {
+  public void createBiddingDocument(BiddingDocumentRequest request) {
     BiddingDocument biddingDocument = new BiddingDocument();
 
     Merchant merchant = new Merchant();
@@ -55,24 +57,23 @@ public class BiddingDocumentImpl implements BiddingDocumentService {
     consignment = consignmentRepository.findById(request.getConsignmentId())
         .orElseThrow(() -> new NotFoundException("Consignment is not found."));
     biddingDocument.setConsignment(consignment);
+
     LocalDateTime bidOpening = Tool.convertToLocalDateTime(request.getBidOpening());
     biddingDocument.setBidOpening(bidOpening);
+
     LocalDateTime bidClosing = Tool.convertToLocalDateTime(request.getBidClosing());
     biddingDocument.setBidClosing(bidClosing);
-    biddingDocument.setCurrencyOfPayment(EnumCurrency.findByName(request.getCurrencyOfPayment()));
 
-    try {
-      biddingDocument.setBidPackagePrice(Float.parseFloat(request.getBidPackagePrice()));
-      biddingDocument.setBidFloorPrice(Float.parseFloat(request.getBidFloorPrice()));
-      biddingDocument.setBidStep(Float.parseFloat(request.getBidStep()));
-      biddingDocument.setPriceLeadership(Float.parseFloat(request.getPriceLeaderShip()));
-    } catch (Exception e) {
-      throw new InternalException("Parameter must be float");
-    }
+    biddingDocument.setCurrencyOfPayment(EnumCurrency.findByName(request.getCurrencyOfPayment()));
+    biddingDocument.setBidPackagePrice(request.getBidPackagePrice());
+    biddingDocument.setBidFloorPrice(request.getBidFloorPrice());
+    biddingDocument.setBidStep(request.getBidStep());
+    biddingDocument.setPriceLeadership(request.getPriceLeadership());
 
     biddingDocument.setBidDiscountCode(discountRepository.findByCode(request.getBidDiscountCode())
         .orElseThrow(() -> new NotFoundException("Discount is not found.")));
 
+    biddingDocumentRepository.save(biddingDocument);
   }
 
   @Override
@@ -94,7 +95,8 @@ public class BiddingDocumentImpl implements BiddingDocumentService {
   public Page<BiddingDocument> getBiddingDocumentsByMerchant(Long id, PaginationRequest request) {
     Page<BiddingDocument> biddingDocuments = null;
     if (merchantRepository.existsById(id)) {
-      biddingDocuments = biddingDocumentRepository.findBiddingDocumentByMerchant(id, PageRequest.of(request.getPage(), request.getLimit()));
+      biddingDocuments = biddingDocumentRepository.findBiddingDocumentByMerchant(id,
+          PageRequest.of(request.getPage(), request.getLimit()));
     } else {
       throw new NotFoundException("Merchant is not found.");
     }
@@ -102,7 +104,7 @@ public class BiddingDocumentImpl implements BiddingDocumentService {
   }
 
   @Override
-  public void deleteBiddingDocument(Long id) {
+  public void removeBiddingDocument(Long id) {
     if (biddingDocumentRepository.existsById(id)) {
       biddingDocumentRepository.deleteById(id);
     } else {
@@ -112,60 +114,27 @@ public class BiddingDocumentImpl implements BiddingDocumentService {
 
   @Override
   public BiddingDocument updateBiddingDocument(BiddingDocumentRequest request) {
-
     BiddingDocument biddingDocument = biddingDocumentRepository.findById(request.getId())
         .orElseThrow(() -> new NotFoundException("Bidding document is not found."));
-    
-    String bidOpening = request.getBidOpening();
-    if (bidOpening != null) {
-      LocalDateTime bidOpeningTime = Tool.convertToLocalDateTime(bidOpening);
-      biddingDocument.setBidOpening(bidOpeningTime);
-    }
 
-    String bidClosing = request.getBidClosing();
-    if (bidClosing != null) {
-      LocalDateTime bidClosingTime = Tool.convertToLocalDateTime(bidClosing);
-      biddingDocument.setBidClosing(bidClosingTime);
-    }
-    
-    String currency = request.getCurrencyOfPayment();
-    if (currency != null) {
-      EnumCurrency currencyOfPayment = EnumCurrency.findByName(currency);
-      if (currencyOfPayment == null) {
-        currencyOfPayment = EnumCurrency.VND;
-      }
-      biddingDocument.setCurrencyOfPayment(currencyOfPayment);
+    LocalDateTime bidOpeningTime = Tool.convertToLocalDateTime(request.getBidOpening());
+    biddingDocument.setBidOpening(bidOpeningTime);
+
+    LocalDateTime bidClosingTime = Tool.convertToLocalDateTime(request.getBidClosing());
+    biddingDocument.setBidClosing(bidClosingTime);
+
+    EnumCurrency currencyOfPayment = EnumCurrency.findByName(request.getCurrencyOfPayment());
+    if (currencyOfPayment == null) {
+      currencyOfPayment = EnumCurrency.VND;
     } else {
-      biddingDocument.setCurrencyOfPayment(EnumCurrency.VND);
+      biddingDocument.setCurrencyOfPayment(currencyOfPayment);
     }
-    
-    try {
-      String packagePriceString = request.getBidPackagePrice();
-      if (packagePriceString != null) {
-        Float bidPackagePrice = Float.parseFloat(packagePriceString);
-        biddingDocument.setBidPackagePrice(bidPackagePrice);
-      }
 
-      String floorPriceString = request.getBidFloorPrice();
-      if (floorPriceString != null) {
-        Float bidFloorPrice = Float.parseFloat(floorPriceString);
-        biddingDocument.setBidFloorPrice(bidFloorPrice);
-      }
+    biddingDocument.setBidPackagePrice(request.getBidPackagePrice());
+    biddingDocument.setBidFloorPrice(request.getBidFloorPrice());
+    biddingDocument.setBidStep(request.getBidStep());
+    biddingDocument.setPriceLeadership(request.getPriceLeadership());
 
-      String stepString = request.getBidStep();
-      if (stepString != null) {
-        Float bidStep = Float.parseFloat(stepString);
-        biddingDocument.setBidStep(bidStep);
-      }
-
-      String priceLeadershipString = request.getPriceLeaderShip();
-      if (priceLeadershipString != null) {
-        Float priceLeadership = Float.parseFloat(priceLeadershipString);
-        biddingDocument.setPriceLeadership(priceLeadership);
-      }
-    } catch (Exception e) {
-      throw new InternalException("Parameters must be float.");
-    }
     biddingDocumentRepository.save(biddingDocument);
     return biddingDocument;
   }
@@ -225,28 +194,27 @@ public class BiddingDocumentImpl implements BiddingDocumentService {
     } catch (Exception e) {
       throw new InternalException("Parameters must be float.");
     }
-    
+
     NotificationOfAward notificationOfAward = new NotificationOfAward();
-    
+
     Bid successfulBid = new Bid();
     String successfulBidId = (String) updates.get("successful_bid");
     String dateOfDecisionString = (String) updates.get("date_of_decision");
-    if(successfulBidId != null) {
+    if (successfulBidId != null) {
       try {
         Long bidId = Long.parseLong(successfulBidId);
-        successfulBid = bidRepository.findById(bidId)
-            .orElseThrow(() -> new NotFoundException("Bid is not found."));
+        successfulBid = bidRepository.findById(bidId).orElseThrow(() -> new NotFoundException("Bid is not found."));
       } catch (Exception e) {
         throw new InternalException("Parameter must be float.");
       }
       notificationOfAward.setSuccessfulBid(successfulBid);
-      if(dateOfDecisionString != null) {
+      if (dateOfDecisionString != null) {
         LocalDateTime dateOfDecision = Tool.convertToLocalDateTime(dateOfDecisionString);
         notificationOfAward.setDateOfDecision(dateOfDecision);
       }
       biddingDocument.setNotificationOfAward(notificationOfAward);
     }
-    
+
     biddingDocumentRepository.save(biddingDocument);
     return biddingDocument;
   }

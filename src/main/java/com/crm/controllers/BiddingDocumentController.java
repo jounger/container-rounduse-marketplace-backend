@@ -59,15 +59,15 @@ public class BiddingDocumentController {
   
   @PreAuthorize("hasRole('MERCHANT')")
   @GetMapping("/{id}")
-  public ResponseEntity<?> getBiddingDocumentById(@PathVariable Long id) {
+  public ResponseEntity<?> getBiddingDocument(@PathVariable Long id) {
      BiddingDocument biddingDocument = biddingDocumentService.getBiddingDocument(id);
      BiddingDocumentDto biddingDocumentDto = BiddingDocumentMapper.toBiddingDocumentDto(biddingDocument);
      return ResponseEntity.ok(biddingDocumentDto);
   }
   
   @PreAuthorize("hasRole('MERCHANT')")
-  @RequestMapping(value = "/{id}", method = RequestMethod.PATCH, consumes = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<?> updateBiddingDocument(@PathVariable Long id, @Valid @RequestBody BiddingDocumentRequest request) {
+  @RequestMapping(value = "", method = RequestMethod.PATCH, consumes = MediaType.APPLICATION_JSON_VALUE)
+  public ResponseEntity<?> updateBiddingDocument(@Valid @RequestBody BiddingDocumentRequest request) {
      BiddingDocument biddingDocument = biddingDocumentService.updateBiddingDocument(request);     
      BiddingDocumentDto biddingDocumentDto = BiddingDocumentMapper.toBiddingDocumentDto(biddingDocument);
      return ResponseEntity.ok(biddingDocumentDto);
@@ -84,7 +84,7 @@ public class BiddingDocumentController {
   @PreAuthorize("hasRole('MERCHANT')")
   @DeleteMapping("/{id}")
   public ResponseEntity<?> deleteBiddingDocument(@PathVariable Long id) {
-    biddingDocumentService.deleteBiddingDocument(id);
+    biddingDocumentService.removeBiddingDocument(id);
     return ResponseEntity.ok(new MessageResponse("Bidding document deleted successfully."));
   }
 }

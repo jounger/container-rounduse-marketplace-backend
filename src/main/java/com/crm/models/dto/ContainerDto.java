@@ -13,12 +13,14 @@ import lombok.Setter;
 @Setter
 public class ContainerDto {
   
+  private Long id;
+  
   @JsonProperty("shipping_line")
   private String shippingLine;
   
   @JsonProperty("container_type")
   private String containerType;
-  
+
   private String status;
   
   @JsonProperty("forwarder_id")
@@ -57,5 +59,6 @@ public class ContainerDto {
   @JsonProperty("free_time")
   private int freeTime;
   
+  @JsonProperty("bids")
   private Set<Long> bids;
 }

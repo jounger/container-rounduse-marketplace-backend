@@ -13,12 +13,12 @@ public class ContainerMapper {
   
   public static ContainerDto toContainerDto(Container container) {
     ContainerDto containerDto = new ContainerDto();
-    
+    containerDto.setId(container.getId());
     containerDto.setShippingLine(container.getShippingLine().getCompanyName());
     containerDto.setContainerType(container.getContainerType().getName());
     containerDto.setStatus(container.getStatus().name());
     containerDto.setForwarderId(container.getForwarder().getId());
-//    containerDto.setDriverId(container.getDriver().getId());      
+    containerDto.setDriverId(container.getDriver().getId());      
     containerDto.setContainerTractor(container.getContainerTractor());      
     containerDto.setContainerTrailer(container.getContainerTrailer());
     containerDto.setContainerNumber(container.getContainerNumber());

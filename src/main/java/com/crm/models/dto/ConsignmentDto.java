@@ -13,6 +13,8 @@ import lombok.Setter;
 @Setter
 public class ConsignmentDto {
   
+  private Long id;
+  
   @JsonProperty("shipping_line")
   private String shippingLine;
   

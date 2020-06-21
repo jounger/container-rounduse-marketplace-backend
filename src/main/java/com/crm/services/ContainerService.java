@@ -12,9 +12,9 @@ public interface ContainerService {
 	
 	void saveContainer(ContainerRequest request);
 	
-	void editContainer(ContainerRequest request);
+	void updateContainer(ContainerRequest request);
 	  
-	void deleteContainer(Long id);
+	void removeContainer(Long id);
 	  
 	Container getContainerById(Long id);
 	

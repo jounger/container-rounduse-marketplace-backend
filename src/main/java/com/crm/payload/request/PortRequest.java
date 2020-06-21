@@ -8,6 +8,8 @@ import lombok.Setter;
 @Getter
 @Setter
 public class PortRequest {
+  
+    private Long id;
 	
 	private String fullname;
 	

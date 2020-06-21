@@ -124,7 +124,7 @@ public class ContainerServiceImpl implements ContainerService {
   }
 
   @Override
-  public void editContainer(ContainerRequest request) {
+  public void updateContainer(ContainerRequest request) {
     Container container = containerRepository.findById(request.getId())
         .orElseThrow(() -> new NotFoundException("ERROR: Container is not found."));
     
@@ -179,7 +179,7 @@ public class ContainerServiceImpl implements ContainerService {
   }
 
   @Override
-  public void deleteContainer(Long id) {
+  public void removeContainer(Long id) {
     containerRepository.deleteById(id);
 
   }

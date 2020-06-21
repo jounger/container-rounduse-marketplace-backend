@@ -52,14 +52,14 @@ public class ConsignmentServiceImpl implements ConsignmentService {
   private PortRepository portRepository;
 
   @Override
-  public Page<Consignment> getListConsignment(PaginationRequest request) {
+  public Page<Consignment> getConsignments(PaginationRequest request) {
     Page<Consignment> pages = consignmentRepository.findAll(PageRequest.of(request.getPage(), request.getLimit()));
     return pages;
   }
   
 
   @Override
-  public void saveConsignment(ConsignmentRequest request) {
+  public void createConsignment(ConsignmentRequest request) {
     
     Consignment consignment = new Consignment();
 
@@ -111,7 +111,7 @@ public class ConsignmentServiceImpl implements ConsignmentService {
   }
 
   @Override
-  public void editConsignment(ConsignmentRequest request) {
+  public void updateConsignment(ConsignmentRequest request) {
     
     Consignment consignment = consignmentRepository.findById(request.getId())
         .orElseThrow(() -> new NotFoundException("ERROR: Consignment is not found."));
@@ -172,14 +172,14 @@ public class ConsignmentServiceImpl implements ConsignmentService {
   }
 
   @Override
-  public void deleteConsignment(Long id) {
+  public void removeConsignment(Long id) {
     Consignment consignment = consignmentRepository.findById(id)
         .orElseThrow(() -> new NotFoundException("ERROR: Consignment is not found."));
     consignmentRepository.delete(consignment);
   }
 
   @Override
-  public Consignment findConsignmentById(Long id) {
+  public Consignment getConsignmentById(Long id) {
     Consignment consignment = consignmentRepository.findById(id)
         .orElseThrow(() -> new NotFoundException("ERROR: Consignment is not found."));
     return consignment;    

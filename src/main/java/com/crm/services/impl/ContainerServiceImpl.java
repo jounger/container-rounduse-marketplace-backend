@@ -171,6 +171,17 @@ public class ContainerServiceImpl implements ContainerService {
         .orElseThrow(() -> new NotFoundException("ERROR: Port is not found."));
     container.setPortOfDelivery(port);
 
+    Set<Long> bids = request.getBids();
+    Set<Bid> listbids = new HashSet<>();
+
+    if (bids != null) {
+      bids.forEach(item -> {
+        Bid bid = bidRepository.findById(item).orElseThrow(() -> new NotFoundException("Error: Bid is not found"));
+        listbids.add(bid);
+      });
+    }
+    container.setBids(listbids);
+
     container.setFreeTime(request.getFreeTime());
 
     containerRepository.save(container);

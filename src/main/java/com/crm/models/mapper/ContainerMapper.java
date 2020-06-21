@@ -1,9 +1,7 @@
 package com.crm.models.mapper;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 import com.crm.common.Tool;
 import com.crm.models.Container;
@@ -36,14 +34,9 @@ public class ContainerMapper {
       returnStation = AddressMapper.toAddressHashMap(container.getReturnStation());
       containerDto.setReturnStation(returnStation);     
     }
-    
     containerDto.setPortOfDelivery(container.getPortOfDelivery().getFullname());
-    
     containerDto.setFreeTime(container.getFreeTime());
     
-    Set<Long> bids = new HashSet<>();
-    container.getBids().forEach(item -> bids.add(item.getId()));
-    containerDto.setBids(bids);
     return containerDto;
   }
 }

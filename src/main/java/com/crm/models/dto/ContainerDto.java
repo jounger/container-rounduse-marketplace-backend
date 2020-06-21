@@ -2,7 +2,6 @@ package com.crm.models.dto;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -59,6 +58,4 @@ public class ContainerDto {
   @JsonProperty("free_time")
   private int freeTime;
   
-  @JsonProperty("bids")
-  private Set<Long> bids;
 }

@@ -7,16 +7,17 @@ import com.crm.payload.request.ContainerRequest;
 import com.crm.payload.request.PaginationRequest;
 
 public interface ContainerService {
-  
-    Page<Container> getContainers(PaginationRequest request);
-	
-	void saveContainer(ContainerRequest request);
-	
-	void updateContainer(ContainerRequest request);
-	  
-	void removeContainer(Long id);
-	  
-	Container getContainerById(Long id);
-	
-	Page<Container> getContainersByMerchant(Long id, PaginationRequest request);
+
+  Container getContainerById(Long id);
+
+  Page<Container> getContainersByForwarder(Long id, PaginationRequest request);
+
+  Page<Container> getContainers(PaginationRequest request);
+
+  void createContainer(ContainerRequest request);
+
+  void updateContainer(ContainerRequest request);
+
+  void removeContainer(Long id);
+
 }

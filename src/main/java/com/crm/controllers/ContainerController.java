@@ -68,7 +68,7 @@ public class ContainerController {
   @PreAuthorize("hasRole('FORWARDER')")
   public ResponseEntity<?> getContainersByForwarder(@PathVariable Long id, @Valid PaginationRequest request) {
     
-    Page<Container> pages = containerService.getContainersByMerchant(id, request);
+    Page<Container> pages = containerService.getContainersByForwarder(id, request);
     PaginationResponse<ContainerDto> response = new PaginationResponse<>();
     response.setPageNumber(request.getPage());
     response.setPageSize(request.getLimit());
@@ -87,7 +87,7 @@ public class ContainerController {
   @PostMapping("")
   @PreAuthorize("hasRole('FORWARDER')")
   public ResponseEntity<?> createContainer(@Valid @RequestBody ContainerRequest request) {
-    containerService.saveContainer(request);
+    containerService.createContainer(request);
     return ResponseEntity.ok(new MessageResponse("Container has been created successfully"));
   }
   

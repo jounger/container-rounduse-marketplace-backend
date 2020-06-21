@@ -95,7 +95,7 @@ public class ContainerController {
   @PutMapping("")
   @PreAuthorize("hasRole('FORWARDER')")
   public ResponseEntity<?> updateContainer(@Valid @RequestBody ContainerRequest request){
-    containerService.editContainer(request);
+    containerService.updateContainer(request);
     return ResponseEntity.ok(new MessageResponse("Container has update successfully"));
   }
   

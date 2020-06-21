@@ -68,22 +68,23 @@ public class PortController {
   @PostMapping("")
   @PreAuthorize("hasRole('MODERATOR')")
   public ResponseEntity<?> createPort(@Valid @RequestBody PortRequest request) {
-    portService.savePort(request);
+    portService.createPort(request);
     return ResponseEntity.ok(new MessageResponse("Port created successfully"));
   }
-  
+
   @Transactional
   @PutMapping("")
   @PreAuthorize("hasRole('MODERATOR')")
-  public ResponseEntity<?> UpdatePort(@Valid @RequestBody PortRequest request){
-    portService.updatePort(request);
-    return ResponseEntity.ok(new MessageResponse("Port has update successfully"));
+  public ResponseEntity<?> updatePort(@Valid @RequestBody PortRequest request) {
+    Port port = portService.updatePort(request);
+    PortDto portDto = PortMapper.toPortDto(port);
+    return ResponseEntity.ok(portDto);
   }
 
   @Transactional
   @DeleteMapping("/{id}")
   @PreAuthorize("hasRole('MODERATOR')")
-  public ResponseEntity<?> removePort(@PathVariable Long id){       
+  public ResponseEntity<?> removePort(@PathVariable Long id) {
     portService.deletePort(id);
     return ResponseEntity.ok(new MessageResponse("Port has remove successfully"));
   }

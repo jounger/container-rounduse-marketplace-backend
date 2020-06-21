@@ -50,7 +50,8 @@ public class ContainerTypeController {
 
     List<ContainerType> containerTypes = pages.getContent();
     List<ContainerTypeDto> containerTypeDto = new ArrayList<>();
-    containerTypes.forEach(containerType -> containerTypeDto.add(ContainerTypeMapper.toContainerTypeDto(containerType)));
+    containerTypes
+        .forEach(containerType -> containerTypeDto.add(ContainerTypeMapper.toContainerTypeDto(containerType)));
     response.setContents(containerTypeDto);
 
     return ResponseEntity.ok(response);
@@ -69,22 +70,23 @@ public class ContainerTypeController {
   @PostMapping("")
   @PreAuthorize("hasRole('MODERATOR')")
   public ResponseEntity<?> createContainerType(@Valid @RequestBody ContainerTypeRequest request) {
-    containerTypeService.saveContainerType(request);
+    containerTypeService.createContainerType(request);
     return ResponseEntity.ok(new MessageResponse("Container Type created successfully"));
   }
-  
+
   @Transactional
   @PutMapping("")
   @PreAuthorize("hasRole('MODERATOR')")
-  public ResponseEntity<?> UpdateContainerType(@Valid @RequestBody ContainerTypeRequest request){
-    containerTypeService.updateContainerType(request);
-    return ResponseEntity.ok(new MessageResponse("Container Type has update successfully"));
+  public ResponseEntity<?> updateContainerType(@Valid @RequestBody ContainerTypeRequest request) {
+    ContainerType containerType = containerTypeService.updateContainerType(request);
+    ContainerTypeDto containerTypeDto = ContainerTypeMapper.toContainerTypeDto(containerType);
+    return ResponseEntity.ok(containerTypeDto);
   }
-  
+
   @Transactional
   @DeleteMapping("/{id}")
   @PreAuthorize("hasRole('MODERATOR')")
-  public ResponseEntity<?> removeContainerType(@PathVariable Long id){       
+  public ResponseEntity<?> removeContainerType(@PathVariable Long id) {
     containerTypeService.deleteContainerType(id);
     return ResponseEntity.ok(new MessageResponse("Container Type has remove successfully"));
   }

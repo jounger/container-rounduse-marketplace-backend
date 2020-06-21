@@ -15,6 +15,8 @@ public class ConsignmentMapper {
   
   public static ConsignmentDto toConsignmentDto(Consignment consignment) {
     ConsignmentDto dto = new ConsignmentDto();
+    
+    dto.setId(consignment.getId());
     dto.setShippingLine(consignment.getShippingLine().getCompanyCode());
     dto.setContainerType(consignment.getContainerType().getName());
     dto.setStatus(consignment.getStatus().name());

@@ -179,7 +179,7 @@ public class ContainerServiceImpl implements ContainerService {
   }
 
   @Override
-  public void deleteContainer(Long id) {
+  public void removeContainer(Long id) {
     containerRepository.deleteById(id);
 
   }

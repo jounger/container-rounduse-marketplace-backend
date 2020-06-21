@@ -18,7 +18,7 @@ public class ContainerMapper {
     containerDto.setContainerType(container.getContainerType().getName());
     containerDto.setStatus(container.getStatus().name());
     containerDto.setForwarderId(container.getForwarder().getId());
-//    containerDto.setDriverId(container.getDriver().getId());      
+    containerDto.setDriverId(container.getDriver().getId());      
     containerDto.setContainerTractor(container.getContainerTractor());      
     containerDto.setContainerTrailer(container.getContainerTrailer());
     containerDto.setContainerNumber(container.getContainerNumber());

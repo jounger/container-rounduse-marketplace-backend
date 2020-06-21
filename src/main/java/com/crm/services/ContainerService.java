@@ -14,7 +14,7 @@ public interface ContainerService {
 	
 	void editContainer(ContainerRequest request);
 	  
-	void deleteContainer(Long id);
+	void removeContainer(Long id);
 	  
 	Container getContainerById(Long id);
 	

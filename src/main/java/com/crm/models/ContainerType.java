@@ -47,7 +47,7 @@ public class ContainerType {
 	private float internalLength;
 
 	@Column(name = "internal_width")
-	private float internalWeight;
+	private float internalWidth;
 
 	@Column(name = "internal_height")
 	private float internalHeight;

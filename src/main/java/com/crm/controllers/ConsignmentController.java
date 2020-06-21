@@ -41,6 +41,35 @@ public class ConsignmentController {
   @Autowired
   private ConsignmentService consignmentService;
   
+  @GetMapping("/{id}")
+  @PreAuthorize("hasRole('MODERATOR') or hasRole('MERCHANT')")
+  public ResponseEntity<?> getConsignment(@PathVariable Long id){
+    Consignment consignment = consignmentService.findConsignmentById(id);
+    ConsignmentDto consignmentDto = new ConsignmentDto();
+    consignmentDto = ConsignmentMapper.toConsignmentDto(consignment);
+    return ResponseEntity.ok(consignmentDto);
+  }
+  
+  @GetMapping("/merchant/{id}")
+  @PreAuthorize("hasRole('MERCHANT')")
+  public ResponseEntity<?> getConsignmentsByMerchant(@PathVariable Long id, @Valid PaginationRequest request) {
+    
+    Page<Consignment> pages = consignmentService.getConsignmentsByMerchant(id, request);
+    PaginationResponse<ConsignmentDto> response = new PaginationResponse<>();
+    response.setPageNumber(request.getPage());
+    response.setPageSize(request.getLimit());
+    response.setTotalElements(pages.getTotalElements());
+    response.setTotalPages(pages.getTotalPages());
+    
+    List<Consignment> consignments = pages.getContent();
+    List<ConsignmentDto> consignmentsDto = new ArrayList<>();
+    consignments.forEach(consignment -> consignmentsDto.add(ConsignmentMapper.toConsignmentDto(consignment)));
+    response.setContents(consignmentsDto);
+    
+    return ResponseEntity.ok(response);
+    
+  }
+  
   @GetMapping("")
   @PreAuthorize("hasRole('MODERATOR')")
   public ResponseEntity<?> getConsignments(@Valid PaginationRequest request) {
@@ -70,47 +99,19 @@ public class ConsignmentController {
   }
   
   @Transactional
-  @DeleteMapping("")
-  @PreAuthorize("hasRole('MERCHANT')")
-  public ResponseEntity<?> removeConsignment(@Valid @RequestBody ConsignmentRequest request){       
-    consignmentService.deleteConsignment(request.getId());
-    return ResponseEntity.ok(new MessageResponse("Consignment has remove successfully"));
-  }
-  
-  @Transactional
   @PutMapping("")
   @PreAuthorize("hasRole('MERCHANT')")
-  public ResponseEntity<?> editConsignment(@Valid @RequestBody ConsignmentRequest request){
-    consignmentService.editConsignment(request);
+  public ResponseEntity<?> updateConsignment(@Valid @RequestBody ConsignmentRequest request){
+    consignmentService.updateConsignment(request);
     return ResponseEntity.ok(new MessageResponse("Consignment has update successfully"));
   }
   
-  @GetMapping("/{id}")
-  @PreAuthorize("hasRole('MODERATOR') or hasRole('MERCHANT')")
-  public ResponseEntity<?> getConsignment(@PathVariable Long id){
-    Consignment consignment = consignmentService.findConsignmentById(id);
-    ConsignmentDto consignmentDto = new ConsignmentDto();
-    consignmentDto = ConsignmentMapper.toConsignmentDto(consignment);
-    return ResponseEntity.ok(consignmentDto);
-  }
-  
-  @GetMapping("/merchant/{id}")
+  @Transactional
+  @DeleteMapping("/{id}")
   @PreAuthorize("hasRole('MERCHANT')")
-  public ResponseEntity<?> getConsignmentsByMerchant(@PathVariable Long id, @Valid PaginationRequest request) {
-    
-    Page<Consignment> pages = consignmentService.getConsignmentsByMerchant(id, request);
-    PaginationResponse<ConsignmentDto> response = new PaginationResponse<>();
-    response.setPageNumber(request.getPage());
-    response.setPageSize(request.getLimit());
-    response.setTotalElements(pages.getTotalElements());
-    response.setTotalPages(pages.getTotalPages());
-    
-    List<Consignment> consignments = pages.getContent();
-    List<ConsignmentDto> consignmentsDto = new ArrayList<>();
-    consignments.forEach(consignment -> consignmentsDto.add(ConsignmentMapper.toConsignmentDto(consignment)));
-    response.setContents(consignmentsDto);
-    
-    return ResponseEntity.ok(response);
-    
+  public ResponseEntity<?> removeConsignment(@PathVariable Long id){       
+    consignmentService.removeConsignment(id);
+    return ResponseEntity.ok(new MessageResponse("Consignment has remove successfully"));
   }
+   
 }

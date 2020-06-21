@@ -12,9 +12,9 @@ public interface ConsignmentService {
   
   void saveConsignment(ConsignmentRequest request);
   
-  void editConsignment(ConsignmentRequest request);
+  void updateConsignment(ConsignmentRequest request);
   
-  void deleteConsignment(Long id);
+  void removeConsignment(Long id);
   
   Consignment findConsignmentById(Long id);
   

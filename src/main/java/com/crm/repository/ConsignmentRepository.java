@@ -14,6 +14,8 @@ import com.crm.models.Consignment;
 @Repository
 public interface ConsignmentRepository extends JpaRepository<Consignment, Long>{
   
+  boolean existsById(Long id);
+  
   Optional<Consignment> findById(Long id);
   
   @Query(value = "SELECT c FROM Consignment c WHERE c.merchant.id = :id")

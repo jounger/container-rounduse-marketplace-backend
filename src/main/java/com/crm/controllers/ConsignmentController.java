@@ -44,7 +44,7 @@ public class ConsignmentController {
   @GetMapping("/{id}")
   @PreAuthorize("hasRole('MODERATOR') or hasRole('MERCHANT')")
   public ResponseEntity<?> getConsignment(@PathVariable Long id){
-    Consignment consignment = consignmentService.findConsignmentById(id);
+    Consignment consignment = consignmentService.getConsignmentById(id);
     ConsignmentDto consignmentDto = new ConsignmentDto();
     consignmentDto = ConsignmentMapper.toConsignmentDto(consignment);
     return ResponseEntity.ok(consignmentDto);
@@ -74,7 +74,7 @@ public class ConsignmentController {
   @PreAuthorize("hasRole('MODERATOR')")
   public ResponseEntity<?> getConsignments(@Valid PaginationRequest request) {
     
-    Page<Consignment> pages = consignmentService.getListConsignment(request);
+    Page<Consignment> pages = consignmentService.getConsignments(request);
     PaginationResponse<ConsignmentDto> response = new PaginationResponse<>();
     response.setPageNumber(request.getPage());
     response.setPageSize(request.getLimit());
@@ -94,7 +94,7 @@ public class ConsignmentController {
   @PreAuthorize("hasRole('MERCHANT')")
   public ResponseEntity<?> createConsignment(@Valid @RequestBody ConsignmentRequest request){
     logger.error("Runtime error: {}", request);
-    consignmentService.saveConsignment(request);
+    consignmentService.createConsignment(request);
     return ResponseEntity.ok(new MessageResponse("Consignment created successfully"));
   }
   

@@ -8,16 +8,16 @@ import com.crm.payload.request.PaginationRequest;
 
 public interface ConsignmentService {
   
-  Page<Consignment> getListConsignment(PaginationRequest request);
+  Consignment getConsignmentById(Long id);
   
-  void saveConsignment(ConsignmentRequest request);
+  Page<Consignment> getConsignments(PaginationRequest request);
+  
+  Page<Consignment> getConsignmentsByMerchant(Long id, PaginationRequest request);
+  
+  void createConsignment(ConsignmentRequest request);
   
   void updateConsignment(ConsignmentRequest request);
   
   void removeConsignment(Long id);
-  
-  Consignment findConsignmentById(Long id);
-  
-  Page<Consignment> getConsignmentsByMerchant(Long id, PaginationRequest request);
   
 }

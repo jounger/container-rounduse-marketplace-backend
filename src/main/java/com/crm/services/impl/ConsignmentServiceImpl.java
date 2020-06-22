@@ -110,7 +110,7 @@ public class ConsignmentServiceImpl implements ConsignmentService {
       consignment.setCategories(listCategory);
     }
 
-    consignment.setFcl(true);
+    consignment.setFcl(request.isFcl());
 
     Port port = portRepository.findByNameCode(request.getPortOfLoading())
         .orElseThrow(() -> new NotFoundException("ERROR: Port is not found."));
@@ -177,7 +177,7 @@ public class ConsignmentServiceImpl implements ConsignmentService {
       consignment.setCategories(listCategory);
     }
 
-    consignment.setFcl(true);
+    consignment.setFcl(request.isFcl());
 
     Port port = portRepository.findByNameCode(request.getPortOfLoading())
         .orElseThrow(() -> new NotFoundException("ERROR: Port is not found."));

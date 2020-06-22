@@ -45,7 +45,7 @@ public class ConsignmentMapper {
     
     dto.setPayload(consignment.getPayload());
     dto.setUnitOfMeasurement(consignment.getUnitOfMeasurement().name());
-    dto.setFcl(true);
+    dto.setFcl(consignment.isFcl());
     dto.setPortOfLoading(consignment.getPortOfLoading().getFullname());
     return dto;
     

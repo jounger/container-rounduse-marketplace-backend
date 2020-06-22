@@ -16,7 +16,7 @@ public interface ContainerService {
 
   void createContainer(ContainerRequest request);
 
-  void updateContainer(ContainerRequest request);
+  Container updateContainer(ContainerRequest request);
 
   void removeContainer(Long id);
 

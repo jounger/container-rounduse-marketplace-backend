@@ -33,9 +33,9 @@ public class Permission {
   @Column(length = 20, unique = true)
   private String name;
 
-	private String description;
-	
-	@ManyToMany(mappedBy = "permissions")
-	private Collection<Role> roles = new ArrayList<Role>();
+  private String description;
+
+  @ManyToMany(mappedBy = "permissions")
+  private Collection<Role> roles = new ArrayList<Role>();
 
 }

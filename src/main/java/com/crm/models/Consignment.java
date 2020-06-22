@@ -51,8 +51,8 @@ public class Consignment extends Supply {
   @Column(name = "laytime")
   private LocalDateTime laytime;
 
-	@Column(name = "cut_off_time")
-	private LocalDateTime cutOffTime;
+  @Column(name = "cut_off_time")
+  private LocalDateTime cutOffTime;
 
   @Column(name = "payload")
   private float payload;

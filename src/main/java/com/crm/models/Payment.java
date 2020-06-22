@@ -30,11 +30,11 @@ public class Payment {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-	@ManyToOne
-	@JoinColumn(name = "account_id")
-	private Account account;
-	
-	private String detail;
+  @ManyToOne
+  @JoinColumn(name = "account_id")
+  private Account account;
+
+  private String detail;
 
   private float amount;
 

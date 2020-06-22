@@ -28,10 +28,8 @@ import lombok.ToString;
 @NoArgsConstructor
 @ToString
 @Entity
-@Table(name="user", uniqueConstraints = {
-    @UniqueConstraint(columnNames="username"),
-    @UniqueConstraint(columnNames="email")
-})
+@Table(name = "user", uniqueConstraints = { @UniqueConstraint(columnNames = "username"),
+    @UniqueConstraint(columnNames = "email") })
 @Inheritance(strategy = InheritanceType.JOINED)
 @EntityListeners(AuditingEntityListener.class)
 @JsonIgnoreProperties(value = { "createdAt", "updatedAt" }, allowGetters = true)

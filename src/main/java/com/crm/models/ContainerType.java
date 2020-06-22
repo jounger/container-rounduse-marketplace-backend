@@ -47,8 +47,8 @@ public class ContainerType {
   @Column(name = "internal_length")
   private float internalLength;
 
-	@Column(name = "internal_width")
-	private float internalWidth;
+  @Column(name = "internal_width")
+  private float internalWidth;
 
   @Column(name = "internal_height")
   private float internalHeight;
@@ -56,9 +56,9 @@ public class ContainerType {
   @Column(name = "door_open_width")
   private float doorOpeningWidth;
 
-	@Column(name = "door_open_height")
-	private float doorOpeningHeight;
-	
-	@OneToMany(mappedBy = "containerType")
-	private Collection<Supply> supplies = new ArrayList<Supply>();
+  @Column(name = "door_open_height")
+  private float doorOpeningHeight;
+
+  @OneToMany(mappedBy = "containerType")
+  private Collection<Supply> supplies = new ArrayList<Supply>();
 }

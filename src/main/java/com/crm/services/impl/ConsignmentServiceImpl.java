@@ -18,6 +18,7 @@ import com.crm.models.Address;
 import com.crm.models.Category;
 import com.crm.models.Consignment;
 import com.crm.models.ContainerType;
+import com.crm.models.Merchant;
 import com.crm.models.Port;
 import com.crm.models.ShippingLine;
 import com.crm.payload.request.ConsignmentRequest;
@@ -26,6 +27,7 @@ import com.crm.repository.AddressRepository;
 import com.crm.repository.CategoryRepository;
 import com.crm.repository.ConsignmentRepository;
 import com.crm.repository.ContainerTypeRepository;
+import com.crm.repository.MerchantRepository;
 import com.crm.repository.PortRepository;
 import com.crm.repository.ShippingLineRepository;
 import com.crm.services.ConsignmentService;
@@ -50,6 +52,9 @@ public class ConsignmentServiceImpl implements ConsignmentService {
 
   @Autowired
   private PortRepository portRepository;
+  
+  @Autowired
+  private MerchantRepository merchantRepository;
 
   @Override
   public Page<Consignment> getConsignments(PaginationRequest request) {
@@ -61,6 +66,10 @@ public class ConsignmentServiceImpl implements ConsignmentService {
   public void createConsignment(ConsignmentRequest request) {
 
     Consignment consignment = new Consignment();
+    
+    Merchant merchant = merchantRepository.findByUsername(request.getMerchant())
+        .orElseThrow(() -> new NotFoundException("ERROR: Merchant is not found."));
+    consignment.setMerchant(merchant);
 
     ShippingLine shippingLine = shippingLineRepository.findByCompanyCode(request.getShippingLine())
         .orElseThrow(() -> new NotFoundException("ERROR: Shipping Line is not found."));
@@ -116,6 +125,10 @@ public class ConsignmentServiceImpl implements ConsignmentService {
 
     Consignment consignment = consignmentRepository.findById(request.getId())
         .orElseThrow(() -> new NotFoundException("ERROR: Consignment is not found."));
+    
+    Merchant merchant = merchantRepository.findByUsername(request.getMerchant())
+        .orElseThrow(() -> new NotFoundException("ERROR: Merchant is not found."));
+    consignment.setMerchant(merchant);
 
     ShippingLine shippingLine = shippingLineRepository.findByCompanyCode(request.getShippingLine())
         .orElseThrow(() -> new NotFoundException("ERROR: Shipping Line is not found."));

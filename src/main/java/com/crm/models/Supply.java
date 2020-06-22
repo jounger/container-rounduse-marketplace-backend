@@ -52,23 +52,23 @@ public class Supply {
   @JoinColumn(name = "shipping_line_id")
   private ShippingLine shippingLine;
 
-  @ManyToOne
-  @JoinColumn(name = "container_type_id")
-  private ContainerType containerType;
+	@ManyToOne
+	@JoinColumn(name = "container_type_id")
+	private ContainerType containerType;
+	
+	private EnumSupplyStatus status;
+	
+	@Column(name = "created_at", nullable = false, updatable = false)
+	@Temporal(TemporalType.TIMESTAMP)
+	@CreatedDate
+	private Date createdAt;
 
-  private EnumSupplyStatus status;
-
-  @Column(name = "created_at", nullable = false, updatable = false)
-  @Temporal(TemporalType.TIMESTAMP)
-  @CreatedDate
-  private Date createdAt;
-
-  @Column(name = "updated_at", nullable = false)
-  @Temporal(TemporalType.TIMESTAMP)
-  @LastModifiedDate
-  private Date updatedAt;
-
-  @OneToMany(mappedBy = "supply")
-  private Set<Report> reports = new HashSet<Report>();
+	@Column(name = "updated_at", nullable = false)
+	@Temporal(TemporalType.TIMESTAMP)
+	@LastModifiedDate
+	private Date updatedAt;
+	
+	@OneToMany(mappedBy = "supply")
+	private Set<Report> reports = new HashSet<Report>();
 
 }

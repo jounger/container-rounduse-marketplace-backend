@@ -26,17 +26,17 @@ import lombok.ToString;
 @Entity
 @Table(name = "driver")
 @PrimaryKeyJoinColumn(name = "user_id")
-public class Driver extends User {
+public class Driver extends User{
+	
+	@Column(name = "fullname", length = 50)
+	private String fullname;
 
-  @Column(name = "fullname", length = 50)
-  private String fullname;
-
-  @Column(name = "driver_license", length = 50)
-  private String driverLicense;
-
-  @ManyToOne
-  @JoinColumn(name = "forwarder_id")
-  private Forwarder forwarder;
+	@Column(name = "driver_license", length = 50)
+	private String driverLicense;
+	
+	@ManyToOne
+	@JoinColumn(name = "forwarder_id")
+	private Forwarder forwarder;
 
   @OneToOne(mappedBy = "driver")
   private Location location;

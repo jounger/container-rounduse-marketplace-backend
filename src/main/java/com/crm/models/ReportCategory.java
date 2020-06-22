@@ -24,16 +24,15 @@ import lombok.Setter;
 @Table(name = "report_category")
 public class ReportCategory {
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
-
+  
   @Column(unique = true)
   private String name;
-
+  
   private String description;
-
+  
   @ManyToMany(mappedBy = "categories")
   private List<Report> reports = new ArrayList<>();
-
+  
 }

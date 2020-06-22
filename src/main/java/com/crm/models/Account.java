@@ -38,19 +38,19 @@ public class Account {
   @JoinColumn(name = "supplier_id")
   private Supplier supplier;
 
-  @ManyToOne
-  @JoinColumn(name = "address_id")
-  private Address address;
-
-  @Column(name = "account_name")
-  private String accountName;
+	@ManyToOne
+	@JoinColumn(name = "address_id")
+	private Address address;
+	
+	@Column(name = "account_name")
+	private String accountName;
 
   @Column(name = "account_number")
   private String accountNumber;
 
-  @Column(name = "bank_name")
-  private String bankName;
-
-  @OneToMany(mappedBy = "account", cascade = CascadeType.ALL)
-  private Collection<Payment> payments = new ArrayList<Payment>();
+	@Column(name = "bank_name")
+	private String bankName;
+	
+	@OneToMany(mappedBy = "account", cascade = CascadeType.ALL)
+	private Collection<Payment> payments = new ArrayList<Payment>();
 }

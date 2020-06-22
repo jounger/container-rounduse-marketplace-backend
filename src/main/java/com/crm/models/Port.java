@@ -35,10 +35,10 @@ public class Port {
   @Column(name = "name_code", unique = true)
   private String nameCode;
 
-  private String address;
-
-  @OneToMany(mappedBy = "portOfDelivery")
-  private Set<Container> containers = new HashSet<Container>();
+	private String address;
+	
+	@OneToMany(mappedBy = "portOfDelivery")
+	private Set<Container> containers = new HashSet<Container>();
 
   @OneToMany(mappedBy = "portOfLoading")
   private Set<Consignment> consignments = new HashSet<Consignment>();

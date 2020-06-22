@@ -13,4 +13,5 @@ public interface IcdRepository extends JpaRepository<Icd, Long>{
 	Optional<Icd> findByNameCode(String nameCode);
 	
 	Boolean existsByNameCode(String nameCode);
+	
 }

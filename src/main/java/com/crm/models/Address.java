@@ -1,4 +1,4 @@
-package com.crm.models;
+wpackage com.crm.models;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -34,11 +34,11 @@ public class Address {
   @Column(length = 50)
   private String county;
 
-  @Column(length = 50)
-  private String city;
-
-  @Column(length = 50)
-  private String country;
+	@Column(length = 50)
+	private String county;
+	
+	@Column(length = 50)
+	private String city;
 
   @Column(length = 6)
   private String postalCode;

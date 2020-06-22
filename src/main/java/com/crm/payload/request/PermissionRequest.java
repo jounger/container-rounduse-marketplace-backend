@@ -1,7 +1,5 @@
 package com.crm.payload.request;
 
-import javax.validation.constraints.NotBlank;
-
 import lombok.Getter;
 import lombok.Setter;
 
@@ -9,6 +7,9 @@ import lombok.Setter;
 @Setter
 public class PermissionRequest {
 
-	@NotBlank
-	private String name;
+  private Long id;
+  
+  private String name;
+
+  private String description;
 }

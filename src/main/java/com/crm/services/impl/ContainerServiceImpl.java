@@ -63,7 +63,7 @@ public class ContainerServiceImpl implements ContainerService {
   @Override
   public void createContainer(ContainerRequest request) {
     Container container = new Container();
-    ShippingLine shippingLine = shippingLineRepository.findByCompanyCode(request.getShippingLineName())
+    ShippingLine shippingLine = shippingLineRepository.findByCompanyCode(request.getShippingLine())
         .orElseThrow(() -> new NotFoundException("ERROR: Shipping Line is not found."));
     container.setShippingLine(shippingLine);
 
@@ -127,7 +127,7 @@ public class ContainerServiceImpl implements ContainerService {
     Container container = containerRepository.findById(request.getId())
         .orElseThrow(() -> new NotFoundException("ERROR: Container is not found."));
 
-    ShippingLine shippingLine = shippingLineRepository.findByCompanyCode(request.getShippingLineName())
+    ShippingLine shippingLine = shippingLineRepository.findByCompanyCode(request.getShippingLine())
         .orElseThrow(() -> new NotFoundException("ERROR: Shipping Line is not found."));
     container.setShippingLine(shippingLine);
 

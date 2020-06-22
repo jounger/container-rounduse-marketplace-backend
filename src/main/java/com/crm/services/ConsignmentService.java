@@ -16,7 +16,7 @@ public interface ConsignmentService {
   
   void createConsignment(ConsignmentRequest request);
   
-  void updateConsignment(ConsignmentRequest request);
+  Consignment updateConsignment(ConsignmentRequest request);
   
   void removeConsignment(Long id);
   

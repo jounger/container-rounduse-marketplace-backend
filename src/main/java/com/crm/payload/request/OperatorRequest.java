@@ -9,4 +9,5 @@ public class OperatorRequest extends SignUpRequest {
 
 	private String fullname;
 
+	private boolean isRoot;
 }

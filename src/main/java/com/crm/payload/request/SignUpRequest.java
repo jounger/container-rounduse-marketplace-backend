@@ -7,7 +7,6 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 
 import com.crm.models.Address;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -15,6 +14,8 @@ import lombok.Setter;
 @Getter
 @Setter
 public class SignUpRequest {
+  
+  private Long id;
   
   @NotBlank
   @Size(min = 2, max = 20)
@@ -33,7 +34,6 @@ public class SignUpRequest {
   
   private String status;
   
-  @JsonProperty("address")
   private Address address;
   
   @NotBlank

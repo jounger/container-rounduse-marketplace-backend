@@ -11,17 +11,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class ConsignmentDto {
-  
-  private Long id;
-  
-  @JsonProperty("shipping_line")
-  private String shippingLine;
-  
-  @JsonProperty("container_type")
-  private String containerType;
-  
-  private String status;
+public class ConsignmentDto extends SupplyDto{
   
   @JsonProperty("merchant_id")
   private Long merchantId;

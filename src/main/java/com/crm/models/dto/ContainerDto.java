@@ -10,17 +10,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class ContainerDto {
-  
-  private Long id;
-  
-  @JsonProperty("shipping_line")
-  private String shippingLine;
-  
-  @JsonProperty("container_type")
-  private String containerType;
-
-  private String status;
+public class ContainerDto extends SupplyDto{
   
   @JsonProperty("forwarder_id")
   private Long forwarderId;

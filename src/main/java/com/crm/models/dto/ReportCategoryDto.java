@@ -5,8 +5,8 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class CategoryDto {
-  
+public class ReportCategoryDto {
+
   private Long id;
   
   private String name;

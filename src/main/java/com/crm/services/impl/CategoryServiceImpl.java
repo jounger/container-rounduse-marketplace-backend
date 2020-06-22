@@ -39,7 +39,7 @@ public class CategoryServiceImpl implements CategoryService {
       throw new DuplicateRecordException("Error: Category has been existed");
     }
     category.setName(request.getName());
-    category.setDesciption(request.getDesciption());
+    category.setDescription(request.getDescription());
     categoryRepository.save(category);
   }
 
@@ -48,7 +48,7 @@ public class CategoryServiceImpl implements CategoryService {
     Category category = categoryRepository.findById(request.getId())
         .orElseThrow(() -> new NotFoundException("ERROR: Category is not found."));
     category.setName(request.getName());
-    category.setDesciption(request.getDesciption());
+    category.setDescription(request.getDescription());
     categoryRepository.save(category);
     return category;
   }
@@ -58,7 +58,7 @@ public class CategoryServiceImpl implements CategoryService {
     if (categoryRepository.existsById(id)) {
       categoryRepository.deleteById(id);
     } else {
-      throw new DuplicateRecordException("Error: Category has been existed");
+      throw new NotFoundException("Error: Category is not found.");
     }
   }
 

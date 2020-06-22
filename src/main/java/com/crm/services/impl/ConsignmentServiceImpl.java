@@ -62,7 +62,7 @@ public class ConsignmentServiceImpl implements ConsignmentService {
 
     Consignment consignment = new Consignment();
 
-    ShippingLine shippingLine = shippingLineRepository.findByCompanyCode(request.getShippingLineName())
+    ShippingLine shippingLine = shippingLineRepository.findByCompanyCode(request.getShippingLine())
         .orElseThrow(() -> new NotFoundException("ERROR: Shipping Line is not found."));
     consignment.setShippingLine(shippingLine);
 
@@ -83,8 +83,8 @@ public class ConsignmentServiceImpl implements ConsignmentService {
     LocalDateTime layTime = Tool.convertToLocalDateTime(request.getLaytime());
     consignment.setLaytime(layTime);
 
-    LocalDateTime cutOftime = Tool.convertToLocalDateTime(request.getCutOfTime());
-    consignment.setCutOfTime(cutOftime);
+    LocalDateTime cutOfftime = Tool.convertToLocalDateTime(request.getCutOffTime());
+    consignment.setCutOffTime(cutOfftime);
 
     consignment.setPayload(request.getPayload());
     consignment.setUnitOfMeasurement(EnumUnit.findByName(request.getUnitOfMeasurement()));
@@ -117,7 +117,7 @@ public class ConsignmentServiceImpl implements ConsignmentService {
     Consignment consignment = consignmentRepository.findById(request.getId())
         .orElseThrow(() -> new NotFoundException("ERROR: Consignment is not found."));
 
-    ShippingLine shippingLine = shippingLineRepository.findByCompanyCode(request.getShippingLineName())
+    ShippingLine shippingLine = shippingLineRepository.findByCompanyCode(request.getShippingLine())
         .orElseThrow(() -> new NotFoundException("ERROR: Shipping Line is not found."));
     consignment.setShippingLine(shippingLine);
 
@@ -146,8 +146,8 @@ public class ConsignmentServiceImpl implements ConsignmentService {
     LocalDateTime layTime = Tool.convertToLocalDateTime(request.getLaytime());
     consignment.setLaytime(layTime);
 
-    LocalDateTime cutOftime = Tool.convertToLocalDateTime(request.getCutOfTime());
-    consignment.setCutOfTime(cutOftime);
+    LocalDateTime cutOfftime = Tool.convertToLocalDateTime(request.getCutOffTime());
+    consignment.setCutOffTime(cutOfftime);
 
     consignment.setPayload(request.getPayload());
     consignment.setUnitOfMeasurement(EnumUnit.findByName(request.getUnitOfMeasurement()));

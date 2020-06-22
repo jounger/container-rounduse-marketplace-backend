@@ -26,15 +26,16 @@ import lombok.ToString;
 @Table(name = "permission")
 public class Permission {
 
-	@Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-	@Column(length = 20, unique = true)
-	private String name;
+  @Column(length = 20, unique = true)
+  private String name;
 
-	private String description;
-	
-	@ManyToMany(mappedBy = "permissions")
-	private Collection<Role> roles = new ArrayList<Role>();
+  private String description;
+
+  @ManyToMany(mappedBy = "permissions")
+  private Collection<Role> roles = new ArrayList<Role>();
 
 }

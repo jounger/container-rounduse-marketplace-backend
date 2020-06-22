@@ -45,59 +45,60 @@ import lombok.ToString;
 @JsonIgnoreProperties(value = {"createdAt", "updatedAt"}, 
 allowGetters = true)
 public class BiddingDocument {
-	
-	@Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
-	
-	@ManyToOne
-	@JoinColumn(name = "merchant_id")
-	private Merchant merchant;
-	
-	@OneToOne(mappedBy = "biddingDocument")
-	private NotificationOfAward notificationOfAward;
-	
-	@ManyToOne
-	@JoinColumn(name = "consignment_id")
-	private Consignment consignment;
-	
-	@OneToMany(fetch = FetchType.LAZY, mappedBy = "biddingDocument")
-	private List<Bid> bids = new ArrayList<Bid>();
-	
-	@OneToMany(mappedBy = "report")
-	private Collection<Report> reports = new ArrayList<Report>();
-	
-	@Column(name = "bid_opening")
-	private LocalDateTime bidOpening;
-	
-	@Column(name = "bid_closing")
-	private LocalDateTime bidClosing;
-	
-	@Column(name = "currency_of_payment")
-	private EnumCurrency currencyOfPayment;
-	
-	@Column(name = "bid_package_price")
-	private float bidPackagePrice;
-	
-	@Column(name = "bid_floor_price")
-	private float bidFloorPrice;
-	
-	@Column(name = "bid_step")
-	private float bidStep;
-	
-	@ManyToOne
-	@JoinColumn(name = "discount_id")
-	private Discount bidDiscountCode;
-	
-	@Column(name = "price_leadership")
-	private float priceLeadership;
-	
-	@Column(name = "created_at", nullable = false, updatable = false)
-	@Temporal(TemporalType.TIMESTAMP)
-	@CreatedDate
-	private Date createdAt;
-	
-	@Column(name = "updated_at", nullable = false)
-	@Temporal(TemporalType.TIMESTAMP)
-	@LastModifiedDate
-	private Date updatedAt;
+
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
+
+  @ManyToOne
+  @JoinColumn(name = "merchant_id")
+  private Merchant merchant;
+
+  @ManyToOne
+  @JoinColumn(name = "consignment_id")
+  private Consignment consignment;
+
+  @Column(name = "bid_opening")
+  private LocalDateTime bidOpening;
+
+  @Column(name = "bid_closing")
+  private LocalDateTime bidClosing;
+
+  @Column(name = "currency_of_payment")
+  private EnumCurrency currencyOfPayment;
+
+  @Column(name = "bid_package_price")
+  private float bidPackagePrice;
+
+  @Column(name = "bid_floor_price")
+  private float bidFloorPrice;
+
+  @Column(name = "bit_step")
+  private float bitStep;
+
+  @ManyToOne
+  @JoinColumn(name = "discount_id")
+  private Discount bidDiscountCode;
+
+  @Column(name = "price_leadership")
+  private float priceLeadership;
+
+  @Column(name = "created_at", nullable = false, updatable = false)
+  @Temporal(TemporalType.TIMESTAMP)
+  @CreatedDate
+  private Date createdAt;
+
+  @Column(name = "updated_at", nullable = false)
+  @Temporal(TemporalType.TIMESTAMP)
+  @LastModifiedDate
+  private Date updatedAt;
+
+  @OneToOne(mappedBy = "biddingDocument")
+  private NotificationOfAward notificationOfAward;
+
+  @OneToMany(fetch = FetchType.LAZY, mappedBy = "biddingDocument")
+  private List<Bid> bids = new ArrayList<Bid>();
+
+  @OneToMany(mappedBy = "report")
+  private Collection<Report> reports = new ArrayList<Report>();
 }

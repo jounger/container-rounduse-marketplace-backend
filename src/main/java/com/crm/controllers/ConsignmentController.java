@@ -31,87 +31,88 @@ import com.crm.payload.response.MessageResponse;
 import com.crm.payload.response.PaginationResponse;
 import com.crm.services.ConsignmentService;
 
-@CrossOrigin(origins="*", maxAge=3600)
+@CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 @RequestMapping("/api/consignment")
 public class ConsignmentController {
-  
+
   private static final Logger logger = LoggerFactory.getLogger(ConsignmentController.class);
-  
+
   @Autowired
   private ConsignmentService consignmentService;
-  
+
   @GetMapping("/{id}")
   @PreAuthorize("hasRole('MODERATOR') or hasRole('MERCHANT')")
-  public ResponseEntity<?> getConsignment(@PathVariable Long id){
+  public ResponseEntity<?> getConsignment(@PathVariable Long id) {
     Consignment consignment = consignmentService.getConsignmentById(id);
     ConsignmentDto consignmentDto = new ConsignmentDto();
     consignmentDto = ConsignmentMapper.toConsignmentDto(consignment);
     return ResponseEntity.ok(consignmentDto);
   }
-  
+
   @GetMapping("/merchant/{id}")
   @PreAuthorize("hasRole('MERCHANT')")
   public ResponseEntity<?> getConsignmentsByMerchant(@PathVariable Long id, @Valid PaginationRequest request) {
-    
+
     Page<Consignment> pages = consignmentService.getConsignmentsByMerchant(id, request);
     PaginationResponse<ConsignmentDto> response = new PaginationResponse<>();
     response.setPageNumber(request.getPage());
     response.setPageSize(request.getLimit());
     response.setTotalElements(pages.getTotalElements());
     response.setTotalPages(pages.getTotalPages());
-    
+
     List<Consignment> consignments = pages.getContent();
     List<ConsignmentDto> consignmentsDto = new ArrayList<>();
     consignments.forEach(consignment -> consignmentsDto.add(ConsignmentMapper.toConsignmentDto(consignment)));
     response.setContents(consignmentsDto);
-    
+
     return ResponseEntity.ok(response);
-    
+
   }
-  
+
   @GetMapping("")
   @PreAuthorize("hasRole('MODERATOR')")
   public ResponseEntity<?> getConsignments(@Valid PaginationRequest request) {
-    
+
     Page<Consignment> pages = consignmentService.getConsignments(request);
     PaginationResponse<ConsignmentDto> response = new PaginationResponse<>();
     response.setPageNumber(request.getPage());
     response.setPageSize(request.getLimit());
     response.setTotalElements(pages.getTotalElements());
     response.setTotalPages(pages.getTotalPages());
-    
+
     List<Consignment> consignments = pages.getContent();
     List<ConsignmentDto> consignmentsDto = new ArrayList<>();
     consignments.forEach(consignment -> consignmentsDto.add(ConsignmentMapper.toConsignmentDto(consignment)));
     response.setContents(consignmentsDto);
-    
+
     return ResponseEntity.ok(response);
-    
+
   }
-  
+
   @PostMapping("")
   @PreAuthorize("hasRole('MERCHANT')")
-  public ResponseEntity<?> createConsignment(@Valid @RequestBody ConsignmentRequest request){
+  public ResponseEntity<?> createConsignment(@Valid @RequestBody ConsignmentRequest request) {
     logger.error("Runtime error: {}", request);
     consignmentService.createConsignment(request);
     return ResponseEntity.ok(new MessageResponse("Consignment created successfully"));
   }
-  
+
   @Transactional
   @PutMapping("")
   @PreAuthorize("hasRole('MERCHANT')")
-  public ResponseEntity<?> updateConsignment(@Valid @RequestBody ConsignmentRequest request){
-    consignmentService.updateConsignment(request);
-    return ResponseEntity.ok(new MessageResponse("Consignment has update successfully"));
+  public ResponseEntity<?> updateConsignment(@Valid @RequestBody ConsignmentRequest request) {
+    Consignment consignment = consignmentService.updateConsignment(request);
+    ConsignmentDto consignmentDto = ConsignmentMapper.toConsignmentDto(consignment);
+    return ResponseEntity.ok(consignmentDto);
   }
-  
+
   @Transactional
   @DeleteMapping("/{id}")
   @PreAuthorize("hasRole('MERCHANT')")
-  public ResponseEntity<?> removeConsignment(@PathVariable Long id){       
+  public ResponseEntity<?> removeConsignment(@PathVariable Long id) {
     consignmentService.removeConsignment(id);
     return ResponseEntity.ok(new MessageResponse("Consignment has remove successfully"));
   }
-   
+
 }

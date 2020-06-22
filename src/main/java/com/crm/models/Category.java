@@ -25,16 +25,17 @@ import lombok.ToString;
 @Entity
 @Table(name = "category")
 public class Category {
-	
-	@Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
-	
-	@Column(length = 20, unique = true)
-	private String name;
-	
-	@Column(length = 100)
-	private String desciption;
-	
-	@ManyToMany(mappedBy = "categories")
-	private Collection<Consignment> categories = new ArrayList<Consignment>();
+
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
+
+  @Column(length = 20, unique = true)
+  private String name;
+
+  @Column(length = 100)
+  private String description;
+
+  @ManyToMany(mappedBy = "categories")
+  private Collection<Consignment> categories = new ArrayList<Consignment>();
 }

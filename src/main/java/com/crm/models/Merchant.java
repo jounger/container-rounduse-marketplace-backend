@@ -18,11 +18,11 @@ import lombok.ToString;
 @Entity
 @Table(name = "merchant")
 @PrimaryKeyJoinColumn(name = "user_id")
-public class Merchant extends Supplier{
+public class Merchant extends Supplier {
 
-	@OneToMany(mappedBy = "merchant")
-	private Set<Consignment> consignments = new HashSet<Consignment>();
+  @OneToMany(mappedBy = "merchant")
+  private Set<Consignment> consignments = new HashSet<Consignment>();
 
-	@OneToMany(mappedBy = "merchant")
-	private Set<BiddingDocument> biddingDocuments = new HashSet<BiddingDocument>();
+  @OneToMany(mappedBy = "merchant")
+  private Set<BiddingDocument> biddingDocuments = new HashSet<BiddingDocument>();
 }

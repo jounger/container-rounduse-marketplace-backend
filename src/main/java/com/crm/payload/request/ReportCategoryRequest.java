@@ -5,8 +5,8 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class CategoryRequest {
-  
+public class ReportCategoryRequest {
+
   private Long id;
   
   private String name;

@@ -1,7 +1,5 @@
 package com.crm.models.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import lombok.Getter;
 import lombok.Setter;
 
@@ -12,7 +10,6 @@ public class IcdDto {
 
   private String fullname;
 
-  @JsonProperty("name_code")
   private String nameCode;
 
   private String address;

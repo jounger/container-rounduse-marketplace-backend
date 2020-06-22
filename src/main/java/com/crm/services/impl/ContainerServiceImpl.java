@@ -126,7 +126,7 @@ public class ContainerServiceImpl implements ContainerService {
   public Container updateContainer(ContainerRequest request) {
     Container container = containerRepository.findById(request.getId())
         .orElseThrow(() -> new NotFoundException("ERROR: Container is not found."));
-
+    
     ShippingLine shippingLine = shippingLineRepository.findByCompanyCode(request.getShippingLine())
         .orElseThrow(() -> new NotFoundException("ERROR: Shipping Line is not found."));
     container.setShippingLine(shippingLine);

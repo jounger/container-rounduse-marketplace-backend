@@ -34,41 +34,39 @@ import lombok.ToString;
 @PrimaryKeyJoinColumn(name = "supply_id")
 public class Consignment extends Supply {
 
-	@ManyToOne
-	@JoinColumn(name = "merchant_id")
-	private Merchant merchant;
+  @ManyToOne
+  @JoinColumn(name = "merchant_id")
+  private Merchant merchant;
 
-	@ManyToMany
-	@JoinTable(name = "consignment_category",
-				joinColumns = @JoinColumn(name = "consignment_id"),
-				inverseJoinColumns = @JoinColumn(name = "category_id"))
-	private Set<Category> categories = new HashSet<Category>();
+  @ManyToMany
+  @JoinTable(name = "consignment_category", joinColumns = @JoinColumn(name = "consignment_id"), inverseJoinColumns = @JoinColumn(name = "category_id"))
+  private Set<Category> categories = new HashSet<Category>();
 
-	@Column(name = "packing_time")
-	private LocalDateTime packingTime;
+  @Column(name = "packing_time")
+  private LocalDateTime packingTime;
 
-	@Column(name = "booking_number")
-	private String bookingNumber;
+  @Column(name = "booking_number")
+  private String bookingNumber;
 
-	@Column(name = "laytime")
-	private LocalDateTime laytime;
+  @Column(name = "laytime")
+  private LocalDateTime laytime;
 
-	@Column(name = "cut_off_time")
-	private LocalDateTime cutOffTime;
+  @Column(name = "cut_off_time")
+  private LocalDateTime cutOffTime;
 
-	@Column(name = "payload")
-	private float payload;
+  @Column(name = "payload")
+  private float payload;
 
-	@Column(name = "unit_of_measurment")
-	private EnumUnit unitOfMeasurement;
+  @Column(name = "unit_of_measurment")
+  private EnumUnit unitOfMeasurement;
 
-	private boolean fcl;
+  private boolean fcl;
 
-	@OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-	@JoinColumn(name = "address_id")
-	private Address packingStation;
+  @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+  @JoinColumn(name = "address_id")
+  private Address packingStation;
 
-	@ManyToOne
-	@JoinColumn(name = "port_id")
-	private Port portOfLoading;
+  @ManyToOne
+  @JoinColumn(name = "port_id")
+  private Port portOfLoading;
 }

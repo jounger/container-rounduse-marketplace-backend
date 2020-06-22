@@ -80,7 +80,7 @@ public class ContainerTypeServiceImpl implements ContainerTypeService {
   }
 
   @Override
-  public void deleteContainerType(Long id) {
+  public void removeContainerType(Long id) {
     if (containerTypeRepository.existsById(id)) {
       containerTypeRepository.deleteById(id);
     } else {

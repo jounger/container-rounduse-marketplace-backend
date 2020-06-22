@@ -16,6 +16,6 @@ public interface ContainerTypeService {
 
   ContainerType updateContainerType(ContainerTypeRequest request);
 
-  void deleteContainerType(Long id);
+  void removeContainerType(Long id);
 
 }

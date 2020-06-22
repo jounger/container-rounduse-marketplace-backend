@@ -46,7 +46,7 @@ public class PortServiceImpl implements PortService {
   }
 
   @Override
-  public void deletePort(Long id) {
+  public void removePort(Long id) {
     if (portRepository.existsById(id)) {
       portRepository.deleteById(id);
     } else {

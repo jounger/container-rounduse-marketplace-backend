@@ -56,11 +56,11 @@ public class IcdServiceImpl implements IcdService {
 
     icdRepository.save(icd);
 
-    return (icd);
+    return icd;
   }
 
   @Override
-  public void deleteIcd(Long id) {
+  public void removeIcd(Long id) {
     if (icdRepository.existsById(id)) {
       icdRepository.deleteById(id);
     } else {

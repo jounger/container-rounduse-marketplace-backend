@@ -86,7 +86,7 @@ public class IcdController {
   @DeleteMapping("/{id}")
   @PreAuthorize("hasRole('MODERATOR')")
   public ResponseEntity<?> removeIcd(@PathVariable Long id) {
-    icdService.deleteIcd(id);
+    icdService.removeIcd(id);
     return ResponseEntity.ok(new MessageResponse("Icd has remove successfully"));
   }
 }

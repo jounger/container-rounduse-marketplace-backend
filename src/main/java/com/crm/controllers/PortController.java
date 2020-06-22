@@ -85,7 +85,7 @@ public class PortController {
   @DeleteMapping("/{id}")
   @PreAuthorize("hasRole('MODERATOR')")
   public ResponseEntity<?> removePort(@PathVariable Long id) {
-    portService.deletePort(id);
+    portService.removePort(id);
     return ResponseEntity.ok(new MessageResponse("Port has remove successfully"));
   }
 }

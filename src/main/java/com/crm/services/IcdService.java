@@ -16,6 +16,6 @@ public interface IcdService {
 
   Icd updateIcd(IcdRequest request);
 
-  void deleteIcd(Long id);
+  void removeIcd(Long id);
 
 }

@@ -16,5 +16,5 @@ public interface PortService {
 
   Port updatePort(PortRequest request);
 
-  void deletePort(Long id);
+  void removePort(Long id);
 }

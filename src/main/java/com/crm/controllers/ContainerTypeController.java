@@ -87,7 +87,7 @@ public class ContainerTypeController {
   @DeleteMapping("/{id}")
   @PreAuthorize("hasRole('MODERATOR')")
   public ResponseEntity<?> removeContainerType(@PathVariable Long id) {
-    containerTypeService.deleteContainerType(id);
+    containerTypeService.removeContainerType(id);
     return ResponseEntity.ok(new MessageResponse("Container Type has remove successfully"));
   }
 }

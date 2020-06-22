@@ -18,11 +18,11 @@ public interface BiddingDocumentService {
   
   Page<BiddingDocument> getBiddingDocumentsByMerchant(Long id, PaginationRequest request);
   
-  void removeBiddingDocument(Long id);
-  
   //update full biddingDocument
   BiddingDocument updateBiddingDocument(BiddingDocumentRequest request);
   
   //update part biddingDocument
   BiddingDocument editBiddingDocument(Long id, Map<String, Object> updates);
+  
+  void removeBiddingDocument(Long id);
 }

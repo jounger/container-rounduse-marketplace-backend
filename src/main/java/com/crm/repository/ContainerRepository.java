@@ -15,4 +15,7 @@ public interface ContainerRepository extends JpaRepository<Container, Long> {
   @Query(value = "SELECT c FROM Container c WHERE c.forwarder.id = :id")
   Page<Container> findByForwarderId(@Param("id") Long id, Pageable pageable);
 
+  //find by consignment id
+  @Query(value = "SELECT * FROM container ", nativeQuery = true)
+  Page<Container> findByConsignment(@Param("id") Long id, Pageable pageable);
 }

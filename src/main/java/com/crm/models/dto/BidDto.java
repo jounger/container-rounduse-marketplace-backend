@@ -9,6 +9,7 @@ import lombok.Setter;
 @Setter
 public class BidDto {
  
+  //forwarder username
   private String bidder; 
 
   private ContainerDto container;

@@ -33,5 +33,5 @@ public class BidRequest {
   private String bidValidityPeriod;
   
   @JsonProperty(value = "ebid_status_name")
-  private Float eBidStatusName;
+  private String eBidStatusName;
 }

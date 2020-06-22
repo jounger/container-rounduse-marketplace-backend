@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import com.crm.common.Tool;
 import com.crm.enums.EnumBidStatus;
+import com.crm.exception.InternalException;
 import com.crm.exception.NotFoundException;
 import com.crm.models.Bid;
 import com.crm.models.BiddingDocument;
@@ -122,14 +123,52 @@ public class BidServiceImpl implements BidService {
 
     bid.setStatus(EnumBidStatus.PENDING);
 
-    bidRepository.save(bid);
+    bidRepository.save(bid); 
+    
+     
+     
     return bid;
   }
 
   @Override
   public Bid editBid(Long id, Map<String, Object> updates) {
-    // TODO Auto-generated method stub
-    return null;
+    Bid bid = bidRepository.findById(id)
+        .orElseThrow(() -> new NotFoundException("Bid is not found."));
+    
+    try {
+      String bidPriceString = (String) updates.get("bid_price");
+      if(bidPriceString != null) {
+        Float bidPrice = Float.parseFloat(bidPriceString);
+        bid.setBidPrice(bidPrice);
+      }
+      
+      String currentBidPriceString = (String) updates.get("current_bid_price");
+      if(currentBidPriceString != null) {
+        Float currentBidPrice = Float.parseFloat(currentBidPriceString);
+        bid.setCurrentBidPrice(currentBidPrice);
+      }
+    } catch (Exception e) {
+      throw new InternalException("Parameter must be Float");
+    }
+    
+    String bidDateString = (String) updates.get("bid_date");
+    if(bidDateString != null) {
+      LocalDateTime bidDate = Tool.convertToLocalDateTime(bidDateString);
+      bid.setBidDate(bidDate);
+    }
+    
+    String bidValidityPeriodString = (String) updates.get("bid_validity_period");
+    if(bidValidityPeriodString != null) {
+      LocalDateTime bidValidityPeriod = Tool.convertToLocalDateTime(bidValidityPeriodString);
+      bid.setBidValidityPeriod(bidValidityPeriod);
+    }
+    
+    String statusString = (String) updates.get("ebid_status_name");
+    if(statusString != null) {
+      EnumBidStatus status = EnumBidStatus.findByName(statusString);
+      bid.setStatus(status);
+    }
+    return bid;
   }
 
 }

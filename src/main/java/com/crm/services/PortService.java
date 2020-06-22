@@ -8,13 +8,13 @@ import com.crm.payload.request.PortRequest;
 
 public interface PortService {
 
-	void savePort(PortRequest request);
-	
-	void updatePort(PortRequest request);
-    
-    void deletePort(Long id);
-    
-    Page<Port> getPorts(PaginationRequest request);
-    
-    Port getPortById(Long id);
+  Page<Port> getPorts(PaginationRequest request);
+
+  Port getPortById(Long id);
+
+  void createPort(PortRequest request);
+
+  Port updatePort(PortRequest request);
+
+  void removePort(Long id);
 }

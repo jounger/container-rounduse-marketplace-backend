@@ -1,6 +1,7 @@
 package com.crm.services.impl;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,7 @@ import com.crm.exception.InternalException;
 import com.crm.exception.NotFoundException;
 import com.crm.models.Bid;
 import com.crm.models.BiddingDocument;
+import com.crm.models.Consignment;
 import com.crm.models.Container;
 import com.crm.models.Forwarder;
 import com.crm.payload.request.BidRequest;
@@ -52,8 +54,18 @@ public class BidServiceImpl implements BidService {
 
     Container container = containerRepository.findById(request.getContainerId())
         .orElseThrow(() -> new NotFoundException("Container is not found."));
-    bid.setContainer(container);
-
+    Consignment consignment = biddingDocument.getConsignment();
+    List<Container> suitableContainers = 
+        containerRepository.findByConsignment(consignment.getShippingLine().getId()
+            , consignment.getContainerType().getId(), consignment.getStatus().ordinal()
+            , consignment.getPackingTime(), consignment.getCutOfTime()
+            , consignment.getPortOfLoading().getId());
+    if(suitableContainers.contains(container)) {
+      bid.setContainer(container);
+    }else {
+      throw new NotFoundException("Container is not suitable.");
+    }
+    
     bid.setBidPrice(request.getBidPrice());
     bid.setCurrentBidPrice(request.getCurrentBidPrice());
 

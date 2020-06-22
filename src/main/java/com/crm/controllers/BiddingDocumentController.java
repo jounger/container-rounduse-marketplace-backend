@@ -40,10 +40,9 @@ public class BiddingDocumentController {
 
   @PreAuthorize("hasRole('MERCHANT')")
   @PutMapping("")
-  public ResponseEntity<?> createBid(@Valid @RequestBody BiddingDocumentRequest request) {
-     BiddingDocument biddingDocument = biddingDocumentService.createBiddingDocument(request);     
-     BiddingDocumentDto biddingDocumentDto = BiddingDocumentMapper.toBiddingDocumentDto(biddingDocument);
-     return ResponseEntity.ok(biddingDocumentDto);
+  public ResponseEntity<?> createBiddingDocument(@Valid @RequestBody BiddingDocumentRequest request) {
+     biddingDocumentService.createBiddingDocument(request);     
+     return ResponseEntity.ok(new MessageResponse("Bidding Document was created successfully"));
   } 
   
   @PreAuthorize("hasRole('MERCHANT')")

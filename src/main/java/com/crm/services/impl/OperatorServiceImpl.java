@@ -58,7 +58,7 @@ public class OperatorServiceImpl implements OperatorService {
     String encoder = passwordEncoder.encode(request.getPassword());
     operator.setPassword(encoder);
     operator.setFullname(request.getFullname());
-    operator.setRoot(false);
+    operator.setRoot(request.isRoot());
     operatorRepository.save(operator);
 
   }
@@ -97,7 +97,7 @@ public class OperatorServiceImpl implements OperatorService {
     String encoder = passwordEncoder.encode(request.getPassword());
     operator.setPassword(encoder);
     operator.setFullname(request.getFullname());
-    operator.setRoot(false);
+    operator.setRoot(request.isRoot());
     operatorRepository.save(operator);
     
     return operator;

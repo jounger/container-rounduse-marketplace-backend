@@ -8,6 +8,7 @@ import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -22,8 +23,10 @@ import javax.persistence.TemporalType;
 
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.crm.enums.EnumCurrency;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -38,6 +41,9 @@ import lombok.ToString;
 @ToString
 @Entity
 @Table(name = "bidding_document")
+@EntityListeners(AuditingEntityListener.class)
+@JsonIgnoreProperties(value = {"createdAt", "updatedAt"}, 
+allowGetters = true)
 public class BiddingDocument {
 	
 	@Id @GeneratedValue(strategy = GenerationType.IDENTITY)

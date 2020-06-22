@@ -29,6 +29,7 @@ INSERT INTO crm_db.supplier (company_address,company_code,description,company_na
 INSERT INTO crm_db.shipping_line (company_code,company_name,website,user_id) VALUES ('apl','Pacific Mail Steamship Company','apl.com','3');
 INSERT INTO crm_db.forwarder (user_id) VALUES ('4');
 INSERT INTO crm_db.merchant (user_id) VALUES ('5');
+INSERT INTO crm_db.driver (user_id) VALUES ('6');
 
 # ICD
 INSERT INTO crm_db.icd (address,fullname,name_code) VALUES ('TS 10, Dong Nguyen, Tu Son, Bac Ninh','ICD Tien Son','TIENSON');

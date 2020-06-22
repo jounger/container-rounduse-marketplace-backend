@@ -15,6 +15,7 @@ import com.crm.exception.NotFoundException;
 import com.crm.models.Bid;
 import com.crm.models.BiddingDocument;
 import com.crm.models.Consignment;
+import com.crm.models.Discount;
 import com.crm.models.Merchant;
 import com.crm.models.NotificationOfAward;
 import com.crm.payload.request.BiddingDocumentRequest;
@@ -68,10 +69,15 @@ public class BiddingDocumentImpl implements BiddingDocumentService {
     biddingDocument.setBidPackagePrice(request.getBidPackagePrice());
     biddingDocument.setBidFloorPrice(request.getBidFloorPrice());
     biddingDocument.setBidStep(request.getBidStep());
-    biddingDocument.setPriceLeadership(request.getPriceLeadership());
+    biddingDocument.setPriceLeadership(request.getBidFloorPrice());
 
-    biddingDocument.setBidDiscountCode(discountRepository.findByCode(request.getBidDiscountCode())
-        .orElseThrow(() -> new NotFoundException("Discount is not found.")));
+    
+    String discountCodeString = request.getBidDiscountCode();
+    if(discountCodeString != null) {
+      Discount bidDiscountCode = discountRepository.findByCode(discountCodeString)
+          .orElseThrow(() -> new NotFoundException("Discount is not found."));
+      biddingDocument.setBidDiscountCode(bidDiscountCode);
+    }
 
     biddingDocumentRepository.save(biddingDocument);
   }

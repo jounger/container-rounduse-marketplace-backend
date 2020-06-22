@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import com.crm.common.Tool;
@@ -89,13 +90,13 @@ public class BidServiceImpl implements BidService {
 
   @Override
   public Page<Bid> getBidsByBiddingDocument(Long id, PaginationRequest request) {
-    Page<Bid> bids = bidRepository.getBidsByBiddingDocument(id, request);
+    Page<Bid> bids = bidRepository.getBidsByBiddingDocument(id, PageRequest.of(request.getPage(), request.getLimit()));
     return bids;
   }
 
   @Override
   public Page<Bid> getBidsByForwarder(Long id, PaginationRequest request) {
-    Page<Bid> bids = bidRepository.getBidsByForwarder(id, request);
+    Page<Bid> bids = bidRepository.getBidsByForwarder(id, PageRequest.of(request.getPage(), request.getLimit()));
     return bids;
   }
 

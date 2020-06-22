@@ -96,7 +96,7 @@ public class BidController {
      return ResponseEntity.ok(bidDto);
   }
 
-  @PreAuthorize("hasRole('MERCHANT')")
+  @PreAuthorize("hasRole('MERCHANT') or hasRole('FORWARDER')")
   @RequestMapping(value = "/{id}", method = RequestMethod.PATCH, consumes = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<?> editBid(@PathVariable("id") Long id, @RequestBody Map<String, Object> updates) {
     Bid Bid = bidService.editBid(id, updates);
@@ -104,9 +104,9 @@ public class BidController {
     return ResponseEntity.ok(BidDto);
   }
 
-  @PreAuthorize("hasRole('MERCHANT')")
+  @PreAuthorize("hasRole('FORWARDER')")
   @DeleteMapping("/{id}")
-  public ResponseEntity<?> deleteBid(@PathVariable Long id) {
+  public ResponseEntity<?> removeBid(@PathVariable Long id) {
     bidService.removeBid(id);
     return ResponseEntity.ok(new MessageResponse("Bidding document deleted successfully."));
   }

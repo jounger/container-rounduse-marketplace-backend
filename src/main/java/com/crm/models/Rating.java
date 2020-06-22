@@ -21,20 +21,21 @@ import lombok.ToString;
 @NoArgsConstructor
 @ToString
 @Entity
-@Table(name="rating")
+@Table(name = "rating")
 public class Rating {
 
-	@Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
-	
-	@ManyToOne
-	@JoinColumn(name = "sender_supplier_id")
-	private Supplier sender;
-	
-	@ManyToOne
-	@JoinColumn(name = "receiver_supplier_id")
-	private Supplier receiver;
-	
-	@Column(name = "rating_value")
-	private int ratingValue;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
+
+  @ManyToOne
+  @JoinColumn(name = "sender_supplier_id")
+  private Supplier sender;
+
+  @ManyToOne
+  @JoinColumn(name = "receiver_supplier_id")
+  private Supplier receiver;
+
+  @Column(name = "rating_value")
+  private int ratingValue;
 }

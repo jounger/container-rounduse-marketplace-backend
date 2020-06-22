@@ -35,36 +35,36 @@ import lombok.ToString;
 @Entity
 @Table(name = "discount")
 @EntityListeners(AuditingEntityListener.class)
-@JsonIgnoreProperties(value = {"createdAt", "updatedAt"}, 
-allowGetters = true)
+@JsonIgnoreProperties(value = { "createdAt", "updatedAt" }, allowGetters = true)
 public class Discount {
 
-	@Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-	@Column(unique = true)
-	private String code;
+  @Column(unique = true)
+  private String code;
 
-	private String detail;
+  private String detail;
 
-	private float percent;
+  private float percent;
 
-	@Column(name = "maximum_discount")
-	private float maximumDiscount;
+  @Column(name = "maximum_discount")
+  private float maximumDiscount;
 
-	@Column(name = "expired_date")
-	private LocalDateTime expiredDate;
+  @Column(name = "expired_date")
+  private LocalDateTime expiredDate;
 
-	@Column(name = "created_at", nullable = false, updatable = false)
-	@Temporal(TemporalType.TIMESTAMP)
-	@CreatedDate
-	private Date createdAt;
+  @Column(name = "created_at", nullable = false, updatable = false)
+  @Temporal(TemporalType.TIMESTAMP)
+  @CreatedDate
+  private Date createdAt;
 
-	@Column(name = "updated_at", nullable = false)
-	@Temporal(TemporalType.TIMESTAMP)
-	@LastModifiedDate
-	private Date updatedAt;
-	
-	@OneToMany(mappedBy = "bidDiscountCode")
-	private List<BiddingDocument> biddingDocuments;
+  @Column(name = "updated_at", nullable = false)
+  @Temporal(TemporalType.TIMESTAMP)
+  @LastModifiedDate
+  private Date updatedAt;
+
+  @OneToMany(mappedBy = "bidDiscountCode")
+  private List<BiddingDocument> biddingDocuments;
 }

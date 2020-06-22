@@ -1,11 +1,11 @@
-package com.crm.payload.request;
+package com.crm.models.dto;
 
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-public class SupplyRequest {
+public class SupplyDto {
   
   private Long id;
   

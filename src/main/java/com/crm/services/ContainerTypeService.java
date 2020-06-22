@@ -8,13 +8,14 @@ import com.crm.payload.request.PaginationRequest;
 
 public interface ContainerTypeService {
 
-	void saveContainerType(ContainerTypeRequest request);
-	
-	void updateContainerType(ContainerTypeRequest request);
-    
-    void deleteContainerType(Long id);
-    
-    Page<ContainerType> getContainerTypes(PaginationRequest request);
-    
-    ContainerType getContainerTypeById(Long id);
+  Page<ContainerType> getContainerTypes(PaginationRequest request);
+
+  ContainerType getContainerTypeById(Long id);
+
+  void createContainerType(ContainerTypeRequest request);
+
+  ContainerType updateContainerType(ContainerTypeRequest request);
+
+  void removeContainerType(Long id);
+
 }

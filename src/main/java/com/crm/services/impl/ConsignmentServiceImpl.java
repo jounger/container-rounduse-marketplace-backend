@@ -41,13 +41,13 @@ public class ConsignmentServiceImpl implements ConsignmentService {
 
   @Autowired
   private ContainerTypeRepository containerTypeRepository;
-  
+
   @Autowired
   private AddressRepository addressRepository;
 
   @Autowired
   private CategoryRepository categoryRepository;
-  
+
   @Autowired
   private PortRepository portRepository;
 
@@ -56,17 +56,16 @@ public class ConsignmentServiceImpl implements ConsignmentService {
     Page<Consignment> pages = consignmentRepository.findAll(PageRequest.of(request.getPage(), request.getLimit()));
     return pages;
   }
-  
 
   @Override
   public void createConsignment(ConsignmentRequest request) {
-    
+
     Consignment consignment = new Consignment();
 
-    ShippingLine shippingLine = shippingLineRepository.findByCompanyCode(request.getShippingLineName())
+    ShippingLine shippingLine = shippingLineRepository.findByCompanyCode(request.getShippingLine())
         .orElseThrow(() -> new NotFoundException("ERROR: Shipping Line is not found."));
     consignment.setShippingLine(shippingLine);
-    
+
     ContainerType containerType = containerTypeRepository.findByName(request.getContainerType())
         .orElseThrow(() -> new NotFoundException("ERROR: Type is not found."));
     consignment.setContainerType(containerType);
@@ -80,46 +79,48 @@ public class ConsignmentServiceImpl implements ConsignmentService {
     consignment.setPackingStation(packingStation);
 
     consignment.setBookingNumber(request.getBookingNumber());
-    
+
     LocalDateTime layTime = Tool.convertToLocalDateTime(request.getLaytime());
     consignment.setLaytime(layTime);
-    
-    LocalDateTime cutOftime = Tool.convertToLocalDateTime(request.getCutOfTime());
-    consignment.setCutOfTime(cutOftime);
-    
+
+    LocalDateTime cutOfftime = Tool.convertToLocalDateTime(request.getCutOffTime());
+    consignment.setCutOffTime(cutOfftime);
+
     consignment.setPayload(request.getPayload());
     consignment.setUnitOfMeasurement(EnumUnit.findByName(request.getUnitOfMeasurement()));
 
     Set<String> categoryListString = request.getCategories();
     Set<Category> listCategory = new HashSet<>();
 
-    categoryListString.forEach(item -> {
-      Category category = categoryRepository.findByName(item)
-          .orElseThrow(() -> new NotFoundException("Error: Category is not found"));
-      listCategory.add(category);
-    });
-    consignment.setCategories(listCategory);
-    
+    if (categoryListString != null) {
+      categoryListString.forEach(item -> {
+        Category category = categoryRepository.findByName(item)
+            .orElseThrow(() -> new NotFoundException("Error: Category is not found"));
+        listCategory.add(category);
+      });
+      consignment.setCategories(listCategory);
+    }
+
     consignment.setFcl(true);
-    
+
     Port port = portRepository.findByNameCode(request.getPortOfLoading())
         .orElseThrow(() -> new NotFoundException("ERROR: Port is not found."));
     consignment.setPortOfLoading(port);
-    
+
     consignmentRepository.save(consignment);
-    
+
   }
 
   @Override
-  public void updateConsignment(ConsignmentRequest request) {
-    
+  public Consignment updateConsignment(ConsignmentRequest request) {
+
     Consignment consignment = consignmentRepository.findById(request.getId())
         .orElseThrow(() -> new NotFoundException("ERROR: Consignment is not found."));
-    
-    ShippingLine shippingLine = shippingLineRepository.findByCompanyCode(request.getShippingLineName())
+
+    ShippingLine shippingLine = shippingLineRepository.findByCompanyCode(request.getShippingLine())
         .orElseThrow(() -> new NotFoundException("ERROR: Shipping Line is not found."));
     consignment.setShippingLine(shippingLine);
-    
+
     ContainerType containerType = containerTypeRepository.findByName(request.getContainerType())
         .orElseThrow(() -> new NotFoundException("ERROR: Type is not found."));
     consignment.setContainerType(containerType);
@@ -137,54 +138,58 @@ public class ConsignmentServiceImpl implements ConsignmentService {
     packingStation.setCounty(packingStationReq.getCounty());
     packingStation.setCountry(packingStationReq.getCountry());
     packingStation.setPostalCode(packingStationReq.getPostalCode());
-    
+
 //    consignment.setPackingStation(packingStation);
 
     consignment.setBookingNumber(request.getBookingNumber());
-    
+
     LocalDateTime layTime = Tool.convertToLocalDateTime(request.getLaytime());
     consignment.setLaytime(layTime);
-    
-    LocalDateTime cutOftime = Tool.convertToLocalDateTime(request.getCutOfTime());
-    consignment.setCutOfTime(cutOftime);
-    
+
+    LocalDateTime cutOfftime = Tool.convertToLocalDateTime(request.getCutOffTime());
+    consignment.setCutOffTime(cutOfftime);
+
     consignment.setPayload(request.getPayload());
     consignment.setUnitOfMeasurement(EnumUnit.findByName(request.getUnitOfMeasurement()));
 
     Set<String> categoryListString = request.getCategories();
     Set<Category> listCategory = new HashSet<>();
 
-    categoryListString.forEach(categories -> {
-      Category category = categoryRepository.findByName(categories)
-          .orElseThrow(() -> new NotFoundException("Error: Category is not found"));
-      listCategory.add(category);
-    });
-    consignment.setCategories(listCategory);
-    
+    if (categoryListString != null) {
+      categoryListString.forEach(categories -> {
+        Category category = categoryRepository.findByName(categories)
+            .orElseThrow(() -> new NotFoundException("Error: Category is not found"));
+        listCategory.add(category);
+      });
+      consignment.setCategories(listCategory);
+    }
+
     consignment.setFcl(true);
-    
+
     Port port = portRepository.findByNameCode(request.getPortOfLoading())
         .orElseThrow(() -> new NotFoundException("ERROR: Port is not found."));
     consignment.setPortOfLoading(port);
-    
+
     consignmentRepository.save(consignment);
-    
+
+    return consignment;
   }
 
   @Override
   public void removeConsignment(Long id) {
-    Consignment consignment = consignmentRepository.findById(id)
-        .orElseThrow(() -> new NotFoundException("ERROR: Consignment is not found."));
-    consignmentRepository.delete(consignment);
+    if (consignmentRepository.existsById(id)) {
+      consignmentRepository.deleteById(id);
+    } else {
+      throw new NotFoundException("ERROR: Consignment is not found.");
+    }
   }
 
   @Override
   public Consignment getConsignmentById(Long id) {
     Consignment consignment = consignmentRepository.findById(id)
         .orElseThrow(() -> new NotFoundException("ERROR: Consignment is not found."));
-    return consignment;    
+    return consignment;
   }
-
 
   @Override
   public Page<Consignment> getConsignmentsByMerchant(Long id, PaginationRequest request) {

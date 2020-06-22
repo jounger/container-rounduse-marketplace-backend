@@ -40,11 +40,12 @@ public class ConsignmentMapper {
     String laytime = Tool.convertLocalDateTimeToString(consignment.getLaytime());
     dto.setLaytime(laytime);
     
-    String cutOfTime = Tool.convertLocalDateTimeToString(consignment.getCutOfTime());
-    dto.setCutOfTime(cutOfTime);
+    String cutOffTime = Tool.convertLocalDateTimeToString(consignment.getCutOffTime());
+    dto.setCutOffTime(cutOffTime);
     
     dto.setPayload(consignment.getPayload());
     dto.setUnitOfMeasurement(consignment.getUnitOfMeasurement().name());
+    dto.setFcl(true);
     dto.setPortOfLoading(consignment.getPortOfLoading().getFullname());
     return dto;
     

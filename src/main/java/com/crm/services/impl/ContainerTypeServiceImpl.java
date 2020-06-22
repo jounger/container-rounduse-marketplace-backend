@@ -21,7 +21,20 @@ public class ContainerTypeServiceImpl implements ContainerTypeService {
   private ContainerTypeRepository containerTypeRepository;
 
   @Override
-  public void saveContainerType(ContainerTypeRequest request) {
+  public Page<ContainerType> getContainerTypes(PaginationRequest request) {
+    Page<ContainerType> pages = containerTypeRepository.findAll(PageRequest.of(request.getPage(), request.getLimit()));
+    return pages;
+  }
+
+  @Override
+  public ContainerType getContainerTypeById(Long id) {
+    ContainerType containerType = containerTypeRepository.findById(id)
+        .orElseThrow(() -> new NotFoundException("ERROR: ContainerType is not found."));
+    return containerType;
+  }
+
+  @Override
+  public void createContainerType(ContainerTypeRequest request) {
     if (containerTypeRepository.existsByName(request.getName())) {
       throw new DuplicateRecordException("ERROR: Type name already exists.");
     }
@@ -45,7 +58,7 @@ public class ContainerTypeServiceImpl implements ContainerTypeService {
   }
 
   @Override
-  public void updateContainerType(ContainerTypeRequest request) {
+  public ContainerType updateContainerType(ContainerTypeRequest request) {
     try {
       ContainerType containerType = containerTypeRepository.findById(request.getId())
           .orElseThrow(() -> new NotFoundException("ERROR: ContainerType is not found."));
@@ -60,29 +73,19 @@ public class ContainerTypeServiceImpl implements ContainerTypeService {
       containerType.setDoorOpeningHeight(Float.parseFloat(request.getDoorOpeningHeight()));
       containerType.setDoorOpeningWidth(Float.parseFloat(request.getDoorOpeningWidth()));
       containerTypeRepository.save(containerType);
+      return containerType;
     } catch (Exception e) {
       throw new InternalException("ERROR: Parameter must be float");
     }
   }
 
   @Override
-  public void deleteContainerType(Long id) {
-    ContainerType containerType = containerTypeRepository.findById(id)
-        .orElseThrow(() -> new NotFoundException("ERROR: ContainerType is not found."));
-    containerTypeRepository.delete(containerType);
-  }
-
-  @Override
-  public Page<ContainerType> getContainerTypes(PaginationRequest request) {
-    Page<ContainerType> pages = containerTypeRepository.findAll(PageRequest.of(request.getPage(), request.getLimit()));
-    return pages;
-  }
-
-  @Override
-  public ContainerType getContainerTypeById(Long id) {
-    ContainerType containerType = containerTypeRepository.findById(id)
-        .orElseThrow(() -> new NotFoundException("ERROR: ContainerType is not found."));
-    return containerType;
+  public void removeContainerType(Long id) {
+    if (containerTypeRepository.existsById(id)) {
+      containerTypeRepository.deleteById(id);
+    } else {
+      new NotFoundException("ERROR: ContainerType is not found.");
+    }
   }
 
 }

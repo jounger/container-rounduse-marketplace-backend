@@ -56,10 +56,10 @@ public class IcdController {
     return ResponseEntity.ok(response);
 
   }
-  
+
   @GetMapping("/{id}")
   @PreAuthorize("hasRole('MODERATOR')")
-  public ResponseEntity<?> getIcd(@PathVariable Long id){
+  public ResponseEntity<?> getIcd(@PathVariable Long id) {
     Icd icd = icdService.getIcdById(id);
     IcdDto icdDto = new IcdDto();
     icdDto = IcdMapper.toIcdDto(icd);
@@ -69,23 +69,24 @@ public class IcdController {
   @PostMapping("")
   @PreAuthorize("hasRole('MODERATOR')")
   public ResponseEntity<?> createIcd(@Valid @RequestBody IcdRequest request) {
-    icdService.saveIcd(request);
+    icdService.createIcd(request);
     return ResponseEntity.ok(new MessageResponse("ICD created successfully"));
   }
-  
+
   @Transactional
   @PutMapping("")
   @PreAuthorize("hasRole('MODERATOR')")
-  public ResponseEntity<?> UpdateIcd(@Valid @RequestBody IcdRequest request){
-    icdService.updateIcd(request);
-    return ResponseEntity.ok(new MessageResponse("Icd has update successfully"));
+  public ResponseEntity<?> updateIcd(@Valid @RequestBody IcdRequest request) {
+    Icd icd = icdService.updateIcd(request);
+    IcdDto icdDto = IcdMapper.toIcdDto(icd);
+    return ResponseEntity.ok(icdDto);
   }
-  
+
   @Transactional
   @DeleteMapping("/{id}")
   @PreAuthorize("hasRole('MODERATOR')")
-  public ResponseEntity<?> removeIcd(@PathVariable Long id){       
-    icdService.deleteIcd(id);
+  public ResponseEntity<?> removeIcd(@PathVariable Long id) {
+    icdService.removeIcd(id);
     return ResponseEntity.ok(new MessageResponse("Icd has remove successfully"));
   }
 }

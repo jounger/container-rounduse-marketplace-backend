@@ -1,12 +1,12 @@
-package com.crm.payload.request;
+package com.crm.models.dto;
 
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-public class CategoryRequest {
-  
+public class ReportCategoryDto {
+
   private Long id;
   
   private String name;

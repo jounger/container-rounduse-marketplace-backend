@@ -33,7 +33,7 @@ public class Category {
 	private String name;
 	
 	@Column(length = 100)
-	private String desciption;
+	private String description;
 	
 	@ManyToMany(mappedBy = "categories")
 	private Collection<Consignment> categories = new ArrayList<Consignment>();

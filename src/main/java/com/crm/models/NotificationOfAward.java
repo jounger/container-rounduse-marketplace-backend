@@ -26,19 +26,20 @@ import lombok.ToString;
 @Entity
 @Table(name = "notification_of_award")
 public class NotificationOfAward {
-	
-	@Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
-	
-	@OneToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "bidding_document_id")
-	private BiddingDocument biddingDocument;
-	
-	@OneToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "bid_id")
-	private Bid successfulBid;
-	
-	@Column(name = "date_of_decision")
-	private LocalDateTime dateOfDecision;
-	
+
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
+
+  @OneToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "bidding_document_id")
+  private BiddingDocument biddingDocument;
+
+  @OneToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "bid_id")
+  private Bid successfulBid;
+
+  @Column(name = "date_of_decision")
+  private LocalDateTime dateOfDecision;
+
 }

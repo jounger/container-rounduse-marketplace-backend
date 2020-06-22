@@ -40,43 +40,41 @@ import lombok.ToString;
 @NoArgsConstructor
 @ToString
 @Entity
-@Table(name="report")
+@Table(name = "report")
 @EntityListeners(AuditingEntityListener.class)
-@JsonIgnoreProperties(value = {"createdAt", "updatedAt"},
-allowGetters = true)
+@JsonIgnoreProperties(value = { "createdAt", "updatedAt" }, allowGetters = true)
 public class Report {
 
-	@Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-	@ManyToOne
-	@JoinColumn(name = "supply_id")
-	private Supply supply;
+  @ManyToOne
+  @JoinColumn(name = "supply_id")
+  private Supply supply;
 
-	@OneToMany(mappedBy = "report")
-	private Set<Feedback> feedbacks = new HashSet<Feedback>();
+  @ManyToOne
+  @JoinColumn(name = "bidding_document_id")
+  private BiddingDocument report;
 
-	@ManyToOne
-	@JoinColumn(name = "bidding_document_id")
-	private BiddingDocument report;
+  private String detail;
 
-	private String detail;
+  private EnumReportStatus status;
 
-	private EnumReportStatus status;
-	
-	@ManyToMany
-	@JoinTable(name = "supply_category",
-	joinColumns = @JoinColumn(name = "report_id"),
-	inverseJoinColumns = @JoinColumn(name = "report_category_id"))
-	private List<ReportCategory> categories = new ArrayList<>();
+  @ManyToMany
+  @JoinTable(name = "supply_category", joinColumns = @JoinColumn(name = "report_id"), inverseJoinColumns = @JoinColumn(name = "report_category_id"))
+  private List<ReportCategory> categories = new ArrayList<>();
 
-	@Column(name = "created_at", nullable = false, updatable = false)
-	@Temporal(TemporalType.TIMESTAMP)
-	@CreatedDate
-	private Date createdAt;
+  @Column(name = "created_at", nullable = false, updatable = false)
+  @Temporal(TemporalType.TIMESTAMP)
+  @CreatedDate
+  private Date createdAt;
 
-	@Column(name = "updated_at", nullable = false)
-	@Temporal(TemporalType.TIMESTAMP)
-	@LastModifiedDate
-	private Date updatedAt;
+  @Column(name = "updated_at", nullable = false)
+  @Temporal(TemporalType.TIMESTAMP)
+  @LastModifiedDate
+  private Date updatedAt;
+
+  @OneToMany(mappedBy = "report")
+  private Set<Feedback> feedbacks = new HashSet<Feedback>();
 }

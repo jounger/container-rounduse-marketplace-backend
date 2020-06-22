@@ -23,41 +23,42 @@ import lombok.ToString;
 @NoArgsConstructor
 @ToString
 @Entity
-@Table(name="container_type")
+@Table(name = "container_type")
 public class ContainerType {
 
-	@Id	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-	@Column(unique = true)
-	private String name;
+  @Column(unique = true)
+  private String name;
 
-	private String description;
+  private String description;
 
-	@Column(name = "tare_weight")
-	private float tareWeight;
+  @Column(name = "tare_weight")
+  private float tareWeight;
 
-	@Column(name = "payload_capacity")
-	private float payloadCapacity;
+  @Column(name = "payload_capacity")
+  private float payloadCapacity;
 
-	@Column(name = "cubic_capacity")
-	private float cubicCapacity;
+  @Column(name = "cubic_capacity")
+  private float cubicCapacity;
 
-	@Column(name = "internal_length")
-	private float internalLength;
+  @Column(name = "internal_length")
+  private float internalLength;
 
-	@Column(name = "internal_width")
-	private float internalWeight;
+  @Column(name = "internal_width")
+  private float internalWeight;
 
-	@Column(name = "internal_height")
-	private float internalHeight;
+  @Column(name = "internal_height")
+  private float internalHeight;
 
-	@Column(name = "door_open_width")
-	private float doorOpeningWidth;
+  @Column(name = "door_open_width")
+  private float doorOpeningWidth;
 
-	@Column(name = "door_open_height")
-	private float doorOpeningHeight;
+  @Column(name = "door_open_height")
+  private float doorOpeningHeight;
 
-	@OneToMany(mappedBy = "containerType")
-	private Collection<Supply> supplies = new ArrayList<Supply>();
+  @OneToMany(mappedBy = "containerType")
+  private Collection<Supply> supplies = new ArrayList<Supply>();
 }

@@ -36,22 +36,23 @@ import lombok.ToString;
 @JsonIgnoreProperties(value = { "createdAt" }, allowGetters = true)
 public class Feedback {
 
-	@Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-	@ManyToOne
-	@JoinColumn(name = "operator_id")
-	private Operator sender;
-	
-	@ManyToOne
-	@JoinColumn(name = "report_id")
-	private Report report;
-	
-	private String message;
+  @ManyToOne
+  @JoinColumn(name = "operator_id")
+  private Operator sender;
 
-	@Column(name = "created_at", nullable = false, updatable = false)
-	@Temporal(TemporalType.TIMESTAMP)
-	@CreatedDate
-	private Date createdAt;
+  @ManyToOne
+  @JoinColumn(name = "report_id")
+  private Report report;
+
+  private String message;
+
+  @Column(name = "created_at", nullable = false, updatable = false)
+  @Temporal(TemporalType.TIMESTAMP)
+  @CreatedDate
+  private Date createdAt;
 
 }

@@ -26,19 +26,20 @@ import lombok.ToString;
 @Table(name = "port")
 public class Port {
 
-	@Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-	private String fullname;
+  private String fullname;
 
-	@Column(name = "name_code", unique = true)
-	private String nameCode;
+  @Column(name = "name_code", unique = true)
+  private String nameCode;
 
-	private String address;
+  private String address;
 
-	@OneToMany(mappedBy = "portOfDelivery")
-	private Set<Container> containers = new HashSet<Container>();
+  @OneToMany(mappedBy = "portOfDelivery")
+  private Set<Container> containers = new HashSet<Container>();
 
-	@OneToMany(mappedBy = "portOfLoading")
-	private Set<Consignment> consignments = new HashSet<Consignment>();
+  @OneToMany(mappedBy = "portOfLoading")
+  private Set<Consignment> consignments = new HashSet<Consignment>();
 }

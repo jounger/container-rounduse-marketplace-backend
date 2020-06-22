@@ -24,30 +24,31 @@ import lombok.ToString;
 @Table(name = "address")
 public class Address {
 
-	@Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-	@OneToOne(mappedBy = "address", fetch = FetchType.LAZY)
-	private User user;
-	
-	@OneToOne(mappedBy = "packingStation", fetch = FetchType.LAZY)
-    private Consignment consignment;
-	
-	@OneToOne(mappedBy = "returnStation", fetch = FetchType.LAZY)
-    private Container container;
+  @Column(length = 50)
+  private String street;
 
-	@Column(length = 50)
-	private String street;
+  @Column(length = 50)
+  private String county;
 
-	@Column(length = 50)
-	private String county;
+  @Column(length = 50)
+  private String city;
 
-	@Column(length = 50)
-	private String city;
+  @Column(length = 50)
+  private String country;
 
-	@Column(length = 50)
-	private String country;
+  @Column(length = 6)
+  private String postalCode;
 
-	@Column(length = 6)
-	private String postalCode;
+  @OneToOne(mappedBy = "address", fetch = FetchType.LAZY)
+  private User user;
+
+  @OneToOne(mappedBy = "packingStation", fetch = FetchType.LAZY)
+  private Consignment consignment;
+
+  @OneToOne(mappedBy = "returnStation", fetch = FetchType.LAZY)
+  private Container container;
 }

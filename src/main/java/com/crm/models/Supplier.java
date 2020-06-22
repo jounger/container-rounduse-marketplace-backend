@@ -45,6 +45,9 @@ public class Supplier extends User {
 
   @Column(name = "company_address", length = 200)
   private String companyAddress;
+  
+  @Column(name = "tin", length = 20)
+  private String tin;
 
   @Column(name = "fax", length = 20)
   private String fax;

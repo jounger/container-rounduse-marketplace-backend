@@ -22,15 +22,16 @@ import lombok.ToString;
 @Entity
 @Table(name = "location")
 public class Location {
-	
-	@Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
-	
-	@OneToOne
-	@JoinColumn(name = "driver_id")
-	private Driver driver;
-	
-	private Double latitude;
-	
-	private Double longtitude;
+
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
+
+  @OneToOne
+  @JoinColumn(name = "driver_id")
+  private Driver driver;
+
+  private Double latitude;
+
+  private Double longtitude;
 }

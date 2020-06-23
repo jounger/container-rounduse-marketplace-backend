@@ -25,11 +25,11 @@ import lombok.ToString;
 @PrimaryKeyJoinColumn(name = "user_id")
 public class Operator extends User {
 
-	private String fullname;
+  private String fullname;
 
-	@Column(name = "is_root")
-	private boolean isRoot;
+  @Column(name = "is_root")
+  private boolean isRoot;
 
-	@OneToMany(mappedBy = "sender")
-	private Set<Feedback> feedbacks = new HashSet<Feedback>();
+  @OneToMany(mappedBy = "sender")
+  private Set<Feedback> feedbacks = new HashSet<Feedback>();
 }

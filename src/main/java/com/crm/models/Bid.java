@@ -37,51 +37,49 @@ import lombok.ToString;
 @Entity
 @Table(name = "bid")
 @EntityListeners(AuditingEntityListener.class)
-@JsonIgnoreProperties(value = {"createdAt", "updatedAt"}, 
-allowGetters = true)
+@JsonIgnoreProperties(value = { "createdAt", "updatedAt" }, allowGetters = true)
 public class Bid {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
-	
-	@ManyToOne
-	@JoinColumn(name = "bidding_document_id")
-	private BiddingDocument biddingDocument;
-	
-	@OneToOne(mappedBy = "successfulBid")
-	private NotificationOfAward notificationOfAward;
-	
-	@ManyToOne
-	@JoinColumn(name = "forwarder_id")
-	private Forwarder bidder;
-	
-	@ManyToOne
-	@JoinColumn(name = "container_id")
-	private Container container;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-	@Column(name = "bid_price")
-	private float bidPrice;
-	
-	@Column(name = "current_bid_price")
-	private float currentBidPrice;
-	
-	@Column(name = "bid_date")
-	private LocalDateTime bidDate;
+  @ManyToOne
+  @JoinColumn(name = "bidding_document_id")
+  private BiddingDocument biddingDocument;
 
-	@Column(name = "bid_validity_period")
-	private LocalDateTime bidValidityPeriod;
-	
-	private EnumBidStatus status;
+  @ManyToOne
+  @JoinColumn(name = "forwarder_id")
+  private Forwarder bidder;
 
-	@Column(name = "created_at", nullable = false, updatable = false)
-	@Temporal(TemporalType.TIMESTAMP)
-	@CreatedDate
-	private Date createdAt;
+  @ManyToOne
+  @JoinColumn(name = "container_id")
+  private Container container;
 
-	@Column(name = "updated_at", nullable = false)
-	@Temporal(TemporalType.TIMESTAMP)
-	@LastModifiedDate
-	private Date updatedAt;
+  @Column(name = "bid_price")
+  private float bidPrice;
 
+  @Column(name = "current_bid_price")
+  private float currentBidPrice;
+
+  @Column(name = "bid_date")
+  private LocalDateTime bidDate;
+
+  @Column(name = "bid_validity_period")
+  private LocalDateTime bidValidityPeriod;
+
+  private EnumBidStatus status;
+
+  @Column(name = "created_at", nullable = false, updatable = false)
+  @Temporal(TemporalType.TIMESTAMP)
+  @CreatedDate
+  private Date createdAt;
+
+  @Column(name = "updated_at", nullable = false)
+  @Temporal(TemporalType.TIMESTAMP)
+  @LastModifiedDate
+  private Date updatedAt;
+
+  @OneToOne(mappedBy = "successfulBid")
+  private NotificationOfAward notificationOfAward;
 }

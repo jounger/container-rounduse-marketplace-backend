@@ -10,6 +10,8 @@ import lombok.Setter;
 @Getter
 @Setter
 public class ConsignmentRequest extends SupplyRequest{
+  
+  private String merchant;
  
   private String packingTime;
   

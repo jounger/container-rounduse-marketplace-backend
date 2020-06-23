@@ -5,8 +5,6 @@ import java.util.List;
 
 import javax.validation.Valid;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -36,13 +34,11 @@ import com.crm.services.OperatorService;
 @RequestMapping("/api/operator")
 public class OperatorController {
 
-  private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
-
   @Autowired
   private OperatorService operatorService;
 
   @GetMapping("/{id}")
-  @PreAuthorize("hasRole('ADMIN')")
+  @PreAuthorize("hasRole('ADMIN') or hasRole('MODERATOR')")
   public ResponseEntity<?> getOperator(@PathVariable Long id) {
     Operator operator = operatorService.getOperatorById(id);
     OperatorDto operatorDto = new OperatorDto();
@@ -74,7 +70,6 @@ public class OperatorController {
   @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<?> createOperator(@Valid @RequestBody OperatorRequest request) {
     operatorService.createOperator(request);
-    logger.info("Operator {} created.", request.getUsername());
     return ResponseEntity.ok(new MessageResponse("Operator created successfully"));
   }
 

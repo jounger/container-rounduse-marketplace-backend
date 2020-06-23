@@ -30,20 +30,18 @@ import lombok.ToString;
 @PrimaryKeyJoinColumn(name = "user_id")
 public class ShippingLine extends User {
 
-	private String website;
-	
-	@Column(name = "company_name", length = 50)
-	private String companyName;
+  private String website;
 
-	@Column(name = "company_code", length = 10, unique = true)
-	private String companyCode;
+  @Column(name = "company_name", length = 50)
+  private String companyName;
 
-	@ManyToMany
-	@JoinTable(name = "shipping_line_icd",
-				joinColumns = @JoinColumn(name = "shipping_line_id"),
-				inverseJoinColumns = @JoinColumn(name = "icd_id"))
-	private Collection<Icd> icds = new ArrayList<Icd>();
+  @Column(name = "company_code", length = 10, unique = true)
+  private String companyCode;
 
-	@OneToMany(mappedBy = "shippingLine")
-	private Set<Supply> supplyList = new HashSet<Supply>();
+  @ManyToMany
+  @JoinTable(name = "shipping_line_icd", joinColumns = @JoinColumn(name = "shipping_line_id"), inverseJoinColumns = @JoinColumn(name = "icd_id"))
+  private Collection<Icd> icds = new ArrayList<Icd>();
+
+  @OneToMany(mappedBy = "shippingLine")
+  private Set<Supply> supplyList = new HashSet<Supply>();
 }

@@ -23,14 +23,14 @@ import lombok.ToString;
 @Entity
 @Table(name = "forwarder")
 @PrimaryKeyJoinColumn(name = "user_id")
-public class Forwarder extends Supplier{
+public class Forwarder extends Supplier {
 
-	@OneToMany(mappedBy = "forwarder", fetch = FetchType.LAZY)
-	private Set<Driver> drivers = new HashSet<Driver>();
+  @OneToMany(mappedBy = "forwarder", fetch = FetchType.LAZY)
+  private Set<Driver> drivers = new HashSet<Driver>();
 
-	@OneToMany(mappedBy = "bidder", fetch = FetchType.LAZY)
-	private Set<Bid> bids = new HashSet<Bid>();
-	
-	@OneToMany(mappedBy = "forwarder")
-	private Set<Container> containers = new HashSet<Container>();
+  @OneToMany(mappedBy = "bidder", fetch = FetchType.LAZY)
+  private Set<Bid> bids = new HashSet<Bid>();
+
+  @OneToMany(mappedBy = "forwarder")
+  private Set<Container> containers = new HashSet<Container>();
 }

@@ -28,7 +28,7 @@ public class OperatorMapper {
     }
     
     operatorDto.setFullname(operator.getFullname());
-    operatorDto.setRoot(false);
+    operatorDto.setRoot(operator.isRoot());
     
     return operatorDto;
   }

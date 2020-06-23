@@ -67,7 +67,7 @@ public class Bid {
   @Column(name = "bid_validity_period")
   private LocalDateTime bidValidityPeriod;
 
-  //enum status
+  //EnumBidStatus
   private String status;
 
   @Column(name = "created_at", nullable = false, updatable = false)

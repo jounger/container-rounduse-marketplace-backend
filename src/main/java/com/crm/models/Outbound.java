@@ -46,7 +46,7 @@ public class Outbound extends Supply {
   @Column(name = "payload")
   private float payload;
 
-  //enum unit
+  //EnumUnit
   @Column(name = "unit_of_measurment")
   private String unitOfMeasurement;
 }

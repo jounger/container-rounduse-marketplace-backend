@@ -72,7 +72,7 @@ public class BiddingDocument {
   @Column(name = "date_of_decision")
   private LocalDateTime dateOfDecision;
 
-  //enum currency
+  //EnumCurrency
   @Column(name = "currency_of_payment")
   private String currencyOfPayment;
 

@@ -1,13 +1,12 @@
 package com.crm.models;
 
-import java.util.ArrayList;
-import java.util.Collection;
+import java.time.LocalDateTime;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 
@@ -23,22 +22,23 @@ import lombok.ToString;
 @NoArgsConstructor
 @ToString
 @Entity
-@Table(name = "driver")
-@PrimaryKeyJoinColumn(name = "user_id")
-public class Driver extends User {
-
-  @Column(name = "fullname", length = 50)
-  private String fullname;
-
-  @Column(name = "driver_license", length = 50)
-  private String driverLicense;
-
+@Table(name = "outbound")
+@PrimaryKeyJoinColumn(name = "supply_id")
+public class Inbound extends Supply{
+  
   @ManyToOne
   @JoinColumn(name = "forwarder_id")
   private Forwarder forwarder;
+  
+  @OneToOne
+  @JoinColumn(name = "bill_of_lading_id")
+  private BillOfLading billOfLading;
 
-  private String location;
-
-  @OneToMany(mappedBy = "driver")
-  private Collection<Container> containers = new ArrayList<Container>();
+  @Column(name = "empty_time")
+  private LocalDateTime emptyTime;
+  
+  @Column(name = "pickup_time")
+  private LocalDateTime pickupTime;
+  
+  
 }

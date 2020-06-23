@@ -14,13 +14,10 @@ public class SupplierMapper {
 		SupplierDto supplierDto = new SupplierDto();
 		supplierDto.setId(supplier.getId());
 		supplierDto.setUsername(supplier.getUsername());
-		
-		Map<String, String> address = new HashMap<>();
-		address = AddressMapper.toAddressHashMap(supplier.getAddress());
-		supplierDto.setAddress(address);
+		supplierDto.setAddress(supplier.getAddress());
 		supplierDto.setEmail(supplier.getEmail());
 		supplierDto.setPhone(supplier.getPhone());
-		supplierDto.setStatus(supplier.getStatus().name());
+		supplierDto.setStatus(supplier.getStatus());
 		
 		Set<String> supplierRoles = new HashSet<>();
 		supplier.getRoles().forEach(role -> supplierRoles.add(RoleMapper.toRoleDto(role).getName()));

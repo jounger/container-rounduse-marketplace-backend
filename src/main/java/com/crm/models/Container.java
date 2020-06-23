@@ -1,19 +1,27 @@
 package com.crm.models;
 
-import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
+import javax.persistence.EntityListeners;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -28,49 +36,42 @@ import lombok.ToString;
 @ToString
 @Entity
 @Table(name = "container")
-@PrimaryKeyJoinColumn(name = "supply_id")
-public class Container extends Supply {
+@EntityListeners(AuditingEntityListener.class)
+@JsonIgnoreProperties(value = { "createdAt", "updatedAt" }, allowGetters = true)
+public class Container{
 
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
+  
   @ManyToOne
   @JoinColumn(name = "driver_id")
   private Driver driver;
-
+  
   @ManyToOne
-  @JoinColumn(name = "forwarder_id")
-  private Forwarder forwarder;
-
-  @Column(name = "container_trailer")
-  private String containerTrailer;
-
-  @Column(name = "container_tractor")
-  private String containerTractor;
+  @JoinColumn(name = "bill_of_lading_id")
+  private BillOfLading billOfLading;
 
   @Column(name = "container_number")
   private String containerNumber;
 
-  @Column(name = "bl_number")
-  private String blNumber;
+  private String trailer;
+
+  private String tractor;
 
   @Column(name = "license_plate")
   private String licensePlate;
+  
+  @Column(name = "created_at", nullable = false, updatable = false)
+  @Temporal(TemporalType.TIMESTAMP)
+  @CreatedDate
+  private Date createdAt;
 
-  @Column(name = "empty_time")
-  private LocalDateTime emptyTime;
+  @Column(name = "updated_at", nullable = false)
+  @Temporal(TemporalType.TIMESTAMP)
+  @LastModifiedDate
+  private Date updatedAt;
 
-  @Column(name = "pick_up_time")
-  private LocalDateTime pickUpTime;
-
-  @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-  @JoinColumn(name = "address_id")
-  private Address returnStation;
-
-  @ManyToOne
-  @JoinColumn(name = "port_id")
-  private Port portOfDelivery;
-
-  @Column(name = "free_time")
-  private int freeTime;
-
-  @OneToMany(mappedBy = "container")
+  @OneToMany(mappedBy = "containers")
   private Set<Bid> bids = new HashSet<Bid>();
 }

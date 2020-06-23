@@ -1,12 +1,7 @@
 package com.crm.models.mapper;
 
-import com.crm.common.Tool;
-import com.crm.models.Bid;
-import com.crm.models.dto.BidDto;
-import com.crm.models.dto.ContainerDto;
-
 public class BidMapper {
-  
+  /*
   public static BidDto toBidDto(Bid bid) {
     BidDto bidDto = new BidDto();
     
@@ -33,4 +28,5 @@ public class BidMapper {
     
     return bidDto;
   }
+  */
 }

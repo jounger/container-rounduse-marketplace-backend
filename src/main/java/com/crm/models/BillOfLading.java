@@ -13,6 +13,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -35,28 +36,25 @@ import lombok.ToString;
 @NoArgsConstructor
 @ToString
 @Entity
-@Table(name = "report")
+@Table(name = "account")
 @EntityListeners(AuditingEntityListener.class)
 @JsonIgnoreProperties(value = { "createdAt", "updatedAt" }, allowGetters = true)
-public class Report {
-
+public class BillOfLading {
+  
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
   @ManyToOne
-  @JoinColumn(name = "supply_id")
-  private Supply supply;
-
-  @ManyToOne
-  @JoinColumn(name = "bidding_document_id")
-  private BiddingDocument report;
-
-  private String detail;
-
-  //EnumReportStatus
-  private String status;
-
+  @JoinColumn(name = "port_id")
+  private Port portOfDelivery;
+  
+  @Column(name = "bill_of_lading_number")
+  private String billOfLadingNumber;
+  
+  @Column(name = "free_time")
+  private int freeTime;
+  
   @Column(name = "created_at", nullable = false, updatable = false)
   @Temporal(TemporalType.TIMESTAMP)
   @CreatedDate
@@ -66,7 +64,10 @@ public class Report {
   @Temporal(TemporalType.TIMESTAMP)
   @LastModifiedDate
   private Date updatedAt;
-
-  @OneToMany(mappedBy = "report")
-  private Set<Feedback> feedbacks = new HashSet<Feedback>();
+  
+  @OneToOne(mappedBy = "billOfLading")
+  private Inbound inbound;
+  
+  @OneToMany(mappedBy = "billOfLading")
+  private Set<Container> containers = new HashSet<>();
 }

@@ -35,7 +35,7 @@ import com.crm.services.BiddingDocumentService;
 @RestController
 @RequestMapping("/api/biddingdocument")
 public class BiddingDocumentController {
-
+  /*
   @Autowired
   private BiddingDocumentService biddingDocumentService;
 
@@ -97,4 +97,5 @@ public class BiddingDocumentController {
     biddingDocumentService.removeBiddingDocument(id);
     return ResponseEntity.ok(new MessageResponse("Bidding document deleted successfully."));
   }
+  */
 }

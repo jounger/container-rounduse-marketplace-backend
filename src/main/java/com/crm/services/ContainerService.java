@@ -7,7 +7,7 @@ import com.crm.payload.request.ContainerRequest;
 import com.crm.payload.request.PaginationRequest;
 
 public interface ContainerService {
-
+  /*
   Container getContainerById(Long id);
 
   Page<Container> getContainersByForwarder(Long id, PaginationRequest request);
@@ -19,5 +19,5 @@ public interface ContainerService {
   Container updateContainer(ContainerRequest request);
 
   void removeContainer(Long id);
-
+  */
 }

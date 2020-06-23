@@ -9,15 +9,16 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import com.crm.models.Consignment;
+import com.crm.models.Outbound;
 
 @Repository
-public interface ConsignmentRepository extends JpaRepository<Consignment, Long>{
+public interface OutboundRepository extends JpaRepository<Outbound, Long>{
   
   boolean existsById(Long id);
   
-  Optional<Consignment> findById(Long id);
-  
+  Optional<Outbound> findById(Long id);
+  /*
   @Query(value = "SELECT c FROM Consignment c WHERE c.merchant.id = :id")
-  Page<Consignment> findByMerchantId(@Param("id") Long id, Pageable pageable);
+  Page<Outbound> findByMerchantId(@Param("id") Long id, Pageable pageable);
+  */
 }

@@ -2,8 +2,6 @@ package com.crm.payload.request;
 
 import java.util.Set;
 
-import com.crm.models.Address;
-
 import lombok.Getter;
 import lombok.Setter;
 
@@ -29,7 +27,7 @@ public class ContainerRequest extends SupplyRequest{
 	
 	private String pickUpTime;
 	
-	private Address returnStation;
+	private String returnStation;
 
 	private String portOfDelivery;
 	

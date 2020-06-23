@@ -6,8 +6,6 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 
-import com.crm.models.Address;
-
 import lombok.Getter;
 import lombok.Setter;
 
@@ -34,7 +32,7 @@ public class SignUpRequest {
   
   private String status;
   
-  private Address address;
+  private String address;
   
   @NotBlank
   @Size(min = 6, max = 120)

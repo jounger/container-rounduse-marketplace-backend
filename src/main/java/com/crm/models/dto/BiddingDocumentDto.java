@@ -14,7 +14,7 @@ public class BiddingDocumentDto {
   //merchant username
   private String merchant;
   
-  private ConsignmentDto consignment;
+  private OutboundDto consignment;
   
   private List<BidDto> bids;
   

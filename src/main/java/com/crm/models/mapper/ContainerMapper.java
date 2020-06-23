@@ -1,15 +1,12 @@
 package com.crm.models.mapper;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import com.crm.common.Tool;
 import com.crm.models.Container;
 import com.crm.models.dto.ContainerDto;
 
 public class ContainerMapper {
-
+  /*
   public static ContainerDto toContainerDto(Container container) {
+    
     ContainerDto containerDto = new ContainerDto();
     containerDto.setId(container.getId());
     containerDto.setShippingLine(container.getShippingLine().getCompanyName());
@@ -39,4 +36,5 @@ public class ContainerMapper {
 
     return containerDto;
   }
+  */
 }

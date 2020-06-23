@@ -7,12 +7,9 @@ import org.springframework.stereotype.Service;
 import com.crm.enums.EnumUserStatus;
 import com.crm.exception.DuplicateRecordException;
 import com.crm.exception.NotFoundException;
-import com.crm.models.Address;
-import com.crm.models.Icd;
 import com.crm.models.Role;
 import com.crm.models.ShippingLine;
 import com.crm.payload.request.ShippingLineRequest;
-import com.crm.repository.IcdRepository;
 import com.crm.repository.RoleRepository;
 import com.crm.repository.ShippingLineRepository;
 import com.crm.repository.UserRepository;
@@ -31,9 +28,6 @@ public class ShippingLineServiceImpl implements ShippingLineService{
 	private ShippingLineRepository shippingLineRepository;
 
 	@Autowired
-	private IcdRepository icdRepository;
-
-	@Autowired
 	private PasswordEncoder passwordEncoder;
 
 	@Override
@@ -46,23 +40,18 @@ public class ShippingLineServiceImpl implements ShippingLineService{
 		shippingLine.setUsername(request.getUsername());
 		shippingLine.setEmail(request.getEmail());
 		shippingLine.setPhone(request.getPhone());
-		shippingLine.setStatus(EnumUserStatus.ACTIVE);
+		shippingLine.setStatus(EnumUserStatus.ACTIVE.name());
 		shippingLine.setWebsite(request.getWebsite());
 		shippingLine.setCompanyName(request.getCompanyName());
 		shippingLine.setCompanyName(request.getCompanyCode());
 		Role userRole = roleRepository.findByName("ROLE_SHIPPINGLINE")
 				.orElseThrow(() -> new NotFoundException("Error: Role is not found"));
 		shippingLine.getRoles().add(userRole);
-		Address address = (Address) request.getAddress();
+		String address = request.getAddress();
 		if (address != null) {
 			shippingLine.setAddress(address);
 		}
 		String encoder = passwordEncoder.encode(request.getPassword());
-		request.getIcdsName().forEach(icdName -> {
-			Icd icd = icdRepository.findByNameCode(icdName)
-					.orElseThrow(() -> new NotFoundException("ICD is not found."));
-			shippingLine.getIcds().add(icd);
-		});
 		shippingLine.setPassword(encoder);
 		shippingLineRepository.save(shippingLine);
 	}

@@ -1,19 +1,23 @@
-package com.crm.payload.request;
+package com.crm.models.dto;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
-
-import com.crm.models.Address;
 
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-public class ConsignmentRequest extends SupplyRequest{
- 
+public class OutboundDto extends SupplyDto{
+  
+  private Long merchantId;
+  
+  private Set<String> categoryList;
+  
   private String packingTime;
   
-  private Address packingStation;
+  private String packingStation;
   
   private String bookingNumber;
   
@@ -25,11 +29,8 @@ public class ConsignmentRequest extends SupplyRequest{
   
   private String unitOfMeasurement;
   
-  private Set<String> categories;
-  
   private boolean fcl;
   
-  private String portOfLoading; 
-  
+  private String portOfLoading;
   
 }

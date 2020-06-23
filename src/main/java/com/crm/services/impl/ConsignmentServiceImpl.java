@@ -1,38 +1,13 @@
 package com.crm.services.impl;
 
-import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import com.crm.common.Tool;
-import com.crm.enums.EnumSupplyStatus;
-import com.crm.enums.EnumUnit;
-import com.crm.exception.NotFoundException;
-import com.crm.models.Address;
-import com.crm.models.Category;
-import com.crm.models.Consignment;
-import com.crm.models.ContainerType;
-import com.crm.models.Port;
-import com.crm.models.ShippingLine;
-import com.crm.payload.request.ConsignmentRequest;
-import com.crm.payload.request.PaginationRequest;
-import com.crm.repository.AddressRepository;
-import com.crm.repository.CategoryRepository;
-import com.crm.repository.ConsignmentRepository;
-import com.crm.repository.ContainerTypeRepository;
-import com.crm.repository.PortRepository;
-import com.crm.repository.ShippingLineRepository;
-import com.crm.services.ConsignmentService;
+import com.crm.services.OutboundService;
 
 @Service
-public class ConsignmentServiceImpl implements ConsignmentService {
-
+public class ConsignmentServiceImpl implements OutboundService {
+  
+  /*
   @Autowired
   private ConsignmentRepository consignmentRepository;
 
@@ -52,42 +27,42 @@ public class ConsignmentServiceImpl implements ConsignmentService {
   private PortRepository portRepository;
 
   @Override
-  public Page<Consignment> getConsignments(PaginationRequest request) {
-    Page<Consignment> pages = consignmentRepository.findAll(PageRequest.of(request.getPage(), request.getLimit()));
+  public Page<Outbound> getConsignments(PaginationRequest request) {
+    Page<Outbound> pages = consignmentRepository.findAll(PageRequest.of(request.getPage(), request.getLimit()));
     return pages;
   }
 
   @Override
   public void createConsignment(ConsignmentRequest request) {
 
-    Consignment consignment = new Consignment();
+    Outbound outbound = new Outbound();
 
     ShippingLine shippingLine = shippingLineRepository.findByCompanyCode(request.getShippingLine())
         .orElseThrow(() -> new NotFoundException("ERROR: Shipping Line is not found."));
-    consignment.setShippingLine(shippingLine);
+    outbound.setShippingLine(shippingLine);
 
     ContainerType containerType = containerTypeRepository.findByName(request.getContainerType())
         .orElseThrow(() -> new NotFoundException("ERROR: Type is not found."));
-    consignment.setContainerType(containerType);
+    outbound.setContainerType(containerType);
 
-    consignment.setStatus(EnumSupplyStatus.findByName(request.getStatus()));
+    outbound.setStatus(EnumSupplyStatus.findByName(request.getStatus()));
 
     LocalDateTime packingTime = Tool.convertToLocalDateTime(request.getPackingTime());
-    consignment.setPackingTime(packingTime);
+    outbound.setPackingTime(packingTime);
 
     Address packingStation = (Address) request.getPackingStation();
-    consignment.setPackingStation(packingStation);
+    outbound.setPackingStation(packingStation);
 
-    consignment.setBookingNumber(request.getBookingNumber());
+    outbound.setBookingNumber(request.getBookingNumber());
 
     LocalDateTime layTime = Tool.convertToLocalDateTime(request.getLaytime());
-    consignment.setLaytime(layTime);
+    outbound.setLaytime(layTime);
 
     LocalDateTime cutOfftime = Tool.convertToLocalDateTime(request.getCutOffTime());
-    consignment.setCutOffTime(cutOfftime);
+    outbound.setCutOffTime(cutOfftime);
 
-    consignment.setPayload(request.getPayload());
-    consignment.setUnitOfMeasurement(EnumUnit.findByName(request.getUnitOfMeasurement()));
+    outbound.setPayload(request.getPayload());
+    outbound.setUnitOfMeasurement(EnumUnit.findByName(request.getUnitOfMeasurement()));
 
     Set<String> categoryListString = request.getCategories();
     Set<Category> listCategory = new HashSet<>();
@@ -98,40 +73,40 @@ public class ConsignmentServiceImpl implements ConsignmentService {
             .orElseThrow(() -> new NotFoundException("Error: Category is not found"));
         listCategory.add(category);
       });
-      consignment.setCategories(listCategory);
+      outbound.setCategories(listCategory);
     }
 
-    consignment.setFcl(true);
+    outbound.setFcl(true);
 
     Port port = portRepository.findByNameCode(request.getPortOfLoading())
         .orElseThrow(() -> new NotFoundException("ERROR: Port is not found."));
-    consignment.setPortOfLoading(port);
+    outbound.setPortOfLoading(port);
 
-    consignmentRepository.save(consignment);
+    consignmentRepository.save(outbound);
 
   }
 
   @Override
-  public Consignment updateConsignment(ConsignmentRequest request) {
+  public Outbound updateConsignment(ConsignmentRequest request) {
 
-    Consignment consignment = consignmentRepository.findById(request.getId())
+    Outbound outbound = consignmentRepository.findById(request.getId())
         .orElseThrow(() -> new NotFoundException("ERROR: Consignment is not found."));
 
     ShippingLine shippingLine = shippingLineRepository.findByCompanyCode(request.getShippingLine())
         .orElseThrow(() -> new NotFoundException("ERROR: Shipping Line is not found."));
-    consignment.setShippingLine(shippingLine);
+    outbound.setShippingLine(shippingLine);
 
     ContainerType containerType = containerTypeRepository.findByName(request.getContainerType())
         .orElseThrow(() -> new NotFoundException("ERROR: Type is not found."));
-    consignment.setContainerType(containerType);
+    outbound.setContainerType(containerType);
 
-    consignment.setStatus(EnumSupplyStatus.findByName(request.getStatus()));
+    outbound.setStatus(EnumSupplyStatus.findByName(request.getStatus()));
 
     LocalDateTime packingTime = Tool.convertToLocalDateTime(request.getPackingTime());
-    consignment.setPackingTime(packingTime);
+    outbound.setPackingTime(packingTime);
 
     Address packingStationReq = (Address) request.getPackingStation();
-    Address packingStation = addressRepository.findById(consignment.getPackingStation().getId())
+    Address packingStation = addressRepository.findById(outbound.getPackingStation().getId())
         .orElseThrow(() -> new NotFoundException("ERROR: Address is not found."));
     packingStation.setCity(packingStationReq.getCity());
     packingStation.setStreet(packingStationReq.getStreet());
@@ -141,16 +116,16 @@ public class ConsignmentServiceImpl implements ConsignmentService {
 
 //    consignment.setPackingStation(packingStation);
 
-    consignment.setBookingNumber(request.getBookingNumber());
+    outbound.setBookingNumber(request.getBookingNumber());
 
     LocalDateTime layTime = Tool.convertToLocalDateTime(request.getLaytime());
-    consignment.setLaytime(layTime);
+    outbound.setLaytime(layTime);
 
     LocalDateTime cutOfftime = Tool.convertToLocalDateTime(request.getCutOffTime());
-    consignment.setCutOffTime(cutOfftime);
+    outbound.setCutOffTime(cutOfftime);
 
-    consignment.setPayload(request.getPayload());
-    consignment.setUnitOfMeasurement(EnumUnit.findByName(request.getUnitOfMeasurement()));
+    outbound.setPayload(request.getPayload());
+    outbound.setUnitOfMeasurement(EnumUnit.findByName(request.getUnitOfMeasurement()));
 
     Set<String> categoryListString = request.getCategories();
     Set<Category> listCategory = new HashSet<>();
@@ -161,18 +136,18 @@ public class ConsignmentServiceImpl implements ConsignmentService {
             .orElseThrow(() -> new NotFoundException("Error: Category is not found"));
         listCategory.add(category);
       });
-      consignment.setCategories(listCategory);
+      outbound.setCategories(listCategory);
     }
 
-    consignment.setFcl(true);
+    outbound.setFcl(true);
 
     Port port = portRepository.findByNameCode(request.getPortOfLoading())
         .orElseThrow(() -> new NotFoundException("ERROR: Port is not found."));
-    consignment.setPortOfLoading(port);
+    outbound.setPortOfLoading(port);
 
-    consignmentRepository.save(consignment);
+    consignmentRepository.save(outbound);
 
-    return consignment;
+    return outbound;
   }
 
   @Override
@@ -185,16 +160,17 @@ public class ConsignmentServiceImpl implements ConsignmentService {
   }
 
   @Override
-  public Consignment getConsignmentById(Long id) {
-    Consignment consignment = consignmentRepository.findById(id)
+  public Outbound getConsignmentById(Long id) {
+    Outbound outbound = consignmentRepository.findById(id)
         .orElseThrow(() -> new NotFoundException("ERROR: Consignment is not found."));
-    return consignment;
+    return outbound;
   }
 
   @Override
-  public Page<Consignment> getConsignmentsByMerchant(Long id, PaginationRequest request) {
+  public Page<Outbound> getConsignmentsByMerchant(Long id, PaginationRequest request) {
     Pageable pageable = PageRequest.of(request.getPage(), request.getLimit());
-    Page<Consignment> pages = consignmentRepository.findByMerchantId(id, pageable);
+    Page<Outbound> pages = consignmentRepository.findByMerchantId(id, pageable);
     return pages;
   }
+  */
 }

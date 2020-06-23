@@ -21,8 +21,8 @@ import lombok.ToString;
 public class Merchant extends Supplier {
 
   @OneToMany(mappedBy = "merchant")
-  private Set<Consignment> consignments = new HashSet<Consignment>();
+  private Set<Outbound> outbounds = new HashSet<Outbound>();
 
-  @OneToMany(mappedBy = "merchant")
+  @OneToMany(mappedBy = "offeree")
   private Set<BiddingDocument> biddingDocuments = new HashSet<BiddingDocument>();
 }

@@ -16,7 +16,6 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -25,7 +24,6 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import com.crm.enums.EnumCurrency;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import lombok.AllArgsConstructor;
@@ -52,33 +50,37 @@ public class BiddingDocument {
 
   @ManyToOne
   @JoinColumn(name = "merchant_id")
-  private Merchant merchant;
+  private Merchant offeree;
 
   @ManyToOne
-  @JoinColumn(name = "consignment_id")
-  private Consignment consignment;
+  @JoinColumn(name = "outbound_id")
+  private Outbound outbound;
+
+  @ManyToOne
+  @JoinColumn(name = "discount_id")
+  private Discount bidDiscountCode;
+  
+  @Column(name = "is_multiple_award")
+  private Boolean isMultipleAward;
 
   @Column(name = "bid_opening")
   private LocalDateTime bidOpening;
 
   @Column(name = "bid_closing")
   private LocalDateTime bidClosing;
+  
+  @Column(name = "date_of_decision")
+  private LocalDateTime dateOfDecision;
 
+  //enum currency
   @Column(name = "currency_of_payment")
-  private EnumCurrency currencyOfPayment;
+  private String currencyOfPayment;
 
   @Column(name = "bid_package_price")
   private float bidPackagePrice;
 
   @Column(name = "bid_floor_price")
   private float bidFloorPrice;
-
-  @Column(name = "bit_step")
-  private float bitStep;
-
-  @ManyToOne
-  @JoinColumn(name = "discount_id")
-  private Discount bidDiscountCode;
 
   @Column(name = "price_leadership")
   private float priceLeadership;
@@ -92,9 +94,6 @@ public class BiddingDocument {
   @Temporal(TemporalType.TIMESTAMP)
   @LastModifiedDate
   private Date updatedAt;
-
-  @OneToOne(mappedBy = "biddingDocument")
-  private NotificationOfAward notificationOfAward;
 
   @OneToMany(fetch = FetchType.LAZY, mappedBy = "biddingDocument")
   private List<Bid> bids = new ArrayList<Bid>();

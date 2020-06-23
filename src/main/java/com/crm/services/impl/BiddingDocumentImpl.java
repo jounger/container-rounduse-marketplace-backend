@@ -1,35 +1,12 @@
 package com.crm.services.impl;
 
-import java.time.LocalDateTime;
-import java.util.Map;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
-import com.crm.common.Tool;
-import com.crm.enums.EnumCurrency;
-import com.crm.exception.InternalException;
-import com.crm.exception.NotFoundException;
-import com.crm.models.Bid;
-import com.crm.models.BiddingDocument;
-import com.crm.models.Consignment;
-import com.crm.models.Discount;
-import com.crm.models.Merchant;
-import com.crm.models.NotificationOfAward;
-import com.crm.payload.request.BiddingDocumentRequest;
-import com.crm.payload.request.PaginationRequest;
-import com.crm.repository.BidRepository;
-import com.crm.repository.BiddingDocumentRepository;
-import com.crm.repository.ConsignmentRepository;
-import com.crm.repository.DiscountRepository;
-import com.crm.repository.MerchantRepository;
 import com.crm.services.BiddingDocumentService;
 
 @Service
 public class BiddingDocumentImpl implements BiddingDocumentService {
-
+  /*
   @Autowired
   private BiddingDocumentRepository biddingDocumentRepository;
 
@@ -54,10 +31,10 @@ public class BiddingDocumentImpl implements BiddingDocumentService {
         .orElseThrow(() -> new NotFoundException("Merchant is not found"));
     biddingDocument.setMerchant(merchant);
 
-    Consignment consignment = new Consignment();
-    consignment = consignmentRepository.findById(request.getConsignmentId())
+    Outbound outbound = new Outbound();
+    outbound = consignmentRepository.findById(request.getConsignmentId())
         .orElseThrow(() -> new NotFoundException("Consignment is not found."));
-    biddingDocument.setConsignment(consignment);
+    biddingDocument.setConsignment(outbound);
 
     LocalDateTime bidOpening = Tool.convertToLocalDateTime(request.getBidOpening());
     biddingDocument.setBidOpening(bidOpening);
@@ -224,5 +201,5 @@ public class BiddingDocumentImpl implements BiddingDocumentService {
     biddingDocumentRepository.save(biddingDocument);
     return biddingDocument;
   }
-
+  */
 }

@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 import com.crm.enums.EnumUserStatus;
 import com.crm.exception.DuplicateRecordException;
 import com.crm.exception.NotFoundException;
-import com.crm.models.Address;
 import com.crm.models.Forwarder;
 import com.crm.models.Role;
 import com.crm.payload.request.SupplierRequest;
@@ -44,7 +43,7 @@ public class ForwarderServiceImpl implements ForwarderService{
 		forwarder.setUsername(request.getUsername());
 		forwarder.setEmail(request.getEmail());
 		forwarder.setPhone(request.getPhone());
-		forwarder.setStatus(EnumUserStatus.PENDING);
+		forwarder.setStatus(EnumUserStatus.PENDING.name());
 		forwarder.setWebsite(request.getWebsite());
 		forwarder.setCompanyName(request.getCompanyName());
 		forwarder.setCompanyCode(request.getCompanyCode());
@@ -58,7 +57,7 @@ public class ForwarderServiceImpl implements ForwarderService{
             .orElseThrow(() -> new NotFoundException("Error: Role is not found"));
         roles.add(userRole);
 		forwarder.setRoles(roles);
-		Address address = (Address) request.getAddress();
+		String address = request.getAddress();
 		if (address != null) {
 		  forwarder.setAddress(address);
 		}

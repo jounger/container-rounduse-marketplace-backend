@@ -23,7 +23,6 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import com.crm.enums.EnumSupplyStatus;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import lombok.AllArgsConstructor;
@@ -55,8 +54,9 @@ public class Supply {
   @ManyToOne
   @JoinColumn(name = "container_type_id")
   private ContainerType containerType;
-
-  private EnumSupplyStatus status;
+  
+  //EnumSupplyStatus
+  private String status;
 
   @Column(name = "created_at", nullable = false, updatable = false)
   @Temporal(TemporalType.TIMESTAMP)

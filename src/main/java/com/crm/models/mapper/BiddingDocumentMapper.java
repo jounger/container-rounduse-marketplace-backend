@@ -6,24 +6,24 @@ import java.util.List;
 import com.crm.common.Tool;
 import com.crm.models.BiddingDocument;
 import com.crm.models.dto.BiddingDocumentDto;
-import com.crm.models.dto.ConsignmentDto;
+import com.crm.models.dto.OutboundDto;
 
 public class BiddingDocumentMapper {
 
   public static BiddingDocumentDto toBiddingDocumentDto(BiddingDocument biddingDocument) {
     BiddingDocumentDto biddingDocumentDto = new BiddingDocumentDto();
     
-    String merchantUsername = biddingDocument.getMerchant().getUsername();
+    String merchantUsername = biddingDocument.getOfferee().getUsername();
     biddingDocumentDto.setMerchant(merchantUsername);
-    
-    ConsignmentDto consignment = ConsignmentMapper.toConsignmentDto(biddingDocument.getConsignment());
+    /*
+    OutboundDto consignment = OutboundMapper.toConsignmentDto(biddingDocument.getOutbound());
     biddingDocumentDto.setConsignment(consignment);
-    
+    */
     List<String> bids = new ArrayList<>();
     biddingDocument.getBids().forEach(bid -> {
       bids.add(String.valueOf(bid.getId()));
     });
-    String currencyOfPayment = biddingDocument.getCurrencyOfPayment().name();
+    String currencyOfPayment = biddingDocument.getCurrencyOfPayment();
     biddingDocumentDto.setCurrencyOfPayment(currencyOfPayment);
     
     String bidOpening = Tool.convertLocalDateTimeToString(biddingDocument.getBidOpening());
@@ -37,9 +37,6 @@ public class BiddingDocumentMapper {
     
     float bidFloorPrice = biddingDocument.getBidFloorPrice();
     biddingDocumentDto.setBidFloorPrice(bidFloorPrice);
-    
-    float bidStep = biddingDocument.getBidStep();
-    biddingDocumentDto.setBidStep(bidStep);
     
     String bidDiscountCode = biddingDocument.getBidDiscountCode().getCode();
     biddingDocumentDto.setBidDiscountCode(bidDiscountCode);

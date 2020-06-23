@@ -15,7 +15,7 @@ import com.crm.exception.InternalException;
 import com.crm.exception.NotFoundException;
 import com.crm.models.Bid;
 import com.crm.models.BiddingDocument;
-import com.crm.models.Consignment;
+import com.crm.models.Outbound;
 import com.crm.models.Container;
 import com.crm.models.Forwarder;
 import com.crm.payload.request.BidRequest;
@@ -28,7 +28,7 @@ import com.crm.services.BidService;
 
 @Service
 public class BidServiceImpl implements BidService {
-
+  /*
   @Autowired
   private BidRepository bidRepository;
 
@@ -55,22 +55,26 @@ public class BidServiceImpl implements BidService {
 
     Container container = containerRepository.findById(request.getContainerId())
         .orElseThrow(() -> new NotFoundException("Container is not found."));
-    Consignment consignment = biddingDocument.getConsignment();
+    Outbound outbound = biddingDocument.getConsignment();
     List<Container> suitableContainers = 
-        containerRepository.findByConsignment(consignment.getShippingLine().getId()
-            , consignment.getContainerType().getId(), consignment.getStatus().ordinal()
-            , consignment.getPackingTime(), consignment.getCutOfTime()
-            , consignment.getPortOfLoading().getId());
+        containerRepository.findByConsignment(outbound.getShippingLine().getId()
+            , outbound.getContainerType().getId(), outbound.getStatus().ordinal()
+            , outbound.getPackingTime(), outbound.getCutOffTime()
+            , outbound.getPortOfLoading().getId());
     if(suitableContainers.contains(container)) {
       bid.setContainer(container);
     }else {
       throw new NotFoundException("Container is not suitable.");
     }
     
+    Float bidPrice = request.getBidPrice();
+    if(bidPrice <= biddingDocument.getBidFloorPrice()) {
+      throw new InternalException("Bid price must be equal or greater than floor price.");
+    }
     bid.setBidPrice(request.getBidPrice());
-    bid.setCurrentBidPrice(request.getCurrentBidPrice());
+    bid.setCurrentBidPrice(biddingDocument.getPriceLeadership());
 
-    LocalDateTime bidDate = Tool.convertToLocalDateTime(request.getBidDate());
+    LocalDateTime bidDate = LocalDateTime.now();
     bid.setBidDate(bidDate);
 
     LocalDateTime bidValidityPeriod = Tool.convertToLocalDateTime(request.getBidValidityPeriod());
@@ -183,5 +187,5 @@ public class BidServiceImpl implements BidService {
     }
     return bid;
   }
-
+  */
 }

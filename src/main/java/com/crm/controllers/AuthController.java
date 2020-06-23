@@ -29,7 +29,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.crm.models.dto.UserDto;
-import com.crm.models.mapper.AddressMapper;
 import com.crm.payload.request.SignInRequest;
 import com.crm.payload.request.SupplierRequest;
 import com.crm.payload.response.JwtResponse;
@@ -145,8 +144,8 @@ public class AuthController {
 				userInfo.setRoles(roles);
 				userInfo.setEmail(userDetails.getEmail());
 				userInfo.setStatus(userDetails.getStatus());
-				userInfo.setAddress(AddressMapper.toAddressHashMap(userDetails.getAddress()));
-
+				userInfo.setAddress(userDetails.getAddress());
+				
 				JwtResponse responseJwt = new JwtResponse();
 				responseJwt.setUserInfo(userInfo);
 

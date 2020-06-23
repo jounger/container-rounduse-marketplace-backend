@@ -9,7 +9,7 @@ import com.crm.payload.request.BiddingDocumentRequest;
 import com.crm.payload.request.PaginationRequest;
 
 public interface BiddingDocumentService {
-  
+  /*
   void createBiddingDocument(BiddingDocumentRequest request);
   
   BiddingDocument getBiddingDocument(Long id);
@@ -25,4 +25,5 @@ public interface BiddingDocumentService {
   BiddingDocument editBiddingDocument(Long id, Map<String, Object> updates);
   
   void removeBiddingDocument(Long id);
+  */
 }

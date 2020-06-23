@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 import com.crm.enums.EnumUserStatus;
 import com.crm.exception.DuplicateRecordException;
 import com.crm.exception.NotFoundException;
-import com.crm.models.Address;
 import com.crm.models.Role;
 import com.crm.models.User;
 import com.crm.payload.request.ChangeUserStatusRequest;
@@ -44,7 +43,7 @@ public class UserServiceImpl implements UserService {
 		user.setUsername(request.getUsername());
 		user.setEmail(request.getEmail());
 		user.setPhone(request.getPhone());
-		user.setStatus(EnumUserStatus.PENDING);
+		user.setStatus(EnumUserStatus.PENDING.name());
 		Set<String> rolesString = request.getRoles();
 		Set<Role> roles = new HashSet<>();
 
@@ -62,7 +61,7 @@ public class UserServiceImpl implements UserService {
 			});
 		}
 		user.setRoles(roles);
-		Address address = (Address) request.getAddress();
+		String address = request.getAddress();
 		if (address == null) {
 			throw new NotFoundException("Error: Address is not found");
 		} else {
@@ -94,7 +93,7 @@ public class UserServiceImpl implements UserService {
 		if (status.equals(null)) {
 			throw new NotFoundException("Error: Status is not found");
 		}
-		user.setStatus(status);
+		user.setStatus(status.name());
 		userRepository.save(user);
 	}
 }

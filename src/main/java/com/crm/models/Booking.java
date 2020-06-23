@@ -1,8 +1,7 @@
 package com.crm.models;
 
+import java.time.LocalDateTime;
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -12,7 +11,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -35,28 +34,30 @@ import lombok.ToString;
 @NoArgsConstructor
 @ToString
 @Entity
-@Table(name = "report")
+@Table(name = "account")
 @EntityListeners(AuditingEntityListener.class)
 @JsonIgnoreProperties(value = { "createdAt", "updatedAt" }, allowGetters = true)
-public class Report {
-
+public class Booking {
+  
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
   @ManyToOne
-  @JoinColumn(name = "supply_id")
-  private Supply supply;
+  @JoinColumn(name = "port_id")
+  private Port portOfLoading;
 
-  @ManyToOne
-  @JoinColumn(name = "bidding_document_id")
-  private BiddingDocument report;
-
-  private String detail;
-
-  //EnumReportStatus
-  private String status;
-
+  @Column(name = "booking_number")
+  private String bookingNumber;
+  
+  private int unit;
+  
+  @Column(name = "cut_off_time")
+  private LocalDateTime cutOffTime;
+  
+  @Column(name = "is_fcl")
+  private boolean isFcl;
+  
   @Column(name = "created_at", nullable = false, updatable = false)
   @Temporal(TemporalType.TIMESTAMP)
   @CreatedDate
@@ -66,7 +67,7 @@ public class Report {
   @Temporal(TemporalType.TIMESTAMP)
   @LastModifiedDate
   private Date updatedAt;
-
-  @OneToMany(mappedBy = "report")
-  private Set<Feedback> feedbacks = new HashSet<Feedback>();
+  
+  @OneToOne(mappedBy = "booking")
+  private Outbound outbound;
 }

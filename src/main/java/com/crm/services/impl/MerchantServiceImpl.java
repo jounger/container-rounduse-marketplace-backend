@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 import com.crm.enums.EnumUserStatus;
 import com.crm.exception.DuplicateRecordException;
 import com.crm.exception.NotFoundException;
-import com.crm.models.Address;
 import com.crm.models.Merchant;
 import com.crm.models.Role;
 import com.crm.payload.request.SupplierRequest;
@@ -44,7 +43,7 @@ public class MerchantServiceImpl implements MerchantService{
 		merchant.setUsername(request.getUsername());
 		merchant.setEmail(request.getEmail());
 		merchant.setPhone(request.getPhone());
-		merchant.setStatus(EnumUserStatus.PENDING);
+		merchant.setStatus(EnumUserStatus.PENDING.name());
 		merchant.setWebsite(request.getWebsite());
 		merchant.setCompanyName(request.getCompanyName());
 		merchant.setCompanyCode(request.getCompanyCode());
@@ -57,7 +56,7 @@ public class MerchantServiceImpl implements MerchantService{
             .orElseThrow(() -> new NotFoundException("Error: Role is not found"));
         roles.add(userRole);
 		merchant.setRoles(roles);
-		Address address = (Address) request.getAddress();
+		String address = request.getAddress();
 		if (address != null) {
 			merchant.setAddress(address);
 		}

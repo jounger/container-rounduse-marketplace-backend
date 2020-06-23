@@ -1,15 +1,9 @@
 package com.crm.models;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
@@ -28,20 +22,8 @@ import lombok.ToString;
 @Entity
 @Table(name = "shipping_line")
 @PrimaryKeyJoinColumn(name = "user_id")
-public class ShippingLine extends User {
-
-  private String website;
-
-  @Column(name = "company_name", length = 50)
-  private String companyName;
-
-  @Column(name = "company_code", length = 10, unique = true)
-  private String companyCode;
-
-  @ManyToMany
-  @JoinTable(name = "shipping_line_icd", joinColumns = @JoinColumn(name = "shipping_line_id"), inverseJoinColumns = @JoinColumn(name = "icd_id"))
-  private Collection<Icd> icds = new ArrayList<Icd>();
+public class ShippingLine extends Supplier {
 
   @OneToMany(mappedBy = "shippingLine")
-  private Set<Supply> supplyList = new HashSet<Supply>();
+  private Set<Supply> supplies = new HashSet<Supply>();
 }

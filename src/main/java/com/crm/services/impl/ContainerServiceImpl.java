@@ -1,41 +1,12 @@
 package com.crm.services.impl;
 
-import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import com.crm.common.Tool;
-import com.crm.enums.EnumSupplyStatus;
-import com.crm.exception.NotFoundException;
-import com.crm.models.Address;
-import com.crm.models.Bid;
-import com.crm.models.Container;
-import com.crm.models.ContainerType;
-import com.crm.models.Driver;
-import com.crm.models.Forwarder;
-import com.crm.models.Port;
-import com.crm.models.ShippingLine;
-import com.crm.payload.request.ContainerRequest;
-import com.crm.payload.request.PaginationRequest;
-import com.crm.repository.AddressRepository;
-import com.crm.repository.BidRepository;
-import com.crm.repository.ContainerRepository;
-import com.crm.repository.ContainerTypeRepository;
-import com.crm.repository.DriverRepository;
-import com.crm.repository.ForwarderRepository;
-import com.crm.repository.PortRepository;
-import com.crm.repository.ShippingLineRepository;
 import com.crm.services.ContainerService;
 
 @Service
 public class ContainerServiceImpl implements ContainerService {
-
+  /*
   @Autowired
   private ContainerRepository containerRepository;
 
@@ -211,5 +182,5 @@ public class ContainerServiceImpl implements ContainerService {
     Page<Container> pages = containerRepository.findByForwarderId(id, pageable);
     return pages;
   }
-
+  */
 }

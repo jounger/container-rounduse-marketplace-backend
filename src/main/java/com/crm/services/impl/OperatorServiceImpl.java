@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 import com.crm.enums.EnumUserStatus;
 import com.crm.exception.DuplicateRecordException;
 import com.crm.exception.NotFoundException;
-import com.crm.models.Address;
 import com.crm.models.Operator;
 import com.crm.models.Role;
 import com.crm.payload.request.OperatorRequest;
@@ -45,11 +44,11 @@ public class OperatorServiceImpl implements OperatorService {
     operator.setUsername(request.getUsername());
     operator.setEmail(request.getEmail());
     operator.setPhone(request.getPhone());
-    operator.setStatus(EnumUserStatus.ACTIVE);
+    operator.setStatus(EnumUserStatus.ACTIVE.name());
     Role userRole = roleRepository.findByName("ROLE_MODERATOR")
         .orElseThrow(() -> new NotFoundException("Error: Role is not found"));
     operator.getRoles().add(userRole);
-    Address address = (Address) request.getAddress();
+    String address = request.getAddress();
     if (address == null) {
       throw new NotFoundException("Error: Address is not found");
     } else {
@@ -84,11 +83,11 @@ public class OperatorServiceImpl implements OperatorService {
     operator.setUsername(request.getUsername());
     operator.setEmail(request.getEmail());
     operator.setPhone(request.getPhone());
-    operator.setStatus(EnumUserStatus.ACTIVE);
+    operator.setStatus(EnumUserStatus.ACTIVE.name());
     Role userRole = roleRepository.findByName("ROLE_MODERATOR")
         .orElseThrow(() -> new NotFoundException("Error: Role is not found"));
     operator.getRoles().add(userRole);
-    Address address = (Address) request.getAddress();
+    String address = request.getAddress();
     if (address == null) {
       throw new NotFoundException("Error: Address is not found");
     } else {

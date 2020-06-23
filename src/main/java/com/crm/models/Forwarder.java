@@ -32,5 +32,5 @@ public class Forwarder extends Supplier {
   private Set<Bid> bids = new HashSet<Bid>();
 
   @OneToMany(mappedBy = "forwarder")
-  private Set<Container> containers = new HashSet<Container>();
+  private Set<Inbound> inbounds = new HashSet<>();
 }

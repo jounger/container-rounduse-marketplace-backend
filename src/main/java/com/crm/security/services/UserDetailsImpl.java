@@ -5,11 +5,11 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import org.apache.tomcat.jni.Address;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import com.crm.models.Address;
 import com.crm.models.User;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -26,7 +26,7 @@ public class UserDetailsImpl implements UserDetails {
   private String password;
   private String email;
   private String phone;
-  private Address address;
+  private String address;
   private String status;
   
   private Collection<? extends GrantedAuthority> authorities;
@@ -58,7 +58,7 @@ public class UserDetailsImpl implements UserDetails {
     return phone;
   }
 
-  public Address getAddress() {
+  public String getAddress() {
 	  return address;
   }
 

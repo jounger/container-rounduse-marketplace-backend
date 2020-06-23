@@ -1,8 +1,6 @@
 package com.crm.models.dto;
 
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 import lombok.AllArgsConstructor;
@@ -28,6 +26,6 @@ public class UserDto {
 
   private Set<String> roles = new HashSet<>();
   
-  private Map<String, String> address = new HashMap<>();
+  private String address;
 
 }

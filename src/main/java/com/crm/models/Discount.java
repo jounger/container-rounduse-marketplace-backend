@@ -46,6 +46,9 @@ public class Discount {
   private String code;
 
   private String detail;
+  
+  //EnumCurrency
+  private String currency;
 
   private float percent;
 

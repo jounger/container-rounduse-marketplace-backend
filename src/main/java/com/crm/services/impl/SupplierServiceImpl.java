@@ -47,7 +47,7 @@ public class SupplierServiceImpl implements SupplierService {
     String status = (String) updates.get("status");
     if (status != null) {
       EnumUserStatus eStatus = EnumUserStatus.findByName(status.toUpperCase());
-      supplier.setStatus(eStatus);  
+      supplier.setStatus(eStatus.name());  
     }
     supplierRepository.save(supplier);
     return supplier;

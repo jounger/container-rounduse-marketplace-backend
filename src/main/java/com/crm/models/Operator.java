@@ -31,5 +31,5 @@ public class Operator extends User {
   private boolean isRoot;
 
   @OneToMany(mappedBy = "sender")
-  private Set<Feedback> feedbacks = new HashSet<Feedback>();
+  private Set<Feedback> feedbacks = new HashSet<>();
 }

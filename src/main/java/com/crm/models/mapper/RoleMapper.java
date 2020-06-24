@@ -13,6 +13,7 @@ public class RoleMapper {
   public static RoleDto toRoleDto(Role role) {
     
     RoleDto roleDto = new RoleDto();
+    roleDto.setId(role.getId());
     roleDto.setName(role.getName());
     List<String> permissionsDto = new ArrayList<>();
     Set<Permission> permissions = role.getPermissions();

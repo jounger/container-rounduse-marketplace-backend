@@ -96,4 +96,11 @@ public class UserServiceImpl implements UserService {
 		user.setStatus(status.name());
 		userRepository.save(user);
 	}
+	
+	public static boolean isEmailChange(String email, User user) {
+	  if(email.equalsIgnoreCase(user.getEmail())) {
+	    return false;
+	  }
+	  return true;
+	}
 }

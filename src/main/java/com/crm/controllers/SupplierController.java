@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import javax.transaction.Transactional;
 import javax.validation.Valid;
 
 import org.slf4j.Logger;
@@ -81,7 +82,8 @@ public class SupplierController {
     return ResponseEntity.ok(supplierDto);
   }
   
-  @PreAuthorize("hasRole('MERCHANT')")
+  @Transactional
+  @PreAuthorize("hasRole('MODERATOR') or hasRole('FORWARDER') or hasRole('MERCHANT')")
   @RequestMapping(value = "/{id}", method = RequestMethod.PATCH, consumes = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<?> editSupplier(@RequestBody Map<String, Object> updates, @PathVariable("id") Long id) {
     Supplier supplier = supplierService.editSupplier(updates, id);

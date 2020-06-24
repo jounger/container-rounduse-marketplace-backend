@@ -69,6 +69,6 @@ public class Supply {
   private Date updatedAt;
 
   @OneToMany(mappedBy = "supply")
-  private Set<Report> reports = new HashSet<Report>();
+  private Set<Report> reports = new HashSet<>();
 
 }

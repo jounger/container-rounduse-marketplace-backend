@@ -68,5 +68,5 @@ public class Report {
   private Date updatedAt;
 
   @OneToMany(mappedBy = "report")
-  private Set<Feedback> feedbacks = new HashSet<Feedback>();
+  private Set<Feedback> feedbacks = new HashSet<>();
 }

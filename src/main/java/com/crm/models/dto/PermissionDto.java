@@ -13,6 +13,6 @@ public class PermissionDto {
   
   private String name;
   
-  private String desciption;
+  private String description;
   
 }

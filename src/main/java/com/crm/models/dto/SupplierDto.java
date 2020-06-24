@@ -17,9 +17,11 @@ public class SupplierDto extends UserDto{
 	
 	private String companyName;
 	
-	private String shortName;
+	private String companyCode;
 	
 	private String companyDescription;
+	
+	private String companyAddress;
 	
 	private String tin;
 	

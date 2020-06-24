@@ -56,8 +56,8 @@ public class Supplier extends User {
   private float ratingValue;
 
   @OneToMany(mappedBy = "receiver")
-  private Collection<Rating> receivedRatings = new ArrayList<Rating>();
+  private Collection<Rating> receivedRatings = new ArrayList<>();
 
   @OneToMany(mappedBy = "sender")
-  private Collection<Rating> sentRatings = new ArrayList<Rating>();
+  private Collection<Rating> sentRatings = new ArrayList<>();
 }

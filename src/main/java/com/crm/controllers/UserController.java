@@ -3,6 +3,7 @@ package com.crm.controllers;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.transaction.Transactional;
 import javax.validation.Valid;
 
 import org.slf4j.Logger;
@@ -26,7 +27,7 @@ import com.crm.payload.request.PaginationRequest;
 import com.crm.payload.response.PaginationResponse;
 import com.crm.services.UserService;
 
-@CrossOrigin(origins="*", maxAge=3600)
+@CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 @RequestMapping("/api/user")
 public class UserController {
@@ -55,11 +56,11 @@ public class UserController {
     return ResponseEntity.ok(response);
   }
 
-
-	@PutMapping("/status")
-	@PreAuthorize("hasRole('OPERATOR')")
-	public ResponseEntity<?> changeUserStatus(@Valid @RequestBody ChangeUserStatusRequest request){
-		userService.changeStatus(request);
-		return ResponseEntity.ok("User's status changed successfully");
-	}
+  @Transactional
+  @PutMapping("/status")
+  @PreAuthorize("hasRole('OPERATOR')")
+  public ResponseEntity<?> changeUserStatus(@Valid @RequestBody ChangeUserStatusRequest request) {
+    userService.changeStatus(request);
+    return ResponseEntity.ok("User's status changed successfully");
+  }
 }

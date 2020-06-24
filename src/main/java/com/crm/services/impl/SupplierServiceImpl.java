@@ -35,8 +35,11 @@ public class SupplierServiceImpl implements SupplierService {
 
   @Override
   public Page<Supplier> getSuppliersByStatus(PaginationRequest request) {
-    EnumUserStatus userStatus = EnumUserStatus.findByName(request.getStatus());
-    Page<Supplier> pages = supplierRepository.findByStatus(userStatus,
+    EnumUserStatus userStatus = EnumUserStatus.findByName(request.getStatus().toString());
+    if(userStatus == null) {
+      throw new NotFoundException("Status is not found.");
+    }
+    Page<Supplier> pages = supplierRepository.findByStatus(userStatus.name(),
         PageRequest.of(request.getPage(), request.getLimit()));
     return pages;
   }

@@ -20,7 +20,7 @@ public class PermissionServiceImpl implements PermissionService {
   PermissionRepository permissionRepository;
 
   @Override
-  public void savePermission(PermissionRequest request) {
+  public void createPermission(PermissionRequest request) {
     Permission permission = new Permission();
     if(permissionRepository.existsByName(request.getName())) {
       throw new DuplicateRecordException("Permission already exists.");

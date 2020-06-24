@@ -7,7 +7,7 @@ import lombok.Setter;
 @Setter
 public class PortRequest {
   
-    private Long id;
+  private Long id;
 	
 	private String fullname;
 

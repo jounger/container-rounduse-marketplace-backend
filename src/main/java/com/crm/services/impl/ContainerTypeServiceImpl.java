@@ -1,12 +1,14 @@
 package com.crm.services.impl;
 
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import com.crm.common.Tool;
 import com.crm.exception.DuplicateRecordException;
-import com.crm.exception.InternalException;
 import com.crm.exception.NotFoundException;
 import com.crm.models.ContainerType;
 import com.crm.payload.request.ContainerTypeRequest;
@@ -36,47 +38,44 @@ public class ContainerTypeServiceImpl implements ContainerTypeService {
   @Override
   public void createContainerType(ContainerTypeRequest request) {
     if (containerTypeRepository.existsByName(request.getName())) {
-      throw new DuplicateRecordException("ERROR: Type name already exists.");
+      throw new DuplicateRecordException("ERROR: ContainerType already exists.");
     }
-    try {
-      ContainerType containerType = new ContainerType();
-      containerType.setName(request.getName());
-      containerType.setDescription(request.getDescription());
-      containerType.setTareWeight(Float.parseFloat(request.getTareWeight()));
-      containerType.setPayloadCapacity(Float.parseFloat(request.getPayloadCapacity()));
-      containerType.setCubicCapacity(Float.parseFloat(request.getCubicCapacity()));
-      containerType.setInternalLength(Float.parseFloat(request.getInternalLength()));
-      containerType.setInternalHeight(Float.parseFloat(request.getInternalHeight()));
-      containerType.setInternalWidth(Float.parseFloat(request.getInternalWidth()));
-      containerType.setDoorOpeningHeight(Float.parseFloat(request.getDoorOpeningHeight()));
-      containerType.setDoorOpeningWidth(Float.parseFloat(request.getDoorOpeningWidth()));
-      containerTypeRepository.save(containerType);
-    } catch (Exception e) {
-      throw new InternalException("ERROR: Parameter must be float");
-    }
+    ContainerType containerType = new ContainerType();
+    containerType.setName(request.getName());
+    containerType.setDescription(request.getDescription());
+
+    containerType.setTareWeight(request.getTareWeight());
+
+    containerType.setPayloadCapacity(request.getPayloadCapacity());
+
+    containerType.setCubicCapacity(request.getCubicCapacity());
+
+    containerType.setInternalLength(request.getInternalLength());
+    containerType.setInternalHeight(request.getInternalHeight());
+    containerType.setInternalWidth(request.getInternalWidth());
+    containerType.setDoorOpeningHeight(request.getDoorOpeningHeight());
+    containerType.setDoorOpeningWidth(request.getDoorOpeningWidth());
+    containerTypeRepository.save(containerType);
 
   }
 
   @Override
   public ContainerType updateContainerType(ContainerTypeRequest request) {
-    try {
-      ContainerType containerType = containerTypeRepository.findById(request.getId())
-          .orElseThrow(() -> new NotFoundException("ERROR: ContainerType is not found."));
-      containerType.setName(request.getName());
-      containerType.setDescription(request.getDescription());
-      containerType.setTareWeight(Float.parseFloat(request.getTareWeight()));
-      containerType.setPayloadCapacity(Float.parseFloat(request.getPayloadCapacity()));
-      containerType.setCubicCapacity(Float.parseFloat(request.getCubicCapacity()));
-      containerType.setInternalLength(Float.parseFloat(request.getInternalLength()));
-      containerType.setInternalHeight(Float.parseFloat(request.getInternalHeight()));
-      containerType.setInternalWidth(Float.parseFloat(request.getInternalWidth()));
-      containerType.setDoorOpeningHeight(Float.parseFloat(request.getDoorOpeningHeight()));
-      containerType.setDoorOpeningWidth(Float.parseFloat(request.getDoorOpeningWidth()));
-      containerTypeRepository.save(containerType);
-      return containerType;
-    } catch (Exception e) {
-      throw new InternalException("ERROR: Parameter must be float");
-    }
+
+    ContainerType containerType = containerTypeRepository.findById(request.getId())
+        .orElseThrow(() -> new NotFoundException("ERROR: ContainerType is not found."));
+    containerType.setName(request.getName());
+    containerType.setDescription(request.getDescription());
+    containerType.setTareWeight(request.getTareWeight());
+    containerType.setPayloadCapacity(request.getPayloadCapacity());
+    containerType.setCubicCapacity(request.getCubicCapacity());
+    containerType.setInternalLength(request.getInternalLength());
+    containerType.setInternalHeight(request.getInternalHeight());
+    containerType.setInternalWidth(request.getInternalWidth());
+    containerType.setDoorOpeningHeight(request.getDoorOpeningHeight());
+    containerType.setDoorOpeningWidth(request.getDoorOpeningWidth());
+    containerTypeRepository.save(containerType);
+    return containerType;
   }
 
   @Override
@@ -86,6 +85,62 @@ public class ContainerTypeServiceImpl implements ContainerTypeService {
     } else {
       new NotFoundException("ERROR: ContainerType is not found.");
     }
+  }
+
+  @Override
+  public ContainerType editContainerType(Map<String, Object> updates, Long id) {
+    ContainerType containerType = containerTypeRepository.findById(id)
+        .orElseThrow(() -> new NotFoundException("ERROR: ContainerType is not found."));
+    String name = (String) updates.get("name");
+    if (name != null) {
+      containerType.setName(name);
+    }
+    String description = (String) updates.get("description");
+    if (description != null) {
+      containerType.setDescription(description);
+    }
+    Double tareWeight = (Double) updates.get("tareWeight");
+    if (tareWeight != null) {      
+      containerType.setTareWeight(Tool.castDoubleToFloat(tareWeight));
+    }
+
+    Double payloadCapacity = (Double) updates.get("payloadCapacity");
+    if (payloadCapacity != null) {
+      containerType.setPayloadCapacity(Tool.castDoubleToFloat(payloadCapacity));
+    }
+
+    Double cubicCapacity = (Double) updates.get("cubicCapacity");
+    if (cubicCapacity != null) {
+      containerType.setCubicCapacity(Tool.castDoubleToFloat(cubicCapacity));
+    }
+
+    Double internalLength = (Double) updates.get("internalLength");
+    if (internalLength != null) {
+      containerType.setInternalLength(Tool.castDoubleToFloat(internalLength));
+    }
+
+    Double internalHeight = (Double) updates.get("internalHeight");
+    if (internalHeight != null) {
+      containerType.setInternalHeight(Tool.castDoubleToFloat(internalHeight));
+    }
+
+    Double internalWidth = (Double) updates.get("internalWidth");
+    if (internalWidth != null) {
+      containerType.setInternalWidth(Tool.castDoubleToFloat(internalWidth));
+    }
+
+    Double doorOpeningHeight = (Double) updates.get("doorOpeningHeight");
+    if (doorOpeningHeight != null) {
+      containerType.setDoorOpeningHeight(Tool.castDoubleToFloat(doorOpeningHeight));
+    }
+
+    Double doorOpeningWidth = (Double) updates.get("doorOpeningWidth");
+    if (doorOpeningWidth != null) {
+      containerType.setDoorOpeningWidth(Tool.castDoubleToFloat(doorOpeningWidth));
+    }
+
+    containerTypeRepository.save(containerType);
+    return containerType;
   }
 
 }

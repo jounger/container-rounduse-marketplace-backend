@@ -1,5 +1,7 @@
 package com.crm.services.impl;
 
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -63,6 +65,25 @@ public class PortServiceImpl implements PortService {
   @Override
   public Port getPortById(Long id) {
     Port port = portRepository.findById(id).orElseThrow(() -> new NotFoundException("ERROR: Port is not found."));
+    return port;
+  }
+
+  @Override
+  public Port editPort(Map<String, Object> updates, Long id) {
+    Port port = portRepository.findById(id).orElseThrow(() -> new NotFoundException("ERROR: Port is not found."));
+    String fullname = (String) updates.get("fullname");
+    if (fullname != null) {
+      port.setFullname(fullname);
+    }
+    String address = (String) updates.get("address");
+    if (address != null) {
+      port.setFullname(address);
+    }
+    String nameCode = (String) updates.get("nameCode");
+    if (nameCode != null) {
+      port.setNameCode(nameCode);
+    }
+    portRepository.save(port);
     return port;
   }
 

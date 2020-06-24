@@ -23,81 +23,82 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.crm.models.Port;
-import com.crm.models.dto.PortDto;
-import com.crm.models.mapper.PortMapper;
+import com.crm.models.Discount;
+import com.crm.models.dto.DiscountDto;
+import com.crm.models.mapper.DiscountMapper;
+import com.crm.payload.request.DiscountRequest;
 import com.crm.payload.request.PaginationRequest;
-import com.crm.payload.request.PortRequest;
 import com.crm.payload.response.MessageResponse;
 import com.crm.payload.response.PaginationResponse;
-import com.crm.services.PortService;
+import com.crm.services.DiscountService;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
-@RequestMapping("/api/port")
-public class PortController {
+@RequestMapping("/api/discount")
+public class DiscountController {
 
   @Autowired
-  private PortService portService;
+  private DiscountService discountService;
 
   @GetMapping("")
   @PreAuthorize("hasRole('MODERATOR')")
-  public ResponseEntity<?> getPorts(@Valid PaginationRequest request) {
+  public ResponseEntity<?> getDiscounts(@Valid PaginationRequest request) {
 
-    Page<Port> pages = portService.getPorts(request);
-    PaginationResponse<PortDto> response = new PaginationResponse<>();
+    Page<Discount> pages = discountService.getDiscounts(request);
+    PaginationResponse<DiscountDto> response = new PaginationResponse<>();
     response.setPageNumber(request.getPage());
     response.setPageSize(request.getLimit());
     response.setTotalElements(pages.getTotalElements());
     response.setTotalPages(pages.getTotalPages());
 
-    List<Port> ports = pages.getContent();
-    List<PortDto> portsDto = new ArrayList<>();
-    ports.forEach(port -> portsDto.add(PortMapper.toPortDto(port)));
-    response.setContents(portsDto);
+    List<Discount> discounts = pages.getContent();
+    List<DiscountDto> discountDto = new ArrayList<>();
+    discounts.forEach(discount -> discountDto.add(DiscountMapper.toDiscountDto(discount)));
+    response.setContents(discountDto);
 
     return ResponseEntity.ok(response);
+
   }
 
   @GetMapping("/{id}")
   @PreAuthorize("hasRole('MODERATOR')")
-  public ResponseEntity<?> getPort(@PathVariable Long id) {
-    Port port = portService.getPortById(id);
-    PortDto portDto = new PortDto();
-    portDto = PortMapper.toPortDto(port);
-    return ResponseEntity.ok(portDto);
+  public ResponseEntity<?> getDiscount(@PathVariable Long id) {
+    Discount discount = discountService.getDiscountById(id);
+    DiscountDto discountDto = new DiscountDto();
+    discountDto = DiscountMapper.toDiscountDto(discount);
+    return ResponseEntity.ok(discountDto);
   }
 
   @PostMapping("")
   @PreAuthorize("hasRole('MODERATOR')")
-  public ResponseEntity<?> createPort(@Valid @RequestBody PortRequest request) {
-    portService.createPort(request);
-    return ResponseEntity.ok(new MessageResponse("Port created successfully"));
+  public ResponseEntity<?> createDiscount(@Valid @RequestBody DiscountRequest request) {
+    discountService.createDiscount(request);
+    return ResponseEntity.ok(new MessageResponse("Discount created successfully"));
   }
 
   @Transactional
   @PutMapping("")
   @PreAuthorize("hasRole('MODERATOR')")
-  public ResponseEntity<?> updatePort(@Valid @RequestBody PortRequest request) {
-    Port port = portService.updatePort(request);
-    PortDto portDto = PortMapper.toPortDto(port);
-    return ResponseEntity.ok(portDto);
+  public ResponseEntity<?> updateDiscount(@Valid @RequestBody DiscountRequest request) {
+    Discount discount = discountService.updateDiscount(request);
+    DiscountDto discountDto = DiscountMapper.toDiscountDto(discount);
+    return ResponseEntity.ok(discountDto);
   }
 
   @PreAuthorize("hasRole('MODERATOR')")
   @RequestMapping(value = "/{id}", method = RequestMethod.PATCH, consumes = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<?> editPort(@RequestBody Map<String, Object> updates, @PathVariable("id") Long id) {
-    Port port = portService.editPort(updates, id);
-    PortDto portDto = new PortDto();
-    portDto = PortMapper.toPortDto(port);
-    return ResponseEntity.ok(portDto);
+  public ResponseEntity<?> editDiscount(@RequestBody Map<String, Object> updates, @PathVariable("id") Long id) {
+    Discount discount = discountService.editDiscount(updates, id);
+    DiscountDto discountDto = new DiscountDto();
+    discountDto = DiscountMapper.toDiscountDto(discount);
+    return ResponseEntity.ok(discountDto);
   }
 
   @Transactional
   @DeleteMapping("/{id}")
   @PreAuthorize("hasRole('MODERATOR')")
-  public ResponseEntity<?> removePort(@PathVariable Long id) {
-    portService.removePort(id);
-    return ResponseEntity.ok(new MessageResponse("Port has remove successfully"));
+  public ResponseEntity<?> removeDiscount(@PathVariable Long id) {
+    discountService.removeDiscount(id);
+    return ResponseEntity.ok(new MessageResponse("Discount has remove successfully"));
   }
 }

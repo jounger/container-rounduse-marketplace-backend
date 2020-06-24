@@ -1,7 +1,5 @@
 package com.crm.payload.request;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import lombok.Getter;
 import lombok.Setter;
 
@@ -9,11 +7,12 @@ import lombok.Setter;
 @Setter
 public class PortRequest {
   
-    private Long id;
+  private Long id;
 	
 	private String fullname;
-	
+
 	private String nameCode;
 	
 	private String address;
+	
 }

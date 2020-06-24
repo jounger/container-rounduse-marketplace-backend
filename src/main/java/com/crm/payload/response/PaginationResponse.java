@@ -24,10 +24,10 @@ public class PaginationResponse<E> implements Serializable{
   @JsonProperty("limit")
   private int pageSize;
   
-  @JsonProperty("total_elements")
+  @JsonProperty("totalElements")
   private long totalElements;
   
-  @JsonProperty("total_pages")
+  @JsonProperty("totalPages")
   private int totalPages;
   
   @JsonProperty("data")

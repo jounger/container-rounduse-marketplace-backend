@@ -17,7 +17,7 @@ public interface ContainerTypeService {
   void createContainerType(ContainerTypeRequest request);
 
   ContainerType updateContainerType(ContainerTypeRequest request);
-  
+
   ContainerType editContainerType(Map<String, Object> updates, Long id);
 
   void removeContainerType(Long id);

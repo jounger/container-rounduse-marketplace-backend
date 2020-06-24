@@ -10,7 +10,7 @@ import com.crm.payload.request.ShippingLineRequest;
 
 public interface ShippingLineService {
 
-	void saveShippingLine(ShippingLineRequest request);
+	void createShippingLine(ShippingLineRequest request);
 	
 	ShippingLine getShippingLine(Long id);
 	

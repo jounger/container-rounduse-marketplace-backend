@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.crm.exception.NotFoundException;
 import com.crm.models.dto.UserDto;
 import com.crm.payload.request.SignInRequest;
 import com.crm.payload.request.SupplierRequest;
@@ -75,11 +76,13 @@ public class AuthController {
 		logger.info("JWT: {}", jwt);
 
 		UserDto userInfo = new UserDto();
+		userInfo.setId(userDetails.getId());
 		userInfo.setUsername(userDetails.getUsername());
 		userInfo.setPhone(userDetails.getPhone());
 		userInfo.setRoles(roles);
 		userInfo.setEmail(userDetails.getEmail());
 		userInfo.setStatus(userDetails.getStatus());
+		userInfo.setAddress(userDetails.getAddress());
 		
 		JwtResponse response = new JwtResponse();
 		response.setIdToken(jwt);
@@ -94,14 +97,15 @@ public class AuthController {
 	@PostMapping("/signup")
 	public ResponseEntity<?> registerUser(@Valid @RequestBody SupplierRequest request) {
 		String role = request.getRoles().iterator().next();
-		switch (role.toLowerCase()) {
-		case "forwarder":
-			forwarderService.saveForwarder(request);
+		switch (role.toUpperCase()) {
+		case "FORWARDER":
+			forwarderService.createForwarder(request);
 			break;
-		case "merchant":
-			merchantService.saveMerchant(request);
+		case "MERCHANT":
+			merchantService.createMerchant(request);
+			break;
 		default:
-			break;
+		  throw new NotFoundException("Role is not found.");
 		}
 
 		return ResponseEntity.ok(new MessageResponse("User registered succesfully"));
@@ -139,6 +143,7 @@ public class AuthController {
 						.collect(Collectors.toSet());
 
 				UserDto userInfo = new UserDto();
+				userInfo.setId(userDetails.getId());
 				userInfo.setUsername(userDetails.getUsername());
 				userInfo.setPhone(userDetails.getPhone());
 				userInfo.setRoles(roles);

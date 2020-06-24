@@ -8,7 +8,7 @@ import com.crm.payload.request.PermissionRequest;
 
 public interface PermissionService {
 
-	void savePermission(PermissionRequest request);
+	void createPermission(PermissionRequest request);
 
 	Page<Permission> getPermission(PaginationRequest request);
 	

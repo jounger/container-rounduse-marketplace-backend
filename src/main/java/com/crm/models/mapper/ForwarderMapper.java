@@ -24,6 +24,11 @@ public class ForwarderMapper {
     forwarderDto.setWebsite(forwarder.getWebsite());
     forwarderDto.setContactPerson(forwarder.getContactPerson());
     forwarderDto.setCompanyName(forwarder.getCompanyName());
+    forwarderDto.setCompanyCode(forwarder.getCompanyCode());
+    forwarderDto.setCompanyDescription(forwarder.getCompanyDescription());
+    forwarderDto.setCompanyAddress(forwarder.getCompanyAddress());
+    forwarderDto.setTin(forwarder.getTin());
+    forwarderDto.setFax(forwarder.getFax());
     forwarderDto.setRatingValue(forwarder.getRatingValue());
     return forwarderDto;
   }

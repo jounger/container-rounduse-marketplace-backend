@@ -42,7 +42,7 @@ public class MerchantController {
 
   @PostMapping("")
   public ResponseEntity<?> createMerchant(@Valid @RequestBody MerchantRequest request) {
-    merchantService.saveMerchant(request);
+    merchantService.createMerchant(request);
     return ResponseEntity.ok("Shipping Line created successfully");
   }
 

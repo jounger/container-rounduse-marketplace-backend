@@ -41,13 +41,13 @@ public class ForwarderController {
 
   @PostMapping("")
   public ResponseEntity<?> createForwarder(@Valid @RequestBody ForwarderRequest request) {
-    forwarderService.saveForwarder(request);
+    forwarderService.createForwarder(request);
     return ResponseEntity.ok("Shipping Line created successfully");
   }
 
   @PreAuthorize("hasRole('OPERATOR')")
   @GetMapping("")
-  public ResponseEntity<?> getForwarders(@PathVariable Long id, @Valid PaginationRequest request) {
+  public ResponseEntity<?> getForwarders(@Valid PaginationRequest request) {
 
     Page<Forwarder> pages = forwarderService.getForwarders(request);
 

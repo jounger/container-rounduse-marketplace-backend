@@ -27,7 +27,7 @@ public class RoleServiceImpl implements RoleService {
   private PermissionRepository permissionRepository;
 
   @Override
-  public void saveRole(RoleRequest request) {
+  public void createRole(RoleRequest request) {
     Role role = new Role();
     if (roleRepository.existsByName(request.getName())) {
       throw new DuplicateRecordException("Role already exists.");

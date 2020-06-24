@@ -34,7 +34,7 @@ import com.crm.services.ShippingLineService;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
-@RequestMapping("/api/shippingline")
+@RequestMapping("/api/shipping-line")
 public class ShippingLineController {
 
   @Autowired
@@ -43,7 +43,7 @@ public class ShippingLineController {
   @PostMapping("")
   @PreAuthorize("hasRole('MODERATOR')")
   public ResponseEntity<?> createShippingLine(@Valid @RequestBody ShippingLineRequest request) {
-    shippingLineService.saveShippingLine(request);
+    shippingLineService.createShippingLine(request);
     return ResponseEntity.ok("Shipping Line created successfully");
   }
 

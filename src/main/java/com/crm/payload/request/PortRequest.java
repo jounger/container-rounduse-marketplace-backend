@@ -13,7 +13,6 @@ public class PortRequest {
 	
 	private String fullname;
 	
-	@JsonProperty("name_code")
 	private String nameCode;
 	
 	private String address;

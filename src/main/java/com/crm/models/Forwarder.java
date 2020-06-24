@@ -26,7 +26,7 @@ import lombok.ToString;
 public class Forwarder extends Supplier {
 
   @OneToMany(mappedBy = "forwarder", fetch = FetchType.LAZY)
-  private Set<Driver> drivers = new HashSet<Driver>();
+  private Set<Driver> drivers = new HashSet<>();
 
   @OneToMany(mappedBy = "bidder", fetch = FetchType.LAZY)
   private Set<Bid> bids = new HashSet<Bid>();

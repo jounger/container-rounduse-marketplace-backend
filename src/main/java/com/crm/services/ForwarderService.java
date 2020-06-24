@@ -11,15 +11,15 @@ import com.crm.payload.request.SupplierRequest;
 
 public interface ForwarderService {
 
-	void saveForwarder(SupplierRequest request);
-	
-	Forwarder getForwarder(Long id);
-	
-	Page<Forwarder> getForwarders(PaginationRequest request);
-	
-	Forwarder updateForwarder(ForwarderRequest request);
-	
-	Forwarder editForwarder(Long id, Map<String, Object> updates);
-	
-	void removeForwarder(Long id);
+  void createForwarder(SupplierRequest request);
+
+  Forwarder getForwarder(Long id);
+
+  Page<Forwarder> getForwarders(PaginationRequest request);
+
+  Forwarder updateForwarder(ForwarderRequest request);
+
+  Forwarder editForwarder(Long id, Map<String, Object> updates);
+
+  void removeForwarder(Long id);
 }

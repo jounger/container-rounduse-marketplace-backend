@@ -53,7 +53,11 @@ public class OperatorServiceImpl implements OperatorService {
     operator.getRoles().add(userRole);
 
     operator.setPhone(request.getPhone());
-    operator.setEmail(request.getEmail());
+    
+    if (UserServiceImpl.isEmailChange(request.getEmail(), operator)) {
+      operator.setEmail(request.getEmail());
+    }
+    
     operator.setAddress(request.getAddress());
     operator.setStatus(EnumUserStatus.ACTIVE.name());
     operator.setFullname(request.getFullname());
@@ -79,9 +83,9 @@ public class OperatorServiceImpl implements OperatorService {
   public Operator updateOperator(OperatorRequest request) {
     Operator operator = operatorRepository.findById(request.getId())
         .orElseThrow(() -> new NotFoundException("Error: Operator is not found"));
-    
+
     operator.setUsername(request.getUsername());
-    
+
     String encoder = passwordEncoder.encode(request.getPassword());
     operator.setPassword(encoder);
 
@@ -96,7 +100,7 @@ public class OperatorServiceImpl implements OperatorService {
     operator.setFullname(request.getFullname());
     operator.setRoot(request.isRoot());
     operatorRepository.save(operator);
-    
+
     return operator;
   }
 
@@ -112,7 +116,7 @@ public class OperatorServiceImpl implements OperatorService {
     }
 
     String email = (String) updates.get("email");
-    if (email != null) {
+    if (email != null && UserServiceImpl.isEmailChange(email, operator)) {
       operator.setEmail(email);
     }
 
@@ -125,22 +129,22 @@ public class OperatorServiceImpl implements OperatorService {
     if (address != null) {
       operator.setAddress(address);
     }
-    
+
     String fullname = (String) updates.get("fullname");
     if (fullname != null) {
       operator.setFullname(fullname);
-    }  
+    }
     return operator;
   }
 
   @Override
   public void removeOperator(Long id) {
-    
-    if(operatorRepository.existsById(id)) {
+
+    if (operatorRepository.existsById(id)) {
       operatorRepository.deleteById(id);
     } else {
       throw new NotFoundException("ERROR: Operator is not found.");
-    }    
+    }
   }
 
 }

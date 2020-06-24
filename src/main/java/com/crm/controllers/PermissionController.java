@@ -74,7 +74,7 @@ public class PermissionController {
   @PostMapping("")
   @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<?> createPermission(@Valid @RequestBody PermissionRequest request) {
-    permissionService.savePermission(request);
+    permissionService.createPermission(request);
     return ResponseEntity.ok(new MessageResponse("Role has been created successfully"));
   }
 }

@@ -37,7 +37,7 @@ public class RoleController {
   @Autowired
   private RoleService roleService;
   
-  @GetMapping("/role")
+  @GetMapping("")
   @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<?> getRoles(@Valid PaginationRequest request) {
     Page<Role> pages = roleService.getRoles(request);
@@ -75,7 +75,7 @@ public class RoleController {
   @PostMapping("")
   @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<?> createRole(@Valid @RequestBody RoleRequest request) {
-    roleService.saveRole(request);
+    roleService.createRole(request);
     return ResponseEntity.ok(new MessageResponse("Role has been created successfully"));
   }
   

@@ -39,14 +39,14 @@ public class ForwarderServiceImpl implements ForwarderService {
   private ForwarderRepository forwarderRepository;
 
   @Override
-  public void saveForwarder(SupplierRequest request) {
+  public void createForwarder(SupplierRequest request) {
     if (userRepository.existsByUsername(request.getUsername()) || userRepository.existsByEmail(request.getEmail())
         || userRepository.existsByPhone(request.getPhone())) {
       throw new DuplicateRecordException("Error: User has been existed");
     }
     Forwarder forwarder = new Forwarder();
     forwarder.setUsername(request.getUsername());
-    
+
     String encoder = passwordEncoder.encode(request.getPassword());
     forwarder.setPassword(encoder);
 
@@ -56,18 +56,15 @@ public class ForwarderServiceImpl implements ForwarderService {
     roles.add(userRole);
     forwarder.setRoles(roles);
 
-    String address = request.getAddress();
-    if (address != null) {
-      forwarder.setAddress(address);
-    }
-
     forwarder.setEmail(request.getEmail());
     forwarder.setPhone(request.getPhone());
+    forwarder.setAddress(request.getAddress());
     forwarder.setStatus(EnumUserStatus.PENDING.name());
     forwarder.setWebsite(request.getWebsite());
     forwarder.setCompanyName(request.getCompanyName());
     forwarder.setCompanyCode(request.getCompanyCode());
     forwarder.setCompanyDescription(request.getCompanyDescription());
+    forwarder.setCompanyAddress(request.getCompanyAddress());
     forwarder.setContactPerson(request.getContactPerson());
     forwarder.setTin(request.getTin());
     forwarder.setFax(request.getFax());
@@ -102,18 +99,18 @@ public class ForwarderServiceImpl implements ForwarderService {
     roles.add(userRole);
     forwarder.setRoles(roles);
 
-    String address = request.getAddress();
-    if (address != null) {
-      forwarder.setAddress(address);
+    if (UserServiceImpl.isEmailChange(request.getEmail(), forwarder)) {
+      forwarder.setEmail(request.getEmail());
     }
-
-    forwarder.setEmail(request.getEmail());
+    
     forwarder.setPhone(request.getPhone());
+    forwarder.setAddress(request.getAddress());
     forwarder.setStatus(EnumUserStatus.PENDING.name());
     forwarder.setWebsite(request.getWebsite());
     forwarder.setCompanyName(request.getCompanyName());
-    forwarder.setCompanyCode(request.getCompanyCode());
+//    forwarder.setCompanyCode(request.getCompanyCode());
     forwarder.setCompanyDescription(request.getCompanyDescription());
+    forwarder.setCompanyAddress(request.getCompanyAddress());
     forwarder.setContactPerson(request.getContactPerson());
     forwarder.setTin(request.getTin());
     forwarder.setFax(request.getFax());
@@ -135,7 +132,7 @@ public class ForwarderServiceImpl implements ForwarderService {
     }
 
     String email = (String) updates.get("email");
-    if (email != null) {
+    if (email != null && UserServiceImpl.isEmailChange(email, forwarder)) {
       forwarder.setEmail(email);
     }
 
@@ -164,14 +161,19 @@ public class ForwarderServiceImpl implements ForwarderService {
       forwarder.setCompanyName(companyName);
     }
 
-    String companyCode = (String) updates.get("companyCode");
-    if (companyCode != null) {
-      forwarder.setCompanyCode(companyCode);
-    }
+//    String companyCode = (String) updates.get("companyCode");
+//    if (companyCode != null) {
+//      forwarder.setCompanyCode(companyCode);
+//    }
 
     String companyDescription = (String) updates.get("companyDescription");
     if (companyDescription != null) {
       forwarder.setCompanyDescription(companyDescription);
+    }
+
+    String companyAddress = (String) updates.get("companyAddress");
+    if (companyAddress != null) {
+      forwarder.setCompanyAddress(companyAddress);
     }
 
     String tin = (String) updates.get("tin");

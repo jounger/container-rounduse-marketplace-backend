@@ -24,6 +24,11 @@ public class MerchantMapper {
     merchantDto.setWebsite(merchant.getWebsite());
     merchantDto.setContactPerson(merchant.getContactPerson());
     merchantDto.setCompanyName(merchant.getCompanyName());
+    merchantDto.setCompanyCode(merchant.getCompanyCode());
+    merchantDto.setCompanyDescription(merchant.getCompanyDescription());
+    merchantDto.setCompanyAddress(merchant.getCompanyAddress());
+    merchantDto.setTin(merchant.getTin());
+    merchantDto.setFax(merchant.getFax());
     merchantDto.setRatingValue(merchant.getRatingValue());
     return merchantDto;
   }

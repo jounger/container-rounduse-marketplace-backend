@@ -88,7 +88,7 @@ public class DriverController {
   @PreAuthorize("hasRole('FORWARDER')")
   public ResponseEntity<?> createDriver(@PathVariable Long id, @Valid @RequestBody DriverRequest request) {
     logger.info("Driver request: {}", request);
-    driverService.saveDriver(request);
+    driverService.createDriver(id, request);
     return ResponseEntity.ok(new MessageResponse("Driver created successfully"));
   }
 
@@ -112,7 +112,7 @@ public class DriverController {
 
   @Transactional
   @DeleteMapping("/{id}")
-  @PreAuthorize("hasRole('MERCHANT')")
+  @PreAuthorize("hasRole('FORWARDER')")
   public ResponseEntity<?> removeDriver(@PathVariable Long id) {
     driverService.removeDriver(id);
     return ResponseEntity.ok(new MessageResponse("Driver has remove successfully"));

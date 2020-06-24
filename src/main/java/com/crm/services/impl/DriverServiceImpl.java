@@ -43,7 +43,7 @@ public class DriverServiceImpl implements DriverService {
   private ForwarderRepository forwarderRepository;
 
   @Override
-  public void saveDriver(DriverRequest request) {
+  public void createDriver(Long id, DriverRequest request) {
     if (userRepository.existsByUsername(request.getUsername()) || userRepository.existsByEmail(request.getEmail())
         || userRepository.existsByPhone(request.getPhone())) {
       throw new DuplicateRecordException("Error: User has been existed");
@@ -57,6 +57,8 @@ public class DriverServiceImpl implements DriverService {
     driver.setPhone(request.getPhone());
     driver.setEmail(request.getEmail());
     driver.setStatus(EnumUserStatus.PENDING.name());
+    driver.setAddress(request.getAddress());
+
     Set<String> rolesString = request.getRoles();
     Set<Role> roles = new HashSet<Role>();
     if (rolesString == null) {
@@ -72,7 +74,7 @@ public class DriverServiceImpl implements DriverService {
     }
     driver.setRoles(roles);
 
-    Forwarder forwarder = forwarderRepository.findByUsername(request.getForwarderUsername())
+    Forwarder forwarder = forwarderRepository.findById(id)
         .orElseThrow(() -> new NotFoundException("Forwarder is not found"));
     driver.setForwarder(forwarder);
 
@@ -102,12 +104,20 @@ public class DriverServiceImpl implements DriverService {
     Driver driver = driverRepository.findById(request.getId())
         .orElseThrow(() -> new NotFoundException("Driver is not found."));
 
-    String encoder = passwordEncoder.encode(request.getPassword());
-    driver.setPassword(encoder);
+//    String encoder = passwordEncoder.encode(request.getPassword());
+//    driver.setPassword(encoder);
 
     driver.setPhone(request.getPhone());
-    driver.setEmail(request.getEmail());
-    driver.setStatus(EnumUserStatus.PENDING.name());
+    
+    if (UserServiceImpl.isEmailChange(request.getEmail(), driver)) {
+      driver.setEmail(request.getEmail());
+    }
+    
+    EnumUserStatus status = EnumUserStatus.findByName(request.getStatus());
+    if(status != null) {
+      driver.setStatus(status.name());
+    }
+    
     Set<String> rolesString = request.getRoles();
     Set<Role> roles = new HashSet<Role>();
     if (rolesString == null) {
@@ -122,20 +132,16 @@ public class DriverServiceImpl implements DriverService {
       });
     }
     driver.setRoles(roles);
-
-    Forwarder forwarder = forwarderRepository.findByUsername(request.getForwarderUsername())
-        .orElseThrow(() -> new NotFoundException("Forwarder is not found"));
-    driver.setForwarder(forwarder);
-
+    driver.setFullname(request.getFullname());
+    driver.setDriverLicense(request.getDriverLicense());
     driverRepository.save(driver);
     return driver;
   }
 
   @Override
   public Driver editDriver(Long id, Map<String, Object> updates) {
-    Driver driver = driverRepository.findById(id)
-        .orElseThrow(() -> new NotFoundException("Driver is not found."));
-    
+    Driver driver = driverRepository.findById(id).orElseThrow(() -> new NotFoundException("Driver is not found."));
+
     String password = (String) updates.get("password");
     if (password != null) {
       String encoder = passwordEncoder.encode(password);
@@ -143,7 +149,7 @@ public class DriverServiceImpl implements DriverService {
     }
 
     String email = (String) updates.get("email");
-    if (email != null) {
+    if (email != null && UserServiceImpl.isEmailChange(email, driver)) {
       driver.setEmail(email);
     }
 
@@ -156,22 +162,22 @@ public class DriverServiceImpl implements DriverService {
     if (address != null) {
       driver.setAddress(address);
     }
-    
+
     String fullname = (String) updates.get("fullname");
     if (fullname != null) {
       driver.setFullname(fullname);
     }
-    
+
     String driverLicense = (String) updates.get("driverLicense");
     if (driverLicense != null) {
       driver.setDriverLicense(driverLicense);
     }
-    
+
     String location = (String) updates.get("location");
     if (location != null) {
       driver.setLocation(location);
     }
-    
+
     driverRepository.save(driver);
     return driver;
   }

@@ -82,5 +82,5 @@ public class ContainerType {
   private Date updatedAt;
 
   @OneToMany(mappedBy = "containerType")
-  private Collection<Supply> supplies = new ArrayList<Supply>();
+  private Collection<Supply> supplies = new ArrayList<>();
 }

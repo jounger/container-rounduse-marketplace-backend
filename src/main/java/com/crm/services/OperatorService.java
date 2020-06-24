@@ -15,10 +15,10 @@ public interface OperatorService {
   Operator getOperatorById(Long id);
 
   Page<Operator> getOperators(PaginationRequest request);
-  
+
   Operator updateOperator(OperatorRequest request);
-  
+
   Operator editOperator(Long id, Map<String, Object> updates);
-  
+
   void removeOperator(Long id);
 }

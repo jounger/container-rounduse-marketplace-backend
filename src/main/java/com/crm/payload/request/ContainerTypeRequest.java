@@ -8,36 +8,36 @@ import lombok.Setter;
 @Getter
 @Setter
 public class ContainerTypeRequest {
-  
-    private Long id;
 
-	@NotBlank
-	private String name;
-	
-	@NotBlank
-	private String description;
+  private Long id;
 
-	@NotBlank
-	private float tareWeight;
+  @NotBlank
+  private String name;
 
-	@NotBlank
-	private float payloadCapacity;
+  @NotBlank
+  private String description;
 
-	@NotBlank
-	private float cubicCapacity;
+  @NotBlank
+  private float tareWeight;
 
-	@NotBlank
-	private float internalLength;
+  @NotBlank
+  private float payloadCapacity;
 
-	@NotBlank 
-	private float internalWidth;
+  @NotBlank
+  private float cubicCapacity;
 
-	@NotBlank 
-	private float internalHeight;
+  @NotBlank
+  private float internalLength;
 
-	@NotBlank 
-	private float doorOpeningWidth;
+  @NotBlank
+  private float internalWidth;
 
-	@NotBlank 
-	private float doorOpeningHeight;
+  @NotBlank
+  private float internalHeight;
+
+  @NotBlank
+  private float doorOpeningWidth;
+
+  @NotBlank
+  private float doorOpeningHeight;
 }

@@ -38,8 +38,8 @@ public class PermissionServiceImpl implements PermissionService {
   }
 
   @Override
-  public void deletePermission(PermissionRequest request) {
-    Permission permission = permissionRepository.findById(request.getId()).orElseThrow(() -> new NotFoundException("Permission is not found."));
+  public void removePermission(Long id) {
+    Permission permission = permissionRepository.findById(id).orElseThrow(() -> new NotFoundException("Permission is not found."));
     permissionRepository.delete(permission);
   }
 

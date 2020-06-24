@@ -2,11 +2,13 @@ package com.crm.controllers;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.crm.models.ContainerType;
@@ -80,6 +83,15 @@ public class ContainerTypeController {
   public ResponseEntity<?> updateContainerType(@Valid @RequestBody ContainerTypeRequest request) {
     ContainerType containerType = containerTypeService.updateContainerType(request);
     ContainerTypeDto containerTypeDto = ContainerTypeMapper.toContainerTypeDto(containerType);
+    return ResponseEntity.ok(containerTypeDto);
+  }
+
+  @PreAuthorize("hasRole('MODERATOR')")
+  @RequestMapping(value = "/{id}", method = RequestMethod.PATCH, consumes = MediaType.APPLICATION_JSON_VALUE)
+  public ResponseEntity<?> editContainerType(@RequestBody Map<String, Object> updates, @PathVariable("id") Long id) {
+    ContainerType containerType = containerTypeService.editContainerType(updates, id);
+    ContainerTypeDto containerTypeDto = new ContainerTypeDto();
+    containerTypeDto = ContainerTypeMapper.toContainerTypeDto(containerType);
     return ResponseEntity.ok(containerTypeDto);
   }
 

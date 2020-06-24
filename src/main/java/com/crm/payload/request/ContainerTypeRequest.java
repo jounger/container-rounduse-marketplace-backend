@@ -2,11 +2,6 @@ package com.crm.payload.request;
 
 import javax.validation.constraints.NotBlank;
 
-import org.springframework.format.annotation.NumberFormat;
-import org.springframework.format.annotation.NumberFormat.Style;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import lombok.Getter;
 import lombok.Setter;
 
@@ -23,39 +18,26 @@ public class ContainerTypeRequest {
 	private String description;
 
 	@NotBlank
-	@JsonProperty("tare_weight")
-	private String tareWeight;
+	private float tareWeight;
 
 	@NotBlank
-	@JsonProperty("payload_capacity")
-	private String payloadCapacity;
+	private float payloadCapacity;
 
 	@NotBlank
-	@JsonProperty("cubic_capacity")
-	private String cubicCapacity;
+	private float cubicCapacity;
 
 	@NotBlank
-	@NumberFormat(style = Style.NUMBER)
-	@JsonProperty("internal_length")
-	private String internalLength;
+	private float internalLength;
 
 	@NotBlank 
-	@NumberFormat(style = Style.NUMBER)
-	@JsonProperty("internal-width")
-	private String internalWidth;
+	private float internalWidth;
 
 	@NotBlank 
-	@NumberFormat(style = Style.NUMBER)
-	@JsonProperty("internal_height")
-	private String internalHeight;
+	private float internalHeight;
 
 	@NotBlank 
-	@NumberFormat(style = Style.NUMBER)
-	@JsonProperty("door_opening_width")
-	private String doorOpeningWidth;
+	private float doorOpeningWidth;
 
 	@NotBlank 
-	@NumberFormat(style = Style.NUMBER)
-	@JsonProperty("door_opening_height")
-	private String doorOpeningHeight;
+	private float doorOpeningHeight;
 }

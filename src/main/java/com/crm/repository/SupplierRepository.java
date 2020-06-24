@@ -21,5 +21,5 @@ public interface SupplierRepository extends JpaRepository<Supplier, Long> {
 
 	Boolean existsByPhone(String phone);
 
-	Page<Supplier> findByStatus(EnumUserStatus status, Pageable pageable);
+	Page<Supplier> findByStatus(String status, Pageable pageable);
 }

@@ -48,7 +48,7 @@ public class Permission {
   private String description;
 
   @ManyToMany(mappedBy = "permissions")
-  private Collection<Role> roles = new ArrayList<Role>();
+  private Collection<Role> roles = new ArrayList<>();
 
   @Column(name = "created_at", nullable = false, updatable = false)
   @Temporal(TemporalType.TIMESTAMP)

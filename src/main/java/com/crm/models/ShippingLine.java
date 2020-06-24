@@ -25,5 +25,5 @@ import lombok.ToString;
 public class ShippingLine extends Supplier {
 
   @OneToMany(mappedBy = "shippingLine")
-  private Set<Supply> supplies = new HashSet<Supply>();
+  private Set<Supply> supplies = new HashSet<>();
 }

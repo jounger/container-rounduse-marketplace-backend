@@ -22,4 +22,6 @@ public class SupplierRequest extends SignUpRequest{
 	private String tin;
 	
 	private String fax;
+	
+	private int ratingValue;
 }

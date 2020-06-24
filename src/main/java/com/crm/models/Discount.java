@@ -1,6 +1,7 @@
 package com.crm.models;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -69,5 +70,5 @@ public class Discount {
   private Date updatedAt;
 
   @OneToMany(mappedBy = "bidDiscountCode")
-  private List<BiddingDocument> biddingDocuments;
+  private List<BiddingDocument> biddingDocuments = new ArrayList<>();
 }

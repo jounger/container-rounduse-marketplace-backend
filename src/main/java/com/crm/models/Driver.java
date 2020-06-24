@@ -40,5 +40,5 @@ public class Driver extends User {
   private String location;
 
   @OneToMany(mappedBy = "driver")
-  private Collection<Container> containers = new ArrayList<Container>();
+  private Collection<Container> containers = new ArrayList<>();
 }

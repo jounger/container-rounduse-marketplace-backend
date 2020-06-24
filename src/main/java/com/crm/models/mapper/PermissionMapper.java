@@ -9,7 +9,7 @@ public class PermissionMapper {
     
     PermissionDto permissionDto = new PermissionDto();
     permissionDto.setName(permission.getName());
-    permissionDto.setDesciption(permission.getDescription());
+    permissionDto.setDescription(permission.getDescription());
     return permissionDto;
   }
   

@@ -1,8 +1,6 @@
 package com.crm.models.mapper;
 
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 import com.crm.models.Supplier;
@@ -26,6 +24,11 @@ public class SupplierMapper {
 		supplierDto.setWebsite(supplier.getWebsite());
 		supplierDto.setContactPerson(supplier.getContactPerson());
 		supplierDto.setCompanyName(supplier.getCompanyName());
+		supplierDto.setCompanyCode(supplier.getCompanyCode());
+		supplierDto.setCompanyDescription(supplier.getCompanyDescription());
+		supplierDto.setCompanyAddress(supplier.getCompanyAddress());
+		supplierDto.setTin(supplier.getTin());
+		supplierDto.setFax(supplier.getFax());
 		return supplierDto;
 	}
 }

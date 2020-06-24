@@ -3,6 +3,7 @@ package com.crm.controllers;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.transaction.Transactional;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +37,7 @@ public class RoleController {
   @Autowired
   private RoleService roleService;
   
-  @GetMapping("/role")
+  @GetMapping("")
   @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<?> getRoles(@Valid PaginationRequest request) {
     Page<Role> pages = roleService.getRoles(request);
@@ -54,21 +55,27 @@ public class RoleController {
     return ResponseEntity.ok(response);
   }
   
+  @Transactional
   @PutMapping("")
+  @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<?> updateRole(@Valid @RequestBody RoleRequest request) {
     roleService.updateRole(request);
     return ResponseEntity.ok(new MessageResponse("Role has been updated successfully"));
   }
   
+  @Transactional
   @DeleteMapping("")
+  @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<?> deleteRole(@Valid @RequestBody RoleRequest request) {
     roleService.deleteRole(request);
     return ResponseEntity.ok(new MessageResponse("Role has been deleted successfully"));
   }
   
+  @Transactional
   @PostMapping("")
+  @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<?> createRole(@Valid @RequestBody RoleRequest request) {
-    roleService.saveRole(request);
+    roleService.createRole(request);
     return ResponseEntity.ok(new MessageResponse("Role has been created successfully"));
   }
   

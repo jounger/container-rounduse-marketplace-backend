@@ -96,8 +96,8 @@ public class BiddingDocument {
   private Date updatedAt;
 
   @OneToMany(fetch = FetchType.LAZY, mappedBy = "biddingDocument")
-  private List<Bid> bids = new ArrayList<Bid>();
+  private List<Bid> bids = new ArrayList<>();
 
   @OneToMany(mappedBy = "report")
-  private Collection<Report> reports = new ArrayList<Report>();
+  private Collection<Report> reports = new ArrayList<>();
 }

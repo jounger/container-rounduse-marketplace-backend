@@ -2,11 +2,13 @@ package com.crm.controllers;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.crm.models.Operator;
@@ -47,7 +50,7 @@ public class OperatorController {
   }
 
   @GetMapping("")
-  @PreAuthorize("hasRole('ADMIN')")
+  @PreAuthorize("hasRole('ADMIN') or hasRole('MODERATOR')")
   public ResponseEntity<?> getOperators(@Valid PaginationRequest request) {
 
     Page<Operator> pages = operatorService.getOperators(request);
@@ -75,9 +78,18 @@ public class OperatorController {
 
   @Transactional
   @PutMapping("")
-  @PreAuthorize("hasRole('ADMIN')")
+  @PreAuthorize("hasRole('ADMIN') or hasRole('MODERATOR')")
   public ResponseEntity<?> updateOperator(@Valid @RequestBody OperatorRequest request){
     Operator operator = operatorService.updateOperator(request);
+    OperatorDto operatorDto = OperatorMapper.toOperatorDto(operator);
+    return ResponseEntity.ok(operatorDto);
+  }
+  
+  @Transactional
+  @PreAuthorize("hasRole('MODERATOR')")
+  @RequestMapping(value = "/{id}", method = RequestMethod.PATCH, consumes = MediaType.APPLICATION_JSON_VALUE)
+  public ResponseEntity<?> editOperator(@PathVariable("id") Long id, @RequestBody Map<String, Object> updates) {
+    Operator operator = operatorService.editOperator(id, updates);
     OperatorDto operatorDto = OperatorMapper.toOperatorDto(operator);
     return ResponseEntity.ok(operatorDto);
   }

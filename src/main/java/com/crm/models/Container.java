@@ -73,5 +73,5 @@ public class Container{
   private Date updatedAt;
 
   @OneToMany(mappedBy = "containers")
-  private Set<Bid> bids = new HashSet<Bid>();
+  private Set<Bid> bids = new HashSet<>();
 }

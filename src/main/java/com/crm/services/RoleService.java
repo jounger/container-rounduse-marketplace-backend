@@ -8,7 +8,7 @@ import com.crm.payload.request.RoleRequest;
 
 public interface RoleService {
   
-  void saveRole(RoleRequest request);
+  void createRole(RoleRequest request);
   
   Page<Role> getRoles(PaginationRequest request);
   

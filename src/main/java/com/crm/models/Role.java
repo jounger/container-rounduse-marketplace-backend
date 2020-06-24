@@ -40,8 +40,8 @@ public class Role {
 
   @ManyToMany(fetch = FetchType.LAZY)
   @JoinTable(name = "role_permission", joinColumns = @JoinColumn(name = "role_id"), inverseJoinColumns = @JoinColumn(name = "permission_id"))
-  private Set<Permission> permissions = new HashSet<Permission>();
+  private Set<Permission> permissions = new HashSet<>();
 
   @ManyToMany(mappedBy = "roles", fetch = FetchType.LAZY)
-  private Collection<User> users = new ArrayList<User>();
+  private Collection<User> users = new ArrayList<>();
 }

@@ -36,7 +36,7 @@ import lombok.ToString;
 @NoArgsConstructor
 @ToString
 @Entity
-@Table(name = "account")
+@Table(name = "bill_of_lading")
 @EntityListeners(AuditingEntityListener.class)
 @JsonIgnoreProperties(value = { "createdAt", "updatedAt" }, allowGetters = true)
 public class BillOfLading {

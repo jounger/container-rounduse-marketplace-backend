@@ -22,7 +22,7 @@ import lombok.ToString;
 @NoArgsConstructor
 @ToString
 @Entity
-@Table(name = "outbound")
+@Table(name = "inbound")
 @PrimaryKeyJoinColumn(name = "supply_id")
 public class Inbound extends Supply{
   

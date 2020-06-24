@@ -33,7 +33,7 @@ import com.crm.services.BiddingDocumentService;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
-@RequestMapping("/api/biddingdocument")
+@RequestMapping("/api/bidding-document")
 public class BiddingDocumentController {
   /*
   @Autowired

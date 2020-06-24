@@ -3,6 +3,7 @@ package com.crm.controllers;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.transaction.Transactional;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +38,7 @@ public class PermissionController {
   
   @GetMapping("")
   @PreAuthorize("hasRole('ADMIN')")
-  public ResponseEntity<?> getPermissions(@Valid @RequestBody PaginationRequest request) {
+  public ResponseEntity<?> getPermissions(@Valid PaginationRequest request) {
     Page<Permission> pages = permissionService.getPermission(request);
     PaginationResponse<PermissionDto> response = new PaginationResponse<>();
     response.setPageNumber(request.getPage());
@@ -53,19 +54,25 @@ public class PermissionController {
     return ResponseEntity.ok(response);
   }
   
+  @Transactional
   @PutMapping("")
+  @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<?> updatePermission(@Valid @RequestBody PermissionRequest request) {
     permissionService.updatePermission(request);
     return ResponseEntity.ok(new MessageResponse("Role has been updated successfully"));
   }
   
+  @Transactional
   @DeleteMapping("")
+  @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<?> deletePermission(@Valid @RequestBody PermissionRequest request) {
     permissionService.deletePermission(request);
     return ResponseEntity.ok(new MessageResponse("Role has been deleted successfully"));
   }
   
+  @Transactional
   @PostMapping("")
+  @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<?> createPermission(@Valid @RequestBody PermissionRequest request) {
     permissionService.savePermission(request);
     return ResponseEntity.ok(new MessageResponse("Role has been created successfully"));

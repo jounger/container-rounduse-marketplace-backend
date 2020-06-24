@@ -1,5 +1,7 @@
 package com.crm.services.impl;
 
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -42,20 +44,18 @@ public class OperatorServiceImpl implements OperatorService {
     }
     Operator operator = new Operator();
     operator.setUsername(request.getUsername());
-    operator.setEmail(request.getEmail());
-    operator.setPhone(request.getPhone());
-    operator.setStatus(EnumUserStatus.ACTIVE.name());
+
+    String encoder = passwordEncoder.encode(request.getPassword());
+    operator.setPassword(encoder);
+
     Role userRole = roleRepository.findByName("ROLE_MODERATOR")
         .orElseThrow(() -> new NotFoundException("Error: Role is not found"));
     operator.getRoles().add(userRole);
-    String address = request.getAddress();
-    if (address == null) {
-      throw new NotFoundException("Error: Address is not found");
-    } else {
-      operator.setAddress(address);
-    }
-    String encoder = passwordEncoder.encode(request.getPassword());
-    operator.setPassword(encoder);
+
+    operator.setPhone(request.getPhone());
+    operator.setEmail(request.getEmail());
+    operator.setAddress(request.getAddress());
+    operator.setStatus(EnumUserStatus.ACTIVE.name());
     operator.setFullname(request.getFullname());
     operator.setRoot(request.isRoot());
     operatorRepository.save(operator);
@@ -81,24 +81,55 @@ public class OperatorServiceImpl implements OperatorService {
         .orElseThrow(() -> new NotFoundException("Error: Operator is not found"));
     
     operator.setUsername(request.getUsername());
-    operator.setEmail(request.getEmail());
-    operator.setPhone(request.getPhone());
-    operator.setStatus(EnumUserStatus.ACTIVE.name());
+    
+    String encoder = passwordEncoder.encode(request.getPassword());
+    operator.setPassword(encoder);
+
     Role userRole = roleRepository.findByName("ROLE_MODERATOR")
         .orElseThrow(() -> new NotFoundException("Error: Role is not found"));
     operator.getRoles().add(userRole);
-    String address = request.getAddress();
-    if (address == null) {
-      throw new NotFoundException("Error: Address is not found");
-    } else {
-      operator.setAddress(address);
-    }
-    String encoder = passwordEncoder.encode(request.getPassword());
-    operator.setPassword(encoder);
+
+    operator.setPhone(request.getPhone());
+    operator.setEmail(request.getEmail());
+    operator.setAddress(request.getAddress());
+    operator.setStatus(EnumUserStatus.ACTIVE.name());
     operator.setFullname(request.getFullname());
     operator.setRoot(request.isRoot());
     operatorRepository.save(operator);
     
+    return operator;
+  }
+
+  @Override
+  public Operator editOperator(Long id, Map<String, Object> updates) {
+    Operator operator = operatorRepository.findById(id)
+        .orElseThrow(() -> new NotFoundException("Operator is not found."));
+
+    String password = (String) updates.get("password");
+    if (password != null) {
+      String encoder = passwordEncoder.encode(password);
+      operator.setPassword(encoder);
+    }
+
+    String email = (String) updates.get("email");
+    if (email != null) {
+      operator.setEmail(email);
+    }
+
+    String phone = (String) updates.get("phone");
+    if (phone != null) {
+      operator.setPhone(phone);
+    }
+
+    String address = (String) updates.get("address");
+    if (address != null) {
+      operator.setAddress(address);
+    }
+    
+    String fullname = (String) updates.get("fullname");
+    if (fullname != null) {
+      operator.setFullname(fullname);
+    }  
     return operator;
   }
 

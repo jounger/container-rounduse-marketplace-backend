@@ -47,7 +47,7 @@ public class OperatorController {
   }
 
   @GetMapping("")
-  @PreAuthorize("hasRole('ADMIN')")
+  @PreAuthorize("hasRole('ADMIN') or hasRole('MODERATOR')")
   public ResponseEntity<?> getOperators(@Valid PaginationRequest request) {
 
     Page<Operator> pages = operatorService.getOperators(request);
@@ -75,7 +75,7 @@ public class OperatorController {
 
   @Transactional
   @PutMapping("")
-  @PreAuthorize("hasRole('ADMIN')")
+  @PreAuthorize("hasRole('ADMIN') or hasRole('MODERATOR')")
   public ResponseEntity<?> updateOperator(@Valid @RequestBody OperatorRequest request){
     Operator operator = operatorService.updateOperator(request);
     OperatorDto operatorDto = OperatorMapper.toOperatorDto(operator);

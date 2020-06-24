@@ -18,4 +18,8 @@ public class Tool {
     
   }
   
+  public static float castDoubleToFloat(Double input) {
+    return Float.parseFloat(String.valueOf(input));
+  }
+  
 }

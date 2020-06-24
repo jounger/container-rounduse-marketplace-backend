@@ -9,4 +9,6 @@ import com.crm.models.Discount;
 public interface DiscountRepository extends JpaRepository<Discount, Long>{
 
   Optional<Discount> findByCode(String code);
+  
+  Boolean existsByCode(String code);
 }

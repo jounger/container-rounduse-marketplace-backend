@@ -85,7 +85,7 @@ public class SupplierController {
   @Transactional
   @PreAuthorize("hasRole('MODERATOR') or hasRole('FORWARDER') or hasRole('MERCHANT')")
   @RequestMapping(value = "/{id}", method = RequestMethod.PATCH, consumes = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<?> editSupplier(@RequestBody Map<String, Object> updates, @PathVariable("id") Long id) {
+  public ResponseEntity<?> editSupplier(@PathVariable("id") Long id, @RequestBody Map<String, Object> updates) {
     Supplier supplier = supplierService.editSupplier(updates, id);
     SupplierDto supplierDto = SupplierMapper.toSupplierDto(supplier);
     return ResponseEntity.ok(supplierDto);

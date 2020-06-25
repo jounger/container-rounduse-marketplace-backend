@@ -8,4 +8,7 @@ import com.crm.models.Container;
 @Repository
 public interface ContainerRepository extends JpaRepository<Container, Long> {
 
+  Boolean existsByContainerNumber(String containerNumber);
+
+  Boolean existsByLicensePlate(String licensePlate);
 }

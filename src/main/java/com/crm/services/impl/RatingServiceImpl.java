@@ -40,7 +40,7 @@ public class RatingServiceImpl implements RatingService {
     rating.setRatingValue(request.getRatingValue());
     ratingRepository.save(rating);
 
-    Float ratingValue = ratingRepository.findAvgRatingValueByReceiverId(request.getReceiverId());
+    Double ratingValue = ratingRepository.findAvgRatingValueByReceiverId(request.getReceiverId());
     receiver.setRatingValue(ratingValue);
     
     supplierRepository.save(receiver);
@@ -86,7 +86,7 @@ public class RatingServiceImpl implements RatingService {
     rating.setRatingValue(request.getRatingValue());
     ratingRepository.save(rating);
 
-    Float ratingValue = ratingRepository.findAvgRatingValueByReceiverId(request.getReceiverId());
+    Double ratingValue = ratingRepository.findAvgRatingValueByReceiverId(request.getReceiverId());
     receiver.setRatingValue(ratingValue);
     
     supplierRepository.save(receiver);
@@ -119,7 +119,7 @@ public class RatingServiceImpl implements RatingService {
       rating.setRatingValue(ratingValue);
       ratingRepository.save(rating);
       
-      Float receiverRatingValue = ratingRepository.findAvgRatingValueByReceiverId(receiverId);
+      Double receiverRatingValue = ratingRepository.findAvgRatingValueByReceiverId(receiverId);
       receiver.setRatingValue(receiverRatingValue);     
       supplierRepository.save(receiver);
     }   

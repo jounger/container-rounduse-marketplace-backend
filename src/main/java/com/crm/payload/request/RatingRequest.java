@@ -14,5 +14,5 @@ public class RatingRequest {
   
   private Long receiverId;
   
-  private int ratingValue;
+  private Integer ratingValue;
 }

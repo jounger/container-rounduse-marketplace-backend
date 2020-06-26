@@ -12,7 +12,7 @@ public interface RoleService {
   
   Page<Role> getRoles(PaginationRequest request);
   
-  void updateRole(RoleRequest request);
+  Role updateRole(RoleRequest request);
   
   void removeRole(Long id);
   

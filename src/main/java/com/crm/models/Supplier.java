@@ -11,7 +11,6 @@ import javax.persistence.OneToMany;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 import lombok.AllArgsConstructor;
@@ -72,7 +71,7 @@ public class Supplier extends User {
   private String fax;
 
   @Column(name = "rating_value")
-  private float ratingValue;
+  private Double ratingValue;
 
   @OneToMany(mappedBy = "receiver")
   private Collection<Rating> receivedRatings = new ArrayList<>();

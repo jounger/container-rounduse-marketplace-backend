@@ -42,8 +42,9 @@ public class RoleController {
   @PostMapping("")
   @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<?> createRole(@Valid @RequestBody RoleRequest request) {
-    roleService.createRole(request);
-    return ResponseEntity.ok(new MessageResponse("Role has been created successfully"));
+    Role role = roleService.createRole(request);
+    RoleDto roleDto = RoleMapper.toRoleDto(role);
+    return ResponseEntity.ok(roleDto);
   }
   
   @GetMapping("")
@@ -68,8 +69,9 @@ public class RoleController {
   @PutMapping("")
   @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<?> updateRole(@Valid @RequestBody RoleRequest request) {
-    roleService.updateRole(request);
-    return ResponseEntity.ok(new MessageResponse("Role has been updated successfully"));
+    Role role = roleService.updateRole(request);
+    RoleDto roleDto = RoleMapper.toRoleDto(role);
+    return ResponseEntity.ok(roleDto);
   }
   
   @Transactional

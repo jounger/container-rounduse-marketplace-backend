@@ -58,7 +58,7 @@ public class RoleServiceImpl implements RoleService {
   }
 
   @Override
-  public void updateRole(RoleRequest request) {
+  public Role updateRole(RoleRequest request) {
     Role role = roleRepository.findById(request.getId()).orElseThrow(() -> new NotFoundException("Role is not found"));
     List<String> permissionsString = request.getPermissions();
     permissionsString.forEach(permission -> {
@@ -68,6 +68,7 @@ public class RoleServiceImpl implements RoleService {
     });
     role.setName(request.getName());
     roleRepository.save(role);
+    return role;
   }
 
 }

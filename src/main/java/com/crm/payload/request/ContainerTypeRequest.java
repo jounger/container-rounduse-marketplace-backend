@@ -14,30 +14,21 @@ public class ContainerTypeRequest {
   @NotBlank
   private String name;
 
-  @NotBlank
   private String description;
 
-  @NotBlank
-  private float tareWeight;
+  private Double tareWeight;
 
-  @NotBlank
-  private float payloadCapacity;
+  private Double payloadCapacity;
 
-  @NotBlank
-  private float cubicCapacity;
+  private Double cubicCapacity;
 
-  @NotBlank
-  private float internalLength;
+  private Double internalLength;
 
-  @NotBlank
-  private float internalWidth;
+  private Double internalWidth;
 
-  @NotBlank
-  private float internalHeight;
+  private Double internalHeight;
 
-  @NotBlank
-  private float doorOpeningWidth;
+  private Double doorOpeningWidth;
 
-  @NotBlank
-  private float doorOpeningHeight;
+  private Double doorOpeningHeight;
 }

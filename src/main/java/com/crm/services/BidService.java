@@ -9,7 +9,7 @@ import com.crm.payload.request.BidRequest;
 import com.crm.payload.request.PaginationRequest;
 
 public interface BidService {
-  /*
+  
   void createBid(BidRequest request);
   
   Bid getBid(Long id);
@@ -25,5 +25,5 @@ public interface BidService {
   Bid editBid(Long id, Map<String, Object> updates);
   
   void removeBid(Long id);
-  */
+  
 }

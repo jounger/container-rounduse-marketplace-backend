@@ -6,7 +6,7 @@ import com.crm.services.BiddingDocumentService;
 
 @Service
 public class BiddingDocumentImpl implements BiddingDocumentService {
-  /*
+  
   @Autowired
   private BiddingDocumentRepository biddingDocumentRepository;
 
@@ -201,5 +201,5 @@ public class BiddingDocumentImpl implements BiddingDocumentService {
     biddingDocumentRepository.save(biddingDocument);
     return biddingDocument;
   }
-  */
+  
 }

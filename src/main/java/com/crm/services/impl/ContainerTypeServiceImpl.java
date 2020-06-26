@@ -7,7 +7,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
-import com.crm.common.Tool;
 import com.crm.exception.DuplicateRecordException;
 import com.crm.exception.NotFoundException;
 import com.crm.models.ContainerType;
@@ -100,43 +99,43 @@ public class ContainerTypeServiceImpl implements ContainerTypeService {
       containerType.setDescription(description);
     }
     Double tareWeight = (Double) updates.get("tareWeight");
-    if (tareWeight != null) {      
-      containerType.setTareWeight(Tool.castDoubleToFloat(tareWeight));
+    if (tareWeight != null) {
+      containerType.setTareWeight(tareWeight);
     }
 
     Double payloadCapacity = (Double) updates.get("payloadCapacity");
     if (payloadCapacity != null) {
-      containerType.setPayloadCapacity(Tool.castDoubleToFloat(payloadCapacity));
+      containerType.setPayloadCapacity(payloadCapacity);
     }
 
     Double cubicCapacity = (Double) updates.get("cubicCapacity");
     if (cubicCapacity != null) {
-      containerType.setCubicCapacity(Tool.castDoubleToFloat(cubicCapacity));
+      containerType.setCubicCapacity(cubicCapacity);
     }
 
     Double internalLength = (Double) updates.get("internalLength");
     if (internalLength != null) {
-      containerType.setInternalLength(Tool.castDoubleToFloat(internalLength));
+      containerType.setInternalLength(internalLength);
     }
 
     Double internalHeight = (Double) updates.get("internalHeight");
     if (internalHeight != null) {
-      containerType.setInternalHeight(Tool.castDoubleToFloat(internalHeight));
+      containerType.setInternalHeight(internalHeight);
     }
 
     Double internalWidth = (Double) updates.get("internalWidth");
     if (internalWidth != null) {
-      containerType.setInternalWidth(Tool.castDoubleToFloat(internalWidth));
+      containerType.setInternalWidth(internalWidth);
     }
 
     Double doorOpeningHeight = (Double) updates.get("doorOpeningHeight");
     if (doorOpeningHeight != null) {
-      containerType.setDoorOpeningHeight(Tool.castDoubleToFloat(doorOpeningHeight));
+      containerType.setDoorOpeningHeight(doorOpeningHeight);
     }
 
     Double doorOpeningWidth = (Double) updates.get("doorOpeningWidth");
     if (doorOpeningWidth != null) {
-      containerType.setDoorOpeningWidth(Tool.castDoubleToFloat(doorOpeningWidth));
+      containerType.setDoorOpeningWidth(doorOpeningWidth);
     }
 
     containerTypeRepository.save(containerType);

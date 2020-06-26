@@ -28,17 +28,17 @@ public class BiddingDocumentDto {
   private String bidClosing;
   
   @JsonProperty(value = "bid_package_price")
-  private float bidPackagePrice;
+  private Double bidPackagePrice;
   
   @JsonProperty(value = "bid_floor_price")
-  private float bidFloorPrice;
+  private Double bidFloorPrice;
   
   @JsonProperty(value = "bid_step")
-  private float bidStep;
+  private Double bidStep;
   
   @JsonProperty(value = "bid_discount_code")
   private String bidDiscountCode;
   
   @JsonProperty(value = "price_leadership")
-  private float priceLeadership;
+  private Double priceLeadership;
 }

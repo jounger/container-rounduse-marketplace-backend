@@ -50,13 +50,13 @@ public class Booking {
   @Column(name = "booking_number")
   private String bookingNumber;
   
-  private int unit;
+  private Integer unit;
   
   @Column(name = "cut_off_time")
   private LocalDateTime cutOffTime;
   
   @Column(name = "is_fcl")
-  private boolean isFcl;
+  private Boolean isFcl;
   
   @Column(name = "created_at", nullable = false, updatable = false)
   @Temporal(TemporalType.TIMESTAMP)

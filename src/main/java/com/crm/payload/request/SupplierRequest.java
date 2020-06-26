@@ -46,5 +46,5 @@ public class SupplierRequest extends SignUpRequest {
   @Size(min=5, max = 20)
   private String fax;
 
-  private int ratingValue;
+  private Integer ratingValue;
 }

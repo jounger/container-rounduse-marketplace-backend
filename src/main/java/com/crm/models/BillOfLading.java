@@ -53,7 +53,7 @@ public class BillOfLading {
   private String billOfLadingNumber;
   
   @Column(name = "free_time")
-  private int freeTime;
+  private Integer freeTime;
   
   @Column(name = "created_at", nullable = false, updatable = false)
   @Temporal(TemporalType.TIMESTAMP)

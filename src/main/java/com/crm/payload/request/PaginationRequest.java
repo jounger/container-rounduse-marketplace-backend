@@ -2,26 +2,22 @@ package com.crm.payload.request;
 
 import java.io.Serializable;
 
-import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
 @Setter
-@AllArgsConstructor
-@NoArgsConstructor
 public class PaginationRequest implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
-  @NotBlank
-  private int page;
+  @NotNull
+  private Integer page;
 
-  @NotBlank
-  private int limit;
+  @NotNull
+  private Integer limit;
   
   private String status;
   

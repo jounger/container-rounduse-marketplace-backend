@@ -16,7 +16,7 @@ public class BillOfLadingDto {
 
   private String billOfLadingNumber;
 
-  private int freeTime;
+  private Integer freeTime;
 
   private Set<ContainerDto> containers = new HashSet<>();
 }

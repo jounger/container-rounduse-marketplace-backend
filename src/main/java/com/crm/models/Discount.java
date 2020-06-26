@@ -51,10 +51,10 @@ public class Discount {
   //EnumCurrency
   private String currency;
 
-  private float percent;
+  private Double percent;
 
   @Column(name = "maximum_discount")
-  private float maximumDiscount;
+  private Double maximumDiscount;
 
   @Column(name = "expired_date")
   private LocalDateTime expiredDate;

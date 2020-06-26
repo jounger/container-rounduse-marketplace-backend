@@ -20,7 +20,7 @@ public class OperatorMapper {
     operatorDto.setRoles(roles);
     operatorDto.setAddress(operator.getAddress());
     operatorDto.setFullname(operator.getFullname());
-    operatorDto.setRoot(operator.isRoot());
+    operatorDto.setIsRoot(operator.getIsRoot());
 
     return operatorDto;
   }

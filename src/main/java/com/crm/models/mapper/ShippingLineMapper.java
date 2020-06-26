@@ -24,6 +24,8 @@ public class ShippingLineMapper {
     shippingLineDto.setWebsite(shippingLine.getWebsite());
     shippingLineDto.setContactPerson(shippingLine.getContactPerson());
     shippingLineDto.setCompanyName(shippingLine.getCompanyName());
+    shippingLineDto.setCompanyCode(shippingLine.getCompanyCode());
+    shippingLineDto.setCompanyDescription(shippingLine.getCompanyDescription());
     return shippingLineDto;
 }
 }

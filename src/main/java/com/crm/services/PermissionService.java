@@ -8,11 +8,13 @@ import com.crm.payload.request.PermissionRequest;
 
 public interface PermissionService {
 
-	void createPermission(PermissionRequest request);
+  Permission createPermission(PermissionRequest request);
 
-	Page<Permission> getPermission(PaginationRequest request);
+  Page<Permission> getPermissions(PaginationRequest request);
 
-	void removePermission(Long id);
+  void updatePermission(PermissionRequest request);
+  
+  void removePermission(Long id);
 
-	void updatePermission(PermissionRequest request);
+  
 }

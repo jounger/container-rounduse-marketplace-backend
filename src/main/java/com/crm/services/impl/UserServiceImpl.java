@@ -34,7 +34,7 @@ public class UserServiceImpl implements UserService {
   private PasswordEncoder passwordEncoder;
 
   @Override
-  public void saveUser(SignUpRequest request) {
+  public void createUser(SignUpRequest request) {
     if (userRepository.existsByUsername(request.getUsername()) || userRepository.existsByEmail(request.getEmail())
         || userRepository.existsByPhone(request.getPhone())) {
       throw new DuplicateRecordException("Error: User has been existed");

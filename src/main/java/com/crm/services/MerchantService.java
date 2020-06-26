@@ -11,7 +11,7 @@ import com.crm.payload.request.SupplierRequest;
 
 public interface MerchantService {
 
-  void createMerchant(SupplierRequest request);
+  Merchant createMerchant(SupplierRequest request);
 
   Merchant getMerchant(Long id);
 

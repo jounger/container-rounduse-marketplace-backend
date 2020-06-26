@@ -7,15 +7,12 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class SupplyRequest {
+public class InboundRequest extends SupplyRequest {
 
-  private Long id;
-
-  @NotBlank
-  private String shippingLine;
+  private BillOfLadingRequest billOfLading;
 
   @NotBlank
-  private String containerType;
+  private String pickupTime;
 
-  private String status;
+  private String emptyTime;
 }

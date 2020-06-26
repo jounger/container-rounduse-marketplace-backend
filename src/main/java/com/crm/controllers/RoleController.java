@@ -38,6 +38,14 @@ public class RoleController {
   @Autowired
   private RoleService roleService;
   
+  @Transactional
+  @PostMapping("")
+  @PreAuthorize("hasRole('ADMIN')")
+  public ResponseEntity<?> createRole(@Valid @RequestBody RoleRequest request) {
+    roleService.createRole(request);
+    return ResponseEntity.ok(new MessageResponse("Role has been created successfully"));
+  }
+  
   @GetMapping("")
   @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<?> getRoles(@Valid PaginationRequest request) {
@@ -70,14 +78,6 @@ public class RoleController {
   public ResponseEntity<?> removeRole(@PathVariable Long id) {
     roleService.removeRole(id);
     return ResponseEntity.ok(new MessageResponse("Role has been deleted successfully"));
-  }
-  
-  @Transactional
-  @PostMapping("")
-  @PreAuthorize("hasRole('ADMIN')")
-  public ResponseEntity<?> createRole(@Valid @RequestBody RoleRequest request) {
-    roleService.createRole(request);
-    return ResponseEntity.ok(new MessageResponse("Role has been created successfully"));
   }
   
 }

@@ -39,7 +39,7 @@ public class MerchantServiceImpl implements MerchantService {
   private PasswordEncoder passwordEncoder;
 
   @Override
-  public void createMerchant(SupplierRequest request) {
+  public Merchant createMerchant(SupplierRequest request) {
     if (userRepository.existsByUsername(request.getUsername()) || userRepository.existsByEmail(request.getEmail())
         || userRepository.existsByPhone(request.getPhone())) {
       throw new DuplicateRecordException("Error: User has been existed");
@@ -69,6 +69,8 @@ public class MerchantServiceImpl implements MerchantService {
     merchant.setPassword(encoder);
 
     merchantRepository.save(merchant);
+    
+    return merchant;
   }
 
   @Override

@@ -8,6 +8,8 @@ import javax.persistence.Entity;
 import javax.persistence.OneToMany;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -25,6 +27,8 @@ import lombok.ToString;
 @PrimaryKeyJoinColumn(name = "user_id")
 public class Operator extends User {
 
+  @NotBlank
+  @Size(min = 3, max = 30)
   private String fullname;
 
   @Column(name = "is_root")

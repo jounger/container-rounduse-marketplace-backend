@@ -20,7 +20,7 @@ public class PermissionServiceImpl implements PermissionService {
   PermissionRepository permissionRepository;
 
   @Override
-  public void createPermission(PermissionRequest request) {
+  public Permission createPermission(PermissionRequest request) {
     Permission permission = new Permission();
     if(permissionRepository.existsByName(request.getName())) {
       throw new DuplicateRecordException("Permission already exists.");
@@ -29,10 +29,12 @@ public class PermissionServiceImpl implements PermissionService {
       permission.setDescription(request.getDescription());
       permissionRepository.save(permission);
     }
+    
+    return permission;
   }
 
   @Override
-  public Page<Permission> getPermission(PaginationRequest request) {
+  public Page<Permission> getPermissions(PaginationRequest request) {
     Page<Permission> pages = permissionRepository.findAll(PageRequest.of(request.getPage(), request.getLimit()));
     return pages;
   }

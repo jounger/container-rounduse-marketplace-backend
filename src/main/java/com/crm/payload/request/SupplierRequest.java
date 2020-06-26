@@ -1,27 +1,50 @@
 package com.crm.payload.request;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Size;
+
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.Setter;
 
 @Getter
 @Setter
-public class SupplierRequest extends SignUpRequest{
+public class SupplierRequest extends SignUpRequest {
 
-	private String website;
-	
-	private String contactPerson;
-	
-	private String companyName;
+  @NotBlank
+  @Size(min = 5, max = 50)
+  @NonNull
+  private String website;
 
-	private String companyCode;
-	
-	private String companyDescription;
-	
-	private String companyAddress;
-	
-	private String tin;
-	
-	private String fax;
-	
-	private int ratingValue;
+  @NotBlank
+  @Size(min = 5, max = 50)
+  private String contactPerson;
+
+  @NotBlank
+  @Size(min = 5, max = 100)
+  private String companyName;
+
+  @NotBlank
+  @Size(min = 2, max = 10)
+  private String companyCode;
+
+  @NotBlank
+  @Size(min = 5, max = 200)
+  private String companyDescription;
+
+  @NotBlank
+  @Size(min = 5, max = 200)
+  private String companyAddress;
+
+  @NotBlank
+  @Size(min = 5, max = 20)
+  private String tin;
+
+  @NotBlank
+  @NotEmpty
+  @Size(min=5, max = 20)
+  private String fax;
+
+  private int ratingValue;
 }

@@ -27,7 +27,7 @@ public class RoleServiceImpl implements RoleService {
   private PermissionRepository permissionRepository;
 
   @Override
-  public void createRole(RoleRequest request) {
+  public Role createRole(RoleRequest request) {
     Role role = new Role();
     if (roleRepository.existsByName(request.getName())) {
       throw new DuplicateRecordException("Role already exists.");
@@ -39,7 +39,10 @@ public class RoleServiceImpl implements RoleService {
           .orElseThrow(() -> new NotFoundException("Permission is not found."));
       role.getPermissions().add(rolePermission);
     });
+    
     roleRepository.save(role);
+    
+    return role;
   }
 
   @Override

@@ -10,6 +10,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -28,9 +30,13 @@ import lombok.ToString;
 public class Driver extends User {
 
   @Column(name = "fullname", length = 50)
+  @NotBlank
+  @Size(min = 5, max = 50)
   private String fullname;
 
   @Column(name = "driver_license", length = 50)
+  @NotBlank
+  @Size(min = 5, max = 50)
   private String driverLicense;
 
   @ManyToOne

@@ -36,7 +36,7 @@ public class OperatorServiceImpl implements OperatorService {
   private OperatorRepository operatorRepository;
 
   @Override
-  public void createOperator(OperatorRequest request) {
+  public Operator createOperator(OperatorRequest request) {
 
     if (userRepository.existsByUsername(request.getUsername()) || userRepository.existsByEmail(request.getEmail())
         || userRepository.existsByPhone(request.getPhone())) {
@@ -53,17 +53,19 @@ public class OperatorServiceImpl implements OperatorService {
     operator.getRoles().add(userRole);
 
     operator.setPhone(request.getPhone());
-    
+
     if (UserServiceImpl.isEmailChange(request.getEmail(), operator)) {
       operator.setEmail(request.getEmail());
     }
-    
+
     operator.setAddress(request.getAddress());
     operator.setStatus(EnumUserStatus.ACTIVE.name());
     operator.setFullname(request.getFullname());
     operator.setRoot(request.isRoot());
+
     operatorRepository.save(operator);
 
+    return operator;
   }
 
   @Override
@@ -96,7 +98,14 @@ public class OperatorServiceImpl implements OperatorService {
     operator.setPhone(request.getPhone());
     operator.setEmail(request.getEmail());
     operator.setAddress(request.getAddress());
-    operator.setStatus(EnumUserStatus.ACTIVE.name());
+    
+    EnumUserStatus status = EnumUserStatus.findByName(request.getStatus());
+    if (status != null) {
+      operator.setStatus(EnumUserStatus.ACTIVE.name());
+    }else {
+      throw new NotFoundException("Status is not found.");
+    }
+
     operator.setFullname(request.getFullname());
     operator.setRoot(request.isRoot());
     operatorRepository.save(operator);
@@ -128,6 +137,12 @@ public class OperatorServiceImpl implements OperatorService {
     String address = (String) updates.get("address");
     if (address != null) {
       operator.setAddress(address);
+    }
+
+    String status = (String) updates.get("status");
+    if (status != null) {
+      EnumUserStatus eStatus = EnumUserStatus.findByName(status);
+      operator.setStatus(eStatus.name());
     }
 
     String fullname = (String) updates.get("fullname");

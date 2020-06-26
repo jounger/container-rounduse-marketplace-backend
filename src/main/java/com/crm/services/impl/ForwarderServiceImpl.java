@@ -37,9 +37,9 @@ public class ForwarderServiceImpl implements ForwarderService {
 
   @Autowired
   private ForwarderRepository forwarderRepository;
-
+  
   @Override
-  public void createForwarder(SupplierRequest request) {
+  public Forwarder createForwarder(SupplierRequest request) {
     if (userRepository.existsByUsername(request.getUsername()) || userRepository.existsByEmail(request.getEmail())
         || userRepository.existsByPhone(request.getPhone())) {
       throw new DuplicateRecordException("Error: User has been existed");
@@ -70,6 +70,8 @@ public class ForwarderServiceImpl implements ForwarderService {
     forwarder.setFax(request.getFax());
 
     forwarderRepository.save(forwarder);
+    
+    return forwarder;
   }
 
   @Override

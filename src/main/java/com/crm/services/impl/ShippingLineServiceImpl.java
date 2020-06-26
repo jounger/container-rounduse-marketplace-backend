@@ -36,7 +36,7 @@ public class ShippingLineServiceImpl implements ShippingLineService {
   private PasswordEncoder passwordEncoder;
 
   @Override
-  public void createShippingLine(ShippingLineRequest request) {
+  public ShippingLine createShippingLine(ShippingLineRequest request) {
     if (userRepository.existsByUsername(request.getUsername()) || userRepository.existsByEmail(request.getEmail())
         || userRepository.existsByPhone(request.getPhone())) {
       throw new DuplicateRecordException("Error: User has been existed");
@@ -63,7 +63,10 @@ public class ShippingLineServiceImpl implements ShippingLineService {
     shippingLine.setCompanyAddress(request.getCompanyAddress());
     shippingLine.setTin(request.getTin());
     shippingLine.setFax(request.getFax());
+    
     shippingLineRepository.save(shippingLine);
+    
+    return shippingLine;
   }
 
   @Override
@@ -140,6 +143,12 @@ public class ShippingLineServiceImpl implements ShippingLineService {
       shippingLine.setAddress(address);
     }
 
+    String status = (String) updates.get("status");
+    if (status != null) {
+      EnumUserStatus eStatus = EnumUserStatus.findByName(status);
+      shippingLine.setStatus(eStatus.name());
+    }
+
     String website = (String) updates.get("website");
     if (website != null) {
       shippingLine.setWebsite(website);
@@ -174,6 +183,8 @@ public class ShippingLineServiceImpl implements ShippingLineService {
     if (fax != null) {
       shippingLine.setFax(fax);
     }
+
+    shippingLineRepository.save(shippingLine);
 
     return shippingLine;
   }

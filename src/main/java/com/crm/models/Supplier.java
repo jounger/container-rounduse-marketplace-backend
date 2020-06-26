@@ -10,6 +10,9 @@ import javax.persistence.InheritanceType;
 import javax.persistence.OneToMany;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -29,27 +32,43 @@ import lombok.ToString;
 public class Supplier extends User {
 
   @Column(name = "website", length = 50)
+  @NotBlank
+  @Size(min = 5, max = 100)
   private String website;
 
   @Column(name = "contact_person", length = 100)
+  @Size(min = 5, max = 50)
   private String contactPerson;
 
+  
   @Column(name = "company_name", length = 100)
+  @NotBlank
+  @Size(min = 5, max = 100)
   private String companyName;
 
   @Column(name = "company_code", length = 10, unique = true)
+  @NotBlank
+  @Size(min = 2, max = 10)
   private String companyCode;
 
   @Column(name = "description", length = 100)
+  @NotBlank
+  @Size(min = 5, max = 200)
   private String companyDescription;
 
   @Column(name = "company_address", length = 200)
+  @NotBlank
+  @Size(min = 5, max = 200)
   private String companyAddress;
   
   @Column(name = "tin", length = 20)
+  @NotBlank
+  @Size(min = 5, max = 20)
   private String tin;
 
   @Column(name = "fax", length = 20)
+  @NotBlank
+  @Size(min = 5, max = 20)
   private String fax;
 
   @Column(name = "rating_value")

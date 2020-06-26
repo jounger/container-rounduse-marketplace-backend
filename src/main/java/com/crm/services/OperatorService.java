@@ -10,7 +10,7 @@ import com.crm.payload.request.PaginationRequest;
 
 public interface OperatorService {
 
-  void createOperator(OperatorRequest request);
+  Operator createOperator(OperatorRequest request);
 
   Operator getOperatorById(Long id);
 

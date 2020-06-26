@@ -36,11 +36,19 @@ public class PermissionController {
 
   @Autowired
   private PermissionService permissionService;
+
+  @Transactional
+  @PostMapping("")
+  @PreAuthorize("hasRole('ADMIN')")
+  public ResponseEntity<?> createPermission(@Valid @RequestBody PermissionRequest request) {
+    permissionService.createPermission(request);
+    return ResponseEntity.ok(new MessageResponse("Role has been created successfully"));
+  }
   
   @GetMapping("")
   @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<?> getPermissions(@Valid PaginationRequest request) {
-    Page<Permission> pages = permissionService.getPermission(request);
+    Page<Permission> pages = permissionService.getPermissions(request);
     PaginationResponse<PermissionDto> response = new PaginationResponse<>();
     response.setPageNumber(request.getPage());
     response.setPageSize(request.getLimit());
@@ -69,13 +77,5 @@ public class PermissionController {
   public ResponseEntity<?> removePermission(@PathVariable Long id) {
     permissionService.removePermission(id);
     return ResponseEntity.ok(new MessageResponse("Role has been deleted successfully"));
-  }
-  
-  @Transactional
-  @PostMapping("")
-  @PreAuthorize("hasRole('ADMIN')")
-  public ResponseEntity<?> createPermission(@Valid @RequestBody PermissionRequest request) {
-    permissionService.createPermission(request);
-    return ResponseEntity.ok(new MessageResponse("Role has been created successfully"));
   }
 }

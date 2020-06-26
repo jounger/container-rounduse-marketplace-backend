@@ -69,7 +69,9 @@ public class User {
   @Size(min = 5, max = 50)
   @Email
   private String email;
-
+  
+  @NotBlank
+  @Size(min = 5, max = 200)
   private String address;
 
   //EnumUserStatus

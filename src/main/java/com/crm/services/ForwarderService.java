@@ -11,7 +11,7 @@ import com.crm.payload.request.SupplierRequest;
 
 public interface ForwarderService {
 
-  void createForwarder(SupplierRequest request);
+  Forwarder createForwarder(SupplierRequest request);
 
   Forwarder getForwarder(Long id);
 

@@ -7,31 +7,19 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class ContainerRequest extends SupplyRequest{
+public class ContainerRequest {
 
-	private String driver;
-	
-	private String forwarder;
+  private Long id;
 
-	private String containerTrailer;
+  private String containerNumber;
 
-	private String containerTractor;
+  private String driver;
 
-	private String containerNumber;
+  private String trailer;
 
-	private String blNumber;
+  private String tractor;
 
-	private String licensePlate;
-	
-	private String emptyTime;
-	
-	private String pickUpTime;
-	
-	private String returnStation;
+  private String licensePlate;
 
-	private String portOfDelivery;
-	
-	private int freeTime;
-    
-    private Set<Long> bids;
+  private Set<Long> bids;
 }

@@ -32,6 +32,8 @@ public class SignUpRequest {
   
   private String status;
   
+  @NotBlank
+  @Size(min=5, max = 100)
   private String address;
   
   @NotBlank

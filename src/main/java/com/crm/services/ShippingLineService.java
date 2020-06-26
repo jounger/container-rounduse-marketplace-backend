@@ -10,15 +10,15 @@ import com.crm.payload.request.ShippingLineRequest;
 
 public interface ShippingLineService {
 
-	void createShippingLine(ShippingLineRequest request);
-	
-	ShippingLine getShippingLine(Long id);
-	
-	Page<ShippingLine> getShippingLines(PaginationRequest request);
-	
-	ShippingLine updateShippingLine(ShippingLineRequest request);
-	
-	ShippingLine editShippingLine(Long id, Map<String, Object> updates);
-	
-	void removeShippingLine(Long id);
+  ShippingLine createShippingLine(ShippingLineRequest request);
+
+  ShippingLine getShippingLine(Long id);
+
+  Page<ShippingLine> getShippingLines(PaginationRequest request);
+
+  ShippingLine updateShippingLine(ShippingLineRequest request);
+
+  ShippingLine editShippingLine(Long id, Map<String, Object> updates);
+
+  void removeShippingLine(Long id);
 }

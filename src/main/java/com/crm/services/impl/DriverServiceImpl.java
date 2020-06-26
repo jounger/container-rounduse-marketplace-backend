@@ -43,7 +43,7 @@ public class DriverServiceImpl implements DriverService {
   private ForwarderRepository forwarderRepository;
 
   @Override
-  public void createDriver(Long id, DriverRequest request) {
+  public Driver createDriver(Long id, DriverRequest request) {
     if (userRepository.existsByUsername(request.getUsername()) || userRepository.existsByEmail(request.getEmail())
         || userRepository.existsByPhone(request.getPhone())) {
       throw new DuplicateRecordException("Error: User has been existed");
@@ -59,26 +59,22 @@ public class DriverServiceImpl implements DriverService {
     driver.setStatus(EnumUserStatus.PENDING.name());
     driver.setAddress(request.getAddress());
 
-    Set<String> rolesString = request.getRoles();
-    Set<Role> roles = new HashSet<Role>();
-    if (rolesString == null) {
-      Role userRole = roleRepository.findByName("ROLE_DRIVER")
-          .orElseThrow(() -> new NotFoundException("Error: Role is not found"));
-      roles.add(userRole);
-    } else {
-      rolesString.forEach(role -> {
-        Role userRole = roleRepository.findByName(role)
-            .orElseThrow(() -> new NotFoundException("Error: Role is not found"));
-        roles.add(userRole);
-      });
-    }
+    Set<Role> roles = new HashSet<>();
+    Role userRole = roleRepository.findByName("ROLE_DRIVER")
+        .orElseThrow(() -> new NotFoundException("Error: Role is not found"));
+    roles.add(userRole);
     driver.setRoles(roles);
+    
+    driver.setFullname(request.getFullname());
+    driver.setDriverLicense(request.getDriverLicense());
 
     Forwarder forwarder = forwarderRepository.findById(id)
         .orElseThrow(() -> new NotFoundException("Forwarder is not found"));
     driver.setForwarder(forwarder);
 
     driverRepository.save(driver);
+
+    return driver;
   }
 
   @Override
@@ -108,16 +104,16 @@ public class DriverServiceImpl implements DriverService {
 //    driver.setPassword(encoder);
 
     driver.setPhone(request.getPhone());
-    
+
     if (UserServiceImpl.isEmailChange(request.getEmail(), driver)) {
       driver.setEmail(request.getEmail());
     }
-    
+
     EnumUserStatus status = EnumUserStatus.findByName(request.getStatus());
-    if(status != null) {
+    if (status != null) {
       driver.setStatus(status.name());
     }
-    
+
     Set<String> rolesString = request.getRoles();
     Set<Role> roles = new HashSet<Role>();
     if (rolesString == null) {

@@ -8,12 +8,12 @@ import com.crm.payload.request.RoleRequest;
 
 public interface RoleService {
   
-  void createRole(RoleRequest request);
+  Role createRole(RoleRequest request);
   
   Page<Role> getRoles(PaginationRequest request);
   
-  void removeRole(Long id);
-  
   void updateRole(RoleRequest request);
+  
+  void removeRole(Long id);
   
 }

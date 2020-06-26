@@ -86,7 +86,7 @@ public class OperatorController {
   }
   
   @Transactional
-  @PreAuthorize("hasRole('MODERATOR')")
+  @PreAuthorize("hasRole('ADMIN') or hasRole('MODERATOR')")
   @RequestMapping(value = "/{id}", method = RequestMethod.PATCH, consumes = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<?> editOperator(@PathVariable("id") Long id, @RequestBody Map<String, Object> updates) {
     Operator operator = operatorService.editOperator(id, updates);

@@ -1,14 +1,17 @@
 package com.crm.payload.request;
 
+import javax.validation.constraints.NotBlank;
+
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-public class DriverRequest extends SignUpRequest{
+public class DriverRequest extends SignUpRequest {
 
-	private String fullname;
-	
-	private String driverLicense;
-	
+  @NotBlank
+  private String fullname;
+
+  private String driverLicense;
+
 }

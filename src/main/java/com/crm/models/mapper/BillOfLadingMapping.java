@@ -9,7 +9,9 @@ import com.crm.models.dto.BillOfLadingDto;
 import com.crm.models.dto.ContainerDto;
 
 public class BillOfLadingMapping {
+
   public static BillOfLadingDto toBillOfLadingDto(BillOfLading billOfLading) {
+
     BillOfLadingDto billOfLadingDto = new BillOfLadingDto();
     billOfLadingDto.setId(billOfLading.getId());
     billOfLadingDto.setBillOfLadingNumber(billOfLading.getBillOfLadingNumber());

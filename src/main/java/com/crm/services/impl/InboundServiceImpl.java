@@ -9,6 +9,10 @@ import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+<<<<<<< HEAD
+=======
+import org.springframework.data.domain.PageRequest;
+>>>>>>> master
 import org.springframework.stereotype.Service;
 
 import com.crm.common.Tool;
@@ -66,14 +70,25 @@ public class InboundServiceImpl implements InboundService {
 
   @Override
   public Page<Inbound> getInbounds(PaginationRequest request) {
+<<<<<<< HEAD
     // TODO Auto-generated method stub
     return null;
+=======
+    Page<Inbound> pages = inboundRepository.findAll(PageRequest.of(request.getPage(), request.getLimit()));
+    return pages;
+>>>>>>> master
   }
 
   @Override
   public Inbound getInboundById(Long id) {
+<<<<<<< HEAD
     // TODO Auto-generated method stub
     return null;
+=======
+    Inbound inbound = inboundRepository.findById(id)
+        .orElseThrow(() -> new NotFoundException("ERROR: Inbound is not found."));
+    return inbound;
+>>>>>>> master
   }
 
   @Override
@@ -133,6 +148,10 @@ public class InboundServiceImpl implements InboundService {
       String driverUserName = containersRequest.get(i).getDriver();
       Driver driver = driverRepository.findByUsername(driverUserName)
           .orElseThrow(() -> new NotFoundException("ERROR: Driver is not found."));
+<<<<<<< HEAD
+=======
+      container.setBillOfLading(billOfLading);
+>>>>>>> master
       container.setDriver(driver);
       container.setTractor(containersRequest.get(i).getTractor());
       container.setTrailer(containersRequest.get(i).getTrailer());
@@ -189,6 +208,12 @@ public class InboundServiceImpl implements InboundService {
 
     BillOfLading billOfLading = (BillOfLading) inbound.getBillOfLading();
     BillOfLadingRequest billOfLadingRequest = (BillOfLadingRequest) request.getBillOfLading();
+<<<<<<< HEAD
+=======
+
+    if (billOfLadingRequest != null) {
+
+>>>>>>> master
 //    String billOfLadingNumber = billOfLadingRequest.getBillOfLadingNumber();
 //    if (billOfLadingNumber != null) {
 //      if (billOfLadingRepository.existsByBillOfLadingNumber(billOfLadingNumber)) {
@@ -199,6 +224,7 @@ public class InboundServiceImpl implements InboundService {
 //      throw new NotFoundException("ERROR: BillOfLadingNumber is not found.");
 //    }
 
+<<<<<<< HEAD
     List<ContainerRequest> containersRequest = billOfLadingRequest.getContainers();
 
     for (int i = 0; i < containersRequest.size() - 1; i++) {
@@ -255,6 +281,67 @@ public class InboundServiceImpl implements InboundService {
     billOfLadingRepository.save(billOfLading);
 
     inbound.setBillOfLading(billOfLading);
+=======
+      List<ContainerRequest> containersRequest = billOfLadingRequest.getContainers();
+
+      for (int i = 0; i < containersRequest.size() - 1; i++) {
+        for (int j = i + 1; j < containersRequest.size(); j++) {
+          if (containersRequest.get(i).getContainerNumber().equals(containersRequest.get(j).getContainerNumber())
+              || containersRequest.get(i).getLicensePlate().equals(containersRequest.get(j).getLicensePlate())
+              || containersRequest.get(i).getDriver().equals(containersRequest.get(j).getDriver())) {
+            throw new DuplicateRecordException("Error: Container has been existed");
+          }
+        }
+      }
+
+      Set<Container> setContainers = inbound.getBillOfLading().getContainers();
+      setContainers.forEach(item -> {
+        for (int i = 0; i < containersRequest.size(); i++) {
+          if (item.getContainerNumber().equals(containersRequest.get(i).getContainerNumber())
+              || item.getLicensePlate().equals(containersRequest.get(i).getLicensePlate())
+              || item.getDriver().getUsername().equals(containersRequest.get(i).getDriver())) {
+            if (item.getId().equals(containersRequest.get(i).getId())) {
+
+            } else {
+              throw new DuplicateRecordException("Error: Container has been existed");
+            }
+          }
+        }
+      });
+
+      List<Container> containers = new ArrayList<Container>();
+      for (int i = 0; i < containersRequest.size(); i++) {
+        Container container = containerRepository.findById(containersRequest.get(i).getId())
+            .orElseThrow(() -> new NotFoundException("ERROR: Container is not found."));
+        String driverUserName = containersRequest.get(i).getDriver();
+        Driver driver = driverRepository.findByUsername(driverUserName)
+            .orElseThrow(() -> new NotFoundException("ERROR: Driver is not found."));
+        container.setBillOfLading(billOfLading);
+        container.setDriver(driver);
+        container.setTractor(containersRequest.get(i).getTractor());
+        container.setTrailer(containersRequest.get(i).getTrailer());
+        container.setContainerNumber(containersRequest.get(i).getContainerNumber());
+        container.setLicensePlate(containersRequest.get(i).getLicensePlate());
+        containerRepository.save(container);
+        containers.add(container);
+      }
+
+      Set<Container> containerSet = new HashSet<>(containers);
+
+      billOfLading.setContainers(containerSet);
+
+      Port port = portRepository.findByNameCode(billOfLadingRequest.getPortOfDelivery())
+          .orElseThrow(() -> new NotFoundException("ERROR: Port is not found."));
+      billOfLading.setPortOfDelivery(port);
+
+      billOfLading.setFreeTime(request.getBillOfLading().getFreeTime());
+
+      billOfLadingRepository.save(billOfLading);
+
+      inbound.setBillOfLading(billOfLading);
+
+    }
+>>>>>>> master
 
     inboundRepository.save(inbound);
     return inbound;
@@ -262,14 +349,74 @@ public class InboundServiceImpl implements InboundService {
 
   @Override
   public Inbound editInbound(Map<String, Object> updates, Long id) {
+<<<<<<< HEAD
     // TODO Auto-generated method stub
     return null;
+=======
+    Inbound inbound = inboundRepository.findById(id)
+        .orElseThrow(() -> new NotFoundException("ERROR: Inbound is not found."));
+
+    String shippingLineRequest = (String) updates.get("shippingLine");
+    if (shippingLineRequest != null) {
+      ShippingLine shippingLine = shippingLineRepository.findByCompanyCode(shippingLineRequest)
+          .orElseThrow(() -> new NotFoundException("ERROR: Shipping Line is not found."));
+      inbound.setShippingLine(shippingLine);
+    }
+
+    String containerTypeRequest = (String) updates.get("containerType");
+    if (containerTypeRequest != null) {
+      ContainerType containerType = containerTypeRepository.findByName(containerTypeRequest)
+          .orElseThrow(() -> new NotFoundException("ERROR: Container Type is not found."));
+      inbound.setContainerType(containerType);
+    }
+
+    String statusRequest = (String) updates.get("status");
+    if (statusRequest != null) {
+      inbound.setStatus(EnumSupplyStatus.findByName(statusRequest).name());
+    }
+
+    String pickupTimeRequest = (String) updates.get("pickupTime");
+    if (pickupTimeRequest != null) {
+      LocalDateTime pickupTime = Tool.convertToLocalDateTime(pickupTimeRequest);
+      inbound.setPickupTime(pickupTime);
+    }
+
+    String emptyTimeRequest = (String) updates.get("emptyTime");
+    if (emptyTimeRequest != null) {
+      LocalDateTime emptyTime = Tool.convertToLocalDateTime(emptyTimeRequest);
+      inbound.setEmptyTime(emptyTime);
+    }
+
+    inboundRepository.save(inbound);
+    return inbound;
+>>>>>>> master
   }
 
   @Override
   public void removeInbound(Long id) {
+<<<<<<< HEAD
     // TODO Auto-generated method stub
 
+=======
+    Inbound inbound = inboundRepository.findById(id)
+        .orElseThrow(() -> new NotFoundException("ERROR: Inbound is not found."));
+    inboundRepository.delete(inbound);
+    BillOfLading billOfLading = billOfLadingRepository.findById(inbound.getBillOfLading().getId())
+        .orElseThrow(() -> new NotFoundException("ERROR: BillOfLading is not found."));
+    billOfLadingRepository.delete(billOfLading);
+    Set<Container> containers = billOfLading.getContainers();
+    if (containers != null) {
+      containers.forEach(item -> {
+        containerRepository.deleteById(item.getId());
+      });
+    }
+  }
+
+  @Override
+  public Page<Inbound> getInboundsForwarder(Long id, PaginationRequest request) {
+    Page<Inbound> pages = inboundRepository.findAll(PageRequest.of(request.getPage(), request.getLimit()));
+    return pages;
+>>>>>>> master
   }
 
 }

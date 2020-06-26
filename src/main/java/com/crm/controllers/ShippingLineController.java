@@ -41,15 +41,16 @@ public class ShippingLineController {
   private ShippingLineService shippingLineService;
 
   @PostMapping("")
-  @PreAuthorize("hasRole('MODERATOR')")
+  @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<?> createShippingLine(@Valid @RequestBody ShippingLineRequest request) {
-    shippingLineService.createShippingLine(request);
-    return ResponseEntity.ok("Shipping Line created successfully");
+    ShippingLine shippingLine = shippingLineService.createShippingLine(request);
+    ShippingLineDto shippingLineDto = ShippingLineMapper.toShippingLineDto(shippingLine);
+    return ResponseEntity.ok(shippingLineDto);
   }
 
   @PreAuthorize("hasRole('MODERATOR')")
   @GetMapping("")
-  public ResponseEntity<?> getShippingLines(@PathVariable Long id, @Valid PaginationRequest request) {
+  public ResponseEntity<?> getShippingLines(@Valid PaginationRequest request) {
 
     Page<ShippingLine> pages = shippingLineService.getShippingLines(request);
 

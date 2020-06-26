@@ -59,7 +59,7 @@ public class Bid {
   private Set<Container> containers = new HashSet<>();
 
   @Column(name = "bid_price")
-  private float bidPrice;
+  private Double bidPrice;
 
   @Column(name = "bid_date")
   private LocalDateTime bidDate;

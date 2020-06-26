@@ -13,19 +13,19 @@ public class ContainerTypeDto {
 
   private String description;
 
-  private float tareWeight;
+  private Double tareWeight;
 
-  private float payloadCapacity;
+  private Double payloadCapacity;
 
-  private float cubicCapacity;
+  private Double cubicCapacity;
 
-  private float internalLength;
+  private Double internalLength;
 
-  private float internalWidth;
+  private Double internalWidth;
 
-  private float internalHeight;
+  private Double internalHeight;
 
-  private float doorOpeningWidth;
+  private Double doorOpeningWidth;
 
-  private float doorOpeningHeight;
+  private Double doorOpeningHeight;
 }

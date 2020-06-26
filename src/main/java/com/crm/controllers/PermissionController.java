@@ -41,8 +41,9 @@ public class PermissionController {
   @PostMapping("")
   @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<?> createPermission(@Valid @RequestBody PermissionRequest request) {
-    permissionService.createPermission(request);
-    return ResponseEntity.ok(new MessageResponse("Role has been created successfully"));
+    Permission permission = permissionService.createPermission(request);
+    PermissionDto permissionDto = PermissionMapper.toPermissionDto(permission);
+    return ResponseEntity.ok(permissionDto);
   }
   
   @GetMapping("")
@@ -67,8 +68,9 @@ public class PermissionController {
   @PutMapping("")
   @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<?> updatePermission(@Valid @RequestBody PermissionRequest request) {
-    permissionService.updatePermission(request);
-    return ResponseEntity.ok(new MessageResponse("Role has been updated successfully"));
+    Permission permission = permissionService.updatePermission(request);
+    PermissionDto permissionDto = PermissionMapper.toPermissionDto(permission);
+    return ResponseEntity.ok(permissionDto);
   }
   
   @Transactional

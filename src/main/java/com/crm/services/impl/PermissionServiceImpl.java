@@ -22,14 +22,14 @@ public class PermissionServiceImpl implements PermissionService {
   @Override
   public Permission createPermission(PermissionRequest request) {
     Permission permission = new Permission();
-    if(permissionRepository.existsByName(request.getName())) {
+    if (permissionRepository.existsByName(request.getName())) {
       throw new DuplicateRecordException("Permission already exists.");
-    }else {
+    } else {
       permission.setName(request.getName());
       permission.setDescription(request.getDescription());
       permissionRepository.save(permission);
     }
-    
+
     return permission;
   }
 
@@ -41,15 +41,19 @@ public class PermissionServiceImpl implements PermissionService {
 
   @Override
   public void removePermission(Long id) {
-    Permission permission = permissionRepository.findById(id).orElseThrow(() -> new NotFoundException("Permission is not found."));
+    Permission permission = permissionRepository.findById(id)
+        .orElseThrow(() -> new NotFoundException("Permission is not found."));
     permissionRepository.delete(permission);
   }
 
   @Override
-  public void updatePermission(PermissionRequest request) {
+  public Permission updatePermission(PermissionRequest request) {
     Permission permission = permissionRepository.findById(request.getId()).orElseThrow(() -> new NotFoundException("Permission is not found."));
     permission.setName(request.getName());
     permission.setDescription(request.getDescription());
+    permissionRepository.save(permission);
+    
+    return permission;
   }
 
 }

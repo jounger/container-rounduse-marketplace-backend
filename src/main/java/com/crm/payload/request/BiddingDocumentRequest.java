@@ -23,14 +23,14 @@ public class BiddingDocumentRequest {
   
   private String currencyOfPayment; 
   
-  private Float bidPackagePrice;
+  private Double bidPackagePrice;
   
-  private Float bidFloorPrice;
+  private Double bidFloorPrice;
   
-  private Float bidStep;
+  private Double bidStep;
   
   private String bidDiscountCode;
   
-  private Float priceLeadership;
+  private Double priceLeadership;
   
 }

@@ -32,7 +32,7 @@ public class Operator extends User {
   private String fullname;
 
   @Column(name = "is_root")
-  private boolean isRoot;
+  private Boolean isRoot;
 
   @OneToMany(mappedBy = "sender")
   private Set<Feedback> feedbacks = new HashSet<>();

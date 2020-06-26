@@ -17,5 +17,5 @@ public interface RatingRepository extends JpaRepository<Rating, Long>{
   Page<Rating> findByReceiverId(@Param("id") Long id, Pageable pageable);
   
   @Query(value = "SELECT AVG(r.ratingValue) FROM Rating r WHERE r.receiver.id = :id")
-  Float findAvgRatingValueByReceiverId(@Param("id") Long id);
+  Double findAvgRatingValueByReceiverId(@Param("id") Long id);
 }

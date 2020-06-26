@@ -48,28 +48,28 @@ public class ContainerType {
   private String description;
 
   @Column(name = "tare_weight")
-  private float tareWeight;
+  private Double tareWeight;
 
   @Column(name = "payload_capacity")
-  private float payloadCapacity;
+  private Double payloadCapacity;
 
   @Column(name = "cubic_capacity")
-  private float cubicCapacity;
+  private Double cubicCapacity;
 
   @Column(name = "internal_length")
-  private float internalLength;
+  private Double internalLength;
 
   @Column(name = "internal_width")
-  private float internalWidth;
+  private Double internalWidth;
 
   @Column(name = "internal_height")
-  private float internalHeight;
+  private Double internalHeight;
 
   @Column(name = "door_open_width")
-  private float doorOpeningWidth;
+  private Double doorOpeningWidth;
 
   @Column(name = "door_open_height")
-  private float doorOpeningHeight;
+  private Double doorOpeningHeight;
   
   @Column(name = "created_at", nullable = false, updatable = false)
   @Temporal(TemporalType.TIMESTAMP)

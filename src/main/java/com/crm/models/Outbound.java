@@ -44,7 +44,7 @@ public class Outbound extends Supply {
   private String packingStation;
 
   @Column(name = "payload")
-  private float payload;
+  private Double payload;
 
   //EnumUnit
   @Column(name = "unit_of_measurment")

@@ -47,9 +47,9 @@ public class Payment {
 
   private String detail;
 
-  private float amount;
+  private Double amount;
 
-  private float paid;
+  private Double paid;
 
   @Column(name = "payment_date")
   private LocalDateTime paymentDate;

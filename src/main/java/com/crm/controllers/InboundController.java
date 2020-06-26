@@ -41,6 +41,15 @@ public class InboundController {
   private InboundService inboundService;
 
   @GetMapping("")
+  @PreAuthorize("hasRole('FORWARDER') or hasRole('MERCHANT')")
+  public ResponseEntity<?> getInbounds(@Valid PaginationRequest request) {
+
+    Page<Inbound> pages = inboundService.getInbounds(request);
+    PaginationResponse<InboundDto> response = new PaginationResponse<>();
+    response.setPageNumber(request.getPage());
+    response.setPageSize(request.getLimit());
+    response.setTotalElements(pages.getTotalElements());
+    response.setTotalPages(pages.getTotalPages());
 
     List<Inbound> inbounds = pages.getContent();
     List<InboundDto> inboundsDto = new ArrayList<>();
@@ -90,9 +99,7 @@ public class InboundController {
 
   @Transactional
   @PutMapping("")
-=======
   @PreAuthorize("hasRole('FORWARDER')")
->>>>>>> master
   public ResponseEntity<?> updateInbound(@Valid @RequestBody InboundRequest request) {
     Inbound inbound = inboundService.updateInbound(request);
     InboundDto inboundDto = new InboundDto();

@@ -10,9 +10,11 @@ import com.crm.payload.request.PaginationRequest;
 
 public interface InboundService {
 
+  Inbound getInboundById(Long id);
+
   Page<Inbound> getInbounds(PaginationRequest request);
 
-  Inbound getInboundById(Long id);
+  Page<Inbound> getInboundsForwarder(Long id, PaginationRequest request);
 
   Inbound createInbound(Long id, InboundRequest request);
 

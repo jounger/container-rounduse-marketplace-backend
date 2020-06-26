@@ -9,7 +9,9 @@ import com.crm.models.dto.BillOfLadingDto;
 import com.crm.models.dto.ContainerDto;
 
 public class BillOfLadingMapping {
+
   public static BillOfLadingDto toBillOfLadingDto(BillOfLading billOfLading) {
+
     BillOfLadingDto billOfLadingDto = new BillOfLadingDto();
     billOfLadingDto.setId(billOfLading.getId());
     billOfLadingDto.setBillOfLadingNumber(billOfLading.getBillOfLadingNumber());
@@ -18,6 +20,7 @@ public class BillOfLadingMapping {
     billOfLadingDto.setPortOfDelivery(portOfDelivery);
 
     Set<Container> containers = billOfLading.getContainers();
+
     Set<ContainerDto> containerDtos = new HashSet<>();
     if (containers != null) {
       containers.forEach(container -> {
@@ -26,6 +29,7 @@ public class BillOfLadingMapping {
         containerDtos.add(containerMap);
       });
     }
+
     billOfLadingDto.setContainers(containerDtos);
     return billOfLadingDto;
   }

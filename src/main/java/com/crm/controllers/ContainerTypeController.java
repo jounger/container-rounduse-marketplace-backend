@@ -73,8 +73,9 @@ public class ContainerTypeController {
   @PostMapping("")
   @PreAuthorize("hasRole('MODERATOR')")
   public ResponseEntity<?> createContainerType(@Valid @RequestBody ContainerTypeRequest request) {
-    containerTypeService.createContainerType(request);
-    return ResponseEntity.ok(new MessageResponse("Container Type created successfully"));
+    ContainerType containerType = containerTypeService.createContainerType(request);
+    ContainerTypeDto containerTypeDto = ContainerTypeMapper.toContainerTypeDto(containerType);
+    return ResponseEntity.ok(containerTypeDto);
   }
 
   @Transactional

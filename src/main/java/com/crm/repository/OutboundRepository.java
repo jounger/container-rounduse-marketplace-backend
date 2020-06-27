@@ -17,8 +17,8 @@ public interface OutboundRepository extends JpaRepository<Outbound, Long>{
   boolean existsById(Long id);
   
   Optional<Outbound> findById(Long id);
-  /*
-  @Query(value = "SELECT c FROM Consignment c WHERE c.merchant.id = :id")
+
+  @Query(value = "SELECT o FROM Outbound o WHERE o.merchant.id = :id")
   Page<Outbound> findByMerchantId(@Param("id") Long id, Pageable pageable);
-  */
+
 }

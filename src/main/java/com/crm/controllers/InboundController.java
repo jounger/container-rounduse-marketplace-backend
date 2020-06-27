@@ -77,6 +77,25 @@ public class InboundController {
 
     return ResponseEntity.ok(response);
   }
+  
+  @GetMapping("/outbound/{id}")
+  @PreAuthorize("hasRole('FORWARDER') or hasRole('MERCHANT')")
+  public ResponseEntity<?> getInboundsByOutbound(@PathVariable Long id, @Valid PaginationRequest request) {
+
+    Page<Inbound> pages = inboundService.getInboundsByOutbound(id, request);
+    PaginationResponse<InboundDto> response = new PaginationResponse<>();
+    response.setPageNumber(request.getPage());
+    response.setPageSize(request.getLimit());
+    response.setTotalElements(pages.getTotalElements());
+    response.setTotalPages(pages.getTotalPages());
+
+    List<Inbound> inbounds = pages.getContent();
+    List<InboundDto> inboundsDto = new ArrayList<>();
+    inbounds.forEach(inbound -> inboundsDto.add(InboundMapper.toInboundDto(inbound)));
+    response.setContents(inboundsDto);
+
+    return ResponseEntity.ok(response);
+  }
 
   @GetMapping("/{id}")
   @PreAuthorize("hasRole('FORWARDER') or hasRole('MERCHANT')")

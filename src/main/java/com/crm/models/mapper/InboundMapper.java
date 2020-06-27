@@ -14,7 +14,6 @@ public class InboundMapper {
 
     String containerType = inbound.getContainerType().getName();
     inboundDto.setContainerType(containerType);
-    inboundDto.setStatus(inbound.getStatus());
 
     if (inbound.getEmptyTime() != null) {
       String emptyTime = Tool.convertLocalDateTimeToString(inbound.getEmptyTime());

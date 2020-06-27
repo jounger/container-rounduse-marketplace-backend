@@ -62,6 +62,9 @@ public class Container{
   @Column(name = "license_plate")
   private String licensePlate;
   
+  //EnumSupplyStatus
+  private String status;
+  
   @Column(name = "created_at", nullable = false, updatable = false)
   @Temporal(TemporalType.TIMESTAMP)
   @CreatedDate

@@ -61,7 +61,7 @@ public class OperatorServiceImpl implements OperatorService {
     operator.setAddress(request.getAddress());
     operator.setStatus(EnumUserStatus.ACTIVE.name());
     operator.setFullname(request.getFullname());
-    operator.setRoot(request.isRoot());
+    operator.setIsRoot(request.getIsRoot());
 
     operatorRepository.save(operator);
 
@@ -98,16 +98,16 @@ public class OperatorServiceImpl implements OperatorService {
     operator.setPhone(request.getPhone());
     operator.setEmail(request.getEmail());
     operator.setAddress(request.getAddress());
-    
+
     EnumUserStatus status = EnumUserStatus.findByName(request.getStatus());
     if (status != null) {
       operator.setStatus(EnumUserStatus.ACTIVE.name());
-    }else {
+    } else {
       throw new NotFoundException("Status is not found.");
     }
 
     operator.setFullname(request.getFullname());
-    operator.setRoot(request.isRoot());
+    operator.setIsRoot(request.getIsRoot());
     operatorRepository.save(operator);
 
     return operator;

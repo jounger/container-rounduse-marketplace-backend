@@ -49,7 +49,7 @@ public class Rating {
   private Supplier receiver;
 
   @Column(name = "rating_value")
-  private int ratingValue;
+  private Integer ratingValue;
   
   @Column(name = "created_at", nullable = false, updatable = false)
   @Temporal(TemporalType.TIMESTAMP)

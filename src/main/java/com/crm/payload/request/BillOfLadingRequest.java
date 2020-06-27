@@ -20,8 +20,7 @@ public class BillOfLadingRequest {
   @NotBlank
   private String billOfLadingNumber;
 
-  @NotBlank
-  private int freeTime;
+  private Integer freeTime;
 
   private List<ContainerRequest> containers = new ArrayList<ContainerRequest>();
 }

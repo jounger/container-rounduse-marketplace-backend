@@ -1,7 +1,5 @@
 package com.crm.models.dto;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
 
 import lombok.Getter;
@@ -25,11 +23,11 @@ public class OutboundDto extends SupplyDto{
   
   private String cutOffTime;
   
-  private float payload;
+  private Double payload;
   
   private String unitOfMeasurement;
   
-  private boolean fcl;
+  private Boolean fcl;
   
   private String portOfLoading;
   

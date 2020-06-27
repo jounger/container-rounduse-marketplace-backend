@@ -77,13 +77,13 @@ public class BiddingDocument {
   private String currencyOfPayment;
 
   @Column(name = "bid_package_price")
-  private float bidPackagePrice;
+  private Double bidPackagePrice;
 
   @Column(name = "bid_floor_price")
-  private float bidFloorPrice;
+  private Double bidFloorPrice;
 
   @Column(name = "price_leadership")
-  private float priceLeadership;
+  private Double priceLeadership;
 
   @Column(name = "created_at", nullable = false, updatable = false)
   @Temporal(TemporalType.TIMESTAMP)

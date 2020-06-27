@@ -15,9 +15,9 @@ public class BidRequest {
   
   private Long containerId;
   
-  private Float bidPrice;
+  private Double bidPrice;
   
-  private Float currentBidPrice;
+  private Double currentBidPrice;
   
   private String bidDate;
   

@@ -9,7 +9,7 @@ import lombok.Setter;
 @Setter
 public class ForwarderDto extends SupplierDto{
   
-  float ratingValue;
+  Double ratingValue;
   
   List<String> drivers;
 }

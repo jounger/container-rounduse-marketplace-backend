@@ -9,5 +9,5 @@ public class OperatorDto extends UserDto {
   
   private String fullname;
 
-  private boolean isRoot;
+  private Boolean isRoot;
 }

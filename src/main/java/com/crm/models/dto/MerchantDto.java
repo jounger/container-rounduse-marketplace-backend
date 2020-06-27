@@ -7,5 +7,5 @@ import lombok.Setter;
 @Setter
 public class MerchantDto extends SupplierDto{
   
-  float ratingValue;
+  Double ratingValue;
 }

@@ -15,9 +15,9 @@ public class DiscountDto {
   
   private String currency;
   
-  private float percent;
+  private Double percent;
   
-  private float maximumDiscount;
+  private Double maximumDiscount;
   
   private String expiredDate;
 }

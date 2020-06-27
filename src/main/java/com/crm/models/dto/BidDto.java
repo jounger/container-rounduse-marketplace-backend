@@ -15,10 +15,10 @@ public class BidDto {
   private ContainerDto container;
 
   @JsonProperty(value = "bid_price")
-  private float bidPrice;
+  private Double bidPrice;
   
   @JsonProperty(value = "current_bid_price")
-  private float currentBidPrice;
+  private Double currentBidPrice;
 
   @JsonProperty(value = "bid_date")
   private String bidDate;

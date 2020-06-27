@@ -15,6 +15,7 @@ import com.crm.exception.InternalException;
 import com.crm.exception.NotFoundException;
 import com.crm.models.Bid;
 import com.crm.models.BiddingDocument;
+import com.crm.models.Booking;
 import com.crm.models.Outbound;
 import com.crm.models.Container;
 import com.crm.models.Forwarder;
@@ -28,7 +29,7 @@ import com.crm.services.BidService;
 
 @Service
 public class BidServiceImpl implements BidService {
-  /*
+
   @Autowired
   private BidRepository bidRepository;
 
@@ -42,7 +43,7 @@ public class BidServiceImpl implements BidService {
   private ContainerRepository containerRepository;
 
   @Override
-  public void createBid(BidRequest request) {
+  public Bid createBid(BidRequest request) {
     Bid bid = new Bid();
 
     BiddingDocument biddingDocument = biddingDocumentRepository.findById(request.getBiddingDocumentId())
@@ -53,26 +54,28 @@ public class BidServiceImpl implements BidService {
         .orElseThrow(() -> new NotFoundException("Forwarer is not found."));
     bid.setBidder(bidder);
 
-    Container container = containerRepository.findById(request.getContainerId())
-        .orElseThrow(() -> new NotFoundException("Container is not found."));
-    Outbound outbound = biddingDocument.getConsignment();
+    List<Long> containersId = request.getContainerId();
+    Outbound outbound = biddingDocument.getOutbound();
+    Booking booking = outbound.getBooking();
     List<Container> suitableContainers = 
         containerRepository.findByConsignment(outbound.getShippingLine().getId()
-            , outbound.getContainerType().getId(), outbound.getStatus().ordinal()
-            , outbound.getPackingTime(), outbound.getCutOffTime()
-            , outbound.getPortOfLoading().getId());
-    if(suitableContainers.contains(container)) {
-      bid.setContainer(container);
-    }else {
-      throw new NotFoundException("Container is not suitable.");
-    }
+            , outbound.getContainerType().getId(), outbound.getStatus()
+            , outbound.getPackingTime(), booking.getCutOffTime()
+            , booking.getPortOfLoading().getId());
+    containersId.forEach(containerId ->{
+      Container container = containerRepository.findById(containerId).orElseThrow(() -> new NotFoundException("Container is not found."));
+          if(suitableContainers.contains(container)) {
+            bid.getContainers().add(container);
+          }else {
+            throw new NotFoundException("Container is not suitable.");
+          }
+    });
     
-    Float bidPrice = request.getBidPrice();
+    Double bidPrice = request.getBidPrice();
     if(bidPrice <= biddingDocument.getBidFloorPrice()) {
       throw new InternalException("Bid price must be equal or greater than floor price.");
     }
     bid.setBidPrice(request.getBidPrice());
-    bid.setCurrentBidPrice(biddingDocument.getPriceLeadership());
 
     LocalDateTime bidDate = LocalDateTime.now();
     bid.setBidDate(bidDate);
@@ -80,7 +83,7 @@ public class BidServiceImpl implements BidService {
     LocalDateTime bidValidityPeriod = Tool.convertToLocalDateTime(request.getBidValidityPeriod());
     bid.setBidValidityPeriod(bidValidityPeriod);
 
-    bid.setStatus(EnumBidStatus.PENDING);
+    bid.setStatus(EnumBidStatus.PENDING.name());
 
     bidRepository.save(bid);
   }
@@ -125,12 +128,24 @@ public class BidServiceImpl implements BidService {
         .orElseThrow(() -> new NotFoundException("Forwarder is not found."));
     bid.setBidder(bidder);
 
-    Container container = containerRepository.findById(request.getContainerId())
-        .orElseThrow(() -> new NotFoundException("Container is not found."));
-    bid.setContainer(container);
+    List<Long> containersId = request.getContainerId();
+    Outbound outbound = biddingDocument.getOutbound();
+    Booking booking = outbound.getBooking();
+    List<Container> suitableContainers = 
+        containerRepository.findByConsignment(outbound.getShippingLine().getId()
+            , outbound.getContainerType().getId(), outbound.getStatus()
+            , outbound.getPackingTime(), booking.getCutOffTime()
+            , booking.getPortOfLoading().getId());
+    containersId.forEach(containerId ->{
+      Container container = containerRepository.findById(containerId).orElseThrow(() -> new NotFoundException("Container is not found."));
+          if(suitableContainers.contains(container)) {
+            bid.getContainers().add(container);
+          }else {
+            throw new NotFoundException("Container is not suitable.");
+          }
+    });
 
     bid.setBidPrice(request.getBidPrice());
-    bid.setCurrentBidPrice(request.getCurrentBidPrice());
 
     LocalDateTime bidDate = Tool.convertToLocalDateTime(request.getBidDate());
     bid.setBidDate(bidDate);
@@ -138,54 +153,46 @@ public class BidServiceImpl implements BidService {
     LocalDateTime bidValidityPeriod = Tool.convertToLocalDateTime(request.getBidValidityPeriod());
     bid.setBidValidityPeriod(bidValidityPeriod);
 
-    bid.setStatus(EnumBidStatus.PENDING);
+    EnumBidStatus bidStatus = EnumBidStatus.findByName(request.getEBidStatusName());
+    bid.setStatus(bidStatus.name());
 
-    bidRepository.save(bid); 
-    
-     
-     
+    bidRepository.save(bid);
+
     return bid;
   }
 
   @Override
   public Bid editBid(Long id, Map<String, Object> updates) {
-    Bid bid = bidRepository.findById(id)
-        .orElseThrow(() -> new NotFoundException("Bid is not found."));
-    
+    Bid bid = bidRepository.findById(id).orElseThrow(() -> new NotFoundException("Bid is not found."));
+
     try {
       String bidPriceString = (String) updates.get("bid_price");
-      if(bidPriceString != null) {
-        Float bidPrice = Float.parseFloat(bidPriceString);
+      if (bidPriceString != null) {
+        Double bidPrice = Double.parseDouble(bidPriceString);
         bid.setBidPrice(bidPrice);
       }
-      
-      String currentBidPriceString = (String) updates.get("current_bid_price");
-      if(currentBidPriceString != null) {
-        Float currentBidPrice = Float.parseFloat(currentBidPriceString);
-        bid.setCurrentBidPrice(currentBidPrice);
-      }
     } catch (Exception e) {
-      throw new InternalException("Parameter must be Float");
+      throw new InternalException("Parameter must be Double");
     }
-    
+
     String bidDateString = (String) updates.get("bid_date");
-    if(bidDateString != null) {
+    if (bidDateString != null) {
       LocalDateTime bidDate = Tool.convertToLocalDateTime(bidDateString);
       bid.setBidDate(bidDate);
     }
-    
+
     String bidValidityPeriodString = (String) updates.get("bid_validity_period");
-    if(bidValidityPeriodString != null) {
+    if (bidValidityPeriodString != null) {
       LocalDateTime bidValidityPeriod = Tool.convertToLocalDateTime(bidValidityPeriodString);
       bid.setBidValidityPeriod(bidValidityPeriod);
     }
-    
+
     String statusString = (String) updates.get("ebid_status_name");
-    if(statusString != null) {
+    if (statusString != null) {
       EnumBidStatus status = EnumBidStatus.findByName(statusString);
-      bid.setStatus(status);
+      bid.setStatus(status.name());
     }
     return bid;
   }
-  */
+
 }

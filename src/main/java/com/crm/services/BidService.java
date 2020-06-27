@@ -10,7 +10,7 @@ import com.crm.payload.request.PaginationRequest;
 
 public interface BidService {
   
-  void createBid(BidRequest request);
+  Bid createBid(BidRequest request);
   
   Bid getBid(Long id);
   

@@ -1,12 +1,32 @@
 package com.crm.services.impl;
 
+import java.time.LocalDateTime;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import com.crm.common.Tool;
+import com.crm.enums.EnumCurrency;
+import com.crm.exception.InternalException;
+import com.crm.exception.NotFoundException;
+import com.crm.models.BiddingDocument;
+import com.crm.models.Discount;
+import com.crm.models.Merchant;
+import com.crm.models.Outbound;
+import com.crm.payload.request.BiddingDocumentRequest;
+import com.crm.payload.request.PaginationRequest;
+import com.crm.repository.BiddingDocumentRepository;
+import com.crm.repository.DiscountRepository;
+import com.crm.repository.MerchantRepository;
+import com.crm.repository.OutboundRepository;
 import com.crm.services.BiddingDocumentService;
 
 @Service
 public class BiddingDocumentImpl implements BiddingDocumentService {
-  
+
   @Autowired
   private BiddingDocumentRepository biddingDocumentRepository;
 
@@ -14,27 +34,24 @@ public class BiddingDocumentImpl implements BiddingDocumentService {
   private MerchantRepository merchantRepository;
 
   @Autowired
-  private ConsignmentRepository consignmentRepository;
-
-  @Autowired
-  private BidRepository bidRepository;
+  private OutboundRepository outboundRepository;
 
   @Autowired
   private DiscountRepository discountRepository;
 
   @Override
-  public void createBiddingDocument(BiddingDocumentRequest request) {
+  public BiddingDocument createBiddingDocument(BiddingDocumentRequest request) {
     BiddingDocument biddingDocument = new BiddingDocument();
 
     Merchant merchant = new Merchant();
     merchant = merchantRepository.findById(request.getMerchantId())
         .orElseThrow(() -> new NotFoundException("Merchant is not found"));
-    biddingDocument.setMerchant(merchant);
+    biddingDocument.setOfferee(merchant);
 
     Outbound outbound = new Outbound();
-    outbound = consignmentRepository.findById(request.getConsignmentId())
-        .orElseThrow(() -> new NotFoundException("Consignment is not found."));
-    biddingDocument.setConsignment(outbound);
+    outbound = outboundRepository.findById(request.getOutBoundId())
+        .orElseThrow(() -> new NotFoundException("Outbound is not found."));
+    biddingDocument.setOutbound(outbound);
 
     LocalDateTime bidOpening = Tool.convertToLocalDateTime(request.getBidOpening());
     biddingDocument.setBidOpening(bidOpening);
@@ -42,21 +59,26 @@ public class BiddingDocumentImpl implements BiddingDocumentService {
     LocalDateTime bidClosing = Tool.convertToLocalDateTime(request.getBidClosing());
     biddingDocument.setBidClosing(bidClosing);
 
-    biddingDocument.setCurrencyOfPayment(EnumCurrency.findByName(request.getCurrencyOfPayment()));
+    EnumCurrency currency = EnumCurrency.findByName(request.getCurrencyOfPayment());
+    if (currency != null) {
+      biddingDocument.setCurrencyOfPayment(currency.name());
+    }else {
+      biddingDocument.setCurrencyOfPayment(EnumCurrency.VND.name());
+    }
+    
     biddingDocument.setBidPackagePrice(request.getBidPackagePrice());
     biddingDocument.setBidFloorPrice(request.getBidFloorPrice());
-    biddingDocument.setBidStep(request.getBidStep());
     biddingDocument.setPriceLeadership(request.getBidFloorPrice());
 
-    
     String discountCodeString = request.getBidDiscountCode();
-    if(discountCodeString != null) {
+    if (discountCodeString != null) {
       Discount bidDiscountCode = discountRepository.findByCode(discountCodeString)
           .orElseThrow(() -> new NotFoundException("Discount is not found."));
       biddingDocument.setBidDiscountCode(bidDiscountCode);
     }
 
     biddingDocumentRepository.save(biddingDocument);
+    return biddingDocument;
   }
 
   @Override
@@ -87,15 +109,6 @@ public class BiddingDocumentImpl implements BiddingDocumentService {
   }
 
   @Override
-  public void removeBiddingDocument(Long id) {
-    if (biddingDocumentRepository.existsById(id)) {
-      biddingDocumentRepository.deleteById(id);
-    } else {
-      throw new NotFoundException("Bidding document is not found");
-    }
-  }
-
-  @Override
   public BiddingDocument updateBiddingDocument(BiddingDocumentRequest request) {
     BiddingDocument biddingDocument = biddingDocumentRepository.findById(request.getId())
         .orElseThrow(() -> new NotFoundException("Bidding document is not found."));
@@ -110,12 +123,11 @@ public class BiddingDocumentImpl implements BiddingDocumentService {
     if (currencyOfPayment == null) {
       currencyOfPayment = EnumCurrency.VND;
     } else {
-      biddingDocument.setCurrencyOfPayment(currencyOfPayment);
+      biddingDocument.setCurrencyOfPayment(currencyOfPayment.name());
     }
 
     biddingDocument.setBidPackagePrice(request.getBidPackagePrice());
     biddingDocument.setBidFloorPrice(request.getBidFloorPrice());
-    biddingDocument.setBidStep(request.getBidStep());
     biddingDocument.setPriceLeadership(request.getPriceLeadership());
 
     biddingDocumentRepository.save(biddingDocument);
@@ -145,61 +157,44 @@ public class BiddingDocumentImpl implements BiddingDocumentService {
       if (currencyOfPayment == null) {
         currencyOfPayment = EnumCurrency.VND;
       }
-      biddingDocument.setCurrencyOfPayment(currencyOfPayment);
+      biddingDocument.setCurrencyOfPayment(currencyOfPayment.name());
     } else {
-      biddingDocument.setCurrencyOfPayment(EnumCurrency.VND);
+      biddingDocument.setCurrencyOfPayment(EnumCurrency.VND.name());
     }
 
     try {
       String packagePriceString = (String) updates.get("bid_package_price");
       if (packagePriceString != null) {
-        Float bidPackagePrice = Float.parseFloat(packagePriceString);
+        Double bidPackagePrice = Double.parseDouble(packagePriceString);
         biddingDocument.setBidPackagePrice(bidPackagePrice);
       }
 
       String floorPriceString = (String) updates.get("bid_floor_price");
       if (floorPriceString != null) {
-        Float bidFloorPrice = Float.parseFloat(floorPriceString);
+        Double bidFloorPrice = Double.parseDouble(floorPriceString);
         biddingDocument.setBidFloorPrice(bidFloorPrice);
-      }
-
-      String stepString = (String) updates.get("bid_step");
-      if (stepString != null) {
-        Float bidStep = Float.parseFloat(stepString);
-        biddingDocument.setBidStep(bidStep);
       }
 
       String priceLeadershipString = (String) updates.get("price_leadership");
       if (priceLeadershipString != null) {
-        Float priceLeadership = Float.parseFloat(priceLeadershipString);
+        Double priceLeadership = Double.parseDouble(priceLeadershipString);
         biddingDocument.setPriceLeadership(priceLeadership);
       }
     } catch (Exception e) {
-      throw new InternalException("Parameters must be float.");
-    }
-
-    NotificationOfAward notificationOfAward = new NotificationOfAward();
-
-    Bid successfulBid = new Bid();
-    String successfulBidId = (String) updates.get("successful_bid");
-    String dateOfDecisionString = (String) updates.get("date_of_decision");
-    if (successfulBidId != null) {
-      try {
-        Long bidId = Long.parseLong(successfulBidId);
-        successfulBid = bidRepository.findById(bidId).orElseThrow(() -> new NotFoundException("Bid is not found."));
-      } catch (Exception e) {
-        throw new InternalException("Parameter must be float.");
-      }
-      notificationOfAward.setSuccessfulBid(successfulBid);
-      if (dateOfDecisionString != null) {
-        LocalDateTime dateOfDecision = Tool.convertToLocalDateTime(dateOfDecisionString);
-        notificationOfAward.setDateOfDecision(dateOfDecision);
-      }
-      biddingDocument.setNotificationOfAward(notificationOfAward);
+      throw new InternalException("Parameters must be double.");
     }
 
     biddingDocumentRepository.save(biddingDocument);
     return biddingDocument;
   }
-  
+
+  @Override
+  public void removeBiddingDocument(Long id) {
+    if (biddingDocumentRepository.existsById(id)) {
+      biddingDocumentRepository.deleteById(id);
+    } else {
+      throw new NotFoundException("Bidding document is not found");
+    }
+  }
+
 }

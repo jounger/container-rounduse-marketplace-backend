@@ -1,5 +1,8 @@
 package com.crm.payload.request;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -13,11 +16,9 @@ public class BidRequest {
   
   private Long fowarderId;
   
-  private Long containerId;
+  private List<Long> containerId = new ArrayList<>();
   
   private Double bidPrice;
-  
-  private Double currentBidPrice;
   
   private String bidDate;
   

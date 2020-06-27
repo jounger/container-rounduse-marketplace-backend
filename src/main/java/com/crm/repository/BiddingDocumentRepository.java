@@ -10,8 +10,8 @@ import org.springframework.data.repository.query.Param;
 import com.crm.models.BiddingDocument;
 
 public interface BiddingDocumentRepository extends JpaRepository<BiddingDocument, Long>{
-/*
+
   @Query(value = "FROM BiddingDocument bd WHERE bd.merchant.id = :id")
   Page<BiddingDocument> findBiddingDocumentByMerchant(@Param("id") Long merchantId, Pageable pageable);
-  */
+  
 }

@@ -10,7 +10,7 @@ import com.crm.payload.request.PaginationRequest;
 
 public interface BiddingDocumentService {
   
-  void createBiddingDocument(BiddingDocumentRequest request);
+  BiddingDocument createBiddingDocument(BiddingDocumentRequest request);
   
   BiddingDocument getBiddingDocument(Long id);
   

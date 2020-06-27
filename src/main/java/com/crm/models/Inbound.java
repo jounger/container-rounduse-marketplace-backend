@@ -2,6 +2,7 @@ package com.crm.models;
 
 import java.time.LocalDateTime;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
@@ -30,7 +31,7 @@ public class Inbound extends Supply{
   @JoinColumn(name = "forwarder_id")
   private Forwarder forwarder;
   
-  @OneToOne
+  @OneToOne(cascade = CascadeType.ALL)
   @JoinColumn(name = "bill_of_lading_id")
   private BillOfLading billOfLading;
 

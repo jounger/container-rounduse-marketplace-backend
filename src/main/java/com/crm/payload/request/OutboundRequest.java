@@ -1,15 +1,13 @@
-package com.crm.models.dto;
+package com.crm.payload.request;
 
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-public class OutboundDto extends SupplyDto {
+public class OutboundRequest extends SupplyRequest {
 
-  private String status;
-
-  private BookingDto booking;
+  private BookingRequest booking;
 
   private String goodsDescription;
 
@@ -21,4 +19,5 @@ public class OutboundDto extends SupplyDto {
 
   private String unitOfMeasurement;
 
+  private String status;
 }

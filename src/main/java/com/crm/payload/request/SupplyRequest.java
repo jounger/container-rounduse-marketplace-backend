@@ -16,6 +16,4 @@ public class SupplyRequest {
 
   @NotBlank
   private String containerType;
-
-  private String status;
 }

@@ -20,6 +20,9 @@ public class ContainerRequest {
   private String tractor;
 
   private String licensePlate;
+  
+  //ESupplyStatus
+  private String status;
 
   private Set<Long> bids;
 }

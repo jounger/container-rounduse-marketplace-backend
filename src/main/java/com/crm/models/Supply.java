@@ -54,9 +54,6 @@ public class Supply {
   @ManyToOne
   @JoinColumn(name = "container_type_id")
   private ContainerType containerType;
-  
-  //EnumSupplyStatus
-  private String status;
 
   @Column(name = "created_at", nullable = false, updatable = false)
   @Temporal(TemporalType.TIMESTAMP)

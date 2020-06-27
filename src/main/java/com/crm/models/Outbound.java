@@ -49,4 +49,7 @@ public class Outbound extends Supply {
   //EnumUnit
   @Column(name = "unit_of_measurment")
   private String unitOfMeasurement;
+  
+  //EnumSupplyStatus
+  private String status;
 }

@@ -13,7 +13,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import com.crm.common.Tool;
-import com.crm.enums.EnumSupplyStatus;
 import com.crm.exception.DuplicateRecordException;
 import com.crm.exception.NotFoundException;
 import com.crm.models.BillOfLading;
@@ -92,8 +91,6 @@ public class InboundServiceImpl implements InboundService {
     ContainerType containerType = containerTypeRepository.findByName(request.getContainerType())
         .orElseThrow(() -> new NotFoundException("ERROR: Type is not found."));
     inbound.setContainerType(containerType);
-
-    inbound.setStatus(EnumSupplyStatus.CREATED.name());
 
     if (request.getPickupTime() != null) {
       LocalDateTime pickupTime = Tool.convertToLocalDateTime(request.getPickupTime());
@@ -175,10 +172,6 @@ public class InboundServiceImpl implements InboundService {
     ContainerType containerType = containerTypeRepository.findByName(request.getContainerType())
         .orElseThrow(() -> new NotFoundException("ERROR: Type is not found."));
     inbound.setContainerType(containerType);
-
-    if (request.getStatus() != null) {
-      inbound.setStatus(EnumSupplyStatus.findByName(request.getStatus()).name());
-    }
 
     if (request.getPickupTime() != null) {
       LocalDateTime pickupTime = Tool.convertToLocalDateTime(request.getPickupTime());
@@ -286,11 +279,6 @@ public class InboundServiceImpl implements InboundService {
       ContainerType containerType = containerTypeRepository.findByName(containerTypeRequest)
           .orElseThrow(() -> new NotFoundException("ERROR: Container Type is not found."));
       inbound.setContainerType(containerType);
-    }
-
-    String statusRequest = (String) updates.get("status");
-    if (statusRequest != null) {
-      inbound.setStatus(EnumSupplyStatus.findByName(statusRequest).name());
     }
 
     String pickupTimeRequest = (String) updates.get("pickupTime");

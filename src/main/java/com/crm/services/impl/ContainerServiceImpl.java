@@ -181,12 +181,11 @@ public class ContainerServiceImpl implements ContainerService {
 
     BillOfLading billOfLading = (BillOfLading) container.getBillOfLading();
 
-    Long ContainerId = (Long) updates.get("id");
     Set<Container> containers = billOfLading.getContainers();
     containers.forEach(item -> {
       if (item.getContainerNumber().equals(containerNumber) || item.getDriver().getUsername().equals(driverRequest)
           || item.getLicensePlate().equals(licensePlate)) {
-        if (item.getId().equals(ContainerId)) {
+        if (item.getId().equals(id)) {
 
         } else {
           throw new DuplicateRecordException("Error: Container has been existed");

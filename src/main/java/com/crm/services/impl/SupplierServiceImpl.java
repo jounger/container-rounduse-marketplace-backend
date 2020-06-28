@@ -24,7 +24,7 @@ public class SupplierServiceImpl implements SupplierService {
   @Override
   public Page<Supplier> getSuppliers(PaginationRequest request) {
     Page<Supplier> pages = supplierRepository
-        .findAll(PageRequest.of(request.getPage(), request.getLimit(), Sort.by("user_id").descending()));
+        .findAll(PageRequest.of(request.getPage(), request.getLimit(), Sort.by("id").descending()));
     return pages;
   }
 
@@ -48,7 +48,7 @@ public class SupplierServiceImpl implements SupplierService {
       throw new NotFoundException("Status is not found.");
     }
     Page<Supplier> pages = supplierRepository.findByStatus(userStatus.name(),
-        PageRequest.of(request.getPage(), request.getLimit(), Sort.by("user_id").descending()));
+        PageRequest.of(request.getPage(), request.getLimit(), Sort.by("id").descending()));
     return pages;
   }
 

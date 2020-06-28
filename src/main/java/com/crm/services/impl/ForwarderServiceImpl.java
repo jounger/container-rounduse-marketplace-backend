@@ -85,7 +85,7 @@ public class ForwarderServiceImpl implements ForwarderService {
   @Override
   public Page<Forwarder> getForwarders(PaginationRequest request) {
     Page<Forwarder> forwarders = forwarderRepository
-        .findAll(PageRequest.of(request.getPage(), request.getLimit(), Sort.by("user_id").descending()));
+        .findAll(PageRequest.of(request.getPage(), request.getLimit(), Sort.by("id").descending()));
     return forwarders;
   }
 

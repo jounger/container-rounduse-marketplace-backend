@@ -80,7 +80,7 @@ public class ShippingLineServiceImpl implements ShippingLineService {
   @Override
   public Page<ShippingLine> getShippingLines(PaginationRequest request) {
     Page<ShippingLine> shippingLines = shippingLineRepository
-        .findAll(PageRequest.of(request.getPage(), request.getLimit(), Sort.by("user_id").descending()));
+        .findAll(PageRequest.of(request.getPage(), request.getLimit(), Sort.by("id").descending()));
     return shippingLines;
   }
 

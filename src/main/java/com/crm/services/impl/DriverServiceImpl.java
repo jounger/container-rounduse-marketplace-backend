@@ -87,14 +87,14 @@ public class DriverServiceImpl implements DriverService {
   @Override
   public Page<Driver> getDrivers(PaginationRequest request) {
     Page<Driver> drivers = driverRepository
-        .findAll(PageRequest.of(request.getPage(), request.getLimit(), Sort.by("user_id").descending()));
+        .findAll(PageRequest.of(request.getPage(), request.getLimit(), Sort.by("id").descending()));
     return drivers;
   }
 
   @Override
   public Page<Driver> getDriversByForwarder(Long id, PaginationRequest request) {
     Page<Driver> drivers = driverRepository.findByForwarder(id,
-        PageRequest.of(request.getPage(), request.getLimit(), Sort.by("user_id").descending()));
+        PageRequest.of(request.getPage(), request.getLimit(), Sort.by("id").descending()));
     return drivers;
   }
 

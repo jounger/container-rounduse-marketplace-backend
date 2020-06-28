@@ -70,10 +70,14 @@ public class OutboundServiceImpl implements OutboundService {
 
   @Override
   public Page<Outbound> getOutboundsByMerchant(Long id, PaginationRequest request) {
-    PageRequest pageRequest = PageRequest.of(request.getPage(), request.getLimit(),
-        Sort.by(Sort.Direction.DESC, "createdAt"));
-    Page<Outbound> pages = outboundRepository.findByMerchantId(id, pageRequest);
-    return pages;
+    if (merchantRepository.existsById(id)) {
+      PageRequest pageRequest = PageRequest.of(request.getPage(), request.getLimit(),
+          Sort.by(Sort.Direction.DESC, "createdAt"));
+      Page<Outbound> pages = outboundRepository.findByMerchantId(id, pageRequest);
+      return pages;
+    } else {
+      throw new NotFoundException("ERROR: Merchant is not found.");
+    }
   }
 
   @Override

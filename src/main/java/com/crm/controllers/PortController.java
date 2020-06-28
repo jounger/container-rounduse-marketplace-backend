@@ -67,7 +67,7 @@ public class PortController {
   }
 
   @PostMapping("")
-//  @PreAuthorize("hasRole('MODERATOR')")
+  @PreAuthorize("hasRole('MODERATOR')")
   public ResponseEntity<?> createPort(@Valid @RequestBody PortRequest request) {
     Port port = portService.createPort(request);
     PortDto portDto = PortMapper.toPortDto(port);

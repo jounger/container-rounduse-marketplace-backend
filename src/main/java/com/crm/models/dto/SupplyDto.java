@@ -13,5 +13,4 @@ public class SupplyDto {
   
   private String containerType;
   
-  private String status;
 }

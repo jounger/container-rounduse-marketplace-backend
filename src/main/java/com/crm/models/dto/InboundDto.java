@@ -5,17 +5,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class InboundDto {
-
-  private Long id;
-
-  // shippingLine.companyCode
-  private String shippingLine;
-
-  // containerType.name
-  private String containerType;
-
-  private String status;
+public class InboundDto extends SupplyDto {
 
   private String emptyTime;
 

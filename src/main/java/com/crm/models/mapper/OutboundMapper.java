@@ -2,6 +2,7 @@ package com.crm.models.mapper;
 
 import com.crm.common.Tool;
 import com.crm.models.Outbound;
+import com.crm.models.dto.BookingDto;
 import com.crm.models.dto.OutboundDto;
 
 public class OutboundMapper {
@@ -10,19 +11,27 @@ public class OutboundMapper {
     OutboundDto dto = new OutboundDto();
 
     dto.setId(outbound.getId());
-    dto.setShippingLine(outbound.getShippingLine().getCompanyCode());
-    dto.setContainerType(outbound.getContainerType().getName());
-    dto.setStatus(outbound.getStatus());
-    dto.setMerchantId(outbound.getMerchant().getId());
+    String shippingLine = outbound.getShippingLine().getCompanyCode();
+    dto.setShippingLine(shippingLine);
 
-    String packingTime = Tool.convertLocalDateTimeToString(outbound.getPackingTime());
-    dto.setPackingTime(packingTime);
+    String containerType = outbound.getContainerType().getName();
+    dto.setContainerType(containerType);
+    dto.setStatus(outbound.getStatus());
+
+    BookingDto bookingDto = BookingMapper.toBookingDto(outbound.getBooking());
+    dto.setBooking(bookingDto);
+
+    dto.setGoodsDescription(outbound.getGoodsDescription());
+
+    if (outbound.getPackingTime() != null) {
+      String packingTime = Tool.convertLocalDateTimeToString(outbound.getPackingTime());
+      dto.setPackingTime(packingTime);
+    }
 
     dto.setPackingStation(outbound.getPackingStation());
-
     dto.setPayload(outbound.getPayload());
     dto.setUnitOfMeasurement(outbound.getUnitOfMeasurement());
-    dto.setFcl(true);
+
     return dto;
 
   }

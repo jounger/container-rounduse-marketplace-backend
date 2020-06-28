@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
@@ -40,7 +41,7 @@ import lombok.ToString;
 @EntityListeners(AuditingEntityListener.class)
 @JsonIgnoreProperties(value = { "createdAt", "updatedAt" }, allowGetters = true)
 public class BillOfLading {
-  
+
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
@@ -48,13 +49,13 @@ public class BillOfLading {
   @ManyToOne
   @JoinColumn(name = "port_id")
   private Port portOfDelivery;
-  
+
   @Column(name = "bill_of_lading_number")
   private String billOfLadingNumber;
-  
+
   @Column(name = "free_time")
   private Integer freeTime;
-  
+
   @Column(name = "created_at", nullable = false, updatable = false)
   @Temporal(TemporalType.TIMESTAMP)
   @CreatedDate
@@ -64,10 +65,10 @@ public class BillOfLading {
   @Temporal(TemporalType.TIMESTAMP)
   @LastModifiedDate
   private Date updatedAt;
-  
+
   @OneToOne(mappedBy = "billOfLading")
   private Inbound inbound;
-  
-  @OneToMany(mappedBy = "billOfLading")
+
+  @OneToMany(mappedBy = "billOfLading", cascade = CascadeType.ALL)
   private Set<Container> containers = new HashSet<>();
 }

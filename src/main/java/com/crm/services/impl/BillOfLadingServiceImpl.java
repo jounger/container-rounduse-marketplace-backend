@@ -32,7 +32,7 @@ public class BillOfLadingServiceImpl implements BillOfLaingService {
   InboundRepository inboundRepository;
 
   @Override
-  public Page<BillOfLading> getBillOfLadingsByinbound(Long id, PaginationRequest request) {
+  public Page<BillOfLading> getBillOfLadingsByInbound(Long id, PaginationRequest request) {
     if (inboundRepository.existsById(id)) {
       PageRequest pageRequest = PageRequest.of(request.getPage(), request.getLimit(),
           Sort.by(Sort.Direction.DESC, "createdAt"));

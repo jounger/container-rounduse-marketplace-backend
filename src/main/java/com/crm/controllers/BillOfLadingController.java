@@ -41,7 +41,7 @@ public class BillOfLadingController {
   @PreAuthorize("hasRole('FORWARDER') or hasRole('MERCHANT')")
   public ResponseEntity<?> getBillOfLadingsByOutbound(@PathVariable Long id, @Valid PaginationRequest request) {
 
-    Page<BillOfLading> pages = billOfLadingService.getBillOfLadingsByinbound(id, request);
+    Page<BillOfLading> pages = billOfLadingService.getBillOfLadingsByInbound(id, request);
     PaginationResponse<BillOfLadingDto> response = new PaginationResponse<>();
     response.setPageNumber(request.getPage());
     response.setPageSize(request.getLimit());

@@ -39,7 +39,7 @@ public class BillOfLadingController {
 
   @GetMapping("/inbound/{id}")
   @PreAuthorize("hasRole('FORWARDER') or hasRole('MERCHANT')")
-  public ResponseEntity<?> getBillOfLadingsByOutbound(@PathVariable Long id, @Valid PaginationRequest request) {
+  public ResponseEntity<?> getBillOfLadingsByInbound(@PathVariable Long id, @Valid PaginationRequest request) {
 
     Page<BillOfLading> pages = billOfLadingService.getBillOfLadingsByInbound(id, request);
     PaginationResponse<BillOfLadingDto> response = new PaginationResponse<>();

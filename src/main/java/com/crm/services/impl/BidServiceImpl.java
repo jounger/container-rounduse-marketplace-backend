@@ -1,16 +1,19 @@
 package com.crm.services.impl;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.crm.common.Tool;
 import com.crm.enums.EnumBidStatus;
+import com.crm.enums.EnumSupplyStatus;
 import com.crm.exception.InternalException;
 import com.crm.exception.NotFoundException;
 import com.crm.models.Bid;
@@ -54,25 +57,26 @@ public class BidServiceImpl implements BidService {
         .orElseThrow(() -> new NotFoundException("Forwarer is not found."));
     bid.setBidder(bidder);
 
-    List<Long> containersId = request.getContainerId();
+    List<Long> containersId = request.getContainersId();
     Outbound outbound = biddingDocument.getOutbound();
     Booking booking = outbound.getBooking();
-    List<Container> suitableContainers = 
-        containerRepository.findByConsignment(outbound.getShippingLine().getId()
-            , outbound.getContainerType().getId(), outbound.getStatus()
-            , outbound.getPackingTime(), booking.getCutOffTime()
-            , booking.getPortOfLoading().getId());
-    containersId.forEach(containerId ->{
-      Container container = containerRepository.findById(containerId).orElseThrow(() -> new NotFoundException("Container is not found."));
-          if(suitableContainers.contains(container)) {
-            bid.getContainers().add(container);
-          }else {
-            throw new NotFoundException("Container is not suitable.");
-          }
+    List<Container> suitableContainers = containerRepository.findByOutbound(outbound.getShippingLine().getCompanyCode(),
+        outbound.getContainerType().getName(),
+        Arrays.asList(EnumSupplyStatus.CREATED.name(), EnumSupplyStatus.PUBLISHED.name(),
+            EnumSupplyStatus.BIDDING.name()),
+        outbound.getPackingTime(), booking.getCutOffTime(), booking.getPortOfLoading().getNameCode());
+    containersId.forEach(containerId -> {
+      Container container = containerRepository.findById(containerId)
+          .orElseThrow(() -> new NotFoundException("Container is not found."));
+      if (suitableContainers.contains(container)) {
+        bid.getContainers().add(container);
+      } else {
+        throw new NotFoundException("Container is not suitable.");
+      }
     });
-    
+
     Double bidPrice = request.getBidPrice();
-    if(bidPrice <= biddingDocument.getBidFloorPrice()) {
+    if (bidPrice <= biddingDocument.getBidFloorPrice()) {
       throw new InternalException("Bid price must be equal or greater than floor price.");
     }
     bid.setBidPrice(request.getBidPrice());
@@ -86,6 +90,8 @@ public class BidServiceImpl implements BidService {
     bid.setStatus(EnumBidStatus.PENDING.name());
 
     bidRepository.save(bid);
+
+    return bid;
   }
 
   @Override
@@ -97,23 +103,16 @@ public class BidServiceImpl implements BidService {
 
   @Override
   public Page<Bid> getBidsByBiddingDocument(Long id, PaginationRequest request) {
-    Page<Bid> bids = bidRepository.getBidsByBiddingDocument(id, PageRequest.of(request.getPage(), request.getLimit()));
+    Page<Bid> bids = bidRepository.getBidsByBiddingDocument(id,
+        PageRequest.of(request.getPage(), request.getLimit(), Sort.by("id").descending()));
     return bids;
   }
 
   @Override
   public Page<Bid> getBidsByForwarder(Long id, PaginationRequest request) {
-    Page<Bid> bids = bidRepository.getBidsByForwarder(id, PageRequest.of(request.getPage(), request.getLimit()));
+    Page<Bid> bids = bidRepository.getBidsByForwarder(id,
+        PageRequest.of(request.getPage(), request.getLimit(), Sort.by("id").descending()));
     return bids;
-  }
-
-  @Override
-  public void removeBid(Long id) {
-    if (bidRepository.existsById(id)) {
-      bidRepository.deleteById(id);
-    } else {
-      throw new NotFoundException("Bid is not found.");
-    }
   }
 
   @Override
@@ -128,21 +127,22 @@ public class BidServiceImpl implements BidService {
         .orElseThrow(() -> new NotFoundException("Forwarder is not found."));
     bid.setBidder(bidder);
 
-    List<Long> containersId = request.getContainerId();
+    List<Long> containersId = request.getContainersId();
     Outbound outbound = biddingDocument.getOutbound();
     Booking booking = outbound.getBooking();
-    List<Container> suitableContainers = 
-        containerRepository.findByConsignment(outbound.getShippingLine().getId()
-            , outbound.getContainerType().getId(), outbound.getStatus()
-            , outbound.getPackingTime(), booking.getCutOffTime()
-            , booking.getPortOfLoading().getId());
-    containersId.forEach(containerId ->{
-      Container container = containerRepository.findById(containerId).orElseThrow(() -> new NotFoundException("Container is not found."));
-          if(suitableContainers.contains(container)) {
-            bid.getContainers().add(container);
-          }else {
-            throw new NotFoundException("Container is not suitable.");
-          }
+    List<Container> suitableContainers = containerRepository.findByOutbound(outbound.getShippingLine().getCompanyCode(),
+        outbound.getContainerType().getName(),
+        Arrays.asList(EnumSupplyStatus.CREATED.name(), EnumSupplyStatus.PUBLISHED.name(),
+            EnumSupplyStatus.BIDDING.name()),
+        outbound.getPackingTime(), booking.getCutOffTime(), booking.getPortOfLoading().getNameCode());
+    containersId.forEach(containerId -> {
+      Container container = containerRepository.findById(containerId)
+          .orElseThrow(() -> new NotFoundException("Container is not found."));
+      if (suitableContainers.contains(container)) {
+        bid.getContainers().add(container);
+      } else {
+        throw new NotFoundException("Container is not suitable.");
+      }
     });
 
     bid.setBidPrice(request.getBidPrice());
@@ -164,6 +164,28 @@ public class BidServiceImpl implements BidService {
   @Override
   public Bid editBid(Long id, Map<String, Object> updates) {
     Bid bid = bidRepository.findById(id).orElseThrow(() -> new NotFoundException("Bid is not found."));
+
+    BiddingDocument biddingDocument = bid.getBiddingDocument();
+
+    @SuppressWarnings("unchecked")
+    List<String> containersId = (List<String>) updates.get("containersId");
+    Outbound outbound = biddingDocument.getOutbound();
+    Booking booking = outbound.getBooking();
+
+    List<Container> suitableContainers = containerRepository.findByOutbound(outbound.getShippingLine().getCompanyCode(),
+        outbound.getContainerType().getName(),
+        Arrays.asList(EnumSupplyStatus.CREATED.name(), EnumSupplyStatus.PUBLISHED.name(),
+            EnumSupplyStatus.BIDDING.name()),
+        outbound.getPackingTime(), booking.getCutOffTime(), booking.getPortOfLoading().getNameCode());
+    containersId.forEach(containerId -> {
+      Container container = containerRepository.findById(Long.valueOf(containerId))
+          .orElseThrow(() -> new NotFoundException("Container is not found."));
+      if (suitableContainers.contains(container)) {
+        bid.getContainers().add(container);
+      } else {
+        throw new NotFoundException("Container is not suitable.");
+      }
+    });
 
     try {
       String bidPriceString = (String) updates.get("bid_price");
@@ -193,6 +215,15 @@ public class BidServiceImpl implements BidService {
       bid.setStatus(status.name());
     }
     return bid;
+  }
+
+  @Override
+  public void removeBid(Long id) {
+    if (bidRepository.existsById(id)) {
+      bidRepository.deleteById(id);
+    } else {
+      throw new NotFoundException("Bid is not found.");
+    }
   }
 
 }

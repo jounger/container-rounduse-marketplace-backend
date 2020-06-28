@@ -16,7 +16,7 @@ public class BidRequest {
   
   private Long fowarderId;
   
-  private List<Long> containerId = new ArrayList<>();
+  private List<Long> containersId = new ArrayList<>();
   
   private Double bidPrice;
   

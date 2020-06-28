@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.data.domain.Sort;
 
 import com.crm.common.Tool;
 import com.crm.enums.EnumCurrency;
@@ -49,7 +50,7 @@ public class BiddingDocumentImpl implements BiddingDocumentService {
     biddingDocument.setOfferee(merchant);
 
     Outbound outbound = new Outbound();
-    outbound = outboundRepository.findById(request.getOutBoundId())
+    outbound = outboundRepository.findById(request.getOutboundId())
         .orElseThrow(() -> new NotFoundException("Outbound is not found."));
     biddingDocument.setOutbound(outbound);
 
@@ -92,7 +93,7 @@ public class BiddingDocumentImpl implements BiddingDocumentService {
   @Override
   public Page<BiddingDocument> getBiddingDocuments(PaginationRequest request) {
     Page<BiddingDocument> biddingDocuments = biddingDocumentRepository
-        .findAll(PageRequest.of(request.getPage(), request.getLimit()));
+        .findAll(PageRequest.of(request.getPage(), request.getLimit(), Sort.by("id").descending()));
     return biddingDocuments;
   }
 
@@ -101,7 +102,7 @@ public class BiddingDocumentImpl implements BiddingDocumentService {
     Page<BiddingDocument> biddingDocuments = null;
     if (merchantRepository.existsById(id)) {
       biddingDocuments = biddingDocumentRepository.findBiddingDocumentByMerchant(id,
-          PageRequest.of(request.getPage(), request.getLimit()));
+          PageRequest.of(request.getPage(), request.getLimit(), Sort.by("id").descending()));
     } else {
       throw new NotFoundException("Merchant is not found.");
     }

@@ -13,7 +13,7 @@ public class BiddingDocumentRequest {
   
   private Long merchantId;
   
-  private Long outBoundId;
+  private Long outboundId;
   
   private Boolean isMultipleAward;
   

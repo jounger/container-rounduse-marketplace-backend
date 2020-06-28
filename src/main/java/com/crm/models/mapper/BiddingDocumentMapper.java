@@ -6,6 +6,7 @@ import java.util.List;
 import com.crm.common.Tool;
 import com.crm.models.BiddingDocument;
 import com.crm.models.dto.BiddingDocumentDto;
+import com.crm.models.dto.OutboundDto;
 
 public class BiddingDocumentMapper {
 
@@ -14,11 +15,10 @@ public class BiddingDocumentMapper {
 
     String merchantUsername = biddingDocument.getOfferee().getUsername();
     biddingDocumentDto.setMerchant(merchantUsername);
-    /*
-     * OutboundDto consignment =
-     * OutboundMapper.toConsignmentDto(biddingDocument.getOutbound());
-     * biddingDocumentDto.setConsignment(consignment);
-     */
+
+    OutboundDto outboundDto = OutboundMapper.toOutboundDto(biddingDocument.getOutbound());
+    biddingDocumentDto.setOutbound(outboundDto);
+
     List<String> bids = new ArrayList<>();
     biddingDocument.getBids().forEach(bid -> {
       bids.add(String.valueOf(bid.getId()));

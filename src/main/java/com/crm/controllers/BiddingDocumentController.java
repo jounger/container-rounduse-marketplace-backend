@@ -42,8 +42,8 @@ public class BiddingDocumentController {
   @PreAuthorize("hasRole('MERCHANT')")
   @PostMapping("")
   public ResponseEntity<?> createBiddingDocument(@Valid @RequestBody BiddingDocumentRequest request) {
-     biddingDocumentService.createBiddingDocument(request);     
-     return ResponseEntity.ok(new MessageResponse("Bidding Document was created successfully"));
+     BiddingDocument biddingDocument = biddingDocumentService.createBiddingDocument(request);     
+     return ResponseEntity.ok(biddingDocument);
   } 
   
   @PreAuthorize("hasRole('MERCHANT')")
@@ -67,7 +67,7 @@ public class BiddingDocumentController {
     return ResponseEntity.ok(response);
   }
 
-  @PreAuthorize("hasRole('MERCHANT')")
+  @PreAuthorize("hasRole('MERCHANT') or hasRole('FORWARDER')")
   @GetMapping("/{id}")
   public ResponseEntity<?> getBiddingDocument(@PathVariable Long id) {
     BiddingDocument biddingDocument = biddingDocumentService.getBiddingDocument(id);

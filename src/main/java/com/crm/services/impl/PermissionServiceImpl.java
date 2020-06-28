@@ -3,6 +3,7 @@ package com.crm.services.impl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.crm.exception.DuplicateRecordException;
@@ -35,7 +36,8 @@ public class PermissionServiceImpl implements PermissionService {
 
   @Override
   public Page<Permission> getPermissions(PaginationRequest request) {
-    Page<Permission> pages = permissionRepository.findAll(PageRequest.of(request.getPage(), request.getLimit()));
+    Page<Permission> pages = permissionRepository
+        .findAll(PageRequest.of(request.getPage(), request.getLimit(), Sort.by("id").descending()));
     return pages;
   }
 
@@ -48,11 +50,12 @@ public class PermissionServiceImpl implements PermissionService {
 
   @Override
   public Permission updatePermission(PermissionRequest request) {
-    Permission permission = permissionRepository.findById(request.getId()).orElseThrow(() -> new NotFoundException("Permission is not found."));
+    Permission permission = permissionRepository.findById(request.getId())
+        .orElseThrow(() -> new NotFoundException("Permission is not found."));
     permission.setName(request.getName());
     permission.setDescription(request.getDescription());
     permissionRepository.save(permission);
-    
+
     return permission;
   }
 

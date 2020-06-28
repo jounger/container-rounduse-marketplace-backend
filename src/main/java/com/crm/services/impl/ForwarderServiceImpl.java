@@ -7,6 +7,7 @@ import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -37,7 +38,7 @@ public class ForwarderServiceImpl implements ForwarderService {
 
   @Autowired
   private ForwarderRepository forwarderRepository;
-  
+
   @Override
   public Forwarder createForwarder(SupplierRequest request) {
     if (userRepository.existsByUsername(request.getUsername()) || userRepository.existsByEmail(request.getEmail())
@@ -70,7 +71,7 @@ public class ForwarderServiceImpl implements ForwarderService {
     forwarder.setFax(request.getFax());
 
     forwarderRepository.save(forwarder);
-    
+
     return forwarder;
   }
 
@@ -83,7 +84,8 @@ public class ForwarderServiceImpl implements ForwarderService {
 
   @Override
   public Page<Forwarder> getForwarders(PaginationRequest request) {
-    Page<Forwarder> forwarders = forwarderRepository.findAll(PageRequest.of(request.getPage(), request.getLimit()));
+    Page<Forwarder> forwarders = forwarderRepository
+        .findAll(PageRequest.of(request.getPage(), request.getLimit(), Sort.by("user_id").descending()));
     return forwarders;
   }
 
@@ -104,7 +106,7 @@ public class ForwarderServiceImpl implements ForwarderService {
     if (UserServiceImpl.isEmailChange(request.getEmail(), forwarder)) {
       forwarder.setEmail(request.getEmail());
     }
-    
+
     forwarder.setPhone(request.getPhone());
     forwarder.setAddress(request.getAddress());
     forwarder.setStatus(EnumUserStatus.PENDING.name());

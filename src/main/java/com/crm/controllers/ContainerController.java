@@ -118,7 +118,6 @@ public class ContainerController {
   @Transactional
   @PutMapping("")
   @PreAuthorize("hasRole('MODERATOR') or hasRole('FORWARDER')")
-//  @PreAuthorize("hasRole('FORWARDER')")
   public ResponseEntity<?> updateContainer(@Valid @RequestBody ContainerRequest request) {
     Container container = containerService.updateContainer(request);
     ContainerDto containerDto = ContainerMapper.toContainerDto(container);

@@ -1,6 +1,7 @@
 package com.crm.services.impl;
 
 import java.util.Map;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -9,6 +10,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.crm.enums.EnumSupplyStatus;
+import com.crm.exception.DuplicateRecordException;
 import com.crm.exception.NotFoundException;
 import com.crm.models.BillOfLading;
 import com.crm.models.Container;
@@ -69,6 +71,14 @@ public class ContainerServiceImpl implements ContainerService {
     BillOfLading billOfLading = billOfLadingRepository.findById(id)
         .orElseThrow(() -> new NotFoundException("ERROR: BillOfLading is not found."));
 
+    Set<Container> containers = billOfLading.getContainers();
+    containers.forEach(item -> {
+      if (item.getContainerNumber().equals(request.getContainerNumber())
+          || item.getDriver().getUsername().equals(request.getDriver())
+          || item.getLicensePlate().equals(request.getLicensePlate())) {
+        throw new DuplicateRecordException("Error: Container has been existed");
+      }
+    });
     container.setBillOfLading(billOfLading);
     container.setStatus(EnumSupplyStatus.CREATED.name());
 
@@ -89,6 +99,21 @@ public class ContainerServiceImpl implements ContainerService {
   public Container updateContainer(ContainerRequest request) {
     Container container = containerRepository.findById(request.getId())
         .orElseThrow(() -> new NotFoundException("ERROR: Container is not found."));
+
+    BillOfLading billOfLading = (BillOfLading) container.getBillOfLading();
+
+    Set<Container> containers = billOfLading.getContainers();
+    containers.forEach(item -> {
+      if (item.getContainerNumber().equals(request.getContainerNumber())
+          || item.getDriver().getUsername().equals(request.getDriver())
+          || item.getLicensePlate().equals(request.getLicensePlate())) {
+        if (item.getId().equals(request.getId())) {
+
+        } else {
+          throw new DuplicateRecordException("Error: Container has been existed");
+        }
+      }
+    });
 
     if (request.getStatus() != null) {
       container.setStatus(EnumSupplyStatus.findByName(request.getStatus()).name());
@@ -153,6 +178,21 @@ public class ContainerServiceImpl implements ContainerService {
     if (status != null) {
       container.setStatus(status);
     }
+
+    BillOfLading billOfLading = (BillOfLading) container.getBillOfLading();
+
+    Long ContainerId = (Long) updates.get("id");
+    Set<Container> containers = billOfLading.getContainers();
+    containers.forEach(item -> {
+      if (item.getContainerNumber().equals(containerNumber) || item.getDriver().getUsername().equals(driverRequest)
+          || item.getLicensePlate().equals(licensePlate)) {
+        if (item.getId().equals(ContainerId)) {
+
+        } else {
+          throw new DuplicateRecordException("Error: Container has been existed");
+        }
+      }
+    });
 
     containerRepository.save(container);
     return container;

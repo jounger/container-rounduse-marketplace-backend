@@ -41,7 +41,6 @@ public class ContainerTypeController {
   private ContainerTypeService containerTypeService;
 
   @GetMapping("")
-  @PreAuthorize("hasRole('MODERATOR')")
   public ResponseEntity<?> getContainerTypes(@Valid PaginationRequest request) {
 
     Page<ContainerType> pages = containerTypeService.getContainerTypes(request);
@@ -62,7 +61,6 @@ public class ContainerTypeController {
   }
 
   @GetMapping("/{id}")
-  @PreAuthorize("hasRole('MODERATOR')")
   public ResponseEntity<?> getContainerType(@PathVariable Long id) {
     ContainerType containerType = containerTypeService.getContainerTypeById(id);
     ContainerTypeDto containerTypeDto = new ContainerTypeDto();

@@ -69,10 +69,11 @@ public class PortController {
   }
 
   @PostMapping("")
-  @PreAuthorize("hasRole('MODERATOR')")
+//  @PreAuthorize("hasRole('MODERATOR')")
   public ResponseEntity<?> createPort(@Valid @RequestBody PortRequest request) {
-    portService.createPort(request);
-    return ResponseEntity.ok(new MessageResponse("Port created successfully"));
+    Port port = portService.createPort(request);
+    PortDto portDto = PortMapper.toPortDto(port);
+    return ResponseEntity.ok(portDto);
   }
 
   @Transactional

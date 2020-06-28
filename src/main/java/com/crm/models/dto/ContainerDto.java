@@ -19,4 +19,5 @@ public class ContainerDto {
 
   private String licensePlate;
 
+  private String status;
 }

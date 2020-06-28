@@ -5,6 +5,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.crm.exception.DuplicateRecordException;
@@ -22,7 +23,7 @@ public class PortServiceImpl implements PortService {
   private PortRepository portRepository;
 
   @Override
-  public void createPort(PortRequest request) {
+  public Port createPort(PortRequest request) {
     if (portRepository.existsByNameCode(request.getNameCode())) {
       throw new DuplicateRecordException("ERROR: Port already exists.");
     }
@@ -31,7 +32,7 @@ public class PortServiceImpl implements PortService {
     port.setNameCode(request.getNameCode());
     port.setAddress(request.getAddress());
     portRepository.save(port);
-
+    return port;
   }
 
   @Override
@@ -58,7 +59,9 @@ public class PortServiceImpl implements PortService {
 
   @Override
   public Page<Port> getPorts(PaginationRequest request) {
-    Page<Port> pages = portRepository.findAll(PageRequest.of(request.getPage(), request.getLimit()));
+    PageRequest pageRequest = PageRequest.of(request.getPage(), request.getLimit(),
+        Sort.by(Sort.Direction.DESC, "createdAt"));
+    Page<Port> pages = portRepository.findAll(pageRequest);
     return pages;
   }
 

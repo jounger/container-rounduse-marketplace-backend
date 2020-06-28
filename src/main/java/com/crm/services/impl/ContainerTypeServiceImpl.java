@@ -5,6 +5,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.crm.exception.DuplicateRecordException;
@@ -23,7 +24,9 @@ public class ContainerTypeServiceImpl implements ContainerTypeService {
 
   @Override
   public Page<ContainerType> getContainerTypes(PaginationRequest request) {
-    Page<ContainerType> pages = containerTypeRepository.findAll(PageRequest.of(request.getPage(), request.getLimit()));
+    PageRequest pageRequest = PageRequest.of(request.getPage(), request.getLimit(),
+        Sort.by(Sort.Direction.DESC, "createdAt"));
+    Page<ContainerType> pages = containerTypeRepository.findAll(pageRequest);
     return pages;
   }
 
@@ -35,7 +38,7 @@ public class ContainerTypeServiceImpl implements ContainerTypeService {
   }
 
   @Override
-  public void createContainerType(ContainerTypeRequest request) {
+  public ContainerType createContainerType(ContainerTypeRequest request) {
     if (containerTypeRepository.existsByName(request.getName())) {
       throw new DuplicateRecordException("ERROR: ContainerType already exists.");
     }
@@ -55,7 +58,7 @@ public class ContainerTypeServiceImpl implements ContainerTypeService {
     containerType.setDoorOpeningHeight(request.getDoorOpeningHeight());
     containerType.setDoorOpeningWidth(request.getDoorOpeningWidth());
     containerTypeRepository.save(containerType);
-
+    return containerType;
   }
 
   @Override

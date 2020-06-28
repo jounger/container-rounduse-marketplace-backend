@@ -1,53 +1,59 @@
 package com.crm.controllers;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import javax.validation.Valid;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.crm.models.Outbound;
+import com.crm.models.dto.OutboundDto;
+import com.crm.models.mapper.OutboundMapper;
+import com.crm.payload.request.OutboundRequest;
+import com.crm.payload.request.PaginationRequest;
+import com.crm.payload.response.MessageResponse;
+import com.crm.payload.response.PaginationResponse;
+import com.crm.services.OutboundService;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
-@RequestMapping("/api/consignment")
+@RequestMapping("/api/outbound")
 public class OutboundController {
-/*
-  private static final Logger logger = LoggerFactory.getLogger(OutboundController.class);
 
   @Autowired
-  private OutboundService outboundService;
+  private OutboundService outBoundService;
 
   @GetMapping("/{id}")
-  @PreAuthorize("hasRole('MODERATOR') or hasRole('MERCHANT')")
-  public ResponseEntity<?> getConsignment(@PathVariable Long id) {
-    Outbound outbound = outboundService.getConsignmentById(id);
+  @PreAuthorize("hasRole('FORWARDER') or hasRole('MERCHANT')")
+  public ResponseEntity<?> getOutbound(@PathVariable Long id) {
+    Outbound outbound = outBoundService.getOutboundById(id);
     OutboundDto outboundDto = new OutboundDto();
-    outboundDto = OutboundMapper.toConsignmentDto(outbound);
+    outboundDto = OutboundMapper.toOutboundDto(outbound);
     return ResponseEntity.ok(outboundDto);
   }
 
-  @GetMapping("/merchant/{id}")
-  @PreAuthorize("hasRole('MERCHANT')")
-  public ResponseEntity<?> getConsignmentsByMerchant(@PathVariable Long id, @Valid PaginationRequest request) {
-
-    Page<Outbound> pages = outboundService.getConsignmentsByMerchant(id, request);
-    PaginationResponse<OutboundDto> response = new PaginationResponse<>();
-    response.setPageNumber(request.getPage());
-    response.setPageSize(request.getLimit());
-    response.setTotalElements(pages.getTotalElements());
-    response.setTotalPages(pages.getTotalPages());
-
-    List<Outbound> outbounds = pages.getContent();
-    List<OutboundDto> consignmentsDto = new ArrayList<>();
-    outbounds.forEach(consignment -> consignmentsDto.add(OutboundMapper.toConsignmentDto(consignment)));
-    response.setContents(consignmentsDto);
-
-    return ResponseEntity.ok(response);
-
-  }
-
   @GetMapping("")
-  @PreAuthorize("hasRole('MODERATOR')")
-  public ResponseEntity<?> getConsignments(@Valid PaginationRequest request) {
+  @PreAuthorize("hasRole('FORWARDER') or hasRole('MERCHANT')")
+  public ResponseEntity<?> getOutbounds(@Valid PaginationRequest request) {
 
-    Page<Outbound> pages = outboundService.getConsignments(request);
+    Page<Outbound> pages = outBoundService.getOutbounds(request);
     PaginationResponse<OutboundDto> response = new PaginationResponse<>();
     response.setPageNumber(request.getPage());
     response.setPageSize(request.getLimit());
@@ -55,37 +61,67 @@ public class OutboundController {
     response.setTotalPages(pages.getTotalPages());
 
     List<Outbound> outbounds = pages.getContent();
-    List<OutboundDto> consignmentsDto = new ArrayList<>();
-    outbounds.forEach(consignment -> consignmentsDto.add(OutboundMapper.toConsignmentDto(consignment)));
-    response.setContents(consignmentsDto);
+    List<OutboundDto> outboundsDto = new ArrayList<>();
+    outbounds.forEach(outbound -> outboundsDto.add(OutboundMapper.toOutboundDto(outbound)));
+    response.setContents(outboundsDto);
 
     return ResponseEntity.ok(response);
-
   }
 
-  @PostMapping("")
+  @GetMapping("/merchant/{id}")
+  @PreAuthorize("hasRole('FORWARDER') or hasRole('MERCHANT')")
+  public ResponseEntity<?> getOutboundsByMerchant(@PathVariable Long id, @Valid PaginationRequest request) {
+
+    Page<Outbound> pages = outBoundService.getOutboundsByMerchant(id, request);
+    PaginationResponse<OutboundDto> response = new PaginationResponse<>();
+    response.setPageNumber(request.getPage());
+    response.setPageSize(request.getLimit());
+    response.setTotalElements(pages.getTotalElements());
+    response.setTotalPages(pages.getTotalPages());
+
+    List<Outbound> outbounds = pages.getContent();
+    List<OutboundDto> outboundsDto = new ArrayList<>();
+    outbounds.forEach(outbound -> outboundsDto.add(OutboundMapper.toOutboundDto(outbound)));
+    response.setContents(outboundsDto);
+
+    return ResponseEntity.ok(response);
+  }
+
+  @Transactional
+  @PostMapping("/merchant/{id}")
   @PreAuthorize("hasRole('MERCHANT')")
-  public ResponseEntity<?> createConsignment(@Valid @RequestBody ConsignmentRequest request) {
-    logger.error("Runtime error: {}", request);
-    outboundService.createConsignment(request);
-    return ResponseEntity.ok(new MessageResponse("Consignment created successfully"));
+  public ResponseEntity<?> createOutbound(@PathVariable Long id, @Valid @RequestBody OutboundRequest request) {
+    Outbound outbound = outBoundService.createOutbound(id, request);
+    OutboundDto outboundDto = new OutboundDto();
+    outboundDto = OutboundMapper.toOutboundDto(outbound);
+    return ResponseEntity.ok(outboundDto);
   }
 
   @Transactional
   @PutMapping("")
   @PreAuthorize("hasRole('MERCHANT')")
-  public ResponseEntity<?> updateConsignment(@Valid @RequestBody ConsignmentRequest request) {
-    Outbound outbound = outboundService.updateConsignment(request);
-    OutboundDto outboundDto = OutboundMapper.toConsignmentDto(outbound);
+  public ResponseEntity<?> updateOutboundDto(@Valid @RequestBody OutboundRequest request) {
+    Outbound outbound = outBoundService.updateOutbound(request);
+    OutboundDto outboundDto = new OutboundDto();
+    outboundDto = OutboundMapper.toOutboundDto(outbound);
+    return ResponseEntity.ok(outboundDto);
+  }
+
+  @Transactional
+  @RequestMapping(value = "/{id}", method = RequestMethod.PATCH, consumes = MediaType.APPLICATION_JSON_VALUE)
+  @PreAuthorize("hasRole('MERCHANT')")
+  public ResponseEntity<?> editOutbound(@RequestBody Map<String, Object> updates, @PathVariable("id") Long id) {
+    Outbound outbound = outBoundService.editOutbound(updates, id);
+    OutboundDto outboundDto = new OutboundDto();
+    outboundDto = OutboundMapper.toOutboundDto(outbound);
     return ResponseEntity.ok(outboundDto);
   }
 
   @Transactional
   @DeleteMapping("/{id}")
   @PreAuthorize("hasRole('MERCHANT')")
-  public ResponseEntity<?> removeConsignment(@PathVariable Long id) {
-    outboundService.removeConsignment(id);
-    return ResponseEntity.ok(new MessageResponse("Consignment has remove successfully"));
+  public ResponseEntity<?> removeOutbound(@PathVariable Long id) {
+    outBoundService.removeOutbound(id);
+    return ResponseEntity.ok(new MessageResponse("Outbound has remove successfully"));
   }
-*/
 }

@@ -14,7 +14,7 @@ public class ContainerMapper {
     containerDto.setTrailer(container.getTrailer());
     containerDto.setContainerNumber(container.getContainerNumber());
     containerDto.setLicensePlate(container.getLicensePlate());
-
+    containerDto.setStatus(container.getStatus());
     return containerDto;
   }
 

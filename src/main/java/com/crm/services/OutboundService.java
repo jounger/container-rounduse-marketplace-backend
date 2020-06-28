@@ -1,18 +1,27 @@
 package com.crm.services;
 
+import java.util.Map;
+
+import org.springframework.data.domain.Page;
+
+import com.crm.models.Outbound;
+import com.crm.payload.request.OutboundRequest;
+import com.crm.payload.request.PaginationRequest;
+
 public interface OutboundService {
-  
-  /*
-  Outbound getConsignmentById(Long id);
-  
-  Page<Outbound> getConsignments(PaginationRequest request);
-  
-  Page<Outbound> getConsignmentsByMerchant(Long id, PaginationRequest request);
-  
-  void createConsignment(ConsignmentRequest request);
-  
-  Outbound updateConsignment(ConsignmentRequest request);
-  
-  void removeConsignment(Long id);
-  */
+
+  Outbound getOutboundById(Long id);
+
+  Page<Outbound> getOutbounds(PaginationRequest request);
+
+  Page<Outbound> getOutboundsByMerchant(Long id, PaginationRequest request);
+
+  Outbound createOutbound(Long id, OutboundRequest request);
+
+  Outbound updateOutbound(OutboundRequest request);
+
+  Outbound editOutbound(Map<String, Object> updates, Long id);
+
+  void removeOutbound(Long id);
+
 }

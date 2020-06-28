@@ -14,7 +14,7 @@ public interface PortService {
 
   Port getPortById(Long id);
 
-  void createPort(PortRequest request);
+  Port createPort(PortRequest request);
 
   Port updatePort(PortRequest request);
 

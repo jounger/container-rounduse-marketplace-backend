@@ -38,16 +38,16 @@ import lombok.ToString;
 @Table(name = "container")
 @EntityListeners(AuditingEntityListener.class)
 @JsonIgnoreProperties(value = { "createdAt", "updatedAt" }, allowGetters = true)
-public class Container{
+public class Container {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
-  
+
   @ManyToOne
   @JoinColumn(name = "driver_id")
   private Driver driver;
-  
+
   @ManyToOne
   @JoinColumn(name = "bill_of_lading_id")
   private BillOfLading billOfLading;
@@ -61,10 +61,10 @@ public class Container{
 
   @Column(name = "license_plate")
   private String licensePlate;
-  
-  //EnumSupplyStatus
+
+  // EnumSupplyStatus
   private String status;
-  
+
   @Column(name = "created_at", nullable = false, updatable = false)
   @Temporal(TemporalType.TIMESTAMP)
   @CreatedDate

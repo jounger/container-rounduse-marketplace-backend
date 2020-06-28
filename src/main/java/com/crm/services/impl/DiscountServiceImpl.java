@@ -6,6 +6,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.crm.common.Tool;
@@ -26,7 +27,9 @@ public class DiscountServiceImpl implements DiscountService {
 
   @Override
   public Page<Discount> getDiscounts(PaginationRequest request) {
-    Page<Discount> pages = discountRepository.findAll(PageRequest.of(request.getPage(), request.getLimit()));
+    PageRequest pageRequest = PageRequest.of(request.getPage(), request.getLimit(),
+        Sort.by(Sort.Direction.DESC, "createdAt"));
+    Page<Discount> pages = discountRepository.findAll(pageRequest);
     return pages;
   }
 
@@ -38,7 +41,7 @@ public class DiscountServiceImpl implements DiscountService {
   }
 
   @Override
-  public void createDiscount(DiscountRequest request) {
+  public Discount createDiscount(DiscountRequest request) {
     if (discountRepository.existsByCode(request.getCode())) {
       throw new DuplicateRecordException("ERROR: Discount already exists.");
     }
@@ -57,7 +60,7 @@ public class DiscountServiceImpl implements DiscountService {
       discount.setExpiredDate(expiredDate);
     }
     discountRepository.save(discount);
-
+    return discount;
   }
 
   @Override

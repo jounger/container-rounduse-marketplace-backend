@@ -41,7 +41,6 @@ public class DiscountController {
   private DiscountService discountService;
 
   @GetMapping("")
-  @PreAuthorize("hasRole('MODERATOR')")
   public ResponseEntity<?> getDiscounts(@Valid PaginationRequest request) {
 
     Page<Discount> pages = discountService.getDiscounts(request);
@@ -61,7 +60,6 @@ public class DiscountController {
   }
 
   @GetMapping("/{id}")
-  @PreAuthorize("hasRole('MODERATOR')")
   public ResponseEntity<?> getDiscount(@PathVariable Long id) {
     Discount discount = discountService.getDiscountById(id);
     DiscountDto discountDto = new DiscountDto();

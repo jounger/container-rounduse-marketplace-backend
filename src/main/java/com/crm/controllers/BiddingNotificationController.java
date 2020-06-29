@@ -37,12 +37,14 @@ public class BiddingNotificationController {
   @Autowired
   private BiddingNotificationService biddingNotificationService;
   
+  /*
   @PostMapping("")
   public ResponseEntity<?> createBiddingNotification(@Valid @RequestBody BiddingNotificationRequest request) {
      BiddingNotification biddingNotification = biddingNotificationService.createBiddingNotification(request);
      BiddingNotificationDto biddingNotificationDto = BiddingNotificationMapper.toBiddingNotificationDto(biddingNotification);
      return ResponseEntity.ok(biddingNotificationDto);
-  } 
+  }
+  */ 
   
   @GetMapping("/user/{id}")
   public ResponseEntity<?> getBiddingNotificationsByUser(@PathVariable Long id, @Valid PaginationRequest request) {

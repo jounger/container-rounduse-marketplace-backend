@@ -24,5 +24,6 @@ public class BidRequest {
   
   private String bidValidityPeriod;
   
-  private String eBidStatusName;
+  //EnumBidStatus
+  private String status;
 }

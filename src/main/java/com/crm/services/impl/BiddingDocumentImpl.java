@@ -6,11 +6,13 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Sort;
+import org.springframework.stereotype.Service;
 
 import com.crm.common.Tool;
 import com.crm.enums.EnumCurrency;
+import com.crm.enums.EnumSupplyStatus;
+import com.crm.exception.DuplicateRecordException;
 import com.crm.exception.InternalException;
 import com.crm.exception.NotFoundException;
 import com.crm.models.BiddingDocument;
@@ -52,7 +54,14 @@ public class BiddingDocumentImpl implements BiddingDocumentService {
     Outbound outbound = new Outbound();
     outbound = outboundRepository.findById(request.getOutboundId())
         .orElseThrow(() -> new NotFoundException("Outbound is not found."));
+    if (outbound.getStatus().equalsIgnoreCase(EnumSupplyStatus.COMBINED.name())
+        || outbound.getStatus().equalsIgnoreCase(EnumSupplyStatus.BIDDING.name())) {
+      throw new DuplicateRecordException("Outbound must be not in any transaction.");
+    }
+    outbound.setStatus(EnumSupplyStatus.BIDDING.name());
     biddingDocument.setOutbound(outbound);
+
+    biddingDocument.setIsMultipleAward(request.getIsMultipleAward());
 
     LocalDateTime bidOpening = Tool.convertToLocalDateTime(request.getBidOpening());
     biddingDocument.setBidOpening(bidOpening);
@@ -63,10 +72,10 @@ public class BiddingDocumentImpl implements BiddingDocumentService {
     EnumCurrency currency = EnumCurrency.findByName(request.getCurrencyOfPayment());
     if (currency != null) {
       biddingDocument.setCurrencyOfPayment(currency.name());
-    }else {
+    } else {
       biddingDocument.setCurrencyOfPayment(EnumCurrency.VND.name());
     }
-    
+
     biddingDocument.setBidPackagePrice(request.getBidPackagePrice());
     biddingDocument.setBidFloorPrice(request.getBidFloorPrice());
     biddingDocument.setPriceLeadership(request.getBidFloorPrice());
@@ -140,19 +149,19 @@ public class BiddingDocumentImpl implements BiddingDocumentService {
     BiddingDocument biddingDocument = biddingDocumentRepository.findById(id)
         .orElseThrow(() -> new NotFoundException("Bidding document is not found."));
 
-    String bidOpening = (String) updates.get("bid_opening");
+    String bidOpening = (String) updates.get("bidOpening");
     if (bidOpening != null) {
       LocalDateTime bidOpeningTime = Tool.convertToLocalDateTime(bidOpening);
       biddingDocument.setBidOpening(bidOpeningTime);
     }
 
-    String bidClosing = (String) updates.get("bid_closing");
+    String bidClosing = (String) updates.get("bidClosing");
     if (bidClosing != null) {
       LocalDateTime bidClosingTime = Tool.convertToLocalDateTime(bidClosing);
       biddingDocument.setBidClosing(bidClosingTime);
     }
 
-    String currency = (String) updates.get("current_of_payment");
+    String currency = (String) updates.get("currentOfPayment");
     if (currency != null) {
       EnumCurrency currencyOfPayment = EnumCurrency.findByName(currency);
       if (currencyOfPayment == null) {
@@ -164,19 +173,19 @@ public class BiddingDocumentImpl implements BiddingDocumentService {
     }
 
     try {
-      String packagePriceString = (String) updates.get("bid_package_price");
+      String packagePriceString = (String) updates.get("bidPackagePrice");
       if (packagePriceString != null) {
         Double bidPackagePrice = Double.parseDouble(packagePriceString);
         biddingDocument.setBidPackagePrice(bidPackagePrice);
       }
 
-      String floorPriceString = (String) updates.get("bid_floor_price");
+      String floorPriceString = (String) updates.get("bidFloorPrice");
       if (floorPriceString != null) {
         Double bidFloorPrice = Double.parseDouble(floorPriceString);
         biddingDocument.setBidFloorPrice(bidFloorPrice);
       }
 
-      String priceLeadershipString = (String) updates.get("price_leadership");
+      String priceLeadershipString = (String) updates.get("priceLeadership");
       if (priceLeadershipString != null) {
         Double priceLeadership = Double.parseDouble(priceLeadershipString);
         biddingDocument.setPriceLeadership(priceLeadership);
@@ -191,10 +200,14 @@ public class BiddingDocumentImpl implements BiddingDocumentService {
 
   @Override
   public void removeBiddingDocument(Long id) {
-    if (biddingDocumentRepository.existsById(id)) {
+    BiddingDocument biddingDocument = biddingDocumentRepository.findById(id)
+        .orElseThrow(() -> new NotFoundException("Bidding document is not found"));
+    Outbound outbound = biddingDocument.getOutbound();
+    if (outbound.getStatus() != EnumSupplyStatus.BIDDING.name()
+        || outbound.getStatus() != EnumSupplyStatus.COMBINED.name()) {
       biddingDocumentRepository.deleteById(id);
     } else {
-      throw new NotFoundException("Bidding document is not found");
+      throw new InternalException("Bidding document is in a transaction.");
     }
   }
 

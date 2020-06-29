@@ -9,10 +9,15 @@ import lombok.Setter;
 @Setter
 public class BiddingDocumentDto {
   
+  private Long id;
   //merchant username
   private String merchant;
   
   private OutboundDto outbound;
+  
+  private String bidDiscountCode;
+  
+  private Boolean isMultipleAward;
   
   private List<BidDto> bids;
  
@@ -25,8 +30,6 @@ public class BiddingDocumentDto {
   private Double bidPackagePrice;
   
   private Double bidFloorPrice;
-  
-  private String bidDiscountCode;
   
   private Double priceLeadership;
 }

@@ -85,11 +85,25 @@ public class BidServiceImpl implements BidService {
     bid.setBidDate(bidDate);
 
     LocalDateTime bidValidityPeriod = Tool.convertToLocalDateTime(request.getBidValidityPeriod());
-    bid.setBidValidityPeriod(bidValidityPeriod);
+    if (bidValidityPeriod != null ) {
+      if(bidValidityPeriod.isAfter(LocalDateTime.now().plusDays(1)) || bidValidityPeriod.isEqual(LocalDateTime.now().plusDays(1))) {
+        bid.setBidValidityPeriod(bidValidityPeriod);  
+      } else {
+        throw new InternalException("Bid validity period must be at least 1 day after now.");
+      }   
+    } else {
+      bid.setBidValidityPeriod(LocalDateTime.now().plusDays(1));
+    }
 
     bid.setStatus(EnumBidStatus.PENDING.name());
 
     bidRepository.save(bid);
+
+    biddingDocument.getBids().add(bid);
+    if (bid.getBidPrice() < biddingDocument.getPriceLeadership()) {
+      biddingDocument.setPriceLeadership(bid.getBidPrice());
+    }
+    biddingDocumentRepository.save(biddingDocument);
 
     return bid;
   }
@@ -146,14 +160,24 @@ public class BidServiceImpl implements BidService {
     });
 
     bid.setBidPrice(request.getBidPrice());
-
+    
+    /* update bidDate is not allowed
     LocalDateTime bidDate = Tool.convertToLocalDateTime(request.getBidDate());
     bid.setBidDate(bidDate);
+    */
 
     LocalDateTime bidValidityPeriod = Tool.convertToLocalDateTime(request.getBidValidityPeriod());
-    bid.setBidValidityPeriod(bidValidityPeriod);
+    if (bidValidityPeriod != null ) {
+      if(bidValidityPeriod.isAfter(LocalDateTime.now().plusDays(1)) || bidValidityPeriod.isEqual(LocalDateTime.now().plusDays(1))) {
+        bid.setBidValidityPeriod(bidValidityPeriod);  
+      } else {
+        throw new InternalException("Bid validity period must be at least 1 day after now.");
+      }   
+    } else {
+      bid.setBidValidityPeriod(LocalDateTime.now().plusDays(1));
+    }
 
-    EnumBidStatus bidStatus = EnumBidStatus.findByName(request.getEBidStatusName());
+    EnumBidStatus bidStatus = EnumBidStatus.findByName(request.getStatus());
     bid.setStatus(bidStatus.name());
 
     bidRepository.save(bid);
@@ -188,7 +212,7 @@ public class BidServiceImpl implements BidService {
     });
 
     try {
-      String bidPriceString = (String) updates.get("bid_price");
+      String bidPriceString = (String) updates.get("bidPrice");
       if (bidPriceString != null) {
         Double bidPrice = Double.parseDouble(bidPriceString);
         bid.setBidPrice(bidPrice);
@@ -197,29 +221,43 @@ public class BidServiceImpl implements BidService {
       throw new InternalException("Parameter must be Double");
     }
 
+    /* update bidDate is not allowed
     String bidDateString = (String) updates.get("bid_date");
     if (bidDateString != null) {
       LocalDateTime bidDate = Tool.convertToLocalDateTime(bidDateString);
       bid.setBidDate(bidDate);
     }
+    */
 
-    String bidValidityPeriodString = (String) updates.get("bid_validity_period");
+    String bidValidityPeriodString = (String) updates.get("bidValidityPeriod");
     if (bidValidityPeriodString != null) {
       LocalDateTime bidValidityPeriod = Tool.convertToLocalDateTime(bidValidityPeriodString);
-      bid.setBidValidityPeriod(bidValidityPeriod);
+      if (bidValidityPeriod != null ) {
+        if(bidValidityPeriod.isAfter(LocalDateTime.now().plusDays(1)) || bidValidityPeriod.isEqual(LocalDateTime.now().plusDays(1))) {
+          bid.setBidValidityPeriod(bidValidityPeriod);  
+        } else {
+          throw new InternalException("Bid validity period must be at least 1 day after now.");
+        }   
+      } else {
+        bid.setBidValidityPeriod(LocalDateTime.now().plusDays(1));
+      }
     }
 
-    String statusString = (String) updates.get("ebid_status_name");
+    String statusString = (String) updates.get("ebidStatusName");
     if (statusString != null) {
       EnumBidStatus status = EnumBidStatus.findByName(statusString);
       bid.setStatus(status.name());
     }
-    return bid;
+    
+    bidRepository.save(bid);
+    
+    return bid; 
   }
 
   @Override
   public void removeBid(Long id) {
-    if (bidRepository.existsById(id)) {
+    Bid bid = bidRepository.findById(id).orElseThrow(() -> new NotFoundException("Bid is not found."));
+    if (bid.getStatus() != EnumBidStatus.ACCEPTED.name()) {
       bidRepository.deleteById(id);
     } else {
       throw new NotFoundException("Bid is not found.");

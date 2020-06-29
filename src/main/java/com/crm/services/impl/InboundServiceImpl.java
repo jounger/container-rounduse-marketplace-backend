@@ -174,7 +174,8 @@ public class InboundServiceImpl implements InboundService {
         .orElseThrow(() -> new NotFoundException("ERROR: Port is not found."));
     billOfLading.setPortOfDelivery(port);
 
-    billOfLading.setFreeTime(request.getBillOfLading().getFreeTime());
+    LocalDateTime freeTime = Tool.convertToLocalDateTime(request.getBillOfLading().getFreeTime());
+    billOfLading.setFreeTime(freeTime);
 
     inbound.setBillOfLading(billOfLading);
 
@@ -257,7 +258,8 @@ public class InboundServiceImpl implements InboundService {
           .orElseThrow(() -> new NotFoundException("ERROR: Port is not found."));
       billOfLading.setPortOfDelivery(port);
 
-      billOfLading.setFreeTime(request.getBillOfLading().getFreeTime());
+      LocalDateTime freeTime = Tool.convertToLocalDateTime(request.getBillOfLading().getFreeTime());
+      billOfLading.setFreeTime(freeTime);
 
       inbound.setBillOfLading(billOfLading);
 

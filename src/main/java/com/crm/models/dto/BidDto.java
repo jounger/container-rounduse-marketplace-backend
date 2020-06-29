@@ -1,5 +1,6 @@
 package com.crm.models.dto;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import lombok.Getter;
@@ -12,7 +13,7 @@ public class BidDto {
   //forwarder username
   private String bidder; 
 
-  private List<ContainerDto> containers;
+  private List<ContainerDto> containers = new ArrayList<>();
 
   private Double bidPrice;
 

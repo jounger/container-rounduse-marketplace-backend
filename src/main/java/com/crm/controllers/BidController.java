@@ -42,8 +42,9 @@ public class BidController {
   @PreAuthorize("hasRole('FORWARDER')")
   @PostMapping("")
   public ResponseEntity<?> createBiddingDocument(@Valid @RequestBody BidRequest request) {
-     Bid bid = bidService.createBid(request);     
-     return ResponseEntity.ok(bid);
+     Bid bid = bidService.createBid(request);
+     BidDto bidDto = BidMapper.toBidDto(bid);
+     return ResponseEntity.ok(bidDto);
   }
 
   @PreAuthorize("hasRole('MERCHANT') or hasRole('FORWARDER')")

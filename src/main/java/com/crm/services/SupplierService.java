@@ -13,6 +13,8 @@ public interface SupplierService {
 	
 	Supplier getSupplier(String username);
 	
+	Supplier getSupplier(Long id);
+	
 	Page<Supplier> getSuppliersByStatus(PaginationRequest request);
 	
 	Supplier editSupplier(Map<String, Object> updates, Long id);

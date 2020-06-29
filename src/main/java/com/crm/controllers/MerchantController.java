@@ -66,7 +66,7 @@ public class MerchantController {
     return ResponseEntity.ok(response);
   }
 
-  @PreAuthorize("hasRole('OPERATOR') or hasRole('MERCHANT')")
+  @PreAuthorize("hasRole('OPERATOR') or hasRole('MERCHANT') or hasRole('FORWARDER')")
   @GetMapping("/{id}")
   public ResponseEntity<?> getMerchant(@PathVariable Long id) {
     Merchant merchant = merchantService.getMerchant(id);

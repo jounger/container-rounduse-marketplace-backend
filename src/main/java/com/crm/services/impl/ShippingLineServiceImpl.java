@@ -5,6 +5,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -63,9 +64,9 @@ public class ShippingLineServiceImpl implements ShippingLineService {
     shippingLine.setCompanyAddress(request.getCompanyAddress());
     shippingLine.setTin(request.getTin());
     shippingLine.setFax(request.getFax());
-    
+
     shippingLineRepository.save(shippingLine);
-    
+
     return shippingLine;
   }
 
@@ -79,7 +80,7 @@ public class ShippingLineServiceImpl implements ShippingLineService {
   @Override
   public Page<ShippingLine> getShippingLines(PaginationRequest request) {
     Page<ShippingLine> shippingLines = shippingLineRepository
-        .findAll(PageRequest.of(request.getPage(), request.getLimit()));
+        .findAll(PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt")));
     return shippingLines;
   }
 

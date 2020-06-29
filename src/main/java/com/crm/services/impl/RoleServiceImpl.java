@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.crm.exception.DuplicateRecordException;
@@ -22,7 +23,7 @@ public class RoleServiceImpl implements RoleService {
 
   @Autowired
   private RoleRepository roleRepository;
-  
+
   @Autowired
   private PermissionRepository permissionRepository;
 
@@ -39,15 +40,16 @@ public class RoleServiceImpl implements RoleService {
           .orElseThrow(() -> new NotFoundException("Permission is not found."));
       role.getPermissions().add(rolePermission);
     });
-    
+
     roleRepository.save(role);
-    
+
     return role;
   }
 
   @Override
   public Page<Role> getRoles(PaginationRequest request) {
-    Page<Role> pages = roleRepository.findAll(PageRequest.of(request.getPage(), request.getLimit()));
+    Page<Role> pages = roleRepository
+        .findAll(PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt")));
     return pages;
   }
 

@@ -65,7 +65,7 @@ public class ForwarderController {
     return ResponseEntity.ok(response);
   }
 
-  @PreAuthorize("hasRole('OPERATOR') or hasRole('FORWARDER')")
+  @PreAuthorize("hasRole('OPERATOR') or hasRole('MERCHANT') or hasRole('FORWARDER')")
   @GetMapping("/{id}")
   public ResponseEntity<?> getForwarder(@PathVariable Long id) {
     Forwarder forwarder = forwarderService.getForwarder(id);

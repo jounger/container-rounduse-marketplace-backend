@@ -7,6 +7,7 @@ import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -76,10 +77,10 @@ public class UserServiceImpl implements UserService {
   public Page<User> getUsers(PaginationRequest request) {
     Page<User> pages = null;
     if (request.getStatus() == null) {
-      pages = userRepository.findAll(PageRequest.of(request.getPage(), request.getLimit()));
+      pages = userRepository.findAll(PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt")));
     } else {
       pages = userRepository.findByStatus(EnumUserStatus.findByName(request.getStatus()),
-          PageRequest.of(request.getPage(), request.getLimit()));
+          PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt")));
     }
     return pages;
   }

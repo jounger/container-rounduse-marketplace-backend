@@ -1,5 +1,6 @@
 package com.crm.services.impl;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,6 +9,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import com.crm.common.Tool;
 import com.crm.exception.DuplicateRecordException;
 import com.crm.exception.NotFoundException;
 import com.crm.models.BillOfLading;
@@ -64,7 +66,8 @@ public class BillOfLadingServiceImpl implements BillOfLaingService {
     }
 
     if (request.getFreeTime() != null) {
-      billOfLading.setFreeTime(request.getFreeTime());
+      LocalDateTime freeTime = Tool.convertToLocalDateTime(request.getFreeTime());
+      billOfLading.setFreeTime(freeTime);
     }
 
     billOfLadingRepository.save(billOfLading);
@@ -95,8 +98,9 @@ public class BillOfLadingServiceImpl implements BillOfLaingService {
       billOfLading.setBillOfLadingNumber(billOfLadingNumber);
     }
 
-    Integer freeTime = (Integer) updates.get("freeTime");
-    if (freeTime != null) {
+    String freeTimeReq = (String) updates.get("freeTime");
+    if (freeTimeReq != null) {
+      LocalDateTime freeTime = Tool.convertToLocalDateTime(freeTimeReq);
       billOfLading.setFreeTime(freeTime);
     }
 

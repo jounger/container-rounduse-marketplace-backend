@@ -5,6 +5,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.crm.enums.EnumUserStatus;
@@ -22,7 +23,8 @@ public class SupplierServiceImpl implements SupplierService {
 
   @Override
   public Page<Supplier> getSuppliers(PaginationRequest request) {
-    Page<Supplier> pages = supplierRepository.findAll(PageRequest.of(request.getPage(), request.getLimit()));
+    Page<Supplier> pages = supplierRepository
+        .findAll(PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt")));
     return pages;
   }
 
@@ -34,13 +36,19 @@ public class SupplierServiceImpl implements SupplierService {
   }
 
   @Override
+  public Supplier getSupplier(Long id) {
+    Supplier supplier = supplierRepository.findById(id).orElseThrow(() -> new NotFoundException("User is not found"));
+    return supplier;
+  }
+
+  @Override
   public Page<Supplier> getSuppliersByStatus(PaginationRequest request) {
     EnumUserStatus userStatus = EnumUserStatus.findByName(request.getStatus().toString());
-    if(userStatus == null) {
+    if (userStatus == null) {
       throw new NotFoundException("Status is not found.");
     }
     Page<Supplier> pages = supplierRepository.findByStatus(userStatus.name(),
-        PageRequest.of(request.getPage(), request.getLimit()));
+        PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt")));
     return pages;
   }
 
@@ -50,7 +58,7 @@ public class SupplierServiceImpl implements SupplierService {
     String status = (String) updates.get("status");
     if (status != null) {
       EnumUserStatus eStatus = EnumUserStatus.findByName(status.toUpperCase());
-      supplier.setStatus(eStatus.name());  
+      supplier.setStatus(eStatus.name());
     }
     supplierRepository.save(supplier);
     return supplier;

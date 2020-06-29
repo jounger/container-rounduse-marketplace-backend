@@ -41,7 +41,6 @@ public class PortController {
   private PortService portService;
 
   @GetMapping("")
-  @PreAuthorize("hasRole('MODERATOR')")
   public ResponseEntity<?> getPorts(@Valid PaginationRequest request) {
 
     Page<Port> pages = portService.getPorts(request);
@@ -60,7 +59,6 @@ public class PortController {
   }
 
   @GetMapping("/{id}")
-  @PreAuthorize("hasRole('MODERATOR')")
   public ResponseEntity<?> getPort(@PathVariable Long id) {
     Port port = portService.getPortById(id);
     PortDto portDto = new PortDto();
@@ -69,7 +67,7 @@ public class PortController {
   }
 
   @PostMapping("")
-//  @PreAuthorize("hasRole('MODERATOR')")
+  @PreAuthorize("hasRole('MODERATOR')")
   public ResponseEntity<?> createPort(@Valid @RequestBody PortRequest request) {
     Port port = portService.createPort(request);
     PortDto portDto = PortMapper.toPortDto(port);

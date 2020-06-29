@@ -40,8 +40,15 @@ public class PortServiceImpl implements PortService {
     Port port = portRepository.findById(request.getId())
         .orElseThrow(() -> new NotFoundException("ERROR: Port is not found."));
 
-    port.setFullname(request.getFullname());
+    if (portRepository.existsByNameCode(request.getNameCode())) {
+      if (request.getNameCode().equals(port.getNameCode())) {
+      } else {
+        throw new DuplicateRecordException("ERROR: Port already exists.");
+      }
+    }
     port.setNameCode(request.getNameCode());
+
+    port.setFullname(request.getFullname());
     port.setAddress(request.getAddress());
 
     portRepository.save(port);
@@ -74,18 +81,28 @@ public class PortServiceImpl implements PortService {
   @Override
   public Port editPort(Map<String, Object> updates, Long id) {
     Port port = portRepository.findById(id).orElseThrow(() -> new NotFoundException("ERROR: Port is not found."));
+
     String fullname = (String) updates.get("fullname");
     if (fullname != null) {
       port.setFullname(fullname);
     }
+
     String address = (String) updates.get("address");
     if (address != null) {
-      port.setFullname(address);
+      port.setAddress(address);
     }
+
     String nameCode = (String) updates.get("nameCode");
     if (nameCode != null) {
+      if (portRepository.existsByNameCode(nameCode)) {
+        if (nameCode.equals(port.getNameCode())) {
+        } else {
+          throw new DuplicateRecordException("ERROR: Port already exists.");
+        }
+      }
       port.setNameCode(nameCode);
     }
+
     portRepository.save(port);
     return port;
   }

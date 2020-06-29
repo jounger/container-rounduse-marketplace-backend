@@ -1,12 +1,30 @@
 package com.crm.services.impl;
 
+import java.util.Map;
+import java.util.Set;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import com.crm.enums.EnumSupplyStatus;
+import com.crm.exception.DuplicateRecordException;
+import com.crm.exception.NotFoundException;
+import com.crm.models.BillOfLading;
+import com.crm.models.Container;
+import com.crm.models.Driver;
+import com.crm.payload.request.ContainerRequest;
+import com.crm.payload.request.PaginationRequest;
+import com.crm.repository.BillOfLadingRepository;
+import com.crm.repository.ContainerRepository;
+import com.crm.repository.DriverRepository;
 import com.crm.services.ContainerService;
 
 @Service
 public class ContainerServiceImpl implements ContainerService {
-  /*
+
   @Autowired
   private ContainerRepository containerRepository;
 
@@ -14,159 +32,22 @@ public class ContainerServiceImpl implements ContainerService {
   private DriverRepository driverRepository;
 
   @Autowired
-  private ForwarderRepository forwarderRepository;
-
-  @Autowired
-  private ShippingLineRepository shippingLineRepository;
-
-  @Autowired
-  private ContainerTypeRepository containerTypeRepository;
-
-  @Autowired
-  private PortRepository portRepository;
-
-  @Autowired
-  private BidRepository bidRepository;
-
-  @Autowired
-  private AddressRepository addressRepository;
+  private BillOfLadingRepository billOfLadingRepository;
 
   @Override
-  public void createContainer(ContainerRequest request) {
-    Container container = new Container();
-    ShippingLine shippingLine = shippingLineRepository.findByCompanyCode(request.getShippingLine())
-        .orElseThrow(() -> new NotFoundException("ERROR: Shipping Line is not found."));
-    container.setShippingLine(shippingLine);
-
-    ContainerType containerType = containerTypeRepository.findByName(request.getContainerType())
-        .orElseThrow(() -> new NotFoundException("ERROR: Type is not found."));
-    container.setContainerType(containerType);
-
-    container.setStatus(EnumSupplyStatus.findByName(request.getStatus()));
-
-    Driver driver = driverRepository.findByUsername(request.getDriver())
-        .orElseThrow(() -> new NotFoundException("ERROR: Driver is not found."));
-    container.setDriver(driver);
-
-    Forwarder forwarder = forwarderRepository.findByUsername(request.getForwarder())
-        .orElseThrow(() -> new NotFoundException("ERROR: Forwarder is not found."));
-    container.setForwarder(forwarder);
-
-    container.setContainerTrailer(request.getContainerTrailer());
-    container.setContainerTractor(request.getContainerTractor());
-    container.setContainerNumber(request.getContainerNumber());
-    container.setBlNumber(request.getBlNumber());
-    container.setLicensePlate(request.getLicensePlate());
-
-    LocalDateTime emptyTime = Tool.convertToLocalDateTime(request.getEmptyTime());
-    container.setEmptyTime(emptyTime);
-
-    LocalDateTime pickUpTime = Tool.convertToLocalDateTime(request.getPickUpTime());
-    container.setPickUpTime(pickUpTime);
-
-    Address returnStation = (Address) request.getReturnStation();
-    container.setReturnStation(returnStation);
-
-    Port port = portRepository.findByNameCode(request.getPortOfDelivery())
-        .orElseThrow(() -> new NotFoundException("ERROR: Port is not found."));
-    container.setPortOfDelivery(port);
-
-    Set<Long> bids = request.getBids();
-    Set<Bid> listbids = new HashSet<>();
-
-    if (bids != null) {
-      bids.forEach(item -> {
-        Bid bid = bidRepository.findById(item).orElseThrow(() -> new NotFoundException("Error: Bid is not found"));
-        listbids.add(bid);
-      });
-    }
-    container.setBids(listbids);
-
-    container.setFreeTime(request.getFreeTime());
-
-    containerRepository.save(container);
-  }
-
-  @Override
-  public Page<Container> getContainers(PaginationRequest request) {
-    Page<Container> pages = containerRepository.findAll(PageRequest.of(request.getPage(), request.getLimit()));
+  public Page<Container> getContainersByInbound(Long id, PaginationRequest request) {
+    PageRequest pageRequest = PageRequest.of(request.getPage(), request.getLimit(),
+        Sort.by(Sort.Direction.DESC, "createdAt"));
+    Page<Container> pages = containerRepository.getContainersByInbound(id, pageRequest);
     return pages;
   }
 
   @Override
-  public Container updateContainer(ContainerRequest request) {
-    Container container = containerRepository.findById(request.getId())
-        .orElseThrow(() -> new NotFoundException("ERROR: Container is not found."));
-    
-    ShippingLine shippingLine = shippingLineRepository.findByCompanyCode(request.getShippingLine())
-        .orElseThrow(() -> new NotFoundException("ERROR: Shipping Line is not found."));
-    container.setShippingLine(shippingLine);
-
-    ContainerType containerType = containerTypeRepository.findByName(request.getContainerType())
-        .orElseThrow(() -> new NotFoundException("ERROR: Type is not found."));
-    container.setContainerType(containerType);
-
-    container.setStatus(EnumSupplyStatus.findByName(request.getStatus()));
-
-    Driver driver = driverRepository.findByUsername(request.getDriver())
-        .orElseThrow(() -> new NotFoundException("ERROR: Driver is not found."));
-    container.setDriver(driver);
-
-    Forwarder forwarder = forwarderRepository.findByUsername(request.getForwarder())
-        .orElseThrow(() -> new NotFoundException("ERROR: Forwarder is not found."));
-    container.setForwarder(forwarder);
-
-    container.setContainerTrailer(request.getContainerTrailer());
-    container.setContainerTractor(request.getContainerTractor());
-    container.setContainerNumber(request.getContainerNumber());
-    container.setBlNumber(request.getBlNumber());
-    container.setLicensePlate(request.getLicensePlate());
-
-    LocalDateTime emptyTime = Tool.convertToLocalDateTime(request.getEmptyTime());
-    container.setEmptyTime(emptyTime);
-
-    LocalDateTime pickUpTime = Tool.convertToLocalDateTime(request.getPickUpTime());
-    container.setPickUpTime(pickUpTime);
-
-    Address returnStationReq = (Address) request.getReturnStation();
-    Address returnStation = addressRepository.findById(container.getReturnStation().getId())
-        .orElseThrow(() -> new NotFoundException("ERROR: Address is not found."));
-    returnStation.setCity(returnStationReq.getCity());
-    returnStation.setStreet(returnStationReq.getStreet());
-    returnStation.setCounty(returnStationReq.getCounty());
-    returnStation.setCountry(returnStationReq.getCountry());
-    returnStation.setPostalCode(returnStationReq.getPostalCode());
-//    container.setReturnStation(returnStation);
-
-    Port port = portRepository.findByNameCode(request.getPortOfDelivery())
-        .orElseThrow(() -> new NotFoundException("ERROR: Port is not found."));
-    container.setPortOfDelivery(port);
-
-    Set<Long> bids = request.getBids();
-    Set<Bid> listbids = new HashSet<>();
-
-    if (bids != null) {
-      bids.forEach(item -> {
-        Bid bid = bidRepository.findById(item).orElseThrow(() -> new NotFoundException("Error: Bid is not found"));
-        listbids.add(bid);
-      });
-    }
-    container.setBids(listbids);
-
-    container.setFreeTime(request.getFreeTime());
-
-    containerRepository.save(container);
-
-    return container;
-  }
-
-  @Override
-  public void removeContainer(Long id) {
-    if (containerRepository.existsById(id)) {
-      containerRepository.deleteById(id);
-    } else {
-      throw new NotFoundException("ERROR: Container is not found.");
-    }
+  public Page<Container> getContainers(PaginationRequest request) {
+    PageRequest pageRequest = PageRequest.of(request.getPage(), request.getLimit(),
+        Sort.by(Sort.Direction.DESC, "createdAt"));
+    Page<Container> pages = containerRepository.findAll(pageRequest);
+    return pages;
   }
 
   @Override
@@ -177,10 +58,142 @@ public class ContainerServiceImpl implements ContainerService {
   }
 
   @Override
-  public Page<Container> getContainersByForwarder(Long id, PaginationRequest request) {
-    Pageable pageable = PageRequest.of(request.getPage(), request.getLimit());
-    Page<Container> pages = containerRepository.findByForwarderId(id, pageable);
+  public Page<Container> getContainersByBillOfLading(Long id, PaginationRequest request) {
+    PageRequest pageRequest = PageRequest.of(request.getPage(), request.getLimit(),
+        Sort.by(Sort.Direction.DESC, "createdAt"));
+    Page<Container> pages = containerRepository.getContainersByBillOfLading(id, pageRequest);
     return pages;
   }
-  */
+
+  @Override
+  public Container createContainer(Long id, ContainerRequest request) {
+    Container container = new Container();
+    BillOfLading billOfLading = billOfLadingRepository.findById(id)
+        .orElseThrow(() -> new NotFoundException("ERROR: BillOfLading is not found."));
+
+    Set<Container> containers = billOfLading.getContainers();
+    containers.forEach(item -> {
+      if (item.getContainerNumber().equals(request.getContainerNumber())
+          || item.getDriver().getUsername().equals(request.getDriver())
+          || item.getLicensePlate().equals(request.getLicensePlate())) {
+        throw new DuplicateRecordException("Error: Container has been existed");
+      }
+    });
+    container.setBillOfLading(billOfLading);
+    container.setStatus(EnumSupplyStatus.CREATED.name());
+
+    Driver driver = driverRepository.findByUsername(request.getDriver())
+        .orElseThrow(() -> new NotFoundException("ERROR: Driver is not found."));
+    container.setDriver(driver);
+
+    container.setContainerNumber(request.getContainerNumber());
+    container.setTrailer(request.getTrailer());
+    container.setTractor(request.getTractor());
+    container.setLicensePlate(request.getLicensePlate());
+
+    containerRepository.save(container);
+    return container;
+  }
+
+  @Override
+  public Container updateContainer(ContainerRequest request) {
+    Container container = containerRepository.findById(request.getId())
+        .orElseThrow(() -> new NotFoundException("ERROR: Container is not found."));
+
+    BillOfLading billOfLading = (BillOfLading) container.getBillOfLading();
+
+    Set<Container> containers = billOfLading.getContainers();
+    containers.forEach(item -> {
+      if (item.getContainerNumber().equals(request.getContainerNumber())
+          || item.getDriver().getUsername().equals(request.getDriver())
+          || item.getLicensePlate().equals(request.getLicensePlate())) {
+        if (item.getId().equals(request.getId())) {
+
+        } else {
+          throw new DuplicateRecordException("Error: Container has been existed");
+        }
+      }
+    });
+
+    if (request.getStatus() != null) {
+      container.setStatus(EnumSupplyStatus.findByName(request.getStatus()).name());
+    }
+
+    Driver driver = driverRepository.findByUsername(request.getDriver())
+        .orElseThrow(() -> new NotFoundException("ERROR: Driver is not found."));
+    container.setDriver(driver);
+
+    container.setTrailer(request.getTrailer());
+    container.setTractor(request.getTractor());
+    container.setContainerNumber(request.getContainerNumber());
+    container.setLicensePlate(request.getLicensePlate());
+
+    containerRepository.save(container);
+
+    return container;
+  }
+
+  @Override
+  public void removeContainer(Long id) {
+    Container container = containerRepository.findById(id)
+        .orElseThrow(() -> new NotFoundException("ERROR: Container is not found."));
+    if (container.getStatus().equalsIgnoreCase(EnumSupplyStatus.COMBINED.name())) {
+      containerRepository.delete(container);
+    }
+  }
+
+  @Override
+  public Container editContainer(Map<String, Object> updates, Long id) {
+
+    Container container = containerRepository.findById(id)
+        .orElseThrow(() -> new NotFoundException("ERROR: Container is not found."));
+
+    String containerNumber = (String) updates.get("containerNumber");
+    if (containerNumber != null) {
+      container.setContainerNumber(containerNumber);
+    }
+
+    String driverRequest = (String) updates.get("driver");
+    if (driverRequest != null) {
+      Driver driver = driverRepository.findByUsername(driverRequest)
+          .orElseThrow(() -> new NotFoundException("ERROR: Driver is not found."));
+      container.setDriver(driver);
+    }
+    String trailer = (String) updates.get("trailer");
+    if (trailer != null) {
+      container.setTrailer(trailer);
+    }
+
+    String tractor = (String) updates.get("tractor");
+    if (tractor != null) {
+      container.setTractor(tractor);
+    }
+
+    String licensePlate = (String) updates.get("licensePlate");
+    if (licensePlate != null) {
+      container.setLicensePlate(licensePlate);
+    }
+
+    String status = (String) updates.get("status");
+    if (status != null) {
+      container.setStatus(status);
+    }
+
+    BillOfLading billOfLading = (BillOfLading) container.getBillOfLading();
+
+    Set<Container> containers = billOfLading.getContainers();
+    containers.forEach(item -> {
+      if (item.getContainerNumber().equals(containerNumber) || item.getDriver().getUsername().equals(driverRequest)
+          || item.getLicensePlate().equals(licensePlate)) {
+        if (item.getId().equals(id)) {
+
+        } else {
+          throw new DuplicateRecordException("Error: Container has been existed");
+        }
+      }
+    });
+
+    containerRepository.save(container);
+    return container;
+  }
 }

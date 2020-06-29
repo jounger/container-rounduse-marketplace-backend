@@ -87,10 +87,14 @@ public class InboundServiceImpl implements InboundService {
 
   @Override
   public Page<Inbound> getInboundsForwarder(Long id, PaginationRequest request) {
-    PageRequest pageRequest = PageRequest.of(request.getPage(), request.getLimit(),
-        Sort.by(Sort.Direction.DESC, "createdAt"));
-    Page<Inbound> pages = inboundRepository.getInboundsByFowarder(id, pageRequest);
-    return pages;
+    if (forwarderRepository.existsById(id)) {
+      PageRequest pageRequest = PageRequest.of(request.getPage(), request.getLimit(),
+          Sort.by(Sort.Direction.DESC, "createdAt"));
+      Page<Inbound> pages = inboundRepository.getInboundsByFowarder(id, pageRequest);
+      return pages;
+    } else {
+      throw new NotFoundException("ERROR: Forwarder is not found.");
+    }
   }
 
   @Override

@@ -40,6 +40,14 @@ public class OperatorController {
   @Autowired
   private OperatorService operatorService;
 
+  @PostMapping("")
+  @PreAuthorize("hasRole('ADMIN')")
+  public ResponseEntity<?> createOperator(@Valid @RequestBody OperatorRequest request) {
+    Operator operator = operatorService.createOperator(request);
+    OperatorDto operatorDto = OperatorMapper.toOperatorDto(operator);
+    return ResponseEntity.ok(operatorDto);
+  }
+
   @GetMapping("/{id}")
   @PreAuthorize("hasRole('ADMIN') or hasRole('MODERATOR')")
   public ResponseEntity<?> getOperator(@PathVariable Long id) {
@@ -66,14 +74,6 @@ public class OperatorController {
     response.setContents(operatorDto);
 
     return ResponseEntity.ok(response);
-
-  }
-
-  @PostMapping("")
-  @PreAuthorize("hasRole('ADMIN')")
-  public ResponseEntity<?> createOperator(@Valid @RequestBody OperatorRequest request) {
-    operatorService.createOperator(request);
-    return ResponseEntity.ok(new MessageResponse("Operator created successfully"));
   }
 
   @Transactional

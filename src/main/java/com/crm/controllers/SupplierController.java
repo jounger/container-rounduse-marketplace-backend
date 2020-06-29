@@ -45,13 +45,27 @@ public class SupplierController {
   public ResponseEntity<?> getSuppliers(@Valid PaginationRequest request) {
     logger.info("Page request: {}", request.getPage());
 
-    Page<Supplier> pages = null;
-    if (request.getStatus() == null) {
-      pages = supplierService.getSuppliers(request);
-    } else if (request.getStatus() != null) {
-      pages = supplierService.getSuppliersByStatus(request);
-    }
+    Page<Supplier> pages = supplierService.getSuppliers(request);
+    PaginationResponse<SupplierDto> response = new PaginationResponse<>();
+    response.setPageNumber(request.getPage());
+    response.setPageSize(request.getLimit());
+    response.setTotalElements(pages.getTotalElements());
+    response.setTotalPages(pages.getTotalPages());
 
+    List<Supplier> suppliers = pages.getContent();
+    List<SupplierDto> suppliersDto = new ArrayList<>();
+    suppliers.forEach(supplier -> suppliersDto.add(SupplierMapper.toSupplierDto(supplier)));
+    response.setContents(suppliersDto);
+
+    return ResponseEntity.ok(response);
+  }
+  
+  @PreAuthorize("hasRole('MODERATOR')")
+  @GetMapping("/status")
+  public ResponseEntity<?> getSuppliersByStatus(@Valid PaginationRequest request) {
+    logger.info("Page request: {}", request.getPage());
+
+    Page<Supplier> pages = supplierService.getSuppliersByStatus(request);
     PaginationResponse<SupplierDto> response = new PaginationResponse<>();
     response.setPageNumber(request.getPage());
     response.setPageSize(request.getLimit());

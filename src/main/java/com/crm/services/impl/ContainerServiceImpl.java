@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import com.crm.enums.EnumSupplyStatus;
 import com.crm.exception.DuplicateRecordException;
+import com.crm.exception.InternalException;
 import com.crm.exception.NotFoundException;
 import com.crm.models.BillOfLading;
 import com.crm.models.Container;
@@ -138,8 +139,9 @@ public class ContainerServiceImpl implements ContainerService {
     Container container = containerRepository.findById(id)
         .orElseThrow(() -> new NotFoundException("ERROR: Container is not found."));
     if (container.getStatus().equalsIgnoreCase(EnumSupplyStatus.COMBINED.name())) {
-      containerRepository.delete(container);
+      throw new InternalException(String.format("Container %s has been combined", container.getContainerNumber()));
     }
+    containerRepository.delete(container);
   }
 
   @Override

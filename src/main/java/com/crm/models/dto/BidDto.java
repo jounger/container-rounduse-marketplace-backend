@@ -21,5 +21,7 @@ public class BidDto {
 
   private String bidValidityPeriod;
   
+  private String dateOfDecision;
+  
   private String status;
 }

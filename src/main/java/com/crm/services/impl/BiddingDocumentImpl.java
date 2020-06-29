@@ -203,12 +203,11 @@ public class BiddingDocumentImpl implements BiddingDocumentService {
     BiddingDocument biddingDocument = biddingDocumentRepository.findById(id)
         .orElseThrow(() -> new NotFoundException("Bidding document is not found"));
     Outbound outbound = biddingDocument.getOutbound();
-    if (outbound.getStatus() != EnumSupplyStatus.BIDDING.name()
-        || outbound.getStatus() != EnumSupplyStatus.COMBINED.name()) {
-      biddingDocumentRepository.deleteById(id);
-    } else {
+    if (outbound.getStatus().equalsIgnoreCase(EnumSupplyStatus.BIDDING.name())
+        || outbound.getStatus().equalsIgnoreCase(EnumSupplyStatus.COMBINED.name())) {
       throw new InternalException("Bidding document is in a transaction.");
     }
+    biddingDocumentRepository.deleteById(id);
   }
 
 }

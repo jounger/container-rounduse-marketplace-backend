@@ -40,8 +40,7 @@ import lombok.ToString;
 @Entity
 @Table(name = "bidding_document")
 @EntityListeners(AuditingEntityListener.class)
-@JsonIgnoreProperties(value = {"createdAt", "updatedAt"}, 
-allowGetters = true)
+@JsonIgnoreProperties(value = { "createdAt", "updatedAt" }, allowGetters = true)
 public class BiddingDocument {
 
   @Id
@@ -59,7 +58,7 @@ public class BiddingDocument {
   @ManyToOne
   @JoinColumn(name = "discount_id")
   private Discount bidDiscountCode;
-  
+
   @Column(name = "is_multiple_award")
   private Boolean isMultipleAward;
 
@@ -68,11 +67,8 @@ public class BiddingDocument {
 
   @Column(name = "bid_closing")
   private LocalDateTime bidClosing;
-  
-  @Column(name = "date_of_decision")
-  private LocalDateTime dateOfDecision;
 
-  //EnumCurrency
+  // EnumCurrency
   @Column(name = "currency_of_payment")
   private String currencyOfPayment;
 

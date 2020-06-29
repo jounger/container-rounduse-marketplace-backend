@@ -35,15 +35,16 @@ import com.crm.services.BiddingDocumentService;
 @RestController
 @RequestMapping("/api/bidding-document")
 public class BiddingDocumentController {
-  /*
+  
   @Autowired
   private BiddingDocumentService biddingDocumentService;
 
   @PreAuthorize("hasRole('MERCHANT')")
   @PostMapping("")
   public ResponseEntity<?> createBiddingDocument(@Valid @RequestBody BiddingDocumentRequest request) {
-     biddingDocumentService.createBiddingDocument(request);     
-     return ResponseEntity.ok(new MessageResponse("Bidding Document was created successfully"));
+     BiddingDocument biddingDocument = biddingDocumentService.createBiddingDocument(request);
+     BiddingDocumentDto biddingDocumentDto = BiddingDocumentMapper.toBiddingDocumentDto(biddingDocument);
+     return ResponseEntity.ok(biddingDocumentDto);
   } 
   
   @PreAuthorize("hasRole('MERCHANT')")
@@ -67,7 +68,7 @@ public class BiddingDocumentController {
     return ResponseEntity.ok(response);
   }
 
-  @PreAuthorize("hasRole('MERCHANT')")
+  @PreAuthorize("hasRole('MERCHANT') or hasRole('FORWARDER')")
   @GetMapping("/{id}")
   public ResponseEntity<?> getBiddingDocument(@PathVariable Long id) {
     BiddingDocument biddingDocument = biddingDocumentService.getBiddingDocument(id);
@@ -97,5 +98,5 @@ public class BiddingDocumentController {
     biddingDocumentService.removeBiddingDocument(id);
     return ResponseEntity.ok(new MessageResponse("Bidding document deleted successfully."));
   }
-  */
+  
 }

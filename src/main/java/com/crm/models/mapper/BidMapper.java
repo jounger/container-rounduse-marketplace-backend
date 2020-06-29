@@ -1,21 +1,25 @@
 package com.crm.models.mapper;
 
+import com.crm.common.Tool;
+import com.crm.models.Bid;
+import com.crm.models.dto.BidDto;
+import com.crm.models.dto.ContainerDto;
+
 public class BidMapper {
-  /*
+  
   public static BidDto toBidDto(Bid bid) {
     BidDto bidDto = new BidDto();
     
     String bidder = bid.getBidder().getUsername();
     bidDto.setBidder(bidder);
     
-    ContainerDto container = ContainerMapper.toContainerDto(bid.getContainer());
-    bidDto.setContainer(container);
+    bid.getContainers().forEach(container -> {
+      ContainerDto containerDto = ContainerMapper.toContainerDto(container);
+      bidDto.getContainers().add(containerDto);
+    });
     
-    Float bidPrice = bid.getBidPrice();
+    Double bidPrice = bid.getBidPrice();
     bidDto.setBidPrice(bidPrice);
-    
-    Float currentBidPrice = bid.getCurrentBidPrice();
-    bidDto.setCurrentBidPrice(currentBidPrice);
     
     String bidDate = Tool.convertLocalDateTimeToString(bid.getBidDate());
     bidDto.setBidDate(bidDate);
@@ -23,10 +27,13 @@ public class BidMapper {
     String bidValidityPeriod = Tool.convertLocalDateTimeToString(bid.getBidValidityPeriod());
     bidDto.setBidValidityPeriod(bidValidityPeriod);
     
-    String status = bid.getStatus().name();
+    String dateOfDecision = Tool.convertLocalDateTimeToString(bid.getDateOfDecision());
+    bidDto.setDateOfDecision(dateOfDecision);
+    
+    String status = bid.getStatus();
     bidDto.setStatus(status);
     
     return bidDto;
   }
-  */
+  
 }

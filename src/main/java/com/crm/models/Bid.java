@@ -55,7 +55,7 @@ public class Bid {
   private Forwarder bidder;
 
   @ManyToMany
-  @JoinTable(name = "bid_container", joinColumns = @JoinColumn(name = "bid_id"), inverseJoinColumns = @JoinColumn(name ="container_id"))
+  @JoinTable(name = "bid_container", joinColumns = @JoinColumn(name = "bid_id"), inverseJoinColumns = @JoinColumn(name = "container_id"))
   private Set<Container> containers = new HashSet<>();
 
   @Column(name = "bid_price")
@@ -67,7 +67,10 @@ public class Bid {
   @Column(name = "bid_validity_period")
   private LocalDateTime bidValidityPeriod;
 
-  //EnumBidStatus
+  @Column(name = "date_of_decision")
+  private LocalDateTime dateOfDecision;
+
+  // EnumBidStatus
   private String status;
 
   @Column(name = "created_at", nullable = false, updatable = false)

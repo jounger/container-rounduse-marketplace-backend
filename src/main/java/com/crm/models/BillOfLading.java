@@ -1,5 +1,6 @@
 package com.crm.models;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -54,7 +55,8 @@ public class BillOfLading {
   private String billOfLadingNumber;
 
   @Column(name = "free_time")
-  private Integer freeTime;
+  private LocalDateTime freeTime;
+
   @Column(name = "created_at", nullable = false, updatable = false)
   @Temporal(TemporalType.TIMESTAMP)
   @CreatedDate

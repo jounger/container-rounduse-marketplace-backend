@@ -31,7 +31,7 @@ public interface ContainerRepository extends JpaRepository<Container, Long> {
    */
   @Query(value = "FROM Container c" + " WHERE c.billOfLading.inbound.shippingLine.companyCode = :shippingLine"
       + " AND c.billOfLading.inbound.containerType.name = :containerType" + " AND c.status IN :status"
-      + " AND c.billOfLading.inbound.emptyTime < :packingTime" + " AND c.billOfLading.freeTime < :cutOffTime"
+      + " AND c.billOfLading.inbound.emptyTime < :packingTime" + " AND c.billOfLading.freeTime > :cutOffTime"
       + " AND c.billOfLading.portOfDelivery.nameCode = :portOfLoading")
   List<Container> findByOutbound(@Param("shippingLine") String shippingLine,
       @Param("containerType") String containerType, @Param("status") List<String> status,

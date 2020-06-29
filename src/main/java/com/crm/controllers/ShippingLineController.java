@@ -48,7 +48,6 @@ public class ShippingLineController {
     return ResponseEntity.ok(shippingLineDto);
   }
 
-  @PreAuthorize("")
   @GetMapping("")
   public ResponseEntity<?> getShippingLines(@Valid PaginationRequest request) {
 
@@ -68,7 +67,6 @@ public class ShippingLineController {
     return ResponseEntity.ok(response);
   }
 
-  @PreAuthorize("")
   @GetMapping("/{id}")
   public ResponseEntity<?> getShippingLine(@PathVariable Long id) {
     ShippingLine shippingLine = shippingLineService.getShippingLine(id);

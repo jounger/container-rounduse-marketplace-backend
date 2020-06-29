@@ -3,6 +3,7 @@ package com.crm.models.mapper;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.crm.common.Tool;
 import com.crm.models.BillOfLading;
 import com.crm.models.Container;
 import com.crm.models.dto.BillOfLadingDto;
@@ -15,12 +16,11 @@ public class BillOfLadingMapper {
     BillOfLadingDto billOfLadingDto = new BillOfLadingDto();
     billOfLadingDto.setId(billOfLading.getId());
     billOfLadingDto.setBillOfLadingNumber(billOfLading.getBillOfLadingNumber());
-    billOfLadingDto.setFreeTime(billOfLading.getFreeTime());
+    billOfLadingDto.setFreeTime(Tool.convertLocalDateTimeToString(billOfLading.getFreeTime()));
     String portOfDelivery = billOfLading.getPortOfDelivery().getNameCode();
     billOfLadingDto.setPortOfDelivery(portOfDelivery);
 
     Set<Container> containers = billOfLading.getContainers();
-
     Set<ContainerDto> containerDtos = new HashSet<>();
     if (containers != null) {
       containers.forEach(container -> {
@@ -29,7 +29,6 @@ public class BillOfLadingMapper {
         containerDtos.add(containerMap);
       });
     }
-
     billOfLadingDto.setContainers(containerDtos);
     return billOfLadingDto;
   }

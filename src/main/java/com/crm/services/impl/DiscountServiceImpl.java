@@ -67,7 +67,15 @@ public class DiscountServiceImpl implements DiscountService {
   public Discount updateDiscount(DiscountRequest request) {
     Discount discount = discountRepository.findById(request.getId())
         .orElseThrow(() -> new NotFoundException("ERROR: Discount is not found."));
+
+    if (discountRepository.existsByCode(request.getCode())) {
+      if (request.getCode().equals(discount.getCode())) {
+      } else {
+        throw new DuplicateRecordException("ERROR: Discount already exists.");
+      }
+    }
     discount.setCode(request.getCode());
+
     discount.setDetail(request.getDetail());
     if (request.getCurrency() != null) {
       discount.setCurrency(EnumCurrency.findByName(request.getCurrency()).name());
@@ -91,8 +99,15 @@ public class DiscountServiceImpl implements DiscountService {
 
     String code = (String) updates.get("code");
     if (code != null) {
+      if (discountRepository.existsByCode(code)) {
+        if (code.equals(discount.getCode())) {
+        } else {
+          throw new DuplicateRecordException("ERROR: Discount already exists.");
+        }
+      }
       discount.setCode(code);
     }
+
     String detail = (String) updates.get("detail");
     if (detail != null) {
       discount.setDetail(detail);
@@ -117,6 +132,7 @@ public class DiscountServiceImpl implements DiscountService {
     if (maximumDiscount != null) {
       discount.setMaximumDiscount(maximumDiscount);
     }
+
     String expiredDateString = (String) updates.get("expiredDate");
     if (expiredDateString != null) {
       LocalDateTime expiredDate = Tool.convertToLocalDateTime(expiredDateString);

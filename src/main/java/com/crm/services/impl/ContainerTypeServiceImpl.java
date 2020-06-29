@@ -66,7 +66,15 @@ public class ContainerTypeServiceImpl implements ContainerTypeService {
 
     ContainerType containerType = containerTypeRepository.findById(request.getId())
         .orElseThrow(() -> new NotFoundException("ERROR: ContainerType is not found."));
+
+    if (containerTypeRepository.existsByName(request.getName())) {
+      if (request.getName().equals(containerType.getName())) {
+      } else {
+        throw new DuplicateRecordException("ERROR: ContainerType already exists.");
+      }
+    }
     containerType.setName(request.getName());
+
     containerType.setDescription(request.getDescription());
     containerType.setTareWeight(request.getTareWeight());
     containerType.setPayloadCapacity(request.getPayloadCapacity());
@@ -91,16 +99,25 @@ public class ContainerTypeServiceImpl implements ContainerTypeService {
 
   @Override
   public ContainerType editContainerType(Map<String, Object> updates, Long id) {
+
     ContainerType containerType = containerTypeRepository.findById(id)
         .orElseThrow(() -> new NotFoundException("ERROR: ContainerType is not found."));
+
     String name = (String) updates.get("name");
     if (name != null) {
-      containerType.setName(name);
+      if (containerTypeRepository.existsByName(name)) {
+        if (name.equals(containerType.getName())) {
+        } else {
+          throw new DuplicateRecordException("ERROR: ContainerType already exists.");
+        }
+      }
     }
+
     String description = (String) updates.get("description");
     if (description != null) {
       containerType.setDescription(description);
     }
+
     Double tareWeight = (Double) updates.get("tareWeight");
     if (tareWeight != null) {
       containerType.setTareWeight(tareWeight);

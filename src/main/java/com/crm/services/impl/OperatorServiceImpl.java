@@ -5,6 +5,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -70,7 +71,8 @@ public class OperatorServiceImpl implements OperatorService {
 
   @Override
   public Page<Operator> getOperators(PaginationRequest request) {
-    Page<Operator> pages = operatorRepository.findAll(PageRequest.of(request.getPage(), request.getLimit()));
+    Page<Operator> pages = operatorRepository
+        .findAll(PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt")));
     return pages;
   }
 

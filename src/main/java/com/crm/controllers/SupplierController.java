@@ -73,10 +73,18 @@ public class SupplierController {
     SupplierDto supplierDto = SupplierMapper.toSupplierDto(supplier);
     return ResponseEntity.ok(supplierDto);
   }
+  
+  @PreAuthorize("hasRole('MODERATOR') or hasRole('FORWARDER') or hasRole('MERCHANT')")
+  @GetMapping("/{id}")
+  public ResponseEntity<?> getSupplier(@PathVariable("id") Long id) {
+    Supplier supplier = supplierService.getSupplier(id);
+    SupplierDto supplierDto = SupplierMapper.toSupplierDto(supplier);
+    return ResponseEntity.ok(supplierDto);
+  }
 
   @PreAuthorize("hasRole('MODERATOR')")
   @RequestMapping(value = "/register/{id}", method = RequestMethod.PATCH, consumes = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<?> reviewRegister(@RequestBody Map<String, Object> updates, @PathVariable("id") Long id) {
+  public ResponseEntity<?> reviewRegister(@PathVariable("id") Long id, @RequestBody Map<String, Object> updates) {
     Supplier supplier = supplierService.editSupplier(updates, id);
     SupplierDto supplierDto = SupplierMapper.toSupplierDto(supplier);
     return ResponseEntity.ok(supplierDto);

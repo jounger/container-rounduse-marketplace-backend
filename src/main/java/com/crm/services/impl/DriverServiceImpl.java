@@ -7,6 +7,7 @@ import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -64,7 +65,7 @@ public class DriverServiceImpl implements DriverService {
         .orElseThrow(() -> new NotFoundException("Error: Role is not found"));
     roles.add(userRole);
     driver.setRoles(roles);
-    
+
     driver.setFullname(request.getFullname());
     driver.setDriverLicense(request.getDriverLicense());
 
@@ -85,13 +86,15 @@ public class DriverServiceImpl implements DriverService {
 
   @Override
   public Page<Driver> getDrivers(PaginationRequest request) {
-    Page<Driver> drivers = driverRepository.findAll(PageRequest.of(request.getPage(), request.getLimit()));
+    Page<Driver> drivers = driverRepository
+        .findAll(PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt")));
     return drivers;
   }
 
   @Override
   public Page<Driver> getDriversByForwarder(Long id, PaginationRequest request) {
-    Page<Driver> drivers = driverRepository.findByForwarder(id, PageRequest.of(request.getPage(), request.getLimit()));
+    Page<Driver> drivers = driverRepository.findByForwarder(id,
+        PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt")));
     return drivers;
   }
 

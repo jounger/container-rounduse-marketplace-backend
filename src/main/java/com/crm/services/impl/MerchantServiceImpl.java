@@ -7,6 +7,7 @@ import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -69,7 +70,7 @@ public class MerchantServiceImpl implements MerchantService {
     merchant.setPassword(encoder);
 
     merchantRepository.save(merchant);
-    
+
     return merchant;
   }
 
@@ -82,7 +83,8 @@ public class MerchantServiceImpl implements MerchantService {
 
   @Override
   public Page<Merchant> getMerchants(PaginationRequest request) {
-    Page<Merchant> merchants = merchantRepository.findAll(PageRequest.of(request.getPage(), request.getLimit()));
+    Page<Merchant> merchants = merchantRepository
+        .findAll(PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt")));
     return merchants;
   }
 
@@ -103,7 +105,7 @@ public class MerchantServiceImpl implements MerchantService {
     if (UserServiceImpl.isEmailChange(request.getEmail(), merchant)) {
       merchant.setEmail(request.getEmail());
     }
-    
+
     merchant.setPhone(request.getPhone());
     merchant.setAddress(request.getAddress());
     merchant.setStatus(EnumUserStatus.PENDING.name());

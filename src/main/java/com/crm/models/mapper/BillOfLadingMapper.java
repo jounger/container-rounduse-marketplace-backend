@@ -9,7 +9,7 @@ import com.crm.models.Container;
 import com.crm.models.dto.BillOfLadingDto;
 import com.crm.models.dto.ContainerDto;
 
-public class BillOfLadingMapping {
+public class BillOfLadingMapper {
 
   public static BillOfLadingDto toBillOfLadingDto(BillOfLading billOfLading) {
 

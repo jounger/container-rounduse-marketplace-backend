@@ -77,7 +77,7 @@ public class InboundController {
 
     return ResponseEntity.ok(response);
   }
-  
+
   @GetMapping("/outbound/{id}")
   @PreAuthorize("hasRole('FORWARDER') or hasRole('MERCHANT')")
   public ResponseEntity<?> getInboundsByOutbound(@PathVariable Long id, @Valid PaginationRequest request) {

@@ -13,7 +13,9 @@ public class BiddingDocumentRequest {
   
   private Long merchantId;
   
-  private Long consignmentId;
+  private Long outboundId;
+  
+  private Boolean isMultipleAward;
   
   private List<Long> bids;
   
@@ -21,13 +23,13 @@ public class BiddingDocumentRequest {
   
   private String bidClosing;
   
+  private String dateOfDecision;
+  
   private String currencyOfPayment; 
   
   private Double bidPackagePrice;
   
   private Double bidFloorPrice;
-  
-  private Double bidStep;
   
   private String bidDiscountCode;
   

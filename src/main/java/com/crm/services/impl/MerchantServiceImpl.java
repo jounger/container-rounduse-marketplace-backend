@@ -84,7 +84,7 @@ public class MerchantServiceImpl implements MerchantService {
   @Override
   public Page<Merchant> getMerchants(PaginationRequest request) {
     Page<Merchant> merchants = merchantRepository
-        .findAll(PageRequest.of(request.getPage(), request.getLimit(), Sort.by("id").descending()));
+        .findAll(PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt")));
     return merchants;
   }
 

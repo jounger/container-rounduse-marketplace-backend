@@ -72,7 +72,7 @@ public class OperatorServiceImpl implements OperatorService {
   @Override
   public Page<Operator> getOperators(PaginationRequest request) {
     Page<Operator> pages = operatorRepository
-        .findAll(PageRequest.of(request.getPage(), request.getLimit(), Sort.by("id").descending()));
+        .findAll(PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt")));
     return pages;
   }
 

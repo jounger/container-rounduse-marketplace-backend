@@ -37,7 +37,7 @@ public class PermissionServiceImpl implements PermissionService {
   @Override
   public Page<Permission> getPermissions(PaginationRequest request) {
     Page<Permission> pages = permissionRepository
-        .findAll(PageRequest.of(request.getPage(), request.getLimit(), Sort.by("id").descending()));
+        .findAll(PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt")));
     return pages;
   }
 

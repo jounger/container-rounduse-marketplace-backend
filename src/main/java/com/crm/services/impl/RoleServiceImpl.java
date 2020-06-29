@@ -49,7 +49,7 @@ public class RoleServiceImpl implements RoleService {
   @Override
   public Page<Role> getRoles(PaginationRequest request) {
     Page<Role> pages = roleRepository
-        .findAll(PageRequest.of(request.getPage(), request.getLimit(), Sort.by("id").descending()));
+        .findAll(PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt")));
     return pages;
   }
 

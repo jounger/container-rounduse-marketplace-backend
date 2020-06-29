@@ -318,7 +318,27 @@ public class InboundServiceImpl implements InboundService {
     String pickupTimeRequest = (String) updates.get("pickupTime");
     if (pickupTimeRequest != null) {
       LocalDateTime pickupTime = Tool.convertToLocalDateTime(pickupTimeRequest);
-      inbound.setPickupTime(pickupTime);
+      Set<Container> containers = inbound.getBillOfLading().getContainers();
+      containers.forEach(item -> {
+        Long driverId = item.getDriver().getId();
+        List<Container> listContainer = containerRepository.findByDriver(driverId);
+        listContainer.forEach(container -> {
+          if (container.getBillOfLading().getFreeTime().isBefore(pickupTime) || container.getBillOfLading().getInbound()
+              .getPickupTime().isAfter(inbound.getBillOfLading().getFreeTime())) {
+          } else {
+            if (container.getBillOfLading().getId().equals(inbound.getId())) {
+            } else {
+              throw new InternalException(
+                  String.format("Driver %s has been busy", container.getDriver().getUsername()));
+            }
+          }
+        });
+      });
+      if (inbound.getBillOfLading().getFreeTime().isAfter(pickupTime)) {
+        inbound.setPickupTime(pickupTime);
+      } else {
+        throw new InternalException("Error: pickupTime must before freeTime");
+      }
     }
 
     String emptyTimeRequest = (String) updates.get("emptyTime");

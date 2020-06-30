@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.crm.models.Discount;
@@ -62,6 +63,14 @@ public class DiscountController {
   @GetMapping("/{id}")
   public ResponseEntity<?> getDiscount(@PathVariable Long id) {
     Discount discount = discountService.getDiscountById(id);
+    DiscountDto discountDto = new DiscountDto();
+    discountDto = DiscountMapper.toDiscountDto(discount);
+    return ResponseEntity.ok(discountDto);
+  }
+
+  @RequestMapping(method = RequestMethod.GET, params = {"code"})
+  public ResponseEntity<?> getDiscountByCode(@RequestParam String code) {
+    Discount discount = discountService.getDiscountByCode(code);
     DiscountDto discountDto = new DiscountDto();
     discountDto = DiscountMapper.toDiscountDto(discount);
     return ResponseEntity.ok(discountDto);

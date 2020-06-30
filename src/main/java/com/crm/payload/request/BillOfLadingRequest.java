@@ -14,6 +14,7 @@ public class BillOfLadingRequest {
 
   private Long id;
 
+  // portOfDelivery as Port.nameCode
   @NotBlank
   private String portOfDelivery;
 

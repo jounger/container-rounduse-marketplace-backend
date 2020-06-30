@@ -14,6 +14,8 @@ public interface ContainerTypeService {
 
   ContainerType getContainerTypeById(Long id);
 
+  ContainerType getContainerTypeByName(String name);
+
   ContainerType createContainerType(ContainerTypeRequest request);
 
   ContainerType updateContainerType(ContainerTypeRequest request);

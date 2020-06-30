@@ -6,6 +6,8 @@ import java.util.Map;
 
 import javax.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
@@ -42,6 +44,8 @@ import com.crm.websocket.service.BiddingWebSocketService;
 @RestController
 @RequestMapping("/api/bidding-document")
 public class BiddingDocumentController {
+  
+  private static final Logger logger = LoggerFactory.getLogger(BiddingDocumentController.class);
 
   @Autowired
   private BiddingDocumentService biddingDocumentService;
@@ -66,15 +70,22 @@ public class BiddingDocumentController {
      paging.setPage(0);
      paging.setLimit(10);
      Page<Inbound> inboundsPaging = inboundService.getInboundsByOutbound(biddingDocument.getOutbound().getId(), paging);
+     // TODO: deal with duplicate forwarder
      List<Inbound> inbounds = inboundsPaging.getContent();
+     List<BiddingNotification> notifications = new ArrayList<>();
      for(int i = 0; i < inbounds.size(); i++) {
        notifyRequest.setRecipient(inbounds.get(i).getForwarder().getUsername());
        notifyRequest.setRelatedResource(biddingDocument.getId());
        notifyRequest.setMessage("Ban nhan duoc mot HSMT moi");
        notifyRequest.setType(EnumBiddingNotificationType.ADDED.name());
        BiddingNotification notification = biddingNotificationService.createBiddingNotification(notifyRequest);
-       biddingWebSocketService.broadcastBiddingNotifyToUser(notification);
+       notifications.add(notification);
      }
+     // Asynchronous send notification 
+     notifications.parallelStream().forEach(notification -> {
+       logger.info("notification : {}", notification.getId());
+       biddingWebSocketService.broadcastBiddingNotifyToUser(notification);
+     });
      // END NOTIFICATION
      return ResponseEntity.ok(biddingDocumentDto);
   }

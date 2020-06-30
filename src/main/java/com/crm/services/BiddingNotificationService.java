@@ -16,7 +16,9 @@ public interface BiddingNotificationService {
   
   Page<BiddingNotification> getBiddingNotifications(PaginationRequest request);
   
-  Page<BiddingNotification> getBiddingNotificationsByUser(Long id, PaginationRequest request);
+  Page<BiddingNotification> getBiddingNotificationsByUser(Long recipient, PaginationRequest request);
+  
+  Page<BiddingNotification> getBiddingNotificationsByUser(String recipient, PaginationRequest request);
   
   BiddingNotification editBiddingNotification(Long id, Map<String, Object> updates);
   

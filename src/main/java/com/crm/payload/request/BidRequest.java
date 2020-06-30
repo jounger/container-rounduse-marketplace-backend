@@ -12,11 +12,14 @@ public class BidRequest {
 
   private Long id;
 
-  private Long biddingDocumentId;
+  //biddingDocument as BiddingDocument.id
+  private Long biddingDocument;
 
-  private Long fowarderId;
+  //forwarder as Forwarder.username
+  private String fowarder;
 
-  private List<Long> containersId = new ArrayList<>();
+  //containers as List of Container.id
+  private List<Long> containers = new ArrayList<>();
 
   private Double bidPrice;
 

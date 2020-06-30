@@ -1,6 +1,7 @@
 package com.crm.payload.request;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -11,12 +12,13 @@ public class BiddingNotificationRequest {
   
   private Long id;
   
-  @NotBlank
-  private Long recipient;
+  //recipient as User.username
+  @NotNull
+  private String recipient;
   
   private Boolean isRead;
   
-  @NotBlank
+  @NotNull
   private Long relatedResource;
   
   @NotBlank

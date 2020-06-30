@@ -36,7 +36,7 @@ public class BiddingNotificationServiceImpl implements BiddingNotificationServic
   public BiddingNotification createBiddingNotification(BiddingNotificationRequest request) {
     BiddingNotification biddingNotification = new BiddingNotification();
 
-    User recipient = userRepositoty.findById(request.getRecipient())
+    User recipient = userRepositoty.findByUsername(request.getRecipient())
         .orElseThrow(() -> new NotFoundException("Recipient is not found."));
     biddingNotification.setRecipient(recipient);
 

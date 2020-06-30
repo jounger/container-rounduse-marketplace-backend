@@ -37,18 +37,15 @@ public class BiddingNotificationController {
   @Autowired
   private BiddingNotificationService biddingNotificationService;
 
-  UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-  String username = userDetails.getUsername();
-
   /*
-   * @PostMapping("") public ResponseEntity<?>
-   * createBiddingNotification(@Valid @RequestBody BiddingNotificationRequest
-   * request) { BiddingNotification biddingNotification =
-   * biddingNotificationService.createBiddingNotification(request);
-   * BiddingNotificationDto biddingNotificationDto =
-   * BiddingNotificationMapper.toBiddingNotificationDto(biddingNotification);
-   * return ResponseEntity.ok(biddingNotificationDto); }
-   */
+  @PostMapping("")
+  public ResponseEntity<?> createBiddingNotification(@Valid @RequestBody BiddingNotificationRequest request) {
+    BiddingNotification biddingNotification = biddingNotificationService.createBiddingNotification(request);
+    BiddingNotificationDto biddingNotificationDto = BiddingNotificationMapper
+        .toBiddingNotificationDto(biddingNotification);
+    return ResponseEntity.ok(biddingNotificationDto);
+  }
+  */
 
   @GetMapping("/user/{id}")
   public ResponseEntity<?> getBiddingNotificationsByUser(@PathVariable Long id, @Valid PaginationRequest request) {
@@ -69,10 +66,12 @@ public class BiddingNotificationController {
 
     return ResponseEntity.ok(response);
   }
-  
+
   @GetMapping("")
   public ResponseEntity<?> getBiddingNotificationsByUser(@Valid PaginationRequest request) {
 
+    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    String username = userDetails.getUsername();
     Page<BiddingNotification> pages = biddingNotificationService.getBiddingNotificationsByUser(username, request);
 
     PaginationResponse<BiddingNotificationDto> response = new PaginationResponse<>();

@@ -22,16 +22,21 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.crm.enums.EnumBiddingNotificationType;
 import com.crm.models.BiddingDocument;
+import com.crm.models.BiddingNotification;
+import com.crm.models.Inbound;
 import com.crm.models.dto.BiddingDocumentDto;
 import com.crm.models.mapper.BiddingDocumentMapper;
 import com.crm.payload.request.BiddingDocumentRequest;
+import com.crm.payload.request.BiddingNotificationRequest;
 import com.crm.payload.request.PaginationRequest;
 import com.crm.payload.response.MessageResponse;
 import com.crm.payload.response.PaginationResponse;
 import com.crm.services.BiddingDocumentService;
-import com.crm.services.SupplierService;
-import com.crm.websocket.service.BiddingNotifyService;
+import com.crm.services.BiddingNotificationService;
+import com.crm.services.InboundService;
+import com.crm.websocket.service.BiddingWebSocketService;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -40,19 +45,37 @@ public class BiddingDocumentController {
 
   @Autowired
   private BiddingDocumentService biddingDocumentService;
+  
+  @Autowired
+  private BiddingNotificationService biddingNotificationService;
 
   @Autowired
-  private BiddingNotifyService biddingNotifyService;
-
+  private BiddingWebSocketService biddingWebSocketService;
+  
   @Autowired
-  private SupplierService supplierService;
+  private InboundService inboundService;
 
   @PreAuthorize("hasRole('MERCHANT')")
   @PostMapping("")
   public ResponseEntity<?> createBiddingDocument(@Valid @RequestBody BiddingDocumentRequest request) {
      BiddingDocument biddingDocument = biddingDocumentService.createBiddingDocument(request);
      BiddingDocumentDto biddingDocumentDto = BiddingDocumentMapper.toBiddingDocumentDto(biddingDocument);
-     biddingNotifyService.BiddingDocumentNotification(biddingDocument, supplierService.getSupplier("forwarder"));
+     // CREATE NOTIFICATION
+     BiddingNotificationRequest notifyRequest = new BiddingNotificationRequest();
+     PaginationRequest paging = new PaginationRequest();
+     paging.setPage(0);
+     paging.setLimit(10);
+     Page<Inbound> inboundsPaging = inboundService.getInboundsByOutbound(biddingDocument.getOutbound().getId(), paging);
+     List<Inbound> inbounds = inboundsPaging.getContent();
+     for(int i = 0; i < inbounds.size(); i++) {
+       notifyRequest.setRecipient(inbounds.get(i).getForwarder().getUsername());
+       notifyRequest.setRelatedResource(biddingDocument.getId());
+       notifyRequest.setMessage("Ban nhan duoc mot HSMT moi");
+       notifyRequest.setType(EnumBiddingNotificationType.ADDED.name());
+       BiddingNotification notification = biddingNotificationService.createBiddingNotification(notifyRequest);
+       biddingWebSocketService.broadcastBiddingNotifyToUser(notification);
+     }
+     // END NOTIFICATION
      return ResponseEntity.ok(biddingDocumentDto);
   }
 

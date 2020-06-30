@@ -25,6 +25,8 @@ public class InboundMapper {
       inboundDto.setPickupTime(pickUpTime);
     }
 
+    inboundDto.setReturnStation(inbound.getReturnStation());
+
     BillOfLadingDto billOfLadingDto = BillOfLadingMapper.toBillOfLadingDto(inbound.getBillOfLading());
     inboundDto.setBillOfLading(billOfLadingDto);
 

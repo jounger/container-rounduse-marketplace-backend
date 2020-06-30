@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.crm.models.Port;
@@ -61,6 +62,14 @@ public class PortController {
   @GetMapping("/{id}")
   public ResponseEntity<?> getPort(@PathVariable Long id) {
     Port port = portService.getPortById(id);
+    PortDto portDto = new PortDto();
+    portDto = PortMapper.toPortDto(port);
+    return ResponseEntity.ok(portDto);
+  }
+
+  @RequestMapping(method = RequestMethod.GET, params = { "nameCode" })
+  public ResponseEntity<?> getPortByNameCode(@RequestParam String nameCode) {
+    Port port = portService.getPortByNameCode(nameCode);
     PortDto portDto = new PortDto();
     portDto = PortMapper.toPortDto(port);
     return ResponseEntity.ok(portDto);

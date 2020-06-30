@@ -41,6 +41,13 @@ public class DiscountServiceImpl implements DiscountService {
   }
 
   @Override
+  public Discount getDiscountByCode(String code) {
+    Discount discount = discountRepository.findByCode(code)
+        .orElseThrow(() -> new NotFoundException("ERROR: Discount is not found."));
+    return discount;
+  }
+
+  @Override
   public Discount createDiscount(DiscountRequest request) {
     if (discountRepository.existsByCode(request.getCode())) {
       throw new DuplicateRecordException("ERROR: Discount already exists.");

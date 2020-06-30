@@ -11,5 +11,7 @@ public class InboundDto extends SupplyDto {
 
   private String pickupTime;
 
+  private String returnStation;
+
   private BillOfLadingDto billOfLading;
 }

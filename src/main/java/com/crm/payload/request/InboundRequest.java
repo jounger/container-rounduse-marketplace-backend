@@ -15,4 +15,7 @@ public class InboundRequest extends SupplyRequest {
   private String pickupTime;
 
   private String emptyTime;
+
+  @NotBlank
+  private String returnStation;
 }

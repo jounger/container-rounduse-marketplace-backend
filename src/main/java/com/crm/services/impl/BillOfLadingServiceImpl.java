@@ -78,6 +78,28 @@ public class BillOfLadingServiceImpl implements BillOfLaingService {
 
       Set<Container> containers = billOfLading.getContainers();
       containers.forEach(item -> {
+
+        String containerNumber = item.getContainerNumber();
+        String licensePlate = item.getLicensePlate();
+        List<BillOfLading> billOfLadings = billOfLadingRepository.findAll();
+        billOfLadings.forEach(billOfLadingItem -> {
+          Set<Container> setContainer = billOfLadingItem.getContainers();
+          setContainer.forEach(containerItem -> {
+            if (containerNumber.equals(containerItem.getContainerNumber())
+                || licensePlate.equals(containerItem.getLicensePlate())) {
+              if (containerItem.getBillOfLading().getFreeTime().isBefore(billOfLading.getInbound().getPickupTime())
+                  || containerItem.getBillOfLading().getInbound().getPickupTime().isAfter(freeTime)) {
+              } else {
+                if (request.getId().equals(billOfLadingItem.getId())) {
+                } else {
+                  throw new InternalException(
+                      String.format("Container %s has been busy", containerItem.getContainerNumber()));
+                }
+              }
+            }
+          });
+        });
+
         Long driverId = item.getDriver().getId();
         List<Container> listContainer = containerRepository.findByDriver(driverId);
         listContainer.forEach(container -> {
@@ -134,6 +156,28 @@ public class BillOfLadingServiceImpl implements BillOfLaingService {
 
       Set<Container> containers = billOfLading.getContainers();
       containers.forEach(item -> {
+
+        String containerNumber = item.getContainerNumber();
+        String licensePlate = item.getLicensePlate();
+        List<BillOfLading> billOfLadings = billOfLadingRepository.findAll();
+        billOfLadings.forEach(billOfLadingItem -> {
+          Set<Container> setContainer = billOfLadingItem.getContainers();
+          setContainer.forEach(containerItem -> {
+            if (containerNumber.equals(containerItem.getContainerNumber())
+                || licensePlate.equals(containerItem.getLicensePlate())) {
+              if (containerItem.getBillOfLading().getFreeTime().isBefore(billOfLading.getInbound().getPickupTime())
+                  || containerItem.getBillOfLading().getInbound().getPickupTime().isAfter(freeTime)) {
+              } else {
+                if (id.equals(billOfLadingItem.getId())) {
+                } else {
+                  throw new InternalException(
+                      String.format("Container %s has been busy", containerItem.getContainerNumber()));
+                }
+              }
+            }
+          });
+        });
+
         Long driverId = item.getDriver().getId();
         List<Container> listContainer = containerRepository.findByDriver(driverId);
         listContainer.forEach(container -> {
@@ -157,6 +201,20 @@ public class BillOfLadingServiceImpl implements BillOfLaingService {
 
     billOfLadingRepository.save(billOfLading);
 
+    return billOfLading;
+  }
+
+  @Override
+  public BillOfLading getBillOfLadingByBillOfLadingNumber(String billOfLadingNumber) {
+    BillOfLading billOfLading = billOfLadingRepository.findByBillOfLadingNumber(billOfLadingNumber)
+        .orElseThrow(() -> new NotFoundException("ERROR: BillOfLading is not found."));
+    return billOfLading;
+  }
+
+  @Override
+  public BillOfLading getBillOfLadingById(Long id) {
+    BillOfLading billOfLading = billOfLadingRepository.findById(id)
+        .orElseThrow(() -> new NotFoundException("ERROR: BillOfLading is not found."));
     return billOfLading;
   }
 

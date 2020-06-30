@@ -122,4 +122,18 @@ public class BookingServiceImpl implements BookingService {
     bookingRepository.save(booking);
     return booking;
   }
+
+  @Override
+  public Booking getBookingById(Long id) {
+    Booking booking = bookingRepository.findById(id)
+        .orElseThrow(() -> new NotFoundException("ERROR: Booking is not found."));
+    return booking;
+  }
+
+  @Override
+  public Booking getBookingsByBookingNumber(String bookingNumber) {
+    Booking booking = bookingRepository.findByBookingNumber(bookingNumber)
+        .orElseThrow(() -> new NotFoundException("ERROR: Booking is not found."));
+    return booking;
+  }
 }

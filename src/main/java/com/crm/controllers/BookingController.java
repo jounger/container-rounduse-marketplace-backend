@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.crm.models.Booking;
@@ -54,6 +55,22 @@ public class BookingController {
     response.setContents(bookingsDto);
 
     return ResponseEntity.ok(response);
+  }
+
+  @GetMapping("/{id}")
+  @PreAuthorize("hasRole('FORWARDER') or hasRole('MERCHANT')")
+  public ResponseEntity<?> getBooking(@PathVariable Long id) {
+    Booking booking = bookingService.getBookingById(id);
+    BookingDto bookingDto = BookingMapper.toBookingDto(booking);
+    return ResponseEntity.ok(bookingDto);
+  }
+
+  @RequestMapping(method = RequestMethod.GET, params = { "bookingNumber" })
+  @PreAuthorize("hasRole('FORWARDER') or hasRole('MERCHANT')")
+  public ResponseEntity<?> getBookingsByBookingNumber(@RequestParam String bookingNumber) {
+    Booking booking = bookingService.getBookingsByBookingNumber(bookingNumber);
+    BookingDto bookingDto = BookingMapper.toBookingDto(booking);
+    return ResponseEntity.ok(bookingDto);
   }
 
   @Transactional

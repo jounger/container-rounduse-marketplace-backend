@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.crm.models.BillOfLading;
@@ -54,6 +55,24 @@ public class BillOfLadingController {
     response.setContents(BillOfLadingsDto);
 
     return ResponseEntity.ok(response);
+  }
+
+  @GetMapping("/{id}")
+  @PreAuthorize("hasRole('FORWARDER') or hasRole('MERCHANT')")
+  public ResponseEntity<?> getBillOfLading(@PathVariable Long id) {
+    BillOfLading billOfLading = billOfLadingService.getBillOfLadingById(id);
+    BillOfLadingDto billOfLadingDto = new BillOfLadingDto();
+    billOfLadingDto = BillOfLadingMapper.toBillOfLadingDto(billOfLading);
+    return ResponseEntity.ok(billOfLadingDto);
+  }
+
+  @RequestMapping(method = RequestMethod.GET, params = { "billOfLadingNumber" })
+  @PreAuthorize("hasRole('FORWARDER') or hasRole('MERCHANT')")
+  public ResponseEntity<?> getBillOfLadingByBillOfLadingNumber(@RequestParam String billOfLadingNumber) {
+    BillOfLading billOfLading = billOfLadingService.getBillOfLadingByBillOfLadingNumber(billOfLadingNumber);
+    BillOfLadingDto billOfLadingDto = new BillOfLadingDto();
+    billOfLadingDto = BillOfLadingMapper.toBillOfLadingDto(billOfLading);
+    return ResponseEntity.ok(billOfLadingDto);
   }
 
   @Transactional

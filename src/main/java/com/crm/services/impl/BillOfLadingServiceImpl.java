@@ -1,7 +1,9 @@
 package com.crm.services.impl;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -11,12 +13,15 @@ import org.springframework.stereotype.Service;
 
 import com.crm.common.Tool;
 import com.crm.exception.DuplicateRecordException;
+import com.crm.exception.InternalException;
 import com.crm.exception.NotFoundException;
 import com.crm.models.BillOfLading;
+import com.crm.models.Container;
 import com.crm.models.Port;
 import com.crm.payload.request.BillOfLadingRequest;
 import com.crm.payload.request.PaginationRequest;
 import com.crm.repository.BillOfLadingRepository;
+import com.crm.repository.ContainerRepository;
 import com.crm.repository.InboundRepository;
 import com.crm.repository.PortRepository;
 import com.crm.services.BillOfLaingService;
@@ -32,6 +37,9 @@ public class BillOfLadingServiceImpl implements BillOfLaingService {
 
   @Autowired
   InboundRepository inboundRepository;
+
+  @Autowired
+  private ContainerRepository containerRepository;
 
   @Override
   public Page<BillOfLading> getBillOfLadingsByInbound(Long id, PaginationRequest request) {
@@ -67,7 +75,28 @@ public class BillOfLadingServiceImpl implements BillOfLaingService {
 
     if (request.getFreeTime() != null) {
       LocalDateTime freeTime = Tool.convertToLocalDateTime(request.getFreeTime());
-      billOfLading.setFreeTime(freeTime);
+
+      Set<Container> containers = billOfLading.getContainers();
+      containers.forEach(item -> {
+        Long driverId = item.getDriver().getId();
+        List<Container> listContainer = containerRepository.findByDriver(driverId);
+        listContainer.forEach(container -> {
+          if (container.getBillOfLading().getFreeTime().isBefore(billOfLading.getInbound().getPickupTime())
+              || container.getBillOfLading().getInbound().getPickupTime().isAfter(freeTime)) {
+          } else {
+            if (container.getBillOfLading().getId().equals(request.getId())) {
+            } else {
+              throw new InternalException(
+                  String.format("Driver %s has been busy", container.getDriver().getUsername()));
+            }
+          }
+        });
+      });
+      if (freeTime.isAfter(billOfLading.getInbound().getPickupTime())) {
+        billOfLading.setFreeTime(freeTime);
+      } else {
+        throw new InternalException("Error: pickupTime must before freeTime");
+      }
     }
 
     billOfLadingRepository.save(billOfLading);
@@ -100,8 +129,30 @@ public class BillOfLadingServiceImpl implements BillOfLaingService {
 
     String freeTimeReq = (String) updates.get("freeTime");
     if (freeTimeReq != null) {
+
       LocalDateTime freeTime = Tool.convertToLocalDateTime(freeTimeReq);
-      billOfLading.setFreeTime(freeTime);
+
+      Set<Container> containers = billOfLading.getContainers();
+      containers.forEach(item -> {
+        Long driverId = item.getDriver().getId();
+        List<Container> listContainer = containerRepository.findByDriver(driverId);
+        listContainer.forEach(container -> {
+          if (container.getBillOfLading().getFreeTime().isBefore(billOfLading.getInbound().getPickupTime())
+              || container.getBillOfLading().getInbound().getPickupTime().isAfter(freeTime)) {
+          } else {
+            if (container.getBillOfLading().getId().equals(id)) {
+            } else {
+              throw new InternalException(
+                  String.format("Driver %s has been busy", container.getDriver().getUsername()));
+            }
+          }
+        });
+      });
+      if (freeTime.isAfter(billOfLading.getInbound().getPickupTime())) {
+        billOfLading.setFreeTime(freeTime);
+      } else {
+        throw new InternalException("Error: pickupTime must before freeTime");
+      }
     }
 
     billOfLadingRepository.save(billOfLading);

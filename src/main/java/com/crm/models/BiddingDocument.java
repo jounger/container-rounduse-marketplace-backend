@@ -4,7 +4,9 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -96,4 +98,7 @@ public class BiddingDocument {
 
   @OneToMany(mappedBy = "report")
   private Collection<Report> reports = new ArrayList<>();
+  
+  @OneToMany(mappedBy = "relatedResource")
+  private Set<BiddingNotification> biddingNotifications = new HashSet<>();
 }

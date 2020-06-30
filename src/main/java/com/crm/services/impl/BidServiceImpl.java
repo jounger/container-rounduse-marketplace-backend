@@ -49,15 +49,15 @@ public class BidServiceImpl implements BidService {
   public Bid createBid(BidRequest request) {
     Bid bid = new Bid();
 
-    BiddingDocument biddingDocument = biddingDocumentRepository.findById(request.getBiddingDocumentId())
+    BiddingDocument biddingDocument = biddingDocumentRepository.findById(request.getBiddingDocument())
         .orElseThrow(() -> new NotFoundException("Bidding document is not found."));
     bid.setBiddingDocument(biddingDocument);
 
-    Forwarder bidder = forwarderRepository.findById(request.getFowarderId())
+    Forwarder bidder = forwarderRepository.findByUsername(request.getFowarder())
         .orElseThrow(() -> new NotFoundException("Forwarer is not found."));
     bid.setBidder(bidder);
 
-    List<Long> containersId = request.getContainersId();
+    List<Long> containersId = request.getContainers();
     Outbound outbound = biddingDocument.getOutbound();
     Booking booking = outbound.getBooking();
     List<Container> suitableContainers = containerRepository.findByOutbound(outbound.getShippingLine().getCompanyCode(),
@@ -134,15 +134,15 @@ public class BidServiceImpl implements BidService {
   public Bid updateBid(BidRequest request) {
     Bid bid = bidRepository.findById(request.getId()).orElseThrow(() -> new NotFoundException("Bid is not found."));
 
-    BiddingDocument biddingDocument = biddingDocumentRepository.findById(request.getBiddingDocumentId())
+    BiddingDocument biddingDocument = biddingDocumentRepository.findById(request.getBiddingDocument())
         .orElseThrow(() -> new NotFoundException("Bidding document is not found."));
     bid.setBiddingDocument(biddingDocument);
 
-    Forwarder bidder = forwarderRepository.findById(request.getFowarderId())
+    Forwarder bidder = forwarderRepository.findByUsername(request.getFowarder())
         .orElseThrow(() -> new NotFoundException("Forwarder is not found."));
     bid.setBidder(bidder);
 
-    List<Long> containersId = request.getContainersId();
+    List<Long> containersId = request.getContainers();
     Outbound outbound = biddingDocument.getOutbound();
     Booking booking = outbound.getBooking();
     List<Container> suitableContainers = containerRepository.findByOutbound(outbound.getShippingLine().getCompanyCode(),

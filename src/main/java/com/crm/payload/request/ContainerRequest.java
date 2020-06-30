@@ -13,6 +13,7 @@ public class ContainerRequest {
 
   private String containerNumber;
 
+  // driver as Driver.userName
   private String driver;
 
   private String trailer;
@@ -20,8 +21,8 @@ public class ContainerRequest {
   private String tractor;
 
   private String licensePlate;
-  
-  //ESupplyStatus
+
+  // ESupplyStatus
   private String status;
 
   private Set<Long> bids;

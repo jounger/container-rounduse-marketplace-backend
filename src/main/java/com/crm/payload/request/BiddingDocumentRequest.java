@@ -11,9 +11,10 @@ public class BiddingDocumentRequest {
 
   private Long id;
 
-  private Long merchantId;
+  //merchant as Merchant.username
+  private String merchant;
 
-  private Long outboundId;
+  private Long outbound;
 
   private Boolean isMultipleAward;
 

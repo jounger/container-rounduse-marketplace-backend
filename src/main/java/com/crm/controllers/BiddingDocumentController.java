@@ -37,13 +37,13 @@ import com.crm.websocket.service.BiddingNotifyService;
 @RestController
 @RequestMapping("/api/bidding-document")
 public class BiddingDocumentController {
-  
+
   @Autowired
   private BiddingDocumentService biddingDocumentService;
-  
+
   @Autowired
   private BiddingNotifyService biddingNotifyService;
-  
+
   @Autowired
   private SupplierService supplierService;
 
@@ -54,8 +54,8 @@ public class BiddingDocumentController {
      BiddingDocumentDto biddingDocumentDto = BiddingDocumentMapper.toBiddingDocumentDto(biddingDocument);
      biddingNotifyService.BiddingDocumentNotification(biddingDocument, supplierService.getSupplier("forwarder"));
      return ResponseEntity.ok(biddingDocumentDto);
-  } 
-  
+  }
+
   @PreAuthorize("hasRole('MERCHANT')")
   @GetMapping("/merchant/{id}")
   public ResponseEntity<?> getBiddingDocumentsByMerchant(@PathVariable Long id, @Valid PaginationRequest request) {
@@ -88,9 +88,9 @@ public class BiddingDocumentController {
   @PreAuthorize("hasRole('MERCHANT')")
   @PutMapping("")
   public ResponseEntity<?> updateBiddingDocument(@Valid @RequestBody BiddingDocumentRequest request) {
-     BiddingDocument biddingDocument = biddingDocumentService.updateBiddingDocument(request);     
-     BiddingDocumentDto biddingDocumentDto = BiddingDocumentMapper.toBiddingDocumentDto(biddingDocument);
-     return ResponseEntity.ok(biddingDocumentDto);
+    BiddingDocument biddingDocument = biddingDocumentService.updateBiddingDocument(request);
+    BiddingDocumentDto biddingDocumentDto = BiddingDocumentMapper.toBiddingDocumentDto(biddingDocument);
+    return ResponseEntity.ok(biddingDocumentDto);
   }
 
   @PreAuthorize("hasRole('MERCHANT')")
@@ -107,5 +107,5 @@ public class BiddingDocumentController {
     biddingDocumentService.removeBiddingDocument(id);
     return ResponseEntity.ok(new MessageResponse("Bidding document deleted successfully."));
   }
-  
+
 }

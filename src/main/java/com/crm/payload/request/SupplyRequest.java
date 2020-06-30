@@ -11,9 +11,11 @@ public class SupplyRequest {
 
   private Long id;
 
+  // shippingLine as ShippingLine.companyCode
   @NotBlank
   private String shippingLine;
 
+  // containerType as ContainerType.name
   @NotBlank
   private String containerType;
 }

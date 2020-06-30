@@ -1,5 +1,6 @@
 package com.crm.services.impl;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -80,12 +81,44 @@ public class ContainerServiceImpl implements ContainerService {
         throw new DuplicateRecordException("Error: Container has been existed");
       }
     });
+
+    String containerNumber = request.getContainerNumber();
+    String licensePlate = request.getLicensePlate();
+    List<BillOfLading> billOfLadings = billOfLadingRepository.findAll();
+    billOfLadings.forEach(item -> {
+      Set<Container> setContainer = item.getContainers();
+      setContainer.forEach(containerItem -> {
+        if (containerNumber.equals(containerItem.getContainerNumber())
+            || licensePlate.equals(containerItem.getLicensePlate())) {
+          if (containerItem.getBillOfLading().getFreeTime().isBefore(billOfLading.getInbound().getPickupTime())
+              || containerItem.getBillOfLading().getInbound().getPickupTime().isAfter(billOfLading.getFreeTime())) {
+          } else {
+            throw new InternalException(
+                String.format("Container %s has been busy", containerItem.getContainerNumber()));
+          }
+        }
+      });
+    });
+
+    String driverUserName = request.getDriver();
+    Driver driver = driverRepository.findByUsername(driverUserName)
+        .orElseThrow(() -> new NotFoundException("ERROR: Driver is not found."));
+
+    List<Container> listContainer = containerRepository.findByDriver(driver.getId());
+    listContainer.forEach(item -> {
+      if (item.getBillOfLading().getFreeTime().isBefore(billOfLading.getInbound().getPickupTime())
+          || item.getBillOfLading().getInbound().getPickupTime().isAfter(billOfLading.getFreeTime())) {
+      } else {
+        if (item.getBillOfLading().getInbound().getId().equals(request.getId())) {
+        } else {
+          throw new InternalException(String.format("Driver %s has been busy", item.getDriver().getUsername()));
+        }
+      }
+    });
+
+    container.setDriver(driver);
     container.setBillOfLading(billOfLading);
     container.setStatus(EnumSupplyStatus.CREATED.name());
-
-    Driver driver = driverRepository.findByUsername(request.getDriver())
-        .orElseThrow(() -> new NotFoundException("ERROR: Driver is not found."));
-    container.setDriver(driver);
 
     container.setContainerNumber(request.getContainerNumber());
     container.setTrailer(request.getTrailer());
@@ -116,18 +149,54 @@ public class ContainerServiceImpl implements ContainerService {
       }
     });
 
+    String containerNumber = request.getContainerNumber();
+    String licensePlate = request.getLicensePlate();
+    List<BillOfLading> billOfLadings = billOfLadingRepository.findAll();
+    billOfLadings.forEach(item -> {
+      Set<Container> setContainer = item.getContainers();
+      setContainer.forEach(containerItem -> {
+        if (containerNumber.equals(containerItem.getContainerNumber())
+            || licensePlate.equals(containerItem.getLicensePlate())) {
+          if (containerItem.getBillOfLading().getFreeTime().isBefore(billOfLading.getInbound().getPickupTime())
+              || containerItem.getBillOfLading().getInbound().getPickupTime().isAfter(billOfLading.getFreeTime())) {
+          } else {
+            if (item.getId().equals(billOfLading.getId())) {
+            } else {
+              throw new InternalException(
+                  String.format("Container %s has been busy", containerItem.getContainerNumber()));
+            }
+          }
+        }
+      });
+    });
+
+    String driverUserName = request.getDriver();
+    Driver driver = driverRepository.findByUsername(driverUserName)
+        .orElseThrow(() -> new NotFoundException("ERROR: Driver is not found."));
+
+    List<Container> listContainer = containerRepository.findByDriver(driver.getId());
+    listContainer.forEach(item -> {
+      if (item.getBillOfLading().getFreeTime().isBefore(billOfLading.getInbound().getPickupTime())
+          || item.getBillOfLading().getInbound().getPickupTime().isAfter(billOfLading.getFreeTime())) {
+      } else {
+        if (item.getBillOfLading().getId().equals(billOfLading.getId())) {
+        } else {
+          throw new InternalException(String.format("Driver %s has been busy", item.getDriver().getUsername()));
+        }
+      }
+    });
+
     if (request.getStatus() != null) {
       container.setStatus(EnumSupplyStatus.findByName(request.getStatus()).name());
     }
 
-    Driver driver = driverRepository.findByUsername(request.getDriver())
-        .orElseThrow(() -> new NotFoundException("ERROR: Driver is not found."));
     container.setDriver(driver);
 
+    container.setBillOfLading(billOfLading);
     container.setTrailer(request.getTrailer());
     container.setTractor(request.getTractor());
-    container.setContainerNumber(request.getContainerNumber());
-    container.setLicensePlate(request.getLicensePlate());
+    container.setContainerNumber(containerNumber);
+    container.setLicensePlate(licensePlate);
 
     containerRepository.save(container);
 
@@ -185,12 +254,46 @@ public class ContainerServiceImpl implements ContainerService {
 
     Set<Container> containers = billOfLading.getContainers();
     containers.forEach(item -> {
-      if (item.getContainerNumber().equals(containerNumber) || item.getDriver().getUsername().equals(driverRequest)
-          || item.getLicensePlate().equals(licensePlate)) {
+      if (item.getContainerNumber().equals(container.getContainerNumber()) || item.getDriver().getUsername().equals(container.getDriver().getUsername())
+          || item.getLicensePlate().equals(container.getLicensePlate())) {
         if (item.getId().equals(id)) {
 
         } else {
           throw new DuplicateRecordException("Error: Container has been existed");
+        }
+      }
+    });
+
+    List<BillOfLading> billOfLadings = billOfLadingRepository.findAll();
+    billOfLadings.forEach(item -> {
+      Set<Container> setContainer = item.getContainers();
+      setContainer.forEach(containerItem -> {
+        if (container.getContainerNumber().equals(containerItem.getContainerNumber())
+            || container.getLicensePlate().equals(containerItem.getLicensePlate())) {
+          if (containerItem.getBillOfLading().getFreeTime().isBefore(billOfLading.getInbound().getPickupTime())
+              || containerItem.getBillOfLading().getInbound().getPickupTime().isAfter(billOfLading.getFreeTime())) {
+          } else {
+            if (item.getId().equals(billOfLading.getId())) {
+            } else {
+              throw new InternalException(
+                  String.format("Container %s has been busy", containerItem.getContainerNumber()));
+            }
+          }
+        }
+      });
+    });
+
+    Driver driver = driverRepository.findByUsername(driverRequest)
+        .orElseThrow(() -> new NotFoundException("ERROR: Driver is not found."));
+
+    List<Container> listContainer = containerRepository.findByDriver(driver.getId());
+    listContainer.forEach(item -> {
+      if (item.getBillOfLading().getFreeTime().isBefore(billOfLading.getInbound().getPickupTime())
+          || item.getBillOfLading().getInbound().getPickupTime().isAfter(billOfLading.getFreeTime())) {
+      } else {
+        if (item.getBillOfLading().getId().equals(billOfLading.getId())) {
+        } else {
+          throw new InternalException(String.format("Driver %s has been busy", item.getDriver().getUsername()));
         }
       }
     });

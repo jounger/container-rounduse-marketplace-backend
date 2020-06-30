@@ -38,6 +38,13 @@ public class ContainerTypeServiceImpl implements ContainerTypeService {
   }
 
   @Override
+  public ContainerType getContainerTypeByName(String name) {
+    ContainerType containerType = containerTypeRepository.findByName(name)
+        .orElseThrow(() -> new NotFoundException("ERROR: ContainerType is not found."));
+    return containerType;
+  }
+
+  @Override
   public ContainerType createContainerType(ContainerTypeRequest request) {
     if (containerTypeRepository.existsByName(request.getName())) {
       throw new DuplicateRecordException("ERROR: ContainerType already exists.");

@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.crm.models.ContainerType;
@@ -63,6 +64,14 @@ public class ContainerTypeController {
   @GetMapping("/{id}")
   public ResponseEntity<?> getContainerType(@PathVariable Long id) {
     ContainerType containerType = containerTypeService.getContainerTypeById(id);
+    ContainerTypeDto containerTypeDto = new ContainerTypeDto();
+    containerTypeDto = ContainerTypeMapper.toContainerTypeDto(containerType);
+    return ResponseEntity.ok(containerTypeDto);
+  }
+
+  @RequestMapping(method = RequestMethod.GET, params = {"name"})
+  public ResponseEntity<?> getContainerTypeByName(@RequestParam String name) {
+    ContainerType containerType = containerTypeService.getContainerTypeByName(name);
     ContainerTypeDto containerTypeDto = new ContainerTypeDto();
     containerTypeDto = ContainerTypeMapper.toContainerTypeDto(containerType);
     return ResponseEntity.ok(containerTypeDto);

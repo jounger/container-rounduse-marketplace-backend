@@ -1,5 +1,7 @@
 package com.crm.repository;
 
+import java.util.Optional;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -16,4 +18,6 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
   @Query(value = "SELECT b FROM Booking b WHERE b.outbound.id = :id")
   Page<Booking> findByOutbound(@Param("id") Long id, Pageable pageable);
+
+  Optional<Booking> findByBookingNumber(String bookingNumber);
 }

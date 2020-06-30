@@ -30,6 +30,8 @@ import com.crm.payload.request.PaginationRequest;
 import com.crm.payload.response.MessageResponse;
 import com.crm.payload.response.PaginationResponse;
 import com.crm.services.BiddingDocumentService;
+import com.crm.services.SupplierService;
+import com.crm.websocket.service.BiddingNotifyService;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -38,12 +40,19 @@ public class BiddingDocumentController {
   
   @Autowired
   private BiddingDocumentService biddingDocumentService;
+  
+  @Autowired
+  private BiddingNotifyService biddingNotifyService;
+  
+  @Autowired
+  private SupplierService supplierService;
 
   @PreAuthorize("hasRole('MERCHANT')")
   @PostMapping("")
   public ResponseEntity<?> createBiddingDocument(@Valid @RequestBody BiddingDocumentRequest request) {
      BiddingDocument biddingDocument = biddingDocumentService.createBiddingDocument(request);
      BiddingDocumentDto biddingDocumentDto = BiddingDocumentMapper.toBiddingDocumentDto(biddingDocument);
+     biddingNotifyService.BiddingDocumentNotification(biddingDocument, supplierService.getSupplier("forwarder"));
      return ResponseEntity.ok(biddingDocumentDto);
   } 
   

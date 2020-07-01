@@ -236,6 +236,14 @@ public class BidServiceImpl implements BidService {
     String bidValidityPeriodString = (String) updates.get("bidValidityPeriod");
     if (bidValidityPeriodString != null) {
       LocalDateTime bidValidityPeriod = Tool.convertToLocalDateTime(bidValidityPeriodString);
+      if (bidValidityPeriod != null) {
+        if (bidValidityPeriod.isAfter(LocalDateTime.now().plusDays(1))
+            || bidValidityPeriod.isEqual(LocalDateTime.now().plusDays(1))) {
+          bid.setBidValidityPeriod(bidValidityPeriod);
+        } else {
+          throw new InternalException("Bid validity period must be at least 1 day after now.");
+        }
+      } else {
         bid.setBidValidityPeriod(LocalDateTime.now().plusDays(1));
       }
     }

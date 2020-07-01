@@ -74,6 +74,15 @@ public class BiddingNotificationServiceImpl implements BiddingNotificationServic
         PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt")));
     return biddingNotifications;
   }
+  
+
+
+  @Override
+  public Page<BiddingNotification> getBiddingNotificationsByUser(String recipient, PaginationRequest request) {
+    Page<BiddingNotification> biddingNotifications = biddingNotificationRepository.findBiddingNotificationsByUser(recipient,
+        PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt")));
+    return biddingNotifications;
+  }
 
   @Override
   public BiddingNotification editBiddingNotification(Long id, Map<String, Object> updates) {

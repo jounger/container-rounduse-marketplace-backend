@@ -12,5 +12,8 @@ public interface BiddingNotificationRepository extends JpaRepository<BiddingNoti
   
   @Query(value = "FROM BiddingNotification bn WHERE bn.recipient.id = :id")
   Page<BiddingNotification> findBiddingNotificationsByUser(@Param("id") Long id, Pageable pageable);
+  
+  @Query(value = "FROM BiddingNotification bn WHERE bn.recipient.username = :username")
+  Page<BiddingNotification> findBiddingNotificationsByUser(@Param("username") String username, Pageable pageable);
 
 }

@@ -8,31 +8,31 @@ import lombok.Setter;
 @Getter
 @Setter
 public class BiddingDocumentRequest {
-  
+
   private Long id;
-  
-  private Long merchantId;
-  
-  private Long outboundId;
-  
+
+  //merchant as Merchant.username
+  private String merchant;
+
+  private Long outbound;
+
   private Boolean isMultipleAward;
-  
+
+  // List id of bid entities
   private List<Long> bids;
-  
+
   private String bidOpening;
-  
+
   private String bidClosing;
-  
-  private String dateOfDecision;
-  
-  private String currencyOfPayment; 
-  
+
+  private String currencyOfPayment;
+
   private Double bidPackagePrice;
-  
+
   private Double bidFloorPrice;
   
   private String bidDiscountCode;
-  
+
   private Double priceLeadership;
-  
+
 }

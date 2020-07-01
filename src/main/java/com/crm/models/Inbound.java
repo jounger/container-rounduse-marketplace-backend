@@ -25,21 +25,23 @@ import lombok.ToString;
 @Entity
 @Table(name = "inbound")
 @PrimaryKeyJoinColumn(name = "supply_id")
-public class Inbound extends Supply{
-  
+public class Inbound extends Supply {
+
   @ManyToOne
   @JoinColumn(name = "forwarder_id")
   private Forwarder forwarder;
-  
+
   @OneToOne(cascade = CascadeType.ALL)
   @JoinColumn(name = "bill_of_lading_id")
   private BillOfLading billOfLading;
 
   @Column(name = "empty_time")
   private LocalDateTime emptyTime;
-  
+
   @Column(name = "pickup_time")
   private LocalDateTime pickupTime;
-  
-  
+
+  @Column(name = "return_station")
+  private String returnStation;
+
 }

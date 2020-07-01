@@ -107,4 +107,11 @@ public class PortServiceImpl implements PortService {
     return port;
   }
 
+  @Override
+  public Port getPortByNameCode(String nameCode) {
+    Port port = portRepository.findByNameCode(nameCode)
+        .orElseThrow(() -> new NotFoundException("ERROR: Port is not found."));
+    return port;
+  }
+
 }

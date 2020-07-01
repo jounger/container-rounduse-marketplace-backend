@@ -1,6 +1,9 @@
 package com.crm.services.impl;
 
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -8,13 +11,17 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import com.crm.common.Tool;
 import com.crm.exception.DuplicateRecordException;
+import com.crm.exception.InternalException;
 import com.crm.exception.NotFoundException;
 import com.crm.models.BillOfLading;
+import com.crm.models.Container;
 import com.crm.models.Port;
 import com.crm.payload.request.BillOfLadingRequest;
 import com.crm.payload.request.PaginationRequest;
 import com.crm.repository.BillOfLadingRepository;
+import com.crm.repository.ContainerRepository;
 import com.crm.repository.InboundRepository;
 import com.crm.repository.PortRepository;
 import com.crm.services.BillOfLaingService;
@@ -30,6 +37,9 @@ public class BillOfLadingServiceImpl implements BillOfLaingService {
 
   @Autowired
   InboundRepository inboundRepository;
+
+  @Autowired
+  private ContainerRepository containerRepository;
 
   @Override
   public Page<BillOfLading> getBillOfLadingsByInbound(Long id, PaginationRequest request) {
@@ -64,7 +74,51 @@ public class BillOfLadingServiceImpl implements BillOfLaingService {
     }
 
     if (request.getFreeTime() != null) {
-      billOfLading.setFreeTime(request.getFreeTime());
+      LocalDateTime freeTime = Tool.convertToLocalDateTime(request.getFreeTime());
+
+      Set<Container> containers = billOfLading.getContainers();
+      containers.forEach(item -> {
+
+        String containerNumber = item.getContainerNumber();
+        String licensePlate = item.getLicensePlate();
+        List<BillOfLading> billOfLadings = billOfLadingRepository.findAll();
+        billOfLadings.forEach(billOfLadingItem -> {
+          Set<Container> setContainer = billOfLadingItem.getContainers();
+          setContainer.forEach(containerItem -> {
+            if (containerNumber.equals(containerItem.getContainerNumber())
+                || licensePlate.equals(containerItem.getLicensePlate())) {
+              if (containerItem.getBillOfLading().getFreeTime().isBefore(billOfLading.getInbound().getPickupTime())
+                  || containerItem.getBillOfLading().getInbound().getPickupTime().isAfter(freeTime)) {
+              } else {
+                if (request.getId().equals(billOfLadingItem.getId())) {
+                } else {
+                  throw new InternalException(
+                      String.format("Container %s has been busy", containerItem.getContainerNumber()));
+                }
+              }
+            }
+          });
+        });
+
+        Long driverId = item.getDriver().getId();
+        List<Container> listContainer = containerRepository.findByDriver(driverId);
+        listContainer.forEach(container -> {
+          if (container.getBillOfLading().getFreeTime().isBefore(billOfLading.getInbound().getPickupTime())
+              || container.getBillOfLading().getInbound().getPickupTime().isAfter(freeTime)) {
+          } else {
+            if (container.getBillOfLading().getId().equals(request.getId())) {
+            } else {
+              throw new InternalException(
+                  String.format("Driver %s has been busy", container.getDriver().getUsername()));
+            }
+          }
+        });
+      });
+      if (freeTime.isAfter(billOfLading.getInbound().getPickupTime())) {
+        billOfLading.setFreeTime(freeTime);
+      } else {
+        throw new InternalException("Error: pickupTime must before freeTime");
+      }
     }
 
     billOfLadingRepository.save(billOfLading);
@@ -95,13 +149,72 @@ public class BillOfLadingServiceImpl implements BillOfLaingService {
       billOfLading.setBillOfLadingNumber(billOfLadingNumber);
     }
 
-    Integer freeTime = (Integer) updates.get("freeTime");
-    if (freeTime != null) {
-      billOfLading.setFreeTime(freeTime);
+    String freeTimeReq = (String) updates.get("freeTime");
+    if (freeTimeReq != null) {
+
+      LocalDateTime freeTime = Tool.convertToLocalDateTime(freeTimeReq);
+
+      Set<Container> containers = billOfLading.getContainers();
+      containers.forEach(item -> {
+
+        String containerNumber = item.getContainerNumber();
+        String licensePlate = item.getLicensePlate();
+        List<BillOfLading> billOfLadings = billOfLadingRepository.findAll();
+        billOfLadings.forEach(billOfLadingItem -> {
+          Set<Container> setContainer = billOfLadingItem.getContainers();
+          setContainer.forEach(containerItem -> {
+            if (containerNumber.equals(containerItem.getContainerNumber())
+                || licensePlate.equals(containerItem.getLicensePlate())) {
+              if (containerItem.getBillOfLading().getFreeTime().isBefore(billOfLading.getInbound().getPickupTime())
+                  || containerItem.getBillOfLading().getInbound().getPickupTime().isAfter(freeTime)) {
+              } else {
+                if (id.equals(billOfLadingItem.getId())) {
+                } else {
+                  throw new InternalException(
+                      String.format("Container %s has been busy", containerItem.getContainerNumber()));
+                }
+              }
+            }
+          });
+        });
+
+        Long driverId = item.getDriver().getId();
+        List<Container> listContainer = containerRepository.findByDriver(driverId);
+        listContainer.forEach(container -> {
+          if (container.getBillOfLading().getFreeTime().isBefore(billOfLading.getInbound().getPickupTime())
+              || container.getBillOfLading().getInbound().getPickupTime().isAfter(freeTime)) {
+          } else {
+            if (container.getBillOfLading().getId().equals(id)) {
+            } else {
+              throw new InternalException(
+                  String.format("Driver %s has been busy", container.getDriver().getUsername()));
+            }
+          }
+        });
+      });
+      if (freeTime.isAfter(billOfLading.getInbound().getPickupTime())) {
+        billOfLading.setFreeTime(freeTime);
+      } else {
+        throw new InternalException("Error: pickupTime must before freeTime");
+      }
     }
 
     billOfLadingRepository.save(billOfLading);
 
+    return billOfLading;
+  }
+
+  @Override
+  public BillOfLading getBillOfLadingByBillOfLadingNumber(String billOfLadingNumber) {
+    BillOfLading billOfLading = billOfLadingRepository.findByBillOfLadingNumber(billOfLadingNumber)
+        .orElseThrow(() -> new NotFoundException("ERROR: BillOfLading is not found."));
+    return billOfLading;
+  }
+
+  @Override
+  public BillOfLading getBillOfLadingById(Long id) {
+    BillOfLading billOfLading = billOfLadingRepository.findById(id)
+        .orElseThrow(() -> new NotFoundException("ERROR: BillOfLading is not found."));
     return billOfLading;
   }
 

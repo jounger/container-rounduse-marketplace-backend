@@ -12,6 +12,10 @@ public interface BillOfLaingService {
 
   Page<BillOfLading> getBillOfLadingsByInbound(Long id, PaginationRequest request);
 
+  BillOfLading getBillOfLadingById(Long id);
+
+  BillOfLading getBillOfLadingByBillOfLadingNumber(String billOfLadingNumber);
+
   BillOfLading updateBillOfLading(BillOfLadingRequest request);
 
   BillOfLading editBillOfLading(Map<String, Object> updates, Long id);

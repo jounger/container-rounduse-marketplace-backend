@@ -9,21 +9,26 @@ import lombok.Setter;
 @Getter
 @Setter
 public class BidRequest {
-  
+
   private Long id;
-  
-  private Long biddingDocumentId;
-  
-  private Long fowarderId;
-  
-  private List<Long> containersId = new ArrayList<>();
-  
+
+  //biddingDocument as BiddingDocument.id
+  private Long biddingDocument;
+
+  //forwarder as Forwarder.username
+  private String fowarder;
+
+  //containers as List of Container.id
+  private List<Long> containers = new ArrayList<>();
+
   private Double bidPrice;
-  
+
   private String bidDate;
-  
+
   private String bidValidityPeriod;
-  
-  //EnumBidStatus
+
+  private String dateOfDecision;
+
+  // EnumBidStatus
   private String status;
 }

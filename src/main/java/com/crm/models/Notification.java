@@ -1,9 +1,6 @@
 package com.crm.models;
 
-import java.time.LocalDateTime;
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -11,9 +8,9 @@ import javax.persistence.EntityListeners;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
@@ -37,41 +34,22 @@ import lombok.ToString;
 @NoArgsConstructor
 @ToString
 @Entity
-@Table(name = "bid")
+@Table(name = "notification")
+@Inheritance(strategy = InheritanceType.JOINED)
 @EntityListeners(AuditingEntityListener.class)
 @JsonIgnoreProperties(value = { "createdAt", "updatedAt" }, allowGetters = true)
-public class Bid {
+public class Notification {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
-
+  
   @ManyToOne
-  @JoinColumn(name = "bidding_document_id")
-  private BiddingDocument biddingDocument;
-
-  @ManyToOne
-  @JoinColumn(name = "forwarder_id")
-  private Forwarder bidder;
-
-  @ManyToMany
-  @JoinTable(name = "bid_container", joinColumns = @JoinColumn(name = "bid_id"), inverseJoinColumns = @JoinColumn(name = "container_id"))
-  private Set<Container> containers = new HashSet<>();
-
-  @Column(name = "bid_price")
-  private Double bidPrice;
-
-  @Column(name = "bid_date")
-  private LocalDateTime bidDate;
-
-  @Column(name = "bid_validity_period")
-  private LocalDateTime bidValidityPeriod;
-
-  @Column(name = "date_of_decision")
-  private LocalDateTime dateOfDecision;
-
-  // EnumBidStatus
-  private String status;
+  @JoinColumn(name = "user_id")
+  private User recipient;
+  
+  @Column(name = "is_read")
+  private Boolean isRead;
 
   @Column(name = "created_at", nullable = false, updatable = false)
   @Temporal(TemporalType.TIMESTAMP)

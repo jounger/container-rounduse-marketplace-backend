@@ -14,6 +14,8 @@ public interface DiscountService {
 
   Discount getDiscountById(Long id);
 
+  Discount getDiscountByCode(String code);
+
   Discount createDiscount(DiscountRequest request);
 
   Discount updateDiscount(DiscountRequest request);

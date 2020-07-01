@@ -47,12 +47,12 @@ public class BiddingDocumentImpl implements BiddingDocumentService {
     BiddingDocument biddingDocument = new BiddingDocument();
 
     Merchant merchant = new Merchant();
-    merchant = merchantRepository.findById(request.getMerchantId())
+    merchant = merchantRepository.findByUsername(request.getMerchant())
         .orElseThrow(() -> new NotFoundException("Merchant is not found"));
     biddingDocument.setOfferee(merchant);
 
     Outbound outbound = new Outbound();
-    outbound = outboundRepository.findById(request.getOutboundId())
+    outbound = outboundRepository.findById(request.getOutbound())
         .orElseThrow(() -> new NotFoundException("Outbound is not found."));
     if (outbound.getStatus().equalsIgnoreCase(EnumSupplyStatus.COMBINED.name())
         || outbound.getStatus().equalsIgnoreCase(EnumSupplyStatus.BIDDING.name())) {
@@ -203,12 +203,11 @@ public class BiddingDocumentImpl implements BiddingDocumentService {
     BiddingDocument biddingDocument = biddingDocumentRepository.findById(id)
         .orElseThrow(() -> new NotFoundException("Bidding document is not found"));
     Outbound outbound = biddingDocument.getOutbound();
-    if (outbound.getStatus() != EnumSupplyStatus.BIDDING.name()
-        || outbound.getStatus() != EnumSupplyStatus.COMBINED.name()) {
-      biddingDocumentRepository.deleteById(id);
-    } else {
+    if (outbound.getStatus().equalsIgnoreCase(EnumSupplyStatus.BIDDING.name())
+        || outbound.getStatus().equalsIgnoreCase(EnumSupplyStatus.COMBINED.name())) {
       throw new InternalException("Bidding document is in a transaction.");
     }
+    biddingDocumentRepository.deleteById(id);
   }
 
 }

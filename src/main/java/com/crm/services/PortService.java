@@ -14,6 +14,8 @@ public interface PortService {
 
   Port getPortById(Long id);
 
+  Port getPortByNameCode(String nameCode);
+
   Port createPort(PortRequest request);
 
   Port updatePort(PortRequest request);

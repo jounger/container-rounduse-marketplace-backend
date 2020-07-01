@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.crm.common.Tool;
+import com.crm.models.Bid;
 import com.crm.models.BiddingDocument;
+import com.crm.models.dto.BidDto;
 import com.crm.models.dto.BiddingDocumentDto;
 import com.crm.models.dto.OutboundDto;
 
@@ -23,10 +25,14 @@ public class BiddingDocumentMapper {
     
     biddingDocumentDto.setIsMultipleAward(biddingDocument.getIsMultipleAward());
 
-    List<String> bids = new ArrayList<>();
-    biddingDocument.getBids().forEach(bid -> {
-      bids.add(String.valueOf(bid.getId()));
+    List<BidDto> bidsDto = new ArrayList<>();
+    List<Bid> bids = biddingDocument.getBids();
+    bids.forEach(bid -> {
+      BidDto bidDto = BidMapper.toBidDto(bid);
+      bidsDto.add(bidDto);
     });
+    biddingDocumentDto.setBids(bidsDto);
+    
     String currencyOfPayment = biddingDocument.getCurrencyOfPayment();
     biddingDocumentDto.setCurrencyOfPayment(currencyOfPayment);
 

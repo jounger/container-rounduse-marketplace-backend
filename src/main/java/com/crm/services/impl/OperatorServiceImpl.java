@@ -132,23 +132,23 @@ public class OperatorServiceImpl implements OperatorService {
     }
 
     String phone = (String) updates.get("phone");
-    if (phone != null) {
+    if (phone != null && !phone.isEmpty()) {
       operator.setPhone(phone);
     }
 
     String address = (String) updates.get("address");
-    if (address != null) {
+    if (address != null && !address.isEmpty()) {
       operator.setAddress(address);
     }
 
     String status = (String) updates.get("status");
-    if (status != null) {
+    if (status != null && !status.isEmpty()) {
       EnumUserStatus eStatus = EnumUserStatus.findByName(status);
       operator.setStatus(eStatus.name());
     }
 
     String fullname = (String) updates.get("fullname");
-    if (fullname != null) {
+    if (fullname != null && !fullname.isEmpty()) {
       operator.setFullname(fullname);
     }
     return operator;

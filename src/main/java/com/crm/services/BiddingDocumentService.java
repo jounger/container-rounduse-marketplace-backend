@@ -18,6 +18,8 @@ public interface BiddingDocumentService {
   
   Page<BiddingDocument> getBiddingDocumentsByMerchant(Long id, PaginationRequest request);
   
+  Page<BiddingDocument> getBiddingDocumentsByForwarder(Long id, PaginationRequest request);
+  
   //update full biddingDocument
   BiddingDocument updateBiddingDocument(BiddingDocumentRequest request);
   

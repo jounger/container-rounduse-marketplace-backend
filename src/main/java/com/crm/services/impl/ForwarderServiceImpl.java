@@ -146,22 +146,22 @@ public class ForwarderServiceImpl implements ForwarderService {
     }
 
     String address = (String) updates.get("address");
-    if (address != null) {
+    if (address != null && !address.isEmpty()) {
       forwarder.setAddress(address);
     }
 
     String website = (String) updates.get("website");
-    if (website != null) {
+    if (website != null && !website.isEmpty()) {
       forwarder.setWebsite(website);
     }
 
     String contactPerson = (String) updates.get("contactPerson");
-    if (contactPerson != null) {
+    if (contactPerson != null && !contactPerson.isEmpty()) {
       forwarder.setContactPerson(contactPerson);
     }
 
     String companyName = (String) updates.get("companyName");
-    if (companyName != null) {
+    if (companyName != null && !companyName.isEmpty()) {
       forwarder.setCompanyName(companyName);
     }
 
@@ -171,22 +171,22 @@ public class ForwarderServiceImpl implements ForwarderService {
 //    }
 
     String companyDescription = (String) updates.get("companyDescription");
-    if (companyDescription != null) {
+    if (companyDescription != null && !companyDescription.isEmpty()) {
       forwarder.setCompanyDescription(companyDescription);
     }
 
     String companyAddress = (String) updates.get("companyAddress");
-    if (companyAddress != null) {
+    if (companyAddress != null && !companyAddress.isEmpty()) {
       forwarder.setCompanyAddress(companyAddress);
     }
 
     String tin = (String) updates.get("tin");
-    if (tin != null) {
+    if (tin != null && !tin.isEmpty()) {
       forwarder.setTin(tin);
     }
 
     String fax = (String) updates.get("fax");
-    if (fax != null) {
+    if (fax != null && !fax.isEmpty()) {
       forwarder.setFax(fax);
     }
     return null;

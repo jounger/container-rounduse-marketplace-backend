@@ -40,6 +40,7 @@ public class MerchantController {
   @Autowired
   private MerchantService merchantService;
 
+  @Transactional
   @PostMapping("")
   public ResponseEntity<?> createMerchant(@Valid @RequestBody MerchantRequest request) {
     merchantService.createMerchant(request);

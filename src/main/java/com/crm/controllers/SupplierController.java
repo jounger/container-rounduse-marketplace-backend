@@ -81,7 +81,7 @@ public class SupplierController {
   }
 
   @PreAuthorize("hasRole('MODERATOR') or hasRole('FORWARDER') or hasRole('MERCHANT')")
-  @GetMapping("registration")
+  @GetMapping("/registration")
   public ResponseEntity<?> getSupplier(@Valid SupplierRequest request) {
     Supplier supplier = supplierService.getSupplier(request.getUsername());
     SupplierDto supplierDto = SupplierMapper.toSupplierDto(supplier);
@@ -96,6 +96,7 @@ public class SupplierController {
     return ResponseEntity.ok(supplierDto);
   }
 
+  @Transactional
   @PreAuthorize("hasRole('MODERATOR')")
   @RequestMapping(value = "/register/{id}", method = RequestMethod.PATCH, consumes = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<?> reviewRegister(@PathVariable("id") Long id, @RequestBody Map<String, Object> updates) {

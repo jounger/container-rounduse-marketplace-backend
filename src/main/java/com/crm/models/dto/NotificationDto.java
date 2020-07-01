@@ -12,5 +12,7 @@ public class NotificationDto {
   private String recipient;
   
   private Boolean isRead;
+  
+  private String sendDate;
 
 }

@@ -111,7 +111,7 @@ public class ContainerTypeServiceImpl implements ContainerTypeService {
         .orElseThrow(() -> new NotFoundException("ERROR: ContainerType is not found."));
 
     String name = (String) updates.get("name");
-    if (name != null && name.isEmpty()) {
+    if (name != null && !name.isEmpty()) {
       if (containerTypeRepository.existsByName(name)) {
         if (name.equals(containerType.getName())) {
         } else {
@@ -121,7 +121,7 @@ public class ContainerTypeServiceImpl implements ContainerTypeService {
     }
 
     String description = (String) updates.get("description");
-    if (description != null && description.isEmpty()) {
+    if (description != null && !description.isEmpty()) {
       containerType.setDescription(description);
     }
 

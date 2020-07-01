@@ -83,17 +83,17 @@ public class PortServiceImpl implements PortService {
     Port port = portRepository.findById(id).orElseThrow(() -> new NotFoundException("ERROR: Port is not found."));
 
     String fullname = (String) updates.get("fullname");
-    if (fullname != null && fullname.isEmpty()) {
+    if (fullname != null && !fullname.isEmpty()) {
       port.setFullname(fullname);
     }
 
     String address = (String) updates.get("address");
-    if (address != null && address.isEmpty()) {
+    if (address != null && !address.isEmpty()) {
       port.setAddress(address);
     }
 
     String nameCode = (String) updates.get("nameCode");
-    if (nameCode != null && nameCode.isEmpty()) {
+    if (nameCode != null && !nameCode.isEmpty()) {
       if (portRepository.existsByNameCode(nameCode)) {
         if (nameCode.equals(port.getNameCode())) {
         } else {

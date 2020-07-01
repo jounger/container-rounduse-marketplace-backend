@@ -100,7 +100,7 @@ public class OutboundServiceImpl implements OutboundService {
 
     outbound.setGoodsDescription(request.getGoodsDescription());
 
-    if (request.getPackingTime() != null && request.getPackingTime().isEmpty()) {
+    if (request.getPackingTime() != null && !request.getPackingTime().isEmpty()) {
       LocalDateTime packingTime = Tool.convertToLocalDateTime(request.getPackingTime());
       outbound.setPackingTime(packingTime);
     }
@@ -109,14 +109,14 @@ public class OutboundServiceImpl implements OutboundService {
 
     outbound.setPayload(request.getPayload());
 
-    if (request.getUnitOfMeasurement() != null && request.getUnitOfMeasurement().isEmpty()) {
+    if (request.getUnitOfMeasurement() != null && !request.getUnitOfMeasurement().isEmpty()) {
       outbound.setUnitOfMeasurement(EnumUnit.findByName(request.getUnitOfMeasurement()).name());
     }
 
     Booking booking = new Booking();
     BookingRequest bookingRequest = (BookingRequest) request.getBooking();
     String bookingNumber = bookingRequest.getBookingNumber();
-    if (bookingNumber != null && bookingNumber.isEmpty()) {
+    if (bookingNumber != null && !bookingNumber.isEmpty()) {
       if (bookingRepository.existsByBookingNumber(bookingNumber)) {
         throw new DuplicateRecordException("Error: Booking has been existed");
       }
@@ -131,7 +131,7 @@ public class OutboundServiceImpl implements OutboundService {
 
     booking.setUnit(bookingRequest.getUnit());
 
-    if (bookingRequest.getCutOffTime() != null && bookingRequest.getCutOffTime().isEmpty()) {
+    if (bookingRequest.getCutOffTime() != null && !bookingRequest.getCutOffTime().isEmpty()) {
       LocalDateTime cutOffTime = Tool.convertToLocalDateTime(bookingRequest.getCutOffTime());
       booking.setCutOffTime(cutOffTime);
     }
@@ -162,7 +162,7 @@ public class OutboundServiceImpl implements OutboundService {
 
     outbound.setGoodsDescription(request.getGoodsDescription());
 
-    if (request.getPackingTime() != null && request.getPackingTime().isEmpty()) {
+    if (request.getPackingTime() != null && !request.getPackingTime().isEmpty()) {
       LocalDateTime packingTime = Tool.convertToLocalDateTime(request.getPackingTime());
       outbound.setPackingTime(packingTime);
     }
@@ -171,7 +171,7 @@ public class OutboundServiceImpl implements OutboundService {
 
     outbound.setPayload(request.getPayload());
 
-    if (request.getUnitOfMeasurement() != null && request.getUnitOfMeasurement().isEmpty()) {
+    if (request.getUnitOfMeasurement() != null && !request.getUnitOfMeasurement().isEmpty()) {
       outbound.setUnitOfMeasurement(EnumUnit.findByName(request.getUnitOfMeasurement()).name());
     }
 
@@ -186,7 +186,7 @@ public class OutboundServiceImpl implements OutboundService {
 
       booking.setUnit(bookingRequest.getUnit());
 
-      if (bookingRequest.getCutOffTime() != null && bookingRequest.getCutOffTime().isEmpty()) {
+      if (bookingRequest.getCutOffTime() != null && !bookingRequest.getCutOffTime().isEmpty()) {
         LocalDateTime cutOffTime = Tool.convertToLocalDateTime(bookingRequest.getCutOffTime());
         booking.setCutOffTime(cutOffTime);
       }
@@ -206,37 +206,37 @@ public class OutboundServiceImpl implements OutboundService {
         .orElseThrow(() -> new NotFoundException("ERROR: Outbound is not found."));
 
     String shippingLineRequest = (String) updates.get("shippingLine");
-    if (shippingLineRequest != null && shippingLineRequest.isEmpty()) {
+    if (shippingLineRequest != null && !shippingLineRequest.isEmpty()) {
       ShippingLine shippingLine = shippingLineRepository.findByCompanyCode(shippingLineRequest)
           .orElseThrow(() -> new NotFoundException("ERROR: Shipping Line is not found."));
       outbound.setShippingLine(shippingLine);
     }
 
     String containerTypeRequest = (String) updates.get("containerType");
-    if (containerTypeRequest != null && containerTypeRequest.isEmpty()) {
+    if (containerTypeRequest != null && !containerTypeRequest.isEmpty()) {
       ContainerType containerType = containerTypeRepository.findByName(containerTypeRequest)
           .orElseThrow(() -> new NotFoundException("ERROR: Container Type is not found."));
       outbound.setContainerType(containerType);
     }
 
     String statusRequest = (String) updates.get("status");
-    if (statusRequest != null && statusRequest.isEmpty()) {
+    if (statusRequest != null && !statusRequest.isEmpty()) {
       outbound.setStatus(EnumSupplyStatus.findByName(statusRequest).name());
     }
 
     String packingTimeRequest = (String) updates.get("packingTime");
-    if (packingTimeRequest != null && packingTimeRequest.isEmpty()) {
+    if (packingTimeRequest != null && !packingTimeRequest.isEmpty()) {
       LocalDateTime packingTime = Tool.convertToLocalDateTime(packingTimeRequest);
       outbound.setPackingTime(packingTime);
     }
 
     String packingStationRequest = (String) updates.get("packingStation");
-    if (packingStationRequest != null && packingStationRequest.isEmpty()) {
+    if (packingStationRequest != null && !packingStationRequest.isEmpty()) {
       outbound.setPackingStation(packingStationRequest);
     }
 
     String goodsDescriptionRequest = (String) updates.get("goodsDescription");
-    if (goodsDescriptionRequest != null && goodsDescriptionRequest.isEmpty()) {
+    if (goodsDescriptionRequest != null && !goodsDescriptionRequest.isEmpty()) {
       outbound.setGoodsDescription(goodsDescriptionRequest);
     }
 
@@ -246,7 +246,7 @@ public class OutboundServiceImpl implements OutboundService {
     }
 
     String unitOfMeasurementRequest = (String) updates.get("unitOfMeasurement");
-    if (unitOfMeasurementRequest != null && unitOfMeasurementRequest.isEmpty()) {
+    if (unitOfMeasurementRequest != null && !unitOfMeasurementRequest.isEmpty()) {
       outbound.setUnitOfMeasurement(unitOfMeasurementRequest);
     }
 

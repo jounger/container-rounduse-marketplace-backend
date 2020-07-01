@@ -40,6 +40,7 @@ public class ShippingLineController {
   @Autowired
   private ShippingLineService shippingLineService;
 
+  @Transactional
   @PostMapping("")
   @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<?> createShippingLine(@Valid @RequestBody ShippingLineRequest request) {

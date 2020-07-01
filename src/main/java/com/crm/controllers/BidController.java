@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import javax.transaction.Transactional;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +40,7 @@ public class BidController {
   @Autowired
   private BidService bidService;
   
+  @Transactional
   @PreAuthorize("hasRole('FORWARDER')")
   @PostMapping("")
   public ResponseEntity<?> createBiddingDocument(@Valid @RequestBody BidRequest request) {
@@ -97,6 +99,7 @@ public class BidController {
     return ResponseEntity.ok(response);
   }
 
+  @Transactional
   @PreAuthorize("hasRole('FORWARDER')")
   @PutMapping("")
   public ResponseEntity<?> updateBid(@Valid @RequestBody BidRequest request) {
@@ -105,6 +108,7 @@ public class BidController {
      return ResponseEntity.ok(bidDto);
   }
 
+  @Transactional
   @PreAuthorize("hasRole('FORWARDER')")
   @RequestMapping(value = "/{id}", method = RequestMethod.PATCH, consumes = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<?> editBid(@PathVariable("id") Long id, @RequestBody Map<String, Object> updates) {
@@ -113,6 +117,7 @@ public class BidController {
     return ResponseEntity.ok(BidDto);
   }
 
+  @Transactional
   @PreAuthorize("hasRole('FORWARDER')")
   @DeleteMapping("/{id}")
   public ResponseEntity<?> removeBid(@PathVariable Long id) {

@@ -84,6 +84,7 @@ public class DriverController {
 
   }
 
+  @Transactional
   @PostMapping("/forwarder/{id}")
   @PreAuthorize("hasRole('FORWARDER')")
   public ResponseEntity<?> createDriver(@PathVariable Long id, @Valid @RequestBody DriverRequest request) {

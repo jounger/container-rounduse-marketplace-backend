@@ -25,10 +25,12 @@ public class BidMapper {
     bidDto.setBidDate(bidDate);
     
     String bidValidityPeriod = Tool.convertLocalDateTimeToString(bid.getBidValidityPeriod());
-    bidDto.setBidValidityPeriod(bidValidityPeriod);
+    bidDto.setBidValidityPeriod(bidValidityPeriod);  
     
-    String dateOfDecision = Tool.convertLocalDateTimeToString(bid.getDateOfDecision());
-    bidDto.setDateOfDecision(dateOfDecision);
+    if(bid.getDateOfDecision() != null) {
+      String dateOfDecision = Tool.convertLocalDateTimeToString(bid.getDateOfDecision());
+      bidDto.setDateOfDecision(dateOfDecision);
+    }
     
     String status = bid.getStatus();
     bidDto.setStatus(status);

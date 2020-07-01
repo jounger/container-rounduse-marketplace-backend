@@ -12,7 +12,7 @@ public class BiddingDocumentRequest {
   private Long id;
 
   //merchant as Merchant.username
-  private String merchant;
+  private String offeree;
 
   private Long outbound;
 

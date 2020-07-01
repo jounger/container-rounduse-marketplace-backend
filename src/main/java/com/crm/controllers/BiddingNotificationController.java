@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import javax.transaction.Transactional;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -97,6 +98,7 @@ public class BiddingNotificationController {
     return ResponseEntity.ok(biddingNotificationDto);
   }
 
+  @Transactional
   @RequestMapping(value = "/{id}", method = RequestMethod.PATCH, consumes = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<?> editBiddingNotification(@PathVariable("id") Long id,
       @RequestBody Map<String, Object> updates) {
@@ -106,6 +108,7 @@ public class BiddingNotificationController {
     return ResponseEntity.ok(biddingNotificationDto);
   }
 
+  @Transactional
   @DeleteMapping("/{id}")
   public ResponseEntity<?> deleteBiddingNotification(@PathVariable Long id) {
     biddingNotificationService.removeBiddingNotification(id);

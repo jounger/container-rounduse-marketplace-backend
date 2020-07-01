@@ -39,6 +39,7 @@ public class ForwarderController {
   @Autowired
   private ForwarderService forwarderService;
 
+  @Transactional
   @PostMapping("")
   public ResponseEntity<?> createForwarder(@Valid @RequestBody ForwarderRequest request) {
     forwarderService.createForwarder(request);

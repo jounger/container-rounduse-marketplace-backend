@@ -47,7 +47,7 @@ public class BiddingDocumentImpl implements BiddingDocumentService {
     BiddingDocument biddingDocument = new BiddingDocument();
 
     Merchant merchant = new Merchant();
-    merchant = merchantRepository.findByUsername(request.getMerchant())
+    merchant = merchantRepository.findByUsername(request.getOfferee())
         .orElseThrow(() -> new NotFoundException("Merchant is not found"));
     biddingDocument.setOfferee(merchant);
 

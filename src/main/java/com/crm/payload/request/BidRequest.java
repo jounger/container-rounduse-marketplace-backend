@@ -16,7 +16,7 @@ public class BidRequest {
   private Long biddingDocument;
 
   //forwarder as Forwarder.username
-  private String fowarder;
+  private String bidder;
 
   //containers as List of Container.id
   private List<Long> containers = new ArrayList<>();

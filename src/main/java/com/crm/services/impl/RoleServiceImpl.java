@@ -1,5 +1,6 @@
 package com.crm.services.impl;
 
+import java.util.HashSet;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,12 +63,15 @@ public class RoleServiceImpl implements RoleService {
   @Override
   public Role updateRole(RoleRequest request) {
     Role role = roleRepository.findById(request.getId()).orElseThrow(() -> new NotFoundException("Role is not found"));
+
+    role.setPermissions(new HashSet<>());
     List<String> permissionsString = request.getPermissions();
     permissionsString.forEach(permission -> {
       Permission rolePermission = permissionRepository.findByName(permission)
           .orElseThrow(() -> new NotFoundException("Permission is not found."));
       role.getPermissions().add(rolePermission);
     });
+    
     role.setName(request.getName());
     roleRepository.save(role);
     return role;

@@ -258,7 +258,7 @@ public class BidServiceImpl implements BidService {
 
     try {
       String bidPriceString = (String) updates.get("bidPrice");
-      if (bidPriceString != null) {
+      if (bidPriceString != null && !bidPriceString.isEmpty()) {
         Double bidPrice = Double.parseDouble(bidPriceString);
         bid.setBidPrice(bidPrice);
       }
@@ -273,7 +273,7 @@ public class BidServiceImpl implements BidService {
      */
 
     String bidValidityPeriodString = (String) updates.get("bidValidityPeriod");
-    if (bidValidityPeriodString != null) {
+    if (bidValidityPeriodString != null && !bidValidityPeriodString.isEmpty()) {
       LocalDateTime bidValidityPeriod = Tool.convertToLocalDateTime(bidValidityPeriodString);
       if (bidValidityPeriod != null) {
         if (bidValidityPeriod.isAfter(LocalDateTime.now().plusDays(1))
@@ -288,7 +288,7 @@ public class BidServiceImpl implements BidService {
     }
 
     String statusString = (String) updates.get("status");
-    if (statusString != null) {
+    if (statusString != null && statusString.isEmpty()) {
       EnumBidStatus status = EnumBidStatus.findByName(statusString);
       bid.setStatus(status.name());
       if (bid.getStatus().equalsIgnoreCase(EnumBidStatus.ACCEPTED.name())

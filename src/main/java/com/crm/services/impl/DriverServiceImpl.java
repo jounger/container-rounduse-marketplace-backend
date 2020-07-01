@@ -153,27 +153,27 @@ public class DriverServiceImpl implements DriverService {
     }
 
     String phone = (String) updates.get("phone");
-    if (phone != null) {
+    if (phone != null && !phone.isEmpty()) {
       driver.setPhone(phone);
     }
 
     String address = (String) updates.get("address");
-    if (address != null) {
+    if (address != null && !address.isEmpty()) {
       driver.setAddress(address);
     }
 
     String fullname = (String) updates.get("fullname");
-    if (fullname != null) {
+    if (fullname != null && fullname.isEmpty()) {
       driver.setFullname(fullname);
     }
 
     String driverLicense = (String) updates.get("driverLicense");
-    if (driverLicense != null) {
+    if (driverLicense != null && driverLicense.isEmpty()) {
       driver.setDriverLicense(driverLicense);
     }
 
     String location = (String) updates.get("location");
-    if (location != null) {
+    if (location != null && !location.isEmpty()) {
       driver.setLocation(location);
     }
 

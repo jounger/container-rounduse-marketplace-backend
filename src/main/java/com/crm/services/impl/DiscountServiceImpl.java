@@ -105,7 +105,7 @@ public class DiscountServiceImpl implements DiscountService {
         .orElseThrow(() -> new NotFoundException("ERROR: Discount is not found."));
 
     String code = (String) updates.get("code");
-    if (code != null) {
+    if (code != null && !code.isEmpty()) {
       if (discountRepository.existsByCode(code)) {
         if (code.equals(discount.getCode())) {
         } else {
@@ -116,12 +116,12 @@ public class DiscountServiceImpl implements DiscountService {
     }
 
     String detail = (String) updates.get("detail");
-    if (detail != null) {
+    if (detail != null && !detail.isEmpty()) {
       discount.setDetail(detail);
     }
 
     String currency = (String) updates.get("currency");
-    if (currency != null) {
+    if (currency != null && !currency.isEmpty()) {
       String currencyName = EnumCurrency.findByName(currency).name();
       if (currencyName != null) {
         discount.setCurrency(currencyName);
@@ -141,7 +141,7 @@ public class DiscountServiceImpl implements DiscountService {
     }
 
     String expiredDateString = (String) updates.get("expiredDate");
-    if (expiredDateString != null) {
+    if (expiredDateString != null && !expiredDateString.isEmpty()) {
       LocalDateTime expiredDate = Tool.convertToLocalDateTime(expiredDateString);
       discount.setExpiredDate(expiredDate);
     }

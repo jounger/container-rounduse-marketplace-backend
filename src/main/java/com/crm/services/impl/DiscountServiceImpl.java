@@ -55,14 +55,14 @@ public class DiscountServiceImpl implements DiscountService {
     Discount discount = new Discount();
     discount.setCode(request.getCode());
     discount.setDetail(request.getDetail());
-    if (request.getCurrency() != null) {
+    if (request.getCurrency() != null && !request.getCurrency().isEmpty()) {
       discount.setCurrency(EnumCurrency.findByName(request.getCurrency()).name());
     } else {
       throw new NotFoundException("ERROR: Currency is not found.");
     }
     discount.setPercent(request.getPercent());
     discount.setMaximumDiscount(request.getMaximumDiscount());
-    if (request.getExpiredDate() != null) {
+    if (request.getExpiredDate() != null && !request.getExpiredDate().isEmpty()) {
       LocalDateTime expiredDate = Tool.convertToLocalDateTime(request.getExpiredDate());
       discount.setExpiredDate(expiredDate);
     }
@@ -84,14 +84,14 @@ public class DiscountServiceImpl implements DiscountService {
     discount.setCode(request.getCode());
 
     discount.setDetail(request.getDetail());
-    if (request.getCurrency() != null) {
+    if (request.getCurrency() != null && !request.getCurrency().isEmpty()) {
       discount.setCurrency(EnumCurrency.findByName(request.getCurrency()).name());
     } else {
       throw new NotFoundException("ERROR: Currency is not found.");
     }
     discount.setPercent(request.getPercent());
     discount.setMaximumDiscount(request.getMaximumDiscount());
-    if (request.getExpiredDate() != null) {
+    if (request.getExpiredDate() != null && !request.getExpiredDate().isEmpty()) {
       LocalDateTime expiredDate = Tool.convertToLocalDateTime(request.getExpiredDate());
       discount.setExpiredDate(expiredDate);
     }
@@ -123,7 +123,7 @@ public class DiscountServiceImpl implements DiscountService {
     String currency = (String) updates.get("currency");
     if (currency != null && !currency.isEmpty()) {
       String currencyName = EnumCurrency.findByName(currency).name();
-      if (currencyName != null) {
+      if (currencyName != null && !currencyName.isEmpty()) {
         discount.setCurrency(currencyName);
       } else {
         throw new NotFoundException("ERROR: Currency is not found.");

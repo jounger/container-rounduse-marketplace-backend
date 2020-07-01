@@ -76,6 +76,7 @@ public class DiscountController {
     return ResponseEntity.ok(discountDto);
   }
 
+  @Transactional
   @PostMapping("")
   @PreAuthorize("hasRole('MODERATOR')")
   public ResponseEntity<?> createDiscount(@Valid @RequestBody DiscountRequest request) {

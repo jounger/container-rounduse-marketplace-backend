@@ -1,5 +1,6 @@
 package com.crm.models;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -50,6 +51,9 @@ public class Notification {
   
   @Column(name = "is_read")
   private Boolean isRead;
+  
+  @Column(name = "send_date")
+  private LocalDateTime sendDate;
 
   @Column(name = "created_at", nullable = false, updatable = false)
   @Temporal(TemporalType.TIMESTAMP)

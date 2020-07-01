@@ -1,8 +1,10 @@
 package com.crm.controllers;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.validation.Valid;
 
@@ -27,6 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.crm.enums.EnumBiddingNotificationType;
 import com.crm.models.BiddingDocument;
 import com.crm.models.BiddingNotification;
+import com.crm.models.Forwarder;
 import com.crm.models.Inbound;
 import com.crm.models.dto.BiddingDocumentDto;
 import com.crm.models.mapper.BiddingDocumentMapper;
@@ -44,50 +47,58 @@ import com.crm.websocket.service.BiddingWebSocketService;
 @RestController
 @RequestMapping("/api/bidding-document")
 public class BiddingDocumentController {
-  
+
   private static final Logger logger = LoggerFactory.getLogger(BiddingDocumentController.class);
 
   @Autowired
   private BiddingDocumentService biddingDocumentService;
-  
+
   @Autowired
   private BiddingNotificationService biddingNotificationService;
 
   @Autowired
   private BiddingWebSocketService biddingWebSocketService;
-  
+
   @Autowired
   private InboundService inboundService;
 
   @PreAuthorize("hasRole('MERCHANT')")
   @PostMapping("")
   public ResponseEntity<?> createBiddingDocument(@Valid @RequestBody BiddingDocumentRequest request) {
-     BiddingDocument biddingDocument = biddingDocumentService.createBiddingDocument(request);
-     BiddingDocumentDto biddingDocumentDto = BiddingDocumentMapper.toBiddingDocumentDto(biddingDocument);
-     // CREATE NOTIFICATION
-     BiddingNotificationRequest notifyRequest = new BiddingNotificationRequest();
-     PaginationRequest paging = new PaginationRequest();
-     paging.setPage(0);
-     paging.setLimit(10);
-     Page<Inbound> inboundsPaging = inboundService.getInboundsByOutbound(biddingDocument.getOutbound().getId(), paging);
-     // TODO: deal with duplicate forwarder
-     List<Inbound> inbounds = inboundsPaging.getContent();
-     List<BiddingNotification> notifications = new ArrayList<>();
-     for(int i = 0; i < inbounds.size(); i++) {
-       notifyRequest.setRecipient(inbounds.get(i).getForwarder().getUsername());
-       notifyRequest.setRelatedResource(biddingDocument.getId());
-       notifyRequest.setMessage("Ban nhan duoc mot HSMT moi");
-       notifyRequest.setType(EnumBiddingNotificationType.ADDED.name());
-       BiddingNotification notification = biddingNotificationService.createBiddingNotification(notifyRequest);
-       notifications.add(notification);
-     }
-     // Asynchronous send notification 
-     notifications.parallelStream().forEach(notification -> {
-       logger.info("notification : {}", notification.getId());
-       biddingWebSocketService.broadcastBiddingNotifyToUser(notification);
-     });
-     // END NOTIFICATION
-     return ResponseEntity.ok(biddingDocumentDto);
+    BiddingDocument biddingDocument = biddingDocumentService.createBiddingDocument(request);
+    BiddingDocumentDto biddingDocumentDto = BiddingDocumentMapper.toBiddingDocumentDto(biddingDocument);
+
+    // CREATE NOTIFICATION
+    BiddingNotificationRequest notifyRequest = new BiddingNotificationRequest();
+    PaginationRequest paging = new PaginationRequest();
+    paging.setPage(0);
+    paging.setLimit(100);
+    Page<Inbound> inboundsPaging = inboundService.getInboundsByOutbound(biddingDocument.getOutbound().getId(), paging);
+    // TODO: deal with duplicate forwarder
+    Set<Forwarder> forwarders = new HashSet<>();
+    List<Inbound> inbounds = inboundsPaging.getContent();
+    List<BiddingNotification> notifications = new ArrayList<>();
+    inbounds.parallelStream().forEach(inbound -> {
+      forwarders.add(inbound.getForwarder());
+    });
+    // Create new message notifications and save to Database
+    for (Forwarder f : forwarders) {
+      notifyRequest.setRecipient(f.getUsername());
+      notifyRequest.setRelatedResource(biddingDocument.getId());
+      notifyRequest.setMessage(
+          String.format("You got a new Bidding Document from %s", biddingDocument.getOfferee().getUsername()));
+      notifyRequest.setType(EnumBiddingNotificationType.ADDED.name());
+      BiddingNotification notification = biddingNotificationService.createBiddingNotification(notifyRequest);
+      notifications.add(notification);
+    }
+    // Asynchronous send notification to forwarders
+    notifications.parallelStream().forEach(notification -> {
+      logger.info("notification : {}", notification.getId());
+      biddingWebSocketService.broadcastBiddingNotifyToUser(notification);
+    });
+    // END NOTIFICATION
+
+    return ResponseEntity.ok(biddingDocumentDto);
   }
 
   @PreAuthorize("hasRole('MERCHANT')")

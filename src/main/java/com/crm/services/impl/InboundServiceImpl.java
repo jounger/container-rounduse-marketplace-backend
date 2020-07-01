@@ -189,6 +189,9 @@ public class InboundServiceImpl implements InboundService {
       String driverUserName = containersRequest.get(i).getDriver();
       Driver driver = driverRepository.findByUsername(driverUserName)
           .orElseThrow(() -> new NotFoundException("ERROR: Driver is not found."));
+      if (!driver.getForwarder().getId().equals(id)) {
+        throw new NotFoundException("ERROR: The forwarder does not own this driver.");
+      }
       container.setBillOfLading(billOfLading);
 
       List<Container> containers = containerRepository.findByDriver(driver.getId());
@@ -309,6 +312,9 @@ public class InboundServiceImpl implements InboundService {
         String driverUserName = containersRequest.get(i).getDriver();
         Driver driver = driverRepository.findByUsername(driverUserName)
             .orElseThrow(() -> new NotFoundException("ERROR: Driver is not found."));
+        if (!driver.getForwarder().getId().equals(inbound.getForwarder().getId())) {
+          throw new NotFoundException("ERROR: The forwarder does not own this driver.");
+        }
         container.setBillOfLading(billOfLading);
 
         List<Container> containers = containerRepository.findByDriver(driver.getId());

@@ -52,7 +52,7 @@ public class BookingServiceImpl implements BookingService {
         .orElseThrow(() -> new NotFoundException("ERROR: Booking is not found."));
 
     String bookingNumber = request.getBookingNumber();
-    if (bookingNumber != null) {
+    if (bookingNumber != null && bookingNumber.isEmpty()) {
       if (bookingRepository.existsByBookingNumber(bookingNumber)) {
         if (bookingNumber.equals(booking.getBookingNumber())) {
         } else {
@@ -68,7 +68,7 @@ public class BookingServiceImpl implements BookingService {
 
     booking.setUnit(request.getUnit());
 
-    if (request.getCutOffTime() != null) {
+    if (request.getCutOffTime() != null && request.getCutOffTime().isEmpty()) {
       LocalDateTime cutOffTime = Tool.convertToLocalDateTime(request.getCutOffTime());
       booking.setCutOffTime(cutOffTime);
     }
@@ -86,14 +86,14 @@ public class BookingServiceImpl implements BookingService {
         .orElseThrow(() -> new NotFoundException("ERROR: Booking is not found."));
 
     String portOfLoadingRequest = (String) updates.get("portOfLoading");
-    if (portOfLoadingRequest != null) {
+    if (portOfLoadingRequest != null && portOfLoadingRequest.isEmpty()) {
       Port portOfLoading = portRepository.findByNameCode(portOfLoadingRequest)
           .orElseThrow(() -> new NotFoundException("ERROR: PortOfLoading is not found."));
       booking.setPortOfLoading(portOfLoading);
     }
 
     String bookingNumberRequest = (String) updates.get("bookingNumber");
-    if (bookingNumberRequest != null) {
+    if (bookingNumberRequest != null && bookingNumberRequest.isEmpty()) {
       if (bookingRepository.existsByBookingNumber(bookingNumberRequest)) {
         if (bookingNumberRequest.equals(booking.getBookingNumber())) {
         } else {
@@ -109,7 +109,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     String cutOffTimeRequest = (String) updates.get("cutOffTime");
-    if (cutOffTimeRequest != null) {
+    if (cutOffTimeRequest != null && cutOffTimeRequest.isEmpty()) {
       LocalDateTime cutOffTime = Tool.convertToLocalDateTime(cutOffTimeRequest);
       booking.setCutOffTime(cutOffTime);
     }

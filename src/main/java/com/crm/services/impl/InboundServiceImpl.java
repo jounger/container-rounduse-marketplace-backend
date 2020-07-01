@@ -124,7 +124,7 @@ public class InboundServiceImpl implements InboundService {
         .orElseThrow(() -> new NotFoundException("ERROR: ContainerType is not found."));
     inbound.setContainerType(containerType);
 
-    if (request.getEmptyTime() != null) {
+    if (request.getEmptyTime() != null && request.getEmptyTime().isEmpty()) {
       LocalDateTime emptyTime = Tool.convertToLocalDateTime(request.getEmptyTime());
       inbound.setEmptyTime(emptyTime);
     }
@@ -134,7 +134,7 @@ public class InboundServiceImpl implements InboundService {
     BillOfLading billOfLading = new BillOfLading();
     BillOfLadingRequest billOfLadingRequest = (BillOfLadingRequest) request.getBillOfLading();
     String billOfLadingNumber = billOfLadingRequest.getBillOfLadingNumber();
-    if (billOfLadingNumber != null) {
+    if (billOfLadingNumber != null && billOfLadingNumber.isEmpty()) {
       if (billOfLadingRepository.existsByBillOfLadingNumber(billOfLadingNumber)) {
         throw new DuplicateRecordException("Error: BillOfLading has been existed");
       }
@@ -161,10 +161,6 @@ public class InboundServiceImpl implements InboundService {
       throw new InternalException("Error: pickupTime must before freeTime");
     }
 
-    LocalDateTime currentDay = LocalDateTime.now();
-    if (pickupTime.isBefore(currentDay)) {
-      throw new InternalException("Error: pickupTime must create before present");
-    }
     inbound.setPickupTime(pickupTime);
     billOfLading.setFreeTime(freeTime);
 
@@ -237,7 +233,7 @@ public class InboundServiceImpl implements InboundService {
         .orElseThrow(() -> new NotFoundException("ERROR: Type is not found."));
     inbound.setContainerType(containerType);
 
-    if (request.getEmptyTime() != null) {
+    if (request.getEmptyTime() != null && request.getEmptyTime().isEmpty()) {
       LocalDateTime emptyTime = Tool.convertToLocalDateTime(request.getEmptyTime());
       inbound.setEmptyTime(emptyTime);
     }
@@ -281,10 +277,7 @@ public class InboundServiceImpl implements InboundService {
       if (pickupTime.isAfter(freeTime)) {
         throw new InternalException("Error: pickupTime must before freeTime");
       }
-      LocalDateTime currentDay = LocalDateTime.now();
-      if (pickupTime.isBefore(currentDay)) {
-        throw new InternalException("Error: pickupTime must create before present");
-      }
+
       inbound.setPickupTime(pickupTime);
       billOfLading.setFreeTime(freeTime);
 
@@ -357,26 +350,26 @@ public class InboundServiceImpl implements InboundService {
         .orElseThrow(() -> new NotFoundException("ERROR: Inbound is not found."));
 
     String shippingLineRequest = (String) updates.get("shippingLine");
-    if (shippingLineRequest != null) {
+    if (shippingLineRequest != null && shippingLineRequest.isEmpty()) {
       ShippingLine shippingLine = shippingLineRepository.findByCompanyCode(shippingLineRequest)
           .orElseThrow(() -> new NotFoundException("ERROR: Shipping Line is not found."));
       inbound.setShippingLine(shippingLine);
     }
 
     String containerTypeRequest = (String) updates.get("containerType");
-    if (containerTypeRequest != null) {
+    if (containerTypeRequest != null && containerTypeRequest.isEmpty()) {
       ContainerType containerType = containerTypeRepository.findByName(containerTypeRequest)
           .orElseThrow(() -> new NotFoundException("ERROR: Container Type is not found."));
       inbound.setContainerType(containerType);
     }
 
     String returnStationRequest = (String) updates.get("returnStation");
-    if (returnStationRequest != null) {
+    if (returnStationRequest != null && returnStationRequest.isEmpty()) {
       inbound.setReturnStation(returnStationRequest);
     }
 
     String pickupTimeRequest = (String) updates.get("pickupTime");
-    if (pickupTimeRequest != null) {
+    if (pickupTimeRequest != null && pickupTimeRequest.isEmpty()) {
       LocalDateTime pickupTime = Tool.convertToLocalDateTime(pickupTimeRequest);
 
       Set<Container> containers = inbound.getBillOfLading().getContainers();
@@ -417,10 +410,7 @@ public class InboundServiceImpl implements InboundService {
           }
         });
       });
-      LocalDateTime currentDay = LocalDateTime.now();
-      if (pickupTime.isBefore(currentDay)) {
-        throw new InternalException("Error: pickupTime must create before present");
-      }
+
       if (inbound.getBillOfLading().getFreeTime().isAfter(pickupTime)) {
         inbound.setPickupTime(pickupTime);
       } else {
@@ -429,7 +419,7 @@ public class InboundServiceImpl implements InboundService {
     }
 
     String emptyTimeRequest = (String) updates.get("emptyTime");
-    if (emptyTimeRequest != null) {
+    if (emptyTimeRequest != null && emptyTimeRequest.isEmpty()) {
       LocalDateTime emptyTime = Tool.convertToLocalDateTime(emptyTimeRequest);
       inbound.setEmptyTime(emptyTime);
     }

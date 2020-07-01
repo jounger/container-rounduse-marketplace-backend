@@ -186,7 +186,7 @@ public class ContainerServiceImpl implements ContainerService {
       }
     });
 
-    if (request.getStatus() != null) {
+    if (request.getStatus() != null && request.getStatus().isEmpty()) {
       container.setStatus(EnumSupplyStatus.findByName(request.getStatus()).name());
     }
 
@@ -220,33 +220,33 @@ public class ContainerServiceImpl implements ContainerService {
         .orElseThrow(() -> new NotFoundException("ERROR: Container is not found."));
 
     String containerNumber = (String) updates.get("containerNumber");
-    if (containerNumber != null) {
+    if (containerNumber != null && containerNumber.isEmpty()) {
       container.setContainerNumber(containerNumber);
     }
 
     String driverRequest = (String) updates.get("driver");
-    if (driverRequest != null) {
+    if (driverRequest != null && driverRequest.isEmpty()) {
       Driver driver = driverRepository.findByUsername(driverRequest)
           .orElseThrow(() -> new NotFoundException("ERROR: Driver is not found."));
       container.setDriver(driver);
     }
     String trailer = (String) updates.get("trailer");
-    if (trailer != null) {
+    if (trailer != null && trailer.isEmpty()) {
       container.setTrailer(trailer);
     }
 
     String tractor = (String) updates.get("tractor");
-    if (tractor != null) {
+    if (tractor != null && tractor.isEmpty()) {
       container.setTractor(tractor);
     }
 
     String licensePlate = (String) updates.get("licensePlate");
-    if (licensePlate != null) {
+    if (licensePlate != null && licensePlate.isEmpty()) {
       container.setLicensePlate(licensePlate);
     }
 
     String status = (String) updates.get("status");
-    if (status != null) {
+    if (status != null && status.isEmpty()) {
       container.setStatus(status);
     }
 

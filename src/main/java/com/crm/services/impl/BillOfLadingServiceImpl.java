@@ -63,7 +63,7 @@ public class BillOfLadingServiceImpl implements BillOfLaingService {
     billOfLading.setPortOfDelivery(port);
 
     String billOfLadingNumber = request.getBillOfLadingNumber();
-    if (billOfLadingNumber != null) {
+    if (billOfLadingNumber != null && billOfLadingNumber.isEmpty()) {
       if (billOfLadingRepository.existsByBillOfLadingNumber(billOfLadingNumber)) {
         if (billOfLadingNumber.equals(billOfLading.getBillOfLadingNumber())) {
         } else {
@@ -73,7 +73,7 @@ public class BillOfLadingServiceImpl implements BillOfLaingService {
       billOfLading.setBillOfLadingNumber(billOfLadingNumber);
     }
 
-    if (request.getFreeTime() != null) {
+    if (request.getFreeTime() != null && request.getFreeTime().isEmpty()) {
       LocalDateTime freeTime = Tool.convertToLocalDateTime(request.getFreeTime());
 
       Set<Container> containers = billOfLading.getContainers();
@@ -132,14 +132,14 @@ public class BillOfLadingServiceImpl implements BillOfLaingService {
         .orElseThrow(() -> new NotFoundException("ERROR: BillOfLading is not found."));
 
     String portOfDelivery = (String) updates.get("portOfDelivery");
-    if (portOfDelivery != null) {
+    if (portOfDelivery != null && portOfDelivery.isEmpty()) {
       Port port = portRepository.findByNameCode(portOfDelivery)
           .orElseThrow(() -> new NotFoundException("ERROR: Port is not found."));
       billOfLading.setPortOfDelivery(port);
     }
 
     String billOfLadingNumber = (String) updates.get("billOfLadingNumber");
-    if (billOfLadingNumber != null) {
+    if (billOfLadingNumber != null && billOfLadingNumber.isEmpty()) {
       if (billOfLadingRepository.existsByBillOfLadingNumber(billOfLadingNumber)) {
         if (billOfLadingNumber.equals(billOfLading.getBillOfLadingNumber())) {
         } else {
@@ -150,7 +150,7 @@ public class BillOfLadingServiceImpl implements BillOfLaingService {
     }
 
     String freeTimeReq = (String) updates.get("freeTime");
-    if (freeTimeReq != null) {
+    if (freeTimeReq != null && freeTimeReq.isEmpty()) {
 
       LocalDateTime freeTime = Tool.convertToLocalDateTime(freeTimeReq);
 

@@ -103,6 +103,9 @@ public class ContainerServiceImpl implements ContainerService {
     String driverUserName = request.getDriver();
     Driver driver = driverRepository.findByUsername(driverUserName)
         .orElseThrow(() -> new NotFoundException("ERROR: Driver is not found."));
+    if (!driver.getForwarder().getId().equals(billOfLading.getInbound().getForwarder().getId())) {
+      throw new NotFoundException("ERROR: The forwarder does not own this driver.");
+    }
 
     List<Container> listContainer = containerRepository.findByDriver(driver.getId());
     listContainer.forEach(item -> {
@@ -173,6 +176,9 @@ public class ContainerServiceImpl implements ContainerService {
     String driverUserName = request.getDriver();
     Driver driver = driverRepository.findByUsername(driverUserName)
         .orElseThrow(() -> new NotFoundException("ERROR: Driver is not found."));
+    if (!driver.getForwarder().getId().equals(billOfLading.getInbound().getForwarder().getId())) {
+      throw new NotFoundException("ERROR: The forwarder does not own this driver.");
+    }
 
     List<Container> listContainer = containerRepository.findByDriver(driver.getId());
     listContainer.forEach(item -> {
@@ -219,6 +225,8 @@ public class ContainerServiceImpl implements ContainerService {
     Container container = containerRepository.findById(id)
         .orElseThrow(() -> new NotFoundException("ERROR: Container is not found."));
 
+    BillOfLading billOfLading = (BillOfLading) container.getBillOfLading();
+
     String containerNumber = (String) updates.get("containerNumber");
     if (containerNumber != null && !containerNumber.isEmpty()) {
       container.setContainerNumber(containerNumber);
@@ -228,6 +236,22 @@ public class ContainerServiceImpl implements ContainerService {
     if (driverRequest != null && !driverRequest.isEmpty()) {
       Driver driver = driverRepository.findByUsername(driverRequest)
           .orElseThrow(() -> new NotFoundException("ERROR: Driver is not found."));
+      if (!driver.getForwarder().getId().equals(billOfLading.getInbound().getForwarder().getId())) {
+        throw new NotFoundException("ERROR: The forwarder does not own this driver.");
+      }
+
+      List<Container> listContainer = containerRepository.findByDriver(driver.getId());
+      listContainer.forEach(item -> {
+        if (item.getBillOfLading().getFreeTime().isBefore(billOfLading.getInbound().getPickupTime())
+            || item.getBillOfLading().getInbound().getPickupTime().isAfter(billOfLading.getFreeTime())) {
+        } else {
+          if (item.getBillOfLading().getId().equals(billOfLading.getId())) {
+          } else {
+            throw new InternalException(String.format("Driver %s has been busy", item.getDriver().getUsername()));
+          }
+        }
+      });
+
       container.setDriver(driver);
     }
     String trailer = (String) updates.get("trailer");
@@ -250,11 +274,10 @@ public class ContainerServiceImpl implements ContainerService {
       container.setStatus(status);
     }
 
-    BillOfLading billOfLading = (BillOfLading) container.getBillOfLading();
-
     Set<Container> containers = billOfLading.getContainers();
     containers.forEach(item -> {
-      if (item.getContainerNumber().equals(container.getContainerNumber()) || item.getDriver().getUsername().equals(container.getDriver().getUsername())
+      if (item.getContainerNumber().equals(container.getContainerNumber())
+          || item.getDriver().getUsername().equals(container.getDriver().getUsername())
           || item.getLicensePlate().equals(container.getLicensePlate())) {
         if (item.getId().equals(id)) {
 
@@ -281,21 +304,6 @@ public class ContainerServiceImpl implements ContainerService {
           }
         }
       });
-    });
-
-    Driver driver = driverRepository.findByUsername(driverRequest)
-        .orElseThrow(() -> new NotFoundException("ERROR: Driver is not found."));
-
-    List<Container> listContainer = containerRepository.findByDriver(driver.getId());
-    listContainer.forEach(item -> {
-      if (item.getBillOfLading().getFreeTime().isBefore(billOfLading.getInbound().getPickupTime())
-          || item.getBillOfLading().getInbound().getPickupTime().isAfter(billOfLading.getFreeTime())) {
-      } else {
-        if (item.getBillOfLading().getId().equals(billOfLading.getId())) {
-        } else {
-          throw new InternalException(String.format("Driver %s has been busy", item.getDriver().getUsername()));
-        }
-      }
     });
 
     containerRepository.save(container);

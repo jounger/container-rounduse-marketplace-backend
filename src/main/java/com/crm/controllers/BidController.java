@@ -14,6 +14,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -37,6 +38,7 @@ import com.crm.payload.request.BiddingNotificationRequest;
 import com.crm.payload.request.PaginationRequest;
 import com.crm.payload.response.MessageResponse;
 import com.crm.payload.response.PaginationResponse;
+import com.crm.security.services.UserDetailsImpl;
 import com.crm.services.BidService;
 import com.crm.services.BiddingNotificationService;
 import com.crm.websocket.service.BiddingWebSocketService;
@@ -59,10 +61,13 @@ public class BidController {
 
   @Transactional
   @PreAuthorize("hasRole('FORWARDER')")
-  @PostMapping("")
-  public ResponseEntity<?> createBid(@Valid @RequestBody BidRequest request) {
-
-    Bid bid = bidService.createBid(request);
+  @PostMapping("/bidding-document/{id}")
+  public ResponseEntity<?> createBid(@PathVariable Long bidDocid, @Valid @RequestBody BidRequest request) {
+    
+    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    Long id = userDetails.getId();
+    
+    Bid bid = bidService.createBid(bidDocid, id, request);
     BidDto bidDto = BidMapper.toBidDto(bid);
 
     // CREATE NOTIFICATION

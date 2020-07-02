@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import com.crm.common.Tool;
 import com.crm.enums.EnumBidStatus;
+import com.crm.enums.EnumCombinedStatus;
 import com.crm.enums.EnumSupplyStatus;
 import com.crm.exception.DuplicateRecordException;
 import com.crm.exception.InternalException;
@@ -21,6 +22,7 @@ import com.crm.exception.NotFoundException;
 import com.crm.models.Bid;
 import com.crm.models.BiddingDocument;
 import com.crm.models.Booking;
+import com.crm.models.Combined;
 import com.crm.models.Container;
 import com.crm.models.Forwarder;
 import com.crm.models.Outbound;
@@ -28,6 +30,7 @@ import com.crm.payload.request.BidRequest;
 import com.crm.payload.request.PaginationRequest;
 import com.crm.repository.BidRepository;
 import com.crm.repository.BiddingDocumentRepository;
+import com.crm.repository.CombinedRepository;
 import com.crm.repository.ContainerRepository;
 import com.crm.repository.ForwarderRepository;
 import com.crm.services.BidService;
@@ -47,15 +50,18 @@ public class BidServiceImpl implements BidService {
   @Autowired
   private ContainerRepository containerRepository;
 
+  @Autowired
+  private CombinedRepository combinedRepository;
+  
   @Override
-  public Bid createBid(BidRequest request) {
+  public Bid createBid(Long bidDocId, Long id, BidRequest request) {
     Bid bid = new Bid();
 
-    BiddingDocument biddingDocument = biddingDocumentRepository.findById(request.getBiddingDocument())
+    BiddingDocument biddingDocument = biddingDocumentRepository.findById(bidDocId)
         .orElseThrow(() -> new NotFoundException("Bidding document is not found."));
     bid.setBiddingDocument(biddingDocument);
 
-    Forwarder bidder = forwarderRepository.findByUsername(request.getBidder())
+    Forwarder bidder = forwarderRepository.findById(id)
         .orElseThrow(() -> new NotFoundException("Forwarder is not found."));
     bid.setBidder(bidder);
 
@@ -145,16 +151,8 @@ public class BidServiceImpl implements BidService {
   @Override
   public Bid updateBid(BidRequest request) {
     Bid bid = bidRepository.findById(request.getId()).orElseThrow(() -> new NotFoundException("Bid is not found."));
-
-    Set<Container> oldContainers = bid.getContainers();
-    oldContainers.forEach(container -> {
-      container.setStatus(EnumSupplyStatus.CREATED.name());
-      containerRepository.save(container);
-    });
-
-    BiddingDocument biddingDocument = biddingDocumentRepository.findById(request.getBiddingDocument())
-        .orElseThrow(() -> new NotFoundException("Bidding document is not found."));
-    bid.setBiddingDocument(biddingDocument);
+    
+    BiddingDocument biddingDocument = bid.getBiddingDocument();
 
     Forwarder bidder = forwarderRepository.findByUsername(request.getBidder())
         .orElseThrow(() -> new NotFoundException("Forwarder is not found."));
@@ -166,6 +164,12 @@ public class BidServiceImpl implements BidService {
     if (containersId.size() > booking.getUnit()) {
       throw new InternalException("Number of containers is more than needed.");
     }
+    Set<Container> oldContainers = bid.getContainers();
+    oldContainers.forEach(container -> {
+      container.setStatus(EnumSupplyStatus.CREATED.name());
+      containerRepository.save(container);
+    });
+    
     List<Container> suitableContainers = containerRepository.findByOutbound(outbound.getShippingLine().getCompanyCode(),
         outbound.getContainerType().getName(),
         Arrays.asList(EnumSupplyStatus.CREATED.name(), EnumSupplyStatus.PUBLISHED.name(),
@@ -224,13 +228,8 @@ public class BidServiceImpl implements BidService {
   @Override
   public Bid editBid(Long id, Map<String, Object> updates) {
     Bid bid = bidRepository.findById(id).orElseThrow(() -> new NotFoundException("Bid is not found."));
-
     Set<Container> oldContainers = bid.getContainers();
-    oldContainers.forEach(container -> {
-      container.setStatus(EnumSupplyStatus.CREATED.name());
-      containerRepository.save(container);
-    });
-
+    
     BiddingDocument biddingDocument = bid.getBiddingDocument();
 
     @SuppressWarnings("unchecked")
@@ -241,6 +240,11 @@ public class BidServiceImpl implements BidService {
       if (containersId.size() > booking.getUnit()) {
         throw new InternalException("Number of containers is more than needed.");
       }
+      
+      oldContainers.forEach(container -> {
+        container.setStatus(EnumSupplyStatus.CREATED.name());
+        containerRepository.save(container);
+      });
       List<Container> suitableContainers = containerRepository.findByOutbound(
           outbound.getShippingLine().getCompanyCode(), outbound.getContainerType().getName(),
           Arrays.asList(EnumSupplyStatus.CREATED.name(), EnumSupplyStatus.PUBLISHED.name(),
@@ -252,6 +256,7 @@ public class BidServiceImpl implements BidService {
         if (suitableContainers.contains(container)) {
           container.setStatus(EnumSupplyStatus.BIDDING.name());
           bid.getContainers().add(container);
+          containerRepository.save(container);
         } else {
           throw new NotFoundException("Container is not suitable.");
         }
@@ -289,15 +294,38 @@ public class BidServiceImpl implements BidService {
         bid.setBidValidityPeriod(LocalDateTime.now().plusDays(1));
       }
     }
-
+    
     String statusString = (String) updates.get("status");
-    if (statusString != null && statusString.isEmpty()) {
+    if (statusString != null && !statusString.isEmpty()) {
       EnumBidStatus status = EnumBidStatus.findByName(statusString);
       bid.setStatus(status.name());
-      if (bid.getStatus().equalsIgnoreCase(EnumBidStatus.ACCEPTED.name())
-          || bid.getStatus().equalsIgnoreCase(EnumBidStatus.REJECTED.name())) {
+      
+      if (bid.getStatus().equalsIgnoreCase(EnumBidStatus.REJECTED.name())) {
         bid.setDateOfDecision(LocalDateTime.now());
+        Set<Container> containers = bid.getContainers();
+        containers.forEach(container -> {
+          container.setStatus(EnumSupplyStatus.CREATED.name());
+          containerRepository.save(container);
+        });
       }
+      
+      if (bid.getStatus().equalsIgnoreCase(EnumBidStatus.ACCEPTED.name())) {
+        int combinedContainer = containerRepository.getCombinedContainersByBiddingDocument(biddingDocument.getId());
+        if(booking.getUnit() < combinedContainer + bid.getContainers().size()) {
+          throw new InternalException("Number of containers is more than needed.");
+        }
+        bid.setDateOfDecision(LocalDateTime.now());
+        Set<Container> containers = bid.getContainers();
+        containers.forEach(container -> {
+          container.setStatus(EnumSupplyStatus.COMBINED.name());
+          containerRepository.save(container);
+        });
+        Combined combined = new Combined();
+        combined.setBiddingDocument(biddingDocument);
+        combined.setStatus(EnumCombinedStatus.INFO_RECEIVED.name());
+        combinedRepository.save(combined);
+      }
+      
       if (bid.getStatus().equalsIgnoreCase(EnumBidStatus.CANCELED.name())
           || bid.getStatus().equalsIgnoreCase(EnumBidStatus.REJECTED.name())
           || bid.getStatus().equalsIgnoreCase(EnumBidStatus.EXPIRED.name())) {
@@ -317,8 +345,8 @@ public class BidServiceImpl implements BidService {
   public void removeBid(Long id) {
     Bid bid = bidRepository.findById(id).orElseThrow(() -> new NotFoundException("Bid is not found."));
     if (!bid.getStatus().equalsIgnoreCase(EnumBidStatus.ACCEPTED.name())) {
-      Set<Container> oldContainers = bid.getContainers();
-      oldContainers.forEach(container -> {
+      Set<Container> containers = bid.getContainers();
+      containers.forEach(container -> {
         container.setStatus(EnumSupplyStatus.CREATED.name());
         containerRepository.save(container);
       });

@@ -11,4 +11,6 @@ import com.crm.models.Forwarder;
 public interface ForwarderRepository extends JpaRepository<Forwarder, Long>{
 
 	Optional<Forwarder> findByUsername(String username);
+	
+	boolean existsByUsername(String username);
 }

@@ -237,24 +237,4 @@ public class BiddingDocumentImpl implements BiddingDocumentService {
     biddingDocumentRepository.deleteById(id);
   }
 
-  @Override
-  public Page<BiddingDocument> getBiddingDocumentsByForwarder(Long id, PaginationRequest request) {
-    Page<BiddingDocument> biddingDocuments = null;
-    if (forwarderRepository.existsById(id)) {
-      biddingDocuments = biddingDocumentRepository.findBiddingDocumentByForwarder(id,
-          PageRequest.of(request.getPage(), request.getLimit(), Sort.by("id").descending()));
-    } else {
-      throw new NotFoundException("Merchant is not found.");
-    }
-    
-    List<BiddingDocument> bdList = biddingDocuments.getContent();
-    bdList.parallelStream().forEach(bd -> {
-      Bid result = bd.getBids().stream().filter((bid) -> bid.getBidder().getId() == id).findAny()
-          .orElseThrow(() -> new NotFoundException("Bidder is not found."));
-      bd.setBids(Arrays.asList(result));
-    });
-    
-    return biddingDocuments;
-  }
-
 }

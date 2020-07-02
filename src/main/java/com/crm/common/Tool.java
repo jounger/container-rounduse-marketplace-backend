@@ -17,5 +17,17 @@ public class Tool {
     return dateTime;
 
   }
+  
+  /*
+   * 
+   */
+  public static boolean isBlank(String string) {
+    string = string.trim();
+    if(string.isEmpty()) {
+      return true;
+    }else {
+      return false;
+    }
+  }
 
 }

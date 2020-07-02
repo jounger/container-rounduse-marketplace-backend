@@ -110,7 +110,8 @@ public class BiddingNotificationServiceImpl implements BiddingNotificationServic
     } else {
       throw new NotFoundException("Is Read is not found.");
     }
-
+    
+    biddingNotificationRepository.save(biddingNotification);
     return biddingNotification;
   }
 

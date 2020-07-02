@@ -123,6 +123,27 @@ public class BiddingDocumentController {
 
     return ResponseEntity.ok(response);
   }
+  
+  @PreAuthorize("hasRole('FORWARDER')")
+  @GetMapping("/forwarder/{id}")
+  public ResponseEntity<?> getBiddingDocumentsByForwarder(@PathVariable Long id, @Valid PaginationRequest request) {
+
+    Page<BiddingDocument> pages = biddingDocumentService.getBiddingDocumentsByForwarder(id, request);
+
+    PaginationResponse<BiddingDocumentDto> response = new PaginationResponse<>();
+    response.setPageNumber(request.getPage());
+    response.setPageSize(request.getLimit());
+    response.setTotalElements(pages.getTotalElements());
+    response.setTotalPages(pages.getTotalPages());
+
+    List<BiddingDocument> biddingDocuments = pages.getContent();
+    List<BiddingDocumentDto> biddingDocumentsDto = new ArrayList<>();
+    biddingDocuments.forEach(
+        biddingDocument -> biddingDocumentsDto.add(BiddingDocumentMapper.toBiddingDocumentDto(biddingDocument)));
+    response.setContents(biddingDocumentsDto);
+
+    return ResponseEntity.ok(response);
+  }
 
   @PreAuthorize("hasRole('MERCHANT') or hasRole('FORWARDER')")
   @GetMapping("/{id}")

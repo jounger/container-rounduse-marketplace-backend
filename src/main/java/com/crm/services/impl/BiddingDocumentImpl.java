@@ -1,6 +1,8 @@
 package com.crm.services.impl;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +17,7 @@ import com.crm.enums.EnumSupplyStatus;
 import com.crm.exception.DuplicateRecordException;
 import com.crm.exception.InternalException;
 import com.crm.exception.NotFoundException;
+import com.crm.models.Bid;
 import com.crm.models.BiddingDocument;
 import com.crm.models.Discount;
 import com.crm.models.Merchant;
@@ -23,6 +26,7 @@ import com.crm.payload.request.BiddingDocumentRequest;
 import com.crm.payload.request.PaginationRequest;
 import com.crm.repository.BiddingDocumentRepository;
 import com.crm.repository.DiscountRepository;
+import com.crm.repository.ForwarderRepository;
 import com.crm.repository.MerchantRepository;
 import com.crm.repository.OutboundRepository;
 import com.crm.services.BiddingDocumentService;
@@ -35,6 +39,9 @@ public class BiddingDocumentImpl implements BiddingDocumentService {
 
   @Autowired
   private MerchantRepository merchantRepository;
+
+  @Autowired
+  private ForwarderRepository forwarderRepository;
 
   @Autowired
   private OutboundRepository outboundRepository;
@@ -119,6 +126,26 @@ public class BiddingDocumentImpl implements BiddingDocumentService {
   }
 
   @Override
+  public Page<BiddingDocument> getBiddingDocumentsByForwarder(Long id, PaginationRequest request) {
+    Page<BiddingDocument> biddingDocuments = null;
+    if (forwarderRepository.existsById(id)) {
+      biddingDocuments = biddingDocumentRepository.findBiddingDocumentByForwarder(id,
+          PageRequest.of(request.getPage(), request.getLimit(), Sort.by("id").descending()));
+    } else {
+      throw new NotFoundException("Merchant is not found.");
+    }
+    
+    List<BiddingDocument> bdList = biddingDocuments.getContent();
+    bdList.parallelStream().forEach(bd -> {
+      Bid result = bd.getBids().stream().filter((bid) -> bid.getBidder().getId() == id).findAny()
+          .orElseThrow(() -> new NotFoundException("Bidder is not found."));
+      bd.setBids(Arrays.asList(result));
+    });
+    
+    return biddingDocuments;
+  }
+
+  @Override
   public BiddingDocument updateBiddingDocument(BiddingDocumentRequest request) {
     BiddingDocument biddingDocument = biddingDocumentRepository.findById(request.getId())
         .orElseThrow(() -> new NotFoundException("Bidding document is not found."));
@@ -150,19 +177,19 @@ public class BiddingDocumentImpl implements BiddingDocumentService {
         .orElseThrow(() -> new NotFoundException("Bidding document is not found."));
 
     String bidOpening = (String) updates.get("bidOpening");
-    if (bidOpening != null) {
+    if (bidOpening != null && !bidOpening.isEmpty()) {
       LocalDateTime bidOpeningTime = Tool.convertToLocalDateTime(bidOpening);
       biddingDocument.setBidOpening(bidOpeningTime);
     }
 
     String bidClosing = (String) updates.get("bidClosing");
-    if (bidClosing != null) {
+    if (bidClosing != null && !bidClosing.isEmpty()) {
       LocalDateTime bidClosingTime = Tool.convertToLocalDateTime(bidClosing);
       biddingDocument.setBidClosing(bidClosingTime);
     }
 
     String currency = (String) updates.get("currentOfPayment");
-    if (currency != null) {
+    if (currency != null && !currency.isEmpty()) {
       EnumCurrency currencyOfPayment = EnumCurrency.findByName(currency);
       if (currencyOfPayment == null) {
         currencyOfPayment = EnumCurrency.VND;
@@ -174,19 +201,19 @@ public class BiddingDocumentImpl implements BiddingDocumentService {
 
     try {
       String packagePriceString = (String) updates.get("bidPackagePrice");
-      if (packagePriceString != null) {
+      if (packagePriceString != null && !packagePriceString.isEmpty()) {
         Double bidPackagePrice = Double.parseDouble(packagePriceString);
         biddingDocument.setBidPackagePrice(bidPackagePrice);
       }
 
       String floorPriceString = (String) updates.get("bidFloorPrice");
-      if (floorPriceString != null) {
+      if (floorPriceString != null && !floorPriceString.isEmpty()) {
         Double bidFloorPrice = Double.parseDouble(floorPriceString);
         biddingDocument.setBidFloorPrice(bidFloorPrice);
       }
 
       String priceLeadershipString = (String) updates.get("priceLeadership");
-      if (priceLeadershipString != null) {
+      if (priceLeadershipString != null && !priceLeadershipString.isEmpty()) {
         Double priceLeadership = Double.parseDouble(priceLeadershipString);
         biddingDocument.setPriceLeadership(priceLeadership);
       }
@@ -208,6 +235,26 @@ public class BiddingDocumentImpl implements BiddingDocumentService {
       throw new InternalException("Bidding document is in a transaction.");
     }
     biddingDocumentRepository.deleteById(id);
+  }
+
+  @Override
+  public Page<BiddingDocument> getBiddingDocumentsByForwarder(Long id, PaginationRequest request) {
+    Page<BiddingDocument> biddingDocuments = null;
+    if (forwarderRepository.existsById(id)) {
+      biddingDocuments = biddingDocumentRepository.findBiddingDocumentByForwarder(id,
+          PageRequest.of(request.getPage(), request.getLimit(), Sort.by("id").descending()));
+    } else {
+      throw new NotFoundException("Merchant is not found.");
+    }
+    
+    List<BiddingDocument> bdList = biddingDocuments.getContent();
+    bdList.parallelStream().forEach(bd -> {
+      Bid result = bd.getBids().stream().filter((bid) -> bid.getBidder().getId() == id).findAny()
+          .orElseThrow(() -> new NotFoundException("Bidder is not found."));
+      bd.setBids(Arrays.asList(result));
+    });
+    
+    return biddingDocuments;
   }
 
 }

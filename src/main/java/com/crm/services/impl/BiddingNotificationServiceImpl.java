@@ -46,13 +46,13 @@ public class BiddingNotificationServiceImpl implements BiddingNotificationServic
     BiddingDocument relatedResource = biddingDocumentRepository.findById(request.getRelatedResource())
         .orElseThrow(() -> new NotFoundException("Related resource is not found."));
     biddingNotification.setRelatedResource(relatedResource);
-    
-    biddingNotification.setMessage(request.getMessage()); 
+
+    biddingNotification.setMessage(request.getMessage());
     EnumBiddingNotificationType type = EnumBiddingNotificationType.findByName(request.getType());
     biddingNotification.setType(type.name());
-    
+
     biddingNotification.setSendDate(LocalDateTime.now());
-    
+
     biddingNotificationRepository.save(biddingNotification);
     return biddingNotification;
   }
@@ -73,17 +73,29 @@ public class BiddingNotificationServiceImpl implements BiddingNotificationServic
 
   @Override
   public Page<BiddingNotification> getBiddingNotificationsByUser(Long id, PaginationRequest request) {
-    Page<BiddingNotification> biddingNotifications = biddingNotificationRepository.findBiddingNotificationsByUser(id,
-        PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt")));
+    String status = request.getStatus();
+    Page<BiddingNotification> biddingNotifications = null;
+    if (status != null && !status.isEmpty()) {
+      biddingNotifications = biddingNotificationRepository.findBiddingNotificationsByUserAndStatus(id, status,
+          PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt")));
+    } else {
+      biddingNotifications = biddingNotificationRepository.findBiddingNotificationsByUser(id,
+          PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt")));
+    }
     return biddingNotifications;
   }
-  
-
 
   @Override
   public Page<BiddingNotification> getBiddingNotificationsByUser(String recipient, PaginationRequest request) {
-    Page<BiddingNotification> biddingNotifications = biddingNotificationRepository.findBiddingNotificationsByUser(recipient,
-        PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt")));
+    String status = request.getStatus();
+    Page<BiddingNotification> biddingNotifications = null;
+    if (status != null && !status.isEmpty()) {
+      biddingNotifications = biddingNotificationRepository.findBiddingNotificationsByUserAndStatus(recipient, status,
+          PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt")));
+    } else {
+      biddingNotifications = biddingNotificationRepository.findBiddingNotificationsByUser(recipient,
+          PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt")));
+    }
     return biddingNotifications;
   }
 
@@ -91,22 +103,22 @@ public class BiddingNotificationServiceImpl implements BiddingNotificationServic
   public BiddingNotification editBiddingNotification(Long id, Map<String, Object> updates) {
     BiddingNotification biddingNotification = biddingNotificationRepository.findById(id)
         .orElseThrow(() -> new NotFoundException("Bidding notification is not found."));
-    
-    Boolean isRead = (Boolean)updates.get("isRead");
-    if(isRead != null) {
+
+    Boolean isRead = (Boolean) updates.get("isRead");
+    if (isRead != null) {
       biddingNotification.setIsRead(isRead);
-    }else {
+    } else {
       throw new NotFoundException("Is Read is not found.");
     }
-    
+
     return biddingNotification;
   }
 
   @Override
   public void removeBiddingNotification(Long id) {
-    if(biddingNotificationRepository.existsById(id)) {
+    if (biddingNotificationRepository.existsById(id)) {
       biddingNotificationRepository.deleteById(id);
-    }else {
+    } else {
       throw new NotFoundException("Bidding notification is not found.");
     }
   }

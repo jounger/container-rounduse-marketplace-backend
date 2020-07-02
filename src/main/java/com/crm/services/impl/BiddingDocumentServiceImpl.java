@@ -32,7 +32,7 @@ import com.crm.repository.OutboundRepository;
 import com.crm.services.BiddingDocumentService;
 
 @Service
-public class BiddingDocumentImpl implements BiddingDocumentService {
+public class BiddingDocumentServiceImpl implements BiddingDocumentService {
 
   @Autowired
   private BiddingDocumentRepository biddingDocumentRepository;
@@ -50,11 +50,11 @@ public class BiddingDocumentImpl implements BiddingDocumentService {
   private DiscountRepository discountRepository;
 
   @Override
-  public BiddingDocument createBiddingDocument(BiddingDocumentRequest request) {
+  public BiddingDocument createBiddingDocument(Long id, BiddingDocumentRequest request) {
     BiddingDocument biddingDocument = new BiddingDocument();
 
     Merchant merchant = new Merchant();
-    merchant = merchantRepository.findByUsername(request.getOfferee())
+    merchant = merchantRepository.findById(id)
         .orElseThrow(() -> new NotFoundException("Merchant is not found"));
     biddingDocument.setOfferee(merchant);
 
@@ -88,7 +88,7 @@ public class BiddingDocumentImpl implements BiddingDocumentService {
     biddingDocument.setPriceLeadership(request.getBidFloorPrice());
 
     String discountCodeString = request.getBidDiscountCode();
-    if (discountCodeString != null) {
+    if (discountCodeString != null && !discountCodeString.isEmpty()) {
       Discount bidDiscountCode = discountRepository.findByCode(discountCodeString)
           .orElseThrow(() -> new NotFoundException("Discount is not found."));
       biddingDocument.setBidDiscountCode(bidDiscountCode);
@@ -230,8 +230,7 @@ public class BiddingDocumentImpl implements BiddingDocumentService {
     BiddingDocument biddingDocument = biddingDocumentRepository.findById(id)
         .orElseThrow(() -> new NotFoundException("Bidding document is not found"));
     Outbound outbound = biddingDocument.getOutbound();
-    if (outbound.getStatus().equalsIgnoreCase(EnumSupplyStatus.BIDDING.name())
-        || outbound.getStatus().equalsIgnoreCase(EnumSupplyStatus.COMBINED.name())) {
+    if (outbound.getStatus().equalsIgnoreCase(EnumSupplyStatus.COMBINED.name())) {
       throw new InternalException("Bidding document is in a transaction.");
     }
     biddingDocumentRepository.deleteById(id);

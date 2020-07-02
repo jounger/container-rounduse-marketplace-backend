@@ -291,7 +291,7 @@ public class BidServiceImpl implements BidService {
     }
 
     String statusString = (String) updates.get("status");
-    if (statusString != null && statusString.isEmpty()) {
+    if (statusString != null && !statusString.isEmpty()) {
       EnumBidStatus status = EnumBidStatus.findByName(statusString);
       bid.setStatus(status.name());
       if (bid.getStatus().equalsIgnoreCase(EnumBidStatus.ACCEPTED.name())

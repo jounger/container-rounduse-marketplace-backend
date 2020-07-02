@@ -1,5 +1,6 @@
 package com.crm.services.impl;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,6 +50,8 @@ public class BiddingNotificationServiceImpl implements BiddingNotificationServic
     biddingNotification.setMessage(request.getMessage()); 
     EnumBiddingNotificationType type = EnumBiddingNotificationType.findByName(request.getType());
     biddingNotification.setType(type.name());
+    
+    biddingNotification.setSendDate(LocalDateTime.now());
     
     biddingNotificationRepository.save(biddingNotification);
     return biddingNotification;

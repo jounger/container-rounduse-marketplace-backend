@@ -1,6 +1,7 @@
 package com.crm.models.mapper;
 
 
+import com.crm.common.Tool;
 import com.crm.models.BiddingNotification;
 import com.crm.models.dto.BiddingDocumentDto;
 import com.crm.models.dto.BiddingNotificationDto;
@@ -19,6 +20,8 @@ public class BiddingNotificationMapper {
     
     biddingNotificationDto.setMessage(biddingNotification.getMessage());
     biddingNotificationDto.setType(biddingNotification.getType());
+    
+    biddingNotificationDto.setSendDate(Tool.convertLocalDateTimeToString(biddingNotification.getSendDate()));
     
     return biddingNotificationDto;
   }

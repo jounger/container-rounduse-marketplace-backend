@@ -16,6 +16,6 @@ public class InboundRequest extends SupplyRequest {
 
   private String emptyTime;
 
-  @NotBlank
+//  @NotBlank
   private String returnStation;
 }

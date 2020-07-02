@@ -125,44 +125,44 @@ public class ContainerTypeServiceImpl implements ContainerTypeService {
       containerType.setDescription(description);
     }
 
-    Double tareWeight = (Double) updates.get("tareWeight");
+    String tareWeight = (String) updates.get("tareWeight");
     if (tareWeight != null) {
-      containerType.setTareWeight(tareWeight);
+      containerType.setTareWeight(Double.valueOf(tareWeight));
     }
 
-    Double payloadCapacity = (Double) updates.get("payloadCapacity");
+    String payloadCapacity = (String) updates.get("payloadCapacity");
     if (payloadCapacity != null) {
-      containerType.setPayloadCapacity(payloadCapacity);
+      containerType.setPayloadCapacity(Double.valueOf(payloadCapacity));
     }
 
-    Double cubicCapacity = (Double) updates.get("cubicCapacity");
+    String cubicCapacity = (String) updates.get("cubicCapacity");
     if (cubicCapacity != null) {
-      containerType.setCubicCapacity(cubicCapacity);
+      containerType.setCubicCapacity(Double.valueOf(cubicCapacity));
     }
 
-    Double internalLength = (Double) updates.get("internalLength");
+    String internalLength = (String) updates.get("internalLength");
     if (internalLength != null) {
-      containerType.setInternalLength(internalLength);
+      containerType.setInternalLength(Double.valueOf(internalLength));
     }
 
-    Double internalHeight = (Double) updates.get("internalHeight");
+    String internalHeight = (String) updates.get("internalHeight");
     if (internalHeight != null) {
-      containerType.setInternalHeight(internalHeight);
+      containerType.setInternalHeight(Double.valueOf(internalHeight));
     }
 
-    Double internalWidth = (Double) updates.get("internalWidth");
+    String internalWidth = (String) updates.get("internalWidth");
     if (internalWidth != null) {
-      containerType.setInternalWidth(internalWidth);
+      containerType.setInternalWidth(Double.valueOf(internalWidth));
     }
 
-    Double doorOpeningHeight = (Double) updates.get("doorOpeningHeight");
+    String doorOpeningHeight = (String) updates.get("doorOpeningHeight");
     if (doorOpeningHeight != null) {
-      containerType.setDoorOpeningHeight(doorOpeningHeight);
+      containerType.setDoorOpeningHeight(Double.valueOf(doorOpeningHeight));
     }
 
-    Double doorOpeningWidth = (Double) updates.get("doorOpeningWidth");
+    String doorOpeningWidth = (String) updates.get("doorOpeningWidth");
     if (doorOpeningWidth != null) {
-      containerType.setDoorOpeningWidth(doorOpeningWidth);
+      containerType.setDoorOpeningWidth(Double.valueOf(doorOpeningWidth));
     }
 
     containerTypeRepository.save(containerType);

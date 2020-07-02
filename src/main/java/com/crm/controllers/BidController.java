@@ -85,7 +85,7 @@ public class BidController {
     notifyRequest.setType(EnumBiddingNotificationType.ADDED.name());
     BiddingNotification notification = biddingNotificationService.createBiddingNotification(notifyRequest);
 
-    // Asynchronous send notification to forwarders
+    // Asynchronous send notification to merchant
 
     logger.info("notification : {}", notification.getId());
     biddingWebSocketService.broadcastBiddingNotifyToUser(notification);
@@ -156,6 +156,7 @@ public class BidController {
   @PreAuthorize("hasRole('MERCHANT') or hasRole('FORWARDER')")
   @RequestMapping(value = "/{id}", method = RequestMethod.PATCH, consumes = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<?> editBid(@PathVariable("id") Long id, @RequestBody Map<String, Object> updates) {
+    BiddingNotification notification = new BiddingNotification();
     Bid bid = bidService.getBid(id);
     String status = bid.getStatus();
     Bid bidEdit = bidService.editBid(id, updates);
@@ -175,6 +176,12 @@ public class BidController {
       notifyRequest.setRelatedResource(bidEdit.getBiddingDocument().getId());
       notifyRequest.setMessage(String.format("Bid have been MODIFIED by %s", bidEdit.getBidder().getUsername()));
       notifyRequest.setType(EnumBiddingNotificationType.MODIFIED.name());
+      notification = biddingNotificationService.createBiddingNotification(notifyRequest);
+
+      // Asynchronous send notification to merchant
+
+      logger.info("notification : {}", notification.getId());
+      biddingWebSocketService.broadcastBiddingNotifyToUser(notification);
 
     } else {
       if (bidEdit.getStatus().equals(EnumBidStatus.ACCEPTED.name())) {
@@ -183,6 +190,25 @@ public class BidController {
         notifyRequest.setRelatedResource(bid.getBiddingDocument().getId());
         notifyRequest.setMessage(String.format("Your Bid have ACCEPTED from %s", offeree.getUsername()));
         notifyRequest.setType(EnumBiddingNotificationType.ACCEPTED.name());
+        notification = biddingNotificationService.createBiddingNotification(notifyRequest);
+
+        // Asynchronous send notification to forwarders
+
+        logger.info("notification : {}", notification.getId());
+        biddingWebSocketService.broadcastBiddingNotifyToUser(notification);
+
+        String numberOfContainer = String.valueOf(bid.getContainers().size());
+        String shippingLine = bid.getBiddingDocument().getOutbound().getShippingLine().getUsername();
+        notifyRequest.setRecipient(shippingLine);
+        notifyRequest.setRelatedResource(bid.getBiddingDocument().getId());
+        notifyRequest.setMessage(String.format("%s and %s want to borrow %s container from you", offeree.getUsername(),
+            bidEdit.getBidder().getUsername(), numberOfContainer));
+        notifyRequest.setType(EnumBiddingNotificationType.ACCEPTED.name());
+        notification = biddingNotificationService.createBiddingNotification(notifyRequest);
+
+        // Asynchronous send notification to ShippingLine
+
+        biddingWebSocketService.broadcastBiddingNotifyToShippingLine(notification, bidEdit);
 
       } else if (bidEdit.getStatus().equals(EnumBidStatus.REJECTED.name())) {
 
@@ -190,14 +216,14 @@ public class BidController {
         notifyRequest.setRelatedResource(bid.getBiddingDocument().getId());
         notifyRequest.setMessage(String.format("Your Bid have REJECTED from %s", offeree.getUsername()));
         notifyRequest.setType(EnumBiddingNotificationType.REJECTED.name());
+        notification = biddingNotificationService.createBiddingNotification(notifyRequest);
+
+        // Asynchronous send notification to forwarders
+
+        logger.info("notification : {}", notification.getId());
+        biddingWebSocketService.broadcastBiddingNotifyToUser(notification);
       }
     }
-    BiddingNotification notification = biddingNotificationService.createBiddingNotification(notifyRequest);
-
-    // Asynchronous send notification to forwarders
-
-    logger.info("notification : {}", notification.getId());
-    biddingWebSocketService.broadcastBiddingNotifyToUser(notification);
 
     // END NOTIFICATION
 
@@ -226,7 +252,7 @@ public class BidController {
     notifyRequest.setType(EnumBiddingNotificationType.REMOVED.name());
     BiddingNotification notification = biddingNotificationService.createBiddingNotification(notifyRequest);
 
-    // Asynchronous send notification to forwarders
+    // Asynchronous send notification to merchant
 
     logger.info("notification : {}", notification.getId());
     biddingWebSocketService.broadcastBiddingNotifyToUser(notification);

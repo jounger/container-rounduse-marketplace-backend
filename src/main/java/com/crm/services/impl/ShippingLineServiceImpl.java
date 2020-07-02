@@ -89,8 +89,10 @@ public class ShippingLineServiceImpl implements ShippingLineService {
     ShippingLine shippingLine = shippingLineRepository.findById(request.getId())
         .orElseThrow(() -> new NotFoundException("Shipping Line is not found."));
 
-    String encoder = passwordEncoder.encode(request.getPassword());
-    shippingLine.setPassword(encoder);
+    /*
+     * String encoder = passwordEncoder.encode(request.getPassword());
+     * shippingLine.setPassword(encoder);
+     */
 
     Role userRole = roleRepository.findByName(request.getRoles().iterator().next())
         .orElseThrow(() -> new NotFoundException("Error: Role is not found"));
@@ -123,11 +125,11 @@ public class ShippingLineServiceImpl implements ShippingLineService {
     ShippingLine shippingLine = shippingLineRepository.findById(id)
         .orElseThrow(() -> new NotFoundException("Shipping Line is not found."));
 
-    String password = (String) updates.get("password");
-    if (password != null && !password.isEmpty()) {
-      String encoder = passwordEncoder.encode(password);
-      shippingLine.setPassword(encoder);
-    }
+    /*
+     * String password = (String) updates.get("password"); if (password != null &&
+     * !password.isEmpty()) { String encoder = passwordEncoder.encode(password);
+     * shippingLine.setPassword(encoder); }
+     */
 
     String email = (String) updates.get("email");
     if (email != null && UserServiceImpl.isEmailChange(email, shippingLine) && !email.isEmpty()) {

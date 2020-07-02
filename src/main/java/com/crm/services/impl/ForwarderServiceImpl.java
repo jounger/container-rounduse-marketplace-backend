@@ -94,8 +94,10 @@ public class ForwarderServiceImpl implements ForwarderService {
     Forwarder forwarder = forwarderRepository.findById(request.getId())
         .orElseThrow(() -> new NotFoundException("Forwarder is not found."));
 
-    String encoder = passwordEncoder.encode(request.getPassword());
-    forwarder.setPassword(encoder);
+    /*
+     * String encoder = passwordEncoder.encode(request.getPassword());
+     * forwarder.setPassword(encoder);
+     */
 
     Set<Role> roles = new HashSet<>();
     Role userRole = roleRepository.findByName("ROLE_FORWARDER")
@@ -129,11 +131,11 @@ public class ForwarderServiceImpl implements ForwarderService {
     Forwarder forwarder = forwarderRepository.findById(id)
         .orElseThrow(() -> new NotFoundException("Forwarder is not found."));
 
-    String password = (String) updates.get("password");
-    if (password != null) {
-      String encoder = passwordEncoder.encode(password);
-      forwarder.setPassword(encoder);
-    }
+    /*
+     * String password = (String) updates.get("password"); if (password != null) {
+     * String encoder = passwordEncoder.encode(password);
+     * forwarder.setPassword(encoder); }
+     */
 
     String email = (String) updates.get("email");
     if (email != null && UserServiceImpl.isEmailChange(email, forwarder)) {
@@ -189,7 +191,9 @@ public class ForwarderServiceImpl implements ForwarderService {
     if (fax != null && !fax.isEmpty()) {
       forwarder.setFax(fax);
     }
-    return null;
+
+    forwarderRepository.save(forwarder);
+    return forwarder;
   }
 
   @Override

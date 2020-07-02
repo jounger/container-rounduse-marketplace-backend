@@ -93,8 +93,10 @@ public class MerchantServiceImpl implements MerchantService {
     Merchant merchant = merchantRepository.findById(request.getId())
         .orElseThrow(() -> new NotFoundException("Merchant is not found."));
 
+    /*
     String encoder = passwordEncoder.encode(request.getPassword());
     merchant.setPassword(encoder);
+    */
 
     Set<Role> roles = new HashSet<>();
     Role userRole = roleRepository.findByName("ROLE_FORWARDER")
@@ -128,11 +130,13 @@ public class MerchantServiceImpl implements MerchantService {
     Merchant merchant = merchantRepository.findById(id)
         .orElseThrow(() -> new NotFoundException("Merchant is not found."));
 
+    /*
     String password = (String) updates.get("password");
     if (password != null) {
       String encoder = passwordEncoder.encode(password);
       merchant.setPassword(encoder);
     }
+    */
 
     String email = (String) updates.get("email");
     if (email != null && UserServiceImpl.isEmailChange(email, merchant)) {
@@ -188,6 +192,8 @@ public class MerchantServiceImpl implements MerchantService {
     if (fax != null) {
       merchant.setFax(fax);
     }
+    
+    merchantRepository.save(merchant);
     return merchant;
   }
 

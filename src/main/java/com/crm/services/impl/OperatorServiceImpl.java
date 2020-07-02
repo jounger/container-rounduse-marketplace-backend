@@ -90,8 +90,10 @@ public class OperatorServiceImpl implements OperatorService {
 
     operator.setUsername(request.getUsername());
 
-    String encoder = passwordEncoder.encode(request.getPassword());
-    operator.setPassword(encoder);
+    /*
+     * String encoder = passwordEncoder.encode(request.getPassword());
+     * operator.setPassword(encoder);
+     */
 
     Role userRole = roleRepository.findByName("ROLE_MODERATOR")
         .orElseThrow(() -> new NotFoundException("Error: Role is not found"));
@@ -120,14 +122,14 @@ public class OperatorServiceImpl implements OperatorService {
     Operator operator = operatorRepository.findById(id)
         .orElseThrow(() -> new NotFoundException("Operator is not found."));
 
-    String password = (String) updates.get("password");
-    if (password != null) {
-      String encoder = passwordEncoder.encode(password);
-      operator.setPassword(encoder);
-    }
+    /*
+     * String password = (String) updates.get("password"); if (password != null &&
+     * !password.isEmpty()) { String encoder = passwordEncoder.encode(password);
+     * operator.setPassword(encoder); }
+     */
 
     String email = (String) updates.get("email");
-    if (email != null && UserServiceImpl.isEmailChange(email, operator)) {
+    if (email != null && UserServiceImpl.isEmailChange(email, operator) && email.isEmpty()) {
       operator.setEmail(email);
     }
 
@@ -151,6 +153,8 @@ public class OperatorServiceImpl implements OperatorService {
     if (fullname != null && !fullname.isEmpty()) {
       operator.setFullname(fullname);
     }
+
+    operatorRepository.save(operator);
     return operator;
   }
 

@@ -126,6 +126,26 @@ public class BiddingDocumentImpl implements BiddingDocumentService {
   }
 
   @Override
+  public Page<BiddingDocument> getBiddingDocumentsByForwarder(Long id, PaginationRequest request) {
+    Page<BiddingDocument> biddingDocuments = null;
+    if (forwarderRepository.existsById(id)) {
+      biddingDocuments = biddingDocumentRepository.findBiddingDocumentByForwarder(id,
+          PageRequest.of(request.getPage(), request.getLimit(), Sort.by("id").descending()));
+    } else {
+      throw new NotFoundException("Merchant is not found.");
+    }
+    
+    List<BiddingDocument> bdList = biddingDocuments.getContent();
+    bdList.parallelStream().forEach(bd -> {
+      Bid result = bd.getBids().stream().filter((bid) -> bid.getBidder().getId() == id).findAny()
+          .orElseThrow(() -> new NotFoundException("Bidder is not found."));
+      bd.setBids(Arrays.asList(result));
+    });
+    
+    return biddingDocuments;
+  }
+
+  @Override
   public BiddingDocument updateBiddingDocument(BiddingDocumentRequest request) {
     BiddingDocument biddingDocument = biddingDocumentRepository.findById(request.getId())
         .orElseThrow(() -> new NotFoundException("Bidding document is not found."));
@@ -215,26 +235,6 @@ public class BiddingDocumentImpl implements BiddingDocumentService {
       throw new InternalException("Bidding document is in a transaction.");
     }
     biddingDocumentRepository.deleteById(id);
-  }
-
-  @Override
-  public Page<BiddingDocument> getBiddingDocumentsByForwarder(Long id, PaginationRequest request) {
-    Page<BiddingDocument> biddingDocuments = null;
-    if (forwarderRepository.existsById(id)) {
-      biddingDocuments = biddingDocumentRepository.findBiddingDocumentByForwarder(id,
-          PageRequest.of(request.getPage(), request.getLimit(), Sort.by("id").descending()));
-    } else {
-      throw new NotFoundException("Merchant is not found.");
-    }
-    
-    List<BiddingDocument> bdList = biddingDocuments.getContent();
-    bdList.parallelStream().forEach(bd -> {
-      Bid result = bd.getBids().stream().filter((bid) -> bid.getBidder().getId() == id).findAny()
-          .orElseThrow(() -> new NotFoundException("Bidder is not found."));
-      bd.setBids(Arrays.asList(result));
-    });
-    
-    return biddingDocuments;
   }
 
 }

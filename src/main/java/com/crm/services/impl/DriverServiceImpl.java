@@ -103,8 +103,10 @@ public class DriverServiceImpl implements DriverService {
     Driver driver = driverRepository.findById(request.getId())
         .orElseThrow(() -> new NotFoundException("Driver is not found."));
 
-//    String encoder = passwordEncoder.encode(request.getPassword());
-//    driver.setPassword(encoder);
+    /*
+     * String encoder = passwordEncoder.encode(request.getPassword());
+     * driver.setPassword(encoder);
+     */
 
     driver.setPhone(request.getPhone());
 
@@ -141,11 +143,11 @@ public class DriverServiceImpl implements DriverService {
   public Driver editDriver(Long id, Map<String, Object> updates) {
     Driver driver = driverRepository.findById(id).orElseThrow(() -> new NotFoundException("Driver is not found."));
 
-    String password = (String) updates.get("password");
-    if (password != null) {
-      String encoder = passwordEncoder.encode(password);
-      driver.setPassword(encoder);
-    }
+    /*
+     * String password = (String) updates.get("password"); if (password != null) {
+     * String encoder = passwordEncoder.encode(password);
+     * driver.setPassword(encoder); }
+     */
 
     String email = (String) updates.get("email");
     if (email != null && UserServiceImpl.isEmailChange(email, driver)) {

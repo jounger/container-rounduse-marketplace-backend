@@ -14,9 +14,7 @@ public interface CombinedService {
   
   Combined getCombined(Long id);
   
-  Page<Combined> getCombinedsByMerchant(Long id, PaginationRequest request);
-  
-  Page<Combined> getCombinedsByForwarder(String username, PaginationRequest request);
+  Page<Combined> getCombinedsByUser(Long id, PaginationRequest request);
   
   Page<Combined> getCombineds(PaginationRequest request);
   

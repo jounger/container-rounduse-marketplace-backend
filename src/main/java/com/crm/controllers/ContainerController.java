@@ -67,7 +67,7 @@ public class ContainerController {
     return ResponseEntity.ok(containerDto);
   }
 
-  @GetMapping("/billOfLading/{id}")
+  @GetMapping("/bill-of-lading/{id}")
   @PreAuthorize("hasRole('MODERATOR') or hasRole('FORWARDER') or hasRole('MERCHANT')")
   public ResponseEntity<?> getContainersByBillOfLading(@PathVariable Long id, @Valid PaginationRequest request) {
 

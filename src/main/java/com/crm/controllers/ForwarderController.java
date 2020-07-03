@@ -46,7 +46,7 @@ public class ForwarderController {
     return ResponseEntity.ok("Shipping Line created successfully");
   }
 
-  @PreAuthorize("hasRole('OPERATOR')")
+  @PreAuthorize("hasRole('MODERATOR')")
   @GetMapping("")
   public ResponseEntity<?> getForwarders(@Valid PaginationRequest request) {
 
@@ -65,8 +65,28 @@ public class ForwarderController {
 
     return ResponseEntity.ok(response);
   }
+  
+  @PreAuthorize("hasRole('MODERATOR')")
+  @GetMapping("/outbound/{id}")
+  public ResponseEntity<?> findForwardersByOutbound(@PathVariable Long id, @Valid PaginationRequest request) {
 
-  @PreAuthorize("hasRole('OPERATOR') or hasRole('MERCHANT') or hasRole('FORWARDER')")
+    Page<Forwarder> pages = forwarderService.findForwardersByOutbound(id, request);
+
+    PaginationResponse<ForwarderDto> response = new PaginationResponse<>();
+    response.setPageNumber(request.getPage());
+    response.setPageSize(request.getLimit());
+    response.setTotalElements(pages.getTotalElements());
+    response.setTotalPages(pages.getTotalPages());
+
+    List<Forwarder> forwarders = pages.getContent();
+    List<ForwarderDto> forwardersDto = new ArrayList<>();
+    forwarders.forEach(forwarder -> forwardersDto.add(ForwarderMapper.toForwarderDto(forwarder)));
+    response.setContents(forwardersDto);
+
+    return ResponseEntity.ok(response);
+  }
+
+  @PreAuthorize("hasRole('MODERATOR') or hasRole('MERCHANT') or hasRole('FORWARDER')")
   @GetMapping("/{id}")
   public ResponseEntity<?> getForwarder(@PathVariable Long id) {
     Forwarder forwarder = forwarderService.getForwarder(id);
@@ -93,7 +113,7 @@ public class ForwarderController {
   }
 
   @Transactional
-  @PreAuthorize("hasRole('OPERATOR')")
+  @PreAuthorize("hasRole('MODERATOR')")
   @DeleteMapping("/{id}")
   public ResponseEntity<?> deleteForwarder(@PathVariable Long id) {
     forwarderService.removeForwarder(id);

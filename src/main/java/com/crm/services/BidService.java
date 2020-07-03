@@ -13,6 +13,8 @@ public interface BidService {
   Bid createBid(Long bidDocId, Long id, BidRequest request);
 
   Bid getBid(Long id);
+  
+  Bid getBidByBiddingDocumentAndForwarder(Long biddingDocument, String username);
 
   Page<Bid> getBidsByBiddingDocument(Long id, PaginationRequest request);
 

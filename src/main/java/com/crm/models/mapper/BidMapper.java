@@ -10,6 +10,8 @@ public class BidMapper {
   public static BidDto toBidDto(Bid bid) {
     BidDto bidDto = new BidDto();
     
+    bidDto.setId(bid.getId());
+    
     String bidder = bid.getBidder().getUsername();
     bidDto.setBidder(bidder);
     

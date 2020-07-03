@@ -20,18 +20,4 @@ public class CombinedMapper {
     
     return combinedDto;
   }
-
-  public static CombinedDto toCombinedDtoForForwarder(Combined combined, String username) {
-    CombinedDto combinedDto = new CombinedDto();
-    
-    combinedDto.setId(combined.getId());
-    
-    BiddingDocument biddingDocument = combined.getBiddingDocument();
-    BiddingDocumentDto biddingDocumentDto = BiddingDocumentMapper.toBiddingDocumentDtoForForwarder(biddingDocument, username);
-    combinedDto.setBiddingDocumentDto(biddingDocumentDto);
-    
-    combinedDto.setStatus(combined.getStatus());
-    
-    return combinedDto;
-  }
 }

@@ -17,4 +17,10 @@ public interface BiddingDocumentRepository extends JpaRepository<BiddingDocument
   @Query(value = "SELECT bd FROM BiddingDocument bd JOIN bd.bids b WHERE b.bidder.id = :id")
   Page<BiddingDocument> findBiddingDocumentByForwarder(@Param("id") Long forwarder, Pageable pageable);
   
+  @Query(value = "FROM BiddingDocument bd WHERE bd.offeree.id = :id AND bd.status = :status")
+  Page<BiddingDocument> findBiddingDocumentByMerchant(@Param("id") Long merchantId, @Param("status") String status, Pageable pageable);
+  
+  @Query(value = "SELECT bd FROM BiddingDocument bd JOIN bd.bids b WHERE b.bidder.id = :id AND bd.status = :status")
+  Page<BiddingDocument> findBiddingDocumentByForwarder(@Param("id") Long forwarderId, @Param("status") String status, Pageable pageable);
+  
 }

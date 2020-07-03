@@ -35,4 +35,5 @@ public class BiddingDocumentRequest {
 
   private Double priceLeadership;
 
+  private String status;
 }

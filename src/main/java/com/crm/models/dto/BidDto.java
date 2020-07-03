@@ -10,6 +10,8 @@ import lombok.Setter;
 @Setter
 public class BidDto {
  
+  private Long id;
+  
   //forwarder username
   private String bidder; 
 

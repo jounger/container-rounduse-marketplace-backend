@@ -40,7 +40,7 @@ public class ContainerServiceImpl implements ContainerService {
   public Page<Container> getContainersByInbound(Long id, PaginationRequest request) {
     PageRequest pageRequest = PageRequest.of(request.getPage(), request.getLimit(),
         Sort.by(Sort.Direction.DESC, "createdAt"));
-    Page<Container> pages = containerRepository.getContainersByInbound(id, pageRequest);
+    Page<Container> pages = containerRepository.findContainersByInbound(id, pageRequest);
     return pages;
   }
 
@@ -63,7 +63,7 @@ public class ContainerServiceImpl implements ContainerService {
   public Page<Container> getContainersByBillOfLading(Long id, PaginationRequest request) {
     PageRequest pageRequest = PageRequest.of(request.getPage(), request.getLimit(),
         Sort.by(Sort.Direction.DESC, "createdAt"));
-    Page<Container> pages = containerRepository.getContainersByBillOfLading(id, pageRequest);
+    Page<Container> pages = containerRepository.findContainersByBillOfLading(id, pageRequest);
     return pages;
   }
 

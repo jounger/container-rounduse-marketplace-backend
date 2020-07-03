@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import com.crm.common.Tool;
 import com.crm.enums.EnumBidStatus;
+import com.crm.enums.EnumBiddingStatus;
 import com.crm.enums.EnumCombinedStatus;
 import com.crm.enums.EnumSupplyStatus;
 import com.crm.exception.DuplicateRecordException;
@@ -135,21 +136,21 @@ public class BidServiceImpl implements BidService {
 
   @Override
   public Bid getBidByBiddingDocumentAndForwarder(Long biddingDocumentId, String username) {
-    Bid bid = bidRepository.getBidByBiddingDocumentAndForwarder(biddingDocumentId, username)
+    Bid bid = bidRepository.findBidByBiddingDocumentAndForwarder(biddingDocumentId, username)
         .orElseThrow(() -> new NotFoundException("Bid is not found."));
     return bid;
   }
 
   @Override
   public Page<Bid> getBidsByBiddingDocument(Long id, PaginationRequest request) {
-    Page<Bid> bids = bidRepository.getBidsByBiddingDocument(id,
+    Page<Bid> bids = bidRepository.findBidsByBiddingDocument(id,
         PageRequest.of(request.getPage(), request.getLimit(), Sort.by("id").descending()));
     return bids;
   }
 
   @Override
   public Page<Bid> getBidsByForwarder(Long id, PaginationRequest request) {
-    Page<Bid> bids = bidRepository.getBidsByForwarder(id,
+    Page<Bid> bids = bidRepository.findBidsByForwarder(id,
         PageRequest.of(request.getPage(), request.getLimit(), Sort.by("id").descending()));
     return bids;
   }
@@ -314,9 +315,12 @@ public class BidServiceImpl implements BidService {
       }
 
       if (bid.getStatus().equalsIgnoreCase(EnumBidStatus.ACCEPTED.name())) {
-        int combinedContainer = containerRepository.getCombinedContainersByBiddingDocument(biddingDocument.getId());
+        int combinedContainer = containerRepository.countCombinedContainersByBiddingDocument(biddingDocument.getId());
         if (booking.getUnit() < combinedContainer + bid.getContainers().size()) {
           throw new InternalException("Number of containers is more than needed.");
+        }if(booking.getUnit() == combinedContainer + bid.getContainers().size()) {
+          biddingDocument.setStatus(EnumBiddingStatus.COMBINED.name());
+          biddingDocumentRepository.save(biddingDocument);
         }
         bid.setDateOfDecision(LocalDateTime.now());
         Set<Container> containers = bid.getContainers();

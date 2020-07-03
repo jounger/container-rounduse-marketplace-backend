@@ -16,6 +16,8 @@ public interface ContainerService {
 
   Page<Container> getContainersByInbound(Long id, PaginationRequest request);
 
+  Page<Container> getContainersByBid(Long id, PaginationRequest request);
+
   Page<Container> getContainers(PaginationRequest request);
 
   Container createContainer(Long id, ContainerRequest request);

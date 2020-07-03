@@ -312,4 +312,20 @@ public class ContainerServiceImpl implements ContainerService {
     containerRepository.save(container);
     return container;
   }
+
+  @Override
+  public Page<Container> getContainersByBid(Long id, PaginationRequest request) {
+
+    String status = request.getStatus();
+    PageRequest pageRequest = PageRequest.of(request.getPage(), request.getLimit(),
+        Sort.by(Sort.Direction.DESC, "createdAt"));
+    Page<Container> pages = null;
+
+    if (status != null && !status.isEmpty()) {
+      pages = containerRepository.getContainersByBid(id, status, pageRequest);
+    } else {
+      pages = containerRepository.getContainersByBid(id, pageRequest);
+    }
+    return pages;
+  }
 }

@@ -43,7 +43,13 @@ public interface ContainerRepository extends JpaRepository<Container, Long> {
 
   @Query(value = "SELECT d FROM Container d WHERE d.driver.id = :id")
   List<Container> findByDriver(@Param("id") Long id);
-  
+
   @Query(value = "SELECT COUNT(c) FROM Container c WHERE c.bid.biddingDocument.id = :id AND c.status = 'COMBINED'")
   int getCombinedContainersByBiddingDocument(@Param("id") Long id);
+
+  @Query(value = "SELECT b FROM Container b WHERE b.bid.id = :id")
+  Page<Container> getContainersByBid(@Param("id") Long id, Pageable pageable);
+
+  @Query(value = "SELECT b FROM Container b WHERE b.bid.id = :id AND b.status = :status")
+  Page<Container> getContainersByBid(@Param("id") Long id, @Param("status") String status, Pageable pageable);
 }

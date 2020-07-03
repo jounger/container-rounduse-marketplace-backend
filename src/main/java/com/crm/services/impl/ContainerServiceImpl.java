@@ -322,9 +322,9 @@ public class ContainerServiceImpl implements ContainerService {
     Page<Container> pages = null;
 
     if (status != null && !status.isEmpty()) {
-      pages = containerRepository.getContainersByBid(id, status, pageRequest);
+      pages = containerRepository.findContainersByBid(id, status, pageRequest);
     } else {
-      pages = containerRepository.getContainersByBid(id, pageRequest);
+      pages = containerRepository.findContainersByBid(id, pageRequest);
     }
     return pages;
   }

@@ -150,7 +150,7 @@ public class DriverServiceImpl implements DriverService {
      */
 
     String email = (String) updates.get("email");
-    if (email != null && UserServiceImpl.isEmailChange(email, driver)) {
+    if (email != null && UserServiceImpl.isEmailChange(email, driver) && !email.isEmpty()) {
       driver.setEmail(email);
     }
 
@@ -165,12 +165,12 @@ public class DriverServiceImpl implements DriverService {
     }
 
     String fullname = (String) updates.get("fullname");
-    if (fullname != null && fullname.isEmpty()) {
+    if (fullname != null && !fullname.isEmpty()) {
       driver.setFullname(fullname);
     }
 
     String driverLicense = (String) updates.get("driverLicense");
-    if (driverLicense != null && driverLicense.isEmpty()) {
+    if (driverLicense != null && !driverLicense.isEmpty()) {
       driver.setDriverLicense(driverLicense);
     }
 

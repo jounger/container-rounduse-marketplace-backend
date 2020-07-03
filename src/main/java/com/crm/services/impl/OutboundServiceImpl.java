@@ -149,6 +149,10 @@ public class OutboundServiceImpl implements OutboundService {
 
     Outbound outbound = outboundRepository.findById(request.getId())
         .orElseThrow(() -> new NotFoundException("ERROR: Outbound is not found."));
+    if (outbound.getStatus().equals(EnumSupplyStatus.COMBINED.name())) {
+      throw new InternalException(
+          String.format("Outbound with bookingNumber %s has been combined", outbound.getBooking().getBookingNumber()));
+    }
 
     ShippingLine shippingLine = shippingLineRepository.findByCompanyCode(request.getShippingLine())
         .orElseThrow(() -> new NotFoundException("ERROR: Shipping Line is not found."));
@@ -204,6 +208,10 @@ public class OutboundServiceImpl implements OutboundService {
   public Outbound editOutbound(Map<String, Object> updates, Long id) {
     Outbound outbound = outboundRepository.findById(id)
         .orElseThrow(() -> new NotFoundException("ERROR: Outbound is not found."));
+    if (outbound.getStatus().equals(EnumSupplyStatus.COMBINED.name())) {
+      throw new InternalException(
+          String.format("Outbound with bookingNumber %s has been combined", outbound.getBooking().getBookingNumber()));
+    }
 
     String shippingLineRequest = (String) updates.get("shippingLine");
     if (shippingLineRequest != null && !shippingLineRequest.isEmpty()) {

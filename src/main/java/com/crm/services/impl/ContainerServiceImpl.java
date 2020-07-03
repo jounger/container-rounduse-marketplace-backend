@@ -224,6 +224,9 @@ public class ContainerServiceImpl implements ContainerService {
 
     Container container = containerRepository.findById(id)
         .orElseThrow(() -> new NotFoundException("ERROR: Container is not found."));
+    if (container.getStatus().equalsIgnoreCase(EnumSupplyStatus.COMBINED.name())) {
+      throw new InternalException(String.format("Container %s has been combined", container.getContainerNumber()));
+    }
 
     BillOfLading billOfLading = (BillOfLading) container.getBillOfLading();
 

@@ -128,7 +128,7 @@ public class ContainerController {
   }
 
   @Transactional
-  @PostMapping("/billOfLading/{id}")
+  @PostMapping("/bill-of-lading/{id}")
   @PreAuthorize("hasRole('FORWARDER')")
   public ResponseEntity<?> createContainer(@PathVariable Long id, @Valid @RequestBody ContainerRequest request) {
     Container container = containerService.createContainer(id, request);

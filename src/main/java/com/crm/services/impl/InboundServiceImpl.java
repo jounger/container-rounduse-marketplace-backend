@@ -124,11 +124,6 @@ public class InboundServiceImpl implements InboundService {
         .orElseThrow(() -> new NotFoundException("ERROR: ContainerType is not found."));
     inbound.setContainerType(containerType);
 
-    if (request.getEmptyTime() != null && !request.getEmptyTime().isEmpty()) {
-      LocalDateTime emptyTime = Tool.convertToLocalDateTime(request.getEmptyTime());
-      inbound.setEmptyTime(emptyTime);
-    }
-
     inbound.setReturnStation(request.getReturnStation());
 
     BillOfLading billOfLading = new BillOfLading();
@@ -163,6 +158,9 @@ public class InboundServiceImpl implements InboundService {
 
     inbound.setPickupTime(pickupTime);
     billOfLading.setFreeTime(freeTime);
+
+    LocalDateTime emptyTime = pickupTime.plusDays(1);
+    inbound.setEmptyTime(emptyTime);
 
     for (int i = 0; i < containersRequest.size(); i++) {
 
@@ -236,11 +234,6 @@ public class InboundServiceImpl implements InboundService {
         .orElseThrow(() -> new NotFoundException("ERROR: Type is not found."));
     inbound.setContainerType(containerType);
 
-    if (request.getEmptyTime() != null && !request.getEmptyTime().isEmpty()) {
-      LocalDateTime emptyTime = Tool.convertToLocalDateTime(request.getEmptyTime());
-      inbound.setEmptyTime(emptyTime);
-    }
-
     inbound.setReturnStation(request.getReturnStation());
 
     BillOfLading billOfLading = (BillOfLading) inbound.getBillOfLading();
@@ -288,6 +281,9 @@ public class InboundServiceImpl implements InboundService {
 
       inbound.setPickupTime(pickupTime);
       billOfLading.setFreeTime(freeTime);
+
+      LocalDateTime emptyTime = pickupTime.plusDays(1);
+      inbound.setEmptyTime(emptyTime);
 
       for (int i = 0; i < containersRequest.size(); i++) {
         Container container = containerRepository.findById(containersRequest.get(i).getId())
@@ -383,6 +379,9 @@ public class InboundServiceImpl implements InboundService {
     if (pickupTimeRequest != null && !pickupTimeRequest.isEmpty()) {
       LocalDateTime pickupTime = Tool.convertToLocalDateTime(pickupTimeRequest);
 
+      LocalDateTime emptyTime = pickupTime.plusDays(1);
+      inbound.setEmptyTime(emptyTime);
+
       Set<Container> containers = inbound.getBillOfLading().getContainers();
       containers.forEach(item -> {
 
@@ -465,7 +464,8 @@ public class InboundServiceImpl implements InboundService {
         Sort.by(Sort.Direction.DESC, "createdAt"));
     String shippingLine = outbound.getShippingLine().getCompanyCode();
     String containerType = outbound.getContainerType().getName();
-    Page<Inbound> pages = inboundRepository.findInboundsByOutboundAndForwarder(userId, shippingLine, containerType, pageRequest);
+    Page<Inbound> pages = inboundRepository.findInboundsByOutboundAndForwarder(userId, shippingLine, containerType,
+        pageRequest);
     return pages;
   }
 

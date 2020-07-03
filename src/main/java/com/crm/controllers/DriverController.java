@@ -14,6 +14,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -32,6 +33,7 @@ import com.crm.payload.request.DriverRequest;
 import com.crm.payload.request.PaginationRequest;
 import com.crm.payload.response.MessageResponse;
 import com.crm.payload.response.PaginationResponse;
+import com.crm.security.services.UserDetailsImpl;
 import com.crm.services.DriverService;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
@@ -85,12 +87,15 @@ public class DriverController {
   }
 
   @Transactional
-  @PostMapping("/forwarder/{id}")
+  @PostMapping("/forwarder")
   @PreAuthorize("hasRole('FORWARDER')")
-  public ResponseEntity<?> createDriver(@PathVariable Long id, @Valid @RequestBody DriverRequest request) {
+  public ResponseEntity<?> createDriver(@Valid @RequestBody DriverRequest request) {
     logger.info("Driver request: {}", request);
-    driverService.createDriver(id, request);
-    return ResponseEntity.ok(new MessageResponse("Driver created successfully"));
+    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    Long id = userDetails.getId();
+    Driver driver = driverService.createDriver(id, request);
+    DriverDto driverDto = DriverMapper.toDriverDto(driver);
+    return ResponseEntity.ok(driverDto);
   }
 
   @Transactional

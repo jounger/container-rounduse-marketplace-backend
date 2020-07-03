@@ -9,7 +9,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -24,44 +24,27 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
 
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
-@ToString
+@AllArgsConstructor
 @Entity
-@Table(name = "container")
+@Table(name = "combined")
 @EntityListeners(AuditingEntityListener.class)
 @JsonIgnoreProperties(value = { "createdAt", "updatedAt" }, allowGetters = true)
-public class Container {
+public class Combined {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
-
-  @ManyToOne
-  @JoinColumn(name = "driver_id")
-  private Driver driver;
-
-  @ManyToOne
-  @JoinColumn(name = "bill_of_lading_id")
-  private BillOfLading billOfLading;
-
-  @Column(name = "container_number")
-  private String containerNumber;
-
-  private String trailer;
-
-  private String tractor;
-
-  @Column(name = "license_plate")
-  private String licensePlate;
-
-  // EnumSupplyStatus
+  
+  @OneToOne
+  @JoinColumn(name = "bidding_document_id")
+  private BiddingDocument biddingDocument;
+  
   private String status;
-
+  
   @Column(name = "created_at", nullable = false, updatable = false)
   @Temporal(TemporalType.TIMESTAMP)
   @CreatedDate
@@ -71,7 +54,4 @@ public class Container {
   @Temporal(TemporalType.TIMESTAMP)
   @LastModifiedDate
   private Date updatedAt;
-
-  @ManyToOne
-  private Bid bid;
 }

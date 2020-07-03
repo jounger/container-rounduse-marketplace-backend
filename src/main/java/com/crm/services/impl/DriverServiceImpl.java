@@ -57,7 +57,7 @@ public class DriverServiceImpl implements DriverService {
 
     driver.setPhone(request.getPhone());
     driver.setEmail(request.getEmail());
-    driver.setStatus(EnumUserStatus.PENDING.name());
+    driver.setStatus(EnumUserStatus.ACTIVE.name());
     driver.setAddress(request.getAddress());
 
     Set<Role> roles = new HashSet<>();

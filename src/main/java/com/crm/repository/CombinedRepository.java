@@ -13,6 +13,6 @@ public interface CombinedRepository extends JpaRepository<Combined, Long>{
   @Query(value = "FROM Combined c WHERE c.biddingDocument.offeree.id = :id")
   Page<Combined> findByMerchant(@Param("id") Long id, Pageable pageable);
   
-  @Query(value = "SELECT c FROM Combined c JOIN c.biddingDocument bd JOIN bd.bids b WHERE b.bidder.username = :username")
-  Page<Combined> findByForwarder(@Param("username") String username, Pageable pageable);
+  @Query(value = "SELECT c FROM Combined c JOIN c.biddingDocument bd JOIN bd.bids b WHERE b.bidder.id = :id")
+  Page<Combined> findByForwarder(@Param("id") Long id, Pageable pageable);
 }

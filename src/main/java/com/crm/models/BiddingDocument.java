@@ -82,6 +82,8 @@ public class BiddingDocument {
 
   @Column(name = "price_leadership")
   private Double priceLeadership;
+  
+  private String status;
 
   @Column(name = "created_at", nullable = false, updatable = false)
   @Temporal(TemporalType.TIMESTAMP)

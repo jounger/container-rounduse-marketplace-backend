@@ -6,6 +6,9 @@ import java.time.format.DateTimeFormatter;
 public class Tool {
 
   public static LocalDateTime convertToLocalDateTime(String date) {
+    if (date.trim().length() <= 10) {
+      date += "T00:00";
+    }
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd\'T\'HH:mm");
     LocalDateTime dateTime = LocalDateTime.parse(date, formatter);
     return dateTime;
@@ -16,6 +19,18 @@ public class Tool {
     String dateTime = time.format(formatter);
     return dateTime;
 
+  }
+
+  /*
+   * 
+   */
+  public static boolean isBlank(String string) {
+    string = string.trim();
+    if (string.isEmpty()) {
+      return true;
+    } else {
+      return false;
+    }
   }
 
 }

@@ -57,7 +57,7 @@ public class DriverServiceImpl implements DriverService {
 
     driver.setPhone(request.getPhone());
     driver.setEmail(request.getEmail());
-    driver.setStatus(EnumUserStatus.PENDING.name());
+    driver.setStatus(EnumUserStatus.ACTIVE.name());
     driver.setAddress(request.getAddress());
 
     Set<Role> roles = new HashSet<>();
@@ -103,8 +103,10 @@ public class DriverServiceImpl implements DriverService {
     Driver driver = driverRepository.findById(request.getId())
         .orElseThrow(() -> new NotFoundException("Driver is not found."));
 
-//    String encoder = passwordEncoder.encode(request.getPassword());
-//    driver.setPassword(encoder);
+    /*
+     * String encoder = passwordEncoder.encode(request.getPassword());
+     * driver.setPassword(encoder);
+     */
 
     driver.setPhone(request.getPhone());
 
@@ -141,11 +143,11 @@ public class DriverServiceImpl implements DriverService {
   public Driver editDriver(Long id, Map<String, Object> updates) {
     Driver driver = driverRepository.findById(id).orElseThrow(() -> new NotFoundException("Driver is not found."));
 
-    String password = (String) updates.get("password");
-    if (password != null) {
-      String encoder = passwordEncoder.encode(password);
-      driver.setPassword(encoder);
-    }
+    /*
+     * String password = (String) updates.get("password"); if (password != null) {
+     * String encoder = passwordEncoder.encode(password);
+     * driver.setPassword(encoder); }
+     */
 
     String email = (String) updates.get("email");
     if (email != null && UserServiceImpl.isEmailChange(email, driver)) {
@@ -153,27 +155,27 @@ public class DriverServiceImpl implements DriverService {
     }
 
     String phone = (String) updates.get("phone");
-    if (phone != null) {
+    if (phone != null && !phone.isEmpty()) {
       driver.setPhone(phone);
     }
 
     String address = (String) updates.get("address");
-    if (address != null) {
+    if (address != null && !address.isEmpty()) {
       driver.setAddress(address);
     }
 
     String fullname = (String) updates.get("fullname");
-    if (fullname != null) {
+    if (fullname != null && fullname.isEmpty()) {
       driver.setFullname(fullname);
     }
 
     String driverLicense = (String) updates.get("driverLicense");
-    if (driverLicense != null) {
+    if (driverLicense != null && driverLicense.isEmpty()) {
       driver.setDriverLicense(driverLicense);
     }
 
     String location = (String) updates.get("location");
-    if (location != null) {
+    if (location != null && !location.isEmpty()) {
       driver.setLocation(location);
     }
 

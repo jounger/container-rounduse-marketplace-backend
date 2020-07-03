@@ -89,8 +89,10 @@ public class ShippingLineServiceImpl implements ShippingLineService {
     ShippingLine shippingLine = shippingLineRepository.findById(request.getId())
         .orElseThrow(() -> new NotFoundException("Shipping Line is not found."));
 
-    String encoder = passwordEncoder.encode(request.getPassword());
-    shippingLine.setPassword(encoder);
+    /*
+     * String encoder = passwordEncoder.encode(request.getPassword());
+     * shippingLine.setPassword(encoder);
+     */
 
     Role userRole = roleRepository.findByName(request.getRoles().iterator().next())
         .orElseThrow(() -> new NotFoundException("Error: Role is not found"));
@@ -123,65 +125,65 @@ public class ShippingLineServiceImpl implements ShippingLineService {
     ShippingLine shippingLine = shippingLineRepository.findById(id)
         .orElseThrow(() -> new NotFoundException("Shipping Line is not found."));
 
-    String password = (String) updates.get("password");
-    if (password != null) {
-      String encoder = passwordEncoder.encode(password);
-      shippingLine.setPassword(encoder);
-    }
+    /*
+     * String password = (String) updates.get("password"); if (password != null &&
+     * !password.isEmpty()) { String encoder = passwordEncoder.encode(password);
+     * shippingLine.setPassword(encoder); }
+     */
 
     String email = (String) updates.get("email");
-    if (email != null && UserServiceImpl.isEmailChange(email, shippingLine)) {
+    if (email != null && UserServiceImpl.isEmailChange(email, shippingLine) && !email.isEmpty()) {
       shippingLine.setEmail(email);
     }
 
     String phone = (String) updates.get("phone");
-    if (phone != null) {
+    if (phone != null && !phone.isEmpty()) {
       shippingLine.setPhone(phone);
     }
 
     String address = (String) updates.get("address");
-    if (address != null) {
+    if (address != null && !address.isEmpty()) {
       shippingLine.setAddress(address);
     }
 
     String status = (String) updates.get("status");
-    if (status != null) {
+    if (status != null && !status.isEmpty()) {
       EnumUserStatus eStatus = EnumUserStatus.findByName(status);
       shippingLine.setStatus(eStatus.name());
     }
 
     String website = (String) updates.get("website");
-    if (website != null) {
+    if (website != null && !website.isEmpty()) {
       shippingLine.setWebsite(website);
     }
 
     String contactPerson = (String) updates.get("contactPerson");
-    if (contactPerson != null) {
+    if (contactPerson != null && !contactPerson.isEmpty()) {
       shippingLine.setContactPerson(contactPerson);
     }
 
     String companyName = (String) updates.get("companyName");
-    if (companyName != null) {
+    if (companyName != null && !companyName.isEmpty()) {
       shippingLine.setCompanyName(companyName);
     }
 
     String companyCode = (String) updates.get("companyCode");
-    if (companyCode != null) {
+    if (companyCode != null && !companyCode.isEmpty()) {
       shippingLine.setCompanyCode(companyCode);
     }
 
     String companyDescription = (String) updates.get("companyDescription");
-    if (companyDescription != null) {
+    if (companyDescription != null && !companyDescription.isEmpty()) {
       shippingLine.setCompanyDescription(companyDescription);
     }
 
     String tin = (String) updates.get("tin");
-    if (tin != null) {
+    if (tin != null && !tin.isEmpty()) {
       shippingLine.setTin(tin);
     }
 
     String fax = (String) updates.get("fax");
-    if (fax != null) {
+    if (fax != null && !fax.isEmpty()) {
       shippingLine.setFax(fax);
     }
 

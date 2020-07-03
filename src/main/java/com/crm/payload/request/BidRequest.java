@@ -12,9 +12,6 @@ public class BidRequest {
 
   private Long id;
 
-  //biddingDocument as BiddingDocument.id
-  private Long biddingDocument;
-
   //forwarder as Forwarder.username
   private String bidder;
 

@@ -71,7 +71,7 @@ public class RoleServiceImpl implements RoleService {
           .orElseThrow(() -> new NotFoundException("Permission is not found."));
       role.getPermissions().add(rolePermission);
     });
-    
+
     role.setName(request.getName());
     roleRepository.save(role);
     return role;

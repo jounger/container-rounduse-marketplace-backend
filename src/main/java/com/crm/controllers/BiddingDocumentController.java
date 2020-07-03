@@ -109,32 +109,13 @@ public class BiddingDocumentController {
     return ResponseEntity.ok(biddingDocumentDto);
   }
 
-  @PreAuthorize("hasRole('MERCHANT')")
-  @GetMapping("/merchant/{id}")
-  public ResponseEntity<?> getBiddingDocumentsByMerchant(@PathVariable Long id, @Valid PaginationRequest request) {
+  @PreAuthorize("hasRole('MERCHANT') or hasRole('FORWARDER')")
+  @GetMapping("")
+  public ResponseEntity<?> getBiddingDocuments(@Valid PaginationRequest request) {
 
-    Page<BiddingDocument> pages = biddingDocumentService.getBiddingDocumentsByMerchant(id, request);
-
-    PaginationResponse<BiddingDocumentDto> response = new PaginationResponse<>();
-    response.setPageNumber(request.getPage());
-    response.setPageSize(request.getLimit());
-    response.setTotalElements(pages.getTotalElements());
-    response.setTotalPages(pages.getTotalPages());
-
-    List<BiddingDocument> biddingDocuments = pages.getContent();
-    List<BiddingDocumentDto> biddingDocumentsDto = new ArrayList<>();
-    biddingDocuments.forEach(
-        biddingDocument -> biddingDocumentsDto.add(BiddingDocumentMapper.toBiddingDocumentDto(biddingDocument)));
-    response.setContents(biddingDocumentsDto);
-
-    return ResponseEntity.ok(response);
-  }
-  
-  @PreAuthorize("hasRole('FORWARDER')")
-  @GetMapping("/forwarder/{id}")
-  public ResponseEntity<?> getBiddingDocumentsByForwarder(@PathVariable Long id, @Valid PaginationRequest request) {
-
-    Page<BiddingDocument> pages = biddingDocumentService.getBiddingDocumentsByForwarder(id, request);
+    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    Long id = userDetails.getId();
+    Page<BiddingDocument> pages = biddingDocumentService.getBiddingDocuments(id, request);
 
     PaginationResponse<BiddingDocumentDto> response = new PaginationResponse<>();
     response.setPageNumber(request.getPage());

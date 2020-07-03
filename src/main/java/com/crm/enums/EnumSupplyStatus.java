@@ -3,7 +3,6 @@ package com.crm.enums;
 public enum EnumSupplyStatus {
 
 	CREATED,
-	PUBLISHED,
 	BIDDING,
 	COMBINED;
 	

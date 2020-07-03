@@ -138,12 +138,12 @@ public class ForwarderServiceImpl implements ForwarderService {
      */
 
     String email = (String) updates.get("email");
-    if (email != null && UserServiceImpl.isEmailChange(email, forwarder)) {
+    if (email != null && UserServiceImpl.isEmailChange(email, forwarder) && !email.isEmpty()) {
       forwarder.setEmail(email);
     }
 
     String phone = (String) updates.get("phone");
-    if (phone != null) {
+    if (phone != null && !phone.isEmpty()) {
       forwarder.setPhone(phone);
     }
 

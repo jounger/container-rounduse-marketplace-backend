@@ -97,7 +97,7 @@ public class CombinedController {
     List<Combined> combineds = pages.getContent();
     List<CombinedDto> combinedsDto = new ArrayList<>();
     combineds.forEach(
-        combined -> combinedsDto.add(CombinedMapper.toCombinedDtoForForwarder(combined, username)));
+        combined -> combinedsDto.add(CombinedMapper.toCombinedDto(combined)));
     response.setContents(combinedsDto);
 
     return ResponseEntity.ok(response);

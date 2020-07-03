@@ -139,57 +139,57 @@ public class MerchantServiceImpl implements MerchantService {
     */
 
     String email = (String) updates.get("email");
-    if (email != null && UserServiceImpl.isEmailChange(email, merchant)) {
+    if (email != null && UserServiceImpl.isEmailChange(email, merchant) && !email.isEmpty()) {
       merchant.setEmail(email);
     }
 
     String phone = (String) updates.get("phone");
-    if (phone != null) {
+    if (phone != null && !phone.isEmpty()) {
       merchant.setPhone(phone);
     }
 
     String address = (String) updates.get("address");
-    if (address != null) {
+    if (address != null  && !address.isEmpty()) {
       merchant.setAddress(address);
     }
 
     String website = (String) updates.get("website");
-    if (website != null) {
+    if (website != null && !email.isEmpty()) {
       merchant.setWebsite(website);
     }
 
     String contactPerson = (String) updates.get("contactPerson");
-    if (contactPerson != null) {
+    if (contactPerson != null && !contactPerson.isEmpty()) {
       merchant.setContactPerson(contactPerson);
     }
 
     String companyName = (String) updates.get("companyName");
-    if (companyName != null) {
+    if (companyName != null && !companyName.isEmpty()) {
       merchant.setCompanyName(companyName);
     }
 
     String companyCode = (String) updates.get("companyCode");
-    if (companyCode != null) {
+    if (companyCode != null && !companyCode.isEmpty()) {
       merchant.setCompanyCode(companyCode);
     }
 
     String companyDescription = (String) updates.get("companyDescription");
-    if (companyDescription != null) {
+    if (companyDescription != null && !companyDescription.isEmpty()) {
       merchant.setCompanyDescription(companyDescription);
     }
 
     String companyAddress = (String) updates.get("companyAddress");
-    if (companyAddress != null) {
+    if (companyAddress != null && !companyAddress.isEmpty()) {
       merchant.setCompanyAddress(companyAddress);
     }
 
     String tin = (String) updates.get("tin");
-    if (tin != null) {
+    if (tin != null && !tin.isEmpty()) {
       merchant.setTin(tin);
     }
 
     String fax = (String) updates.get("fax");
-    if (fax != null) {
+    if (fax != null && !fax.isEmpty()) {
       merchant.setFax(fax);
     }
     

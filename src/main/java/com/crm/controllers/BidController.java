@@ -15,6 +15,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -62,12 +63,12 @@ public class BidController {
   @Transactional
   @PreAuthorize("hasRole('FORWARDER')")
   @PostMapping("/bidding-document/{id}")
-  public ResponseEntity<?> createBid(@PathVariable Long bidDocid, @Valid @RequestBody BidRequest request) {
+  public ResponseEntity<?> createBid(@PathVariable Long id, @Valid @RequestBody BidRequest request) {
     
     UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    Long id = userDetails.getId();
+    Long userId = userDetails.getId();
     
-    Bid bid = bidService.createBid(bidDocid, id, request);
+    Bid bid = bidService.createBid(id, userId, request);
     BidDto bidDto = BidMapper.toBidDto(bid);
 
     // CREATE NOTIFICATION
@@ -99,6 +100,17 @@ public class BidController {
   @GetMapping("/{id}")
   public ResponseEntity<?> getBid(@PathVariable Long id) {
     Bid bid = bidService.getBid(id);
+    BidDto bidDto = BidMapper.toBidDto(bid);
+    return ResponseEntity.ok(bidDto);
+  }
+  
+  @PreAuthorize("hasRole('FORWARDER')")
+  @GetMapping("/bidding-document/{id}")
+  public ResponseEntity<?> getBidByBiddingDocumentAndForwarder(@PathVariable Long id) {
+    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    String username = userDetails.getUsername();
+    
+    Bid bid = bidService.getBidByBiddingDocumentAndForwarder(id, username);
     BidDto bidDto = BidMapper.toBidDto(bid);
     return ResponseEntity.ok(bidDto);
   }

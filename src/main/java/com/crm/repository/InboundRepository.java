@@ -13,7 +13,7 @@ import com.crm.models.Inbound;
 public interface InboundRepository extends JpaRepository<Inbound, Long> {
 
   @Query(value = "SELECT i FROM Inbound i WHERE i.forwarder.id = :id")
-  Page<Inbound> getInboundsByFowarder(@Param("id") Long id, Pageable pageable);
+  Page<Inbound> findInboundsByFowarder(@Param("id") Long id, Pageable pageable);
 
   /*
    * @param shippingLine is companyCode of ShippingLine Entity
@@ -22,7 +22,7 @@ public interface InboundRepository extends JpaRepository<Inbound, Long> {
    * 
    */
   @Query(value = "SELECT i FROM Inbound i WHERE i.shippingLine.companyCode = :shippingLine AND i.containerType.name = :containerType")
-  Page<Inbound> getInboundsByOutbound(@Param("shippingLine") String shippingLine,
+  Page<Inbound> findInboundsByOutbound(@Param("shippingLine") String shippingLine,
       @Param("containerType") String containerType, Pageable pageable);
 
   /*
@@ -34,6 +34,6 @@ public interface InboundRepository extends JpaRepository<Inbound, Long> {
    * 
    */
   @Query(value = "SELECT i FROM Inbound i WHERE i.forwarder.id = :userId AND i.shippingLine.companyCode = :shippingLine AND i.containerType.name = :containerType")
-  Page<Inbound> getInboundsByOutboundAndForwarder(@Param("userId") Long userId,
+  Page<Inbound> findInboundsByOutboundAndForwarder(@Param("userId") Long userId,
       @Param("shippingLine") String shippingLine, @Param("containerType") String containerType, Pageable pageable);
 }

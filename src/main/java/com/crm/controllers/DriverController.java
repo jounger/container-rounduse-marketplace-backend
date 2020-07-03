@@ -93,8 +93,9 @@ public class DriverController {
     logger.info("Driver request: {}", request);
     UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     Long id = userDetails.getId();
-    driverService.createDriver(id, request);
-    return ResponseEntity.ok(new MessageResponse("Driver created successfully"));
+    Driver driver = driverService.createDriver(id, request);
+    DriverDto driverDto = DriverMapper.toDriverDto(driver);
+    return ResponseEntity.ok(driverDto);
   }
 
   @Transactional

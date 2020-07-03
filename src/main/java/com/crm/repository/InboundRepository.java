@@ -17,10 +17,23 @@ public interface InboundRepository extends JpaRepository<Inbound, Long> {
 
   /*
    * @param shippingLine is companyCode of ShippingLine Entity
+   * 
    * @param containerType is name of ContainerType Entity
    * 
    */
   @Query(value = "SELECT i FROM Inbound i WHERE i.shippingLine.companyCode = :shippingLine AND i.containerType.name = :containerType")
-  Page<Inbound> getInboundsByOutbound(@Param("shippingLine") String shippingLine, @Param("containerType") String containerType, Pageable pageable);
-  
+  Page<Inbound> getInboundsByOutbound(@Param("shippingLine") String shippingLine,
+      @Param("containerType") String containerType, Pageable pageable);
+
+  /*
+   * @param shippingLine is companyCode of ShippingLine Entity
+   * 
+   * @param containerType is name of ContainerType Entity
+   * 
+   * @param
+   * 
+   */
+  @Query(value = "SELECT i FROM Inbound i WHERE i.forwarder.id = :userId AND i.shippingLine.companyCode = :shippingLine AND i.containerType.name = :containerType")
+  Page<Inbound> getInboundsByOutboundAndForwarder(@Param("userId") Long userId,
+      @Param("shippingLine") String shippingLine, @Param("containerType") String containerType, Pageable pageable);
 }

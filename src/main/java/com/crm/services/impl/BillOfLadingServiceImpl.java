@@ -12,6 +12,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.crm.common.Tool;
+import com.crm.enums.EnumSupplyStatus;
 import com.crm.exception.DuplicateRecordException;
 import com.crm.exception.InternalException;
 import com.crm.exception.NotFoundException;
@@ -78,6 +79,10 @@ public class BillOfLadingServiceImpl implements BillOfLaingService {
 
       Set<Container> containers = billOfLading.getContainers();
       containers.forEach(item -> {
+
+        if (item.getStatus().equalsIgnoreCase(EnumSupplyStatus.COMBINED.name())) {
+          throw new InternalException(String.format("Container %s has been combined", item.getContainerNumber()));
+        }
 
         String containerNumber = item.getContainerNumber();
         String licensePlate = item.getLicensePlate();
@@ -156,6 +161,10 @@ public class BillOfLadingServiceImpl implements BillOfLaingService {
 
       Set<Container> containers = billOfLading.getContainers();
       containers.forEach(item -> {
+
+        if (item.getStatus().equalsIgnoreCase(EnumSupplyStatus.COMBINED.name())) {
+          throw new InternalException(String.format("Container %s has been combined", item.getContainerNumber()));
+        }
 
         String containerNumber = item.getContainerNumber();
         String licensePlate = item.getLicensePlate();

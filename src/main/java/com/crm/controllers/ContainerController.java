@@ -107,6 +107,26 @@ public class ContainerController {
 
   }
 
+  @GetMapping("/bid/{id}")
+  @PreAuthorize("hasRole('MODERATOR') or hasRole('FORWARDER') or hasRole('MERCHANT')")
+  public ResponseEntity<?> getContainersByBid(@PathVariable Long id, @Valid PaginationRequest request) {
+
+    Page<Container> pages = containerService.getContainersByBid(id, request);
+    PaginationResponse<ContainerDto> response = new PaginationResponse<>();
+    response.setPageNumber(request.getPage());
+    response.setPageSize(request.getLimit());
+    response.setTotalElements(pages.getTotalElements());
+    response.setTotalPages(pages.getTotalPages());
+
+    List<Container> containers = pages.getContent();
+    List<ContainerDto> containerDto = new ArrayList<>();
+    containers.forEach(container -> containerDto.add(ContainerMapper.toContainerDto(container)));
+    response.setContents(containerDto);
+
+    return ResponseEntity.ok(response);
+
+  }
+
   @Transactional
   @PostMapping("/billOfLading/{id}")
   @PreAuthorize("hasRole('MODERATOR') or hasRole('FORWARDER')")

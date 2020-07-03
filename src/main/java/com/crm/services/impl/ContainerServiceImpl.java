@@ -224,6 +224,9 @@ public class ContainerServiceImpl implements ContainerService {
 
     Container container = containerRepository.findById(id)
         .orElseThrow(() -> new NotFoundException("ERROR: Container is not found."));
+    if (container.getStatus().equalsIgnoreCase(EnumSupplyStatus.COMBINED.name())) {
+      throw new InternalException(String.format("Container %s has been combined", container.getContainerNumber()));
+    }
 
     BillOfLading billOfLading = (BillOfLading) container.getBillOfLading();
 
@@ -308,5 +311,21 @@ public class ContainerServiceImpl implements ContainerService {
 
     containerRepository.save(container);
     return container;
+  }
+
+  @Override
+  public Page<Container> getContainersByBid(Long id, PaginationRequest request) {
+
+    String status = request.getStatus();
+    PageRequest pageRequest = PageRequest.of(request.getPage(), request.getLimit(),
+        Sort.by(Sort.Direction.DESC, "createdAt"));
+    Page<Container> pages = null;
+
+    if (status != null && !status.isEmpty()) {
+      pages = containerRepository.getContainersByBid(id, status, pageRequest);
+    } else {
+      pages = containerRepository.getContainersByBid(id, pageRequest);
+    }
+    return pages;
   }
 }

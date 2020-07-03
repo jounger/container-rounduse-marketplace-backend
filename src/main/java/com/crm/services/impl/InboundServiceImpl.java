@@ -262,6 +262,11 @@ public class InboundServiceImpl implements InboundService {
 
       Set<Container> setContainers = inbound.getBillOfLading().getContainers();
       setContainers.forEach(item -> {
+
+        if (item.getStatus().equalsIgnoreCase(EnumSupplyStatus.COMBINED.name())) {
+          throw new InternalException(String.format("Container %s has been combined", item.getContainerNumber()));
+        }
+
         for (int i = 0; i < containersRequest.size(); i++) {
           if (item.getContainerNumber().equals(containersRequest.get(i).getContainerNumber())
               || item.getLicensePlate().equals(containersRequest.get(i).getLicensePlate())
@@ -381,6 +386,10 @@ public class InboundServiceImpl implements InboundService {
       Set<Container> containers = inbound.getBillOfLading().getContainers();
       containers.forEach(item -> {
 
+        if (item.getStatus().equalsIgnoreCase(EnumSupplyStatus.COMBINED.name())) {
+          throw new InternalException(String.format("Container %s has been combined", item.getContainerNumber()));
+        }
+
         String containerNumber = item.getContainerNumber();
         String licensePlate = item.getLicensePlate();
         List<BillOfLading> billOfLadings = billOfLadingRepository.findAll();
@@ -446,6 +455,18 @@ public class InboundServiceImpl implements InboundService {
       }
     });
     inboundRepository.delete(inbound);
+  }
+
+  @Override
+  public Page<Inbound> getInboundsByOutboundAndForwarder(Long id, Long userId, PaginationRequest request) {
+    Outbound outbound = outboundRepository.findById(id)
+        .orElseThrow(() -> new NotFoundException("ERROR: Outbound is not found."));
+    PageRequest pageRequest = PageRequest.of(request.getPage(), request.getLimit(),
+        Sort.by(Sort.Direction.DESC, "createdAt"));
+    String shippingLine = outbound.getShippingLine().getCompanyCode();
+    String containerType = outbound.getContainerType().getName();
+    Page<Inbound> pages = inboundRepository.getInboundsByOutboundAndForwarder(userId, shippingLine, containerType, pageRequest);
+    return pages;
   }
 
 }

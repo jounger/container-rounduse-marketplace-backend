@@ -40,10 +40,10 @@ public class ForwarderController {
   private ForwarderService forwarderService;
 
   @Transactional
-  @PostMapping("")
+  @PostMapping("hasRole('MODERATOR')")
   public ResponseEntity<?> createForwarder(@Valid @RequestBody ForwarderRequest request) {
     forwarderService.createForwarder(request);
-    return ResponseEntity.ok("Shipping Line created successfully");
+    return ResponseEntity.ok("Forwarder created successfully");
   }
 
   @PreAuthorize("hasRole('MODERATOR')")
@@ -65,8 +65,8 @@ public class ForwarderController {
 
     return ResponseEntity.ok(response);
   }
-  
-  @PreAuthorize("hasRole('MODERATOR')")
+
+  @PreAuthorize("hasRole('MERCHANT') or hasRole('FORWARDER')")
   @GetMapping("/outbound/{id}")
   public ResponseEntity<?> findForwardersByOutbound(@PathVariable Long id, @Valid PaginationRequest request) {
 
@@ -95,7 +95,7 @@ public class ForwarderController {
   }
 
   @Transactional
-  @PreAuthorize("hasRole('FORWARDER')")
+  @PreAuthorize("hasRole('MODERATOR') or hasRole('FORWARDER')")
   @PutMapping("")
   public ResponseEntity<?> updateForwarder(@Valid @RequestBody ForwarderRequest request) {
     Forwarder forwarder = forwarderService.updateForwarder(request);
@@ -104,7 +104,7 @@ public class ForwarderController {
   }
 
   @Transactional
-  @PreAuthorize("hasRole('FORWARDER')")
+  @PreAuthorize("hasRole('MODERATOR') or hasRole('FORWARDER')")
   @RequestMapping(value = "/{id}", method = RequestMethod.PATCH, consumes = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<?> editForwarder(@PathVariable("id") Long id, @RequestBody Map<String, Object> updates) {
     Forwarder forwarder = forwarderService.editForwarder(id, updates);

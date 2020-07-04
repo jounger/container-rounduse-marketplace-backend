@@ -1,8 +1,6 @@
 package com.crm.services.impl;
 
 import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,23 +10,27 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.crm.common.Tool;
+import com.crm.enums.EnumBidStatus;
+import com.crm.enums.EnumBiddingStatus;
 import com.crm.enums.EnumCurrency;
 import com.crm.enums.EnumSupplyStatus;
 import com.crm.exception.DuplicateRecordException;
 import com.crm.exception.InternalException;
 import com.crm.exception.NotFoundException;
-import com.crm.models.Bid;
 import com.crm.models.BiddingDocument;
 import com.crm.models.Discount;
 import com.crm.models.Merchant;
 import com.crm.models.Outbound;
+import com.crm.models.User;
 import com.crm.payload.request.BiddingDocumentRequest;
 import com.crm.payload.request.PaginationRequest;
+import com.crm.repository.BidRepository;
 import com.crm.repository.BiddingDocumentRepository;
+import com.crm.repository.ContainerRepository;
 import com.crm.repository.DiscountRepository;
-import com.crm.repository.ForwarderRepository;
 import com.crm.repository.MerchantRepository;
 import com.crm.repository.OutboundRepository;
+import com.crm.repository.UserRepository;
 import com.crm.services.BiddingDocumentService;
 
 @Service
@@ -41,7 +43,7 @@ public class BiddingDocumentServiceImpl implements BiddingDocumentService {
   private MerchantRepository merchantRepository;
 
   @Autowired
-  private ForwarderRepository forwarderRepository;
+  private UserRepository userRepository;
 
   @Autowired
   private OutboundRepository outboundRepository;
@@ -49,13 +51,18 @@ public class BiddingDocumentServiceImpl implements BiddingDocumentService {
   @Autowired
   private DiscountRepository discountRepository;
 
+  @Autowired
+  private ContainerRepository containerRepository;
+
+  @Autowired
+  private BidRepository bidRepository;
+
   @Override
   public BiddingDocument createBiddingDocument(Long id, BiddingDocumentRequest request) {
     BiddingDocument biddingDocument = new BiddingDocument();
 
     Merchant merchant = new Merchant();
-    merchant = merchantRepository.findById(id)
-        .orElseThrow(() -> new NotFoundException("Merchant is not found"));
+    merchant = merchantRepository.findById(id).orElseThrow(() -> new NotFoundException("Merchant is not found"));
     biddingDocument.setOfferee(merchant);
 
     Outbound outbound = new Outbound();
@@ -94,6 +101,8 @@ public class BiddingDocumentServiceImpl implements BiddingDocumentService {
       biddingDocument.setBidDiscountCode(bidDiscountCode);
     }
 
+    biddingDocument.setStatus(EnumBiddingStatus.BIDDING.name());
+
     biddingDocumentRepository.save(biddingDocument);
     return biddingDocument;
   }
@@ -107,41 +116,28 @@ public class BiddingDocumentServiceImpl implements BiddingDocumentService {
   }
 
   @Override
-  public Page<BiddingDocument> getBiddingDocuments(PaginationRequest request) {
-    Page<BiddingDocument> biddingDocuments = biddingDocumentRepository
-        .findAll(PageRequest.of(request.getPage(), request.getLimit(), Sort.by("id").descending()));
-    return biddingDocuments;
-  }
-
-  @Override
-  public Page<BiddingDocument> getBiddingDocumentsByMerchant(Long id, PaginationRequest request) {
+  public Page<BiddingDocument> getBiddingDocuments(Long id, PaginationRequest request) {
+    User user = userRepository.findById(id).orElseThrow(() -> new NotFoundException("User is not found."));
+    String status = request.getStatus();
     Page<BiddingDocument> biddingDocuments = null;
-    if (merchantRepository.existsById(id)) {
-      biddingDocuments = biddingDocumentRepository.findBiddingDocumentByMerchant(id,
-          PageRequest.of(request.getPage(), request.getLimit(), Sort.by("id").descending()));
-    } else {
-      throw new NotFoundException("Merchant is not found.");
+    if (user.getRoles().iterator().next().getName().equalsIgnoreCase("ROLE_MERCHANT")) {
+      if (status != null && !status.isEmpty()) {
+        biddingDocuments = biddingDocumentRepository.findBiddingDocumentByMerchant(id, request.getStatus(),
+            PageRequest.of(request.getPage(), request.getLimit(), Sort.by("id").descending()));
+      } else {
+        biddingDocuments = biddingDocumentRepository.findBiddingDocumentByMerchant(id,
+            PageRequest.of(request.getPage(), request.getLimit(), Sort.by("id").descending()));
+      }
     }
-    return biddingDocuments;
-  }
-
-  @Override
-  public Page<BiddingDocument> getBiddingDocumentsByForwarder(Long id, PaginationRequest request) {
-    Page<BiddingDocument> biddingDocuments = null;
-    if (forwarderRepository.existsById(id)) {
-      biddingDocuments = biddingDocumentRepository.findBiddingDocumentByForwarder(id,
-          PageRequest.of(request.getPage(), request.getLimit(), Sort.by("id").descending()));
-    } else {
-      throw new NotFoundException("Merchant is not found.");
+    if (user.getRoles().iterator().next().getName().equalsIgnoreCase("ROLE_FORWARDER")) {
+      if (status != null && !status.isEmpty()) {
+        biddingDocuments = biddingDocumentRepository.findBiddingDocumentByForwarder(id, request.getStatus(),
+            PageRequest.of(request.getPage(), request.getLimit(), Sort.by("id").descending()));
+      } else {
+        biddingDocuments = biddingDocumentRepository.findBiddingDocumentByForwarder(id,
+            PageRequest.of(request.getPage(), request.getLimit(), Sort.by("id").descending()));
+      }
     }
-    
-    List<BiddingDocument> bdList = biddingDocuments.getContent();
-    bdList.parallelStream().forEach(bd -> {
-      Bid result = bd.getBids().stream().filter((bid) -> bid.getBidder().getId() == id).findAny()
-          .orElseThrow(() -> new NotFoundException("Bidder is not found."));
-      bd.setBids(Arrays.asList(result));
-    });
-    
     return biddingDocuments;
   }
 
@@ -175,6 +171,10 @@ public class BiddingDocumentServiceImpl implements BiddingDocumentService {
   public BiddingDocument editBiddingDocument(Long id, Map<String, Object> updates) {
     BiddingDocument biddingDocument = biddingDocumentRepository.findById(id)
         .orElseThrow(() -> new NotFoundException("Bidding document is not found."));
+
+    if (biddingDocument.getStatus().equalsIgnoreCase(EnumBiddingStatus.COMBINED.name())) {
+      throw new InternalException("CAN NOT edit bidding document if it was combined.");
+    }
 
     String bidOpening = (String) updates.get("bidOpening");
     if (bidOpening != null && !bidOpening.isEmpty()) {
@@ -219,6 +219,30 @@ public class BiddingDocumentServiceImpl implements BiddingDocumentService {
       }
     } catch (Exception e) {
       throw new InternalException("Parameters must be double.");
+    }
+
+    String status = (String) updates.get("status");
+    if (status != null && !status.isEmpty()) {
+      EnumBiddingStatus eStatus = EnumBiddingStatus.findByName(status);
+      if (eStatus != null) {
+        biddingDocument.setStatus(eStatus.name());
+      } else {
+        throw new NotFoundException("Status is not found.");
+      }
+      if (eStatus.name().equalsIgnoreCase(EnumBiddingStatus.CANCELED.name())) {
+        Outbound outbound = biddingDocument.getOutbound();
+        outbound.setStatus(EnumSupplyStatus.CREATED.name());
+        outboundRepository.save(outbound);
+
+        biddingDocument.getBids().forEach(bid -> {
+          bid.setStatus(EnumBidStatus.REJECTED.name());
+          bid.getContainers().forEach(container -> {
+            container.setStatus(EnumSupplyStatus.CREATED.name());
+            containerRepository.save(container);
+          });
+          bidRepository.save(bid);
+        });
+      }
     }
 
     biddingDocumentRepository.save(biddingDocument);

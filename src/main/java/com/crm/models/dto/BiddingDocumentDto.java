@@ -32,4 +32,6 @@ public class BiddingDocumentDto {
   private Double bidFloorPrice;
   
   private Double priceLeadership;
+  
+  private String status;
 }

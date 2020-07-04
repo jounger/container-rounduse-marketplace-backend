@@ -129,7 +129,7 @@ public class OperatorServiceImpl implements OperatorService {
      */
 
     String email = (String) updates.get("email");
-    if (email != null && UserServiceImpl.isEmailChange(email, operator) && email.isEmpty()) {
+    if (email != null && UserServiceImpl.isEmailChange(email, operator) && !email.isEmpty()) {
       operator.setEmail(email);
     }
 

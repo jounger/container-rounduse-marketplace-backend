@@ -41,7 +41,7 @@ public class ContainerController {
   private ContainerService containerService;
 
   @GetMapping("")
-  @PreAuthorize("hasRole('MODERATOR') or hasRole('FORWARDER') or hasRole('MERCHANT')")
+  @PreAuthorize("hasRole('FORWARDER') or hasRole('MERCHANT')")
   public ResponseEntity<?> getContainers(@Valid PaginationRequest request) {
     Page<Container> pages = containerService.getContainers(request);
     PaginationResponse<ContainerDto> response = new PaginationResponse<>();
@@ -59,7 +59,7 @@ public class ContainerController {
   }
 
   @GetMapping("/{id}")
-  @PreAuthorize("hasRole('MODERATOR') or hasRole('FORWARDER') or hasRole('MERCHANT')")
+  @PreAuthorize("hasRole('FORWARDER') or hasRole('MERCHANT')")
   public ResponseEntity<?> getContainer(@PathVariable Long id) {
     Container container = containerService.getContainerById(id);
     ContainerDto containerDto = new ContainerDto();
@@ -67,8 +67,8 @@ public class ContainerController {
     return ResponseEntity.ok(containerDto);
   }
 
-  @GetMapping("/billOfLading/{id}")
-  @PreAuthorize("hasRole('MODERATOR') or hasRole('FORWARDER') or hasRole('MERCHANT')")
+  @GetMapping("/bill-of-lading/{id}")
+  @PreAuthorize("hasRole('FORWARDER') or hasRole('MERCHANT')")
   public ResponseEntity<?> getContainersByBillOfLading(@PathVariable Long id, @Valid PaginationRequest request) {
 
     Page<Container> pages = containerService.getContainersByBillOfLading(id, request);
@@ -88,7 +88,7 @@ public class ContainerController {
   }
 
   @GetMapping("/inbound/{id}")
-  @PreAuthorize("hasRole('MODERATOR') or hasRole('FORWARDER') or hasRole('MERCHANT')")
+  @PreAuthorize("hasRole('FORWARDER') or hasRole('MERCHANT')")
   public ResponseEntity<?> getContainersByInbound(@PathVariable Long id, @Valid PaginationRequest request) {
 
     Page<Container> pages = containerService.getContainersByInbound(id, request);
@@ -107,9 +107,29 @@ public class ContainerController {
 
   }
 
+  @GetMapping("/bid/{id}")
+  @PreAuthorize("hasRole('FORWARDER') or hasRole('MERCHANT')")
+  public ResponseEntity<?> getContainersByBid(@PathVariable Long id, @Valid PaginationRequest request) {
+
+    Page<Container> pages = containerService.getContainersByBid(id, request);
+    PaginationResponse<ContainerDto> response = new PaginationResponse<>();
+    response.setPageNumber(request.getPage());
+    response.setPageSize(request.getLimit());
+    response.setTotalElements(pages.getTotalElements());
+    response.setTotalPages(pages.getTotalPages());
+
+    List<Container> containers = pages.getContent();
+    List<ContainerDto> containerDto = new ArrayList<>();
+    containers.forEach(container -> containerDto.add(ContainerMapper.toContainerDto(container)));
+    response.setContents(containerDto);
+
+    return ResponseEntity.ok(response);
+
+  }
+
   @Transactional
-  @PostMapping("/billOfLading/{id}")
-  @PreAuthorize("hasRole('MODERATOR') or hasRole('FORWARDER')")
+  @PostMapping("/bill-of-lading/{id}")
+  @PreAuthorize("hasRole('FORWARDER')")
   public ResponseEntity<?> createContainer(@PathVariable Long id, @Valid @RequestBody ContainerRequest request) {
     Container container = containerService.createContainer(id, request);
     ContainerDto containerDto = ContainerMapper.toContainerDto(container);
@@ -118,14 +138,14 @@ public class ContainerController {
 
   @Transactional
   @PutMapping("")
-  @PreAuthorize("hasRole('MODERATOR') or hasRole('FORWARDER')")
+  @PreAuthorize("hasRole('FORWARDER')")
   public ResponseEntity<?> updateContainer(@Valid @RequestBody ContainerRequest request) {
     Container container = containerService.updateContainer(request);
     ContainerDto containerDto = ContainerMapper.toContainerDto(container);
     return ResponseEntity.ok(containerDto);
   }
 
-  @PreAuthorize("hasRole('MODERATOR') or hasRole('FORWARDER')")
+  @PreAuthorize("hasRole('FORWARDER')")
   @RequestMapping(value = "/{id}", method = RequestMethod.PATCH, consumes = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<?> editContainer(@RequestBody Map<String, Object> updates, @PathVariable("id") Long id) {
     Container container = containerService.editContainer(updates, id);
@@ -136,7 +156,7 @@ public class ContainerController {
 
   @Transactional
   @DeleteMapping("/{id}")
-  @PreAuthorize("hasRole('MODERATOR') or hasRole('FORWARDER')")
+  @PreAuthorize("hasRole('FORWARDER')")
   public ResponseEntity<?> removeContainer(@PathVariable Long id) {
     containerService.removeContainer(id);
     return ResponseEntity.ok(new MessageResponse("Container has remove successfully"));

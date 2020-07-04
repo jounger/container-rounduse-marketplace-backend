@@ -90,7 +90,7 @@ public class InboundServiceImpl implements InboundService {
     if (forwarderRepository.existsById(id)) {
       PageRequest pageRequest = PageRequest.of(request.getPage(), request.getLimit(),
           Sort.by(Sort.Direction.DESC, "createdAt"));
-      Page<Inbound> pages = inboundRepository.getInboundsByFowarder(id, pageRequest);
+      Page<Inbound> pages = inboundRepository.findInboundsByFowarder(id, pageRequest);
       return pages;
     } else {
       throw new NotFoundException("ERROR: Forwarder is not found.");
@@ -105,7 +105,7 @@ public class InboundServiceImpl implements InboundService {
         Sort.by(Sort.Direction.DESC, "createdAt"));
     String shippingLine = outbound.getShippingLine().getCompanyCode();
     String containerType = outbound.getContainerType().getName();
-    Page<Inbound> pages = inboundRepository.getInboundsByOutbound(shippingLine, containerType, pageRequest);
+    Page<Inbound> pages = inboundRepository.findInboundsByOutbound(shippingLine, containerType, pageRequest);
     return pages;
   }
 
@@ -123,11 +123,6 @@ public class InboundServiceImpl implements InboundService {
     ContainerType containerType = containerTypeRepository.findByName(request.getContainerType())
         .orElseThrow(() -> new NotFoundException("ERROR: ContainerType is not found."));
     inbound.setContainerType(containerType);
-
-    if (request.getEmptyTime() != null && !request.getEmptyTime().isEmpty()) {
-      LocalDateTime emptyTime = Tool.convertToLocalDateTime(request.getEmptyTime());
-      inbound.setEmptyTime(emptyTime);
-    }
 
     inbound.setReturnStation(request.getReturnStation());
 
@@ -163,6 +158,9 @@ public class InboundServiceImpl implements InboundService {
 
     inbound.setPickupTime(pickupTime);
     billOfLading.setFreeTime(freeTime);
+
+    LocalDateTime emptyTime = pickupTime.plusDays(1);
+    inbound.setEmptyTime(emptyTime);
 
     for (int i = 0; i < containersRequest.size(); i++) {
 
@@ -236,11 +234,6 @@ public class InboundServiceImpl implements InboundService {
         .orElseThrow(() -> new NotFoundException("ERROR: Type is not found."));
     inbound.setContainerType(containerType);
 
-    if (request.getEmptyTime() != null && !request.getEmptyTime().isEmpty()) {
-      LocalDateTime emptyTime = Tool.convertToLocalDateTime(request.getEmptyTime());
-      inbound.setEmptyTime(emptyTime);
-    }
-
     inbound.setReturnStation(request.getReturnStation());
 
     BillOfLading billOfLading = (BillOfLading) inbound.getBillOfLading();
@@ -262,6 +255,11 @@ public class InboundServiceImpl implements InboundService {
 
       Set<Container> setContainers = inbound.getBillOfLading().getContainers();
       setContainers.forEach(item -> {
+
+        if (item.getStatus().equalsIgnoreCase(EnumSupplyStatus.COMBINED.name())) {
+          throw new InternalException(String.format("Container %s has been combined", item.getContainerNumber()));
+        }
+
         for (int i = 0; i < containersRequest.size(); i++) {
           if (item.getContainerNumber().equals(containersRequest.get(i).getContainerNumber())
               || item.getLicensePlate().equals(containersRequest.get(i).getLicensePlate())
@@ -283,6 +281,9 @@ public class InboundServiceImpl implements InboundService {
 
       inbound.setPickupTime(pickupTime);
       billOfLading.setFreeTime(freeTime);
+
+      LocalDateTime emptyTime = pickupTime.plusDays(1);
+      inbound.setEmptyTime(emptyTime);
 
       for (int i = 0; i < containersRequest.size(); i++) {
         Container container = containerRepository.findById(containersRequest.get(i).getId())
@@ -378,8 +379,15 @@ public class InboundServiceImpl implements InboundService {
     if (pickupTimeRequest != null && !pickupTimeRequest.isEmpty()) {
       LocalDateTime pickupTime = Tool.convertToLocalDateTime(pickupTimeRequest);
 
+      LocalDateTime emptyTime = pickupTime.plusDays(1);
+      inbound.setEmptyTime(emptyTime);
+
       Set<Container> containers = inbound.getBillOfLading().getContainers();
       containers.forEach(item -> {
+
+        if (item.getStatus().equalsIgnoreCase(EnumSupplyStatus.COMBINED.name())) {
+          throw new InternalException(String.format("Container %s has been combined", item.getContainerNumber()));
+        }
 
         String containerNumber = item.getContainerNumber();
         String licensePlate = item.getLicensePlate();
@@ -446,6 +454,19 @@ public class InboundServiceImpl implements InboundService {
       }
     });
     inboundRepository.delete(inbound);
+  }
+
+  @Override
+  public Page<Inbound> getInboundsByOutboundAndForwarder(Long id, Long userId, PaginationRequest request) {
+    Outbound outbound = outboundRepository.findById(id)
+        .orElseThrow(() -> new NotFoundException("ERROR: Outbound is not found."));
+    PageRequest pageRequest = PageRequest.of(request.getPage(), request.getLimit(),
+        Sort.by(Sort.Direction.DESC, "createdAt"));
+    String shippingLine = outbound.getShippingLine().getCompanyCode();
+    String containerType = outbound.getContainerType().getName();
+    Page<Inbound> pages = inboundRepository.findInboundsByOutboundAndForwarder(userId, shippingLine, containerType,
+        pageRequest);
+    return pages;
   }
 
 }

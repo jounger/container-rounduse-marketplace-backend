@@ -13,14 +13,27 @@ import com.crm.models.Inbound;
 public interface InboundRepository extends JpaRepository<Inbound, Long> {
 
   @Query(value = "SELECT i FROM Inbound i WHERE i.forwarder.id = :id")
-  Page<Inbound> getInboundsByFowarder(@Param("id") Long id, Pageable pageable);
+  Page<Inbound> findInboundsByFowarder(@Param("id") Long id, Pageable pageable);
 
   /*
    * @param shippingLine is companyCode of ShippingLine Entity
+   * 
    * @param containerType is name of ContainerType Entity
    * 
    */
   @Query(value = "SELECT i FROM Inbound i WHERE i.shippingLine.companyCode = :shippingLine AND i.containerType.name = :containerType")
-  Page<Inbound> getInboundsByOutbound(@Param("shippingLine") String shippingLine, @Param("containerType") String containerType, Pageable pageable);
-  
+  Page<Inbound> findInboundsByOutbound(@Param("shippingLine") String shippingLine,
+      @Param("containerType") String containerType, Pageable pageable);
+
+  /*
+   * @param shippingLine is companyCode of ShippingLine Entity
+   * 
+   * @param containerType is name of ContainerType Entity
+   * 
+   * @param
+   * 
+   */
+  @Query(value = "SELECT i FROM Inbound i WHERE i.forwarder.id = :userId AND i.shippingLine.companyCode = :shippingLine AND i.containerType.name = :containerType")
+  Page<Inbound> findInboundsByOutboundAndForwarder(@Param("userId") Long userId,
+      @Param("shippingLine") String shippingLine, @Param("containerType") String containerType, Pageable pageable);
 }

@@ -12,12 +12,14 @@ import com.crm.enums.EnumCombinedStatus;
 import com.crm.exception.NotFoundException;
 import com.crm.models.BiddingDocument;
 import com.crm.models.Combined;
+import com.crm.models.User;
 import com.crm.payload.request.CombinedRequest;
 import com.crm.payload.request.PaginationRequest;
 import com.crm.repository.BiddingDocumentRepository;
 import com.crm.repository.CombinedRepository;
 import com.crm.repository.ForwarderRepository;
 import com.crm.repository.MerchantRepository;
+import com.crm.repository.UserRepository;
 import com.crm.services.CombinedService;
 
 @Service
@@ -28,12 +30,9 @@ public class CombinedServiceImpl implements CombinedService {
 
   @Autowired
   private BiddingDocumentRepository biddingDocumentRepository;
-
+  
   @Autowired
-  private MerchantRepository merchantRepository;
-
-  @Autowired
-  private ForwarderRepository forwarderRepository;
+  private UserRepository userRepository;
 
   @Override
   public Combined createCombined(CombinedRequest request) {
@@ -57,25 +56,18 @@ public class CombinedServiceImpl implements CombinedService {
   }
 
   @Override
-  public Page<Combined> getCombinedsByMerchant(Long id, PaginationRequest request) {
-    if (merchantRepository.existsById(id)) {
-      Page<Combined> combineds = combinedRepository.findByMerchant(id,
+  public Page<Combined> getCombinedsByUser(Long id, PaginationRequest request) {
+    User user = userRepository.findById(id).orElseThrow(() -> new NotFoundException("User is not found."));
+    String role = user.getRoles().iterator().next().getName();
+    Page<Combined> combineds = null;
+    if (role.equalsIgnoreCase("ROLE_MERCHANT")) {
+      combineds = combinedRepository.findByMerchant(id,
           PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt")));
-      return combineds;
-    }else {
-      throw new NotFoundException("Merchant is not found.");
+    }else if(role.equalsIgnoreCase("ROLE_FORWARDER")) {
+      combineds = combinedRepository.findByForwarder(id,
+          PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt")));
     }
-  }
-
-  @Override
-  public Page<Combined> getCombinedsByForwarder(String username, PaginationRequest request) {
-    if(forwarderRepository.existsByUsername(username)) {
-      Page<Combined> combineds = combinedRepository.findByForwarder(username,
-          PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt")));
-      return combineds;
-    }else {
-      throw new NotFoundException("Forwarder is not found.");
-    } 
+    return combineds;
   }
 
   @Override

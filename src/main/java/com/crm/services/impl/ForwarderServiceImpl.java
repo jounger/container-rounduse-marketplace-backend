@@ -14,12 +14,15 @@ import org.springframework.stereotype.Service;
 import com.crm.enums.EnumUserStatus;
 import com.crm.exception.DuplicateRecordException;
 import com.crm.exception.NotFoundException;
+import com.crm.models.Booking;
 import com.crm.models.Forwarder;
+import com.crm.models.Outbound;
 import com.crm.models.Role;
 import com.crm.payload.request.ForwarderRequest;
 import com.crm.payload.request.PaginationRequest;
 import com.crm.payload.request.SupplierRequest;
 import com.crm.repository.ForwarderRepository;
+import com.crm.repository.OutboundRepository;
 import com.crm.repository.RoleRepository;
 import com.crm.repository.UserRepository;
 import com.crm.services.ForwarderService;
@@ -38,6 +41,9 @@ public class ForwarderServiceImpl implements ForwarderService {
 
   @Autowired
   private ForwarderRepository forwarderRepository;
+
+  @Autowired
+  private OutboundRepository outboundRepository;
 
   @Override
   public Forwarder createForwarder(SupplierRequest request) {
@@ -138,12 +144,12 @@ public class ForwarderServiceImpl implements ForwarderService {
      */
 
     String email = (String) updates.get("email");
-    if (email != null && UserServiceImpl.isEmailChange(email, forwarder)) {
+    if (email != null && UserServiceImpl.isEmailChange(email, forwarder) && !email.isEmpty()) {
       forwarder.setEmail(email);
     }
 
     String phone = (String) updates.get("phone");
-    if (phone != null) {
+    if (phone != null && !phone.isEmpty()) {
       forwarder.setPhone(phone);
     }
 
@@ -204,6 +210,21 @@ public class ForwarderServiceImpl implements ForwarderService {
       throw new NotFoundException("Forwarder is not found.");
     }
 
+  }
+
+  @Override
+  public Page<Forwarder> findForwardersByOutbound(Long id, PaginationRequest request) {
+    Outbound outbound = outboundRepository.findById(id)
+        .orElseThrow(() -> new NotFoundException("ERROR: Outbound is not found."));
+    PageRequest pageRequest = PageRequest.of(request.getPage(), request.getLimit(),
+        Sort.by(Sort.Direction.DESC, "createdAt"));
+    String shippingLine = outbound.getShippingLine().getCompanyCode();
+    String containerType = outbound.getContainerType().getName();
+    Booking booking = outbound.getBooking();
+
+    Page<Forwarder> forwarders = forwarderRepository.findByOutbound(shippingLine, containerType,
+        outbound.getPackingTime(), booking.getCutOffTime(), pageRequest);
+    return forwarders;
   }
 
 }

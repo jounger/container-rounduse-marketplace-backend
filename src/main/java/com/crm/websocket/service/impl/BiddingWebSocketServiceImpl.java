@@ -24,7 +24,7 @@ public class BiddingWebSocketServiceImpl implements BiddingWebSocketService {
   SimpMessagingTemplate messagingTemplate;
 
   @Override
-  public void broadcastBiddingNotifyToUser(BiddingNotification notification) {
+  public void sendBiddingNotifyToUser(BiddingNotification notification) {
     BiddingNotificationDto notificationDto = BiddingNotificationMapper.toBiddingNotificationDto(notification);
     logger.info("Send to: {}", notificationDto.getRecipient());
     logger.info("Notification: {}", notificationDto.toString());
@@ -33,7 +33,7 @@ public class BiddingWebSocketServiceImpl implements BiddingWebSocketService {
   }
 
   @Override
-  public void broadcastBiddingNotifyToShippingLine(BiddingNotification notification, Bid bid) {
+  public void sendBiddingNotifyToShippingLine(BiddingNotification notification, Bid bid) {
     ShippingLineNotificationDto shippingLineNotificationDto = ShippingLineNotificationMapper
         .toShippingLineNotificationDto(notification, bid);
     logger.info("Send to: {}", shippingLineNotificationDto.getRecipient());

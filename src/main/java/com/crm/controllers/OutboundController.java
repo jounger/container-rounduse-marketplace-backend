@@ -11,6 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -30,6 +31,7 @@ import com.crm.payload.request.OutboundRequest;
 import com.crm.payload.request.PaginationRequest;
 import com.crm.payload.response.MessageResponse;
 import com.crm.payload.response.PaginationResponse;
+import com.crm.security.services.UserDetailsImpl;
 import com.crm.services.OutboundService;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
@@ -88,9 +90,12 @@ public class OutboundController {
   }
 
   @Transactional
-  @PostMapping("/merchant/{id}")
+  @PostMapping("")
   @PreAuthorize("hasRole('MERCHANT')")
-  public ResponseEntity<?> createOutbound(@PathVariable Long id, @Valid @RequestBody OutboundRequest request) {
+  public ResponseEntity<?> createOutbound(@Valid @RequestBody OutboundRequest request) {
+    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
+        .getPrincipal();
+    Long id = userDetails.getId();
     Outbound outbound = outBoundService.createOutbound(id, request);
     OutboundDto outboundDto = new OutboundDto();
     outboundDto = OutboundMapper.toOutboundDto(outbound);

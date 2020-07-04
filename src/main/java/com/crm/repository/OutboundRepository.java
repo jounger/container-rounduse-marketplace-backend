@@ -12,13 +12,19 @@ import org.springframework.stereotype.Repository;
 import com.crm.models.Outbound;
 
 @Repository
-public interface OutboundRepository extends JpaRepository<Outbound, Long>{
-  
+public interface OutboundRepository extends JpaRepository<Outbound, Long> {
+
   boolean existsById(Long id);
-  
+
   Optional<Outbound> findById(Long id);
+
+  @Query(value = "SELECT o FROM Outbound o WHERE o.status = :status")
+  Page<Outbound> findAll(@Param("status") String status, Pageable pageable);
 
   @Query(value = "SELECT o FROM Outbound o WHERE o.merchant.id = :id")
   Page<Outbound> findByMerchantId(@Param("id") Long id, Pageable pageable);
+
+  @Query(value = "SELECT o FROM Outbound o WHERE o.merchant.id = :id AND o.status = :status")
+  Page<Outbound> findByMerchantId(@Param("id") Long id, @Param("status") String status, Pageable pageable);
 
 }

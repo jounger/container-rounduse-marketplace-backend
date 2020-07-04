@@ -132,9 +132,12 @@ public class InboundController {
   }
 
   @Transactional
-  @PostMapping("/forwarder/{id}")
+  @PostMapping("")
   @PreAuthorize("hasRole('FORWARDER')")
-  public ResponseEntity<?> createInbound(@PathVariable Long id, @Valid @RequestBody InboundRequest request) {
+  public ResponseEntity<?> createInbound(@Valid @RequestBody InboundRequest request) {
+    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
+        .getPrincipal();
+    Long id = userDetails.getId();
     Inbound inbound = inboundService.createInbound(id, request);
     InboundDto inboundDto = new InboundDto();
     inboundDto = InboundMapper.toInboundDto(inbound);

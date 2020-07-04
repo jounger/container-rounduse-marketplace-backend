@@ -44,8 +44,11 @@ public class Outbound extends Supply {
   @Column(name = "packing_station")
   private String packingStation;
 
-  @Column(name = "payload")
-  private Double payload;
+  @Column(name = "gross_weight")
+  private Double grossWeight;
+
+  @Column(name = "delivery_time")
+  private LocalDateTime deliveryTime;
 
   // EnumUnit
   @Column(name = "unit_of_measurment")

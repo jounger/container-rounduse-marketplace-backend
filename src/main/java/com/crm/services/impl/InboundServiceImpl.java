@@ -256,8 +256,10 @@ public class InboundServiceImpl implements InboundService {
       Set<Container> setContainers = inbound.getBillOfLading().getContainers();
       setContainers.forEach(item -> {
 
-        if (item.getStatus().equalsIgnoreCase(EnumSupplyStatus.COMBINED.name())) {
-          throw new InternalException(String.format("Container %s has been combined", item.getContainerNumber()));
+        if (item.getStatus().equalsIgnoreCase(EnumSupplyStatus.COMBINED.name())
+            || item.getStatus().equalsIgnoreCase(EnumSupplyStatus.BIDDING.name())) {
+          throw new InternalException(
+              String.format("Container %s has been %s", item.getContainerNumber(), item.getStatus()));
         }
 
         for (int i = 0; i < containersRequest.size(); i++) {
@@ -385,8 +387,10 @@ public class InboundServiceImpl implements InboundService {
       Set<Container> containers = inbound.getBillOfLading().getContainers();
       containers.forEach(item -> {
 
-        if (item.getStatus().equalsIgnoreCase(EnumSupplyStatus.COMBINED.name())) {
-          throw new InternalException(String.format("Container %s has been combined", item.getContainerNumber()));
+        if (item.getStatus().equalsIgnoreCase(EnumSupplyStatus.COMBINED.name())
+            || item.getStatus().equalsIgnoreCase(EnumSupplyStatus.BIDDING.name())) {
+          throw new InternalException(
+              String.format("Container %s has been %s", item.getContainerNumber(), item.getStatus()));
         }
 
         String containerNumber = item.getContainerNumber();
@@ -449,8 +453,10 @@ public class InboundServiceImpl implements InboundService {
 
     Set<Container> containers = inbound.getBillOfLading().getContainers();
     containers.forEach(item -> {
-      if (item.getStatus().equalsIgnoreCase(EnumSupplyStatus.COMBINED.name())) {
-        throw new InternalException(String.format("Container %s has been combined", item.getContainerNumber()));
+      if (item.getStatus().equalsIgnoreCase(EnumSupplyStatus.COMBINED.name())
+          || item.getStatus().equalsIgnoreCase(EnumSupplyStatus.BIDDING.name())) {
+        throw new InternalException(
+            String.format("Container %s has been %s", item.getContainerNumber(), item.getStatus()));
       }
     });
     inboundRepository.delete(inbound);

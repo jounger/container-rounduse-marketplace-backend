@@ -5,7 +5,7 @@ import com.crm.models.BiddingNotification;
 
 public interface BiddingWebSocketService {
 
-  void broadcastBiddingNotifyToUser(BiddingNotification notification);
+  void sendBiddingNotifyToUser(BiddingNotification notification);
 
-  void broadcastBiddingNotifyToShippingLine(BiddingNotification notification, Bid bid);
+  void sendBiddingNotifyToShippingLine(BiddingNotification notification, Bid bid);
 }

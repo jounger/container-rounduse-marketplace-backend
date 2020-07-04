@@ -6,12 +6,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.persistence.criteria.CommonAbstractCriteria;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import com.crm.common.Constant;
 import com.crm.common.Tool;
 import com.crm.enums.EnumBidStatus;
 import com.crm.enums.EnumBiddingStatus;
@@ -111,18 +114,7 @@ public class BidServiceImpl implements BidService {
     LocalDateTime bidDate = LocalDateTime.now();
     bid.setBidDate(bidDate);
 
-    LocalDateTime bidValidityPeriod = Tool.convertToLocalDateTime(request.getBidValidityPeriod());
-    if (bidValidityPeriod != null) {
-      if (bidValidityPeriod.isAfter(LocalDateTime.now().plusDays(1))
-          || bidValidityPeriod.isEqual(LocalDateTime.now().plusDays(1))) {
-        bid.setBidValidityPeriod(bidValidityPeriod);
-      } else {
-        throw new InternalException("Bid validity period must be at least 1 day after now.");
-      }
-    } else {
-      bid.setBidValidityPeriod(LocalDateTime.now().plusDays(1));
-    }
-
+    bid.setBidValidityPeriod(LocalDateTime.now().plusHours(Constant.BID_VALIDITY_PERIOD));
     bid.setStatus(EnumBidStatus.PENDING.name());
 
     bidRepository.save(bid);
@@ -175,6 +167,11 @@ public class BidServiceImpl implements BidService {
       throw new InternalException("Bid only can be edited while in PENDING status.");
     }
 
+    LocalDateTime bidValidityPeriod = bid.getBidValidityPeriod();
+    if (bidValidityPeriod.isAfter(LocalDateTime.now())) {
+      throw new InternalException("Bid only can be edited after bid validity period.");
+    }
+
     Forwarder bidder = forwarderRepository.findByUsername(request.getBidder())
         .orElseThrow(() -> new NotFoundException("Forwarder is not found."));
     bid.setBidder(bidder);
@@ -192,6 +189,7 @@ public class BidServiceImpl implements BidService {
     oldContainers.forEach(container -> {
       container.setStatus(EnumSupplyStatus.CREATED.name());
       containerRepository.save(container);
+
     });
 
     List<Container> suitableContainers = containerRepository.findByOutbound(outbound.getShippingLine().getCompanyCode(),
@@ -204,29 +202,20 @@ public class BidServiceImpl implements BidService {
       if (suitableContainers.contains(container)) {
         container.setStatus(EnumSupplyStatus.BIDDING.name());
         bid.getContainers().add(container);
+        bid.setBidValidityPeriod(LocalDateTime.now().plusHours(Constant.BID_VALIDITY_PERIOD));
       } else {
         throw new NotFoundException("Container is not suitable.");
       }
     });
 
-    bid.setBidPrice(request.getBidPrice());
-
+    if (bid.getBidPrice() != request.getBidPrice()) {
+      bid.setBidPrice(request.getBidPrice());
+      bid.setBidValidityPeriod(LocalDateTime.now().plusHours(Constant.BID_VALIDITY_PERIOD));
+    }
     /*
      * update bidDate is not allowed LocalDateTime bidDate =
      * Tool.convertToLocalDateTime(request.getBidDate()); bid.setBidDate(bidDate);
      */
-
-    LocalDateTime bidValidityPeriod = Tool.convertToLocalDateTime(request.getBidValidityPeriod());
-    if (bidValidityPeriod != null) {
-      if (bidValidityPeriod.isAfter(LocalDateTime.now().plusDays(1))
-          || bidValidityPeriod.isEqual(LocalDateTime.now().plusDays(1))) {
-        bid.setBidValidityPeriod(bidValidityPeriod);
-      } else {
-        throw new InternalException("Bid validity period must be at least 1 day after now.");
-      }
-    } else {
-      bid.setBidValidityPeriod(LocalDateTime.now().plusDays(1));
-    }
 
     EnumBidStatus eBidStatus = EnumBidStatus.findByName(request.getStatus());
     bid.setStatus(eBidStatus.name());
@@ -293,6 +282,7 @@ public class BidServiceImpl implements BidService {
           container.setStatus(EnumSupplyStatus.BIDDING.name());
           bid.getContainers().add(container);
           containerRepository.save(container);
+          bid.setBidValidityPeriod(LocalDateTime.now().plusHours(Constant.BID_VALIDITY_PERIOD));
         } else {
           throw new NotFoundException("Container is not suitable.");
         }
@@ -305,6 +295,7 @@ public class BidServiceImpl implements BidService {
       if (bidPriceString != null && !bidPriceString.isEmpty()) {
         Double bidPrice = Double.parseDouble(bidPriceString);
         bid.setBidPrice(bidPrice);
+        bid.setBidValidityPeriod(LocalDateTime.now().plusHours(Constant.BID_VALIDITY_PERIOD));
       }
     } catch (Exception e) {
       throw new InternalException("Parameter must be Double");
@@ -315,21 +306,6 @@ public class BidServiceImpl implements BidService {
      * updates.get("bid_date"); if (bidDateString != null) { LocalDateTime bidDate =
      * Tool.convertToLocalDateTime(bidDateString); bid.setBidDate(bidDate); }
      */
-
-    String bidValidityPeriodString = (String) updates.get("bidValidityPeriod");
-    if (bidValidityPeriodString != null && !bidValidityPeriodString.isEmpty()) {
-      LocalDateTime bidValidityPeriod = Tool.convertToLocalDateTime(bidValidityPeriodString);
-      if (bidValidityPeriod != null) {
-        if (bidValidityPeriod.isAfter(LocalDateTime.now().plusDays(1))
-            || bidValidityPeriod.isEqual(LocalDateTime.now().plusDays(1))) {
-          bid.setBidValidityPeriod(bidValidityPeriod);
-        } else {
-          throw new InternalException("Bid validity period must be at least 1 day after now.");
-        }
-      } else {
-        bid.setBidValidityPeriod(LocalDateTime.now().plusDays(1));
-      }
-    }
 
     String statusString = (String) updates.get("status");
     if (statusString != null && !statusString.isEmpty()) {

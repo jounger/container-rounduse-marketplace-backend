@@ -7,8 +7,6 @@ import java.util.Map;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
@@ -26,41 +24,24 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.crm.enums.EnumBiddingNotificationType;
 import com.crm.models.BiddingDocument;
-import com.crm.models.BiddingNotification;
-import com.crm.models.Forwarder;
 import com.crm.models.dto.BiddingDocumentDto;
 import com.crm.models.mapper.BiddingDocumentMapper;
 import com.crm.payload.request.BiddingDocumentRequest;
-import com.crm.payload.request.BiddingNotificationRequest;
 import com.crm.payload.request.PaginationRequest;
 import com.crm.payload.response.MessageResponse;
 import com.crm.payload.response.PaginationResponse;
 import com.crm.security.services.UserDetailsImpl;
 import com.crm.services.BiddingDocumentService;
-import com.crm.services.BiddingNotificationService;
-import com.crm.services.ForwarderService;
-import com.crm.websocket.service.BiddingWebSocketService;
+import com.crm.websocket.controller.NotificationController;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 @RequestMapping("/api/bidding-document")
 public class BiddingDocumentController {
 
-  private static final Logger logger = LoggerFactory.getLogger(BiddingDocumentController.class);
-
   @Autowired
   private BiddingDocumentService biddingDocumentService;
-
-  @Autowired
-  private ForwarderService forwarderService;
-
-  @Autowired
-  private BiddingNotificationService biddingNotificationService;
-
-  @Autowired
-  private BiddingWebSocketService biddingWebSocketService;
 
   @Transactional
   @PreAuthorize("hasRole('MERCHANT')")
@@ -75,31 +56,7 @@ public class BiddingDocumentController {
     BiddingDocumentDto biddingDocumentDto = BiddingDocumentMapper.toBiddingDocumentDto(biddingDocument);
 
     // CREATE NOTIFICATION
-    BiddingNotificationRequest notifyRequest = new BiddingNotificationRequest();
-    PaginationRequest paging = new PaginationRequest();
-    paging.setPage(0);
-    paging.setLimit(100);
-    Page<Forwarder> forwardersPage = forwarderService.findForwardersByOutbound(biddingDocument.getOutbound().getId(),
-        paging);
-    // TODO: deal with duplicate forwarder
-    List<Forwarder> forwarders = forwardersPage.getContent();
-    List<BiddingNotification> notifications = new ArrayList<>();
-
-    // Create new message notifications and save to Database
-    for (Forwarder f : forwarders) {
-      notifyRequest.setRecipient(f.getUsername());
-      notifyRequest.setRelatedResource(biddingDocument.getId());
-      notifyRequest.setMessage(
-          String.format("You got a new Bidding Document from %s", biddingDocument.getOfferee().getUsername()));
-      notifyRequest.setType(EnumBiddingNotificationType.ADDED.name());
-      BiddingNotification notification = biddingNotificationService.createBiddingNotification(notifyRequest);
-      notifications.add(notification);
-    }
-    // Asynchronous send notification to forwarders
-    notifications.parallelStream().forEach(notification -> {
-      logger.info("notification : {}", notification.getId());
-      biddingWebSocketService.broadcastBiddingNotifyToUser(notification);
-    });
+    NotificationController.broadcastCreateBiddingDocumentToForwarder(biddingDocument);
     // END NOTIFICATION
 
     return ResponseEntity.ok(biddingDocumentDto);

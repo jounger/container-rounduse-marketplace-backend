@@ -7,8 +7,6 @@ import java.util.Map;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
@@ -27,70 +25,39 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.crm.enums.EnumBidStatus;
-import com.crm.enums.EnumBiddingNotificationType;
 import com.crm.models.Bid;
-import com.crm.models.BiddingNotification;
-import com.crm.models.Merchant;
 import com.crm.models.dto.BidDto;
 import com.crm.models.mapper.BidMapper;
 import com.crm.payload.request.BidRequest;
-import com.crm.payload.request.BiddingNotificationRequest;
 import com.crm.payload.request.PaginationRequest;
 import com.crm.payload.response.MessageResponse;
 import com.crm.payload.response.PaginationResponse;
 import com.crm.security.services.UserDetailsImpl;
 import com.crm.services.BidService;
-import com.crm.services.BiddingNotificationService;
-import com.crm.websocket.service.BiddingWebSocketService;
+import com.crm.websocket.controller.NotificationController;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 @RequestMapping("/api/bid")
 public class BidController {
 
-  private static final Logger logger = LoggerFactory.getLogger(BiddingDocumentController.class);
-
   @Autowired
   private BidService bidService;
-
-  @Autowired
-  private BiddingNotificationService biddingNotificationService;
-
-  @Autowired
-  private BiddingWebSocketService biddingWebSocketService;
 
   @Transactional
   @PreAuthorize("hasRole('FORWARDER')")
   @PostMapping("/bidding-document/{id}")
   public ResponseEntity<?> createBid(@PathVariable Long id, @Valid @RequestBody BidRequest request) {
-    
-    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
+        .getPrincipal();
     Long userId = userDetails.getId();
-    
+
     Bid bid = bidService.createBid(id, userId, request);
     BidDto bidDto = BidMapper.toBidDto(bid);
 
     // CREATE NOTIFICATION
-    BiddingNotificationRequest notifyRequest = new BiddingNotificationRequest();
-    PaginationRequest paging = new PaginationRequest();
-    paging.setPage(0);
-    paging.setLimit(100);
-    Merchant offeree = bid.getBiddingDocument().getOfferee();
-
-    // Create new message notifications and save to Database
-
-    notifyRequest.setRecipient(offeree.getUsername());
-    notifyRequest.setRelatedResource(bid.getBiddingDocument().getId());
-    notifyRequest.setMessage(String.format("You got a new Bid from %s", bid.getBidder().getUsername()));
-    notifyRequest.setType(EnumBiddingNotificationType.ADDED.name());
-    BiddingNotification notification = biddingNotificationService.createBiddingNotification(notifyRequest);
-
-    // Asynchronous send notification to merchant
-
-    logger.info("notification : {}", notification.getId());
-    biddingWebSocketService.broadcastBiddingNotifyToUser(notification);
-
+    NotificationController.broadcastCreateBidToMerchant(bid);
     // END NOTIFICATION
 
     return ResponseEntity.ok(bidDto);
@@ -103,13 +70,13 @@ public class BidController {
     BidDto bidDto = BidMapper.toBidDto(bid);
     return ResponseEntity.ok(bidDto);
   }
-  
+
   @PreAuthorize("hasRole('FORWARDER')")
   @GetMapping("/bidding-document/{id}")
   public ResponseEntity<?> getBidByBiddingDocumentAndForwarder(@PathVariable Long id) {
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
-    
+
     Bid bid = bidService.getBidByBiddingDocumentAndForwarder(id, username);
     BidDto bidDto = BidMapper.toBidDto(bid);
     return ResponseEntity.ok(bidDto);
@@ -168,75 +135,13 @@ public class BidController {
   @PreAuthorize("hasRole('MERCHANT') or hasRole('FORWARDER')")
   @RequestMapping(value = "/{id}", method = RequestMethod.PATCH, consumes = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<?> editBid(@PathVariable("id") Long id, @RequestBody Map<String, Object> updates) {
-    BiddingNotification notification = new BiddingNotification();
     Bid bid = bidService.getBid(id);
     String status = bid.getStatus();
     Bid bidEdit = bidService.editBid(id, updates);
     BidDto BidDto = BidMapper.toBidDto(bidEdit);
 
     // CREATE NOTIFICATION
-    BiddingNotificationRequest notifyRequest = new BiddingNotificationRequest();
-    PaginationRequest paging = new PaginationRequest();
-    paging.setPage(0);
-    paging.setLimit(100);
-    Merchant offeree = bidEdit.getBiddingDocument().getOfferee();
-
-    // Create new message notifications and save to Database
-    if (bidEdit.getStatus().equals(status)) {
-
-      notifyRequest.setRecipient(offeree.getUsername());
-      notifyRequest.setRelatedResource(bidEdit.getBiddingDocument().getId());
-      notifyRequest.setMessage(String.format("Bid have been MODIFIED by %s", bidEdit.getBidder().getUsername()));
-      notifyRequest.setType(EnumBiddingNotificationType.MODIFIED.name());
-      notification = biddingNotificationService.createBiddingNotification(notifyRequest);
-
-      // Asynchronous send notification to merchant
-
-      logger.info("notification : {}", notification.getId());
-      biddingWebSocketService.broadcastBiddingNotifyToUser(notification);
-
-    } else {
-      if (bidEdit.getStatus().equals(EnumBidStatus.ACCEPTED.name())) {
-
-        notifyRequest.setRecipient(bid.getBidder().getUsername());
-        notifyRequest.setRelatedResource(bid.getBiddingDocument().getId());
-        notifyRequest.setMessage(String.format("Your Bid have ACCEPTED from %s", offeree.getUsername()));
-        notifyRequest.setType(EnumBiddingNotificationType.ACCEPTED.name());
-        notification = biddingNotificationService.createBiddingNotification(notifyRequest);
-
-        // Asynchronous send notification to forwarders
-
-        logger.info("notification : {}", notification.getId());
-        biddingWebSocketService.broadcastBiddingNotifyToUser(notification);
-
-        String numberOfContainer = String.valueOf(bid.getContainers().size());
-        String shippingLine = bid.getBiddingDocument().getOutbound().getShippingLine().getUsername();
-        notifyRequest.setRecipient(shippingLine);
-        notifyRequest.setRelatedResource(bid.getBiddingDocument().getId());
-        notifyRequest.setMessage(String.format("%s and %s want to borrow %s container from you", offeree.getUsername(),
-            bidEdit.getBidder().getUsername(), numberOfContainer));
-        notifyRequest.setType(EnumBiddingNotificationType.ACCEPTED.name());
-        notification = biddingNotificationService.createBiddingNotification(notifyRequest);
-
-        // Asynchronous send notification to ShippingLine
-
-        biddingWebSocketService.broadcastBiddingNotifyToShippingLine(notification, bidEdit);
-
-      } else if (bidEdit.getStatus().equals(EnumBidStatus.REJECTED.name())) {
-
-        notifyRequest.setRecipient(bid.getBidder().getUsername());
-        notifyRequest.setRelatedResource(bid.getBiddingDocument().getId());
-        notifyRequest.setMessage(String.format("Your Bid have REJECTED from %s", offeree.getUsername()));
-        notifyRequest.setType(EnumBiddingNotificationType.REJECTED.name());
-        notification = biddingNotificationService.createBiddingNotification(notifyRequest);
-
-        // Asynchronous send notification to forwarders
-
-        logger.info("notification : {}", notification.getId());
-        biddingWebSocketService.broadcastBiddingNotifyToUser(notification);
-      }
-    }
-
+    NotificationController.broadcastEditBidToMerchantOrForwarder(status, bidEdit);
     // END NOTIFICATION
 
     return ResponseEntity.ok(BidDto);
@@ -250,25 +155,7 @@ public class BidController {
     bidService.removeBid(id);
 
     // CREATE NOTIFICATION
-    BiddingNotificationRequest notifyRequest = new BiddingNotificationRequest();
-    PaginationRequest paging = new PaginationRequest();
-    paging.setPage(0);
-    paging.setLimit(100);
-    Merchant offeree = bid.getBiddingDocument().getOfferee();
-
-    // Create new message notifications and save to Database
-
-    notifyRequest.setRecipient(offeree.getUsername());
-    notifyRequest.setRelatedResource(bid.getBiddingDocument().getId());
-    notifyRequest.setMessage(String.format("Bid have been REMOVED by %s", bid.getBidder().getUsername()));
-    notifyRequest.setType(EnumBiddingNotificationType.REMOVED.name());
-    BiddingNotification notification = biddingNotificationService.createBiddingNotification(notifyRequest);
-
-    // Asynchronous send notification to merchant
-
-    logger.info("notification : {}", notification.getId());
-    biddingWebSocketService.broadcastBiddingNotifyToUser(notification);
-
+    NotificationController.broadcastRemoveBidToMerchant(bid);
     // END NOTIFICATION
 
     return ResponseEntity.ok(new MessageResponse("Bidding document deleted successfully."));

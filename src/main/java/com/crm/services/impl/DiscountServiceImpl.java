@@ -130,14 +130,14 @@ public class DiscountServiceImpl implements DiscountService {
       }
     }
 
-    Double percent = (Double) updates.get("percent");
-    if (percent != null) {
-      discount.setPercent(percent);
+    String percent = (String) updates.get("percent");
+    if (percent != null && !percent.isEmpty()) {
+      discount.setPercent(Double.valueOf(percent));
     }
 
-    Double maximumDiscount = (Double) updates.get("maximumDiscount");
-    if (maximumDiscount != null) {
-      discount.setMaximumDiscount(maximumDiscount);
+    String maximumDiscount = (String) updates.get("maximumDiscount");
+    if (maximumDiscount != null && !maximumDiscount.isEmpty()) {
+      discount.setMaximumDiscount(Double.valueOf(maximumDiscount));
     }
 
     String expiredDateString = (String) updates.get("expiredDate");

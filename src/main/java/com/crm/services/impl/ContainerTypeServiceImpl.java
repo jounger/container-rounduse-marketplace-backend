@@ -126,42 +126,42 @@ public class ContainerTypeServiceImpl implements ContainerTypeService {
     }
 
     String tareWeight = (String) updates.get("tareWeight");
-    if (tareWeight != null) {
+    if (tareWeight != null && !tareWeight.isEmpty()) {
       containerType.setTareWeight(Double.valueOf(tareWeight));
     }
 
     String payloadCapacity = (String) updates.get("payloadCapacity");
-    if (payloadCapacity != null) {
+    if (payloadCapacity != null && !payloadCapacity.isEmpty()) {
       containerType.setPayloadCapacity(Double.valueOf(payloadCapacity));
     }
 
     String cubicCapacity = (String) updates.get("cubicCapacity");
-    if (cubicCapacity != null) {
+    if (cubicCapacity != null && !cubicCapacity.isEmpty()) {
       containerType.setCubicCapacity(Double.valueOf(cubicCapacity));
     }
 
     String internalLength = (String) updates.get("internalLength");
-    if (internalLength != null) {
+    if (internalLength != null && !internalLength.isEmpty()) {
       containerType.setInternalLength(Double.valueOf(internalLength));
     }
 
     String internalHeight = (String) updates.get("internalHeight");
-    if (internalHeight != null) {
+    if (internalHeight != null && !internalHeight.isEmpty()) {
       containerType.setInternalHeight(Double.valueOf(internalHeight));
     }
 
     String internalWidth = (String) updates.get("internalWidth");
-    if (internalWidth != null) {
+    if (internalWidth != null && !internalWidth.isEmpty()) {
       containerType.setInternalWidth(Double.valueOf(internalWidth));
     }
 
     String doorOpeningHeight = (String) updates.get("doorOpeningHeight");
-    if (doorOpeningHeight != null) {
+    if (doorOpeningHeight != null && !doorOpeningHeight.isEmpty()) {
       containerType.setDoorOpeningHeight(Double.valueOf(doorOpeningHeight));
     }
 
     String doorOpeningWidth = (String) updates.get("doorOpeningWidth");
-    if (doorOpeningWidth != null) {
+    if (doorOpeningWidth != null && !doorOpeningWidth.isEmpty()) {
       containerType.setDoorOpeningWidth(Double.valueOf(doorOpeningWidth));
     }
 

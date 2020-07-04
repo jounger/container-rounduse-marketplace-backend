@@ -1,10 +1,8 @@
 package com.crm.controllers;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.transaction.Transactional;
 import javax.validation.Valid;
@@ -32,7 +30,6 @@ import com.crm.enums.EnumBiddingNotificationType;
 import com.crm.models.BiddingDocument;
 import com.crm.models.BiddingNotification;
 import com.crm.models.Forwarder;
-import com.crm.models.Inbound;
 import com.crm.models.dto.BiddingDocumentDto;
 import com.crm.models.mapper.BiddingDocumentMapper;
 import com.crm.payload.request.BiddingDocumentRequest;
@@ -43,7 +40,7 @@ import com.crm.payload.response.PaginationResponse;
 import com.crm.security.services.UserDetailsImpl;
 import com.crm.services.BiddingDocumentService;
 import com.crm.services.BiddingNotificationService;
-import com.crm.services.InboundService;
+import com.crm.services.ForwarderService;
 import com.crm.websocket.service.BiddingWebSocketService;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
@@ -57,22 +54,23 @@ public class BiddingDocumentController {
   private BiddingDocumentService biddingDocumentService;
 
   @Autowired
+  private ForwarderService forwarderService;
+
+  @Autowired
   private BiddingNotificationService biddingNotificationService;
 
   @Autowired
   private BiddingWebSocketService biddingWebSocketService;
 
-  @Autowired
-  private InboundService inboundService;
-
   @Transactional
   @PreAuthorize("hasRole('MERCHANT')")
   @PostMapping("")
   public ResponseEntity<?> createBiddingDocument(@Valid @RequestBody BiddingDocumentRequest request) {
-    
-    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
+        .getPrincipal();
     Long id = userDetails.getId();
-    
+
     BiddingDocument biddingDocument = biddingDocumentService.createBiddingDocument(id, request);
     BiddingDocumentDto biddingDocumentDto = BiddingDocumentMapper.toBiddingDocumentDto(biddingDocument);
 
@@ -81,14 +79,12 @@ public class BiddingDocumentController {
     PaginationRequest paging = new PaginationRequest();
     paging.setPage(0);
     paging.setLimit(100);
-    Page<Inbound> inboundsPaging = inboundService.getInboundsByOutbound(biddingDocument.getOutbound().getId(), paging);
+    Page<Forwarder> forwardersPage = forwarderService.findForwardersByOutbound(biddingDocument.getOutbound().getId(),
+        paging);
     // TODO: deal with duplicate forwarder
-    Set<Forwarder> forwarders = new HashSet<>();
-    List<Inbound> inbounds = inboundsPaging.getContent();
+    List<Forwarder> forwarders = forwardersPage.getContent();
     List<BiddingNotification> notifications = new ArrayList<>();
-    inbounds.parallelStream().forEach(inbound -> {
-      forwarders.add(inbound.getForwarder());
-    });
+
     // Create new message notifications and save to Database
     for (Forwarder f : forwarders) {
       notifyRequest.setRecipient(f.getUsername());
@@ -113,7 +109,8 @@ public class BiddingDocumentController {
   @GetMapping("")
   public ResponseEntity<?> getBiddingDocuments(@Valid PaginationRequest request) {
 
-    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
+        .getPrincipal();
     Long id = userDetails.getId();
     Page<BiddingDocument> pages = biddingDocumentService.getBiddingDocuments(id, request);
 

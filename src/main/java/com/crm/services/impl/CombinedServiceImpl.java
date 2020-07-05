@@ -17,8 +17,6 @@ import com.crm.payload.request.CombinedRequest;
 import com.crm.payload.request.PaginationRequest;
 import com.crm.repository.BiddingDocumentRepository;
 import com.crm.repository.CombinedRepository;
-import com.crm.repository.ForwarderRepository;
-import com.crm.repository.MerchantRepository;
 import com.crm.repository.UserRepository;
 import com.crm.services.CombinedService;
 

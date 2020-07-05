@@ -166,9 +166,10 @@ public class OutboundServiceImpl implements OutboundService {
 
     Outbound outbound = outboundRepository.findById(request.getId())
         .orElseThrow(() -> new NotFoundException("ERROR: Outbound is not found."));
-    if (outbound.getStatus().equals(EnumSupplyStatus.COMBINED.name())) {
-      throw new InternalException(
-          String.format("Outbound with bookingNumber %s has been combined", outbound.getBooking().getBookingNumber()));
+    if (outbound.getStatus().equals(EnumSupplyStatus.COMBINED.name())
+        || outbound.getStatus().equals(EnumSupplyStatus.BIDDING.name())) {
+      throw new InternalException(String.format("Outbound with bookingNumber %s has been %s",
+          outbound.getBooking().getBookingNumber(), outbound.getStatus()));
     }
 
     ShippingLine shippingLine = shippingLineRepository.findByCompanyCode(request.getShippingLine())
@@ -230,9 +231,10 @@ public class OutboundServiceImpl implements OutboundService {
   public Outbound editOutbound(Map<String, Object> updates, Long id) {
     Outbound outbound = outboundRepository.findById(id)
         .orElseThrow(() -> new NotFoundException("ERROR: Outbound is not found."));
-    if (outbound.getStatus().equals(EnumSupplyStatus.COMBINED.name())) {
-      throw new InternalException(
-          String.format("Outbound with bookingNumber %s has been combined", outbound.getBooking().getBookingNumber()));
+    if (outbound.getStatus().equals(EnumSupplyStatus.COMBINED.name())
+        || outbound.getStatus().equals(EnumSupplyStatus.BIDDING.name())) {
+      throw new InternalException(String.format("Outbound with bookingNumber %s has been %s",
+          outbound.getBooking().getBookingNumber(), outbound.getStatus()));
     }
 
     String shippingLineRequest = (String) updates.get("shippingLine");
@@ -304,9 +306,10 @@ public class OutboundServiceImpl implements OutboundService {
 
     Outbound outbound = outboundRepository.findById(id)
         .orElseThrow(() -> new NotFoundException("ERROR: Outbound is not found."));
-    if (outbound.getStatus().equals(EnumSupplyStatus.COMBINED.name())) {
-      throw new InternalException(
-          String.format("Outbound with bookingNumber %s has been combined", outbound.getBooking().getBookingNumber()));
+    if (outbound.getStatus().equals(EnumSupplyStatus.COMBINED.name())
+        || outbound.getStatus().equals(EnumSupplyStatus.BIDDING.name())) {
+      throw new InternalException(String.format("Outbound with bookingNumber %s has been %s",
+          outbound.getBooking().getBookingNumber(), outbound.getStatus()));
     }
     outboundRepository.delete(outbound);
   }

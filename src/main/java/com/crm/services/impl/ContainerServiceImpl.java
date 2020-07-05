@@ -137,6 +137,12 @@ public class ContainerServiceImpl implements ContainerService {
     Container container = containerRepository.findById(request.getId())
         .orElseThrow(() -> new NotFoundException("ERROR: Container is not found."));
 
+    if (container.getStatus().equalsIgnoreCase(EnumSupplyStatus.COMBINED.name())
+        || container.getStatus().equalsIgnoreCase(EnumSupplyStatus.BIDDING.name())) {
+      throw new InternalException(
+          String.format("Container %s has been %s", container.getContainerNumber(), container.getStatus()));
+    }
+
     BillOfLading billOfLading = (BillOfLading) container.getBillOfLading();
 
     Set<Container> containers = billOfLading.getContainers();
@@ -213,8 +219,10 @@ public class ContainerServiceImpl implements ContainerService {
   public void removeContainer(Long id) {
     Container container = containerRepository.findById(id)
         .orElseThrow(() -> new NotFoundException("ERROR: Container is not found."));
-    if (container.getStatus().equalsIgnoreCase(EnumSupplyStatus.COMBINED.name())) {
-      throw new InternalException(String.format("Container %s has been combined", container.getContainerNumber()));
+    if (container.getStatus().equalsIgnoreCase(EnumSupplyStatus.COMBINED.name())
+        || container.getStatus().equalsIgnoreCase(EnumSupplyStatus.BIDDING.name())) {
+      throw new InternalException(
+          String.format("Container %s has been %s", container.getContainerNumber(), container.getStatus()));
     }
     containerRepository.delete(container);
   }
@@ -224,8 +232,10 @@ public class ContainerServiceImpl implements ContainerService {
 
     Container container = containerRepository.findById(id)
         .orElseThrow(() -> new NotFoundException("ERROR: Container is not found."));
-    if (container.getStatus().equalsIgnoreCase(EnumSupplyStatus.COMBINED.name())) {
-      throw new InternalException(String.format("Container %s has been combined", container.getContainerNumber()));
+    if (container.getStatus().equalsIgnoreCase(EnumSupplyStatus.COMBINED.name())
+        || container.getStatus().equalsIgnoreCase(EnumSupplyStatus.BIDDING.name())) {
+      throw new InternalException(
+          String.format("Container %s has been %s", container.getContainerNumber(), container.getStatus()));
     }
 
     BillOfLading billOfLading = (BillOfLading) container.getBillOfLading();

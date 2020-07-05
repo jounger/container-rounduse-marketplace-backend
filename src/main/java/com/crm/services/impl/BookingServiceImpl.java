@@ -10,7 +10,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.crm.common.Tool;
+import com.crm.enums.EnumSupplyStatus;
 import com.crm.exception.DuplicateRecordException;
+import com.crm.exception.InternalException;
 import com.crm.exception.NotFoundException;
 import com.crm.models.Booking;
 import com.crm.models.Port;
@@ -51,6 +53,12 @@ public class BookingServiceImpl implements BookingService {
     Booking booking = bookingRepository.findById(request.getId())
         .orElseThrow(() -> new NotFoundException("ERROR: Booking is not found."));
 
+    if (booking.getOutbound().getStatus().equals(EnumSupplyStatus.COMBINED.name())
+        || booking.getOutbound().getStatus().equals(EnumSupplyStatus.BIDDING.name())) {
+      throw new InternalException(String.format("Outbound with bookingNumber %s has been %s",
+          booking.getBookingNumber(), booking.getOutbound().getStatus()));
+    }
+
     String bookingNumber = request.getBookingNumber();
     if (bookingNumber != null && !bookingNumber.isEmpty()) {
       if (bookingRepository.existsByBookingNumber(bookingNumber)) {
@@ -84,6 +92,12 @@ public class BookingServiceImpl implements BookingService {
 
     Booking booking = bookingRepository.findById(id)
         .orElseThrow(() -> new NotFoundException("ERROR: Booking is not found."));
+
+    if (booking.getOutbound().getStatus().equals(EnumSupplyStatus.COMBINED.name())
+        || booking.getOutbound().getStatus().equals(EnumSupplyStatus.BIDDING.name())) {
+      throw new InternalException(String.format("Outbound with bookingNumber %s has been %s",
+          booking.getBookingNumber(), booking.getOutbound().getStatus()));
+    }
 
     String portOfLoadingRequest = (String) updates.get("portOfLoading");
     if (portOfLoadingRequest != null && !portOfLoadingRequest.isEmpty()) {

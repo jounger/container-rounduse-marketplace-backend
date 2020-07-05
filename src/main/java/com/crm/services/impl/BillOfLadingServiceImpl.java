@@ -80,8 +80,10 @@ public class BillOfLadingServiceImpl implements BillOfLaingService {
       Set<Container> containers = billOfLading.getContainers();
       containers.forEach(item -> {
 
-        if (item.getStatus().equalsIgnoreCase(EnumSupplyStatus.COMBINED.name())) {
-          throw new InternalException(String.format("Container %s has been combined", item.getContainerNumber()));
+        if (item.getStatus().equalsIgnoreCase(EnumSupplyStatus.COMBINED.name())
+            || item.getStatus().equalsIgnoreCase(EnumSupplyStatus.BIDDING.name())) {
+          throw new InternalException(
+              String.format("Container %s has been %s", item.getContainerNumber(), item.getStatus()));
         }
 
         String containerNumber = item.getContainerNumber();
@@ -162,8 +164,10 @@ public class BillOfLadingServiceImpl implements BillOfLaingService {
       Set<Container> containers = billOfLading.getContainers();
       containers.forEach(item -> {
 
-        if (item.getStatus().equalsIgnoreCase(EnumSupplyStatus.COMBINED.name())) {
-          throw new InternalException(String.format("Container %s has been combined", item.getContainerNumber()));
+        if (item.getStatus().equalsIgnoreCase(EnumSupplyStatus.COMBINED.name())
+            || item.getStatus().equalsIgnoreCase(EnumSupplyStatus.BIDDING.name())) {
+          throw new InternalException(
+              String.format("Container %s has been %s", item.getContainerNumber(), item.getStatus()));
         }
 
         String containerNumber = item.getContainerNumber();

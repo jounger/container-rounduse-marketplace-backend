@@ -100,6 +100,9 @@ public class User {
   @ManyToMany(mappedBy = "users", fetch = FetchType.EAGER)
   private Collection<Role> roles = new ArrayList<>();
 
+  @OneToMany(mappedBy = "sender")
+  private Collection<Feedback> feedbacks = new ArrayList<>();
+
   // DO NOT DELETE CODE BELLOW
 
   @Override

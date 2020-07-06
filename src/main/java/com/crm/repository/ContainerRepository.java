@@ -38,18 +38,19 @@ public interface ContainerRepository extends JpaRepository<Container, Long> {
       @Param("packingTime") LocalDateTime packingTime, @Param("cutOffTime") LocalDateTime cutOffTime,
       @Param("portOfLoading") String portOfLoading);
 
-  @Query(value = "SELECT b FROM Container b WHERE b.billOfLading.inbound.id = :id")
+  @Query(value = "SELECT c FROM Container c WHERE c.billOfLading.inbound.id = :id")
   Page<Container> findContainersByInbound(@Param("id") Long id, Pageable pageable);
 
-  @Query(value = "SELECT d FROM Container d WHERE d.driver.id = :id")
+  @Query(value = "SELECT c FROM Container c WHERE c.driver.id = :id")
   List<Container> findByDriver(@Param("id") Long id);
 
-  @Query(value = "SELECT COUNT(c) FROM Container c WHERE c.bid.biddingDocument.id = :id AND c.status = 'COMBINED'")
-  int countCombinedContainersByBiddingDocument(@Param("id") Long id);
+  @Query(value = "SELECT COUNT(*) FROM Container c LEFT JOIN c.bids b LEFT JOIN b.biddingDocument bd WHERE bd.id = :id AND c.status = 'COMBINED'")
+  long countCombinedContainersByBiddingDocument(@Param("id") Long id);
 
-  @Query(value = "SELECT b FROM Container b WHERE b.bid.id = :id")
+  @Query(value = "SELECT c FROM Container c LEFT JOIN c.bids b WHERE b.id = :id")
   Page<Container> findContainersByBid(@Param("id") Long id, Pageable pageable);
 
-  @Query(value = "SELECT b FROM Container b WHERE b.bid.id = :id AND b.status = :status")
+  @Query(value = "SELECT c FROM Container c LEFT JOIN c.bids b WHERE b.id = :id AND c.status = :status")
   Page<Container> findContainersByBid(@Param("id") Long id, @Param("status") String status, Pageable pageable);
+
 }

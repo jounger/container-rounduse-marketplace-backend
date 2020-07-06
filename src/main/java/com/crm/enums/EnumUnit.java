@@ -1,18 +1,17 @@
 package com.crm.enums;
 
 public enum EnumUnit {
+  
+  S, KG, M, M3, FT, FT3;
 
-  KG,
-  KM;
-  
   public static EnumUnit findByName(String name) {
-      for(EnumUnit status : EnumUnit.values()) {
-          if(status.name().equalsIgnoreCase(name)) {
-              return status;
-          }
+    for (EnumUnit unit : EnumUnit.values()) {
+      if (unit.name().equalsIgnoreCase(name)) {
+        return unit;
       }
-      
-      return null;
+    }
+
+    return null;
   }
-  
+
 }

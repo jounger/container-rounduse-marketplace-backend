@@ -1,8 +1,8 @@
 package com.crm.models;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -40,15 +40,18 @@ public class Port {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column(name = "id", updatable = false, nullable = false)
   private Long id;
 
+  @Column(name = "fullname")
   private String fullname;
 
   @Column(name = "name_code", unique = true)
   private String nameCode;
 
+  @Column(name = "address")
   private String address;
-  
+
   @Column(name = "created_at", nullable = false, updatable = false)
   @Temporal(TemporalType.TIMESTAMP)
   @CreatedDate
@@ -60,8 +63,42 @@ public class Port {
   private Date updatedAt;
 
   @OneToMany(mappedBy = "portOfDelivery")
-  private Set<BillOfLading> billOfLading = new HashSet<>();
+  private Collection<BillOfLading> billOfLading = new ArrayList<>();
 
   @OneToMany(mappedBy = "portOfLoading")
-  private Set<Booking> bookings = new HashSet<>();
+  private Collection<Booking> bookings = new ArrayList<>();
+
+  // DO NOT DELETE CODE BELLOW
+
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + ((id == null) ? 0 : id.hashCode());
+    result = prime * result + ((nameCode == null) ? 0 : nameCode.hashCode());
+    return result;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj)
+      return true;
+    if (obj == null)
+      return false;
+    if (getClass() != obj.getClass())
+      return false;
+    Port other = (Port) obj;
+    if (id == null) {
+      if (other.id != null)
+        return false;
+    } else if (!id.equals(other.id))
+      return false;
+    if (nameCode == null) {
+      if (other.nameCode != null)
+        return false;
+    } else if (!nameCode.equals(other.nameCode))
+      return false;
+    return true;
+  }
+
 }

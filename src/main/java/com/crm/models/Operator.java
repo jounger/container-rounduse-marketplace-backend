@@ -1,7 +1,7 @@
 package com.crm.models;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.Collection;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -27,6 +27,7 @@ import lombok.ToString;
 @PrimaryKeyJoinColumn(name = "user_id")
 public class Operator extends User {
 
+  @Column(name = "fullname")
   @NotBlank
   @Size(min = 3, max = 30)
   private String fullname;
@@ -35,5 +36,5 @@ public class Operator extends User {
   private Boolean isRoot;
 
   @OneToMany(mappedBy = "sender")
-  private Set<Feedback> feedbacks = new HashSet<>();
+  private Collection<Feedback> feedbacks = new ArrayList<>();
 }

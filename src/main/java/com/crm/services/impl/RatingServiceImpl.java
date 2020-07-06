@@ -42,7 +42,7 @@ public class RatingServiceImpl implements RatingService {
 
     Double ratingValue = ratingRepository.findAvgRatingValueByReceiverId(request.getReceiverId());
     receiver.setRatingValue(ratingValue);
-    
+
     supplierRepository.save(receiver);
   }
 
@@ -88,7 +88,7 @@ public class RatingServiceImpl implements RatingService {
 
     Double ratingValue = ratingRepository.findAvgRatingValueByReceiverId(request.getReceiverId());
     receiver.setRatingValue(ratingValue);
-    
+
     supplierRepository.save(receiver);
 
     return rating;
@@ -96,34 +96,33 @@ public class RatingServiceImpl implements RatingService {
 
   @Override
   public Rating editRating(Long id, Map<String, Object> updates) {
-    Rating rating = ratingRepository.findById(id)
-        .orElseThrow(() -> new NotFoundException("Rating is not found."));
-    
-    Long senderId = (Long)updates.get("senderId");
-    if(senderId != null) {
+    Rating rating = ratingRepository.findById(id).orElseThrow(() -> new NotFoundException("Rating is not found."));
+
+    Long senderId = (Long) updates.get("senderId");
+    if (senderId != null) {
       Supplier sender = supplierRepository.findById(senderId)
           .orElseThrow(() -> new NotFoundException("Sender is not found."));
       rating.setSender(sender);
     }
-    
-    Long receiverId = (Long)updates.get("receiverId");
+
+    Long receiverId = (Long) updates.get("receiverId");
     Supplier receiver = new Supplier();
-    if(senderId != null) {
+    if (senderId != null) {
       receiver = supplierRepository.findById(receiverId)
           .orElseThrow(() -> new NotFoundException("Receiver is not found."));
       rating.setSender(receiver);
     }
-    
-    Integer ratingValue = (Integer)updates.get("ratingValue");
-    if(ratingValue != null) {
+
+    Integer ratingValue = (Integer) updates.get("ratingValue");
+    if (ratingValue != null) {
       rating.setRatingValue(ratingValue);
       ratingRepository.save(rating);
-      
+
       Double receiverRatingValue = ratingRepository.findAvgRatingValueByReceiverId(receiverId);
-      receiver.setRatingValue(receiverRatingValue);     
+      receiver.setRatingValue(receiverRatingValue);
       supplierRepository.save(receiver);
-    }   
-    
+    }
+
     return rating;
   }
 

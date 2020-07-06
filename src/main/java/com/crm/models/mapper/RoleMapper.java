@@ -2,7 +2,6 @@ package com.crm.models.mapper;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import com.crm.models.Permission;
 import com.crm.models.Role;
@@ -16,7 +15,7 @@ public class RoleMapper {
     roleDto.setId(role.getId());
     roleDto.setName(role.getName());
     List<String> permissionsDto = new ArrayList<>();
-    Set<Permission> permissions = role.getPermissions();
+    ArrayList<Permission> permissions = new ArrayList<Permission>(role.getPermissions());
     permissions.forEach(permission -> permissionsDto.add(permission.getName()));
     roleDto.setPermissions(permissionsDto);
     return roleDto;    

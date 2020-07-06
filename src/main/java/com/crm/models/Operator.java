@@ -1,11 +1,7 @@
 package com.crm.models;
 
-import java.util.ArrayList;
-import java.util.Collection;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.OneToMany;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 import javax.validation.constraints.NotBlank;
@@ -34,7 +30,4 @@ public class Operator extends User {
 
   @Column(name = "is_root")
   private Boolean isRoot;
-
-  @OneToMany(mappedBy = "sender")
-  private Collection<Feedback> feedbacks = new ArrayList<>();
 }

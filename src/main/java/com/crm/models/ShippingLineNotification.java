@@ -29,7 +29,7 @@ import lombok.ToString;
 public class ShippingLineNotification extends Notification {
 
   @ManyToOne
-  @JoinColumn(name = "combine_id")
+  @JoinColumn(name = "combined_id")
   private Combined relatedResource;
 
   // EnumShippingLineNotification

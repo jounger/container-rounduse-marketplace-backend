@@ -44,8 +44,8 @@ public class Feedback {
   private Long id;
 
   @ManyToOne
-  @JoinColumn(name = "operator_id")
-  private Operator sender;
+  @JoinColumn(name = "user_id")
+  private User sender;
 
   @ManyToOne
   @JoinColumn(name = "report_id")

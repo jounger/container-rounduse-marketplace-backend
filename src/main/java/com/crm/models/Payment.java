@@ -42,6 +42,10 @@ public class Payment {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "id", updatable = false, nullable = false)
   private Long id;
+  
+  @ManyToOne
+  @JoinColumn(name = "user_id")
+  private Supplier recipient;
 
   @ManyToOne
   @JoinColumn(name = "contract_id")

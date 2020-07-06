@@ -1,6 +1,7 @@
 package com.crm.services.impl;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -170,7 +171,7 @@ public class InboundServiceImpl implements InboundService {
       String licensePlate = containersRequest.get(i).getLicensePlate();
       List<BillOfLading> billOfLadings = billOfLadingRepository.findAll();
       billOfLadings.forEach(item -> {
-        Set<Container> containers = item.getContainers();
+        Set<Container> containers = new HashSet<>(item.getContainers());
         containers.forEach(containerItem -> {
           if (containerNumber.equals(containerItem.getContainerNumber())
               || licensePlate.equals(containerItem.getLicensePlate())) {
@@ -202,8 +203,6 @@ public class InboundServiceImpl implements InboundService {
       });
 
       container.setDriver(driver);
-      container.setTractor(containersRequest.get(i).getTractor());
-      container.setTrailer(containersRequest.get(i).getTrailer());
       container.setContainerNumber(containersRequest.get(i).getContainerNumber());
       container.setLicensePlate(containersRequest.get(i).getLicensePlate());
       container.setStatus(EnumSupplyStatus.CREATED.name());
@@ -236,8 +235,8 @@ public class InboundServiceImpl implements InboundService {
 
     inbound.setReturnStation(request.getReturnStation());
 
-    BillOfLading billOfLading = (BillOfLading) inbound.getBillOfLading();
-    BillOfLadingRequest billOfLadingRequest = (BillOfLadingRequest) request.getBillOfLading();
+    BillOfLading billOfLading = inbound.getBillOfLading();
+    BillOfLadingRequest billOfLadingRequest = request.getBillOfLading();
 
     if (billOfLadingRequest != null) {
 
@@ -253,7 +252,7 @@ public class InboundServiceImpl implements InboundService {
         }
       }
 
-      Set<Container> setContainers = inbound.getBillOfLading().getContainers();
+      Set<Container> setContainers = new HashSet<>(billOfLading.getContainers());
       setContainers.forEach(item -> {
 
         if (item.getStatus().equalsIgnoreCase(EnumSupplyStatus.COMBINED.name())
@@ -295,7 +294,7 @@ public class InboundServiceImpl implements InboundService {
         String licensePlate = containersRequest.get(i).getLicensePlate();
         List<BillOfLading> billOfLadings = billOfLadingRepository.findAll();
         billOfLadings.forEach(item -> {
-          Set<Container> containers = item.getContainers();
+          Set<Container> containers = new HashSet<>(item.getContainers());
           containers.forEach(containerItem -> {
             if (containerNumber.equals(containerItem.getContainerNumber())
                 || licensePlate.equals(containerItem.getLicensePlate())) {
@@ -333,8 +332,6 @@ public class InboundServiceImpl implements InboundService {
         });
 
         container.setDriver(driver);
-        container.setTractor(containersRequest.get(i).getTractor());
-        container.setTrailer(containersRequest.get(i).getTrailer());
         container.setContainerNumber(containersRequest.get(i).getContainerNumber());
         container.setLicensePlate(containersRequest.get(i).getLicensePlate());
         container.setStatus(containersRequest.get(i).getStatus());
@@ -384,7 +381,8 @@ public class InboundServiceImpl implements InboundService {
       LocalDateTime emptyTime = pickupTime.plusDays(1);
       inbound.setEmptyTime(emptyTime);
 
-      Set<Container> containers = inbound.getBillOfLading().getContainers();
+      BillOfLading billOfLading = inbound.getBillOfLading();
+      Set<Container> containers = new HashSet<>(billOfLading.getContainers());
       containers.forEach(item -> {
 
         if (item.getStatus().equalsIgnoreCase(EnumSupplyStatus.COMBINED.name())
@@ -397,7 +395,7 @@ public class InboundServiceImpl implements InboundService {
         String licensePlate = item.getLicensePlate();
         List<BillOfLading> billOfLadings = billOfLadingRepository.findAll();
         billOfLadings.forEach(itemBillOfLadings -> {
-          Set<Container> setContainer = itemBillOfLadings.getContainers();
+          Set<Container> setContainer = new HashSet<>(itemBillOfLadings.getContainers());
           setContainer.forEach(containerItem -> {
             if (containerNumber.equals(containerItem.getContainerNumber())
                 || licensePlate.equals(containerItem.getLicensePlate())) {
@@ -451,7 +449,8 @@ public class InboundServiceImpl implements InboundService {
     Inbound inbound = inboundRepository.findById(id)
         .orElseThrow(() -> new NotFoundException("ERROR: Inbound is not found."));
 
-    Set<Container> containers = inbound.getBillOfLading().getContainers();
+    BillOfLading billOfLading = inbound.getBillOfLading();
+    Set<Container> containers = new HashSet<>(billOfLading.getContainers());
     containers.forEach(item -> {
       if (item.getStatus().equalsIgnoreCase(EnumSupplyStatus.COMBINED.name())
           || item.getStatus().equalsIgnoreCase(EnumSupplyStatus.BIDDING.name())) {

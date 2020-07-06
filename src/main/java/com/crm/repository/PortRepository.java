@@ -8,9 +8,9 @@ import org.springframework.stereotype.Repository;
 import com.crm.models.Port;
 
 @Repository
-public interface PortRepository extends JpaRepository<Port, Long>{
+public interface PortRepository extends JpaRepository<Port, Long> {
 
-	Optional<Port> findByNameCode(String fullname);
-	
-	Boolean existsByNameCode(String nameCode);
+  Optional<Port> findByNameCode(String fullname);
+
+  Boolean existsByNameCode(String nameCode);
 }

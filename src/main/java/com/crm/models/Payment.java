@@ -14,6 +14,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.validation.constraints.Size;
 
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -34,26 +35,36 @@ import lombok.ToString;
 @Entity
 @Table(name = "payment")
 @EntityListeners(AuditingEntityListener.class)
-@JsonIgnoreProperties(value = { "createdAt"}, allowGetters = true)
+@JsonIgnoreProperties(value = { "createdAt" }, allowGetters = true)
 public class Payment {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column(name = "id", updatable = false, nullable = false)
   private Long id;
 
   @ManyToOne
-  @JoinColumn(name = "account_id")
-  private Account account;
+  @JoinColumn(name = "contract_id")
+  private Contract contract;
 
+  @Column(name = "detail")
+  @Size(min = 2)
   private String detail;
 
+  @Column(name = "amount")
   private Double amount;
 
-  private Double paid;
+  @Column(name = "is_paid")
+  private Boolean isPaid;
+
+  // EnumPaymentType
+  @Column(name = "type")
+  @Size(min = 2, max = 10)
+  private String type;
 
   @Column(name = "payment_date")
   private LocalDateTime paymentDate;
-  
+
   @Column(name = "created_at", nullable = false, updatable = false)
   @Temporal(TemporalType.TIMESTAMP)
   @CreatedDate

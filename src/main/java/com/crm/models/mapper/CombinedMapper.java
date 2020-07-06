@@ -1,8 +1,8 @@
 package com.crm.models.mapper;
 
-import com.crm.models.BiddingDocument;
+import com.crm.models.Bid;
 import com.crm.models.Combined;
-import com.crm.models.dto.BiddingDocumentDto;
+import com.crm.models.dto.BidDto;
 import com.crm.models.dto.CombinedDto;
 
 public class CombinedMapper {
@@ -12,9 +12,9 @@ public class CombinedMapper {
     
     combinedDto.setId(combined.getId());
     
-    BiddingDocument biddingDocument = combined.getBiddingDocument();
-    BiddingDocumentDto biddingDocumentDto = BiddingDocumentMapper.toBiddingDocumentDto(biddingDocument);
-    combinedDto.setBiddingDocumentDto(biddingDocumentDto);
+    Bid bid = combined.getBid();
+    BidDto bidDto = BidMapper.toBidDto(bid);
+    combinedDto.setBidDto(bidDto);
     
     combinedDto.setStatus(combined.getStatus());
     

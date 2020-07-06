@@ -13,8 +13,7 @@ public interface PermissionService {
   Page<Permission> getPermissions(PaginationRequest request);
 
   Permission updatePermission(PermissionRequest request);
-  
+
   void removePermission(Long id);
 
-  
 }

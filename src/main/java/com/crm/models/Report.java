@@ -1,8 +1,8 @@
 package com.crm.models;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -16,6 +16,8 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -42,19 +44,31 @@ public class Report {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column(name = "id", updatable = false, nullable = false)
   private Long id;
 
   @ManyToOne
-  @JoinColumn(name = "supply_id")
-  private Supply supply;
+  @JoinColumn(name = "user_id")
+  private Supplier sender;
 
   @ManyToOne
   @JoinColumn(name = "bidding_document_id")
   private BiddingDocument report;
 
+  @Column(name = "title")
+  @NotBlank
+  @Size(min = 2, max = 50)
+  private String title;
+
+  @Column(name = "detail")
+  @NotBlank
+  @Size(min = 2)
   private String detail;
 
-  //EnumReportStatus
+  // EnumReportStatus
+  @Column(name = "status")
+  @NotBlank
+  @Size(min = 2, max = 20)
   private String status;
 
   @Column(name = "created_at", nullable = false, updatable = false)
@@ -68,5 +82,5 @@ public class Report {
   private Date updatedAt;
 
   @OneToMany(mappedBy = "report")
-  private Set<Feedback> feedbacks = new HashSet<>();
+  private Collection<Feedback> feedbacks = new ArrayList<>();
 }

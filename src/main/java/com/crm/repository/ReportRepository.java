@@ -6,6 +6,6 @@ import org.springframework.stereotype.Repository;
 import com.crm.models.Report;
 
 @Repository
-public interface ReportRepository extends JpaRepository<Report, Long>{
+public interface ReportRepository extends JpaRepository<Report, Long> {
 
 }

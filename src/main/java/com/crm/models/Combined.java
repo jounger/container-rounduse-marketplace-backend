@@ -1,5 +1,7 @@
 package com.crm.models;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -9,6 +11,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
@@ -37,14 +40,16 @@ public class Combined {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column(name = "id", updatable = false, nullable = false)
   private Long id;
-  
+
   @OneToOne
-  @JoinColumn(name = "bidding_document_id")
-  private BiddingDocument biddingDocument;
-  
+  @JoinColumn(name = "bid_id")
+  private Bid bid;
+
+  @Column(name = "status")
   private String status;
-  
+
   @Column(name = "created_at", nullable = false, updatable = false)
   @Temporal(TemporalType.TIMESTAMP)
   @CreatedDate
@@ -54,4 +59,11 @@ public class Combined {
   @Temporal(TemporalType.TIMESTAMP)
   @LastModifiedDate
   private Date updatedAt;
+
+  @OneToMany(mappedBy = "relatedResource")
+  private Collection<ShippingLineNotification> shippingLineNotifications = new ArrayList<>();
+
+  @OneToOne(mappedBy = "combined")
+  private Contract contract;
+
 }

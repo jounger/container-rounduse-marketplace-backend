@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 import com.crm.models.Merchant;
 
 @Repository
-public interface MerchantRepository extends JpaRepository<Merchant, Long>{
-  
+public interface MerchantRepository extends JpaRepository<Merchant, Long> {
+
   Optional<Merchant> findByUsername(String username);
 }

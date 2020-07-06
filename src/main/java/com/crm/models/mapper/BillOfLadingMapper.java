@@ -20,7 +20,7 @@ public class BillOfLadingMapper {
     String portOfDelivery = billOfLading.getPortOfDelivery().getNameCode();
     billOfLadingDto.setPortOfDelivery(portOfDelivery);
 
-    Set<Container> containers = billOfLading.getContainers();
+    Set<Container> containers = new HashSet<Container>(billOfLading.getContainers());
     Set<ContainerDto> containerDtos = new HashSet<>();
     if (containers != null) {
       containers.forEach(container -> {

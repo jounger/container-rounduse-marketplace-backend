@@ -5,17 +5,19 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
 import com.crm.models.Rating;
 
-public interface RatingRepository extends JpaRepository<Rating, Long>{
+@Repository
+public interface RatingRepository extends JpaRepository<Rating, Long> {
 
   @Query(value = "FROM Rating r WHERE r.sender.id = :id")
   Page<Rating> findBySenderId(@Param("id") Long id, Pageable pageable);
-  
+
   @Query(value = "FROM Rating r WHERE r.receiver.id = :id")
   Page<Rating> findByReceiverId(@Param("id") Long id, Pageable pageable);
-  
+
   @Query(value = "SELECT AVG(r.ratingValue) FROM Rating r WHERE r.receiver.id = :id")
   Double findAvgRatingValueByReceiverId(@Param("id") Long id);
 }

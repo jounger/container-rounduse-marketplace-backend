@@ -1,6 +1,7 @@
 package com.crm.services.impl;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -77,7 +78,7 @@ public class BillOfLadingServiceImpl implements BillOfLaingService {
     if (request.getFreeTime() != null && !request.getFreeTime().isEmpty()) {
       LocalDateTime freeTime = Tool.convertToLocalDateTime(request.getFreeTime());
 
-      Set<Container> containers = billOfLading.getContainers();
+      Set<Container> containers = new HashSet<>(billOfLading.getContainers());
       containers.forEach(item -> {
 
         if (item.getStatus().equalsIgnoreCase(EnumSupplyStatus.COMBINED.name())
@@ -90,7 +91,7 @@ public class BillOfLadingServiceImpl implements BillOfLaingService {
         String licensePlate = item.getLicensePlate();
         List<BillOfLading> billOfLadings = billOfLadingRepository.findAll();
         billOfLadings.forEach(billOfLadingItem -> {
-          Set<Container> setContainer = billOfLadingItem.getContainers();
+          Set<Container> setContainer = new HashSet<>(billOfLading.getContainers());
           setContainer.forEach(containerItem -> {
             if (containerNumber.equals(containerItem.getContainerNumber())
                 || licensePlate.equals(containerItem.getLicensePlate())) {
@@ -161,7 +162,7 @@ public class BillOfLadingServiceImpl implements BillOfLaingService {
 
       LocalDateTime freeTime = Tool.convertToLocalDateTime(freeTimeReq);
 
-      Set<Container> containers = billOfLading.getContainers();
+      Set<Container> containers = new HashSet<>(billOfLading.getContainers());
       containers.forEach(item -> {
 
         if (item.getStatus().equalsIgnoreCase(EnumSupplyStatus.COMBINED.name())
@@ -174,7 +175,7 @@ public class BillOfLadingServiceImpl implements BillOfLaingService {
         String licensePlate = item.getLicensePlate();
         List<BillOfLading> billOfLadings = billOfLadingRepository.findAll();
         billOfLadings.forEach(billOfLadingItem -> {
-          Set<Container> setContainer = billOfLadingItem.getContainers();
+          Set<Container> setContainer = new HashSet<>(billOfLading.getContainers());
           setContainer.forEach(containerItem -> {
             if (containerNumber.equals(containerItem.getContainerNumber())
                 || licensePlate.equals(containerItem.getLicensePlate())) {

@@ -1,10 +1,7 @@
 package com.crm.models;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
@@ -12,7 +9,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
@@ -36,31 +32,25 @@ import lombok.ToString;
 @NoArgsConstructor
 @ToString
 @Entity
-@Table(name = "account")
+@Table(name = "geolocation")
 @EntityListeners(AuditingEntityListener.class)
 @JsonIgnoreProperties(value = { "createdAt", "updatedAt" }, allowGetters = true)
-public class Account {
+public class Geolocation {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
   @OneToOne
-  @JoinColumn(name = "supplier_id")
-  private Supplier supplier;
+  @JoinColumn(name = "user_id")
+  private Driver driver;
 
-  @Column(name = "account_name")
-  private String accountName;
+  @Column(name = "latitude")
+  private String latitude;
 
-  @Column(name = "account_number")
-  private String accountNumber;
+  @Column(name = "longitude")
+  private String longitude;
 
-  @Column(name = "bank_name")
-  private String bankName;
-
-  @Column(name = "billing_address")
-  private String billingAddress;
-  
   @Column(name = "created_at", nullable = false, updatable = false)
   @Temporal(TemporalType.TIMESTAMP)
   @CreatedDate
@@ -71,6 +61,4 @@ public class Account {
   @LastModifiedDate
   private Date updatedAt;
 
-  @OneToMany(mappedBy = "account", cascade = CascadeType.ALL)
-  private Collection<Payment> payments = new ArrayList<Payment>();
 }

@@ -20,7 +20,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
   Boolean existsByEmail(String email);
 
   Boolean existsByPhone(String phone);
-  
+
   Page<User> findByStatus(EnumUserStatus status, Pageable pageable);
-  
+
 }

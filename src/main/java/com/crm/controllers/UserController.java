@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.crm.models.User;
@@ -38,6 +39,31 @@ public class UserController {
 
   @Autowired
   private UserService userService;
+
+  /*
+   * REF: https://www.baeldung.com/rest-api-search-language-spring-data-specifications
+   * TODO: Spring Data JPA Specifications
+   * EXAMPLE: http://localhost:8085/api/user/filter?page=0&limit=10&search=phone:0967390098,email~crm,status!active
+   */
+  @GetMapping("/filter")
+  public ResponseEntity<?> searchUsers(@Valid PaginationRequest request,
+      @RequestParam(value = "search") String search) {
+    logger.info("Page request: {}", request.getPage());
+    logger.info("Search: {}", search);
+    Page<User> pages = userService.searchUsers(request, search);
+    PaginationResponse<UserDto> response = new PaginationResponse<>();
+    response.setPageNumber(request.getPage());
+    response.setPageSize(request.getLimit());
+    response.setTotalElements(pages.getTotalElements());
+    response.setTotalPages(pages.getTotalPages());
+
+    List<User> users = pages.getContent();
+    List<UserDto> usersDto = new ArrayList<>();
+    users.forEach(user -> usersDto.add(UserMapper.toUserDto(user)));
+    response.setContents(usersDto);
+
+    return ResponseEntity.ok(response);
+  }
 
   @GetMapping("")
   @PreAuthorize("hasRole('OPERATOR') or hasRole('ADMIN')")

@@ -12,13 +12,13 @@ import com.crm.models.Supplier;
 @Repository
 public interface SupplierRepository extends JpaRepository<Supplier, Long> {
 
-	Optional<Supplier> findByUsername(String username);
+  Optional<Supplier> findByUsername(String username);
 
-	Boolean existsByUsername(String username);
+  Boolean existsByUsername(String username);
 
-	Boolean existsByEmail(String email);
+  Boolean existsByEmail(String email);
 
-	Boolean existsByPhone(String phone);
+  Boolean existsByPhone(String phone);
 
-	Page<Supplier> findByStatus(String status, Pageable pageable);
+  Page<Supplier> findByStatus(String status, Pageable pageable);
 }

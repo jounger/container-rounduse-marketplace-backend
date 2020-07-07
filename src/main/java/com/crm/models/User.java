@@ -1,8 +1,8 @@
 package com.crm.models;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -13,8 +13,6 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
@@ -52,29 +50,36 @@ public class User {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column(name = "id", updatable = false, nullable = false)
   private Long id;
 
+  @Column(name = "username")
   @NotBlank
   @Size(min = 2, max = 20)
   private String username;
 
+  @Column(name = "password")
   @Size(min = 6, max = 120)
   private String password;
 
+  @Column(name = "phone")
   @NotBlank
   @Size(min = 10, max = 10)
   private String phone;
 
+  @Column(name = "email")
   @NotBlank
   @Size(min = 5, max = 50)
   @Email
   private String email;
-  
+
+  @Column(name = "address")
   @NotBlank
   @Size(min = 5, max = 200)
   private String address;
 
-  //EnumUserStatus
+  // EnumUserStatus
+  @Column(name = "status")
   @NotBlank
   @Size(min = 2, max = 20)
   private String status;
@@ -89,13 +94,15 @@ public class User {
   @LastModifiedDate
   private Date updatedAt;
 
-  @ManyToMany(fetch = FetchType.EAGER)
-  @JoinTable(name = "user_role", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
-  private Set<Role> roles = new HashSet<>();
-  
   @OneToMany(mappedBy = "recipient")
-  private Set<Notification> notifications = new HashSet<>();
-  
+  private Collection<Notification> notifications = new ArrayList<>();
+
+  @ManyToMany(mappedBy = "users", fetch = FetchType.EAGER)
+  private Collection<Role> roles = new ArrayList<>();
+
+  @OneToMany(mappedBy = "sender")
+  private Collection<Feedback> feedbacks = new ArrayList<>();
+
   // DO NOT DELETE CODE BELLOW
 
   @Override
@@ -128,5 +135,5 @@ public class User {
       return false;
     return true;
   }
-  
+
 }

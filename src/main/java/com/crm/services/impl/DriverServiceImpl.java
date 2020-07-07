@@ -174,11 +174,6 @@ public class DriverServiceImpl implements DriverService {
       driver.setDriverLicense(driverLicense);
     }
 
-    String location = (String) updates.get("location");
-    if (location != null && !location.isEmpty()) {
-      driver.setLocation(location);
-    }
-
     driverRepository.save(driver);
     return driver;
   }

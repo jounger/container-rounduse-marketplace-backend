@@ -1,7 +1,7 @@
 package com.crm.models;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.Collection;
 
 import javax.persistence.Entity;
 import javax.persistence.OneToMany;
@@ -21,8 +21,8 @@ import lombok.ToString;
 public class Merchant extends Supplier {
 
   @OneToMany(mappedBy = "merchant")
-  private Set<Outbound> outbounds = new HashSet<>();
+  private Collection<Outbound> outbounds = new ArrayList<>();
 
   @OneToMany(mappedBy = "offeree")
-  private Set<BiddingDocument> biddingDocuments = new HashSet<>();
+  private Collection<BiddingDocument> biddingDocuments = new ArrayList<>();
 }

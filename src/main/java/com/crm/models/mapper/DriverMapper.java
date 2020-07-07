@@ -21,7 +21,6 @@ public class DriverMapper {
     driverDto.setAddress(driver.getAddress());
     driverDto.setFullname(driver.getFullname());
     driverDto.setDriverLicense(driver.getDriverLicense());
-    driverDto.setLocation(driver.getLocation());
 
     return driverDto;
   }

@@ -13,6 +13,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -38,17 +40,29 @@ public class Feedback {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column(name = "id", updatable = false, nullable = false)
   private Long id;
 
   @ManyToOne
-  @JoinColumn(name = "operator_id")
-  private Operator sender;
+  @JoinColumn(name = "user_id")
+  private User sender;
 
   @ManyToOne
   @JoinColumn(name = "report_id")
   private Report report;
 
+  @Column(name = "title")
+  @NotBlank
+  @Size(min = 2, max = 50)
+  private String title;
+
+  @Column(name = "message")
+  @NotBlank
+  @Size(min = 2)
   private String message;
+
+  @Column(name = "satisfaction_points")
+  private Integer satisfactionPoints;
 
   @Column(name = "created_at", nullable = false, updatable = false)
   @Temporal(TemporalType.TIMESTAMP)

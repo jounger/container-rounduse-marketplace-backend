@@ -3,9 +3,9 @@ package com.crm.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import com.crm.models.Account;
+import com.crm.models.ContainerSemiTrailer;
 
 @Repository
-public interface AccountRepository extends JpaRepository<Account, Long>{
+public interface ContainerSemiTractorRepository extends JpaRepository<ContainerSemiTrailer, Long> {
 
 }

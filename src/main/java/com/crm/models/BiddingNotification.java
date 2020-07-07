@@ -1,5 +1,6 @@
 package com.crm.models;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
@@ -25,16 +26,14 @@ import lombok.ToString;
 @Table(name = "bidding_notification")
 @Inheritance(strategy = InheritanceType.JOINED)
 @PrimaryKeyJoinColumn(name = "notification_id")
-public class BiddingNotification extends Notification{
+public class BiddingNotification extends Notification {
 
   @ManyToOne
   @JoinColumn(name = "bidding_document_id")
   private BiddingDocument relatedResource;
-  
+
+  @Column(name = "type")
   @NotBlank
-  @Size(min = 2)
-  private String message;
-  
-  @NotBlank
+  @Size(min = 2, max = 20)
   private String type;
 }

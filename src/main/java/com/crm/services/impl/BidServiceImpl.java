@@ -1,10 +1,10 @@
 package com.crm.services.impl;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -76,7 +76,7 @@ public class BidServiceImpl implements BidService {
         .orElseThrow(() -> new NotFoundException("Forwarder is not found."));
     bid.setBidder(bidder);
 
-    List<Bid> bids = biddingDocument.getBids();
+    List<Bid> bids = new ArrayList<>(biddingDocument.getBids());
     bids.forEach(bidOfBidding -> {
       if (bidOfBidding.getBidder() == bidder) {
         throw new DuplicateRecordException("You can only create 1 bid for 1 bidding document.");
@@ -155,7 +155,7 @@ public class BidServiceImpl implements BidService {
     Page<Bid> bids = null;
     String status = request.getStatus();
     if (status != null && !status.isEmpty()) {
-      bids = bidRepository.findBidsByForwarder(id, status, 
+      bids = bidRepository.findBidsByForwarder(id, status,
           PageRequest.of(request.getPage(), request.getLimit(), Sort.by("id").descending()));
     } else {
       bids = bidRepository.findBidsByForwarder(id,
@@ -193,7 +193,7 @@ public class BidServiceImpl implements BidService {
     if (containersId.size() < booking.getUnit() && !biddingDocument.getIsMultipleAward()) {
       throw new InternalException("Number of containers is less than needed.");
     }
-    Set<Container> oldContainers = bid.getContainers();
+    List<Container> oldContainers = new ArrayList<>(bid.getContainers());
     oldContainers.forEach(container -> {
       container.setStatus(EnumSupplyStatus.CREATED.name());
       containerRepository.save(container);
@@ -219,10 +219,6 @@ public class BidServiceImpl implements BidService {
       bid.setBidPrice(request.getBidPrice());
       bid.setBidValidityPeriod(LocalDateTime.now().plusHours(Constant.BID_VALIDITY_PERIOD));
     }
-    /*
-     * update bidDate is not allowed LocalDateTime bidDate =
-     * Tool.convertToLocalDateTime(request.getBidDate()); bid.setBidDate(bidDate);
-     */
 
     EnumBidStatus eBidStatus = EnumBidStatus.findByName(request.getStatus());
     bid.setStatus(eBidStatus.name());
@@ -262,7 +258,7 @@ public class BidServiceImpl implements BidService {
       throw new InternalException("Bid only can be edited after bid validity period.");
     }
 
-    Set<Container> oldContainers = bid.getContainers();
+    List<Container> oldContainers = new ArrayList<>(bid.getContainers());
 
     BiddingDocument biddingDocument = bid.getBiddingDocument();
 
@@ -317,12 +313,6 @@ public class BidServiceImpl implements BidService {
       throw new InternalException("Parameter must be Double");
     }
 
-    /*
-     * update bidDate is not allowed String bidDateString = (String)
-     * updates.get("bid_date"); if (bidDateString != null) { LocalDateTime bidDate =
-     * Tool.convertToLocalDateTime(bidDateString); bid.setBidDate(bidDate); }
-     */
-
     String statusString = (String) updates.get("status");
     if (statusString != null && !statusString.isEmpty()) {
       EnumBidStatus status = EnumBidStatus.findByName(statusString);
@@ -330,7 +320,7 @@ public class BidServiceImpl implements BidService {
 
       if (bid.getStatus().equalsIgnoreCase(EnumBidStatus.REJECTED.name())) {
         bid.setDateOfDecision(LocalDateTime.now());
-        Set<Container> containers = bid.getContainers();
+        List<Container> containers = new ArrayList<>(bid.getContainers());
         containers.forEach(container -> {
           container.setStatus(EnumSupplyStatus.CREATED.name());
           containerRepository.save(container);
@@ -338,7 +328,7 @@ public class BidServiceImpl implements BidService {
       }
 
       if (bid.getStatus().equalsIgnoreCase(EnumBidStatus.ACCEPTED.name())) {
-        int combinedContainer = containerRepository.countCombinedContainersByBiddingDocument(biddingDocument.getId());
+        Long combinedContainer = containerRepository.countCombinedContainersByBiddingDocument(biddingDocument.getId());
         if (booking.getUnit() < combinedContainer + bid.getContainers().size()) {
           throw new InternalException("Number of containers is more than needed.");
         }
@@ -347,13 +337,13 @@ public class BidServiceImpl implements BidService {
           biddingDocumentRepository.save(biddingDocument);
         }
         bid.setDateOfDecision(LocalDateTime.now());
-        Set<Container> containers = bid.getContainers();
+        List<Container> containers = new ArrayList<>(bid.getContainers());
         containers.forEach(container -> {
           container.setStatus(EnumSupplyStatus.COMBINED.name());
           containerRepository.save(container);
         });
         Combined combined = new Combined();
-        combined.setBiddingDocument(biddingDocument);
+        combined.setBid(bid);
         combined.setStatus(EnumCombinedStatus.INFO_RECEIVED.name());
         combinedRepository.save(combined);
       }
@@ -377,7 +367,7 @@ public class BidServiceImpl implements BidService {
   public void removeBid(Long id) {
     Bid bid = bidRepository.findById(id).orElseThrow(() -> new NotFoundException("Bid is not found."));
     if (!bid.getStatus().equalsIgnoreCase(EnumBidStatus.ACCEPTED.name())) {
-      Set<Container> containers = bid.getContainers();
+      List<Container> containers = new ArrayList<>(bid.getContainers());
       containers.forEach(container -> {
         container.setStatus(EnumSupplyStatus.CREATED.name());
         containerRepository.save(container);

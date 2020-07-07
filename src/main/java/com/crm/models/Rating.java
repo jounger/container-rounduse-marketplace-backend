@@ -33,11 +33,12 @@ import lombok.ToString;
 @Entity
 @Table(name = "rating")
 @EntityListeners(AuditingEntityListener.class)
-@JsonIgnoreProperties(value = { "createdAt"}, allowGetters = true)
+@JsonIgnoreProperties(value = { "createdAt" }, allowGetters = true)
 public class Rating {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column(name = "id", updatable = false, nullable = false)
   private Long id;
 
   @ManyToOne
@@ -50,7 +51,7 @@ public class Rating {
 
   @Column(name = "rating_value")
   private Integer ratingValue;
-  
+
   @Column(name = "created_at", nullable = false, updatable = false)
   @Temporal(TemporalType.TIMESTAMP)
   @CreatedDate

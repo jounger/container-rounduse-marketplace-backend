@@ -50,11 +50,12 @@ public class PermissionServiceImpl implements PermissionService {
 
   @Override
   public Permission updatePermission(PermissionRequest request) {
-    Permission permission = permissionRepository.findById(request.getId()).orElseThrow(() -> new NotFoundException("Permission is not found."));
+    Permission permission = permissionRepository.findById(request.getId())
+        .orElseThrow(() -> new NotFoundException("Permission is not found."));
     permission.setName(request.getName());
     permission.setDescription(request.getDescription());
     permissionRepository.save(permission);
-    
+
     return permission;
   }
 

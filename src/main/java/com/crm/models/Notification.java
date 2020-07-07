@@ -16,6 +16,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -43,15 +45,24 @@ public class Notification {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column(name = "id", updatable = false, nullable = false)
   private Long id;
-  
+
   @ManyToOne
   @JoinColumn(name = "user_id")
   private User recipient;
-  
+
+  @NotBlank
+  @Size(min = 2, max = 50)
+  private String title;
+
+  @NotBlank
+  @Size(min = 2)
+  private String message;
+
   @Column(name = "is_read")
   private Boolean isRead;
-  
+
   @Column(name = "send_date")
   private LocalDateTime sendDate;
 

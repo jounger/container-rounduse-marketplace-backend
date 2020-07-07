@@ -8,9 +8,9 @@ import org.springframework.stereotype.Repository;
 import com.crm.models.ContainerType;
 
 @Repository
-public interface ContainerTypeRepository extends JpaRepository<ContainerType, Long>{
+public interface ContainerTypeRepository extends JpaRepository<ContainerType, Long> {
 
-	Optional<ContainerType> findByName(String name);
-	
-	Boolean existsByName(String name);
+  Optional<ContainerType> findByName(String name);
+
+  Boolean existsByName(String name);
 }

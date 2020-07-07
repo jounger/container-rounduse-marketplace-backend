@@ -2,7 +2,6 @@ package com.crm.models;
 
 import java.time.LocalDateTime;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
@@ -31,10 +30,6 @@ public class Outbound extends Supply {
   @JoinColumn(name = "merchant_id")
   private Merchant merchant;
 
-  @OneToOne(cascade = CascadeType.ALL)
-  @JoinColumn(name = "booking_id")
-  private Booking booking;
-
   @Column(name = "goods_description")
   private String goodsDescription;
 
@@ -55,5 +50,9 @@ public class Outbound extends Supply {
   private String unitOfMeasurement;
 
   // EnumSupplyStatus
+  @Column(name = "status")
   private String status;
+
+  @OneToOne(mappedBy = "outbound")
+  private Booking booking;
 }

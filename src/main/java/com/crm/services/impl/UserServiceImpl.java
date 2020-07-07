@@ -3,14 +3,18 @@ package com.crm.services.impl;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.crm.common.Constant;
 import com.crm.enums.EnumUserStatus;
 import com.crm.exception.DuplicateRecordException;
 import com.crm.exception.NotFoundException;
@@ -21,6 +25,7 @@ import com.crm.payload.request.SignUpRequest;
 import com.crm.repository.RoleRepository;
 import com.crm.repository.UserRepository;
 import com.crm.services.UserService;
+import com.crm.specification.builder.UserSpecificationsBuilder;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -77,11 +82,31 @@ public class UserServiceImpl implements UserService {
   public Page<User> getUsers(PaginationRequest request) {
     Page<User> pages = null;
     if (request.getStatus() == null) {
-      pages = userRepository.findAll(PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt")));
+      pages = userRepository
+          .findAll(PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt")));
     } else {
       pages = userRepository.findByStatus(EnumUserStatus.findByName(request.getStatus()),
           PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt")));
     }
+    return pages;
+  }
+
+  @Override
+  public Page<User> searchUsers(PaginationRequest request, String search) {
+    // Extract data from search string
+    UserSpecificationsBuilder builder = new UserSpecificationsBuilder();
+    Pattern pattern = Pattern.compile(Constant.SEARCH_REGEX, Pattern.UNICODE_CHARACTER_CLASS);
+    Matcher matcher = pattern.matcher(search + ",");
+    while (matcher.find()) {
+      // Chaining criteria
+      builder.with(matcher.group(1), matcher.group(2), matcher.group(3));
+    }
+    // Build specification
+    Specification<User> spec = builder.build();
+    PageRequest page = PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt"));
+    // Filter with repository
+    Page<User> pages = userRepository.findAll(spec, page);
+    // Return result
     return pages;
   }
 

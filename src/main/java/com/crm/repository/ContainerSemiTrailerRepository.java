@@ -6,6 +6,6 @@ import org.springframework.stereotype.Repository;
 import com.crm.models.ContainerSemiTrailer;
 
 @Repository
-public interface ContainerSemiTractorRepository extends JpaRepository<ContainerSemiTrailer, Long> {
+public interface ContainerSemiTrailerRepository extends JpaRepository<ContainerSemiTrailer, Long> {
 
 }

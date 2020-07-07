@@ -32,4 +32,7 @@ public class Forwarder extends Supplier {
 
   @OneToMany(mappedBy = "forwarder")
   private Collection<Inbound> inbounds = new ArrayList<>();
+
+  @OneToMany(mappedBy = "forwarder")
+  private Collection<Vehicle> vehicles = new ArrayList<>();
 }

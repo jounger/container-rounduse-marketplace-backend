@@ -148,7 +148,12 @@ public class InboundController {
   @PutMapping("")
   @PreAuthorize("hasRole('FORWARDER')")
   public ResponseEntity<?> updateInbound(@Valid @RequestBody InboundRequest request) {
-    Inbound inbound = inboundService.updateInbound(request);
+    
+    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
+        .getPrincipal();
+    Long id = userDetails.getId();
+    
+    Inbound inbound = inboundService.updateInbound(id, request);
     InboundDto inboundDto = new InboundDto();
     inboundDto = InboundMapper.toInboundDto(inbound);
     return ResponseEntity.ok(inboundDto);

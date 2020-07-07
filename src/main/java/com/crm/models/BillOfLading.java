@@ -59,6 +59,9 @@ public class BillOfLading {
   @Column(name = "bill_of_lading_number")
   private String billOfLadingNumber;
 
+  @Column(name = "unit")
+  private Integer unit;
+
   @Column(name = "free_time")
   private LocalDateTime freeTime;
 

@@ -10,15 +10,13 @@ import org.springframework.stereotype.Service;
 
 import com.crm.enums.EnumCombinedStatus;
 import com.crm.exception.NotFoundException;
-import com.crm.models.BiddingDocument;
+import com.crm.models.Bid;
 import com.crm.models.Combined;
 import com.crm.models.User;
 import com.crm.payload.request.CombinedRequest;
 import com.crm.payload.request.PaginationRequest;
-import com.crm.repository.BiddingDocumentRepository;
+import com.crm.repository.BidRepository;
 import com.crm.repository.CombinedRepository;
-import com.crm.repository.ForwarderRepository;
-import com.crm.repository.MerchantRepository;
 import com.crm.repository.UserRepository;
 import com.crm.services.CombinedService;
 
@@ -29,8 +27,8 @@ public class CombinedServiceImpl implements CombinedService {
   private CombinedRepository combinedRepository;
 
   @Autowired
-  private BiddingDocumentRepository biddingDocumentRepository;
-  
+  private BidRepository bidRepository;
+
   @Autowired
   private UserRepository userRepository;
 
@@ -38,9 +36,9 @@ public class CombinedServiceImpl implements CombinedService {
   public Combined createCombined(CombinedRequest request) {
     Combined combined = new Combined();
 
-    BiddingDocument biddingDocument = biddingDocumentRepository.findById(request.getBiddingDocument())
+    Bid bid = bidRepository.findById(request.getBiddingDocument())
         .orElseThrow(() -> new NotFoundException("Bidding document is not found."));
-    combined.setBiddingDocument(biddingDocument);
+    combined.setBid(bid);
 
     combined.setStatus(EnumCombinedStatus.INFO_RECEIVED.name());
 
@@ -63,7 +61,7 @@ public class CombinedServiceImpl implements CombinedService {
     if (role.equalsIgnoreCase("ROLE_MERCHANT")) {
       combineds = combinedRepository.findByMerchant(id,
           PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt")));
-    }else if(role.equalsIgnoreCase("ROLE_FORWARDER")) {
+    } else if (role.equalsIgnoreCase("ROLE_FORWARDER")) {
       combineds = combinedRepository.findByForwarder(id,
           PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt")));
     }
@@ -82,9 +80,9 @@ public class CombinedServiceImpl implements CombinedService {
     Combined combined = combinedRepository.findById(request.getId())
         .orElseThrow(() -> new NotFoundException("Combined is not found."));
 
-    BiddingDocument biddingDocument = biddingDocumentRepository.findById(request.getBiddingDocument())
+    Bid bid = bidRepository.findById(request.getBiddingDocument())
         .orElseThrow(() -> new NotFoundException("Bidding document is not found."));
-    combined.setBiddingDocument(biddingDocument);
+    combined.setBid(bid);
 
     EnumCombinedStatus status = EnumCombinedStatus.findByName(request.getStatus());
     if (status != null) {

@@ -1,5 +1,6 @@
 package com.crm.services.impl;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -73,7 +74,7 @@ public class ContainerServiceImpl implements ContainerService {
     BillOfLading billOfLading = billOfLadingRepository.findById(id)
         .orElseThrow(() -> new NotFoundException("ERROR: BillOfLading is not found."));
 
-    Set<Container> containers = billOfLading.getContainers();
+    Set<Container> containers = new HashSet<>(billOfLading.getContainers());
     containers.forEach(item -> {
       if (item.getContainerNumber().equals(request.getContainerNumber())
           || item.getDriver().getUsername().equals(request.getDriver())
@@ -86,7 +87,7 @@ public class ContainerServiceImpl implements ContainerService {
     String licensePlate = request.getLicensePlate();
     List<BillOfLading> billOfLadings = billOfLadingRepository.findAll();
     billOfLadings.forEach(item -> {
-      Set<Container> setContainer = item.getContainers();
+      Set<Container> setContainer = new HashSet<>(item.getContainers());
       setContainer.forEach(containerItem -> {
         if (containerNumber.equals(containerItem.getContainerNumber())
             || licensePlate.equals(containerItem.getLicensePlate())) {
@@ -124,8 +125,6 @@ public class ContainerServiceImpl implements ContainerService {
     container.setStatus(EnumSupplyStatus.CREATED.name());
 
     container.setContainerNumber(request.getContainerNumber());
-    container.setTrailer(request.getTrailer());
-    container.setTractor(request.getTractor());
     container.setLicensePlate(request.getLicensePlate());
 
     containerRepository.save(container);
@@ -137,9 +136,15 @@ public class ContainerServiceImpl implements ContainerService {
     Container container = containerRepository.findById(request.getId())
         .orElseThrow(() -> new NotFoundException("ERROR: Container is not found."));
 
+    if (container.getStatus().equalsIgnoreCase(EnumSupplyStatus.COMBINED.name())
+        || container.getStatus().equalsIgnoreCase(EnumSupplyStatus.BIDDING.name())) {
+      throw new InternalException(
+          String.format("Container %s has been %s", container.getContainerNumber(), container.getStatus()));
+    }
+
     BillOfLading billOfLading = (BillOfLading) container.getBillOfLading();
 
-    Set<Container> containers = billOfLading.getContainers();
+    Set<Container> containers = new HashSet<>(billOfLading.getContainers());
     containers.forEach(item -> {
       if (item.getContainerNumber().equals(request.getContainerNumber())
           || item.getDriver().getUsername().equals(request.getDriver())
@@ -156,7 +161,7 @@ public class ContainerServiceImpl implements ContainerService {
     String licensePlate = request.getLicensePlate();
     List<BillOfLading> billOfLadings = billOfLadingRepository.findAll();
     billOfLadings.forEach(item -> {
-      Set<Container> setContainer = item.getContainers();
+      Set<Container> setContainer = new HashSet<>(item.getContainers());
       setContainer.forEach(containerItem -> {
         if (containerNumber.equals(containerItem.getContainerNumber())
             || licensePlate.equals(containerItem.getLicensePlate())) {
@@ -199,8 +204,6 @@ public class ContainerServiceImpl implements ContainerService {
     container.setDriver(driver);
 
     container.setBillOfLading(billOfLading);
-    container.setTrailer(request.getTrailer());
-    container.setTractor(request.getTractor());
     container.setContainerNumber(containerNumber);
     container.setLicensePlate(licensePlate);
 
@@ -213,8 +216,10 @@ public class ContainerServiceImpl implements ContainerService {
   public void removeContainer(Long id) {
     Container container = containerRepository.findById(id)
         .orElseThrow(() -> new NotFoundException("ERROR: Container is not found."));
-    if (container.getStatus().equalsIgnoreCase(EnumSupplyStatus.COMBINED.name())) {
-      throw new InternalException(String.format("Container %s has been combined", container.getContainerNumber()));
+    if (container.getStatus().equalsIgnoreCase(EnumSupplyStatus.COMBINED.name())
+        || container.getStatus().equalsIgnoreCase(EnumSupplyStatus.BIDDING.name())) {
+      throw new InternalException(
+          String.format("Container %s has been %s", container.getContainerNumber(), container.getStatus()));
     }
     containerRepository.delete(container);
   }
@@ -224,8 +229,10 @@ public class ContainerServiceImpl implements ContainerService {
 
     Container container = containerRepository.findById(id)
         .orElseThrow(() -> new NotFoundException("ERROR: Container is not found."));
-    if (container.getStatus().equalsIgnoreCase(EnumSupplyStatus.COMBINED.name())) {
-      throw new InternalException(String.format("Container %s has been combined", container.getContainerNumber()));
+    if (container.getStatus().equalsIgnoreCase(EnumSupplyStatus.COMBINED.name())
+        || container.getStatus().equalsIgnoreCase(EnumSupplyStatus.BIDDING.name())) {
+      throw new InternalException(
+          String.format("Container %s has been %s", container.getContainerNumber(), container.getStatus()));
     }
 
     BillOfLading billOfLading = (BillOfLading) container.getBillOfLading();
@@ -257,15 +264,6 @@ public class ContainerServiceImpl implements ContainerService {
 
       container.setDriver(driver);
     }
-    String trailer = (String) updates.get("trailer");
-    if (trailer != null && !trailer.isEmpty()) {
-      container.setTrailer(trailer);
-    }
-
-    String tractor = (String) updates.get("tractor");
-    if (tractor != null && !tractor.isEmpty()) {
-      container.setTractor(tractor);
-    }
 
     String licensePlate = (String) updates.get("licensePlate");
     if (licensePlate != null && !licensePlate.isEmpty()) {
@@ -277,7 +275,7 @@ public class ContainerServiceImpl implements ContainerService {
       container.setStatus(status);
     }
 
-    Set<Container> containers = billOfLading.getContainers();
+    Set<Container> containers = new HashSet<>(billOfLading.getContainers());
     containers.forEach(item -> {
       if (item.getContainerNumber().equals(container.getContainerNumber())
           || item.getDriver().getUsername().equals(container.getDriver().getUsername())
@@ -292,7 +290,7 @@ public class ContainerServiceImpl implements ContainerService {
 
     List<BillOfLading> billOfLadings = billOfLadingRepository.findAll();
     billOfLadings.forEach(item -> {
-      Set<Container> setContainer = item.getContainers();
+      Set<Container> setContainer = new HashSet<>(item.getContainers());
       setContainer.forEach(containerItem -> {
         if (container.getContainerNumber().equals(containerItem.getContainerNumber())
             || container.getLicensePlate().equals(containerItem.getLicensePlate())) {

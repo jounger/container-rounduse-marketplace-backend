@@ -8,10 +8,10 @@ import org.springframework.stereotype.Repository;
 import com.crm.models.ShippingLine;
 
 @Repository
-public interface ShippingLineRepository extends JpaRepository<ShippingLine, Long>{
+public interface ShippingLineRepository extends JpaRepository<ShippingLine, Long> {
 
-	Boolean existsByCompanyCode(String name);
+  Boolean existsByCompanyCode(String name);
 
-	Optional<ShippingLine> findByCompanyCode(String name);
+  Optional<ShippingLine> findByCompanyCode(String name);
 
 }

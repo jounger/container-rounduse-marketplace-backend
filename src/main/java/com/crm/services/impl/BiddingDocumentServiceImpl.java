@@ -77,10 +77,13 @@ public class BiddingDocumentServiceImpl implements BiddingDocumentService {
 
     biddingDocument.setIsMultipleAward(request.getIsMultipleAward());
 
-    LocalDateTime bidOpening = Tool.convertToLocalDateTime(request.getBidOpening());
-    biddingDocument.setBidOpening(bidOpening);
+    biddingDocument.setBidOpening(LocalDateTime.now());
 
+    LocalDateTime packingTime = outbound.getPackingTime();
     LocalDateTime bidClosing = Tool.convertToLocalDateTime(request.getBidClosing());
+    if (bidClosing.isBefore(LocalDateTime.now()) || bidClosing.isAfter(packingTime)) {
+      throw new InternalException("Bid closing time must be after now.");
+    }
     biddingDocument.setBidClosing(bidClosing);
 
     EnumCurrency currency = EnumCurrency.findByName(request.getCurrencyOfPayment());
@@ -98,7 +101,7 @@ public class BiddingDocumentServiceImpl implements BiddingDocumentService {
     if (discountCodeString != null && !discountCodeString.isEmpty()) {
       Discount bidDiscountCode = discountRepository.findByCode(discountCodeString)
           .orElseThrow(() -> new NotFoundException("Discount is not found."));
-      biddingDocument.setBidDiscountCode(bidDiscountCode);
+      biddingDocument.setDiscount(bidDiscountCode);
     }
 
     biddingDocument.setStatus(EnumBiddingStatus.BIDDING.name());
@@ -146,10 +149,16 @@ public class BiddingDocumentServiceImpl implements BiddingDocumentService {
     BiddingDocument biddingDocument = biddingDocumentRepository.findById(request.getId())
         .orElseThrow(() -> new NotFoundException("Bidding document is not found."));
 
-    LocalDateTime bidOpeningTime = Tool.convertToLocalDateTime(request.getBidOpening());
-    biddingDocument.setBidOpening(bidOpeningTime);
+    if (biddingDocument.getStatus().equalsIgnoreCase(EnumBiddingStatus.COMBINED.name())) {
+      throw new InternalException("CAN NOT edit bidding document if it was combined.");
+    }
 
+    Outbound outbound = biddingDocument.getOutbound();
+    LocalDateTime packingTime = outbound.getPackingTime();
     LocalDateTime bidClosingTime = Tool.convertToLocalDateTime(request.getBidClosing());
+    if (bidClosingTime.isBefore(LocalDateTime.now()) || bidClosingTime.isAfter(packingTime)) {
+      throw new InternalException("Bid closing time must be after now.");
+    }
     biddingDocument.setBidClosing(bidClosingTime);
 
     EnumCurrency currencyOfPayment = EnumCurrency.findByName(request.getCurrencyOfPayment());
@@ -176,15 +185,15 @@ public class BiddingDocumentServiceImpl implements BiddingDocumentService {
       throw new InternalException("CAN NOT edit bidding document if it was combined.");
     }
 
-    String bidOpening = (String) updates.get("bidOpening");
-    if (bidOpening != null && !bidOpening.isEmpty()) {
-      LocalDateTime bidOpeningTime = Tool.convertToLocalDateTime(bidOpening);
-      biddingDocument.setBidOpening(bidOpeningTime);
-    }
+    Outbound outbound = biddingDocument.getOutbound();
+    LocalDateTime packingTime = outbound.getPackingTime();
 
     String bidClosing = (String) updates.get("bidClosing");
     if (bidClosing != null && !bidClosing.isEmpty()) {
       LocalDateTime bidClosingTime = Tool.convertToLocalDateTime(bidClosing);
+      if (bidClosingTime.isBefore(LocalDateTime.now()) || bidClosingTime.isAfter(packingTime)) {
+        throw new InternalException("Bid closing time must be after now.");
+      }
       biddingDocument.setBidClosing(bidClosingTime);
     }
 
@@ -230,12 +239,13 @@ public class BiddingDocumentServiceImpl implements BiddingDocumentService {
         throw new NotFoundException("Status is not found.");
       }
       if (eStatus.name().equalsIgnoreCase(EnumBiddingStatus.CANCELED.name())) {
-        Outbound outbound = biddingDocument.getOutbound();
+        outbound = biddingDocument.getOutbound();
         outbound.setStatus(EnumSupplyStatus.CREATED.name());
         outboundRepository.save(outbound);
 
         biddingDocument.getBids().forEach(bid -> {
           bid.setStatus(EnumBidStatus.REJECTED.name());
+          bid.setDateOfDecision(LocalDateTime.now());
           bid.getContainers().forEach(container -> {
             container.setStatus(EnumSupplyStatus.CREATED.name());
             containerRepository.save(container);
@@ -253,8 +263,7 @@ public class BiddingDocumentServiceImpl implements BiddingDocumentService {
   public void removeBiddingDocument(Long id) {
     BiddingDocument biddingDocument = biddingDocumentRepository.findById(id)
         .orElseThrow(() -> new NotFoundException("Bidding document is not found"));
-    Outbound outbound = biddingDocument.getOutbound();
-    if (outbound.getStatus().equalsIgnoreCase(EnumSupplyStatus.COMBINED.name())) {
+    if (!biddingDocument.getStatus().equalsIgnoreCase(EnumBiddingStatus.CANCELED.name())) {
       throw new InternalException("Bidding document is in a transaction.");
     }
     biddingDocumentRepository.deleteById(id);

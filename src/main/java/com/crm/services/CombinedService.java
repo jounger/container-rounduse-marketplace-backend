@@ -11,16 +11,16 @@ import com.crm.payload.request.PaginationRequest;
 public interface CombinedService {
 
   Combined createCombined(CombinedRequest request);
-  
+
   Combined getCombined(Long id);
-  
+
   Page<Combined> getCombinedsByUser(Long id, PaginationRequest request);
-  
+
   Page<Combined> getCombineds(PaginationRequest request);
-  
+
   Combined updateCombined(CombinedRequest request);
-  
+
   Combined editCombined(Long id, Map<String, Object> updates);
-  
+
   void removeCombined(Long id);
 }

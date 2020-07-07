@@ -64,7 +64,13 @@ public class OutboundServiceImpl implements OutboundService {
   public Page<Outbound> getOutbounds(PaginationRequest request) {
     PageRequest pageRequest = PageRequest.of(request.getPage(), request.getLimit(),
         Sort.by(Sort.Direction.DESC, "createdAt"));
-    Page<Outbound> pages = outboundRepository.findAll(pageRequest);
+    String status = request.getStatus();
+    Page<Outbound> pages = null;
+    if (status != null && !status.isEmpty()) {
+      pages = outboundRepository.findAll(status, pageRequest);
+    } else {
+      pages = outboundRepository.findAll(pageRequest);
+    }
     return pages;
   }
 
@@ -73,7 +79,13 @@ public class OutboundServiceImpl implements OutboundService {
     if (merchantRepository.existsById(id)) {
       PageRequest pageRequest = PageRequest.of(request.getPage(), request.getLimit(),
           Sort.by(Sort.Direction.DESC, "createdAt"));
-      Page<Outbound> pages = outboundRepository.findByMerchantId(id, pageRequest);
+      String status = request.getStatus();
+      Page<Outbound> pages = null;
+      if (status != null && !status.isEmpty()) {
+        pages = outboundRepository.findByMerchantId(id, status, pageRequest);
+      } else {
+        pages = outboundRepository.findByMerchantId(id, pageRequest);
+      }
       return pages;
     } else {
       throw new NotFoundException("ERROR: Merchant is not found.");
@@ -100,14 +112,19 @@ public class OutboundServiceImpl implements OutboundService {
 
     outbound.setGoodsDescription(request.getGoodsDescription());
 
-    if (request.getPackingTime() != null && !request.getPackingTime().isEmpty()) {
-      LocalDateTime packingTime = Tool.convertToLocalDateTime(request.getPackingTime());
-      outbound.setPackingTime(packingTime);
+    LocalDateTime packingTime = Tool.convertToLocalDateTime(request.getPackingTime());
+    outbound.setPackingTime(packingTime);
+
+    LocalDateTime deliveryTime = Tool.convertToLocalDateTime(request.getDeliveryTime());
+    outbound.setDeliveryTime(deliveryTime);
+
+    if (packingTime.isAfter(deliveryTime)) {
+      throw new InternalException("Error: packingTime must before deliveryTime");
     }
 
     outbound.setPackingStation(request.getPackingStation());
 
-    outbound.setPayload(request.getPayload());
+    outbound.setGrossWeight(request.getGrossWeight());
 
     if (request.getUnitOfMeasurement() != null && !request.getUnitOfMeasurement().isEmpty()) {
       outbound.setUnitOfMeasurement(EnumUnit.findByName(request.getUnitOfMeasurement()).name());
@@ -149,9 +166,10 @@ public class OutboundServiceImpl implements OutboundService {
 
     Outbound outbound = outboundRepository.findById(request.getId())
         .orElseThrow(() -> new NotFoundException("ERROR: Outbound is not found."));
-    if (outbound.getStatus().equals(EnumSupplyStatus.COMBINED.name())) {
-      throw new InternalException(
-          String.format("Outbound with bookingNumber %s has been combined", outbound.getBooking().getBookingNumber()));
+    if (outbound.getStatus().equals(EnumSupplyStatus.COMBINED.name())
+        || outbound.getStatus().equals(EnumSupplyStatus.BIDDING.name())) {
+      throw new InternalException(String.format("Outbound with bookingNumber %s has been %s",
+          outbound.getBooking().getBookingNumber(), outbound.getStatus()));
     }
 
     ShippingLine shippingLine = shippingLineRepository.findByCompanyCode(request.getShippingLine())
@@ -166,14 +184,19 @@ public class OutboundServiceImpl implements OutboundService {
 
     outbound.setGoodsDescription(request.getGoodsDescription());
 
-    if (request.getPackingTime() != null && !request.getPackingTime().isEmpty()) {
-      LocalDateTime packingTime = Tool.convertToLocalDateTime(request.getPackingTime());
-      outbound.setPackingTime(packingTime);
+    LocalDateTime packingTime = Tool.convertToLocalDateTime(request.getPackingTime());
+    outbound.setPackingTime(packingTime);
+
+    LocalDateTime deliveryTime = Tool.convertToLocalDateTime(request.getDeliveryTime());
+    outbound.setDeliveryTime(deliveryTime);
+
+    if (packingTime.isAfter(deliveryTime)) {
+      throw new InternalException("Error: packingTime must before deliveryTime");
     }
 
     outbound.setPackingStation(request.getPackingStation());
 
-    outbound.setPayload(request.getPayload());
+    outbound.setGrossWeight(request.getGrossWeight());
 
     if (request.getUnitOfMeasurement() != null && !request.getUnitOfMeasurement().isEmpty()) {
       outbound.setUnitOfMeasurement(EnumUnit.findByName(request.getUnitOfMeasurement()).name());
@@ -208,9 +231,10 @@ public class OutboundServiceImpl implements OutboundService {
   public Outbound editOutbound(Map<String, Object> updates, Long id) {
     Outbound outbound = outboundRepository.findById(id)
         .orElseThrow(() -> new NotFoundException("ERROR: Outbound is not found."));
-    if (outbound.getStatus().equals(EnumSupplyStatus.COMBINED.name())) {
-      throw new InternalException(
-          String.format("Outbound with bookingNumber %s has been combined", outbound.getBooking().getBookingNumber()));
+    if (outbound.getStatus().equals(EnumSupplyStatus.COMBINED.name())
+        || outbound.getStatus().equals(EnumSupplyStatus.BIDDING.name())) {
+      throw new InternalException(String.format("Outbound with bookingNumber %s has been %s",
+          outbound.getBooking().getBookingNumber(), outbound.getStatus()));
     }
 
     String shippingLineRequest = (String) updates.get("shippingLine");
@@ -248,14 +272,29 @@ public class OutboundServiceImpl implements OutboundService {
       outbound.setGoodsDescription(goodsDescriptionRequest);
     }
 
-    Double payloadRequest = (Double) updates.get("payload");
-    if (payloadRequest != null) {
-      outbound.setPayload(payloadRequest);
+    String grossWeightRequest = (String) updates.get("grossWeight");
+    if (grossWeightRequest != null && !grossWeightRequest.isEmpty()) {
+      outbound.setGrossWeight(Double.valueOf(grossWeightRequest));
+    }
+
+    String deliveryTimeRequest = (String) updates.get("deliveryTime");
+    if (deliveryTimeRequest != null && !deliveryTimeRequest.isEmpty()) {
+      LocalDateTime deliveryTime = Tool.convertToLocalDateTime(deliveryTimeRequest);
+      outbound.setDeliveryTime(deliveryTime);
     }
 
     String unitOfMeasurementRequest = (String) updates.get("unitOfMeasurement");
     if (unitOfMeasurementRequest != null && !unitOfMeasurementRequest.isEmpty()) {
       outbound.setUnitOfMeasurement(unitOfMeasurementRequest);
+    }
+
+    if (packingTimeRequest != null && !packingTimeRequest.isEmpty() && deliveryTimeRequest != null
+        && !deliveryTimeRequest.isEmpty()) {
+      LocalDateTime packingTime = Tool.convertToLocalDateTime(packingTimeRequest);
+      LocalDateTime deliveryTime = Tool.convertToLocalDateTime(deliveryTimeRequest);
+      if (packingTime.isAfter(deliveryTime)) {
+        throw new InternalException("Error: packingTime must before deliveryTime");
+      }
     }
 
     outboundRepository.save(outbound);
@@ -267,9 +306,10 @@ public class OutboundServiceImpl implements OutboundService {
 
     Outbound outbound = outboundRepository.findById(id)
         .orElseThrow(() -> new NotFoundException("ERROR: Outbound is not found."));
-    if (outbound.getStatus().equals(EnumSupplyStatus.COMBINED.name())) {
-      throw new InternalException(
-          String.format("Outbound with bookingNumber %s has been combined", outbound.getBooking().getBookingNumber()));
+    if (outbound.getStatus().equals(EnumSupplyStatus.COMBINED.name())
+        || outbound.getStatus().equals(EnumSupplyStatus.BIDDING.name())) {
+      throw new InternalException(String.format("Outbound with bookingNumber %s has been %s",
+          outbound.getBooking().getBookingNumber(), outbound.getStatus()));
     }
     outboundRepository.delete(outbound);
   }

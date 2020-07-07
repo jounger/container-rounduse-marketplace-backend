@@ -1,7 +1,7 @@
 package com.crm.models;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.Collection;
 
 import javax.persistence.Entity;
 import javax.persistence.OneToMany;
@@ -25,5 +25,5 @@ import lombok.ToString;
 public class ShippingLine extends Supplier {
 
   @OneToMany(mappedBy = "shippingLine")
-  private Set<Supply> supplies = new HashSet<>();
+  private Collection<Supply> supplies = new ArrayList<>();
 }

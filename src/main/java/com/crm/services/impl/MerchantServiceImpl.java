@@ -94,9 +94,9 @@ public class MerchantServiceImpl implements MerchantService {
         .orElseThrow(() -> new NotFoundException("Merchant is not found."));
 
     /*
-    String encoder = passwordEncoder.encode(request.getPassword());
-    merchant.setPassword(encoder);
-    */
+     * String encoder = passwordEncoder.encode(request.getPassword());
+     * merchant.setPassword(encoder);
+     */
 
     Set<Role> roles = new HashSet<>();
     Role userRole = roleRepository.findByName("ROLE_FORWARDER")
@@ -131,12 +131,10 @@ public class MerchantServiceImpl implements MerchantService {
         .orElseThrow(() -> new NotFoundException("Merchant is not found."));
 
     /*
-    String password = (String) updates.get("password");
-    if (password != null) {
-      String encoder = passwordEncoder.encode(password);
-      merchant.setPassword(encoder);
-    }
-    */
+     * String password = (String) updates.get("password"); if (password != null) {
+     * String encoder = passwordEncoder.encode(password);
+     * merchant.setPassword(encoder); }
+     */
 
     String email = (String) updates.get("email");
     if (email != null && UserServiceImpl.isEmailChange(email, merchant) && !email.isEmpty()) {
@@ -149,7 +147,7 @@ public class MerchantServiceImpl implements MerchantService {
     }
 
     String address = (String) updates.get("address");
-    if (address != null  && !address.isEmpty()) {
+    if (address != null && !address.isEmpty()) {
       merchant.setAddress(address);
     }
 
@@ -192,7 +190,7 @@ public class MerchantServiceImpl implements MerchantService {
     if (fax != null && !fax.isEmpty()) {
       merchant.setFax(fax);
     }
-    
+
     merchantRepository.save(merchant);
     return merchant;
   }

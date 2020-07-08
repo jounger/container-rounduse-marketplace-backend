@@ -70,9 +70,13 @@ public class OutboundController {
     return ResponseEntity.ok(response);
   }
 
-  @GetMapping("/merchant/{id}")
-  @PreAuthorize("hasRole('FORWARDER') or hasRole('MERCHANT')")
-  public ResponseEntity<?> getOutboundsByMerchant(@PathVariable Long id, @Valid PaginationRequest request) {
+  @GetMapping("/merchant")
+  @PreAuthorize("hasRole('MERCHANT')")
+  public ResponseEntity<?> getOutboundsByMerchant(@Valid PaginationRequest request) {
+
+    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
+        .getPrincipal();
+    Long id = userDetails.getId();
 
     Page<Outbound> pages = outBoundService.getOutboundsByMerchant(id, request);
     PaginationResponse<OutboundDto> response = new PaginationResponse<>();
@@ -106,7 +110,12 @@ public class OutboundController {
   @PutMapping("")
   @PreAuthorize("hasRole('MERCHANT')")
   public ResponseEntity<?> updateOutboundDto(@Valid @RequestBody OutboundRequest request) {
-    Outbound outbound = outBoundService.updateOutbound(request);
+
+    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
+        .getPrincipal();
+    Long id = userDetails.getId();
+
+    Outbound outbound = outBoundService.updateOutbound(id, request);
     OutboundDto outboundDto = new OutboundDto();
     outboundDto = OutboundMapper.toOutboundDto(outbound);
     return ResponseEntity.ok(outboundDto);
@@ -116,7 +125,12 @@ public class OutboundController {
   @RequestMapping(value = "/{id}", method = RequestMethod.PATCH, consumes = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("hasRole('MERCHANT')")
   public ResponseEntity<?> editOutbound(@RequestBody Map<String, Object> updates, @PathVariable("id") Long id) {
-    Outbound outbound = outBoundService.editOutbound(updates, id);
+
+    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
+        .getPrincipal();
+    Long userId = userDetails.getId();
+
+    Outbound outbound = outBoundService.editOutbound(updates, id, userId);
     OutboundDto outboundDto = new OutboundDto();
     outboundDto = OutboundMapper.toOutboundDto(outbound);
     return ResponseEntity.ok(outboundDto);
@@ -126,7 +140,12 @@ public class OutboundController {
   @DeleteMapping("/{id}")
   @PreAuthorize("hasRole('MERCHANT')")
   public ResponseEntity<?> removeOutbound(@PathVariable Long id) {
-    outBoundService.removeOutbound(id);
+
+    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
+        .getPrincipal();
+    Long userId = userDetails.getId();
+
+    outBoundService.removeOutbound(id, userId);
     return ResponseEntity.ok(new MessageResponse("Outbound has remove successfully"));
   }
 }

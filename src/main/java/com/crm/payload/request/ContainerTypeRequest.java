@@ -31,4 +31,6 @@ public class ContainerTypeRequest {
   private Double doorOpeningWidth;
 
   private Double doorOpeningHeight;
+
+  private String unitOfMeasurement;
 }

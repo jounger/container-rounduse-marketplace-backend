@@ -8,6 +8,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import com.crm.enums.EnumUnit;
 import com.crm.exception.DuplicateRecordException;
 import com.crm.exception.NotFoundException;
 import com.crm.models.ContainerType;
@@ -64,6 +65,11 @@ public class ContainerTypeServiceImpl implements ContainerTypeService {
     containerType.setInternalWidth(request.getInternalWidth());
     containerType.setDoorOpeningHeight(request.getDoorOpeningHeight());
     containerType.setDoorOpeningWidth(request.getDoorOpeningWidth());
+    try {
+      containerType.setUnitOfMeasurement(EnumUnit.findByName(request.getUnitOfMeasurement()).name());
+    } catch (Exception e) {
+      throw new NotFoundException("ERROR: UnitOfMeasurement is not found.");
+    }
     containerTypeRepository.save(containerType);
     return containerType;
   }
@@ -91,6 +97,11 @@ public class ContainerTypeServiceImpl implements ContainerTypeService {
     containerType.setInternalWidth(request.getInternalWidth());
     containerType.setDoorOpeningHeight(request.getDoorOpeningHeight());
     containerType.setDoorOpeningWidth(request.getDoorOpeningWidth());
+    try {
+      containerType.setUnitOfMeasurement(EnumUnit.findByName(request.getUnitOfMeasurement()).name());
+    } catch (Exception e) {
+      throw new NotFoundException("ERROR: UnitOfMeasurement is not found.");
+    }
     containerTypeRepository.save(containerType);
     return containerType;
   }
@@ -163,6 +174,15 @@ public class ContainerTypeServiceImpl implements ContainerTypeService {
     String doorOpeningWidth = (String) updates.get("doorOpeningWidth");
     if (doorOpeningWidth != null && !doorOpeningWidth.isEmpty()) {
       containerType.setDoorOpeningWidth(Double.valueOf(doorOpeningWidth));
+    }
+
+    String unitOfMeasurement = (String) updates.get("unitOfMeasurement");
+    if (unitOfMeasurement != null && !unitOfMeasurement.isEmpty()) {
+      try {
+        containerType.setUnitOfMeasurement(EnumUnit.findByName(unitOfMeasurement).name());
+      } catch (Exception e) {
+        throw new NotFoundException("ERROR: UnitOfMeasurement is not found.");
+      }
     }
 
     containerTypeRepository.save(containerType);

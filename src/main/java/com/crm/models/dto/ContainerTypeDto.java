@@ -6,9 +6,9 @@ import lombok.Setter;
 @Getter
 @Setter
 public class ContainerTypeDto {
-  
+
   private Long id;
-  
+
   private String name;
 
   private String description;
@@ -28,4 +28,6 @@ public class ContainerTypeDto {
   private Double doorOpeningWidth;
 
   private Double doorOpeningHeight;
+
+  private String unitOfMeasurement;
 }

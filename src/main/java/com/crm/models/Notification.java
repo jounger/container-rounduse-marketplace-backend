@@ -52,7 +52,6 @@ public class Notification {
   @JoinColumn(name = "user_id")
   private User recipient;
 
-  @NotBlank
   @Size(min = 2, max = 50)
   private String title;
 

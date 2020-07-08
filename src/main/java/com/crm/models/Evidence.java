@@ -1,6 +1,5 @@
 package com.crm.models;
 
-import java.time.LocalDateTime;
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -14,9 +13,9 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-import javax.validation.constraints.Size;
 
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -33,48 +32,37 @@ import lombok.ToString;
 @NoArgsConstructor
 @ToString
 @Entity
-@Table(name = "payment")
+@Table(name = "evidence")
 @EntityListeners(AuditingEntityListener.class)
-@JsonIgnoreProperties(value = { "createdAt" }, allowGetters = true)
-public class Payment {
+@JsonIgnoreProperties(value = { "createdAt", "updatedAt" }, allowGetters = true)
+public class Evidence {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "id", updatable = false, nullable = false)
   private Long id;
-  
-  @ManyToOne
-  @JoinColumn(name = "recipient_id")
-  private Supplier recipient;
-  
-  @ManyToOne
-  @JoinColumn(name = "sender_id")
-  private Supplier sender;
 
   @ManyToOne
   @JoinColumn(name = "contract_id")
   private Contract contract;
+  
+  @ManyToOne
+  @JoinColumn(name = "supplier_id")
+  private Supplier sender;
 
-  @Column(name = "detail")
-  @Size(min = 2)
-  private String detail;
+  @Column(name = "evidence")
+  private String evidence;
 
-  @Column(name = "amount")
-  private Double amount;
-
-  @Column(name = "is_paid")
-  private Boolean isPaid;
-
-  // EnumPaymentType
-  @Column(name = "type")
-  @Size(min = 2, max = 10)
-  private String type;
-
-  @Column(name = "payment_date")
-  private LocalDateTime paymentDate;
+  @Column(name = "is_valid")
+  private Boolean isValid;
 
   @Column(name = "created_at", nullable = false, updatable = false)
   @Temporal(TemporalType.TIMESTAMP)
   @CreatedDate
   private Date createdAt;
+
+  @Column(name = "updated_at", nullable = false)
+  @Temporal(TemporalType.TIMESTAMP)
+  @LastModifiedDate
+  private Date updatedAt;
 }

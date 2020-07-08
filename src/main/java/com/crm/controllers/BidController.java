@@ -126,7 +126,9 @@ public class BidController {
   @PreAuthorize("hasRole('FORWARDER')")
   @PutMapping("")
   public ResponseEntity<?> updateBid(@Valid @RequestBody BidRequest request) {
-    Bid bid = bidService.updateBid(request);
+    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    String username = userDetails.getUsername();
+    Bid bid = bidService.updateBid(username, request);
     BidDto bidDto = BidMapper.toBidDto(bid);
     return ResponseEntity.ok(bidDto);
   }
@@ -135,9 +137,11 @@ public class BidController {
   @PreAuthorize("hasRole('MERCHANT') or hasRole('FORWARDER')")
   @RequestMapping(value = "/{id}", method = RequestMethod.PATCH, consumes = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<?> editBid(@PathVariable("id") Long id, @RequestBody Map<String, Object> updates) {
+    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    String username = userDetails.getUsername();
     Bid bid = bidService.getBid(id);
     String status = bid.getStatus();
-    Bid bidEdit = bidService.editBid(id, updates);
+    Bid bidEdit = bidService.editBid(id, username, updates);
     BidDto BidDto = BidMapper.toBidDto(bidEdit);
 
     // CREATE NOTIFICATION

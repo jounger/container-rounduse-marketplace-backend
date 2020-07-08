@@ -44,7 +44,7 @@ public class DriverServiceImpl implements DriverService {
   private ForwarderRepository forwarderRepository;
 
   @Override
-  public Driver createDriver(Long id, DriverRequest request) {
+  public Driver createDriver(Long userId, DriverRequest request) {
     if (userRepository.existsByUsername(request.getUsername()) || userRepository.existsByEmail(request.getEmail())
         || userRepository.existsByPhone(request.getPhone())) {
       throw new DuplicateRecordException("Error: User has been existed");
@@ -69,7 +69,7 @@ public class DriverServiceImpl implements DriverService {
     driver.setFullname(request.getFullname());
     driver.setDriverLicense(request.getDriverLicense());
 
-    Forwarder forwarder = forwarderRepository.findById(id)
+    Forwarder forwarder = forwarderRepository.findById(userId)
         .orElseThrow(() -> new NotFoundException("Forwarder is not found"));
     driver.setForwarder(forwarder);
 

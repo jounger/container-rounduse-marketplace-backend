@@ -61,11 +61,15 @@ public class InboundController {
     return ResponseEntity.ok(response);
   }
 
-  @GetMapping("/forwarder/{id}")
-  @PreAuthorize("hasRole('FORWARDER') or hasRole('MERCHANT')")
-  public ResponseEntity<?> getInboundsByForwarder(@PathVariable Long id, @Valid PaginationRequest request) {
+  @GetMapping("/forwarder")
+  @PreAuthorize("hasRole('FORWARDER')")
+  public ResponseEntity<?> getInboundsByForwarder(@Valid PaginationRequest request) {
 
-    Page<Inbound> pages = inboundService.getInboundsForwarder(id, request);
+    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
+        .getPrincipal();
+    Long userId = userDetails.getId();
+    
+    Page<Inbound> pages = inboundService.getInboundsForwarder(userId, request);
     PaginationResponse<InboundDto> response = new PaginationResponse<>();
     response.setPageNumber(request.getPage());
     response.setPageSize(request.getLimit());
@@ -148,11 +152,11 @@ public class InboundController {
   @PutMapping("")
   @PreAuthorize("hasRole('FORWARDER')")
   public ResponseEntity<?> updateInbound(@Valid @RequestBody InboundRequest request) {
-    
+
     UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
         .getPrincipal();
     Long id = userDetails.getId();
-    
+
     Inbound inbound = inboundService.updateInbound(id, request);
     InboundDto inboundDto = new InboundDto();
     inboundDto = InboundMapper.toInboundDto(inbound);
@@ -163,7 +167,12 @@ public class InboundController {
   @RequestMapping(value = "/{id}", method = RequestMethod.PATCH, consumes = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("hasRole('FORWARDER')")
   public ResponseEntity<?> editInbound(@RequestBody Map<String, Object> updates, @PathVariable("id") Long id) {
-    Inbound inbound = inboundService.editInbound(updates, id);
+
+    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
+        .getPrincipal();
+    Long userId = userDetails.getId();
+
+    Inbound inbound = inboundService.editInbound(updates, id, userId);
     InboundDto inboundDto = new InboundDto();
     inboundDto = InboundMapper.toInboundDto(inbound);
     return ResponseEntity.ok(inboundDto);
@@ -173,7 +182,12 @@ public class InboundController {
   @DeleteMapping("/{id}")
   @PreAuthorize("hasRole('FORWARDER')")
   public ResponseEntity<?> removeInbound(@PathVariable Long id) {
-    inboundService.removeInbound(id);
+
+    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
+        .getPrincipal();
+    Long userId = userDetails.getId();
+
+    inboundService.removeInbound(id, userId);
     return ResponseEntity.ok(new MessageResponse("Inbound has remove successfully"));
   }
 

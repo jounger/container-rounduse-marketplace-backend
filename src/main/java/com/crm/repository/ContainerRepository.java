@@ -17,8 +17,6 @@ public interface ContainerRepository extends JpaRepository<Container, Long> {
 
   Boolean existsByContainerNumber(String containerNumber);
 
-  Boolean existsByLicensePlate(String licensePlate);
-
   @Query(value = "SELECT b FROM Container b WHERE b.billOfLading.id = :id")
   Page<Container> findContainersByBillOfLading(@Param("id") Long id, Pageable pageable);
 
@@ -41,8 +39,14 @@ public interface ContainerRepository extends JpaRepository<Container, Long> {
   @Query(value = "SELECT c FROM Container c WHERE c.billOfLading.inbound.id = :id")
   Page<Container> findContainersByInbound(@Param("id") Long id, Pageable pageable);
 
-  @Query(value = "SELECT c FROM Container c WHERE c.driver.id = :id")
-  List<Container> findByDriver(@Param("id") Long id);
+  @Query(value = "SELECT c FROM Container c WHERE c.driver.id = :driverId")
+  List<Container> findByDriver(@Param("driverId") Long driverId);
+
+  @Query(value = "SELECT c FROM Container c WHERE c.trailer.id = :trailerId")
+  List<Container> findByTrailer(@Param("trailerId") Long trailerId);
+
+  @Query(value = "SELECT c FROM Container c WHERE c.tractor.id = :tractorId")
+  List<Container> findByTractor(@Param("tractorId") Long tractorId);
 
   @Query(value = "SELECT COUNT(*) FROM Container c LEFT JOIN c.bids b LEFT JOIN b.biddingDocument bd WHERE bd.id = :id AND c.status = 'COMBINED'")
   long countCombinedContainersByBiddingDocument(@Param("id") Long id);

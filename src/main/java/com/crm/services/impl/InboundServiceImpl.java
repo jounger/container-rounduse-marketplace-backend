@@ -1,6 +1,8 @@
 package com.crm.services.impl;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -19,6 +21,8 @@ import com.crm.exception.InternalException;
 import com.crm.exception.NotFoundException;
 import com.crm.models.BillOfLading;
 import com.crm.models.Container;
+import com.crm.models.ContainerSemiTrailer;
+import com.crm.models.ContainerTractor;
 import com.crm.models.ContainerType;
 import com.crm.models.Driver;
 import com.crm.models.Forwarder;
@@ -27,11 +31,12 @@ import com.crm.models.Outbound;
 import com.crm.models.Port;
 import com.crm.models.ShippingLine;
 import com.crm.payload.request.BillOfLadingRequest;
-import com.crm.payload.request.ContainerRequest;
 import com.crm.payload.request.InboundRequest;
 import com.crm.payload.request.PaginationRequest;
 import com.crm.repository.BillOfLadingRepository;
 import com.crm.repository.ContainerRepository;
+import com.crm.repository.ContainerSemiTrailerRepository;
+import com.crm.repository.ContainerTractorRepository;
 import com.crm.repository.ContainerTypeRepository;
 import com.crm.repository.DriverRepository;
 import com.crm.repository.ForwarderRepository;
@@ -70,6 +75,12 @@ public class InboundServiceImpl implements InboundService {
 
   @Autowired
   private OutboundRepository outboundRepository;
+
+  @Autowired
+  private ContainerSemiTrailerRepository containerSemiTrailerRepository;
+
+  @Autowired
+  private ContainerTractorRepository containerTractorRepository;
 
   @Override
   public Page<Inbound> getInbounds(PaginationRequest request) {
@@ -184,81 +195,96 @@ public class InboundServiceImpl implements InboundService {
       inbound.setReturnStation(request.getReturnStation());
 
       BillOfLading billOfLading = inbound.getBillOfLading();
-      BillOfLadingRequest billOfLadingRequest = request.getBillOfLading();
 
-      if (billOfLadingRequest != null) {
-
-        List<ContainerRequest> containersRequest = billOfLadingRequest.getContainers();
-
-        Set<Container> setContainers = new HashSet<>(billOfLading.getContainers());
-        setContainers.forEach(item -> {
-          if (item.getStatus().equalsIgnoreCase(EnumSupplyStatus.COMBINED.name())
-              || item.getStatus().equalsIgnoreCase(EnumSupplyStatus.BIDDING.name())) {
-            throw new InternalException(
-                String.format("Container %s has been %s", item.getContainerNumber(), item.getStatus()));
-          }
-        });
-
-        LocalDateTime pickupTime = Tool.convertToLocalDateTime(request.getPickupTime());
-        LocalDateTime freeTime = Tool.convertToLocalDateTime(request.getBillOfLading().getFreeTime());
-        if (pickupTime.isAfter(freeTime)) {
-          throw new InternalException("Error: pickupTime must before freeTime");
+      Set<Container> setContainers = new HashSet<>(billOfLading.getContainers());
+      setContainers.forEach(item -> {
+        if (item.getStatus().equalsIgnoreCase(EnumSupplyStatus.COMBINED.name())
+            || item.getStatus().equalsIgnoreCase(EnumSupplyStatus.BIDDING.name())) {
+          throw new InternalException(
+              String.format("Container %s has been %s", item.getContainerNumber(), item.getStatus()));
         }
+      });
 
-        inbound.setPickupTime(pickupTime);
-        billOfLading.setFreeTime(freeTime);
-
-        LocalDateTime emptyTime = pickupTime.plusDays(1);
-        inbound.setEmptyTime(emptyTime);
-
-        if (containersRequest != null) {
-          for (int i = 0; i < containersRequest.size(); i++) {
-            Container container = containerRepository.findById(containersRequest.get(i).getId())
-                .orElseThrow(() -> new NotFoundException("ERROR: Container is not found."));
-
-            List<Inbound> inbounds = inboundRepository.checkInboundsByFowarder(id, pickupTime, freeTime,
-                containersRequest.get(i).getContainerNumber(), containersRequest.get(i).getId());
-            if (inbounds != null) {
-              throw new InternalException(
-                  String.format("Container %s has been busy", containersRequest.get(i).getContainerNumber()));
-            }
-
-            String driverUserName = containersRequest.get(i).getDriver();
-            Driver driver = driverRepository.findByUsername(driverUserName)
-                .orElseThrow(() -> new NotFoundException("ERROR: Driver is not found."));
-            if (!driver.getForwarder().getId().equals(inbound.getForwarder().getId())) {
-              throw new NotFoundException("ERROR: The forwarder does not own this driver.");
-            }
-            container.setBillOfLading(billOfLading);
-
-            List<Container> containers = containerRepository.findByDriver(driver.getId());
-            containers.forEach(item -> {
-              if (item.getBillOfLading().getFreeTime().isBefore(pickupTime)
-                  || item.getBillOfLading().getInbound().getPickupTime().isAfter(freeTime)) {
-              } else {
-                if (item.getBillOfLading().getInbound().getId().equals(request.getId())) {
-                } else {
-                  throw new InternalException(String.format("Driver %s has been busy", item.getDriver().getUsername()));
-                }
-              }
-            });
-
-            container.setDriver(driver);
-            container.setContainerNumber(containersRequest.get(i).getContainerNumber());
-            container.setLicensePlate(containersRequest.get(i).getLicensePlate());
-            container.setStatus(containersRequest.get(i).getStatus());
-            billOfLading.getContainers().add(container);
-          }
-        }
-
-        Port port = portRepository.findByNameCode(billOfLadingRequest.getPortOfDelivery())
-            .orElseThrow(() -> new NotFoundException("ERROR: Port is not found."));
-        billOfLading.setPortOfDelivery(port);
-
-        inbound.setBillOfLading(billOfLading);
-
+      LocalDateTime pickupTime = Tool.convertToLocalDateTime(request.getPickupTime());
+      LocalDateTime freeTime = billOfLading.getFreeTime();
+      if (pickupTime.isAfter(freeTime)) {
+        throw new InternalException("Error: pickupTime must before freeTime");
       }
 
+      inbound.setPickupTime(pickupTime);
+
+      LocalDateTime emptyTime = pickupTime.plusDays(1);
+      inbound.setEmptyTime(emptyTime);
+
+      Collection<Container> collectionContainers = billOfLading.getContainers();
+      List<Container> containers = new ArrayList<>(collectionContainers);
+
+      if (containers != null) {
+        for (int i = 0; i < containers.size(); i++) {
+          Container container = containerRepository.findById(containers.get(i).getId())
+              .orElseThrow(() -> new NotFoundException("ERROR: Container is not found."));
+
+          List<Inbound> inbounds = inboundRepository.checkInboundsByFowarder(id, pickupTime, freeTime,
+              container.getContainerNumber(), container.getId());
+          if (inbounds != null) {
+            throw new InternalException(
+                String.format("Container %s has been busy", container.getContainerNumber()));
+          }
+
+          String driverUserName = container.getDriver().getUsername();
+          Driver driver = driverRepository.findByUsername(driverUserName)
+              .orElseThrow(() -> new NotFoundException("ERROR: Driver is not found."));
+          if (!driver.getForwarder().getId().equals(inbound.getForwarder().getId())) {
+            throw new NotFoundException("ERROR: The forwarder does not own this driver.");
+          }
+
+          String trailer = container.getTrailer().getLicensePlate();
+          ContainerSemiTrailer containerSemiTrailer = containerSemiTrailerRepository.findByLicensePlate(trailer)
+              .orElseThrow(() -> new NotFoundException("ERROR: ContainerSemiTrailer is not found."));
+          if (!containerSemiTrailer.getForwarder().getId().equals(billOfLading.getInbound().getForwarder().getId())) {
+            throw new NotFoundException("ERROR: The forwarder does not own this ContainerSemiTrailer.");
+          }
+
+          String tractor = container.getTractor().getLicensePlate();
+          ContainerTractor containerTractor = containerTractorRepository.findByLicensePlate(tractor)
+              .orElseThrow(() -> new NotFoundException("ERROR: ContainerTractor is not found."));
+          if (!containerTractor.getForwarder().getId().equals(billOfLading.getInbound().getForwarder().getId())) {
+            throw new NotFoundException("ERROR: The forwarder does not own this ContainerTractor.");
+          }
+
+          List<Container> containersByDriver = containerRepository.findByDriver(driver.getId());
+          containersByDriver.forEach(item -> {
+            if (item.getBillOfLading().getFreeTime().isBefore(pickupTime)
+                || item.getBillOfLading().getInbound().getPickupTime().isAfter(freeTime)) {
+            } else {
+              if (item.getBillOfLading().getInbound().getId().equals(request.getId())) {
+              } else {
+                throw new InternalException(String.format("Driver %s has been busy", item.getDriver().getUsername()));
+              }
+            }
+          });
+
+          List<Container> listContainerByTractor = containerRepository.findByTractor(containerTractor.getId());
+          listContainerByTractor.forEach(item -> {
+            if (item.getBillOfLading().getFreeTime().isBefore(billOfLading.getInbound().getPickupTime())
+                || item.getBillOfLading().getInbound().getPickupTime().isAfter(billOfLading.getFreeTime())) {
+            } else {
+              throw new InternalException(
+                  String.format("Tractor %s has been busy", item.getTractor().getLicensePlate()));
+            }
+          });
+
+          List<Container> listContainerByTrailer = containerRepository.findByTrailer(containerSemiTrailer.getId());
+          listContainerByTrailer.forEach(item -> {
+            if (item.getBillOfLading().getFreeTime().isBefore(billOfLading.getInbound().getPickupTime())
+                || item.getBillOfLading().getInbound().getPickupTime().isAfter(billOfLading.getFreeTime())) {
+            } else {
+              throw new InternalException(
+                  String.format("Trailer %s has been busy", item.getTrailer().getLicensePlate()));
+            }
+          });
+        }
+      }
       inboundRepository.save(inbound);
       return inbound;
 
@@ -269,114 +295,148 @@ public class InboundServiceImpl implements InboundService {
   }
 
   @Override
-  public Inbound editInbound(Map<String, Object> updates, Long id) {
-    Inbound inbound = inboundRepository.findById(id)
-        .orElseThrow(() -> new NotFoundException("ERROR: Inbound is not found."));
+  public Inbound editInbound(Map<String, Object> updates, Long id, Long userId) {
+    if (forwarderRepository.existsById(userId)) {
+      Inbound inbound = inboundRepository.findById(id)
+          .orElseThrow(() -> new NotFoundException("ERROR: Inbound is not found."));
 
-    String shippingLineRequest = (String) updates.get("shippingLine");
-    if (shippingLineRequest != null && !shippingLineRequest.isEmpty()) {
-      ShippingLine shippingLine = shippingLineRepository.findByCompanyCode(shippingLineRequest)
-          .orElseThrow(() -> new NotFoundException("ERROR: Shipping Line is not found."));
-      inbound.setShippingLine(shippingLine);
-    }
+      String shippingLineRequest = (String) updates.get("shippingLine");
+      if (shippingLineRequest != null && !shippingLineRequest.isEmpty()) {
+        ShippingLine shippingLine = shippingLineRepository.findByCompanyCode(shippingLineRequest)
+            .orElseThrow(() -> new NotFoundException("ERROR: Shipping Line is not found."));
+        inbound.setShippingLine(shippingLine);
+      }
 
-    String containerTypeRequest = (String) updates.get("containerType");
-    if (containerTypeRequest != null && !containerTypeRequest.isEmpty()) {
-      ContainerType containerType = containerTypeRepository.findByName(containerTypeRequest)
-          .orElseThrow(() -> new NotFoundException("ERROR: Container Type is not found."));
-      inbound.setContainerType(containerType);
-    }
+      String containerTypeRequest = (String) updates.get("containerType");
+      if (containerTypeRequest != null && !containerTypeRequest.isEmpty()) {
+        ContainerType containerType = containerTypeRepository.findByName(containerTypeRequest)
+            .orElseThrow(() -> new NotFoundException("ERROR: Container Type is not found."));
+        inbound.setContainerType(containerType);
+      }
 
-    String returnStationRequest = (String) updates.get("returnStation");
-    if (returnStationRequest != null && !returnStationRequest.isEmpty()) {
-      inbound.setReturnStation(returnStationRequest);
-    }
+      String returnStationRequest = (String) updates.get("returnStation");
+      if (returnStationRequest != null && !returnStationRequest.isEmpty()) {
+        inbound.setReturnStation(returnStationRequest);
+      }
 
-    String pickupTimeRequest = (String) updates.get("pickupTime");
-    if (pickupTimeRequest != null && !pickupTimeRequest.isEmpty()) {
-      LocalDateTime pickupTime = Tool.convertToLocalDateTime(pickupTimeRequest);
+      String pickupTimeRequest = (String) updates.get("pickupTime");
+      if (pickupTimeRequest != null && !pickupTimeRequest.isEmpty()) {
+        LocalDateTime pickupTime = Tool.convertToLocalDateTime(pickupTimeRequest);
 
-      LocalDateTime emptyTime = pickupTime.plusDays(1);
-      inbound.setEmptyTime(emptyTime);
+        LocalDateTime emptyTime = pickupTime.plusDays(1);
+        inbound.setEmptyTime(emptyTime);
 
-      BillOfLading billOfLading = inbound.getBillOfLading();
-      Set<Container> containers = new HashSet<>(billOfLading.getContainers());
-      containers.forEach(item -> {
+        BillOfLading billOfLading = inbound.getBillOfLading();
+        Set<Container> containers = new HashSet<>(billOfLading.getContainers());
+        containers.forEach(item -> {
 
-        if (item.getStatus().equalsIgnoreCase(EnumSupplyStatus.COMBINED.name())
-            || item.getStatus().equalsIgnoreCase(EnumSupplyStatus.BIDDING.name())) {
-          throw new InternalException(
-              String.format("Container %s has been %s", item.getContainerNumber(), item.getStatus()));
-        }
+          if (item.getStatus().equalsIgnoreCase(EnumSupplyStatus.COMBINED.name())
+              || item.getStatus().equalsIgnoreCase(EnumSupplyStatus.BIDDING.name())) {
+            throw new InternalException(
+                String.format("Container %s has been %s", item.getContainerNumber(), item.getStatus()));
+          }
 
-        String containerNumber = item.getContainerNumber();
-        String licensePlate = item.getLicensePlate();
-        List<BillOfLading> billOfLadings = billOfLadingRepository.findAll();
-        billOfLadings.forEach(itemBillOfLadings -> {
-          Set<Container> setContainer = new HashSet<>(itemBillOfLadings.getContainers());
-          setContainer.forEach(containerItem -> {
-            if (containerNumber.equals(containerItem.getContainerNumber())
-                || licensePlate.equals(containerItem.getLicensePlate())) {
-              if (containerItem.getBillOfLading().getFreeTime().isBefore(pickupTime) || containerItem.getBillOfLading()
-                  .getInbound().getPickupTime().isAfter(inbound.getBillOfLading().getFreeTime())) {
-              } else {
-                if (containerItem.getBillOfLading().getId().equals(inbound.getId())) {
+          String containerNumber = item.getContainerNumber();
+          List<BillOfLading> billOfLadings = billOfLadingRepository.findByForwarder(userId);
+          billOfLadings.forEach(itemBillOfLadings -> {
+            Set<Container> setContainer = new HashSet<>(itemBillOfLadings.getContainers());
+            setContainer.forEach(containerItem -> {
+              if (containerNumber.equals(containerItem.getContainerNumber())) {
+                if (containerItem.getBillOfLading().getFreeTime().isBefore(pickupTime) || containerItem
+                    .getBillOfLading().getInbound().getPickupTime().isAfter(inbound.getBillOfLading().getFreeTime())) {
                 } else {
-                  throw new InternalException(
-                      String.format("Container %s has been busy", containerItem.getContainerNumber()));
+                  if (containerItem.getBillOfLading().getId().equals(inbound.getId())) {
+                  } else {
+                    throw new InternalException(
+                        String.format("Container %s has been busy", containerItem.getContainerNumber()));
+                  }
                 }
+              }
+            });
+          });
+
+          Long driverId = item.getDriver().getId();
+          List<Container> listContainerByDriver = containerRepository.findByDriver(driverId);
+          listContainerByDriver.forEach(container -> {
+            if (container.getBillOfLading().getFreeTime().isBefore(pickupTime) || container.getBillOfLading()
+                .getInbound().getPickupTime().isAfter(inbound.getBillOfLading().getFreeTime())) {
+            } else {
+              if (container.getBillOfLading().getId().equals(inbound.getId())) {
+              } else {
+                throw new InternalException(
+                    String.format("Driver %s has been busy", container.getDriver().getUsername()));
+              }
+            }
+          });
+
+          Long tractorId = item.getTractor().getId();
+          List<Container> listContainerByTractor = containerRepository.findByTractor(tractorId);
+          listContainerByTractor.forEach(container -> {
+            if (container.getBillOfLading().getFreeTime().isBefore(pickupTime) || container.getBillOfLading()
+                .getInbound().getPickupTime().isAfter(inbound.getBillOfLading().getFreeTime())) {
+            } else {
+              if (container.getBillOfLading().getId().equals(inbound.getId())) {
+              } else {
+                throw new InternalException(
+                    String.format("Tractor %s has been busy", container.getTractor().getLicensePlate()));
+              }
+            }
+          });
+
+          Long trailerId = item.getTrailer().getId();
+          List<Container> listContainerByTrailer = containerRepository.findByTrailer(trailerId);
+          listContainerByTrailer.forEach(container -> {
+            if (container.getBillOfLading().getFreeTime().isBefore(pickupTime) || container.getBillOfLading()
+                .getInbound().getPickupTime().isAfter(inbound.getBillOfLading().getFreeTime())) {
+            } else {
+              if (container.getBillOfLading().getId().equals(inbound.getId())) {
+              } else {
+                throw new InternalException(
+                    String.format("Trailer %s has been busy", container.getTrailer().getLicensePlate()));
               }
             }
           });
         });
 
-        Long driverId = item.getDriver().getId();
-        List<Container> listContainer = containerRepository.findByDriver(driverId);
-        listContainer.forEach(container -> {
-          if (container.getBillOfLading().getFreeTime().isBefore(pickupTime) || container.getBillOfLading().getInbound()
-              .getPickupTime().isAfter(inbound.getBillOfLading().getFreeTime())) {
-          } else {
-            if (container.getBillOfLading().getId().equals(inbound.getId())) {
-            } else {
-              throw new InternalException(
-                  String.format("Driver %s has been busy", container.getDriver().getUsername()));
-            }
-          }
-        });
-      });
-
-      if (inbound.getBillOfLading().getFreeTime().isAfter(pickupTime)) {
-        inbound.setPickupTime(pickupTime);
-      } else {
-        throw new InternalException("Error: pickupTime must before freeTime");
+        if (inbound.getBillOfLading().getFreeTime().isAfter(pickupTime)) {
+          inbound.setPickupTime(pickupTime);
+        } else {
+          throw new InternalException("Error: pickupTime must before freeTime");
+        }
       }
-    }
 
-    String emptyTimeRequest = (String) updates.get("emptyTime");
-    if (emptyTimeRequest != null && !emptyTimeRequest.isEmpty()) {
-      LocalDateTime emptyTime = Tool.convertToLocalDateTime(emptyTimeRequest);
-      inbound.setEmptyTime(emptyTime);
-    }
+      String emptyTimeRequest = (String) updates.get("emptyTime");
+      if (emptyTimeRequest != null && !emptyTimeRequest.isEmpty()) {
+        LocalDateTime emptyTime = Tool.convertToLocalDateTime(emptyTimeRequest);
+        inbound.setEmptyTime(emptyTime);
+      }
 
-    inboundRepository.save(inbound);
-    return inbound;
+      inboundRepository.save(inbound);
+      return inbound;
+    } else {
+      throw new NotFoundException("ERROR: Forwarder is not found.");
+    }
   }
 
   @Override
-  public void removeInbound(Long id) {
-    Inbound inbound = inboundRepository.findById(id)
-        .orElseThrow(() -> new NotFoundException("ERROR: Inbound is not found."));
+  public void removeInbound(Long id, Long userId) {
+    if (forwarderRepository.existsById(id)) {
+      Inbound inbound = inboundRepository.findById(id)
+          .orElseThrow(() -> new NotFoundException("ERROR: Inbound is not found."));
 
-    BillOfLading billOfLading = inbound.getBillOfLading();
-    Set<Container> containers = new HashSet<>(billOfLading.getContainers());
-    containers.forEach(item -> {
-      if (item.getStatus().equalsIgnoreCase(EnumSupplyStatus.COMBINED.name())
-          || item.getStatus().equalsIgnoreCase(EnumSupplyStatus.BIDDING.name())) {
-        throw new InternalException(
-            String.format("Container %s has been %s", item.getContainerNumber(), item.getStatus()));
-      }
-    });
-    inboundRepository.delete(inbound);
+      BillOfLading billOfLading = inbound.getBillOfLading();
+      Set<Container> containers = new HashSet<>(billOfLading.getContainers());
+      containers.forEach(item -> {
+        if (item.getStatus().equalsIgnoreCase(EnumSupplyStatus.COMBINED.name())
+            || item.getStatus().equalsIgnoreCase(EnumSupplyStatus.BIDDING.name())) {
+          throw new InternalException(
+              String.format("Container %s has been %s", item.getContainerNumber(), item.getStatus()));
+        }
+      });
+      inboundRepository.delete(inbound);
+    } else {
+      throw new NotFoundException("ERROR: Forwarder is not found.");
+    }
   }
 
   @Override

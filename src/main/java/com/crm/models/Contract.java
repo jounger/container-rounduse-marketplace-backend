@@ -11,7 +11,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
@@ -46,22 +45,12 @@ public class Contract {
   @Column(name = "id", updatable = false, nullable = false)
   private Long id;
 
-  @ManyToOne
-  @JoinColumn(name = "supplier_id")
-  private Supplier sender;
-
   @OneToOne
   @JoinColumn(name = "combined_id")
   private Combined combined;
 
   @Column(name = "fines_against_contract_violations")
   private Integer finesAgainstContractViolations;
-
-  @Column(name = "evidence")
-  private String evidence;
-
-  @Column(name = "is_valid")
-  private Boolean isValid;
 
   @Column(name = "required")
   private Boolean required;
@@ -78,4 +67,7 @@ public class Contract {
 
   @OneToMany(mappedBy = "contract")
   private Collection<Payment> payments = new ArrayList<>();
+  
+  @OneToMany(mappedBy = "contract")
+  private Collection<Evidence> evidences = new ArrayList<>();
 }

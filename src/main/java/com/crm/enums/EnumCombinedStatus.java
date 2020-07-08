@@ -2,7 +2,7 @@ package com.crm.enums;
 
 public enum EnumCombinedStatus {
 
-  INFO_RECEIVED, SHIPPING, DELIVERED, PAID, EXCEPTION;
+  INFO_RECEIVED, SHIPPING, DELIVERED, PAID, EXCEPTION, CANCELED;
 
   public static EnumCombinedStatus findByName(String name) {
     for (EnumCombinedStatus status : EnumCombinedStatus.values()) {

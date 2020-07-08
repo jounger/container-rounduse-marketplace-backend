@@ -11,6 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -30,6 +31,7 @@ import com.crm.payload.request.ContainerRequest;
 import com.crm.payload.request.PaginationRequest;
 import com.crm.payload.response.MessageResponse;
 import com.crm.payload.response.PaginationResponse;
+import com.crm.security.services.UserDetailsImpl;
 import com.crm.services.ContainerService;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
@@ -131,7 +133,12 @@ public class ContainerController {
   @PostMapping("/bill-of-lading/{id}")
   @PreAuthorize("hasRole('FORWARDER')")
   public ResponseEntity<?> createContainer(@PathVariable Long id, @Valid @RequestBody ContainerRequest request) {
-    Container container = containerService.createContainer(id, request);
+
+    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
+        .getPrincipal();
+    Long userId = userDetails.getId();
+
+    Container container = containerService.createContainer(id, userId, request);
     ContainerDto containerDto = ContainerMapper.toContainerDto(container);
     return ResponseEntity.ok(containerDto);
   }
@@ -140,7 +147,12 @@ public class ContainerController {
   @PutMapping("")
   @PreAuthorize("hasRole('FORWARDER')")
   public ResponseEntity<?> updateContainer(@Valid @RequestBody ContainerRequest request) {
-    Container container = containerService.updateContainer(request);
+
+    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
+        .getPrincipal();
+    Long userId = userDetails.getId();
+
+    Container container = containerService.updateContainer(userId, request);
     ContainerDto containerDto = ContainerMapper.toContainerDto(container);
     return ResponseEntity.ok(containerDto);
   }
@@ -148,7 +160,12 @@ public class ContainerController {
   @PreAuthorize("hasRole('FORWARDER')")
   @RequestMapping(value = "/{id}", method = RequestMethod.PATCH, consumes = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<?> editContainer(@RequestBody Map<String, Object> updates, @PathVariable("id") Long id) {
-    Container container = containerService.editContainer(updates, id);
+
+    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
+        .getPrincipal();
+    Long userId = userDetails.getId();
+
+    Container container = containerService.editContainer(updates, id, userId);
     ContainerDto containerDto = new ContainerDto();
     containerDto = ContainerMapper.toContainerDto(container);
     return ResponseEntity.ok(containerDto);
@@ -158,7 +175,12 @@ public class ContainerController {
   @DeleteMapping("/{id}")
   @PreAuthorize("hasRole('FORWARDER')")
   public ResponseEntity<?> removeContainer(@PathVariable Long id) {
-    containerService.removeContainer(id);
+
+    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
+        .getPrincipal();
+    Long userId = userDetails.getId();
+
+    containerService.removeContainer(id, userId);
     return ResponseEntity.ok(new MessageResponse("Container has remove successfully"));
   }
 

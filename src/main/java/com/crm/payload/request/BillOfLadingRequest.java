@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -22,6 +23,9 @@ public class BillOfLadingRequest {
   private String billOfLadingNumber;
 
   private String freeTime;
+
+  @NotNull
+  private Integer unit;
 
   private List<ContainerRequest> containers = new ArrayList<ContainerRequest>();
 }

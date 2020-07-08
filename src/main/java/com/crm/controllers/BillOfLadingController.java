@@ -11,6 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,7 +29,8 @@ import com.crm.models.mapper.BillOfLadingMapper;
 import com.crm.payload.request.BillOfLadingRequest;
 import com.crm.payload.request.PaginationRequest;
 import com.crm.payload.response.PaginationResponse;
-import com.crm.services.BillOfLaingService;
+import com.crm.security.services.UserDetailsImpl;
+import com.crm.services.BillOfLadingService;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -36,7 +38,7 @@ import com.crm.services.BillOfLaingService;
 public class BillOfLadingController {
 
   @Autowired
-  BillOfLaingService billOfLadingService;
+  BillOfLadingService billOfLadingService;
 
   @GetMapping("/inbound/{id}")
   @PreAuthorize("hasRole('FORWARDER') or hasRole('MERCHANT')")
@@ -79,7 +81,12 @@ public class BillOfLadingController {
   @PutMapping("")
   @PreAuthorize("hasRole('FORWARDER')")
   public ResponseEntity<?> updateBillOfLading(@Valid @RequestBody BillOfLadingRequest request) {
-    BillOfLading billOfLading = billOfLadingService.updateBillOfLading(request);
+    
+    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
+        .getPrincipal();
+    Long userId = userDetails.getId();
+    
+    BillOfLading billOfLading = billOfLadingService.updateBillOfLading(userId, request);
     BillOfLadingDto billOfLadingDto = BillOfLadingMapper.toBillOfLadingDto(billOfLading);
     return ResponseEntity.ok(billOfLadingDto);
   }
@@ -87,7 +94,12 @@ public class BillOfLadingController {
   @RequestMapping(value = "/{id}", method = RequestMethod.PATCH, consumes = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("hasRole('FORWARDER')")
   public ResponseEntity<?> editBillOfLading(@RequestBody Map<String, Object> updates, @PathVariable("id") Long id) {
-    BillOfLading billOfLading = billOfLadingService.editBillOfLading(updates, id);
+    
+    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
+        .getPrincipal();
+    Long userId = userDetails.getId();
+    
+    BillOfLading billOfLading = billOfLadingService.editBillOfLading(updates, id, userId);
     BillOfLadingDto billOfLadingDto = new BillOfLadingDto();
     billOfLadingDto = BillOfLadingMapper.toBillOfLadingDto(billOfLading);
     return ResponseEntity.ok(billOfLadingDto);

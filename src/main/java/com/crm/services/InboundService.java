@@ -22,9 +22,9 @@ public interface InboundService {
 
   Inbound createInbound(Long id, InboundRequest request);
 
-  Inbound updateInbound(InboundRequest request);
+  Inbound updateInbound(Long id, InboundRequest request);
 
-  Inbound editInbound(Map<String, Object> updates, Long id);
+  Inbound editInbound(Map<String, Object> updates, Long id, Long userId);
 
-  void removeInbound(Long id);
+  void removeInbound(Long id, Long userId);
 }

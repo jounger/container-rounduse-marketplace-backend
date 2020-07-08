@@ -11,13 +11,11 @@ public class ContainerDto {
 
   private String driver;
 
-  private String trailer;
+  private ContainerSemiTrailerDto trailer;
 
-  private String tractor;
+  private ContainerTractorDto tractor;
 
   private String containerNumber;
-
-  private String licensePlate;
 
   private String status;
 }

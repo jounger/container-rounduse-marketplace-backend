@@ -1,5 +1,6 @@
 package com.crm.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -20,4 +21,7 @@ public interface BillOfLadingRepository extends JpaRepository<BillOfLading, Long
   Page<BillOfLading> findByInbound(@Param("id") Long id, Pageable pageable);
 
   Optional<BillOfLading> findByBillOfLadingNumber(String billOfLadingNumber);
+
+  @Query(value = "SELECT b FROM BillOfLading b WHERE b.inbound.forwarder.id = :id")
+  List<BillOfLading> findByForwarder(Long id);
 }

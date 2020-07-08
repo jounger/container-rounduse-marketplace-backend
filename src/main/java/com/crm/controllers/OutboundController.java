@@ -99,8 +99,8 @@ public class OutboundController {
   public ResponseEntity<?> createOutbound(@Valid @RequestBody OutboundRequest request) {
     UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
         .getPrincipal();
-    Long id = userDetails.getId();
-    Outbound outbound = outBoundService.createOutbound(id, request);
+    Long userId = userDetails.getId();
+    Outbound outbound = outBoundService.createOutbound(userId, request);
     OutboundDto outboundDto = new OutboundDto();
     outboundDto = OutboundMapper.toOutboundDto(outbound);
     return ResponseEntity.ok(outboundDto);
@@ -113,9 +113,9 @@ public class OutboundController {
 
     UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
         .getPrincipal();
-    Long id = userDetails.getId();
+    Long userId = userDetails.getId();
 
-    Outbound outbound = outBoundService.updateOutbound(id, request);
+    Outbound outbound = outBoundService.updateOutbound(userId, request);
     OutboundDto outboundDto = new OutboundDto();
     outboundDto = OutboundMapper.toOutboundDto(outbound);
     return ResponseEntity.ok(outboundDto);

@@ -75,16 +75,16 @@ public class OutboundServiceImpl implements OutboundService {
   }
 
   @Override
-  public Page<Outbound> getOutboundsByMerchant(Long id, PaginationRequest request) {
-    if (merchantRepository.existsById(id)) {
+  public Page<Outbound> getOutboundsByMerchant(Long userId, PaginationRequest request) {
+    if (merchantRepository.existsById(userId)) {
       PageRequest pageRequest = PageRequest.of(request.getPage(), request.getLimit(),
           Sort.by(Sort.Direction.DESC, "createdAt"));
       String status = request.getStatus();
       Page<Outbound> pages = null;
       if (status != null && !status.isEmpty()) {
-        pages = outboundRepository.findByMerchantId(id, status, pageRequest);
+        pages = outboundRepository.findByMerchantId(userId, status, pageRequest);
       } else {
-        pages = outboundRepository.findByMerchantId(id, pageRequest);
+        pages = outboundRepository.findByMerchantId(userId, pageRequest);
       }
       return pages;
     } else {
@@ -93,10 +93,10 @@ public class OutboundServiceImpl implements OutboundService {
   }
 
   @Override
-  public Outbound createOutbound(Long id, OutboundRequest request) {
+  public Outbound createOutbound(Long userId, OutboundRequest request) {
     Outbound outbound = new Outbound();
 
-    Merchant merchant = merchantRepository.findById(id)
+    Merchant merchant = merchantRepository.findById(userId)
         .orElseThrow(() -> new NotFoundException("ERROR: Merchant is not found."));
     outbound.setMerchant(merchant);
 

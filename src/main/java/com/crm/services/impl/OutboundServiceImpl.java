@@ -156,6 +156,7 @@ public class OutboundServiceImpl implements OutboundService {
     booking.setIsFcl(bookingRequest.getIsFcl());
 
     outbound.setBooking(booking);
+    booking.setOutbound(outbound);
 
     outboundRepository.save(outbound);
     return outbound;
@@ -223,7 +224,8 @@ public class OutboundServiceImpl implements OutboundService {
       outbound.setBooking(booking);
     }
 
-    outboundRepository.save(outbound);
+    bookingRepository.save(booking);
+    //outboundRepository.save(outbound);
     return outbound;
   }
 

@@ -65,15 +65,18 @@ public class BiddingDocumentServiceImpl implements BiddingDocumentService {
     merchant = merchantRepository.findById(id).orElseThrow(() -> new NotFoundException("Merchant is not found"));
     biddingDocument.setOfferee(merchant);
 
-    Outbound outbound = new Outbound();
-    outbound = outboundRepository.findById(request.getOutbound())
+    Outbound outbound = outboundRepository.findById(request.getOutbound())
         .orElseThrow(() -> new NotFoundException("Outbound is not found."));
-    if (outbound.getStatus().equalsIgnoreCase(EnumSupplyStatus.COMBINED.name())
-        || outbound.getStatus().equalsIgnoreCase(EnumSupplyStatus.BIDDING.name())) {
-      throw new DuplicateRecordException("Outbound must be not in any transaction.");
+    if (merchant.getOutbounds().contains(outbound)) {
+      if (outbound.getStatus().equalsIgnoreCase(EnumSupplyStatus.COMBINED.name())
+          || outbound.getStatus().equalsIgnoreCase(EnumSupplyStatus.BIDDING.name())) {
+        throw new DuplicateRecordException("Outbound must be not in any transaction.");
+      }
+      outbound.setStatus(EnumSupplyStatus.BIDDING.name());
+      biddingDocument.setOutbound(outbound);
+    } else {
+      throw new NotFoundException("This outbound must be your outbound.");
     }
-    outbound.setStatus(EnumSupplyStatus.BIDDING.name());
-    biddingDocument.setOutbound(outbound);
 
     biddingDocument.setIsMultipleAward(request.getIsMultipleAward());
 
@@ -82,7 +85,7 @@ public class BiddingDocumentServiceImpl implements BiddingDocumentService {
     LocalDateTime packingTime = outbound.getPackingTime();
     LocalDateTime bidClosing = Tool.convertToLocalDateTime(request.getBidClosing());
     if (bidClosing.isBefore(LocalDateTime.now()) || bidClosing.isAfter(packingTime)) {
-      throw new InternalException("Bid closing time must be after now.");
+      throw new InternalException("Bid closing time must be after now and before packing time.");
     }
     biddingDocument.setBidClosing(bidClosing);
 
@@ -95,7 +98,7 @@ public class BiddingDocumentServiceImpl implements BiddingDocumentService {
 
     biddingDocument.setBidPackagePrice(request.getBidPackagePrice());
     biddingDocument.setBidFloorPrice(request.getBidFloorPrice());
-    biddingDocument.setPriceLeadership(request.getBidFloorPrice());
+    biddingDocument.setPriceLeadership(request.getBidPackagePrice());
 
     String discountCodeString = request.getBidDiscountCode();
     if (discountCodeString != null && !discountCodeString.isEmpty()) {

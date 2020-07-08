@@ -8,13 +8,13 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import com.crm.models.Contract;
+import com.crm.models.Evidence;
 
 @Repository
-public interface ContractRepository extends JpaRepository<Contract, Long>, JpaSpecificationExecutor<Contract> {
+public interface EvidenceRepository extends JpaRepository<Evidence, Long>, JpaSpecificationExecutor<Evidence>{
 
-  @Query(value = "SELECT c FROM Contract c LEFT JOIN c.combined cb "
-      + "LEFT JOIN cb.bid b LEFT JOIN b.biddingDocument bd "
+  @Query(value = "SELECT e FROM Evidence e LEFT JOIN e.sender s "
+      + "LEFT JOIN s.bids b LEFT JOIN s.biddingDocuments bd "
       + "WHERE bd.offeree.username = :username or b.bidder.username = :username")
-  Page<Contract> findByUser(@Param("username") String username, Pageable pageable);
+  Page<Evidence> findByUser(@Param("username") String username, Pageable pageable);
 }

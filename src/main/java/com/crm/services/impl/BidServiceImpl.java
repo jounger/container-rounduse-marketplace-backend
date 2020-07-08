@@ -27,6 +27,8 @@ import com.crm.models.Combined;
 import com.crm.models.Container;
 import com.crm.models.Forwarder;
 import com.crm.models.Outbound;
+import com.crm.models.Role;
+import com.crm.models.User;
 import com.crm.payload.request.BidRequest;
 import com.crm.payload.request.PaginationRequest;
 import com.crm.repository.BidRepository;
@@ -35,6 +37,7 @@ import com.crm.repository.CombinedRepository;
 import com.crm.repository.ContainerRepository;
 import com.crm.repository.ForwarderRepository;
 import com.crm.repository.OutboundRepository;
+import com.crm.repository.UserRepository;
 import com.crm.services.BidService;
 
 @Service
@@ -57,6 +60,9 @@ public class BidServiceImpl implements BidService {
 
   @Autowired
   private OutboundRepository outboundRepository;
+
+  @Autowired
+  private UserRepository userRepository;
 
   @Override
   public Bid createBid(Long bidDocId, Long id, BidRequest request) {
@@ -88,6 +94,9 @@ public class BidServiceImpl implements BidService {
     Booking booking = outbound.getBooking();
     if (containersId.size() > booking.getUnit()) {
       throw new InternalException("Number of containers is more than needed.");
+    }
+    if (booking.getUnit() > containersId.size() && !biddingDocument.getIsMultipleAward()) {
+      throw new InternalException("Number of containers is less than needed.");
     }
     if (containersId.size() < booking.getUnit() && !biddingDocument.getIsMultipleAward()) {
       throw new InternalException("Number of containers is less than needed.");
@@ -165,19 +174,23 @@ public class BidServiceImpl implements BidService {
   }
 
   @Override
-  public Bid updateBid(BidRequest request) {
+  public Bid updateBid(String username, BidRequest request) {
     Bid bid = bidRepository.findById(request.getId()).orElseThrow(() -> new NotFoundException("Bid is not found."));
 
     BiddingDocument biddingDocument = bid.getBiddingDocument();
 
-    String bidStatus = bid.getStatus();
-    if (!bidStatus.equalsIgnoreCase(EnumBidStatus.PENDING.name())) {
-      throw new InternalException("Bid only can be edited while in PENDING status.");
-    }
+    User user = userRepository.findByUsername(username).orElseThrow(() -> new NotFoundException("Bid is not found."));
+    Role role = user.getRoles().iterator().next();
+    if (role.getName().equalsIgnoreCase("ROLE_FORWARDER")) {
+      String bidStatus = bid.getStatus();
+      if (!bidStatus.equalsIgnoreCase(EnumBidStatus.PENDING.name())) {
+        throw new InternalException("Bid only can be edited while in PENDING status.");
+      }
 
-    LocalDateTime bidValidityPeriod = bid.getBidValidityPeriod();
-    if (bidValidityPeriod.isAfter(LocalDateTime.now())) {
-      throw new InternalException("Bid only can be edited after bid validity period.");
+      LocalDateTime bidValidityPeriod = bid.getBidValidityPeriod();
+      if (bidValidityPeriod.isAfter(LocalDateTime.now())) {
+        throw new InternalException("Bid only can be edited after bid validity period.");
+      }
     }
 
     Forwarder bidder = forwarderRepository.findByUsername(request.getBidder())
@@ -245,17 +258,21 @@ public class BidServiceImpl implements BidService {
   }
 
   @Override
-  public Bid editBid(Long id, Map<String, Object> updates) {
+  public Bid editBid(Long id, String username, Map<String, Object> updates) {
     Bid bid = bidRepository.findById(id).orElseThrow(() -> new NotFoundException("Bid is not found."));
+    User user = userRepository.findByUsername(username).orElseThrow(() -> new NotFoundException("Bid is not found."));
+    Role role = user.getRoles().iterator().next();
 
-    String bidStatus = bid.getStatus();
-    if (!bidStatus.equalsIgnoreCase(EnumBidStatus.PENDING.name())) {
-      throw new InternalException("Bid only can be edited while in PENDING status.");
-    }
+    if (role.getName().equalsIgnoreCase("ROLE_FORWARDER")) {
+      String bidStatus = bid.getStatus();
+      if (!bidStatus.equalsIgnoreCase(EnumBidStatus.PENDING.name())) {
+        throw new InternalException("Bid only can be edited while in PENDING status.");
+      }
 
-    LocalDateTime bidValidityPeriod = bid.getBidValidityPeriod();
-    if (bidValidityPeriod.isAfter(LocalDateTime.now())) {
-      throw new InternalException("Bid only can be edited after bid validity period.");
+      LocalDateTime bidValidityPeriod = bid.getBidValidityPeriod();
+      if (bidValidityPeriod.isAfter(LocalDateTime.now())) {
+        throw new InternalException("Bid only can be edited after bid validity period.");
+      }
     }
 
     List<Container> oldContainers = new ArrayList<>(bid.getContainers());

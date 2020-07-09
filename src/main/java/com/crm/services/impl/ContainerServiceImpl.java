@@ -196,6 +196,10 @@ public class ContainerServiceImpl implements ContainerService {
       Container container = containerRepository.findById(request.getId())
           .orElseThrow(() -> new NotFoundException("ERROR: Container is not found."));
 
+      if (!container.getBillOfLading().getInbound().getForwarder().getId().equals(userId)) {
+        throw new InternalException(String.format("Forwarder %s not owned Container", userId));
+      }
+
       if (container.getStatus().equalsIgnoreCase(EnumSupplyStatus.COMBINED.name())
           || container.getStatus().equalsIgnoreCase(EnumSupplyStatus.BIDDING.name())) {
         throw new InternalException(
@@ -319,6 +323,11 @@ public class ContainerServiceImpl implements ContainerService {
 
       Container container = containerRepository.findById(id)
           .orElseThrow(() -> new NotFoundException("ERROR: Container is not found."));
+
+      if (!container.getBillOfLading().getInbound().getForwarder().getId().equals(userId)) {
+        throw new InternalException(String.format("Forwarder %s not owned Container", userId));
+      }
+
       if (container.getStatus().equalsIgnoreCase(EnumSupplyStatus.COMBINED.name())
           || container.getStatus().equalsIgnoreCase(EnumSupplyStatus.BIDDING.name())) {
         throw new InternalException(
@@ -337,6 +346,11 @@ public class ContainerServiceImpl implements ContainerService {
 
       Container container = containerRepository.findById(id)
           .orElseThrow(() -> new NotFoundException("ERROR: Container is not found."));
+
+      if (!container.getBillOfLading().getInbound().getForwarder().getId().equals(userId)) {
+        throw new InternalException(String.format("Forwarder %s not owned Container", userId));
+      }
+
       if (container.getStatus().equalsIgnoreCase(EnumSupplyStatus.COMBINED.name())
           || container.getStatus().equalsIgnoreCase(EnumSupplyStatus.BIDDING.name())) {
         throw new InternalException(

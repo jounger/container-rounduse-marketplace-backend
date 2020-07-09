@@ -18,6 +18,7 @@ import com.crm.models.ContainerTractor;
 import com.crm.models.Forwarder;
 import com.crm.payload.request.ContainerTractorRequest;
 import com.crm.payload.request.PaginationRequest;
+import com.crm.repository.ContainerRepository;
 import com.crm.repository.ContainerTractorRepository;
 import com.crm.repository.ForwarderRepository;
 import com.crm.repository.VehicleRepository;
@@ -34,6 +35,9 @@ public class ContainerTractorServiceImpl implements ContainerTractorService {
 
   @Autowired
   VehicleRepository vehicleRepository;
+
+  @Autowired
+  ContainerRepository containerRepository;
 
   @Override
   public ContainerTractor getContainerTractorById(Long id) {
@@ -64,6 +68,8 @@ public class ContainerTractorServiceImpl implements ContainerTractorService {
       containerTractor.setLicensePlate(request.getLicensePlate());
     }
 
+    containerTractor.setNumberOfAxles(request.getNumberOfAxles());
+
     containerTractor.setForwarder(forwarder);
 
     containerTractorRepository.save(containerTractor);
@@ -78,12 +84,30 @@ public class ContainerTractorServiceImpl implements ContainerTractorService {
       ContainerTractor containerTractor = containerTractorRepository.findById(request.getId())
           .orElseThrow(() -> new NotFoundException("ERROR: ContainerTractor is not found."));
 
+      if (!containerTractor.getForwarder().getId().equals(userId)) {
+        throw new InternalException(String.format("Forwarder %s not owned containerTractor", userId));
+      }
+
+      Collection<Container> containers = containerRepository.findContainersByTractor(request.getId(),
+          EnumSupplyStatus.COMBINED.name(), EnumSupplyStatus.BIDDING.name());
+      if (containers != null) {
+        containers.forEach(item -> {
+          if (item.getStatus().equalsIgnoreCase(EnumSupplyStatus.COMBINED.name())
+              || item.getStatus().equalsIgnoreCase(EnumSupplyStatus.BIDDING.name())) {
+            throw new InternalException(
+                String.format("Container %s has been %s", item.getContainerNumber(), item.getStatus()));
+          }
+        });
+      }
+
       if (vehicleRepository.existsByLicensePlate(request.getLicensePlate())
           && !request.getLicensePlate().equals(containerTractor.getLicensePlate())) {
         throw new DuplicateRecordException("Error: LicensePlate has been existed");
       } else {
         containerTractor.setLicensePlate(request.getLicensePlate());
       }
+
+      containerTractor.setNumberOfAxles(request.getNumberOfAxles());
 
       containerTractorRepository.save(containerTractor);
       return containerTractor;
@@ -99,6 +123,22 @@ public class ContainerTractorServiceImpl implements ContainerTractorService {
       ContainerTractor containerTractor = containerTractorRepository.findById(id)
           .orElseThrow(() -> new NotFoundException("ERROR: ContainerTractor is not found."));
 
+      if (!containerTractor.getForwarder().getId().equals(userId)) {
+        throw new InternalException(String.format("Forwarder %s not owned containerTractor", userId));
+      }
+
+      Collection<Container> containers = containerRepository.findContainersByTractor(id,
+          EnumSupplyStatus.COMBINED.name(), EnumSupplyStatus.BIDDING.name());
+      if (containers != null) {
+        containers.forEach(item -> {
+          if (item.getStatus().equalsIgnoreCase(EnumSupplyStatus.COMBINED.name())
+              || item.getStatus().equalsIgnoreCase(EnumSupplyStatus.BIDDING.name())) {
+            throw new InternalException(
+                String.format("Container %s has been %s", item.getContainerNumber(), item.getStatus()));
+          }
+        });
+      }
+
       String licensePlate = (String) updates.get("licensePlate");
       if (licensePlate != null && !licensePlate.isEmpty() && !licensePlate.equals(containerTractor.getLicensePlate())) {
         if (vehicleRepository.existsByLicensePlate(licensePlate)) {
@@ -106,6 +146,11 @@ public class ContainerTractorServiceImpl implements ContainerTractorService {
         } else {
           containerTractor.setLicensePlate(licensePlate);
         }
+      }
+
+      String numberOfAxles = (String) updates.get("numberOfAxles");
+      if (numberOfAxles != null && !numberOfAxles.isEmpty()) {
+        containerTractor.setNumberOfAxles(Integer.valueOf(numberOfAxles));
       }
 
       containerTractorRepository.save(containerTractor);
@@ -122,19 +167,38 @@ public class ContainerTractorServiceImpl implements ContainerTractorService {
       ContainerTractor containerTractor = containerTractorRepository.findById(id)
           .orElseThrow(() -> new NotFoundException("ERROR: ContainerTractor is not found."));
 
-      Collection<Container> containers = containerTractor.getContainers();
-      containers.forEach(item -> {
-        if (item.getStatus().equalsIgnoreCase(EnumSupplyStatus.COMBINED.name())
-            || item.getStatus().equalsIgnoreCase(EnumSupplyStatus.BIDDING.name())) {
-          throw new InternalException(
-              String.format("Container %s has been %s", item.getContainerNumber(), item.getStatus()));
-        }
-      });
+      if (!containerTractor.getForwarder().getId().equals(userId)) {
+        throw new InternalException(String.format("Forwarder %s not owned containerTractor", userId));
+      }
+
+      Collection<Container> containers = containerRepository.findContainersByTractor(id,
+          EnumSupplyStatus.COMBINED.name(), EnumSupplyStatus.BIDDING.name());
+      if (containers != null) {
+        containers.forEach(item -> {
+          if (item.getStatus().equalsIgnoreCase(EnumSupplyStatus.COMBINED.name())
+              || item.getStatus().equalsIgnoreCase(EnumSupplyStatus.BIDDING.name())) {
+            throw new InternalException(
+                String.format("Container %s has been %s", item.getContainerNumber(), item.getStatus()));
+          }
+        });
+      }
       containerTractorRepository.delete(containerTractor);
     } else {
       throw new NotFoundException("ERROR: Forwarder is not found.");
     }
 
+  }
+
+  @Override
+  public Page<ContainerTractor> getContainerTractorsByForwarder(Long userId, PaginationRequest request) {
+    if (forwarderRepository.existsById(userId)) {
+      PageRequest pageRequest = PageRequest.of(request.getPage(), request.getLimit(),
+          Sort.by(Sort.Direction.DESC, "createdAt"));
+      Page<ContainerTractor> pages = containerTractorRepository.findByForwarder(userId, pageRequest);
+      return pages;
+    } else {
+      throw new NotFoundException("ERROR: Forwarder is not found.");
+    }
   }
 
 }

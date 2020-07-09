@@ -59,6 +59,26 @@ public class BookingController {
     return ResponseEntity.ok(response);
   }
 
+  @GetMapping("/filter")
+  @PreAuthorize("hasRole('FORWARDER') or hasRole('MERCHANT')")
+  public ResponseEntity<?> searchBookings(@Valid PaginationRequest request,
+      @RequestParam(value = "search") String search) {
+
+    Page<Booking> pages = bookingService.searchBookings(request, search);
+    PaginationResponse<BookingDto> response = new PaginationResponse<>();
+    response.setPageNumber(request.getPage());
+    response.setPageSize(request.getLimit());
+    response.setTotalElements(pages.getTotalElements());
+    response.setTotalPages(pages.getTotalPages());
+
+    List<Booking> bookings = pages.getContent();
+    List<BookingDto> bookingsDto = new ArrayList<>();
+    bookings.forEach(booking -> bookingsDto.add(BookingMapper.toBookingDto(booking)));
+    response.setContents(bookingsDto);
+
+    return ResponseEntity.ok(response);
+  }
+
   @GetMapping("/{id}")
   @PreAuthorize("hasRole('FORWARDER') or hasRole('MERCHANT')")
   public ResponseEntity<?> getBooking(@PathVariable Long id) {

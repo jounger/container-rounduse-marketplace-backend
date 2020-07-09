@@ -54,6 +54,9 @@ public class Vehicle {
   @Size(min = 2, max = 20)
   private String licensePlate;
 
+  @Column(name = "number_of_axles")
+  private Integer numberOfAxles;
+
   @Column(name = "created_at", nullable = false, updatable = false)
   @Temporal(TemporalType.TIMESTAMP)
   @CreatedDate

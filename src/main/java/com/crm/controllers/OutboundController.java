@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.crm.models.Outbound;
@@ -49,6 +50,26 @@ public class OutboundController {
     OutboundDto outboundDto = new OutboundDto();
     outboundDto = OutboundMapper.toOutboundDto(outbound);
     return ResponseEntity.ok(outboundDto);
+  }
+
+  @PreAuthorize("hasRole('MERCHANT') or hasRole('FORWARDER')")
+  @GetMapping("/filter")
+  public ResponseEntity<?> searchOutbounds(@Valid PaginationRequest request,
+      @RequestParam(value = "search") String search) {
+
+    Page<Outbound> pages = outBoundService.searchOutbounds(request, search);
+    PaginationResponse<OutboundDto> response = new PaginationResponse<>();
+    response.setPageNumber(request.getPage());
+    response.setPageSize(request.getLimit());
+    response.setTotalElements(pages.getTotalElements());
+    response.setTotalPages(pages.getTotalPages());
+
+    List<Outbound> outbounds = pages.getContent();
+    List<OutboundDto> outboundsDto = new ArrayList<>();
+    outbounds.forEach(outbound -> outboundsDto.add(OutboundMapper.toOutboundDto(outbound)));
+    response.setContents(outboundsDto);
+
+    return ResponseEntity.ok(response);
   }
 
   @GetMapping("")

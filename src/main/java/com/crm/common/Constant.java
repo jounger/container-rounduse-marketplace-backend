@@ -9,4 +9,6 @@ public class Constant {
   
   //BID_VALIDITY_PERIOD as bid.bidValidityPeriod
   public static final Long BID_VALIDITY_PERIOD = 1L;
+  
+  public static final String EMPTY_STRING = "";
 }

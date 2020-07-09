@@ -8,6 +8,7 @@ public class ContainerTractorMapper {
     ContainerTractorDto containerTractorDto = new ContainerTractorDto();
     containerTractorDto.setId(containerTractor.getId());
     containerTractorDto.setLicensePlate(containerTractor.getLicensePlate());
+    containerTractorDto.setNumberOfAxles(containerTractor.getNumberOfAxles());
     return containerTractorDto;
   }
 }

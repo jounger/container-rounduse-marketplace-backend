@@ -2,13 +2,17 @@ package com.crm.services.impl;
 
 import java.time.LocalDateTime;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import com.crm.common.Constant;
 import com.crm.common.Tool;
 import com.crm.enums.EnumSupplyStatus;
 import com.crm.exception.DuplicateRecordException;
@@ -23,6 +27,7 @@ import com.crm.repository.MerchantRepository;
 import com.crm.repository.OutboundRepository;
 import com.crm.repository.PortRepository;
 import com.crm.services.BookingService;
+import com.crm.specification.builder.BookingSpecificationsBuilder;
 
 @Service
 public class BookingServiceImpl implements BookingService {
@@ -58,6 +63,10 @@ public class BookingServiceImpl implements BookingService {
 
       Booking booking = bookingRepository.findById(request.getId())
           .orElseThrow(() -> new NotFoundException("ERROR: Booking is not found."));
+
+      if (!booking.getOutbound().getMerchant().getId().equals(id)) {
+        throw new InternalException(String.format("Merchant %s not owned Booking", id));
+      }
 
       if (booking.getOutbound().getStatus().equals(EnumSupplyStatus.COMBINED.name())
           || booking.getOutbound().getStatus().equals(EnumSupplyStatus.BIDDING.name())) {
@@ -102,6 +111,10 @@ public class BookingServiceImpl implements BookingService {
     if (merchantRepository.existsById(userId)) {
       Booking booking = bookingRepository.findById(id)
           .orElseThrow(() -> new NotFoundException("ERROR: Booking is not found."));
+
+      if (!booking.getOutbound().getMerchant().getId().equals(userId)) {
+        throw new InternalException(String.format("Merchant %s not owned Booking", id));
+      }
 
       if (booking.getOutbound().getStatus().equals(EnumSupplyStatus.COMBINED.name())
           || booking.getOutbound().getStatus().equals(EnumSupplyStatus.BIDDING.name())) {
@@ -162,5 +175,23 @@ public class BookingServiceImpl implements BookingService {
     Booking booking = bookingRepository.findByBookingNumber(bookingNumber)
         .orElseThrow(() -> new NotFoundException("ERROR: Booking is not found."));
     return booking;
+  }
+
+  @Override
+  public Page<Booking> searchBookings(PaginationRequest request, String search) {
+    BookingSpecificationsBuilder builder = new BookingSpecificationsBuilder();
+    Pattern pattern = Pattern.compile(Constant.SEARCH_REGEX, Pattern.UNICODE_CHARACTER_CLASS);
+    Matcher matcher = pattern.matcher(search + ",");
+    while (matcher.find()) {
+      // Chaining criteria
+      builder.with(matcher.group(1), matcher.group(2), matcher.group(3));
+    }
+    // Build specification
+    Specification<Booking> spec = builder.build();
+    PageRequest page = PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt"));
+    // Filter with repository
+    Page<Booking> pages = bookingRepository.findAll(spec, page);
+    // Return result
+    return pages;
   }
 }

@@ -3,6 +3,7 @@ package com.crm.models;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
@@ -44,7 +45,7 @@ public class Driver extends User {
   @JoinColumn(name = "forwarder_id")
   private Forwarder forwarder;
 
-  @OneToOne(mappedBy = "driver")
+  @OneToOne(mappedBy = "driver", cascade = CascadeType.ALL)
   private Geolocation location;
 
   @OneToMany(mappedBy = "driver")

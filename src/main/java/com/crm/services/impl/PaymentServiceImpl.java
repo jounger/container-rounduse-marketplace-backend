@@ -81,6 +81,13 @@ public class PaymentServiceImpl implements PaymentService {
   }
 
   @Override
+  public Page<Payment> getPaymentsByUser(String username, PaginationRequest request) {
+    PageRequest page = PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Direction.DESC, "createdAt"));
+    Page<Payment> payments = paymentRepository.findByUser(username, page);
+    return payments;
+  }
+
+  @Override
   public Page<Payment> searchPayments(PaginationRequest request, String search) {
     PaymentSpecificationsBuilder builder = new PaymentSpecificationsBuilder();
     Pattern pattern = Pattern.compile(Constant.SEARCH_REGEX, Pattern.UNICODE_CHARACTER_CLASS);
@@ -134,13 +141,6 @@ public class PaymentServiceImpl implements PaymentService {
     } else {
       throw new NotFoundException("You are not allow to delete this Payment");
     }
-  }
-
-  @Override
-  public Page<Payment> getPaymentsByUser(String username, PaginationRequest request) {
-    PageRequest page = PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Direction.DESC, "createdAt"));
-    Page<Payment> payments = paymentRepository.findByUser(username, page);
-    return payments;
   }
 
 }

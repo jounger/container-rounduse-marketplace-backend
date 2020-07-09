@@ -112,6 +112,6 @@ public class ContractController {
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
     contractService.removeContract(id, username);
-    return ResponseEntity.ok(new MessageResponse("Bidding document deleted successfully."));
+    return ResponseEntity.ok(new MessageResponse("Contract deleted successfully."));
   }
 }

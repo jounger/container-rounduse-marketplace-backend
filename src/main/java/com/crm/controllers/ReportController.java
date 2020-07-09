@@ -25,93 +25,93 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.crm.models.Evidence;
-import com.crm.models.dto.EvidenceDto;
-import com.crm.models.mapper.EvidenceMapper;
-import com.crm.payload.request.EvidenceRequest;
+import com.crm.models.Report;
+import com.crm.models.dto.ReportDto;
+import com.crm.models.mapper.ReportMapper;
 import com.crm.payload.request.PaginationRequest;
+import com.crm.payload.request.ReportRequest;
 import com.crm.payload.response.MessageResponse;
 import com.crm.payload.response.PaginationResponse;
-import com.crm.services.EvidenceService;
+import com.crm.services.ReportService;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
-@RequestMapping("/api/evidence")
-public class EvidenceController {
-  
+@RequestMapping("/api/report")
+public class ReportController {
+
   @Autowired
-  private EvidenceService evidenceService;
+  private ReportService reportService;
 
   @Transactional
   @PostMapping("")
-  @PreAuthorize("hasRole('MERCHANT') or hasRole('FORWARDER')")
-  public ResponseEntity<?> createEvidence(@Valid @RequestBody EvidenceRequest request) {
+  @PreAuthorize("hasRole('FORWARDER')")
+  public ResponseEntity<?> createReport(@Valid @RequestBody ReportRequest request) {
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
-    Evidence evidence = evidenceService.createEvidence(username, request);
-    EvidenceDto evidenceDto = EvidenceMapper.toEvidenceDto(evidence);
-    return ResponseEntity.ok(evidenceDto);
+    Report report = reportService.createReport(username, request);
+    ReportDto reportDto = ReportMapper.toReportDto(report);
+    return ResponseEntity.ok(reportDto);
   }
   
-  @PreAuthorize("hasRole('MERCHANT') or hasRole('FORWARDER')")
+  @PreAuthorize("hasRole('MODERATOR') or hasRole('FORWARDER')")
   @GetMapping("/user")
-  public ResponseEntity<?> getEvidencesByUser(@Valid PaginationRequest request) {
+  public ResponseEntity<?> getReportsByUser(@Valid PaginationRequest request) {
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
     
-    Page<Evidence> pages = evidenceService.getEvidencesByUser(username, request);
+    Page<Report> pages = reportService.getReportsByUser(username, request);
     
-    PaginationResponse<EvidenceDto> response = new PaginationResponse<>();
+    PaginationResponse<ReportDto> response = new PaginationResponse<>();
     response.setPageNumber(request.getPage());
     response.setPageSize(request.getLimit());
     response.setTotalElements(pages.getTotalElements());
     response.setTotalPages(pages.getTotalPages());
 
-    List<Evidence> evidences = pages.getContent();
-    List<EvidenceDto> evidencesDto = new ArrayList<>();
-    evidences.forEach(evidence -> evidencesDto.add(EvidenceMapper.toEvidenceDto(evidence)));
-    response.setContents(evidencesDto);
+    List<Report> reports = pages.getContent();
+    List<ReportDto> reportsDto = new ArrayList<>();
+    reports.forEach(report -> reportsDto.add(ReportMapper.toReportDto(report)));
+    response.setContents(reportsDto);
 
     return ResponseEntity.ok(response);
   }
 
-  @PreAuthorize("hasRole('MERCHANT') or hasRole('FORWARDER')")
+  @PreAuthorize("hasRole('MODERATOR') or hasRole('FORWARDER')")
   @GetMapping("/filter")
-  public ResponseEntity<?> searchEvidences(@Valid PaginationRequest request,
+  public ResponseEntity<?> searchReports(@Valid PaginationRequest request,
       @RequestParam(value = "search") String search) {
-    Page<Evidence> pages = evidenceService.searchEvidences(request, search);
-    PaginationResponse<EvidenceDto> response = new PaginationResponse<>();
+    Page<Report> pages = reportService.searchReports(request, search);
+    PaginationResponse<ReportDto> response = new PaginationResponse<>();
     response.setPageNumber(request.getPage());
     response.setPageSize(request.getLimit());
     response.setTotalElements(pages.getTotalElements());
     response.setTotalPages(pages.getTotalPages());
 
-    List<Evidence> evidences = pages.getContent();
-    List<EvidenceDto> evidencesDto = new ArrayList<>();
-    evidences.forEach(evidence -> evidencesDto.add(EvidenceMapper.toEvidenceDto(evidence)));
-    response.setContents(evidencesDto);
+    List<Report> reports = pages.getContent();
+    List<ReportDto> reportsDto = new ArrayList<>();
+    reports.forEach(report -> reportsDto.add(ReportMapper.toReportDto(report)));
+    response.setContents(reportsDto);
 
     return ResponseEntity.ok(response);
   }
 
   @Transactional
-  @PreAuthorize("hasRole('MERCHANT') or hasRole('FORWARDER')")
+  @PreAuthorize("hasRole('MODERATOR') or hasRole('FORWARDER')")
   @RequestMapping(value = "/{id}", method = RequestMethod.PATCH, consumes = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<?> editEvidence(@PathVariable("id") Long id, @RequestBody Map<String, Object> updates) {
+  public ResponseEntity<?> editReport(@PathVariable("id") Long id, @RequestBody Map<String, Object> updates) {
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
-    Evidence evidence = evidenceService.editEvidence(id, username, updates);
-    EvidenceDto evidenceDto = EvidenceMapper.toEvidenceDto(evidence);
-    return ResponseEntity.ok(evidenceDto);
+    Report report = reportService.editReport(id, username, updates);
+    ReportDto reportDto = ReportMapper.toReportDto(report);
+    return ResponseEntity.ok(reportDto);
   }
 
   @Transactional
-  @PreAuthorize("hasRole('MERCHANT') or hasRole('FORWARDER')")
+  @PreAuthorize("hasRole('FORWARDER')")
   @DeleteMapping("/{id}")
-  public ResponseEntity<?> deleteEvidence(@PathVariable Long id) {
+  public ResponseEntity<?> deleteReport(@PathVariable Long id) {
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
-    evidenceService.removeEvidence(id, username);
-    return ResponseEntity.ok(new MessageResponse("Evidence deleted successfully."));
+    reportService.removeReport(id, username);
+    return ResponseEntity.ok(new MessageResponse("Report deleted successfully."));
   }
 }

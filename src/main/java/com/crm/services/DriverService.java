@@ -10,7 +10,7 @@ import com.crm.payload.request.PaginationRequest;
 
 public interface DriverService {
 
-  Driver createDriver(Long id, DriverRequest request);
+  Driver createDriver(Long userId, DriverRequest request);
 
   Driver getDriver(Long id);
 

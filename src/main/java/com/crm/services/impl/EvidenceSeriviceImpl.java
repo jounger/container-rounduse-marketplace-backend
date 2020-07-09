@@ -69,13 +69,6 @@ public class EvidenceSeriviceImpl implements EvidenceService {
   }
 
   @Override
-  public Page<Evidence> getEvidencesByUser(String username, PaginationRequest request) {
-    PageRequest page = PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt"));
-    Page<Evidence> evidences = evidenceRepository.findByUser(username, page);
-    return evidences;
-  }
-
-  @Override
   public Page<Evidence> searchEvidences(PaginationRequest request, String search) {
     // Extract data from search string
     EvidenceSpecificationsBuilder builder = new EvidenceSpecificationsBuilder();
@@ -120,7 +113,7 @@ public class EvidenceSeriviceImpl implements EvidenceService {
     } else {
       throw new InternalException("Is valid is not valid.");
     }
-
+    
     evidenceRepository.save(evidence);
     return evidence;
 

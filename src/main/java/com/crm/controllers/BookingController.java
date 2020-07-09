@@ -11,6 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,6 +29,7 @@ import com.crm.models.mapper.BookingMapper;
 import com.crm.payload.request.BookingRequest;
 import com.crm.payload.request.PaginationRequest;
 import com.crm.payload.response.PaginationResponse;
+import com.crm.security.services.UserDetailsImpl;
 import com.crm.services.BookingService;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
@@ -77,7 +79,12 @@ public class BookingController {
   @PutMapping("")
   @PreAuthorize("hasRole('MERCHANT')")
   public ResponseEntity<?> updateBooking(@Valid @RequestBody BookingRequest request) {
-    Booking booking = bookingService.updateBooking(request);
+
+    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
+        .getPrincipal();
+    Long id = userDetails.getId();
+
+    Booking booking = bookingService.updateBooking(id, request);
     BookingDto bookingDto = BookingMapper.toBookingDto(booking);
     return ResponseEntity.ok(bookingDto);
   }
@@ -85,7 +92,12 @@ public class BookingController {
   @RequestMapping(value = "/{id}", method = RequestMethod.PATCH, consumes = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("hasRole('MERCHANT')")
   public ResponseEntity<?> editBooking(@RequestBody Map<String, Object> updates, @PathVariable("id") Long id) {
-    Booking booking = bookingService.editBooking(updates, id);
+
+    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
+        .getPrincipal();
+    Long userId = userDetails.getId();
+
+    Booking booking = bookingService.editBooking(updates, id, userId);
     BookingDto bookingDto = new BookingDto();
     bookingDto = BookingMapper.toBookingDto(booking);
     return ResponseEntity.ok(bookingDto);

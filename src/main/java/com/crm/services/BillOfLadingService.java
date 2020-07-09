@@ -8,7 +8,7 @@ import com.crm.models.BillOfLading;
 import com.crm.payload.request.BillOfLadingRequest;
 import com.crm.payload.request.PaginationRequest;
 
-public interface BillOfLaingService {
+public interface BillOfLadingService {
 
   Page<BillOfLading> getBillOfLadingsByInbound(Long id, PaginationRequest request);
 
@@ -16,7 +16,7 @@ public interface BillOfLaingService {
 
   BillOfLading getBillOfLadingByBillOfLadingNumber(String billOfLadingNumber);
 
-  BillOfLading updateBillOfLading(BillOfLadingRequest request);
+  BillOfLading updateBillOfLading(Long userId, BillOfLadingRequest request);
 
-  BillOfLading editBillOfLading(Map<String, Object> updates, Long id);
+  BillOfLading editBillOfLading(Map<String, Object> updates, Long id, Long userId);
 }

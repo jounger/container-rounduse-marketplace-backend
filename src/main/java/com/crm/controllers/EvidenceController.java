@@ -112,6 +112,6 @@ public class EvidenceController {
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
     evidenceService.removeEvidence(id, username);
-    return ResponseEntity.ok(new MessageResponse("Evidence deleted successfully."));
+    return ResponseEntity.ok(new MessageResponse("Bidding document deleted successfully."));
   }
 }

@@ -20,6 +20,7 @@ import com.crm.models.ContainerSemiTrailer;
 import com.crm.models.Forwarder;
 import com.crm.payload.request.ContainerSemiTrailerRequest;
 import com.crm.payload.request.PaginationRequest;
+import com.crm.repository.ContainerRepository;
 import com.crm.repository.ContainerSemiTrailerRepository;
 import com.crm.repository.ForwarderRepository;
 import com.crm.repository.VehicleRepository;
@@ -37,6 +38,9 @@ public class ContainerSemiTrailerServiceImpl implements ContainerSemiTrailerServ
   @Autowired
   ForwarderRepository forwarderRepository;
 
+  @Autowired
+  ContainerRepository containerRepository;
+
   @Override
   public ContainerSemiTrailer getContainerSemiTrailerById(Long id) {
     ContainerSemiTrailer containerSemiTrailer = containerSemiTrailerRepository.findById(id)
@@ -53,11 +57,11 @@ public class ContainerSemiTrailerServiceImpl implements ContainerSemiTrailerServ
   }
 
   @Override
-  public ContainerSemiTrailer createContainerSemiTrailer(Long id, ContainerSemiTrailerRequest request) {
+  public ContainerSemiTrailer createContainerSemiTrailer(Long userId, ContainerSemiTrailerRequest request) {
 
     ContainerSemiTrailer containerSemiTrailer = new ContainerSemiTrailer();
 
-    Forwarder forwarder = forwarderRepository.findById(id)
+    Forwarder forwarder = forwarderRepository.findById(userId)
         .orElseThrow(() -> new NotFoundException("ERROR: Forwarder is not found."));
 
     if (vehicleRepository.existsByLicensePlate(request.getLicensePlate())) {
@@ -80,17 +84,35 @@ public class ContainerSemiTrailerServiceImpl implements ContainerSemiTrailerServ
       throw new NotFoundException("ERROR: UnitOfMeasurement is not found.");
     }
 
+    containerSemiTrailer.setNumberOfAxles(request.getNumberOfAxles());
+
     containerSemiTrailerRepository.save(containerSemiTrailer);
     return containerSemiTrailer;
   }
 
   @Override
-  public ContainerSemiTrailer updateContainerSemiTrailer(Long id, ContainerSemiTrailerRequest request) {
+  public ContainerSemiTrailer updateContainerSemiTrailer(Long userId, ContainerSemiTrailerRequest request) {
 
-    if (forwarderRepository.existsById(id)) {
+    if (forwarderRepository.existsById(userId)) {
 
       ContainerSemiTrailer containerSemiTrailer = containerSemiTrailerRepository.findById(request.getId())
           .orElseThrow(() -> new NotFoundException("ERROR: ContainerSemiTrailer is not found."));
+
+      if (!containerSemiTrailer.getForwarder().getId().equals(userId)) {
+        throw new InternalException(String.format("Forwarder %s not owned containerSemiTrailer", userId));
+      }
+
+      Collection<Container> containers = containerRepository.findContainersByTrailer(request.getId(),
+          EnumSupplyStatus.COMBINED.name(), EnumSupplyStatus.BIDDING.name());
+      if (containers != null) {
+        containers.forEach(item -> {
+          if (item.getStatus().equalsIgnoreCase(EnumSupplyStatus.COMBINED.name())
+              || item.getStatus().equalsIgnoreCase(EnumSupplyStatus.BIDDING.name())) {
+            throw new InternalException(
+                String.format("Container %s has been %s", item.getContainerNumber(), item.getStatus()));
+          }
+        });
+      }
 
       if (vehicleRepository.existsByLicensePlate(request.getLicensePlate())
           && !request.getLicensePlate().equals(containerSemiTrailer.getLicensePlate())) {
@@ -111,6 +133,8 @@ public class ContainerSemiTrailerServiceImpl implements ContainerSemiTrailerServ
         throw new NotFoundException("ERROR: UnitOfMeasurement is not found.");
       }
 
+      containerSemiTrailer.setNumberOfAxles(request.getNumberOfAxles());
+
       containerSemiTrailerRepository.save(containerSemiTrailer);
       return containerSemiTrailer;
     } else {
@@ -126,6 +150,22 @@ public class ContainerSemiTrailerServiceImpl implements ContainerSemiTrailerServ
       ContainerSemiTrailer containerSemiTrailer = containerSemiTrailerRepository.findById(id)
           .orElseThrow(() -> new NotFoundException("ERROR: ContainerSemiTrailer is not found."));
 
+      if (!containerSemiTrailer.getForwarder().getId().equals(userId)) {
+        throw new InternalException(String.format("Forwarder %s not owned containerSemiTrailer", userId));
+      }
+
+      Collection<Container> containers = containerRepository.findContainersByTrailer(id,
+          EnumSupplyStatus.COMBINED.name(), EnumSupplyStatus.BIDDING.name());
+      if (containers != null) {
+        containers.forEach(item -> {
+          if (item.getStatus().equalsIgnoreCase(EnumSupplyStatus.COMBINED.name())
+              || item.getStatus().equalsIgnoreCase(EnumSupplyStatus.BIDDING.name())) {
+            throw new InternalException(
+                String.format("Container %s has been %s", item.getContainerNumber(), item.getStatus()));
+          }
+        });
+      }
+
       String licensePlate = (String) updates.get("licensePlate");
       if (licensePlate != null && !licensePlate.isEmpty()
           && !licensePlate.equals(containerSemiTrailer.getLicensePlate())) {
@@ -134,6 +174,11 @@ public class ContainerSemiTrailerServiceImpl implements ContainerSemiTrailerServ
         } else {
           containerSemiTrailer.setLicensePlate(licensePlate);
         }
+      }
+
+      String numberOfAxles = (String) updates.get("numberOfAxles");
+      if (numberOfAxles != null && !numberOfAxles.isEmpty()) {
+        containerSemiTrailer.setNumberOfAxles(Integer.valueOf(numberOfAxles));
       }
 
       String type = (String) updates.get("type");
@@ -168,16 +213,35 @@ public class ContainerSemiTrailerServiceImpl implements ContainerSemiTrailerServ
       ContainerSemiTrailer containerSemiTrailer = containerSemiTrailerRepository.findById(id)
           .orElseThrow(() -> new NotFoundException("ERROR: ContainerSemiTrailer is not found."));
 
-      Collection<Container> containers = containerSemiTrailer.getContainers();
-      containers.forEach(item -> {
-        if (item.getStatus().equalsIgnoreCase(EnumSupplyStatus.COMBINED.name())
-            || item.getStatus().equalsIgnoreCase(EnumSupplyStatus.BIDDING.name())) {
-          throw new InternalException(
-              String.format("Container %s has been %s", item.getContainerNumber(), item.getStatus()));
-        }
-      });
+      if (!containerSemiTrailer.getForwarder().getId().equals(userId)) {
+        throw new InternalException(String.format("Forwarder %s not owned containerSemiTrailer", userId));
+      }
+
+      Collection<Container> containers = containerRepository.findContainersByTrailer(id,
+          EnumSupplyStatus.COMBINED.name(), EnumSupplyStatus.BIDDING.name());
+      if (containers != null) {
+        containers.forEach(item -> {
+          if (item.getStatus().equalsIgnoreCase(EnumSupplyStatus.COMBINED.name())
+              || item.getStatus().equalsIgnoreCase(EnumSupplyStatus.BIDDING.name())) {
+            throw new InternalException(
+                String.format("Container %s has been %s", item.getContainerNumber(), item.getStatus()));
+          }
+        });
+      }
       containerSemiTrailerRepository.delete(containerSemiTrailer);
 
+    } else {
+      throw new NotFoundException("ERROR: Forwarder is not found.");
+    }
+  }
+
+  @Override
+  public Page<ContainerSemiTrailer> getContainerSemiTrailersByForwarder(Long userId, PaginationRequest request) {
+    if (forwarderRepository.existsById(userId)) {
+      PageRequest pageRequest = PageRequest.of(request.getPage(), request.getLimit(),
+          Sort.by(Sort.Direction.DESC, "createdAt"));
+      Page<ContainerSemiTrailer> pages = containerSemiTrailerRepository.findByForwarder(userId, pageRequest);
+      return pages;
     } else {
       throw new NotFoundException("ERROR: Forwarder is not found.");
     }

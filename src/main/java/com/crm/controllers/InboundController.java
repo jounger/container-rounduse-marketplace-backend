@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.crm.models.Inbound;
@@ -61,6 +62,26 @@ public class InboundController {
     return ResponseEntity.ok(response);
   }
 
+  @GetMapping("/filter")
+  @PreAuthorize("hasRole('FORWARDER') or hasRole('MERCHANT')")
+  public ResponseEntity<?> searchInbounds(@Valid PaginationRequest request,
+      @RequestParam(value = "search") String search) {
+
+    Page<Inbound> pages = inboundService.searchInbounds(request, search);
+    PaginationResponse<InboundDto> response = new PaginationResponse<>();
+    response.setPageNumber(request.getPage());
+    response.setPageSize(request.getLimit());
+    response.setTotalElements(pages.getTotalElements());
+    response.setTotalPages(pages.getTotalPages());
+
+    List<Inbound> inbounds = pages.getContent();
+    List<InboundDto> inboundsDto = new ArrayList<>();
+    inbounds.forEach(inbound -> inboundsDto.add(InboundMapper.toInboundDto(inbound)));
+    response.setContents(inboundsDto);
+
+    return ResponseEntity.ok(response);
+  }
+
   @GetMapping("/forwarder")
   @PreAuthorize("hasRole('FORWARDER')")
   public ResponseEntity<?> getInboundsByForwarder(@Valid PaginationRequest request) {
@@ -68,7 +89,7 @@ public class InboundController {
     UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
         .getPrincipal();
     Long userId = userDetails.getId();
-    
+
     Page<Inbound> pages = inboundService.getInboundsForwarder(userId, request);
     PaginationResponse<InboundDto> response = new PaginationResponse<>();
     response.setPageNumber(request.getPage());

@@ -5,13 +5,17 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import com.crm.common.Constant;
 import com.crm.common.Tool;
 import com.crm.enums.EnumSupplyStatus;
 import com.crm.exception.DuplicateRecordException;
@@ -28,6 +32,7 @@ import com.crm.repository.ForwarderRepository;
 import com.crm.repository.InboundRepository;
 import com.crm.repository.PortRepository;
 import com.crm.services.BillOfLadingService;
+import com.crm.specification.builder.BillOfLadingSpecificationsBuilder;
 
 @Service
 public class BillOfLadingServiceImpl implements BillOfLadingService {
@@ -64,6 +69,10 @@ public class BillOfLadingServiceImpl implements BillOfLadingService {
     if (forwarderRepository.existsById(userId)) {
       BillOfLading billOfLading = billOfLadingRepository.findById(request.getId())
           .orElseThrow(() -> new NotFoundException("ERROR: BillOfLading is not found."));
+
+      if (!billOfLading.getInbound().getForwarder().getId().equals(userId)) {
+        throw new InternalException(String.format("Forwarder %s not owned BillOfLading", userId));
+      }
 
       Port port = portRepository.findByNameCode(request.getPortOfDelivery())
           .orElseThrow(() -> new NotFoundException("ERROR: Port is not found."));
@@ -174,6 +183,10 @@ public class BillOfLadingServiceImpl implements BillOfLadingService {
     if (forwarderRepository.existsById(userId)) {
       BillOfLading billOfLading = billOfLadingRepository.findById(id)
           .orElseThrow(() -> new NotFoundException("ERROR: BillOfLading is not found."));
+
+      if (!billOfLading.getInbound().getForwarder().getId().equals(userId)) {
+        throw new InternalException(String.format("Forwarder %s not owned BillOfLading", userId));
+      }
 
       String portOfDelivery = (String) updates.get("portOfDelivery");
       if (portOfDelivery != null && !portOfDelivery.isEmpty()) {
@@ -295,6 +308,24 @@ public class BillOfLadingServiceImpl implements BillOfLadingService {
     BillOfLading billOfLading = billOfLadingRepository.findById(id)
         .orElseThrow(() -> new NotFoundException("ERROR: BillOfLading is not found."));
     return billOfLading;
+  }
+
+  @Override
+  public Page<BillOfLading> searchBillOfLadings(PaginationRequest request, String search) {
+    BillOfLadingSpecificationsBuilder builder = new BillOfLadingSpecificationsBuilder();
+    Pattern pattern = Pattern.compile(Constant.SEARCH_REGEX, Pattern.UNICODE_CHARACTER_CLASS);
+    Matcher matcher = pattern.matcher(search + ",");
+    while (matcher.find()) {
+      // Chaining criteria
+      builder.with(matcher.group(1), matcher.group(2), matcher.group(3));
+    }
+    // Build specification
+    Specification<BillOfLading> spec = builder.build();
+    PageRequest page = PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt"));
+    // Filter with repository
+    Page<BillOfLading> pages = billOfLadingRepository.findAll(spec, page);
+    // Return result
+    return pages;
   }
 
 }

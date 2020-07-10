@@ -62,6 +62,31 @@ public class ContainerSemiTrailerController {
     return ResponseEntity.ok(response);
   }
 
+  @GetMapping("/forwarder")
+  @PreAuthorize("hasRole('FORWARDER')")
+  public ResponseEntity<?> getContainerSemiTrailersByForwarder(@Valid PaginationRequest request) {
+
+    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
+        .getPrincipal();
+    Long userId = userDetails.getId();
+
+    Page<ContainerSemiTrailer> pages = containerSemiTrailerService.getContainerSemiTrailersByForwarder(userId, request);
+
+    PaginationResponse<ContainerSemiTrailerDto> response = new PaginationResponse<>();
+    response.setPageNumber(request.getPage());
+    response.setPageSize(request.getLimit());
+    response.setTotalElements(pages.getTotalElements());
+    response.setTotalPages(pages.getTotalPages());
+
+    List<ContainerSemiTrailer> containerSemiTrailers = pages.getContent();
+    List<ContainerSemiTrailerDto> containerSemiTrailerDto = new ArrayList<>();
+    containerSemiTrailers.forEach(containerSemiTrailer -> containerSemiTrailerDto
+        .add(ContainerSemiTrailerMapper.toContainerSemiTrailerDto(containerSemiTrailer)));
+    response.setContents(containerSemiTrailerDto);
+
+    return ResponseEntity.ok(response);
+  }
+
   @GetMapping("/{id}")
   @PreAuthorize("hasRole('FORWARDER') or hasRole('MERCHANT')")
   public ResponseEntity<?> getContainerSemiTrailer(@PathVariable Long id) {

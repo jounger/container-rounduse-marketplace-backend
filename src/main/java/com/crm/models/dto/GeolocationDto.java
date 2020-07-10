@@ -5,12 +5,11 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class VehicleDto {
+public class GeolocationDto {
 
   private Long id;
 
-  private String licensePlate;
+  private String latitude;
 
-  private Integer numberOfAxles;
-
+  private String longitude;
 }

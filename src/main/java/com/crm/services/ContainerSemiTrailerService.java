@@ -14,9 +14,11 @@ public interface ContainerSemiTrailerService {
 
   Page<ContainerSemiTrailer> getContainerSemiTrailers(PaginationRequest request);
 
-  ContainerSemiTrailer createContainerSemiTrailer(Long id, ContainerSemiTrailerRequest request);
+  Page<ContainerSemiTrailer> getContainerSemiTrailersByForwarder(Long userId, PaginationRequest request);
 
-  ContainerSemiTrailer updateContainerSemiTrailer(Long id, ContainerSemiTrailerRequest request);
+  ContainerSemiTrailer createContainerSemiTrailer(Long userId, ContainerSemiTrailerRequest request);
+
+  ContainerSemiTrailer updateContainerSemiTrailer(Long userId, ContainerSemiTrailerRequest request);
 
   ContainerSemiTrailer editContainerSemiTrailer(Map<String, Object> updates, Long id, Long userId);
 

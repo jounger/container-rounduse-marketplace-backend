@@ -11,6 +11,7 @@ public class ContainerSemiTrailerMapper {
     containerSemiTrailerDto.setLicensePlate(containerSemiTrailer.getLicensePlate());
     containerSemiTrailerDto.setType(containerSemiTrailer.getType());
     containerSemiTrailerDto.setUnitOfMeasurement(containerSemiTrailer.getUnitOfMeasurement());
+    containerSemiTrailerDto.setNumberOfAxles(containerSemiTrailer.getNumberOfAxles());
     return containerSemiTrailerDto;
   }
 }

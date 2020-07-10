@@ -18,9 +18,9 @@ public interface DriverService {
 
   Page<Driver> getDriversByForwarder(Long id, PaginationRequest request);
 
-  Driver updateDriver(DriverRequest request);
+  Driver updateDriver(Long userId, DriverRequest request);
 
-  Driver editDriver(Long id, Map<String, Object> updates);
+  Driver editDriver(Long id, Long userId, Map<String, Object> updates);
 
-  void removeDriver(Long id);
+  void removeDriver(Long id, Long userId);
 }

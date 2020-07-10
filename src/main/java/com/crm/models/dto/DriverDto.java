@@ -5,11 +5,11 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class DriverDto extends UserDto{
+public class DriverDto extends UserDto {
 
   private String fullname;
-  
+
   private String driverLicense;
-  
-  private String location;
+
+  private GeolocationDto location;
 }

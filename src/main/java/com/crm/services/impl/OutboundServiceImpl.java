@@ -2,13 +2,17 @@ package com.crm.services.impl;
 
 import java.time.LocalDateTime;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import com.crm.common.Constant;
 import com.crm.common.Tool;
 import com.crm.enums.EnumSupplyStatus;
 import com.crm.enums.EnumUnit;
@@ -31,6 +35,7 @@ import com.crm.repository.OutboundRepository;
 import com.crm.repository.PortRepository;
 import com.crm.repository.ShippingLineRepository;
 import com.crm.services.OutboundService;
+import com.crm.specification.builder.OutboundSpecificationsBuilder;
 
 @Service
 public class OutboundServiceImpl implements OutboundService {
@@ -169,6 +174,11 @@ public class OutboundServiceImpl implements OutboundService {
 
       Outbound outbound = outboundRepository.findById(request.getId())
           .orElseThrow(() -> new NotFoundException("ERROR: Outbound is not found."));
+
+      if (!outbound.getMerchant().getId().equals(userId)) {
+        throw new InternalException(String.format("Merchant %s not owned Inbound", userId));
+      }
+
       if (outbound.getStatus().equals(EnumSupplyStatus.COMBINED.name())
           || outbound.getStatus().equals(EnumSupplyStatus.BIDDING.name())) {
         throw new InternalException(String.format("Outbound with bookingNumber %s has been %s",
@@ -238,6 +248,11 @@ public class OutboundServiceImpl implements OutboundService {
     if (merchantRepository.existsById(userId)) {
       Outbound outbound = outboundRepository.findById(id)
           .orElseThrow(() -> new NotFoundException("ERROR: Outbound is not found."));
+
+      if (!outbound.getMerchant().getId().equals(userId)) {
+        throw new InternalException(String.format("Merchant %s not owned Inbound", userId));
+      }
+
       if (outbound.getStatus().equals(EnumSupplyStatus.COMBINED.name())
           || outbound.getStatus().equals(EnumSupplyStatus.BIDDING.name())) {
         throw new InternalException(String.format("Outbound with bookingNumber %s has been %s",
@@ -316,6 +331,11 @@ public class OutboundServiceImpl implements OutboundService {
     if (merchantRepository.existsById(userId)) {
       Outbound outbound = outboundRepository.findById(id)
           .orElseThrow(() -> new NotFoundException("ERROR: Outbound is not found."));
+
+      if (!outbound.getMerchant().getId().equals(userId)) {
+        throw new InternalException(String.format("Merchant %s not owned Inbound", userId));
+      }
+
       if (outbound.getStatus().equals(EnumSupplyStatus.COMBINED.name())
           || outbound.getStatus().equals(EnumSupplyStatus.BIDDING.name())) {
         throw new InternalException(String.format("Outbound with bookingNumber %s has been %s",
@@ -325,5 +345,23 @@ public class OutboundServiceImpl implements OutboundService {
     } else {
       throw new NotFoundException("ERROR: Merchant Type is not found.");
     }
+  }
+
+  @Override
+  public Page<Outbound> searchOutbounds(PaginationRequest request, String search) {
+    OutboundSpecificationsBuilder builder = new OutboundSpecificationsBuilder();
+    Pattern pattern = Pattern.compile(Constant.SEARCH_REGEX, Pattern.UNICODE_CHARACTER_CLASS);
+    Matcher matcher = pattern.matcher(search + ",");
+    while (matcher.find()) {
+      // Chaining criteria
+      builder.with(matcher.group(1), matcher.group(2), matcher.group(3));
+    }
+    // Build specification
+    Specification<Outbound> spec = builder.build();
+    PageRequest page = PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt"));
+    // Filter with repository
+    Page<Outbound> pages = outboundRepository.findAll(spec, page);
+    // Return result
+    return pages;
   }
 }

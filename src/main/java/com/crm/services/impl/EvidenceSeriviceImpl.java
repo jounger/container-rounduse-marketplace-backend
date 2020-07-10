@@ -25,6 +25,7 @@ import com.crm.payload.request.EvidenceRequest;
 import com.crm.payload.request.PaginationRequest;
 import com.crm.repository.ContractRepository;
 import com.crm.repository.EvidenceRepository;
+import com.crm.repository.SupplierRepository;
 import com.crm.services.EvidenceService;
 import com.crm.specification.builder.EvidenceSpecificationsBuilder;
 
@@ -36,6 +37,9 @@ public class EvidenceSeriviceImpl implements EvidenceService {
 
   @Autowired
   private ContractRepository contractRepository;
+  
+  @Autowired
+  private SupplierRepository supplierRepository;
 
   @Override
   public Evidence createEvidence(String username, EvidenceRequest request) {
@@ -66,6 +70,16 @@ public class EvidenceSeriviceImpl implements EvidenceService {
 
     evidenceRepository.save(evidence);
     return evidence;
+  }
+
+  @Override
+  public Page<Evidence> getEvidencesByUser(String username, PaginationRequest request) {
+    if(!supplierRepository.existsByUsername(username)) {
+      throw new NotFoundException("Supplier is not found.");
+    }
+    PageRequest page = PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt"));
+    Page<Evidence> evidences = evidenceRepository.findByUser(username, page);
+    return evidences;
   }
 
   @Override

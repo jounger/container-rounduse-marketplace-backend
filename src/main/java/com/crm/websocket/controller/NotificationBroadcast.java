@@ -24,7 +24,7 @@ import com.crm.services.ForwarderService;
 import com.crm.websocket.service.BiddingWebSocketService;
 
 @Component
-public class NotificationController {
+public class NotificationBroadcast {
 
   private static final Logger logger = LoggerFactory.getLogger(BiddingDocumentController.class);
 
@@ -35,11 +35,11 @@ public class NotificationController {
   private static ForwarderService forwarderService;
 
   @Autowired
-  public NotificationController(BiddingNotificationService biddingNotificationService,
+  public NotificationBroadcast(BiddingNotificationService biddingNotificationService,
       BiddingWebSocketService biddingWebSocketService, ForwarderService forwarderService) {
-    NotificationController.biddingNotificationService = biddingNotificationService;
-    NotificationController.biddingWebSocketService = biddingWebSocketService;
-    NotificationController.forwarderService = forwarderService;
+    NotificationBroadcast.biddingNotificationService = biddingNotificationService;
+    NotificationBroadcast.biddingWebSocketService = biddingWebSocketService;
+    NotificationBroadcast.forwarderService = forwarderService;
   }
 
   public static void broadcastCreateBidToMerchant(Bid bid) {

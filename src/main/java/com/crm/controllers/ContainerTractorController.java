@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.crm.models.ContainerTractor;
@@ -46,6 +47,27 @@ public class ContainerTractorController {
   @PreAuthorize("hasRole('FORWARDER') or hasRole('MERCHANT')")
   public ResponseEntity<?> getContainerTractors(@Valid PaginationRequest request) {
     Page<ContainerTractor> pages = containerTractorService.getContainerTractors(request);
+
+    PaginationResponse<ContainerTractorDto> response = new PaginationResponse<>();
+    response.setPageNumber(request.getPage());
+    response.setPageSize(request.getLimit());
+    response.setTotalElements(pages.getTotalElements());
+    response.setTotalPages(pages.getTotalPages());
+
+    List<ContainerTractor> containerTractors = pages.getContent();
+    List<ContainerTractorDto> containerTractorDto = new ArrayList<>();
+    containerTractors.forEach(
+        containerTractor -> containerTractorDto.add(ContainerTractorMapper.toContainerTractorDto(containerTractor)));
+    response.setContents(containerTractorDto);
+
+    return ResponseEntity.ok(response);
+  }
+
+  @GetMapping("/filter")
+  @PreAuthorize("hasRole('FORWARDER') or hasRole('MERCHANT')")
+  public ResponseEntity<?> searchContainerTractors(@Valid PaginationRequest request,
+      @RequestParam(value = "search") String search) {
+    Page<ContainerTractor> pages = containerTractorService.searchContainerTractors(request, search);
 
     PaginationResponse<ContainerTractorDto> response = new PaginationResponse<>();
     response.setPageNumber(request.getPage());

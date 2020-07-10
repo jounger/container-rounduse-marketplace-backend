@@ -81,6 +81,7 @@ public class DriverServiceImpl implements DriverService {
     location.setLongitude(Constant.EMPTY_STRING);
     location.setDriver(driver);
 
+    driver.setLocation(location);
     driverRepository.save(driver);
 
     return driver;

@@ -137,11 +137,4 @@ public class EvidenceSeriviceImpl implements EvidenceService {
     }
 
   }
-
-  @Override
-  public Page<Evidence> getEvidencesByUser(String username, PaginationRequest request) {
-    PageRequest page = PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt"));
-    Page<Evidence> evidences = evidenceRepository.findByUser(username, page);
-    return evidences;
-  }
 }

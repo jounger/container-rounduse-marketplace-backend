@@ -52,6 +52,28 @@ public class PaymentController {
     PaymentDto paymentDto = PaymentMapper.toPaymentDto(payment);
     return ResponseEntity.ok(paymentDto);
   }
+  
+  @PreAuthorize("hasRole('MERCHANT') or hasRole('FORWARDER')")
+  @GetMapping("/user")
+  public ResponseEntity<?> getPaymentsByUser(@Valid PaginationRequest request) {
+    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    String username = userDetails.getUsername();
+    
+    Page<Payment> pages = paymentService.getPaymentsByUser(username, request);
+    
+    PaginationResponse<PaymentDto> response = new PaginationResponse<>();
+    response.setPageNumber(request.getPage());
+    response.setPageSize(request.getLimit());
+    response.setTotalElements(pages.getTotalElements());
+    response.setTotalPages(pages.getTotalPages());
+
+    List<Payment> payments = pages.getContent();
+    List<PaymentDto> paymentsDto = new ArrayList<>();
+    payments.forEach(payment -> paymentsDto.add(PaymentMapper.toPaymentDto(payment)));
+    response.setContents(paymentsDto);
+
+    return ResponseEntity.ok(response);
+  }
 
   @PreAuthorize("hasRole('MERCHANT') or hasRole('FORWARDER')")
   @GetMapping("/filter")

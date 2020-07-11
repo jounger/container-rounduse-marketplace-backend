@@ -118,27 +118,6 @@ public class NotificationBroadcast {
 
         biddingWebSocketService.sendBiddingNotifyToShippingLine(notification, bidNew);
 
-        Collection<Container> collectionContainers = bidNew.getContainers();
-        List<Container> containers = new ArrayList<Container>(collectionContainers);
-        if (containers != null) {
-          containers.forEach(container -> {
-            DriverNotification driverNotification = new DriverNotification();
-            DriverNotificationRequest driverNotifyRequest = new DriverNotificationRequest();
-            String driverUserName = container.getDriver().getUsername();
-            driverNotifyRequest.setRecipient(driverUserName);
-            driverNotifyRequest.setRelatedResource(bidNew.getBiddingDocument().getOutbound().getId());
-            driverNotifyRequest.setMessage(String.format("%s and %s want you driver container %s",
-                offeree.getUsername(), bidNew.getBidder().getUsername(), container.getContainerNumber()));
-            driverNotifyRequest.setType(EnumDriverNotificationType.TASK.name());
-
-            driverNotification = driverNotificationService.createDriverNotification(driverNotifyRequest);
-
-            // Asynchronous send notification to Driver
-
-            biddingWebSocketService.sendBiddingNotifyToDriver(driverNotification);
-          });
-        }
-
       } else if (bidNew.getStatus().equals(EnumBidStatus.REJECTED.name())) {
 
         notifyRequest.setRecipient(bidNew.getBidder().getUsername());
@@ -201,6 +180,30 @@ public class NotificationBroadcast {
       logger.info("notification : {}", notification.getId());
       biddingWebSocketService.sendBiddingNotifyToUser(notification);
     });
+  }
+
+  public static void broadcastCreateCombinedToDriver(String status, Bid bidNew) {
+    Merchant offeree = bidNew.getBiddingDocument().getOfferee();
+    Collection<Container> collectionContainers = bidNew.getContainers();
+    List<Container> containers = new ArrayList<Container>(collectionContainers);
+    if (containers != null) {
+      containers.forEach(container -> {
+        DriverNotification driverNotification = new DriverNotification();
+        DriverNotificationRequest driverNotifyRequest = new DriverNotificationRequest();
+        String driverUserName = container.getDriver().getUsername();
+        driverNotifyRequest.setRecipient(driverUserName);
+        driverNotifyRequest.setRelatedResource(bidNew.getBiddingDocument().getOutbound().getId());
+        driverNotifyRequest.setMessage(String.format("%s and %s want you driver container %s", offeree.getUsername(),
+            bidNew.getBidder().getUsername(), container.getContainerNumber()));
+        driverNotifyRequest.setType(EnumDriverNotificationType.TASK.name());
+
+        driverNotification = driverNotificationService.createDriverNotification(driverNotifyRequest);
+
+        // Asynchronous send notification to Driver
+
+        biddingWebSocketService.sendBiddingNotifyToDriver(driverNotification);
+      });
+    }
   }
 
 }

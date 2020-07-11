@@ -52,15 +52,15 @@ public class PaymentController {
     PaymentDto paymentDto = PaymentMapper.toPaymentDto(payment);
     return ResponseEntity.ok(paymentDto);
   }
-  
+
   @PreAuthorize("hasRole('MERCHANT') or hasRole('FORWARDER')")
   @GetMapping("/user")
   public ResponseEntity<?> getPaymentsByUser(@Valid PaginationRequest request) {
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
-    
+
     Page<Payment> pages = paymentService.getPaymentsByUser(username, request);
-    
+
     PaginationResponse<PaymentDto> response = new PaginationResponse<>();
     response.setPageNumber(request.getPage());
     response.setPageSize(request.getLimit());

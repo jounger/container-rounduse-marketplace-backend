@@ -104,6 +104,13 @@ public class ReportServiceImpl implements ReportService {
   }
 
   @Override
+  public Page<Report> getReports(PaginationRequest request) {
+    PageRequest page = PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt"));
+    Page<Report> reports = reportRepository.findAll(page);
+    return reports;
+  }
+
+  @Override
   public Report editReport(Long id, String username, Map<String, Object> updates) {
     Report report = reportRepository.findById(id).orElseThrow(() -> new NotFoundException("Report is not found."));
 
@@ -117,7 +124,7 @@ public class ReportServiceImpl implements ReportService {
     }
 
     if (report.getSender().getUsername().equals(username)) {
-      
+
       if (report.getStatus().equals(EnumReportStatus.RESOLVED.name())
           || report.getStatus().equals(EnumReportStatus.REJECTED.name())
           || report.getStatus().equals(EnumReportStatus.CLOSED.name())) {
@@ -132,7 +139,7 @@ public class ReportServiceImpl implements ReportService {
       report.setStatus(EnumReportStatus.UPDATED.name());
     }
 
-    if(role.equals("ROLE_MODERATOR")){
+    if (role.equals("ROLE_MODERATOR")) {
       String statusString = (String) updates.get("status");
       EnumReportStatus status = EnumReportStatus.findByName(statusString);
       if (status != null) {

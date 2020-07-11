@@ -45,7 +45,7 @@ public class Booking {
   private Long id;
 
   @OneToOne
-  @JoinColumn(name = "booking")
+  @JoinColumn(name = "outbound_id")
   private Outbound outbound;
 
   @ManyToOne

@@ -32,11 +32,11 @@ import com.crm.payload.response.MessageResponse;
 import com.crm.payload.response.PaginationResponse;
 import com.crm.services.MerchantService;
 
-@CrossOrigin(origins="*", maxAge=3600)
+@CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 @RequestMapping("/api/merchant")
 public class MerchantController {
-  
+
   @Autowired
   private MerchantService merchantService;
 
@@ -92,7 +92,7 @@ public class MerchantController {
     MerchantDto merchantDto = MerchantMapper.toMerchantDto(merchant);
     return ResponseEntity.ok(merchantDto);
   }
-  
+
   @Transactional
   @PreAuthorize("hasRole('OPERATOR')")
   @DeleteMapping("/{id}")

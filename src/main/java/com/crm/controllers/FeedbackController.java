@@ -43,24 +43,24 @@ public class FeedbackController {
   private FeedbackService paymentService;
 
   @Transactional
-  @PostMapping("")
+  @PostMapping("/report/{id}")
   @PreAuthorize("hasRole('MODERATOR') or hasRole('FORWARDER')")
-  public ResponseEntity<?> createFeedback(@Valid @RequestBody FeedbackRequest request) {
+  public ResponseEntity<?> createFeedback(@PathVariable("id") Long id, @Valid @RequestBody FeedbackRequest request) {
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
-    Feedback payment = paymentService.createFeedback(username, request);
+    Feedback payment = paymentService.createFeedback(id, username, request);
     FeedbackDto paymentDto = FeedbackMapper.toFeedbackDto(payment);
     return ResponseEntity.ok(paymentDto);
   }
-  
+
   @PreAuthorize("hasRole('MODERATOR') or hasRole('FORWARDER')")
   @GetMapping("/report/{id}")
-  public ResponseEntity<?> getFeedbacksByReport(@PathVariable Long id,@Valid PaginationRequest request) {
+  public ResponseEntity<?> getFeedbacksByReport(@PathVariable Long id, @Valid PaginationRequest request) {
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
-    
+
     Page<Feedback> pages = paymentService.getFeedbacksByReport(id, username, request);
-    
+
     PaginationResponse<FeedbackDto> response = new PaginationResponse<>();
     response.setPageNumber(request.getPage());
     response.setPageSize(request.getLimit());
@@ -74,15 +74,15 @@ public class FeedbackController {
 
     return ResponseEntity.ok(response);
   }
-  
+
   @PreAuthorize("hasRole('MODERATOR') or hasRole('FORWARDER')")
   @GetMapping("/user")
   public ResponseEntity<?> getFeedbacksByUser(@Valid PaginationRequest request) {
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
-    
+
     Page<Feedback> pages = paymentService.getFeedbacksByUser(username, request);
-    
+
     PaginationResponse<FeedbackDto> response = new PaginationResponse<>();
     response.setPageNumber(request.getPage());
     response.setPageSize(request.getLimit());

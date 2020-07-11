@@ -37,11 +37,10 @@ public class ContractServiceImp implements ContractService {
   private CombinedRepository combinedRepository;
 
   @Override
-  public Contract createContract(String username, ContractRequest request) {
+  public Contract createContract(Long id, String username, ContractRequest request) {
     Contract contract = new Contract();
 
-    Long combinedId = request.getCombined();
-    Combined combined = combinedRepository.findById(combinedId)
+    Combined combined = combinedRepository.findById(id)
         .orElseThrow(() -> new NotFoundException("Combined is not found."));
     contract.setCombined(combined);
 

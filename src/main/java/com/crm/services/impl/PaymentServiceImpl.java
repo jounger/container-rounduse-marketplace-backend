@@ -126,7 +126,7 @@ public class PaymentServiceImpl implements PaymentService {
       Boolean isPaid = Boolean.valueOf(isPaidString);
       payment.setIsPaid(isPaid);
     }
-    
+
     paymentRepository.save(payment);
     return payment;
   }

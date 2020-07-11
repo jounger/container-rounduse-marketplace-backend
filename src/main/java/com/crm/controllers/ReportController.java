@@ -52,15 +52,15 @@ public class ReportController {
     ReportDto reportDto = ReportMapper.toReportDto(report);
     return ResponseEntity.ok(reportDto);
   }
-  
+
   @PreAuthorize("hasRole('MODERATOR') or hasRole('FORWARDER')")
   @GetMapping("/user")
   public ResponseEntity<?> getReportsByUser(@Valid PaginationRequest request) {
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
-    
+
     Page<Report> pages = reportService.getReportsByUser(username, request);
-    
+
     PaginationResponse<ReportDto> response = new PaginationResponse<>();
     response.setPageNumber(request.getPage());
     response.setPageSize(request.getLimit());
@@ -80,6 +80,24 @@ public class ReportController {
   public ResponseEntity<?> searchReports(@Valid PaginationRequest request,
       @RequestParam(value = "search") String search) {
     Page<Report> pages = reportService.searchReports(request, search);
+    PaginationResponse<ReportDto> response = new PaginationResponse<>();
+    response.setPageNumber(request.getPage());
+    response.setPageSize(request.getLimit());
+    response.setTotalElements(pages.getTotalElements());
+    response.setTotalPages(pages.getTotalPages());
+
+    List<Report> reports = pages.getContent();
+    List<ReportDto> reportsDto = new ArrayList<>();
+    reports.forEach(report -> reportsDto.add(ReportMapper.toReportDto(report)));
+    response.setContents(reportsDto);
+
+    return ResponseEntity.ok(response);
+  }
+
+  @PreAuthorize("hasRole('MODERATOR')")
+  @GetMapping("")
+  public ResponseEntity<?> getReports(@Valid PaginationRequest request) {
+    Page<Report> pages = reportService.getReports(request);
     PaginationResponse<ReportDto> response = new PaginationResponse<>();
     response.setPageNumber(request.getPage());
     response.setPageSize(request.getLimit());

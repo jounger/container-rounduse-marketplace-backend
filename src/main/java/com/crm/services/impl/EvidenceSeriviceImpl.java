@@ -37,7 +37,7 @@ public class EvidenceSeriviceImpl implements EvidenceService {
 
   @Autowired
   private ContractRepository contractRepository;
-  
+
   @Autowired
   private SupplierRepository supplierRepository;
 
@@ -73,7 +73,7 @@ public class EvidenceSeriviceImpl implements EvidenceService {
 
   @Override
   public Page<Evidence> getEvidencesByUser(String username, PaginationRequest request) {
-    if(!supplierRepository.existsByUsername(username)) {
+    if (!supplierRepository.existsByUsername(username)) {
       throw new NotFoundException("Supplier is not found.");
     }
     PageRequest page = PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt"));
@@ -126,7 +126,7 @@ public class EvidenceSeriviceImpl implements EvidenceService {
     } else {
       throw new InternalException("Is valid is not valid.");
     }
-    
+
     evidenceRepository.save(evidence);
     return evidence;
 

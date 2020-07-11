@@ -11,7 +11,7 @@ import org.springframework.stereotype.Repository;
 import com.crm.models.Evidence;
 
 @Repository
-public interface EvidenceRepository extends JpaRepository<Evidence, Long>, JpaSpecificationExecutor<Evidence>{
+public interface EvidenceRepository extends JpaRepository<Evidence, Long>, JpaSpecificationExecutor<Evidence> {
 
   @Query(value = "SELECT e FROM Evidence e LEFT JOIN e.sender s "
       + "LEFT JOIN s.bids b LEFT JOIN s.biddingDocuments bd "

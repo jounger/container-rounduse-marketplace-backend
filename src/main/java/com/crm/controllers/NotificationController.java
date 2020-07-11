@@ -23,7 +23,7 @@ import com.crm.services.NotificationService;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
-@RequestMapping("/api/container-type")
+@RequestMapping("/api/notification")
 public class NotificationController {
 
   @Autowired

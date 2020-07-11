@@ -1,6 +1,7 @@
 package com.crm.websocket.controller;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -12,14 +13,19 @@ import org.springframework.stereotype.Component;
 import com.crm.controllers.BiddingDocumentController;
 import com.crm.enums.EnumBidStatus;
 import com.crm.enums.EnumBiddingNotificationType;
+import com.crm.enums.EnumDriverNotificationType;
 import com.crm.models.Bid;
 import com.crm.models.BiddingDocument;
 import com.crm.models.BiddingNotification;
+import com.crm.models.Container;
+import com.crm.models.DriverNotification;
 import com.crm.models.Forwarder;
 import com.crm.models.Merchant;
 import com.crm.payload.request.BiddingNotificationRequest;
+import com.crm.payload.request.DriverNotificationRequest;
 import com.crm.payload.request.PaginationRequest;
 import com.crm.services.BiddingNotificationService;
+import com.crm.services.DriverNotificationService;
 import com.crm.services.ForwarderService;
 import com.crm.websocket.service.BiddingWebSocketService;
 
@@ -34,12 +40,16 @@ public class NotificationBroadcast {
 
   private static ForwarderService forwarderService;
 
+  private static DriverNotificationService driverNotificationService;
+
   @Autowired
   public NotificationBroadcast(BiddingNotificationService biddingNotificationService,
-      BiddingWebSocketService biddingWebSocketService, ForwarderService forwarderService) {
+      BiddingWebSocketService biddingWebSocketService, ForwarderService forwarderService,
+      DriverNotificationService driverNotificationService) {
     NotificationBroadcast.biddingNotificationService = biddingNotificationService;
     NotificationBroadcast.biddingWebSocketService = biddingWebSocketService;
     NotificationBroadcast.forwarderService = forwarderService;
+    NotificationBroadcast.driverNotificationService = driverNotificationService;
   }
 
   public static void broadcastCreateBidToMerchant(Bid bid) {
@@ -107,6 +117,27 @@ public class NotificationBroadcast {
         // Asynchronous send notification to ShippingLine
 
         biddingWebSocketService.sendBiddingNotifyToShippingLine(notification, bidNew);
+
+        Collection<Container> collectionContainers = bidNew.getContainers();
+        List<Container> containers = new ArrayList<Container>(collectionContainers);
+        if (containers != null) {
+          containers.forEach(container -> {
+            DriverNotification driverNotification = new DriverNotification();
+            DriverNotificationRequest driverNotifyRequest = new DriverNotificationRequest();
+            String driverUserName = container.getDriver().getUsername();
+            driverNotifyRequest.setRecipient(driverUserName);
+            driverNotifyRequest.setRelatedResource(bidNew.getBiddingDocument().getOutbound().getId());
+            driverNotifyRequest.setMessage(String.format("%s and %s want you driver container %s",
+                offeree.getUsername(), bidNew.getBidder().getUsername(), container.getContainerNumber()));
+            driverNotifyRequest.setType(EnumDriverNotificationType.TASK.name());
+
+            driverNotification = driverNotificationService.createDriverNotification(driverNotifyRequest);
+
+            // Asynchronous send notification to Driver
+
+            biddingWebSocketService.sendBiddingNotifyToDriver(driverNotification);
+          });
+        }
 
       } else if (bidNew.getStatus().equals(EnumBidStatus.REJECTED.name())) {
 

@@ -29,15 +29,15 @@ import com.crm.payload.response.MessageResponse;
 import com.crm.payload.response.PaginationResponse;
 import com.crm.services.RoleService;
 
-@CrossOrigin(origins="*", maxAge=3600)
+@CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 @RequestMapping("/api/role")
 @PreAuthorize("hasRole('ADMIN')")
 public class RoleController {
-  
+
   @Autowired
   private RoleService roleService;
-  
+
   @Transactional
   @PostMapping("")
   @PreAuthorize("hasRole('ADMIN')")
@@ -46,7 +46,7 @@ public class RoleController {
     RoleDto roleDto = RoleMapper.toRoleDto(role);
     return ResponseEntity.ok(roleDto);
   }
-  
+
   @GetMapping("")
   @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<?> getRoles(@Valid PaginationRequest request) {
@@ -56,15 +56,15 @@ public class RoleController {
     response.setPageSize(request.getLimit());
     response.setTotalElements(pages.getTotalElements());
     response.setTotalPages(pages.getTotalPages());
-    
+
     List<Role> roles = pages.getContent();
     List<RoleDto> rolesDto = new ArrayList<>();
     roles.forEach(role -> rolesDto.add(RoleMapper.toRoleDto(role)));
     response.setContents(rolesDto);
-    
+
     return ResponseEntity.ok(response);
   }
-  
+
   @Transactional
   @PutMapping("")
   @PreAuthorize("hasRole('ADMIN')")
@@ -73,7 +73,7 @@ public class RoleController {
     RoleDto roleDto = RoleMapper.toRoleDto(role);
     return ResponseEntity.ok(roleDto);
   }
-  
+
   @Transactional
   @DeleteMapping("/{id}")
   @PreAuthorize("hasRole('ADMIN')")
@@ -81,5 +81,5 @@ public class RoleController {
     roleService.removeRole(id);
     return ResponseEntity.ok(new MessageResponse("Role has been deleted successfully"));
   }
-  
+
 }

@@ -43,24 +43,24 @@ public class ContractController {
   private ContractService contractService;
 
   @Transactional
-  @PostMapping("")
+  @PostMapping("/combined/{id}")
   @PreAuthorize("hasRole('MERCHANT') or hasRole('FORWARDER')")
-  public ResponseEntity<?> createContract(@Valid @RequestBody ContractRequest request) {
+  public ResponseEntity<?> createContract(@PathVariable("id") Long id, @Valid @RequestBody ContractRequest request) {
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
-    Contract contract = contractService.createContract(username, request);
+    Contract contract = contractService.createContract(id, username, request);
     ContractDto contractDto = ContractMapper.toContractDto(contract);
     return ResponseEntity.ok(contractDto);
   }
-  
+
   @PreAuthorize("hasRole('MERCHANT') or hasRole('FORWARDER')")
   @GetMapping("/user")
   public ResponseEntity<?> getContractsByUser(@Valid PaginationRequest request) {
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
-    
+
     Page<Contract> pages = contractService.getContractsByUser(username, request);
-    
+
     PaginationResponse<ContractDto> response = new PaginationResponse<>();
     response.setPageNumber(request.getPage());
     response.setPageSize(request.getLimit());

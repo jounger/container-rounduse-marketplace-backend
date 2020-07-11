@@ -69,7 +69,7 @@ public class ContainerTypeController {
     return ResponseEntity.ok(containerTypeDto);
   }
 
-  @RequestMapping(method = RequestMethod.GET, params = {"name"})
+  @RequestMapping(method = RequestMethod.GET, params = { "name" })
   public ResponseEntity<?> getContainerTypeByName(@RequestParam String name) {
     ContainerType containerType = containerTypeService.getContainerTypeByName(name);
     ContainerTypeDto containerTypeDto = new ContainerTypeDto();

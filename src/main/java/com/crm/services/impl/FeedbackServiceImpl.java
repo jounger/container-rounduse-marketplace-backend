@@ -27,40 +27,41 @@ import com.crm.services.FeedbackService;
 import com.crm.specification.builder.FeedbackSpecificationsBuilder;
 
 @Service
-public class FeedbackServiceImpl implements FeedbackService{
+public class FeedbackServiceImpl implements FeedbackService {
 
   @Autowired
   private FeedbackRepository feedbackRepository;
-  
+
   @Autowired
   private UserRepository userRepository;
-  
+
   @Autowired
   private ReportRepository reportRepository;
-  
+
   @Override
-  public Feedback createFeedback(String username, FeedbackRequest request) {
+  public Feedback createFeedback(Long id, String username, FeedbackRequest request) {
     Feedback feedback = new Feedback();
-    
-    Report report = reportRepository.findById(request.getReport()).orElseThrow(() -> new NotFoundException("Report is not found."));
+
+    Report report = reportRepository.findById(id).orElseThrow(() -> new NotFoundException("Report is not found."));
     feedback.setReport(report);
-    User sender = userRepository.findByUsername(username).orElseThrow(() -> new NotFoundException("User is not found."));
+    User sender = userRepository.findByUsername(username)
+        .orElseThrow(() -> new NotFoundException("User is not found."));
     String role = sender.getRoles().iterator().next().getName();
-    if(role.equals("ROLE_MODERATOR") || username.equals(report.getSender().getUsername())) {
+    if (role.equals("ROLE_MODERATOR") || username.equals(report.getSender().getUsername())) {
       feedback.setSender(sender);
-    }else {
+    } else {
       throw new NotFoundException("Access denied.");
     }
-    
+
     String message = request.getMessage();
     feedback.setMessage(message);
-    
+
     Integer satisfactionPoints = request.getSatisfactionPoints();
-    if(satisfactionPoints < 0 || satisfactionPoints > 5) {
+    if (satisfactionPoints < 0 || satisfactionPoints > 5) {
       throw new InternalException("Satisfaction Points must be greater than zero and less than five.");
     }
     feedback.setSatisfactionPoints(satisfactionPoints);
-    
+
     feedbackRepository.save(feedback);
     return feedback;
   }
@@ -68,11 +69,14 @@ public class FeedbackServiceImpl implements FeedbackService{
   @Override
   public Page<Feedback> getFeedbacksByReport(Long reportId, String username, PaginationRequest request) {
     Page<Feedback> feedbacks = null;
-    Report report = reportRepository.findById(reportId).orElseThrow(() -> new NotFoundException("Report is not found."));
-    PageRequest pageRequest = PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Direction.DESC , "createdAt"));
-    User sender = userRepository.findByUsername(username).orElseThrow(() -> new NotFoundException("User is not found."));
+    Report report = reportRepository.findById(reportId)
+        .orElseThrow(() -> new NotFoundException("Report is not found."));
+    PageRequest pageRequest = PageRequest.of(request.getPage(), request.getLimit(),
+        Sort.by(Direction.DESC, "createdAt"));
+    User sender = userRepository.findByUsername(username)
+        .orElseThrow(() -> new NotFoundException("User is not found."));
     String role = sender.getRoles().iterator().next().getName();
-    if(role.equals("ROLE_MODERATOR") || role.equals("ROLE_FORWARDER")) {
+    if (role.equals("ROLE_MODERATOR") || role.equals("ROLE_FORWARDER")) {
       feedbacks = feedbackRepository.findByReport(report.getId(), username, pageRequest);
     }
     return feedbacks;
@@ -81,10 +85,12 @@ public class FeedbackServiceImpl implements FeedbackService{
   @Override
   public Page<Feedback> getFeedbacksByUser(String username, PaginationRequest request) {
     Page<Feedback> feedbacks = null;
-    PageRequest pageRequest = PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Direction.DESC , "createdAt"));
-    User sender = userRepository.findByUsername(username).orElseThrow(() -> new NotFoundException("User is not found."));
+    PageRequest pageRequest = PageRequest.of(request.getPage(), request.getLimit(),
+        Sort.by(Direction.DESC, "createdAt"));
+    User sender = userRepository.findByUsername(username)
+        .orElseThrow(() -> new NotFoundException("User is not found."));
     String role = sender.getRoles().iterator().next().getName();
-    if(role.equals("ROLE_MODERATOR") || role.equals("ROLE_FORWARDER")) {
+    if (role.equals("ROLE_MODERATOR") || role.equals("ROLE_FORWARDER")) {
       feedbacks = feedbackRepository.findBySender(sender, pageRequest);
     }
     return feedbacks;
@@ -92,7 +98,7 @@ public class FeedbackServiceImpl implements FeedbackService{
 
   @Override
   public Page<Feedback> searchFeedbacks(PaginationRequest request, String search) {
- // Extract data from search string
+    // Extract data from search string
     FeedbackSpecificationsBuilder builder = new FeedbackSpecificationsBuilder();
     Pattern pattern = Pattern.compile(Constant.SEARCH_REGEX, Pattern.UNICODE_CHARACTER_CLASS);
     Matcher matcher = pattern.matcher(search + ",");
@@ -117,10 +123,11 @@ public class FeedbackServiceImpl implements FeedbackService{
 
   @Override
   public void removeFeedback(Long id, String username) {
-    Feedback feedback = feedbackRepository.findById(id).orElseThrow(() -> new NotFoundException("Feedback is not found."));
-    if(feedback.getSender().getUsername().equals(username)) {
+    Feedback feedback = feedbackRepository.findById(id)
+        .orElseThrow(() -> new NotFoundException("Feedback is not found."));
+    if (feedback.getSender().getUsername().equals(username)) {
       feedbackRepository.deleteById(id);
-    }else {
+    } else {
       throw new NotFoundException("Access denied.");
     }
   }

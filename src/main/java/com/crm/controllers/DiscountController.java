@@ -68,7 +68,7 @@ public class DiscountController {
     return ResponseEntity.ok(discountDto);
   }
 
-  @RequestMapping(method = RequestMethod.GET, params = {"code"})
+  @RequestMapping(method = RequestMethod.GET, params = { "code" })
   public ResponseEntity<?> getDiscountByCode(@RequestParam String code) {
     Discount discount = discountService.getDiscountByCode(code);
     DiscountDto discountDto = new DiscountDto();

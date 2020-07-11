@@ -49,9 +49,18 @@ public class OperatorServiceImpl implements OperatorService {
     String encoder = passwordEncoder.encode(request.getPassword());
     operator.setPassword(encoder);
 
-    Role userRole = roleRepository.findByName("ROLE_MODERATOR")
-        .orElseThrow(() -> new NotFoundException("Error: Role is not found"));
-    operator.getRoles().add(userRole);
+    String role = request.getRoles().iterator().next();
+    if (role.equalsIgnoreCase("ROLE_MODERATOR")) {
+      Role userRole = roleRepository.findByName("ROLE_MODERATOR")
+          .orElseThrow(() -> new NotFoundException("Error: Role is not found"));
+      operator.getRoles().add(userRole);
+    }else if (role.equalsIgnoreCase("ROLE_ADMIN")) {
+      Role userRole = roleRepository.findByName("ROLE_ADMIN")
+          .orElseThrow(() -> new NotFoundException("Error: Role is not found"));
+      operator.getRoles().add(userRole);
+    }else {
+      throw new NotFoundException("Error: Role is not found");
+    }
 
     operator.setPhone(request.getPhone());
 
@@ -62,7 +71,7 @@ public class OperatorServiceImpl implements OperatorService {
     operator.setAddress(request.getAddress());
     operator.setStatus(EnumUserStatus.ACTIVE.name());
     operator.setFullname(request.getFullname());
-    operator.setIsRoot(request.getIsRoot());
+    operator.setIsRoot(false);
 
     operatorRepository.save(operator);
 

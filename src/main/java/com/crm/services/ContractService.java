@@ -10,7 +10,7 @@ import com.crm.payload.request.ContractRequest;
 
 public interface ContractService {
 
-  Contract createContract(String username, ContractRequest request);
+  Contract createContract(Long id, String username, ContractRequest request);
   
   Contract getContractsByCombined(Long id, String username);
   

@@ -59,7 +59,7 @@ public class SupplierController {
 
     return ResponseEntity.ok(response);
   }
-  
+
   @PreAuthorize("hasRole('MODERATOR')")
   @GetMapping("/role")
   public ResponseEntity<?> getSuppliersByRole(@Valid PaginationRequest request) {
@@ -79,7 +79,7 @@ public class SupplierController {
 
     return ResponseEntity.ok(response);
   }
-  
+
   @PreAuthorize("hasRole('MODERATOR')")
   @GetMapping("/status")
   public ResponseEntity<?> getSuppliersByStatus(@Valid PaginationRequest request) {
@@ -107,7 +107,7 @@ public class SupplierController {
     SupplierDto supplierDto = SupplierMapper.toSupplierDto(supplier);
     return ResponseEntity.ok(supplierDto);
   }
-  
+
   @PreAuthorize("hasRole('MODERATOR') or hasRole('FORWARDER') or hasRole('MERCHANT')")
   @GetMapping("/{id}")
   public ResponseEntity<?> getSupplier(@PathVariable("id") Long id) {
@@ -124,7 +124,7 @@ public class SupplierController {
     SupplierDto supplierDto = SupplierMapper.toSupplierDto(supplier);
     return ResponseEntity.ok(supplierDto);
   }
-  
+
   @Transactional
   @PreAuthorize("hasRole('MODERATOR') or hasRole('FORWARDER') or hasRole('MERCHANT')")
   @RequestMapping(value = "/{id}", method = RequestMethod.PATCH, consumes = MediaType.APPLICATION_JSON_VALUE)

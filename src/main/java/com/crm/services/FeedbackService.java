@@ -10,7 +10,7 @@ import com.crm.payload.request.PaginationRequest;
 
 public interface FeedbackService {
   
-  Feedback createFeedback(String username, FeedbackRequest request);
+  Feedback createFeedback(Long id, String username, FeedbackRequest request);
   
   Page<Feedback> getFeedbacksByReport(Long report, String username, PaginationRequest request);
 

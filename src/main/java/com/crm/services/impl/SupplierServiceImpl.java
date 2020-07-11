@@ -64,4 +64,11 @@ public class SupplierServiceImpl implements SupplierService {
     return supplier;
   }
 
+  @Override
+  public Page<Supplier> getSuppliersByRole(PaginationRequest request) {
+    Page<Supplier> pages = supplierRepository
+        .findByRole(PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt")));
+    return pages;
+  }
+
 }

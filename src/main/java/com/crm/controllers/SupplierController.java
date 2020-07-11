@@ -61,6 +61,26 @@ public class SupplierController {
   }
   
   @PreAuthorize("hasRole('MODERATOR')")
+  @GetMapping("/role")
+  public ResponseEntity<?> getSuppliersByRole(@Valid PaginationRequest request) {
+    logger.info("Page request: {}", request.getPage());
+
+    Page<Supplier> pages = supplierService.getSuppliersByRole(request);
+    PaginationResponse<SupplierDto> response = new PaginationResponse<>();
+    response.setPageNumber(request.getPage());
+    response.setPageSize(request.getLimit());
+    response.setTotalElements(pages.getTotalElements());
+    response.setTotalPages(pages.getTotalPages());
+
+    List<Supplier> suppliers = pages.getContent();
+    List<SupplierDto> suppliersDto = new ArrayList<>();
+    suppliers.forEach(supplier -> suppliersDto.add(SupplierMapper.toSupplierDto(supplier)));
+    response.setContents(suppliersDto);
+
+    return ResponseEntity.ok(response);
+  }
+  
+  @PreAuthorize("hasRole('MODERATOR')")
   @GetMapping("/status")
   public ResponseEntity<?> getSuppliersByStatus(@Valid PaginationRequest request) {
     logger.info("Page request: {}", request.getPage());

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
@@ -46,12 +47,12 @@ public class Role {
   @Column(name = "id", updatable = false, nullable = false)
   private Long id;
 
-  @ManyToMany
-  @JoinTable(name = "user_role", joinColumns = @JoinColumn(name = "role_id"), inverseJoinColumns = @JoinColumn(name = "user_id"))
-  private Collection<User> users = new ArrayList<>();
-
   @Column(length = 20, unique = true)
   private String name;
+
+  @ManyToMany(cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REMOVE},fetch = FetchType.EAGER)
+  @JoinTable(name = "role_permission", joinColumns = @JoinColumn(name = "role_id"), inverseJoinColumns = @JoinColumn(name = "permission_id"))
+  private Collection<Permission> permissions = new ArrayList<>();
 
   @Column(name = "created_at", nullable = false, updatable = false)
   @Temporal(TemporalType.TIMESTAMP)
@@ -63,8 +64,8 @@ public class Role {
   @LastModifiedDate
   private Date updatedAt;
 
-  @ManyToMany(mappedBy = "roles", fetch = FetchType.EAGER)
-  private Collection<Permission> permissions = new ArrayList<>();
+  @ManyToMany(mappedBy = "roles")
+  private Collection<User> users = new ArrayList<>();
 
   // DO NOT DELETE CODE BELLOW
 

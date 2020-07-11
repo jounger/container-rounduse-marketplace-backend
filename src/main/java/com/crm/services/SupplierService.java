@@ -10,6 +10,8 @@ import com.crm.payload.request.PaginationRequest;
 public interface SupplierService {
 
   Page<Supplier> getSuppliers(PaginationRequest request);
+  
+  Page<Supplier> getSuppliersByRole(PaginationRequest request);
 
   Supplier getSupplier(String username);
 

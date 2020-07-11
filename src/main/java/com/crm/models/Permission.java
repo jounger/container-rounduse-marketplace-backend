@@ -10,8 +10,6 @@ import javax.persistence.EntityListeners;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
@@ -51,10 +49,6 @@ public class Permission {
   @Column(name = "description")
   private String description;
 
-  @ManyToMany
-  @JoinTable(name = "role_permission", joinColumns = @JoinColumn(name = "permission_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
-  private Collection<Role> roles = new ArrayList<>();
-
   @Column(name = "created_at", nullable = false, updatable = false)
   @Temporal(TemporalType.TIMESTAMP)
   @CreatedDate
@@ -64,6 +58,9 @@ public class Permission {
   @Temporal(TemporalType.TIMESTAMP)
   @LastModifiedDate
   private Date updatedAt;
+
+  @ManyToMany(mappedBy = "permissions")
+  private Collection<Role> roles = new ArrayList<>();
 
   // DO NOT DELETE CODE BELLOW
 

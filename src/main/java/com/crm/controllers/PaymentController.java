@@ -43,12 +43,12 @@ public class PaymentController {
   private PaymentService paymentService;
 
   @Transactional
-  @PostMapping("")
+  @PostMapping("/contract/{id}")
   @PreAuthorize("hasRole('MERCHANT') or hasRole('FORWARDER')")
-  public ResponseEntity<?> createPayment(@Valid @RequestBody PaymentRequest request) {
+  public ResponseEntity<?> createPayment(@PathVariable("id") Long id, @Valid @RequestBody PaymentRequest request) {
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
-    Payment payment = paymentService.createPayment(username, request);
+    Payment payment = paymentService.createPayment(id, username, request);
     PaymentDto paymentDto = PaymentMapper.toPaymentDto(payment);
     return ResponseEntity.ok(paymentDto);
   }

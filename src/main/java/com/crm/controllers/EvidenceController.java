@@ -43,12 +43,12 @@ public class EvidenceController {
   private EvidenceService evidenceService;
 
   @Transactional
-  @PostMapping("")
+  @PostMapping("/contract/{id}")
   @PreAuthorize("hasRole('MERCHANT') or hasRole('FORWARDER')")
-  public ResponseEntity<?> createEvidence(@Valid @RequestBody EvidenceRequest request) {
+  public ResponseEntity<?> createEvidence(@PathVariable("id") Long id ,@Valid @RequestBody EvidenceRequest request) {
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
-    Evidence evidence = evidenceService.createEvidence(username, request);
+    Evidence evidence = evidenceService.createEvidence(id, username, request);
     EvidenceDto evidenceDto = EvidenceMapper.toEvidenceDto(evidence);
     return ResponseEntity.ok(evidenceDto);
   }

@@ -12,6 +12,8 @@ public interface ContractService {
 
   Contract createContract(String username, ContractRequest request);
   
+  Contract getContractsByCombined(Long id, String username);
+  
   Page<Contract> getContractsByUser(String username, PaginationRequest request);
 
   Page<Contract> searchContracts(PaginationRequest request, String search);

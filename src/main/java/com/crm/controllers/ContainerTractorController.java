@@ -62,6 +62,30 @@ public class ContainerTractorController {
     return ResponseEntity.ok(response);
   }
 
+  @GetMapping("/forwarder")
+  @PreAuthorize("hasRole('FORWARDER') or hasRole('MERCHANT')")
+  public ResponseEntity<?> getContainerTractorsByForwarder(@Valid PaginationRequest request) {
+    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
+        .getPrincipal();
+    Long userId = userDetails.getId();
+
+    Page<ContainerTractor> pages = containerTractorService.getContainerTractorsByForwarder(userId, request);
+
+    PaginationResponse<ContainerTractorDto> response = new PaginationResponse<>();
+    response.setPageNumber(request.getPage());
+    response.setPageSize(request.getLimit());
+    response.setTotalElements(pages.getTotalElements());
+    response.setTotalPages(pages.getTotalPages());
+
+    List<ContainerTractor> containerTractors = pages.getContent();
+    List<ContainerTractorDto> containerTractorDto = new ArrayList<>();
+    containerTractors.forEach(
+        containerTractor -> containerTractorDto.add(ContainerTractorMapper.toContainerTractorDto(containerTractor)));
+    response.setContents(containerTractorDto);
+
+    return ResponseEntity.ok(response);
+  }
+
   @GetMapping("/{id}")
   @PreAuthorize("hasRole('FORWARDER') or hasRole('MERCHANT')")
   public ResponseEntity<?> getContainerTractor(@PathVariable Long id) {

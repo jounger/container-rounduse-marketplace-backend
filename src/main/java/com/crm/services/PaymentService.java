@@ -10,7 +10,7 @@ import com.crm.payload.request.PaymentRequest;
 
 public interface PaymentService {
   
-  Payment createPayment(String username, PaymentRequest request);
+  Payment createPayment(Long id, String username, PaymentRequest request);
   
   Page<Payment> getPaymentsByUser(String username, PaginationRequest request);
   

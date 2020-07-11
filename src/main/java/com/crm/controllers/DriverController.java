@@ -46,11 +46,15 @@ public class DriverController {
   @Autowired
   private DriverService driverService;
 
-  @GetMapping("/forwarder/{id}")
+  @GetMapping("/forwarder")
   @PreAuthorize("hasRole('FORWARDER')")
-  public ResponseEntity<?> getDriversByForwarder(@PathVariable Long id, @Valid PaginationRequest request) {
+  public ResponseEntity<?> getDriversByForwarder(@Valid PaginationRequest request) {
 
-    Page<Driver> pages = driverService.getDriversByForwarder(id, request);
+    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
+        .getPrincipal();
+    Long userId = userDetails.getId();
+
+    Page<Driver> pages = driverService.getDriversByForwarder(userId, request);
     PaginationResponse<DriverDto> response = new PaginationResponse<>();
     response.setPageNumber(request.getPage());
     response.setPageSize(request.getLimit());
@@ -91,7 +95,8 @@ public class DriverController {
   @PreAuthorize("hasRole('FORWARDER')")
   public ResponseEntity<?> createDriver(@Valid @RequestBody DriverRequest request) {
     logger.info("Driver request: {}", request);
-    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
+        .getPrincipal();
     Long userId = userDetails.getId();
     Driver driver = driverService.createDriver(userId, request);
     DriverDto driverDto = DriverMapper.toDriverDto(driver);
@@ -102,7 +107,12 @@ public class DriverController {
   @PutMapping("")
   @PreAuthorize("hasRole('FORWARDER') or hasRole('DRIVER')")
   public ResponseEntity<?> updateDriver(@Valid @RequestBody DriverRequest request) {
-    Driver driver = driverService.updateDriver(request);
+
+    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
+        .getPrincipal();
+    Long userId = userDetails.getId();
+
+    Driver driver = driverService.updateDriver(userId, request);
     DriverDto driverDto = DriverMapper.toDriverDto(driver);
     return ResponseEntity.ok(driverDto);
   }
@@ -111,7 +121,12 @@ public class DriverController {
   @PreAuthorize("hasRole('FORWARDER') or hasRole('DRIVER')")
   @RequestMapping(value = "/{id}", method = RequestMethod.PATCH, consumes = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<?> editDriver(@PathVariable("id") Long id, @RequestBody Map<String, Object> updates) {
-    Driver driver = driverService.editDriver(id, updates);
+
+    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
+        .getPrincipal();
+    Long userId = userDetails.getId();
+
+    Driver driver = driverService.editDriver(id, userId, updates);
     DriverDto driverDto = DriverMapper.toDriverDto(driver);
     return ResponseEntity.ok(driverDto);
   }
@@ -120,7 +135,12 @@ public class DriverController {
   @DeleteMapping("/{id}")
   @PreAuthorize("hasRole('FORWARDER')")
   public ResponseEntity<?> removeDriver(@PathVariable Long id) {
-    driverService.removeDriver(id);
+
+    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
+        .getPrincipal();
+    Long userId = userDetails.getId();
+
+    driverService.removeDriver(id, userId);
     return ResponseEntity.ok(new MessageResponse("Driver has remove successfully"));
   }
 }

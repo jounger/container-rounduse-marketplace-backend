@@ -14,6 +14,8 @@ public interface CombinedService {
 
   Combined getCombined(Long id);
 
+  Page<Combined> getCombinedsByBiddingDocument(Long id, Long userId, PaginationRequest request);
+
   Page<Combined> getCombinedsByUser(Long id, PaginationRequest request);
 
   Page<Combined> getCombineds(PaginationRequest request);

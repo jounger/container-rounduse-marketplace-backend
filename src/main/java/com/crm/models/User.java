@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
@@ -13,6 +14,8 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
@@ -83,6 +86,10 @@ public class User {
   @NotBlank
   @Size(min = 2, max = 20)
   private String status;
+  
+  @ManyToMany(cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REMOVE},fetch = FetchType.EAGER)
+  @JoinTable(name = "user_role", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
+  private Collection<Role> roles = new ArrayList<>();
 
   @Column(name = "created_at", nullable = false, updatable = false)
   @Temporal(TemporalType.TIMESTAMP)
@@ -97,43 +104,40 @@ public class User {
   @OneToMany(mappedBy = "recipient")
   private Collection<Notification> notifications = new ArrayList<>();
 
-  @ManyToMany(mappedBy = "users", fetch = FetchType.EAGER)
-  private Collection<Role> roles = new ArrayList<>();
-
   @OneToMany(mappedBy = "sender")
   private Collection<Feedback> feedbacks = new ArrayList<>();
 
   // DO NOT DELETE CODE BELLOW
 
-  @Override
-  public int hashCode() {
-    final int prime = 31;
-    int result = 1;
-    result = prime * result + ((id == null) ? 0 : id.hashCode());
-    result = prime * result + ((username == null) ? 0 : username.hashCode());
-    return result;
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (this == obj)
-      return true;
-    if (obj == null)
-      return false;
-    if (getClass() != obj.getClass())
-      return false;
-    User other = (User) obj;
-    if (id == null) {
-      if (other.id != null)
-        return false;
-    } else if (!id.equals(other.id))
-      return false;
-    if (username == null) {
-      if (other.username != null)
-        return false;
-    } else if (!username.equals(other.username))
-      return false;
-    return true;
-  }
+//  @Override
+//  public int hashCode() {
+//    final int prime = 31;
+//    int result = 1;
+//    result = prime * result + ((id == null) ? 0 : id.hashCode());
+//    result = prime * result + ((username == null) ? 0 : username.hashCode());
+//    return result;
+//  }
+//
+//  @Override
+//  public boolean equals(Object obj) {
+//    if (this == obj)
+//      return true;
+//    if (obj == null)
+//      return false;
+//    if (getClass() != obj.getClass())
+//      return false;
+//    User other = (User) obj;
+//    if (id == null) {
+//      if (other.id != null)
+//        return false;
+//    } else if (!id.equals(other.id))
+//      return false;
+//    if (username == null) {
+//      if (other.username != null)
+//        return false;
+//    } else if (!username.equals(other.username))
+//      return false;
+//    return true;
+//  }
 
 }

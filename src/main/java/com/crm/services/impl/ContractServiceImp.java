@@ -67,6 +67,21 @@ public class ContractServiceImp implements ContractService {
   }
 
   @Override
+  public Contract getContractsByCombined(Long id, String username) {
+    Combined combined = combinedRepository.findById(id)
+        .orElseThrow(() -> new NotFoundException("Combined is not found."));
+    Bid bid = combined.getBid();
+    BiddingDocument biddingDocument = bid.getBiddingDocument();
+    Supplier offeree = biddingDocument.getOfferee();
+    Contract contract = null;
+    if (username.equals(offeree.getUsername()) || username.equals(bid.getBidder().getUsername())) {
+      contract = contractRepository.findByCombined(id, username)
+          .orElseThrow(() -> new NotFoundException("Contract is not found."));
+    }
+    return contract;
+  }
+
+  @Override
   public Page<Contract> getContractsByUser(String username, PaginationRequest request) {
     PageRequest page = PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt"));
     Page<Contract> contracts = contractRepository.findByUser(username, page);
@@ -103,10 +118,6 @@ public class ContractServiceImp implements ContractService {
     Supplier offeree = biddingDocument.getOfferee();
 
     if (username.equals(offeree.getUsername())) {
-      String fines = (String) updates.get("finesAgainstContractViolations");
-      if (!Tool.isEqual(contract.getFinesAgainstContractViolations(), fines)) {
-        contract.setFinesAgainstContractViolations(Integer.valueOf(fines));
-      }
       String requiredString = (String) updates.get("required");
       if (!Tool.isEqual(contract.getRequired(), requiredString)) {
         contract.setRequired(Boolean.valueOf(requiredString));

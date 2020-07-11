@@ -16,6 +16,8 @@ public interface OutboundService {
 
   Page<Outbound> getOutboundsByMerchant(Long userId, PaginationRequest request);
 
+  Page<Outbound> searchOutbounds(PaginationRequest request, String search);
+
   Outbound createOutbound(Long userId, OutboundRequest request);
 
   Outbound updateOutbound(Long userId, OutboundRequest request);

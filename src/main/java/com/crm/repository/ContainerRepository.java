@@ -1,6 +1,7 @@
 package com.crm.repository;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -56,5 +57,13 @@ public interface ContainerRepository extends JpaRepository<Container, Long> {
 
   @Query(value = "SELECT c FROM Container c LEFT JOIN c.bids b WHERE b.id = :id AND c.status = :status")
   Page<Container> findContainersByBid(@Param("id") Long id, @Param("status") String status, Pageable pageable);
+
+  @Query(value = "SELECT c FROM Container c LEFT JOIN c.trailer t WHERE t.id = :id AND (c.status = :statusCombined OR c.status = :statusBidding)")
+  Collection<Container> findContainersByTrailer(@Param("id") Long id, @Param("statusCombined") String statusCombined,
+      @Param("statusBidding") String statusBidding);
+
+  @Query(value = "SELECT c FROM Container c LEFT JOIN c.tractor t WHERE t.id = :id AND (c.status = :statusCombined OR c.status = :statusBidding)")
+  Collection<Container> findContainersByTractor(@Param("id") Long id, @Param("statusCombined") String statusCombined,
+      @Param("statusBidding") String statusBidding);
 
 }

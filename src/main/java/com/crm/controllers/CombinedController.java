@@ -16,6 +16,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -39,7 +40,6 @@ public class CombinedController {
   @Autowired
   private CombinedService combinedService;
   
-  /*
   @Transactional
   @PreAuthorize("hasRole('FORWARDER')")
   @PostMapping("")
@@ -48,7 +48,7 @@ public class CombinedController {
      CombinedDto combinedDto = CombinedMapper.toCombinedDto(combined);
      return ResponseEntity.ok(combinedDto);
   }
-  */
+  
 
   @PreAuthorize("hasRole('MERCHANT') or hasRole('FORWARDER')")
   @GetMapping("/{id}")
@@ -66,6 +66,30 @@ public class CombinedController {
     Long id = userDetails.getId();
     
     Page<Combined> pages = combinedService.getCombinedsByUser(id, request);
+    
+    PaginationResponse<CombinedDto> response = new PaginationResponse<>();
+    response.setPageNumber(request.getPage());
+    response.setPageSize(request.getLimit());
+    response.setTotalElements(pages.getTotalElements());
+    response.setTotalPages(pages.getTotalPages());
+
+    List<Combined> combineds = pages.getContent();
+    List<CombinedDto> combinedsDto = new ArrayList<>();
+    combineds.forEach(
+        combined -> combinedsDto.add(CombinedMapper.toCombinedDto(combined)));
+    response.setContents(combinedsDto);
+
+    return ResponseEntity.ok(response);
+  }
+  
+  @PreAuthorize("hasRole('MERCHANT') or hasRole('FORWARDER')")
+  @GetMapping("/bidding-document/{id}")
+  public ResponseEntity<?> getCombinedsByBiddingDocument(@PathVariable("id") Long id, @Valid PaginationRequest request) {
+
+    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    Long userId = userDetails.getId();
+    
+    Page<Combined> pages = combinedService.getCombinedsByBiddingDocument(id, userId, request);
     
     PaginationResponse<CombinedDto> response = new PaginationResponse<>();
     response.setPageNumber(request.getPage());

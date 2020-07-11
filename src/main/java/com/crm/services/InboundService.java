@@ -20,6 +20,8 @@ public interface InboundService {
 
   Page<Inbound> getInboundsForwarder(Long id, PaginationRequest request);
 
+  Page<Inbound> searchInbounds(PaginationRequest request, String search);
+
   Inbound createInbound(Long id, InboundRequest request);
 
   Inbound updateInbound(Long id, InboundRequest request);

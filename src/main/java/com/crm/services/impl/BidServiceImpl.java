@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 import com.crm.common.Constant;
 import com.crm.enums.EnumBidStatus;
 import com.crm.enums.EnumBiddingStatus;
-import com.crm.enums.EnumCombinedStatus;
 import com.crm.enums.EnumSupplyStatus;
 import com.crm.exception.DuplicateRecordException;
 import com.crm.exception.InternalException;
@@ -23,7 +22,6 @@ import com.crm.exception.NotFoundException;
 import com.crm.models.Bid;
 import com.crm.models.BiddingDocument;
 import com.crm.models.Booking;
-import com.crm.models.Combined;
 import com.crm.models.Container;
 import com.crm.models.Forwarder;
 import com.crm.models.Outbound;
@@ -33,7 +31,6 @@ import com.crm.payload.request.BidRequest;
 import com.crm.payload.request.PaginationRequest;
 import com.crm.repository.BidRepository;
 import com.crm.repository.BiddingDocumentRepository;
-import com.crm.repository.CombinedRepository;
 import com.crm.repository.ContainerRepository;
 import com.crm.repository.ForwarderRepository;
 import com.crm.repository.OutboundRepository;
@@ -54,9 +51,6 @@ public class BidServiceImpl implements BidService {
 
   @Autowired
   private ContainerRepository containerRepository;
-
-  @Autowired
-  private CombinedRepository combinedRepository;
 
   @Autowired
   private OutboundRepository outboundRepository;
@@ -359,10 +353,6 @@ public class BidServiceImpl implements BidService {
           container.setStatus(EnumSupplyStatus.COMBINED.name());
           containerRepository.save(container);
         });
-        Combined combined = new Combined();
-        combined.setBid(bid);
-        combined.setStatus(EnumCombinedStatus.INFO_RECEIVED.name());
-        combinedRepository.save(combined);
       }
 
       if (bid.getStatus().equalsIgnoreCase(EnumBidStatus.CANCELED.name())

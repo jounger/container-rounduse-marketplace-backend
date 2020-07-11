@@ -47,6 +47,13 @@ public class CombinedServiceImpl implements CombinedService {
   }
 
   @Override
+  public Page<Combined> getCombinedsByBiddingDocument(Long id, Long userId, PaginationRequest request) {
+    PageRequest page = PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt"));
+    Page<Combined> combines = combinedRepository.findByBiddingDocument(id, userId, page);
+    return combines;
+  }
+
+  @Override
   public Combined getCombined(Long id) {
     Combined combined = combinedRepository.findById(id)
         .orElseThrow(() -> new NotFoundException("Combined is not found."));

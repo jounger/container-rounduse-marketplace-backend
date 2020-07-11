@@ -42,11 +42,10 @@ public class EvidenceSeriviceImpl implements EvidenceService {
   private SupplierRepository supplierRepository;
 
   @Override
-  public Evidence createEvidence(String username, EvidenceRequest request) {
+  public Evidence createEvidence(Long id, String username, EvidenceRequest request) {
     Evidence evidence = new Evidence();
 
-    Long contractId = request.getContract();
-    Contract contract = contractRepository.findById(contractId)
+    Contract contract = contractRepository.findById(id)
         .orElseThrow(() -> new NotFoundException("Combined is not found."));
     evidence.setContract(contract);
 

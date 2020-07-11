@@ -59,6 +59,26 @@ public class BillOfLadingController {
     return ResponseEntity.ok(response);
   }
 
+  @GetMapping("/filter")
+  @PreAuthorize("hasRole('FORWARDER') or hasRole('MERCHANT')")
+  public ResponseEntity<?> searchBillOfLadings(@Valid PaginationRequest request,
+      @RequestParam(value = "search") String search) {
+
+    Page<BillOfLading> pages = billOfLadingService.searchBillOfLadings(request, search);
+    PaginationResponse<BillOfLadingDto> response = new PaginationResponse<>();
+    response.setPageNumber(request.getPage());
+    response.setPageSize(request.getLimit());
+    response.setTotalElements(pages.getTotalElements());
+    response.setTotalPages(pages.getTotalPages());
+
+    List<BillOfLading> billOfLadings = pages.getContent();
+    List<BillOfLadingDto> BillOfLadingsDto = new ArrayList<>();
+    billOfLadings.forEach(billOfLading -> BillOfLadingsDto.add(BillOfLadingMapper.toBillOfLadingDto(billOfLading)));
+    response.setContents(BillOfLadingsDto);
+
+    return ResponseEntity.ok(response);
+  }
+
   @GetMapping("/{id}")
   @PreAuthorize("hasRole('FORWARDER') or hasRole('MERCHANT')")
   public ResponseEntity<?> getBillOfLading(@PathVariable Long id) {
@@ -81,11 +101,11 @@ public class BillOfLadingController {
   @PutMapping("")
   @PreAuthorize("hasRole('FORWARDER')")
   public ResponseEntity<?> updateBillOfLading(@Valid @RequestBody BillOfLadingRequest request) {
-    
+
     UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
         .getPrincipal();
     Long userId = userDetails.getId();
-    
+
     BillOfLading billOfLading = billOfLadingService.updateBillOfLading(userId, request);
     BillOfLadingDto billOfLadingDto = BillOfLadingMapper.toBillOfLadingDto(billOfLading);
     return ResponseEntity.ok(billOfLadingDto);
@@ -94,11 +114,11 @@ public class BillOfLadingController {
   @RequestMapping(value = "/{id}", method = RequestMethod.PATCH, consumes = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("hasRole('FORWARDER')")
   public ResponseEntity<?> editBillOfLading(@RequestBody Map<String, Object> updates, @PathVariable("id") Long id) {
-    
+
     UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
         .getPrincipal();
     Long userId = userDetails.getId();
-    
+
     BillOfLading billOfLading = billOfLadingService.editBillOfLading(updates, id, userId);
     BillOfLadingDto billOfLadingDto = new BillOfLadingDto();
     billOfLadingDto = BillOfLadingMapper.toBillOfLadingDto(billOfLading);

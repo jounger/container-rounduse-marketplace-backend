@@ -71,8 +71,8 @@ public interface ContainerRepository extends JpaRepository<Container, Long> {
       + "AND ((c.billOfLading.freeTime > :freeTime AND c.billOfLading.inbound.pickupTime < :freeTime) "
       + "OR (c.billOfLading.freeTime > :pickupTime AND c.billOfLading.inbound.pickupTime < :pickupTime) "
       + "OR (c.billOfLading.freeTime < :freeTime AND c.billOfLading.inbound.pickupTime > :pickupTime) "
-      + "OR (c.billOfLading.freeTime = :freeTime) "
-      + "OR (c.billOfLading.inbound.pickupTime = :pickupTime))")
+      + "OR (c.billOfLading.freeTime = :freeTime) " + "OR (c.billOfLading.inbound.pickupTime = :pickupTime) "
+      + "OR (c.billOfLading.inbound.pickupTime = :freeTime) " + "OR (c.billOfLading.freeTime = :pickupTime))")
   boolean findByContainerNumber(@Param("containerNumber") String containerNumber,
       @Param("pickupTime") LocalDateTime pickupTime, @Param("freeTime") LocalDateTime freeTime);
 
@@ -81,8 +81,8 @@ public interface ContainerRepository extends JpaRepository<Container, Long> {
       + "AND ((c.billOfLading.freeTime > :freeTime AND c.billOfLading.inbound.pickupTime < :freeTime) "
       + "OR (c.billOfLading.freeTime > :pickupTime AND c.billOfLading.inbound.pickupTime < :pickupTime) "
       + "OR (c.billOfLading.freeTime < :freeTime AND c.billOfLading.inbound.pickupTime > :pickupTime) "
-      + "OR (c.billOfLading.freeTime = :freeTime) "
-      + "OR (c.billOfLading.inbound.pickupTime = :pickupTime)) "
+      + "OR (c.billOfLading.freeTime = :freeTime) " + "OR (c.billOfLading.inbound.pickupTime = :pickupTime) "
+      + "OR (c.billOfLading.inbound.pickupTime = :freeTime) " + "OR (c.billOfLading.freeTime = :pickupTime)) "
       + "AND c.billOfLading.id != :id")
   boolean findByContainerNumber(@Param("id") Long id, @Param("containerNumber") String containerNumber,
       @Param("pickupTime") LocalDateTime pickupTime, @Param("freeTime") LocalDateTime freeTime);

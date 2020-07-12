@@ -1,5 +1,7 @@
 package com.crm.repository;
 
+import java.util.Optional;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -13,17 +15,20 @@ import com.crm.models.BiddingDocument;
 public interface BiddingDocumentRepository extends JpaRepository<BiddingDocument, Long> {
 
   @Query(value = "FROM BiddingDocument bd WHERE bd.offeree.id = :id")
-  Page<BiddingDocument> findBiddingDocumentByMerchant(@Param("id") Long merchantId, Pageable pageable);
+  Page<BiddingDocument> findByMerchant(@Param("id") Long merchantId, Pageable pageable);
 
-  @Query(value = "SELECT bd FROM BiddingDocument bd JOIN bd.bids b WHERE b.bidder.id = :id")
-  Page<BiddingDocument> findBiddingDocumentByForwarder(@Param("id") Long forwarder, Pageable pageable);
+  @Query(value = "SELECT bd FROM BiddingDocument bd LEFT JOIN bd.bids b WHERE b.bidder.id = :id")
+  Page<BiddingDocument> findByForwarder(@Param("id") Long forwarder, Pageable pageable);
 
   @Query(value = "FROM BiddingDocument bd WHERE bd.offeree.id = :id AND bd.status = :status")
-  Page<BiddingDocument> findBiddingDocumentByMerchant(@Param("id") Long merchantId, @Param("status") String status,
+  Page<BiddingDocument> findByMerchant(@Param("id") Long merchantId, @Param("status") String status,
       Pageable pageable);
 
-  @Query(value = "SELECT bd FROM BiddingDocument bd JOIN bd.bids b WHERE b.bidder.id = :id AND bd.status = :status")
-  Page<BiddingDocument> findBiddingDocumentByForwarder(@Param("id") Long forwarderId, @Param("status") String status,
+  @Query(value = "SELECT bd FROM BiddingDocument bd LEFT JOIN bd.bids b WHERE b.bidder.id = :id AND bd.status = :status")
+  Page<BiddingDocument> findByForwarder(@Param("id") Long forwarderId, @Param("status") String status,
       Pageable pageable);
+  
+  @Query(value = "FROM BiddingDocument bd LEFT JOIN bd.bids b WHERE bd.offeree.username = :username AND b.id = :id")
+  Optional<BiddingDocument> findByBid(@Param("id") Long bid, @Param("username") String username);
 
 }

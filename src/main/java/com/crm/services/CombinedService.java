@@ -22,7 +22,7 @@ public interface CombinedService {
 
   Combined updateCombined(CombinedRequest request);
 
-  Combined editCombined(Long id, Map<String, Object> updates);
+  Combined editCombined(Long id, String username, Map<String, Object> updates);
 
   void removeCombined(Long id);
 }

@@ -151,7 +151,10 @@ public class CombinedController {
   @PreAuthorize("hasRole('FORWARDER') or hasRole('MERCHANT') or hasRole('DRIVER')")
   @RequestMapping(value = "/{id}", method = RequestMethod.PATCH, consumes = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<?> editCombined(@PathVariable("id") Long id, @RequestBody Map<String, Object> updates) {
-    Combined Combined = combinedService.editCombined(id, updates);
+    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
+        .getPrincipal();
+    String username = userDetails.getUsername();
+    Combined Combined = combinedService.editCombined(id, username, updates);
     CombinedDto CombinedDto = CombinedMapper.toCombinedDto(Combined);
     return ResponseEntity.ok(CombinedDto);
   }

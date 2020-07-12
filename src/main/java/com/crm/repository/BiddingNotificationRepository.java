@@ -13,16 +13,16 @@ import com.crm.models.BiddingNotification;
 public interface BiddingNotificationRepository extends JpaRepository<BiddingNotification, Long> {
 
   @Query(value = "FROM BiddingNotification bn WHERE bn.recipient.id = :id")
-  Page<BiddingNotification> findBiddingNotificationsByUser(@Param("id") Long id, Pageable pageable);
+  Page<BiddingNotification> findByUser(@Param("id") Long id, Pageable pageable);
 
   @Query(value = "FROM BiddingNotification bn WHERE bn.recipient.username = :username")
-  Page<BiddingNotification> findBiddingNotificationsByUser(@Param("username") String username, Pageable pageable);
+  Page<BiddingNotification> findByUser(@Param("username") String username, Pageable pageable);
 
   @Query(value = "FROM BiddingNotification bn WHERE bn.recipient.id = :id AND bn.type = :status")
-  Page<BiddingNotification> findBiddingNotificationsByUserAndStatus(@Param("id") Long id,
+  Page<BiddingNotification> findByUserAndStatus(@Param("id") Long id,
       @Param("status") String status, Pageable pageable);
 
   @Query(value = "FROM BiddingNotification bn WHERE bn.recipient.username = :username AND bn.type = :status")
-  Page<BiddingNotification> findBiddingNotificationsByUserAndStatus(@Param("username") String username,
+  Page<BiddingNotification> findByUserAndStatus(@Param("username") String username,
       @Param("status") String status, Pageable pageable);
 }

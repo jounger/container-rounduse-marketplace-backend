@@ -13,7 +13,7 @@ public class ContractDto {
 
   private Long Id;
 
-  private Integer finesAgainstContractViolation;
+  private Double finesAgainstContractViolation;
 
   private Boolean required;
 

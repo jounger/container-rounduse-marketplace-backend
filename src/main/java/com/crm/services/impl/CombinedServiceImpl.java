@@ -9,14 +9,17 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import com.crm.common.Tool;
 import com.crm.enums.EnumBidStatus;
 import com.crm.enums.EnumCombinedStatus;
+import com.crm.enums.EnumSupplyStatus;
 import com.crm.exception.InternalException;
 import com.crm.exception.NotFoundException;
 import com.crm.models.Bid;
 import com.crm.models.BiddingDocument;
 import com.crm.models.Combined;
 import com.crm.models.Contract;
+import com.crm.models.Outbound;
 import com.crm.models.Supplier;
 import com.crm.models.User;
 import com.crm.payload.request.CombinedRequest;
@@ -24,10 +27,11 @@ import com.crm.payload.request.ContractRequest;
 import com.crm.payload.request.PaginationRequest;
 import com.crm.repository.BidRepository;
 import com.crm.repository.CombinedRepository;
+import com.crm.repository.ContainerRepository;
+import com.crm.repository.OutboundRepository;
 import com.crm.repository.UserRepository;
 import com.crm.services.BidService;
 import com.crm.services.CombinedService;
-import com.crm.services.ContractService;
 
 @Service
 public class CombinedServiceImpl implements CombinedService {
@@ -40,9 +44,15 @@ public class CombinedServiceImpl implements CombinedService {
 
   @Autowired
   private UserRepository userRepository;
-  
+
   @Autowired
   private BidService bidService;
+
+  @Autowired
+  private ContainerRepository containerRepository;
+
+  @Autowired
+  private OutboundRepository outboundRepository;
 
   @Override
   public Combined createCombined(Long bidId, String username, CombinedRequest request) {
@@ -60,8 +70,11 @@ public class CombinedServiceImpl implements CombinedService {
     Supplier offeree = biddingDocument.getOfferee();
     ContractRequest contracRequest = request.getContract();
     Contract contract = new Contract();
-    if (username.equals(offeree.getUsername())) {
-      Integer fines = contracRequest.getFinesAgainstContractViolations();
+    Boolean required = contracRequest.getRequired();
+    contract.setRequired(required);
+    contract.setFinesAgainstContractViolations(0D);
+    if (username.equals(offeree.getUsername()) && required == true) {
+      Double fines = contracRequest.getFinesAgainstContractViolations();
       if (fines > 0) {
         contract.setFinesAgainstContractViolations(fines);
       } else {
@@ -70,10 +83,9 @@ public class CombinedServiceImpl implements CombinedService {
     } else {
       throw new NotFoundException("You must be Offeree to create Contract.");
     }
-    Boolean required = contracRequest.getRequired();
-    contract.setRequired(required);
+
     combined.setContract(contract);
-    
+
     combinedRepository.save(combined);
 
     return combined;
@@ -136,20 +148,37 @@ public class CombinedServiceImpl implements CombinedService {
   }
 
   @Override
-  public Combined editCombined(Long id, Map<String, Object> updates) {
+  public Combined editCombined(Long id, String username, Map<String, Object> updates) {
     Combined combined = combinedRepository.findById(id)
         .orElseThrow(() -> new NotFoundException("Combined is not found."));
 
+    Bid bid = combined.getBid();
+    BiddingDocument biddingDocument = bid.getBiddingDocument();
     String statusString = (String) updates.get("status");
-    if (statusString != null && !statusString.isEmpty()) {
-      EnumCombinedStatus status = EnumCombinedStatus.findByName(statusString);
-      if (status != null) {
-        combined.setStatus(status.name());
-      } else {
-        throw new NotFoundException("Status is not found.");
+    EnumCombinedStatus status = EnumCombinedStatus.findByName(statusString);
+    if (!Tool.isBlank(statusString) && status != null) {
+      combined.setStatus(status.name());
+      if (status.equals(EnumCombinedStatus.CANCELED)) {
+        Map<String, Object> updatesBid = new HashMap<>();
+        updatesBid.put("status", EnumBidStatus.REJECTED.name());
+        bidService.editBid(bid.getId(), username, updatesBid);
       }
+      
+      if (status.equals(EnumCombinedStatus.DELIVERED)) {
+        bid.getContainers().parallelStream().forEach(container -> {
+          container.setStatus(EnumSupplyStatus.DELIVERED.name());
+          containerRepository.save(container);
+        });
+        if (bidRepository.isAllCombinedByBiddingDocument(biddingDocument.getId())) {
+          Outbound outbound = biddingDocument.getOutbound();
+          outbound.setStatus(EnumSupplyStatus.DELIVERED.name());
+          outboundRepository.save(outbound);
+        }
+      }
+    } else {
+      throw new NotFoundException("Status is not found.");
     }
-
+    combinedRepository.save(combined);
     return combined;
   }
 

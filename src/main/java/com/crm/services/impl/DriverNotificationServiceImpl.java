@@ -76,10 +76,10 @@ public class DriverNotificationServiceImpl implements DriverNotificationService 
     String status = request.getStatus();
     Page<DriverNotification> driverNotifications = null;
     if (status != null && !status.isEmpty()) {
-      driverNotifications = driverNotificationRepository.findDriverNotificationsByUserAndStatus(recipient, status,
+      driverNotifications = driverNotificationRepository.findByUserAndStatus(recipient, status,
           PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt")));
     } else {
-      driverNotifications = driverNotificationRepository.findDriverNotificationsByUser(recipient,
+      driverNotifications = driverNotificationRepository.findByUser(recipient,
           PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt")));
     }
     return driverNotifications;
@@ -90,10 +90,10 @@ public class DriverNotificationServiceImpl implements DriverNotificationService 
     String status = request.getStatus();
     Page<DriverNotification> driverNotifications = null;
     if (status != null && !status.isEmpty()) {
-      driverNotifications = driverNotificationRepository.findDriverNotificationsByUserAndStatus(recipient, status,
+      driverNotifications = driverNotificationRepository.findByUserAndStatus(recipient, status,
           PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt")));
     } else {
-      driverNotifications = driverNotificationRepository.findDriverNotificationsByUser(recipient,
+      driverNotifications = driverNotificationRepository.findByUser(recipient,
           PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt")));
     }
     return driverNotifications;

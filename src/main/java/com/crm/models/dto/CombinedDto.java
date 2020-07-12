@@ -12,4 +12,6 @@ public class CombinedDto {
   private BidDto bidDto;
   
   private String status;
+  
+  private ContractDto contract;
 }

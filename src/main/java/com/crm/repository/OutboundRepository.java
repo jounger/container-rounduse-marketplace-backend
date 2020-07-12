@@ -1,7 +1,5 @@
 package com.crm.repository;
 
-import java.util.Optional;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -15,12 +13,7 @@ import com.crm.models.Outbound;
 @Repository
 public interface OutboundRepository extends JpaRepository<Outbound, Long>, JpaSpecificationExecutor<Outbound> {
 
-  boolean existsById(Long id);
-
-  Optional<Outbound> findById(Long id);
-
-  @Query(value = "SELECT o FROM Outbound o WHERE o.status = :status")
-  Page<Outbound> findAll(@Param("status") String status, Pageable pageable);
+  Page<Outbound> findByStatus(String status, Pageable pageable);
 
   @Query(value = "SELECT o FROM Outbound o WHERE o.merchant.id = :id")
   Page<Outbound> findByMerchantId(@Param("id") Long id, Pageable pageable);

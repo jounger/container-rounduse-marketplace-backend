@@ -41,7 +41,7 @@ public class BiddingWebSocketServiceImpl implements BiddingWebSocketService {
         .toShippingLineNotificationDto(notification, bid);
     logger.info("Send to: {}", shippingLineNotificationDto.getRecipient());
     logger.info("shippingLineNotification: {}", shippingLineNotificationDto.toString());
-    messagingTemplate.convertAndSendToUser(shippingLineNotificationDto.getRecipient(), Constant.BIDDING_NOTIFICATION,
+    messagingTemplate.convertAndSendToUser(shippingLineNotificationDto.getRecipient(), Constant.SHIPPING_LINE_NOTIFICATION,
         shippingLineNotificationDto);
   }
 
@@ -50,7 +50,7 @@ public class BiddingWebSocketServiceImpl implements BiddingWebSocketService {
     DriverNotificationDto driverNotificationDto = DriverNotificationMapper.toDriverNotificationDto(notification);
     logger.info("Send to: {}", driverNotificationDto.getRecipient());
     logger.info("shippingLineNotification: {}", driverNotificationDto.toString());
-    messagingTemplate.convertAndSendToUser(driverNotificationDto.getRecipient(), Constant.BIDDING_NOTIFICATION,
+    messagingTemplate.convertAndSendToUser(driverNotificationDto.getRecipient(), Constant.DRIVER_NOTIFICATION,
         driverNotificationDto);
   }
 }

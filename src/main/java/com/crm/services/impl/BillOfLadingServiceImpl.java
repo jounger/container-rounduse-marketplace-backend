@@ -102,23 +102,11 @@ public class BillOfLadingServiceImpl implements BillOfLadingService {
           }
 
           String containerNumber = item.getContainerNumber();
-          List<BillOfLading> billOfLadings = billOfLadingRepository.findAll();
-          billOfLadings.forEach(billOfLadingItem -> {
-            Set<Container> setContainer = new HashSet<>(billOfLading.getContainers());
-            setContainer.forEach(containerItem -> {
-              if (containerNumber.equals(containerItem.getContainerNumber())) {
-                if (containerItem.getBillOfLading().getFreeTime().isBefore(billOfLading.getInbound().getPickupTime())
-                    || containerItem.getBillOfLading().getInbound().getPickupTime().isAfter(freeTime)) {
-                } else {
-                  if (request.getId().equals(billOfLadingItem.getId())) {
-                  } else {
-                    throw new InternalException(
-                        String.format("Container %s has been busy", containerItem.getContainerNumber()));
-                  }
-                }
-              }
-            });
-          });
+          boolean isContainer = containerRepository.findByContainerNumber(billOfLading.getId(), containerNumber,
+              billOfLading.getInbound().getPickupTime(), freeTime);
+          if (!isContainer) {
+            throw new InternalException(String.format("Container %s has been busy", containerNumber));
+          }
 
           Long driverId = item.getDriver().getId();
           List<Container> listContainer = containerRepository.findByDriver(driverId);
@@ -221,23 +209,11 @@ public class BillOfLadingServiceImpl implements BillOfLadingService {
           }
 
           String containerNumber = item.getContainerNumber();
-          List<BillOfLading> billOfLadings = billOfLadingRepository.findAll();
-          billOfLadings.forEach(billOfLadingItem -> {
-            Set<Container> setContainer = new HashSet<>(billOfLading.getContainers());
-            setContainer.forEach(containerItem -> {
-              if (containerNumber.equals(containerItem.getContainerNumber())) {
-                if (containerItem.getBillOfLading().getFreeTime().isBefore(billOfLading.getInbound().getPickupTime())
-                    || containerItem.getBillOfLading().getInbound().getPickupTime().isAfter(freeTime)) {
-                } else {
-                  if (id.equals(billOfLadingItem.getId())) {
-                  } else {
-                    throw new InternalException(
-                        String.format("Container %s has been busy", containerItem.getContainerNumber()));
-                  }
-                }
-              }
-            });
-          });
+          boolean isContainer = containerRepository.findByContainerNumber(billOfLading.getId(), containerNumber,
+              billOfLading.getInbound().getPickupTime(), freeTime);
+          if (!isContainer) {
+            throw new InternalException(String.format("Container %s has been busy", containerNumber));
+          }
 
           Long driverId = item.getDriver().getId();
           List<Container> listContainer = containerRepository.findByDriver(driverId);

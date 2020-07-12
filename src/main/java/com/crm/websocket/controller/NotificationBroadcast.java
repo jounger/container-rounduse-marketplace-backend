@@ -182,7 +182,7 @@ public class NotificationBroadcast {
     });
   }
 
-  public static void broadcastCreateCombinedToDriver(String status, Bid bidNew) {
+  public static void broadcastCreateCombinedToDriver(Bid bidNew) {
     Merchant offeree = bidNew.getBiddingDocument().getOfferee();
     Collection<Container> collectionContainers = bidNew.getContainers();
     List<Container> containers = new ArrayList<Container>(collectionContainers);

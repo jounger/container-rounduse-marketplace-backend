@@ -31,6 +31,7 @@ import com.crm.payload.request.PaginationRequest;
 import com.crm.payload.response.PaginationResponse;
 import com.crm.security.services.UserDetailsImpl;
 import com.crm.services.CombinedService;
+import com.crm.websocket.controller.NotificationBroadcast;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -43,13 +44,18 @@ public class CombinedController {
   @Transactional
   @PreAuthorize("hasRole('MERCHANT')")
   @PostMapping("/bid/{id}")
-  public ResponseEntity<?> createCombined(@PathVariable("id") Long id,@Valid @RequestBody CombinedRequest request) {
+  public ResponseEntity<?> createCombined(@PathVariable("id") Long id, @Valid @RequestBody CombinedRequest request) {
     UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
         .getPrincipal();
     String username = userDetails.getUsername();
-    
+
     Combined combined = combinedService.createCombined(id, username, request);
     CombinedDto combinedDto = CombinedMapper.toCombinedDto(combined);
+
+    // CREATE NOTIFICATION
+    NotificationBroadcast.broadcastCreateCombinedToDriver(combined.getBid());
+    // END NOTIFICATION
+
     return ResponseEntity.ok(combinedDto);
   }
 

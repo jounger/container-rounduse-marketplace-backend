@@ -91,46 +91,19 @@ public class NotificationBroadcast {
       logger.info("notification : {}", notification.getId());
       biddingWebSocketService.sendBiddingNotifyToUser(notification);
 
-    } else {
-      if (bidNew.getStatus().equals(EnumBidStatus.ACCEPTED.name())) {
+    } else if (bidNew.getStatus().equals(EnumBidStatus.REJECTED.name())) {
 
-        notifyRequest.setRecipient(bidNew.getBidder().getUsername());
-        notifyRequest.setRelatedResource(bidNew.getBiddingDocument().getId());
-        notifyRequest.setMessage(String.format("Your Bid have ACCEPTED from %s", offeree.getUsername()));
-        notifyRequest.setType(EnumBiddingNotificationType.ACCEPTED.name());
-        notification = biddingNotificationService.createBiddingNotification(notifyRequest);
+      notifyRequest.setRecipient(bidNew.getBidder().getUsername());
+      notifyRequest.setRelatedResource(bidNew.getBiddingDocument().getId());
+      notifyRequest.setMessage(String.format("Your Bid have REJECTED from %s", offeree.getUsername()));
+      notifyRequest.setType(EnumBiddingNotificationType.REJECTED.name());
+      notification = biddingNotificationService.createBiddingNotification(notifyRequest);
 
-        // Asynchronous send notification to forwarders
+      // Asynchronous send notification to forwarders
 
-        logger.info("notification : {}", notification.getId());
-        biddingWebSocketService.sendBiddingNotifyToUser(notification);
+      logger.info("notification : {}", notification.getId());
+      biddingWebSocketService.sendBiddingNotifyToUser(notification);
 
-        String numberOfContainer = String.valueOf(bidNew.getContainers().size());
-        String shippingLine = bidNew.getBiddingDocument().getOutbound().getShippingLine().getUsername();
-        notifyRequest.setRecipient(shippingLine);
-        notifyRequest.setRelatedResource(bidNew.getBiddingDocument().getId());
-        notifyRequest.setMessage(String.format("%s and %s want to borrow %s container from you", offeree.getUsername(),
-            bidNew.getBidder().getUsername(), numberOfContainer));
-        notifyRequest.setType(EnumBiddingNotificationType.ACCEPTED.name());
-        notification = biddingNotificationService.createBiddingNotification(notifyRequest);
-
-        // Asynchronous send notification to ShippingLine
-
-        biddingWebSocketService.sendBiddingNotifyToShippingLine(notification, bidNew);
-
-      } else if (bidNew.getStatus().equals(EnumBidStatus.REJECTED.name())) {
-
-        notifyRequest.setRecipient(bidNew.getBidder().getUsername());
-        notifyRequest.setRelatedResource(bidNew.getBiddingDocument().getId());
-        notifyRequest.setMessage(String.format("Your Bid have REJECTED from %s", offeree.getUsername()));
-        notifyRequest.setType(EnumBiddingNotificationType.REJECTED.name());
-        notification = biddingNotificationService.createBiddingNotification(notifyRequest);
-
-        // Asynchronous send notification to forwarders
-
-        logger.info("notification : {}", notification.getId());
-        biddingWebSocketService.sendBiddingNotifyToUser(notification);
-      }
     }
   }
 
@@ -183,7 +156,35 @@ public class NotificationBroadcast {
   }
 
   public static void broadcastCreateCombinedToDriver(Bid bidNew) {
+
+    BiddingNotification notification = new BiddingNotification();
+    BiddingNotificationRequest notifyRequest = new BiddingNotificationRequest();
     Merchant offeree = bidNew.getBiddingDocument().getOfferee();
+
+    notifyRequest.setRecipient(bidNew.getBidder().getUsername());
+    notifyRequest.setRelatedResource(bidNew.getBiddingDocument().getId());
+    notifyRequest.setMessage(String.format("Your Bid have ACCEPTED from %s", offeree.getUsername()));
+    notifyRequest.setType(EnumBiddingNotificationType.ACCEPTED.name());
+    notification = biddingNotificationService.createBiddingNotification(notifyRequest);
+
+    // Asynchronous send notification to forwarders
+
+    logger.info("notification : {}", notification.getId());
+    biddingWebSocketService.sendBiddingNotifyToUser(notification);
+
+    String numberOfContainer = String.valueOf(bidNew.getContainers().size());
+    String shippingLine = bidNew.getBiddingDocument().getOutbound().getShippingLine().getUsername();
+    notifyRequest.setRecipient(shippingLine);
+    notifyRequest.setRelatedResource(bidNew.getBiddingDocument().getId());
+    notifyRequest.setMessage(String.format("%s and %s want to borrow %s container from you", offeree.getUsername(),
+        bidNew.getBidder().getUsername(), numberOfContainer));
+    notifyRequest.setType(EnumBiddingNotificationType.ACCEPTED.name());
+    notification = biddingNotificationService.createBiddingNotification(notifyRequest);
+
+    // Asynchronous send notification to ShippingLine
+
+    biddingWebSocketService.sendBiddingNotifyToShippingLine(notification, bidNew);
+
     Collection<Container> collectionContainers = bidNew.getContainers();
     List<Container> containers = new ArrayList<Container>(collectionContainers);
     if (containers != null) {

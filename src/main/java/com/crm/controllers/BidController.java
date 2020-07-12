@@ -34,7 +34,7 @@ import com.crm.payload.response.MessageResponse;
 import com.crm.payload.response.PaginationResponse;
 import com.crm.security.services.UserDetailsImpl;
 import com.crm.services.BidService;
-import com.crm.websocket.controller.NotificationController;
+import com.crm.websocket.controller.NotificationBroadcast;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -57,7 +57,7 @@ public class BidController {
     BidDto bidDto = BidMapper.toBidDto(bid);
 
     // CREATE NOTIFICATION
-    NotificationController.broadcastCreateBidToMerchant(bid);
+    NotificationBroadcast.broadcastCreateBidToMerchant(bid);
     // END NOTIFICATION
 
     return ResponseEntity.ok(bidDto);
@@ -145,7 +145,7 @@ public class BidController {
     BidDto BidDto = BidMapper.toBidDto(bidEdit);
 
     // CREATE NOTIFICATION
-    NotificationController.broadcastEditBidToMerchantOrForwarder(status, bidEdit);
+    NotificationBroadcast.broadcastEditBidToMerchantOrForwarder(status, bidEdit);
     // END NOTIFICATION
 
     return ResponseEntity.ok(BidDto);
@@ -159,7 +159,7 @@ public class BidController {
     bidService.removeBid(id);
 
     // CREATE NOTIFICATION
-    NotificationController.broadcastRemoveBidToMerchant(bid);
+    NotificationBroadcast.broadcastRemoveBidToMerchant(bid);
     // END NOTIFICATION
 
     return ResponseEntity.ok(new MessageResponse("Bidding document deleted successfully."));

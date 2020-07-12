@@ -27,6 +27,7 @@ import com.crm.repository.CombinedRepository;
 import com.crm.repository.UserRepository;
 import com.crm.services.BidService;
 import com.crm.services.CombinedService;
+import com.crm.services.ContractService;
 
 @Service
 public class CombinedServiceImpl implements CombinedService {

@@ -16,6 +16,8 @@ public interface ContainerTractorService {
 
   Page<ContainerTractor> getContainerTractorsByForwarder(Long userId, PaginationRequest request);
 
+  Page<ContainerTractor> searchContainerTractors(PaginationRequest request, String search);
+
   ContainerTractor createContainerTractor(Long userId, ContainerTractorRequest request);
 
   ContainerTractor updateContainerTractor(Long userId, ContainerTractorRequest request);

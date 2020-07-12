@@ -33,7 +33,7 @@ import com.crm.payload.response.MessageResponse;
 import com.crm.payload.response.PaginationResponse;
 import com.crm.security.services.UserDetailsImpl;
 import com.crm.services.BiddingDocumentService;
-import com.crm.websocket.controller.NotificationController;
+import com.crm.websocket.controller.NotificationBroadcast;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -56,7 +56,7 @@ public class BiddingDocumentController {
     BiddingDocumentDto biddingDocumentDto = BiddingDocumentMapper.toBiddingDocumentDto(biddingDocument);
 
     // CREATE NOTIFICATION
-    NotificationController.broadcastCreateBiddingDocumentToForwarder(biddingDocument);
+    NotificationBroadcast.broadcastCreateBiddingDocumentToForwarder(biddingDocument);
     // END NOTIFICATION
 
     return ResponseEntity.ok(biddingDocumentDto);

@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.crm.models.ContainerSemiTrailer;
@@ -46,6 +47,27 @@ public class ContainerSemiTrailerController {
   @PreAuthorize("hasRole('FORWARDER') or hasRole('MERCHANT')")
   public ResponseEntity<?> getContainerSemiTrailers(@Valid PaginationRequest request) {
     Page<ContainerSemiTrailer> pages = containerSemiTrailerService.getContainerSemiTrailers(request);
+
+    PaginationResponse<ContainerSemiTrailerDto> response = new PaginationResponse<>();
+    response.setPageNumber(request.getPage());
+    response.setPageSize(request.getLimit());
+    response.setTotalElements(pages.getTotalElements());
+    response.setTotalPages(pages.getTotalPages());
+
+    List<ContainerSemiTrailer> containerSemiTrailers = pages.getContent();
+    List<ContainerSemiTrailerDto> containerSemiTrailerDto = new ArrayList<>();
+    containerSemiTrailers.forEach(containerSemiTrailer -> containerSemiTrailerDto
+        .add(ContainerSemiTrailerMapper.toContainerSemiTrailerDto(containerSemiTrailer)));
+    response.setContents(containerSemiTrailerDto);
+
+    return ResponseEntity.ok(response);
+  }
+
+  @GetMapping("/filter")
+  @PreAuthorize("hasRole('FORWARDER') or hasRole('MERCHANT')")
+  public ResponseEntity<?> searchContainerSemiTrailers(@Valid PaginationRequest request,
+      @RequestParam(value = "search") String search) {
+    Page<ContainerSemiTrailer> pages = containerSemiTrailerService.searchContainerSemiTrailers(request, search);
 
     PaginationResponse<ContainerSemiTrailerDto> response = new PaginationResponse<>();
     response.setPageNumber(request.getPage());

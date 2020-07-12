@@ -162,7 +162,6 @@ public class OutboundServiceImpl implements OutboundService {
     booking.setOutbound(outbound);
 
     outbound.setBooking(booking);
-    booking.setOutbound(outbound);
 
     outboundRepository.save(outbound);
     return outbound;

@@ -19,7 +19,7 @@ public interface ContainerRepository extends JpaRepository<Container, Long> {
   Boolean existsByContainerNumber(String containerNumber);
 
   @Query(value = "SELECT b FROM Container b WHERE b.billOfLading.id = :id")
-  Page<Container> findContainersByBillOfLading(@Param("id") Long id, Pageable pageable);
+  Page<Container> findByBillOfLading(@Param("id") Long id, Pageable pageable);
 
   /*
    * @param containerType as ContainerType.name
@@ -33,6 +33,16 @@ public interface ContainerRepository extends JpaRepository<Container, Long> {
       + " AND c.billOfLading.inbound.emptyTime < :packingTime" + " AND c.billOfLading.freeTime > :cutOffTime"
       + " AND c.billOfLading.portOfDelivery.nameCode = :portOfLoading")
   List<Container> findByOutbound(@Param("shippingLine") String shippingLine,
+      @Param("containerType") String containerType, @Param("status") List<String> status,
+      @Param("packingTime") LocalDateTime packingTime, @Param("cutOffTime") LocalDateTime cutOffTime,
+      @Param("portOfLoading") String portOfLoading);
+
+  @Query(value = "SELECT CASE WHEN COUNT(c) > 0 THEN TRUE ELSE FALSE END FROM Container c"
+      + " WHERE c.billOfLading.inbound.shippingLine.companyCode = :shippingLine"
+      + " AND c.billOfLading.inbound.containerType.name = :containerType" + " AND c.status IN :status"
+      + " AND c.billOfLading.inbound.emptyTime < :packingTime" + " AND c.billOfLading.freeTime > :cutOffTime"
+      + " AND c.billOfLading.portOfDelivery.nameCode = :portOfLoading AND c.id = :id")
+  Boolean existsByOutbound(@Param("id") Long id, @Param("shippingLine") String shippingLine,
       @Param("containerType") String containerType, @Param("status") List<String> status,
       @Param("packingTime") LocalDateTime packingTime, @Param("cutOffTime") LocalDateTime cutOffTime,
       @Param("portOfLoading") String portOfLoading);
@@ -53,17 +63,17 @@ public interface ContainerRepository extends JpaRepository<Container, Long> {
   long countCombinedContainersByBiddingDocument(@Param("id") Long id);
 
   @Query(value = "SELECT c FROM Container c LEFT JOIN c.bids b WHERE b.id = :id")
-  Page<Container> findContainersByBid(@Param("id") Long id, Pageable pageable);
+  Page<Container> findByBid(@Param("id") Long id, Pageable pageable);
 
   @Query(value = "SELECT c FROM Container c LEFT JOIN c.bids b WHERE b.id = :id AND c.status = :status")
-  Page<Container> findContainersByBid(@Param("id") Long id, @Param("status") String status, Pageable pageable);
+  Page<Container> findByBid(@Param("id") Long id, @Param("status") String status, Pageable pageable);
 
   @Query(value = "SELECT c FROM Container c LEFT JOIN c.trailer t WHERE t.id = :id AND (c.status = :statusCombined OR c.status = :statusBidding)")
-  Collection<Container> findContainersByTrailer(@Param("id") Long id, @Param("statusCombined") String statusCombined,
+  Collection<Container> findByTrailer(@Param("id") Long id, @Param("statusCombined") String statusCombined,
       @Param("statusBidding") String statusBidding);
 
   @Query(value = "SELECT c FROM Container c LEFT JOIN c.tractor t WHERE t.id = :id AND (c.status = :statusCombined OR c.status = :statusBidding)")
-  Collection<Container> findContainersByTractor(@Param("id") Long id, @Param("statusCombined") String statusCombined,
+  Collection<Container> findByTractor(@Param("id") Long id, @Param("statusCombined") String statusCombined,
       @Param("statusBidding") String statusBidding);
 
   @Query(value = "SELECT CASE WHEN COUNT(c) = 0 THEN TRUE ELSE FALSE END "

@@ -11,7 +11,7 @@ public class ContractRequest {
   
   private Long combined;
   
-  private Integer finesAgainstContractViolations;
+  private Double finesAgainstContractViolations;
   
   private Boolean required;
 

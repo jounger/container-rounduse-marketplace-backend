@@ -107,7 +107,7 @@ public class InboundServiceImpl implements InboundService {
     if (forwarderRepository.existsById(id)) {
       PageRequest pageRequest = PageRequest.of(request.getPage(), request.getLimit(),
           Sort.by(Sort.Direction.DESC, "createdAt"));
-      Page<Inbound> pages = inboundRepository.findInboundsByFowarder(id, pageRequest);
+      Page<Inbound> pages = inboundRepository.findByFowarder(id, pageRequest);
       return pages;
     } else {
       throw new NotFoundException("ERROR: Forwarder is not found.");
@@ -122,7 +122,7 @@ public class InboundServiceImpl implements InboundService {
         Sort.by(Sort.Direction.DESC, "createdAt"));
     String shippingLine = outbound.getShippingLine().getCompanyCode();
     String containerType = outbound.getContainerType().getName();
-    Page<Inbound> pages = inboundRepository.findInboundsByOutbound(shippingLine, containerType, pageRequest);
+    Page<Inbound> pages = inboundRepository.findByOutbound(shippingLine, containerType, pageRequest);
     return pages;
   }
 
@@ -465,7 +465,7 @@ public class InboundServiceImpl implements InboundService {
         Sort.by(Sort.Direction.DESC, "createdAt"));
     String shippingLine = outbound.getShippingLine().getCompanyCode();
     String containerType = outbound.getContainerType().getName();
-    Page<Inbound> pages = inboundRepository.findInboundsByOutboundAndForwarder(userId, shippingLine, containerType,
+    Page<Inbound> pages = inboundRepository.findByOutboundAndForwarder(userId, shippingLine, containerType,
         pageRequest);
     return pages;
   }

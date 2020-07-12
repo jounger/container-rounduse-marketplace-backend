@@ -93,7 +93,7 @@ public class ContainerTractorServiceImpl implements ContainerTractorService {
         throw new InternalException(String.format("Forwarder %s not owned containerTractor", userId));
       }
 
-      Collection<Container> containers = containerRepository.findContainersByTractor(request.getId(),
+      Collection<Container> containers = containerRepository.findByTractor(request.getId(),
           EnumSupplyStatus.COMBINED.name(), EnumSupplyStatus.BIDDING.name());
       if (containers != null) {
         containers.forEach(item -> {
@@ -132,7 +132,7 @@ public class ContainerTractorServiceImpl implements ContainerTractorService {
         throw new InternalException(String.format("Forwarder %s not owned containerTractor", userId));
       }
 
-      Collection<Container> containers = containerRepository.findContainersByTractor(id,
+      Collection<Container> containers = containerRepository.findByTractor(id,
           EnumSupplyStatus.COMBINED.name(), EnumSupplyStatus.BIDDING.name());
       if (containers != null) {
         containers.forEach(item -> {
@@ -176,7 +176,7 @@ public class ContainerTractorServiceImpl implements ContainerTractorService {
         throw new InternalException(String.format("Forwarder %s not owned containerTractor", userId));
       }
 
-      Collection<Container> containers = containerRepository.findContainersByTractor(id,
+      Collection<Container> containers = containerRepository.findByTractor(id,
           EnumSupplyStatus.COMBINED.name(), EnumSupplyStatus.BIDDING.name());
       if (containers != null) {
         containers.forEach(item -> {

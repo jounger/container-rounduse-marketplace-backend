@@ -78,7 +78,7 @@ public class ContainerServiceImpl implements ContainerService {
   public Page<Container> getContainersByBillOfLading(Long id, PaginationRequest request) {
     PageRequest pageRequest = PageRequest.of(request.getPage(), request.getLimit(),
         Sort.by(Sort.Direction.DESC, "createdAt"));
-    Page<Container> pages = containerRepository.findContainersByBillOfLading(id, pageRequest);
+    Page<Container> pages = containerRepository.findByBillOfLading(id, pageRequest);
     return pages;
   }
 
@@ -454,9 +454,9 @@ public class ContainerServiceImpl implements ContainerService {
     Page<Container> pages = null;
 
     if (status != null && !status.isEmpty()) {
-      pages = containerRepository.findContainersByBid(id, status, pageRequest);
+      pages = containerRepository.findByBid(id, status, pageRequest);
     } else {
-      pages = containerRepository.findContainersByBid(id, pageRequest);
+      pages = containerRepository.findByBid(id, pageRequest);
     }
     return pages;
   }

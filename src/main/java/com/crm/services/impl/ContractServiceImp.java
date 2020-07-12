@@ -37,11 +37,10 @@ public class ContractServiceImp implements ContractService {
   private CombinedRepository combinedRepository;
 
   @Override
-  public Contract createContract(String username, ContractRequest request) {
+  public Contract createContract(Long id, String username, ContractRequest request) {
     Contract contract = new Contract();
 
-    Long combinedId = request.getCombined();
-    Combined combined = combinedRepository.findById(combinedId)
+    Combined combined = combinedRepository.findById(id)
         .orElseThrow(() -> new NotFoundException("Combined is not found."));
     contract.setCombined(combined);
 
@@ -63,6 +62,21 @@ public class ContractServiceImp implements ContractService {
     contract.setRequired(required);
 
     contractRepository.save(contract);
+    return contract;
+  }
+
+  @Override
+  public Contract getContractsByCombined(Long id, String username) {
+    Combined combined = combinedRepository.findById(id)
+        .orElseThrow(() -> new NotFoundException("Combined is not found."));
+    Bid bid = combined.getBid();
+    BiddingDocument biddingDocument = bid.getBiddingDocument();
+    Supplier offeree = biddingDocument.getOfferee();
+    Contract contract = null;
+    if (username.equals(offeree.getUsername()) || username.equals(bid.getBidder().getUsername())) {
+      contract = contractRepository.findByCombined(id, username)
+          .orElseThrow(() -> new NotFoundException("Contract is not found."));
+    }
     return contract;
   }
 
@@ -103,10 +117,6 @@ public class ContractServiceImp implements ContractService {
     Supplier offeree = biddingDocument.getOfferee();
 
     if (username.equals(offeree.getUsername())) {
-      String fines = (String) updates.get("finesAgainstContractViolations");
-      if (!Tool.isEqual(contract.getFinesAgainstContractViolations(), fines)) {
-        contract.setFinesAgainstContractViolations(Integer.valueOf(fines));
-      }
       String requiredString = (String) updates.get("required");
       if (!Tool.isEqual(contract.getRequired(), requiredString)) {
         contract.setRequired(Boolean.valueOf(requiredString));

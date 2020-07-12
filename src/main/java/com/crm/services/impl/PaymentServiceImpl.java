@@ -42,7 +42,7 @@ public class PaymentServiceImpl implements PaymentService {
   private ContractRepository contractRepository;
 
   @Override
-  public Payment createPayment(String username, PaymentRequest request) {
+  public Payment createPayment(Long id, String username, PaymentRequest request) {
     Payment payment = new Payment();
 
     Supplier sender = supplierRepository.findByUsername(username)
@@ -53,7 +53,7 @@ public class PaymentServiceImpl implements PaymentService {
         .orElseThrow(() -> new NotFoundException("Supplier is not found."));
     payment.setRecipient(recipient);
 
-    Contract contract = contractRepository.findById(request.getContract())
+    Contract contract = contractRepository.findById(id)
         .orElseThrow(() -> new NotFoundException("Contract is not found."));
     payment.setContract(contract);
 
@@ -126,7 +126,7 @@ public class PaymentServiceImpl implements PaymentService {
       Boolean isPaid = Boolean.valueOf(isPaidString);
       payment.setIsPaid(isPaid);
     }
-    
+
     paymentRepository.save(payment);
     return payment;
   }

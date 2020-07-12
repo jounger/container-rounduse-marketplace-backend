@@ -12,8 +12,6 @@ public class PaymentRequest {
   private String sender;
   
   private String recipient;
-  
-  private Long contract;
 
   private String detail;
   

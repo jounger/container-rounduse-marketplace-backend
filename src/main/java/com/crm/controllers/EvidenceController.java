@@ -38,29 +38,29 @@ import com.crm.services.EvidenceService;
 @RestController
 @RequestMapping("/api/evidence")
 public class EvidenceController {
-  
+
   @Autowired
   private EvidenceService evidenceService;
 
   @Transactional
-  @PostMapping("")
+  @PostMapping("/contract/{id}")
   @PreAuthorize("hasRole('MERCHANT') or hasRole('FORWARDER')")
-  public ResponseEntity<?> createEvidence(@Valid @RequestBody EvidenceRequest request) {
+  public ResponseEntity<?> createEvidence(@PathVariable("id") Long id, @Valid @RequestBody EvidenceRequest request) {
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
-    Evidence evidence = evidenceService.createEvidence(username, request);
+    Evidence evidence = evidenceService.createEvidence(id, username, request);
     EvidenceDto evidenceDto = EvidenceMapper.toEvidenceDto(evidence);
     return ResponseEntity.ok(evidenceDto);
   }
-  
+
   @PreAuthorize("hasRole('MERCHANT') or hasRole('FORWARDER')")
   @GetMapping("/user")
   public ResponseEntity<?> getEvidencesByUser(@Valid PaginationRequest request) {
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
-    
+
     Page<Evidence> pages = evidenceService.getEvidencesByUser(username, request);
-    
+
     PaginationResponse<EvidenceDto> response = new PaginationResponse<>();
     response.setPageNumber(request.getPage());
     response.setPageSize(request.getLimit());

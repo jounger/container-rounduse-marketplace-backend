@@ -29,7 +29,7 @@ import com.crm.payload.response.MessageResponse;
 import com.crm.payload.response.PaginationResponse;
 import com.crm.services.PermissionService;
 
-@CrossOrigin(origins="*", maxAge=3600)
+@CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 @RequestMapping("/api/permission")
 public class PermissionController {
@@ -45,7 +45,7 @@ public class PermissionController {
     PermissionDto permissionDto = PermissionMapper.toPermissionDto(permission);
     return ResponseEntity.ok(permissionDto);
   }
-  
+
   @GetMapping("")
   @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<?> getPermissions(@Valid PaginationRequest request) {
@@ -55,15 +55,15 @@ public class PermissionController {
     response.setPageSize(request.getLimit());
     response.setTotalElements(pages.getTotalElements());
     response.setTotalPages(pages.getTotalPages());
-    
+
     List<Permission> permissions = pages.getContent();
     List<PermissionDto> permissionsDto = new ArrayList<>();
     permissions.forEach(permission -> permissionsDto.add(PermissionMapper.toPermissionDto(permission)));
     response.setContents(permissionsDto);
-    
+
     return ResponseEntity.ok(response);
   }
-  
+
   @Transactional
   @PutMapping("")
   @PreAuthorize("hasRole('ADMIN')")
@@ -72,7 +72,7 @@ public class PermissionController {
     PermissionDto permissionDto = PermissionMapper.toPermissionDto(permission);
     return ResponseEntity.ok(permissionDto);
   }
-  
+
   @Transactional
   @DeleteMapping("/{id}")
   @PreAuthorize("hasRole('ADMIN')")

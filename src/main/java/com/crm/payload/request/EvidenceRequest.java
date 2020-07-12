@@ -9,8 +9,6 @@ public class EvidenceRequest {
 
   private Long id;
   
-  private Long contract;
-  
   private String sender;
   
   private String evidence;

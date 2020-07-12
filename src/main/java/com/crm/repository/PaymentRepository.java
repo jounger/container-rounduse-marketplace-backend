@@ -11,7 +11,7 @@ import org.springframework.stereotype.Repository;
 import com.crm.models.Payment;
 
 @Repository
-public interface PaymentRepository extends JpaRepository<Payment, Long>, JpaSpecificationExecutor<Payment>{
+public interface PaymentRepository extends JpaRepository<Payment, Long>, JpaSpecificationExecutor<Payment> {
 
   @Query(value = "FROM Payment p WHERE p.sender.username = :username OR p.recipient.username = :username")
   Page<Payment> findByUser(@Param("username") String username, Pageable pageable);

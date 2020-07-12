@@ -10,7 +10,7 @@ import com.crm.payload.request.PaginationRequest;
 
 public interface EvidenceService {
 
-  Evidence createEvidence(String username, EvidenceRequest request);
+  Evidence createEvidence(Long id, String username, EvidenceRequest request);
 
   Page<Evidence> getEvidencesByUser(String username, PaginationRequest request);
 

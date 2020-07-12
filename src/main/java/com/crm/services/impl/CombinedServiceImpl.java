@@ -27,7 +27,6 @@ import com.crm.repository.CombinedRepository;
 import com.crm.repository.UserRepository;
 import com.crm.services.BidService;
 import com.crm.services.CombinedService;
-import com.crm.services.ContractService;
 
 @Service
 public class CombinedServiceImpl implements CombinedService {
@@ -40,9 +39,6 @@ public class CombinedServiceImpl implements CombinedService {
 
   @Autowired
   private UserRepository userRepository;
-  
-  @Autowired
-  private ContractService contractService;
   
   @Autowired
   private BidService bidService;
@@ -61,7 +57,7 @@ public class CombinedServiceImpl implements CombinedService {
     bid = combined.getBid();
     BiddingDocument biddingDocument = bid.getBiddingDocument();
     Supplier offeree = biddingDocument.getOfferee();
-    ContractRequest contracRequest = request.getContractRequest();
+    ContractRequest contracRequest = request.getContract();
     Contract contract = new Contract();
     if (username.equals(offeree.getUsername())) {
       Integer fines = contracRequest.getFinesAgainstContractViolations();

@@ -13,5 +13,5 @@ public class CombinedRequest {
 
   private String status;
   
-  private ContractRequest contractRequest;
+  private ContractRequest contract;
 }

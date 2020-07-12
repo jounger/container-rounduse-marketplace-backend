@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
@@ -63,7 +64,7 @@ public class Combined {
   @OneToMany(mappedBy = "relatedResource")
   private Collection<ShippingLineNotification> shippingLineNotifications = new ArrayList<>();
 
-  @OneToOne(mappedBy = "combined")
+  @OneToOne(mappedBy = "combined", cascade = CascadeType.ALL)
   private Contract contract;
 
 }

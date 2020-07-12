@@ -1,12 +1,14 @@
 package com.crm.services.impl;
 
 import java.util.Map;
+import java.time.LocalDateTime;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import com.crm.common.Constant;
 import com.crm.exception.NotFoundException;
 import com.crm.models.Rating;
 import com.crm.models.Supplier;
@@ -40,7 +42,8 @@ public class RatingServiceImpl implements RatingService {
     rating.setRatingValue(request.getRatingValue());
     ratingRepository.save(rating);
 
-    Double ratingValue = ratingRepository.findAvgRatingValueByReceiverId(request.getReceiverId());
+    LocalDateTime rewind = LocalDateTime.now().minusMonths(Constant.REWIND_MONTH);
+    Double ratingValue = ratingRepository.calcAvgRatingValueByReceiver(request.getReceiverId(), rewind);
     receiver.setRatingValue(ratingValue);
 
     supplierRepository.save(receiver);
@@ -60,13 +63,13 @@ public class RatingServiceImpl implements RatingService {
 
   @Override
   public Page<Rating> getRatingsBySender(Long id, PaginationRequest request) {
-    Page<Rating> ratings = ratingRepository.findBySenderId(id, PageRequest.of(request.getPage(), request.getLimit()));
+    Page<Rating> ratings = ratingRepository.findBySender(id, PageRequest.of(request.getPage(), request.getLimit()));
     return ratings;
   }
 
   @Override
   public Page<Rating> getRatingsByReceiver(Long id, PaginationRequest request) {
-    Page<Rating> ratings = ratingRepository.findByReceiverId(id, PageRequest.of(request.getPage(), request.getLimit()));
+    Page<Rating> ratings = ratingRepository.findByReceiver(id, PageRequest.of(request.getPage(), request.getLimit()));
     return ratings;
   }
 
@@ -86,7 +89,8 @@ public class RatingServiceImpl implements RatingService {
     rating.setRatingValue(request.getRatingValue());
     ratingRepository.save(rating);
 
-    Double ratingValue = ratingRepository.findAvgRatingValueByReceiverId(request.getReceiverId());
+    LocalDateTime rewind = LocalDateTime.now().minusMonths(Constant.REWIND_MONTH);
+    Double ratingValue = ratingRepository.calcAvgRatingValueByReceiver(request.getReceiverId(), rewind);
     receiver.setRatingValue(ratingValue);
 
     supplierRepository.save(receiver);
@@ -118,7 +122,8 @@ public class RatingServiceImpl implements RatingService {
       rating.setRatingValue(ratingValue);
       ratingRepository.save(rating);
 
-      Double receiverRatingValue = ratingRepository.findAvgRatingValueByReceiverId(receiverId);
+      LocalDateTime rewind = LocalDateTime.now().minusMonths(Constant.REWIND_MONTH);
+      Double receiverRatingValue = ratingRepository.calcAvgRatingValueByReceiver(receiverId, rewind);
       receiver.setRatingValue(receiverRatingValue);
       supplierRepository.save(receiver);
     }

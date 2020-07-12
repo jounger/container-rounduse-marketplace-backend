@@ -47,8 +47,11 @@ public class ContractServiceImp implements ContractService {
     Bid bid = combined.getBid();
     BiddingDocument biddingDocument = bid.getBiddingDocument();
     Supplier offeree = biddingDocument.getOfferee();
-    if (username.equals(offeree.getUsername())) {
-      Integer fines = request.getFinesAgainstContractViolations();
+    Boolean required = request.getRequired();
+    contract.setRequired(required);
+    contract.setFinesAgainstContractViolations(0D);
+    if (username.equals(offeree.getUsername()) && required == true) {
+      Double fines = request.getFinesAgainstContractViolations();
       if (fines > 0) {
         contract.setFinesAgainstContractViolations(fines);
       } else {
@@ -57,9 +60,6 @@ public class ContractServiceImp implements ContractService {
     } else {
       throw new NotFoundException("You must be Offeree to create Contract.");
     }
-
-    Boolean required = request.getRequired();
-    contract.setRequired(required);
 
     contractRepository.save(contract);
     return contract;

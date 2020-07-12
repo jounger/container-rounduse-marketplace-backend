@@ -13,16 +13,16 @@ import com.crm.models.DriverNotification;
 public interface DriverNotificationRepository extends JpaRepository<DriverNotification, Long> {
 
   @Query(value = "FROM DriverNotification dn WHERE dn.recipient.id = :id")
-  Page<DriverNotification> findDriverNotificationsByUser(@Param("id") Long id, Pageable pageable);
+  Page<DriverNotification> findByUser(@Param("id") Long id, Pageable pageable);
 
   @Query(value = "FROM DriverNotification dn WHERE dn.recipient.username = :username")
-  Page<DriverNotification> findDriverNotificationsByUser(@Param("username") String username, Pageable pageable);
+  Page<DriverNotification> findByUser(@Param("username") String username, Pageable pageable);
 
   @Query(value = "FROM DriverNotification dn WHERE dn.recipient.id = :id AND dn.type = :status")
-  Page<DriverNotification> findDriverNotificationsByUserAndStatus(@Param("id") Long id, @Param("status") String status,
+  Page<DriverNotification> findByUserAndStatus(@Param("id") Long id, @Param("status") String status,
       Pageable pageable);
 
   @Query(value = "FROM DriverNotification dn WHERE dn.recipient.username = :username AND dn.type = :status")
-  Page<DriverNotification> findDriverNotificationsByUserAndStatus(@Param("username") String username,
+  Page<DriverNotification> findByUserAndStatus(@Param("username") String username,
       @Param("status") String status, Pageable pageable);
 }

@@ -72,7 +72,7 @@ public class OutboundServiceImpl implements OutboundService {
     String status = request.getStatus();
     Page<Outbound> pages = null;
     if (status != null && !status.isEmpty()) {
-      pages = outboundRepository.findAll(status, pageRequest);
+      pages = outboundRepository.findByStatus(status, pageRequest);
     } else {
       pages = outboundRepository.findAll(pageRequest);
     }

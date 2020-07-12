@@ -107,7 +107,7 @@ public class ContainerSemiTrailerServiceImpl implements ContainerSemiTrailerServ
         throw new InternalException(String.format("Forwarder %s not owned containerSemiTrailer", userId));
       }
 
-      Collection<Container> containers = containerRepository.findContainersByTrailer(request.getId(),
+      Collection<Container> containers = containerRepository.findByTrailer(request.getId(),
           EnumSupplyStatus.COMBINED.name(), EnumSupplyStatus.BIDDING.name());
       if (containers != null) {
         containers.forEach(item -> {
@@ -159,7 +159,7 @@ public class ContainerSemiTrailerServiceImpl implements ContainerSemiTrailerServ
         throw new InternalException(String.format("Forwarder %s not owned containerSemiTrailer", userId));
       }
 
-      Collection<Container> containers = containerRepository.findContainersByTrailer(id,
+      Collection<Container> containers = containerRepository.findByTrailer(id,
           EnumSupplyStatus.COMBINED.name(), EnumSupplyStatus.BIDDING.name());
       if (containers != null) {
         containers.forEach(item -> {
@@ -222,7 +222,7 @@ public class ContainerSemiTrailerServiceImpl implements ContainerSemiTrailerServ
         throw new InternalException(String.format("Forwarder %s not owned containerSemiTrailer", userId));
       }
 
-      Collection<Container> containers = containerRepository.findContainersByTrailer(id,
+      Collection<Container> containers = containerRepository.findByTrailer(id,
           EnumSupplyStatus.COMBINED.name(), EnumSupplyStatus.BIDDING.name());
       if (containers != null) {
         containers.forEach(item -> {

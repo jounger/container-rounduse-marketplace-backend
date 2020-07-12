@@ -128,19 +128,19 @@ public class BiddingDocumentServiceImpl implements BiddingDocumentService {
     Page<BiddingDocument> biddingDocuments = null;
     if (user.getRoles().iterator().next().getName().equalsIgnoreCase("ROLE_MERCHANT")) {
       if (status != null && !status.isEmpty()) {
-        biddingDocuments = biddingDocumentRepository.findBiddingDocumentByMerchant(id, request.getStatus(),
+        biddingDocuments = biddingDocumentRepository.findByMerchant(id, request.getStatus(),
             PageRequest.of(request.getPage(), request.getLimit(), Sort.by("id").descending()));
       } else {
-        biddingDocuments = biddingDocumentRepository.findBiddingDocumentByMerchant(id,
+        biddingDocuments = biddingDocumentRepository.findByMerchant(id,
             PageRequest.of(request.getPage(), request.getLimit(), Sort.by("id").descending()));
       }
     }
     if (user.getRoles().iterator().next().getName().equalsIgnoreCase("ROLE_FORWARDER")) {
       if (status != null && !status.isEmpty()) {
-        biddingDocuments = biddingDocumentRepository.findBiddingDocumentByForwarder(id, request.getStatus(),
+        biddingDocuments = biddingDocumentRepository.findByForwarder(id, request.getStatus(),
             PageRequest.of(request.getPage(), request.getLimit(), Sort.by("id").descending()));
       } else {
-        biddingDocuments = biddingDocumentRepository.findBiddingDocumentByForwarder(id,
+        biddingDocuments = biddingDocumentRepository.findByForwarder(id,
             PageRequest.of(request.getPage(), request.getLimit(), Sort.by("id").descending()));
       }
     }

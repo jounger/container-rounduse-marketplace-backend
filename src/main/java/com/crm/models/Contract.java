@@ -50,7 +50,7 @@ public class Contract {
   private Combined combined;
 
   @Column(name = "fines_against_contract_violations")
-  private Integer finesAgainstContractViolations;
+  private Double finesAgainstContractViolations;
 
   @Column(name = "required")
   private Boolean required;

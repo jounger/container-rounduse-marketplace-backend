@@ -89,21 +89,20 @@ public class BidServiceImpl implements BidService {
     if (containersId.size() > booking.getUnit()) {
       throw new InternalException("Number of containers is more than needed.");
     }
-    if (booking.getUnit() > containersId.size() && !biddingDocument.getIsMultipleAward()) {
+    if ((booking.getUnit() > containersId.size() && !biddingDocument.getIsMultipleAward())
+        || (containersId.size() < booking.getUnit() && !biddingDocument.getIsMultipleAward())) {
       throw new InternalException("Number of containers is less than needed.");
     }
-    if (containersId.size() < booking.getUnit() && !biddingDocument.getIsMultipleAward()) {
-      throw new InternalException("Number of containers is less than needed.");
-    }
-    List<Container> suitableContainers = containerRepository.findByOutbound(outbound.getShippingLine().getCompanyCode(),
-        outbound.getContainerType().getName(), Arrays.asList(EnumSupplyStatus.CREATED.name()),
-        outbound.getPackingTime(), booking.getCutOffTime(), booking.getPortOfLoading().getNameCode());
     containersId.forEach(containerId -> {
       Container container = containerRepository.findById(containerId)
           .orElseThrow(() -> new NotFoundException("Container is not found."));
-      if (suitableContainers.contains(container)) {
-        bid.getContainers().add(container);
+      if (containerRepository.existsByOutbound(containerId, outbound.getShippingLine().getCompanyCode(),
+          outbound.getContainerType().getName(),
+          Arrays.asList(EnumSupplyStatus.CREATED.name(), EnumSupplyStatus.BIDDING.name()), outbound.getPackingTime(),
+          booking.getCutOffTime(), booking.getPortOfLoading().getNameCode())) {
         container.setStatus(EnumSupplyStatus.BIDDING.name());
+        bid.getContainers().add(container);
+        bid.setBidValidityPeriod(LocalDateTime.now().plusHours(Constant.BID_VALIDITY_PERIOD));
       } else {
         throw new NotFoundException("Container is not suitable.");
       }
@@ -141,14 +140,14 @@ public class BidServiceImpl implements BidService {
 
   @Override
   public Bid getBidByBiddingDocumentAndForwarder(Long biddingDocumentId, String username) {
-    Bid bid = bidRepository.findBidByBiddingDocumentAndForwarder(biddingDocumentId, username)
+    Bid bid = bidRepository.findByBiddingDocumentAndForwarder(biddingDocumentId, username)
         .orElseThrow(() -> new NotFoundException("Bid is not found."));
     return bid;
   }
 
   @Override
   public Page<Bid> getBidsByBiddingDocument(Long id, PaginationRequest request) {
-    Page<Bid> bids = bidRepository.findBidsByBiddingDocument(id,
+    Page<Bid> bids = bidRepository.findByBiddingDocument(id,
         PageRequest.of(request.getPage(), request.getLimit(), Sort.by("id").descending()));
     return bids;
   }
@@ -158,10 +157,10 @@ public class BidServiceImpl implements BidService {
     Page<Bid> bids = null;
     String status = request.getStatus();
     if (status != null && !status.isEmpty()) {
-      bids = bidRepository.findBidsByForwarder(id, status,
+      bids = bidRepository.findByForwarder(id, status,
           PageRequest.of(request.getPage(), request.getLimit(), Sort.by("id").descending()));
     } else {
-      bids = bidRepository.findBidsByForwarder(id,
+      bids = bidRepository.findByForwarder(id,
           PageRequest.of(request.getPage(), request.getLimit(), Sort.by("id").descending()));
     }
     return bids;
@@ -206,14 +205,13 @@ public class BidServiceImpl implements BidService {
       containerRepository.save(container);
     });
 
-    List<Container> suitableContainers = containerRepository.findByOutbound(outbound.getShippingLine().getCompanyCode(),
-        outbound.getContainerType().getName(),
-        Arrays.asList(EnumSupplyStatus.CREATED.name(), EnumSupplyStatus.BIDDING.name()), outbound.getPackingTime(),
-        booking.getCutOffTime(), booking.getPortOfLoading().getNameCode());
     containersId.forEach(containerId -> {
       Container container = containerRepository.findById(containerId)
           .orElseThrow(() -> new NotFoundException("Container is not found."));
-      if (suitableContainers.contains(container)) {
+      if (containerRepository.existsByOutbound(containerId, outbound.getShippingLine().getCompanyCode(),
+          outbound.getContainerType().getName(),
+          Arrays.asList(EnumSupplyStatus.CREATED.name(), EnumSupplyStatus.BIDDING.name()), outbound.getPackingTime(),
+          booking.getCutOffTime(), booking.getPortOfLoading().getNameCode())) {
         container.setStatus(EnumSupplyStatus.BIDDING.name());
         bid.getContainers().add(container);
         bid.setBidValidityPeriod(LocalDateTime.now().plusHours(Constant.BID_VALIDITY_PERIOD));

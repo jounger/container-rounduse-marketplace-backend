@@ -42,9 +42,6 @@ public class CombinedServiceImpl implements CombinedService {
   private UserRepository userRepository;
   
   @Autowired
-  private ContractService contractService;
-  
-  @Autowired
   private BidService bidService;
 
   @Override
@@ -61,7 +58,7 @@ public class CombinedServiceImpl implements CombinedService {
     bid = combined.getBid();
     BiddingDocument biddingDocument = bid.getBiddingDocument();
     Supplier offeree = biddingDocument.getOfferee();
-    ContractRequest contracRequest = request.getContractRequest();
+    ContractRequest contracRequest = request.getContract();
     Contract contract = new Contract();
     if (username.equals(offeree.getUsername())) {
       Integer fines = contracRequest.getFinesAgainstContractViolations();

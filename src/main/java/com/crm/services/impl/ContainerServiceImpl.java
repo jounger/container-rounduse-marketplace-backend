@@ -109,20 +109,11 @@ public class ContainerServiceImpl implements ContainerService {
       });
 
       String containerNumber = request.getContainerNumber();
-      List<BillOfLading> billOfLadings = billOfLadingRepository.findByForwarder(userId);
-      billOfLadings.forEach(item -> {
-        Set<Container> setContainer = new HashSet<>(item.getContainers());
-        setContainer.forEach(containerItem -> {
-          if (containerNumber.equals(containerItem.getContainerNumber())) {
-            if (containerItem.getBillOfLading().getFreeTime().isBefore(billOfLading.getInbound().getPickupTime())
-                || containerItem.getBillOfLading().getInbound().getPickupTime().isAfter(billOfLading.getFreeTime())) {
-            } else {
-              throw new InternalException(
-                  String.format("Container %s has been busy", containerItem.getContainerNumber()));
-            }
-          }
-        });
-      });
+      boolean listContainer = containerRepository.findByContainerNumber(containerNumber,
+          billOfLading.getInbound().getPickupTime(), billOfLading.getFreeTime());
+      if (!listContainer) {
+        throw new InternalException(String.format("Container %s has been busy", containerNumber));
+      }
 
       String driverUserName = request.getDriver();
       Driver driver = driverRepository.findByUsername(driverUserName)
@@ -223,23 +214,11 @@ public class ContainerServiceImpl implements ContainerService {
       });
 
       String containerNumber = request.getContainerNumber();
-      List<BillOfLading> billOfLadings = billOfLadingRepository.findByForwarder(userId);
-      billOfLadings.forEach(item -> {
-        Set<Container> setContainer = new HashSet<>(item.getContainers());
-        setContainer.forEach(containerItem -> {
-          if (containerNumber.equals(containerItem.getContainerNumber())) {
-            if (containerItem.getBillOfLading().getFreeTime().isBefore(billOfLading.getInbound().getPickupTime())
-                || containerItem.getBillOfLading().getInbound().getPickupTime().isAfter(billOfLading.getFreeTime())) {
-            } else {
-              if (item.getId().equals(billOfLading.getId())) {
-              } else {
-                throw new InternalException(
-                    String.format("Container %s has been busy", containerItem.getContainerNumber()));
-              }
-            }
-          }
-        });
-      });
+      boolean listContainer = containerRepository.findByContainerNumber(billOfLading.getId(), containerNumber,
+          billOfLading.getInbound().getPickupTime(), billOfLading.getFreeTime());
+      if (!listContainer) {
+        throw new InternalException(String.format("Container %s has been busy", containerNumber));
+      }
 
       String driverUserName = request.getDriver();
       Driver driver = driverRepository.findByUsername(driverUserName)
@@ -453,23 +432,11 @@ public class ContainerServiceImpl implements ContainerService {
         }
       });
 
-      List<BillOfLading> billOfLadings = billOfLadingRepository.findByForwarder(userId);
-      billOfLadings.forEach(item -> {
-        Set<Container> setContainer = new HashSet<>(item.getContainers());
-        setContainer.forEach(containerItem -> {
-          if (container.getContainerNumber().equals(containerItem.getContainerNumber())) {
-            if (containerItem.getBillOfLading().getFreeTime().isBefore(billOfLading.getInbound().getPickupTime())
-                || containerItem.getBillOfLading().getInbound().getPickupTime().isAfter(billOfLading.getFreeTime())) {
-            } else {
-              if (item.getId().equals(billOfLading.getId())) {
-              } else {
-                throw new InternalException(
-                    String.format("Container %s has been busy", containerItem.getContainerNumber()));
-              }
-            }
-          }
-        });
-      });
+      boolean listContainer = containerRepository.findByContainerNumber(billOfLading.getId(),
+          container.getContainerNumber(), billOfLading.getInbound().getPickupTime(), billOfLading.getFreeTime());
+      if (!listContainer) {
+        throw new InternalException(String.format("Container %s has been busy", containerNumber));
+      }
 
       containerRepository.save(container);
       return container;

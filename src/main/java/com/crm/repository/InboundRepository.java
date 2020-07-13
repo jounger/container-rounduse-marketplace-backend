@@ -19,13 +19,6 @@ public interface InboundRepository extends JpaRepository<Inbound, Long>, JpaSpec
   @Query(value = "SELECT i FROM Inbound i WHERE i.forwarder.id = :id")
   Page<Inbound> findByFowarder(@Param("id") Long id, Pageable pageable);
 
-  @Query(value = "SELECT i FROM Inbound i LEFT JOIN i.billOfLading.containers c " + "WHERE i.forwarder.id = :id "
-      + "AND (i.billOfLading.freeTime < :freeTime OR i.pickupTime > :pickupTime) "
-      + "AND c.containerNumber = :containerNumber " + "AND c.id != :containerId")
-  List<Inbound> findByFowarder(@Param("id") Long id, @Param("pickupTime") LocalDateTime pickupTime,
-      @Param("freeTime") LocalDateTime freeTime, @Param("containerNumber") String containerNumber,
-      @Param("containerId") Long containerId);
-
   /*
    * @param shippingLine is companyCode of ShippingLine Entity
    * 

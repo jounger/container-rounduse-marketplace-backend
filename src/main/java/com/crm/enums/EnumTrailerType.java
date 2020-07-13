@@ -2,7 +2,7 @@ package com.crm.enums;
 
 public enum EnumTrailerType {
   
-  T28, T32, T34, T36, T40, T45, T48;
+  T28, T32, T34, T36, T40, T45, T48, T53;
   
   public static EnumTrailerType findByName(String name) {
     for (EnumTrailerType type : EnumTrailerType.values()) {

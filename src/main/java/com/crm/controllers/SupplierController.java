@@ -20,10 +20,14 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.crm.models.Supplier;
+import com.crm.models.Supplier;
 import com.crm.models.dto.SupplierDto;
+import com.crm.models.dto.SupplierDto;
+import com.crm.models.mapper.SupplierMapper;
 import com.crm.models.mapper.SupplierMapper;
 import com.crm.payload.request.PaginationRequest;
 import com.crm.payload.request.SupplierRequest;
@@ -114,6 +118,25 @@ public class SupplierController {
     Supplier supplier = supplierService.getSupplier(id);
     SupplierDto supplierDto = SupplierMapper.toSupplierDto(supplier);
     return ResponseEntity.ok(supplierDto);
+  }
+
+  @PreAuthorize("hasRole('MODERATOR') or hasRole('FORWARDER') or hasRole('MERCHANT')")
+  @GetMapping("/filter")
+  public ResponseEntity<?> searchSuppliers(@Valid PaginationRequest request,
+      @RequestParam(value = "search") String search) {
+    Page<Supplier> pages = supplierService.searchSuppliers(request, search);
+    PaginationResponse<SupplierDto> response = new PaginationResponse<>();
+    response.setPageNumber(request.getPage());
+    response.setPageSize(request.getLimit());
+    response.setTotalElements(pages.getTotalElements());
+    response.setTotalPages(pages.getTotalPages());
+
+    List<Supplier> suppliers = pages.getContent();
+    List<SupplierDto> suppliersDto = new ArrayList<>();
+    suppliers.forEach(supplier -> suppliersDto.add(SupplierMapper.toSupplierDto(supplier)));
+    response.setContents(suppliersDto);
+
+    return ResponseEntity.ok(response);
   }
 
   @Transactional

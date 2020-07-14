@@ -16,8 +16,8 @@ public interface FeedbackRepository extends JpaRepository<Feedback, Long>, JpaSp
 
   Page<Feedback> findBySender(User sender, Pageable pageable);
 
-  @Query(value = "FROM Feedback fb WHERE fb.report.id = :id AND (fb.report.sender.username = :username)")
-  Page<Feedback> findByReport(@Param("id") Long report, @Param("username") String username, Pageable pageable);
+  @Query(value = "FROM Feedback fb WHERE fb.report.id = :id AND (fb.report.sender.id = :userId)")
+  Page<Feedback> findByReport(@Param("id") Long report, @Param("userId") Long userId, Pageable pageable);
 
   @Query(value = "FROM Feedback fb WHERE fb.report.id = :id")
   Page<Feedback> findByReport(@Param("id") Long report, Pageable pageable);

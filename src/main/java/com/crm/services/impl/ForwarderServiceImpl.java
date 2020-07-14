@@ -80,6 +80,7 @@ public class ForwarderServiceImpl implements ForwarderService {
     forwarder.setContactPerson(request.getContactPerson());
     forwarder.setTin(request.getTin());
     forwarder.setFax(request.getFax());
+    forwarder.setRatingValue(0D);
 
     forwarderRepository.save(forwarder);
 

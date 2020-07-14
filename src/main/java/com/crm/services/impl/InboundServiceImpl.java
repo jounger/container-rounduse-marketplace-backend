@@ -234,7 +234,7 @@ public class InboundServiceImpl implements InboundService {
               .orElseThrow(() -> new NotFoundException("ERROR: Container is not found."));
 
           boolean listContainer = containerRepository.findByContainerNumber(billOfLading.getId(),
-              container.getContainerNumber(), pickupTime, freeTime);
+              container.getContainerNumber(), inbound.getPickupTime(), freeTime);
           if (!listContainer) {
             throw new InternalException(String.format("Container %s has been busy", container.getContainerNumber()));
           }
@@ -242,61 +242,32 @@ public class InboundServiceImpl implements InboundService {
           String driverUserName = container.getDriver().getUsername();
           Driver driver = driverRepository.findByUsername(driverUserName)
               .orElseThrow(() -> new NotFoundException("ERROR: Driver is not found."));
-          if (!driver.getForwarder().getId().equals(inbound.getForwarder().getId())) {
-            throw new NotFoundException("ERROR: The forwarder does not own this driver.");
-          }
 
           String trailer = container.getTrailer().getLicensePlate();
           ContainerSemiTrailer containerSemiTrailer = containerSemiTrailerRepository.findByLicensePlate(trailer)
               .orElseThrow(() -> new NotFoundException("ERROR: ContainerSemiTrailer is not found."));
-          if (!containerSemiTrailer.getForwarder().getId().equals(billOfLading.getInbound().getForwarder().getId())) {
-            throw new NotFoundException("ERROR: The forwarder does not own this ContainerSemiTrailer.");
-          }
 
           String tractor = container.getTractor().getLicensePlate();
           ContainerTractor containerTractor = containerTractorRepository.findByLicensePlate(tractor)
               .orElseThrow(() -> new NotFoundException("ERROR: ContainerTractor is not found."));
-          if (!containerTractor.getForwarder().getId().equals(billOfLading.getInbound().getForwarder().getId())) {
-            throw new NotFoundException("ERROR: The forwarder does not own this ContainerTractor.");
+
+          boolean containersByDriver = containerRepository.findByDriver(driver.getId(), inbound.getPickupTime(),
+              freeTime, billOfLading.getId());
+          if (!containersByDriver) {
+            throw new InternalException(String.format("Driver %s has been busy", driverUserName));
           }
 
-          List<Container> containersByDriver = containerRepository.findByDriver(driver.getId());
-          containersByDriver.forEach(item -> {
-            if (item.getBillOfLading().getFreeTime().isBefore(pickupTime)
-                || item.getBillOfLading().getInbound().getPickupTime().isAfter(freeTime)) {
-            } else {
-              if (item.getBillOfLading().getInbound().getId().equals(request.getId())) {
-              } else {
-                throw new InternalException(String.format("Driver %s has been busy", item.getDriver().getUsername()));
-              }
-            }
-          });
+          boolean listContainerByTractor = containerRepository.findByTractor(containerTractor.getId(),
+              inbound.getPickupTime(), freeTime, billOfLading.getId());
+          if (!listContainerByTractor) {
+            throw new InternalException(String.format("Tractor %s has been busy", tractor));
+          }
 
-          List<Container> listContainerByTractor = containerRepository.findByTractor(containerTractor.getId());
-          listContainerByTractor.forEach(item -> {
-            if (item.getBillOfLading().getFreeTime().isBefore(billOfLading.getInbound().getPickupTime())
-                || item.getBillOfLading().getInbound().getPickupTime().isAfter(billOfLading.getFreeTime())) {
-            } else {
-              if (item.getBillOfLading().getInbound().getId().equals(request.getId())) {
-              } else {
-                throw new InternalException(
-                    String.format("Tractor %s has been busy", item.getTractor().getLicensePlate()));
-              }
-            }
-          });
-
-          List<Container> listContainerByTrailer = containerRepository.findByTrailer(containerSemiTrailer.getId());
-          listContainerByTrailer.forEach(item -> {
-            if (item.getBillOfLading().getFreeTime().isBefore(billOfLading.getInbound().getPickupTime())
-                || item.getBillOfLading().getInbound().getPickupTime().isAfter(billOfLading.getFreeTime())) {
-            } else {
-              if (item.getBillOfLading().getInbound().getId().equals(request.getId())) {
-              } else {
-                throw new InternalException(
-                    String.format("Trailer %s has been busy", item.getTrailer().getLicensePlate()));
-              }
-            }
-          });
+          boolean listContainerByTrailer = containerRepository.findByTrailer(containerSemiTrailer.getId(),
+              inbound.getPickupTime(), freeTime, billOfLading.getId());
+          if (!listContainerByTrailer) {
+            throw new InternalException(String.format("Trailer %s has been busy", trailer));
+          }
         }
       }
       inboundRepository.save(inbound);
@@ -369,46 +340,28 @@ public class InboundServiceImpl implements InboundService {
           }
 
           Long driverId = item.getDriver().getId();
-          List<Container> listContainerByDriver = containerRepository.findByDriver(driverId);
-          listContainerByDriver.forEach(container -> {
-            if (container.getBillOfLading().getFreeTime().isBefore(pickupTime) || container.getBillOfLading()
-                .getInbound().getPickupTime().isAfter(inbound.getBillOfLading().getFreeTime())) {
-            } else {
-              if (container.getBillOfLading().getId().equals(inbound.getBillOfLading().getId())) {
-              } else {
-                throw new InternalException(
-                    String.format("Driver %s has been busy", container.getDriver().getUsername()));
-              }
-            }
-          });
+          boolean listContainerByDriver = containerRepository.findByDriver(driverId, pickupTime,
+              billOfLading.getFreeTime(), billOfLading.getId());
+          if (!listContainerByDriver) {
+            throw new InternalException(String.format("Driver %s has been busy", item.getDriver().getUsername()));
+          }
 
           Long tractorId = item.getTractor().getId();
-          List<Container> listContainerByTractor = containerRepository.findByTractor(tractorId);
-          listContainerByTractor.forEach(container -> {
-            if (container.getBillOfLading().getFreeTime().isBefore(pickupTime) || container.getBillOfLading()
-                .getInbound().getPickupTime().isAfter(inbound.getBillOfLading().getFreeTime())) {
-            } else {
-              if (container.getBillOfLading().getId().equals(inbound.getBillOfLading().getId())) {
-              } else {
-                throw new InternalException(
-                    String.format("Tractor %s has been busy", container.getTractor().getLicensePlate()));
-              }
-            }
-          });
+          boolean listContainerByTractor = containerRepository.findByTractor(tractorId, pickupTime,
+              billOfLading.getFreeTime(), billOfLading.getId());
+          if (!listContainerByTractor) {
+            throw new InternalException(String.format("Tractor %s has been busy", item.getTractor().getLicensePlate()));
+
+          }
 
           Long trailerId = item.getTrailer().getId();
-          List<Container> listContainerByTrailer = containerRepository.findByTrailer(trailerId);
-          listContainerByTrailer.forEach(container -> {
-            if (container.getBillOfLading().getFreeTime().isBefore(pickupTime) || container.getBillOfLading()
-                .getInbound().getPickupTime().isAfter(inbound.getBillOfLading().getFreeTime())) {
-            } else {
-              if (container.getBillOfLading().getId().equals(inbound.getBillOfLading().getId())) {
-              } else {
-                throw new InternalException(
-                    String.format("Trailer %s has been busy", container.getTrailer().getLicensePlate()));
-              }
-            }
-          });
+          boolean listContainerByTrailer = containerRepository.findByTrailer(trailerId, pickupTime,
+              billOfLading.getFreeTime(), billOfLading.getId());
+          if (!listContainerByTrailer) {
+            throw new InternalException(String.format("Trailer %s has been busy", item.getTrailer().getLicensePlate()));
+
+          }
+
         });
 
         if (inbound.getBillOfLading().getFreeTime().isAfter(pickupTime)) {

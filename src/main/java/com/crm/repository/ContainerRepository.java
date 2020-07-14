@@ -76,6 +76,8 @@ public interface ContainerRepository extends JpaRepository<Container, Long> {
   Collection<Container> findByTractor(@Param("id") Long id, @Param("statusCombined") String statusCombined,
       @Param("statusBidding") String statusBidding);
 
+  /* Check time busy Container */
+
   @Query(value = "SELECT CASE WHEN COUNT(c) = 0 THEN TRUE ELSE FALSE END "
       + "FROM Container c WHERE c.containerNumber = :containerNumber "
       + "AND ((c.billOfLading.freeTime > :freeTime AND c.billOfLading.inbound.pickupTime < :freeTime) "
@@ -96,4 +98,73 @@ public interface ContainerRepository extends JpaRepository<Container, Long> {
       + "AND c.billOfLading.id != :id")
   boolean findByContainerNumber(@Param("id") Long id, @Param("containerNumber") String containerNumber,
       @Param("pickupTime") LocalDateTime pickupTime, @Param("freeTime") LocalDateTime freeTime);
+
+  /* Check time busy Driver */
+
+  @Query(value = "SELECT CASE WHEN COUNT(c) = 0 THEN TRUE ELSE FALSE END "
+      + "FROM Container c WHERE c.driver.id = :driverId "
+      + "AND ((c.billOfLading.freeTime > :freeTime AND c.billOfLading.inbound.pickupTime < :freeTime) "
+      + "OR (c.billOfLading.freeTime > :pickupTime AND c.billOfLading.inbound.pickupTime < :pickupTime) "
+      + "OR (c.billOfLading.freeTime < :freeTime AND c.billOfLading.inbound.pickupTime > :pickupTime) "
+      + "OR (c.billOfLading.freeTime = :freeTime) " + "OR (c.billOfLading.inbound.pickupTime = :pickupTime) "
+      + "OR (c.billOfLading.inbound.pickupTime = :freeTime) " + "OR (c.billOfLading.freeTime = :pickupTime)) ")
+  boolean findByDriver(@Param("driverId") Long driverId, @Param("pickupTime") LocalDateTime pickupTime,
+      @Param("freeTime") LocalDateTime freeTime);
+
+  @Query(value = "SELECT CASE WHEN COUNT(c) = 0 THEN TRUE ELSE FALSE END "
+      + "FROM Container c WHERE c.driver.id = :driverId "
+      + "AND ((c.billOfLading.freeTime > :freeTime AND c.billOfLading.inbound.pickupTime < :freeTime) "
+      + "OR (c.billOfLading.freeTime > :pickupTime AND c.billOfLading.inbound.pickupTime < :pickupTime) "
+      + "OR (c.billOfLading.freeTime < :freeTime AND c.billOfLading.inbound.pickupTime > :pickupTime) "
+      + "OR (c.billOfLading.freeTime = :freeTime) " + "OR (c.billOfLading.inbound.pickupTime = :pickupTime) "
+      + "OR (c.billOfLading.inbound.pickupTime = :freeTime) " + "OR (c.billOfLading.freeTime = :pickupTime)) "
+      + "AND c.billOfLading.id != :id")
+  boolean findByDriver(@Param("driverId") Long driverId, @Param("pickupTime") LocalDateTime pickupTime,
+      @Param("freeTime") LocalDateTime freeTime, @Param("id") Long id);
+
+  /* Check time busy Trailer */
+
+  @Query(value = "SELECT CASE WHEN COUNT(c) = 0 THEN TRUE ELSE FALSE END "
+      + "FROM Container c WHERE c.trailer.id = :trailerId "
+      + "AND ((c.billOfLading.freeTime > :freeTime AND c.billOfLading.inbound.pickupTime < :freeTime) "
+      + "OR (c.billOfLading.freeTime > :pickupTime AND c.billOfLading.inbound.pickupTime < :pickupTime) "
+      + "OR (c.billOfLading.freeTime < :freeTime AND c.billOfLading.inbound.pickupTime > :pickupTime) "
+      + "OR (c.billOfLading.freeTime = :freeTime) " + "OR (c.billOfLading.inbound.pickupTime = :pickupTime) "
+      + "OR (c.billOfLading.inbound.pickupTime = :freeTime) " + "OR (c.billOfLading.freeTime = :pickupTime)) ")
+  boolean findByTrailer(@Param("trailerId") Long trailerId, @Param("pickupTime") LocalDateTime pickupTime,
+      @Param("freeTime") LocalDateTime freeTime);
+
+  @Query(value = "SELECT CASE WHEN COUNT(c) = 0 THEN TRUE ELSE FALSE END "
+      + "FROM Container c WHERE c.trailer.id = :trailerId "
+      + "AND ((c.billOfLading.freeTime > :freeTime AND c.billOfLading.inbound.pickupTime < :freeTime) "
+      + "OR (c.billOfLading.freeTime > :pickupTime AND c.billOfLading.inbound.pickupTime < :pickupTime) "
+      + "OR (c.billOfLading.freeTime < :freeTime AND c.billOfLading.inbound.pickupTime > :pickupTime) "
+      + "OR (c.billOfLading.freeTime = :freeTime) " + "OR (c.billOfLading.inbound.pickupTime = :pickupTime) "
+      + "OR (c.billOfLading.inbound.pickupTime = :freeTime) " + "OR (c.billOfLading.freeTime = :pickupTime)) "
+      + "AND c.billOfLading.id != :id")
+  boolean findByTrailer(@Param("trailerId") Long trailerId, @Param("pickupTime") LocalDateTime pickupTime,
+      @Param("freeTime") LocalDateTime freeTime, @Param("id") Long id);
+
+  /* Check time busy Tractor */
+
+  @Query(value = "SELECT CASE WHEN COUNT(c) = 0 THEN TRUE ELSE FALSE END "
+      + "FROM Container c WHERE c.tractor.id = :tractorId "
+      + "AND ((c.billOfLading.freeTime > :freeTime AND c.billOfLading.inbound.pickupTime < :freeTime) "
+      + "OR (c.billOfLading.freeTime > :pickupTime AND c.billOfLading.inbound.pickupTime < :pickupTime) "
+      + "OR (c.billOfLading.freeTime < :freeTime AND c.billOfLading.inbound.pickupTime > :pickupTime) "
+      + "OR (c.billOfLading.freeTime = :freeTime) " + "OR (c.billOfLading.inbound.pickupTime = :pickupTime) "
+      + "OR (c.billOfLading.inbound.pickupTime = :freeTime) " + "OR (c.billOfLading.freeTime = :pickupTime)) ")
+  boolean findByTractor(@Param("tractorId") Long tractorId, @Param("pickupTime") LocalDateTime pickupTime,
+      @Param("freeTime") LocalDateTime freeTime);
+
+  @Query(value = "SELECT CASE WHEN COUNT(c) = 0 THEN TRUE ELSE FALSE END "
+      + "FROM Container c WHERE c.tractor.id = :tractorId "
+      + "AND ((c.billOfLading.freeTime > :freeTime AND c.billOfLading.inbound.pickupTime < :freeTime) "
+      + "OR (c.billOfLading.freeTime > :pickupTime AND c.billOfLading.inbound.pickupTime < :pickupTime) "
+      + "OR (c.billOfLading.freeTime < :freeTime AND c.billOfLading.inbound.pickupTime > :pickupTime) "
+      + "OR (c.billOfLading.freeTime = :freeTime) " + "OR (c.billOfLading.inbound.pickupTime = :pickupTime) "
+      + "OR (c.billOfLading.inbound.pickupTime = :freeTime) " + "OR (c.billOfLading.freeTime = :pickupTime)) "
+      + "AND c.billOfLading.id != :id")
+  boolean findByTractor(@Param("tractorId") Long tractorId, @Param("pickupTime") LocalDateTime pickupTime,
+      @Param("freeTime") LocalDateTime freeTime, @Param("id") Long id);
 }

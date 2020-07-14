@@ -69,15 +69,20 @@ public class FeedbackServiceImpl implements FeedbackService {
   @Override
   public Page<Feedback> getFeedbacksByReport(Long reportId, String username, PaginationRequest request) {
     Page<Feedback> feedbacks = null;
-    Report report = reportRepository.findById(reportId)
-        .orElseThrow(() -> new NotFoundException("Report is not found."));
+
+    if (!reportRepository.existsById(reportId)) {
+      throw new NotFoundException("Report is not found.");
+    }
+
     PageRequest pageRequest = PageRequest.of(request.getPage(), request.getLimit(),
         Sort.by(Direction.DESC, "createdAt"));
     User sender = userRepository.findByUsername(username)
         .orElseThrow(() -> new NotFoundException("User is not found."));
     String role = sender.getRoles().iterator().next().getName();
-    if (role.equals("ROLE_MODERATOR") || role.equals("ROLE_FORWARDER")) {
-      feedbacks = feedbackRepository.findByReport(report.getId(), username, pageRequest);
+    if (role.equals("ROLE_MODERATOR")) {
+      feedbacks = feedbackRepository.findByReport(reportId, username, pageRequest);
+    } else if (role.equals("ROLE_FORWARDER")) {
+      feedbacks = feedbackRepository.findByReport(reportId, pageRequest);
     }
     return feedbacks;
   }

@@ -80,11 +80,12 @@ public class CombinedServiceImpl implements CombinedService {
       } else {
         throw new InternalException("Fines against contract violation must be greater than zero.");
       }
-    } else {
+    } else if (!username.equals(offeree.getUsername())) {
       throw new NotFoundException("You must be Offeree to create Contract.");
     }
 
     combined.setContract(contract);
+    contract.setCombined(combined);
 
     combinedRepository.save(combined);
 
@@ -163,7 +164,7 @@ public class CombinedServiceImpl implements CombinedService {
         updatesBid.put("status", EnumBidStatus.REJECTED.name());
         bidService.editBid(bid.getId(), username, updatesBid);
       }
-      
+
       if (status.equals(EnumCombinedStatus.DELIVERED)) {
         bid.getContainers().parallelStream().forEach(container -> {
           container.setStatus(EnumSupplyStatus.DELIVERED.name());

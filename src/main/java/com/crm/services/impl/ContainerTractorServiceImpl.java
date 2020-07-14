@@ -132,8 +132,8 @@ public class ContainerTractorServiceImpl implements ContainerTractorService {
         throw new InternalException(String.format("Forwarder %s not owned containerTractor", userId));
       }
 
-      Collection<Container> containers = containerRepository.findByTractor(id,
-          EnumSupplyStatus.COMBINED.name(), EnumSupplyStatus.BIDDING.name());
+      Collection<Container> containers = containerRepository.findByTractor(id, EnumSupplyStatus.COMBINED.name(),
+          EnumSupplyStatus.BIDDING.name());
       if (containers != null) {
         containers.forEach(item -> {
           if (item.getStatus().equalsIgnoreCase(EnumSupplyStatus.COMBINED.name())
@@ -176,8 +176,8 @@ public class ContainerTractorServiceImpl implements ContainerTractorService {
         throw new InternalException(String.format("Forwarder %s not owned containerTractor", userId));
       }
 
-      Collection<Container> containers = containerRepository.findByTractor(id,
-          EnumSupplyStatus.COMBINED.name(), EnumSupplyStatus.BIDDING.name());
+      Collection<Container> containers = containerRepository.findByTractor(id, EnumSupplyStatus.COMBINED.name(),
+          EnumSupplyStatus.BIDDING.name());
       if (containers != null) {
         containers.forEach(item -> {
           if (item.getStatus().equalsIgnoreCase(EnumSupplyStatus.COMBINED.name())
@@ -222,6 +222,13 @@ public class ContainerTractorServiceImpl implements ContainerTractorService {
     Page<ContainerTractor> pages = containerTractorRepository.findAll(spec, page);
     // Return result
     return pages;
+  }
+
+  @Override
+  public ContainerTractor getContainerTractorByLicensePlate(String licensePlate) {
+    ContainerTractor containerTractor = containerTractorRepository.findByLicensePlate(licensePlate)
+        .orElseThrow(() -> new NotFoundException("ERROR: containerTractor is not found."));
+    return containerTractor;
   }
 
 }

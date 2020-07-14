@@ -12,6 +12,8 @@ public interface ContainerTractorService {
 
   ContainerTractor getContainerTractorById(Long id);
 
+  ContainerTractor getContainerTractorByLicensePlate(String licensePlate);
+
   Page<ContainerTractor> getContainerTractors(PaginationRequest request);
 
   Page<ContainerTractor> getContainerTractorsByForwarder(Long userId, PaginationRequest request);

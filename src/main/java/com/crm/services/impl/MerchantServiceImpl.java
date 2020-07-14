@@ -64,6 +64,7 @@ public class MerchantServiceImpl implements MerchantService {
     merchant.setContactPerson(request.getContactPerson());
     merchant.setTin(request.getTin());
     merchant.setFax(request.getFax());
+    merchant.setRatingValue(0D);
 
     Set<Role> roles = new HashSet<>();
     Role userRole = roleRepository.findByName("ROLE_MERCHANT")

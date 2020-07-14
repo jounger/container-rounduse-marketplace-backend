@@ -122,6 +122,16 @@ public class BiddingDocumentServiceImpl implements BiddingDocumentService {
   }
 
   @Override
+  public BiddingDocument getBiddingDocumentByBid(Long id, String username) {
+    if (bidRepository.existsById(id)) {
+      throw new NotFoundException("Bid is not found");
+    }
+    BiddingDocument biddingDocument = biddingDocumentRepository.findByBid(id, username)
+        .orElseThrow(() -> new NotFoundException("Bidding document is not found."));
+    return biddingDocument;
+  }
+
+  @Override
   public Page<BiddingDocument> getBiddingDocuments(Long id, PaginationRequest request) {
     User user = userRepository.findById(id).orElseThrow(() -> new NotFoundException("User is not found."));
     String status = request.getStatus();

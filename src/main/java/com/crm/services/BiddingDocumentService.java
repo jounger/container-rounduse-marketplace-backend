@@ -14,6 +14,8 @@ public interface BiddingDocumentService {
 
   BiddingDocument getBiddingDocument(Long id);
 
+  BiddingDocument getBiddingDocumentByBid(Long id, String username);
+
   Page<BiddingDocument> getBiddingDocuments(Long id, PaginationRequest request);
 
   // update full biddingDocument

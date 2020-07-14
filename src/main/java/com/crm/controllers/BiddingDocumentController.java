@@ -94,6 +94,17 @@ public class BiddingDocumentController {
     return ResponseEntity.ok(biddingDocumentDto);
   }
 
+  @PreAuthorize("hasRole('MERCHANT') or hasRole('FORWARDER')")
+  @GetMapping("/bid/{id}")
+  public ResponseEntity<?> getBiddingDocumentByBid(@PathVariable Long id) {
+    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
+        .getPrincipal();
+    String username = userDetails.getUsername();
+    BiddingDocument biddingDocument = biddingDocumentService.getBiddingDocumentByBid(id, username);
+    BiddingDocumentDto biddingDocumentDto = BiddingDocumentMapper.toBiddingDocumentDto(biddingDocument);
+    return ResponseEntity.ok(biddingDocumentDto);
+  }
+
   @Transactional
   @PreAuthorize("hasRole('MERCHANT')")
   @PutMapping("")

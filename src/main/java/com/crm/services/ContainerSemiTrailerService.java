@@ -12,6 +12,8 @@ public interface ContainerSemiTrailerService {
 
   ContainerSemiTrailer getContainerSemiTrailerById(Long id);
 
+  ContainerSemiTrailer getContainerSemiTrailerByLicensePlate(String licensePlate);
+
   Page<ContainerSemiTrailer> getContainerSemiTrailers(PaginationRequest request);
 
   Page<ContainerSemiTrailer> getContainerSemiTrailersByForwarder(Long userId, PaginationRequest request);

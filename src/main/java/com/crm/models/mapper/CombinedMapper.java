@@ -16,7 +16,7 @@ public class CombinedMapper {
 
     Bid bid = combined.getBid();
     BidDto bidDto = BidMapper.toBidDto(bid);
-    combinedDto.setBidDto(bidDto);
+    combinedDto.setBid(bidDto);
 
     combinedDto.setStatus(combined.getStatus());
 

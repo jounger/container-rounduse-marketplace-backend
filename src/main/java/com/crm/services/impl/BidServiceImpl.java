@@ -351,6 +351,10 @@ public class BidServiceImpl implements BidService {
           container.setStatus(EnumSupplyStatus.COMBINED.name());
           containerRepository.save(container);
         });
+        if(bidRepository.isAllAcceptedByBiddingDocument(biddingDocument.getId())) {
+          outbound.setStatus(EnumSupplyStatus.COMBINED.name());
+          outboundRepository.save(outbound);
+        }
       }
 
       if (bid.getStatus().equalsIgnoreCase(EnumBidStatus.CANCELED.name())

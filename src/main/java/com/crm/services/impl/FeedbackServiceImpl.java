@@ -13,6 +13,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import com.crm.common.Constant;
+import com.crm.common.Tool;
 import com.crm.exception.InternalException;
 import com.crm.exception.NotFoundException;
 import com.crm.models.Feedback;
@@ -39,15 +40,14 @@ public class FeedbackServiceImpl implements FeedbackService {
   private ReportRepository reportRepository;
 
   @Override
-  public Feedback createFeedback(Long id, String username, FeedbackRequest request) {
+  public Feedback createFeedback(Long id, Long userId, FeedbackRequest request) {
     Feedback feedback = new Feedback();
 
     Report report = reportRepository.findById(id).orElseThrow(() -> new NotFoundException("Report is not found."));
     feedback.setReport(report);
-    User sender = userRepository.findByUsername(username)
-        .orElseThrow(() -> new NotFoundException("User is not found."));
+    User sender = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User is not found."));
     String role = sender.getRoles().iterator().next().getName();
-    if (role.equals("ROLE_MODERATOR") || username.equals(report.getSender().getUsername())) {
+    if (role.equals("ROLE_MODERATOR") || userId.equals(report.getSender().getId())) {
       feedback.setSender(sender);
     } else {
       throw new NotFoundException("Access denied.");
@@ -67,17 +67,21 @@ public class FeedbackServiceImpl implements FeedbackService {
   }
 
   @Override
-  public Page<Feedback> getFeedbacksByReport(Long reportId, String username, PaginationRequest request) {
+  public Page<Feedback> getFeedbacksByReport(Long reportId, Long userId, PaginationRequest request) {
     Page<Feedback> feedbacks = null;
-    Report report = reportRepository.findById(reportId)
-        .orElseThrow(() -> new NotFoundException("Report is not found."));
+
+    if (!reportRepository.existsById(reportId)) {
+      throw new NotFoundException("Report is not found.");
+    }
+
     PageRequest pageRequest = PageRequest.of(request.getPage(), request.getLimit(),
         Sort.by(Direction.DESC, "createdAt"));
-    User sender = userRepository.findByUsername(username)
-        .orElseThrow(() -> new NotFoundException("User is not found."));
+    User sender = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User is not found."));
     String role = sender.getRoles().iterator().next().getName();
-    if (role.equals("ROLE_MODERATOR") || role.equals("ROLE_FORWARDER")) {
-      feedbacks = feedbackRepository.findByReport(report.getId(), username, pageRequest);
+    if (role.equals("ROLE_MODERATOR")) {
+      feedbacks = feedbackRepository.findByReport(reportId, userId, pageRequest);
+    } else if (role.equals("ROLE_FORWARDER")) {
+      feedbacks = feedbackRepository.findByReport(reportId, pageRequest);
     }
     return feedbacks;
   }
@@ -116,16 +120,32 @@ public class FeedbackServiceImpl implements FeedbackService {
   }
 
   @Override
-  public Feedback editFeedback(Long id, String username, Map<String, Object> updates) {
-    // TODO Auto-generated method stub
-    return null;
+  public Feedback editFeedback(Long id, Long userId, Map<String, Object> updates) {
+    Feedback feedback = feedbackRepository.findById(id)
+        .orElseThrow(() -> new NotFoundException("Feedback is not found."));
+    if (feedback.getSender().getId() != userId) {
+      throw new NotFoundException("Access denied, This feedback can be only edited by its onwer.");
+    }
+
+    String message = (String) updates.get("message");
+    if (!Tool.isEqual(feedback.getMessage(), message)) {
+      feedback.setMessage(message);
+    }
+
+    String satisfactionPoints = (String) updates.get("satisfactionPoints");
+    if (!Tool.isEqual(feedback.getSatisfactionPoints(), satisfactionPoints)) {
+      feedback.setSatisfactionPoints(Integer.valueOf(satisfactionPoints));
+    }
+
+    feedbackRepository.save(feedback);
+    return feedback;
   }
 
   @Override
-  public void removeFeedback(Long id, String username) {
+  public void removeFeedback(Long id, Long userId) {
     Feedback feedback = feedbackRepository.findById(id)
         .orElseThrow(() -> new NotFoundException("Feedback is not found."));
-    if (feedback.getSender().getUsername().equals(username)) {
+    if (feedback.getSender().getId().equals(userId)) {
       feedbackRepository.deleteById(id);
     } else {
       throw new NotFoundException("Access denied.");

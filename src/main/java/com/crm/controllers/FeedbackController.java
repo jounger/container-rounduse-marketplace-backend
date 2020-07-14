@@ -32,6 +32,7 @@ import com.crm.payload.request.PaginationRequest;
 import com.crm.payload.request.FeedbackRequest;
 import com.crm.payload.response.MessageResponse;
 import com.crm.payload.response.PaginationResponse;
+import com.crm.security.services.UserDetailsImpl;
 import com.crm.services.FeedbackService;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
@@ -46,9 +47,9 @@ public class FeedbackController {
   @PostMapping("/report/{id}")
   @PreAuthorize("hasRole('MODERATOR') or hasRole('FORWARDER')")
   public ResponseEntity<?> createFeedback(@PathVariable("id") Long id, @Valid @RequestBody FeedbackRequest request) {
-    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    String username = userDetails.getUsername();
-    Feedback payment = paymentService.createFeedback(id, username, request);
+    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    Long userId = userDetails.getId();
+    Feedback payment = paymentService.createFeedback(id, userId, request);
     FeedbackDto paymentDto = FeedbackMapper.toFeedbackDto(payment);
     return ResponseEntity.ok(paymentDto);
   }
@@ -56,10 +57,10 @@ public class FeedbackController {
   @PreAuthorize("hasRole('MODERATOR') or hasRole('FORWARDER')")
   @GetMapping("/report/{id}")
   public ResponseEntity<?> getFeedbacksByReport(@PathVariable Long id, @Valid PaginationRequest request) {
-    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    String username = userDetails.getUsername();
+    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    Long userId = userDetails.getId();
 
-    Page<Feedback> pages = paymentService.getFeedbacksByReport(id, username, request);
+    Page<Feedback> pages = paymentService.getFeedbacksByReport(id, userId, request);
 
     PaginationResponse<FeedbackDto> response = new PaginationResponse<>();
     response.setPageNumber(request.getPage());
@@ -120,9 +121,9 @@ public class FeedbackController {
   @PreAuthorize("hasRole('MODERATOR') or hasRole('FORWARDER')")
   @RequestMapping(value = "/{id}", method = RequestMethod.PATCH, consumes = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<?> editFeedback(@PathVariable("id") Long id, @RequestBody Map<String, Object> updates) {
-    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    String username = userDetails.getUsername();
-    Feedback payment = paymentService.editFeedback(id, username, updates);
+    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    Long userId = userDetails.getId();
+    Feedback payment = paymentService.editFeedback(id, userId, updates);
     FeedbackDto paymentDto = FeedbackMapper.toFeedbackDto(payment);
     return ResponseEntity.ok(paymentDto);
   }
@@ -131,9 +132,9 @@ public class FeedbackController {
   @PreAuthorize("hasRole('MODERATOR') or hasRole('FORWARDER')")
   @DeleteMapping("/{id}")
   public ResponseEntity<?> deleteFeedback(@PathVariable Long id) {
-    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    String username = userDetails.getUsername();
-    paymentService.removeFeedback(id, username);
+    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    Long userId = userDetails.getId();
+    paymentService.removeFeedback(id, userId);
     return ResponseEntity.ok(new MessageResponse("Feedback deleted successfully."));
   }
 }

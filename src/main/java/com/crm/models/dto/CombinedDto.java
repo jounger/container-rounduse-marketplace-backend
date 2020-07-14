@@ -9,7 +9,7 @@ public class CombinedDto {
 
   private Long id;
   
-  private BidDto bidDto;
+  private BidDto bid;
   
   private String status;
   

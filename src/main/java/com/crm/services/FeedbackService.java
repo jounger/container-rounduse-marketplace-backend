@@ -10,15 +10,15 @@ import com.crm.payload.request.PaginationRequest;
 
 public interface FeedbackService {
   
-  Feedback createFeedback(Long id, String username, FeedbackRequest request);
+  Feedback createFeedback(Long id, Long userId, FeedbackRequest request);
   
-  Page<Feedback> getFeedbacksByReport(Long report, String username, PaginationRequest request);
+  Page<Feedback> getFeedbacksByReport(Long reportId, Long userId, PaginationRequest request);
 
   Page<Feedback> getFeedbacksByUser(String username, PaginationRequest request);
 
   Page<Feedback> searchFeedbacks(PaginationRequest request, String search);
 
-  Feedback editFeedback(Long id, String username, Map<String, Object> updates);
+  Feedback editFeedback(Long id, Long userId, Map<String, Object> updates);
 
-  void removeFeedback(Long id, String username);
+  void removeFeedback(Long id, Long userId);
 }

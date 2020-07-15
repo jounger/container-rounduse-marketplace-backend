@@ -88,6 +88,11 @@ public class BillOfLadingServiceImpl implements BillOfLadingService {
         billOfLading.setBillOfLadingNumber(billOfLadingNumber);
       }
 
+      if (request.getUnit() < billOfLading.getContainers().size()) {
+        throw new InternalException("unit must be more or equal number of container");
+      }
+      billOfLading.setUnit(request.getUnit());
+
       if (request.getFreeTime() != null && !request.getFreeTime().isEmpty()) {
         LocalDateTime freeTime = Tool.convertToLocalDateTime(request.getFreeTime());
 
@@ -155,25 +160,35 @@ public class BillOfLadingServiceImpl implements BillOfLadingService {
       }
 
       String portOfDelivery = (String) updates.get("portOfDelivery");
-      if (portOfDelivery != null && !portOfDelivery.isEmpty()) {
+      if (portOfDelivery != null && !portOfDelivery.isEmpty()
+          && !portOfDelivery.equals(billOfLading.getPortOfDelivery().getNameCode())) {
         Port port = portRepository.findByNameCode(portOfDelivery)
             .orElseThrow(() -> new NotFoundException("ERROR: Port is not found."));
         billOfLading.setPortOfDelivery(port);
       }
 
       String billOfLadingNumber = (String) updates.get("billOfLadingNumber");
-      if (billOfLadingNumber != null && !billOfLadingNumber.isEmpty()) {
+      if (billOfLadingNumber != null && !billOfLadingNumber.isEmpty()
+          && !billOfLadingNumber.equals(billOfLading.getBillOfLadingNumber())) {
         if (billOfLadingRepository.existsByBillOfLadingNumber(billOfLadingNumber)) {
-          if (billOfLadingNumber.equals(billOfLading.getBillOfLadingNumber())) {
-          } else {
-            throw new DuplicateRecordException("Error: BillOfLading has been existed");
-          }
+          throw new DuplicateRecordException("Error: BillOfLading has been existed");
         }
         billOfLading.setBillOfLadingNumber(billOfLadingNumber);
       }
 
+      String unitRequest = (String) updates.get("unit");
+      if (unitRequest != null && !unitRequest.isEmpty()
+          && !unitRequest.equals(String.valueOf(billOfLading.getUnit()))) {
+        int unit = Integer.parseInt(unitRequest);
+        if (unit < billOfLading.getContainers().size()) {
+          throw new InternalException("unit must be more or equal number of container");
+        }
+        billOfLading.setUnit(unit);
+      }
+
       String freeTimeReq = (String) updates.get("freeTime");
-      if (freeTimeReq != null && !freeTimeReq.isEmpty()) {
+      if (freeTimeReq != null && !freeTimeReq.isEmpty()
+          && !freeTimeReq.equals(String.valueOf(billOfLading.getFreeTime()))) {
 
         LocalDateTime freeTime = Tool.convertToLocalDateTime(freeTimeReq);
 

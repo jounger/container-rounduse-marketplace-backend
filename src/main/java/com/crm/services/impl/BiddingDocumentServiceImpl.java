@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 
 import com.crm.common.Tool;
@@ -28,6 +29,7 @@ import com.crm.repository.BidRepository;
 import com.crm.repository.BiddingDocumentRepository;
 import com.crm.repository.ContainerRepository;
 import com.crm.repository.DiscountRepository;
+import com.crm.repository.ForwarderRepository;
 import com.crm.repository.MerchantRepository;
 import com.crm.repository.OutboundRepository;
 import com.crm.repository.UserRepository;
@@ -56,6 +58,9 @@ public class BiddingDocumentServiceImpl implements BiddingDocumentService {
 
   @Autowired
   private BidRepository bidRepository;
+  
+  @Autowired
+  private ForwarderRepository forwarderRepository;
 
   @Override
   public BiddingDocument createBiddingDocument(Long id, BiddingDocumentRequest request) {
@@ -129,6 +134,16 @@ public class BiddingDocumentServiceImpl implements BiddingDocumentService {
     BiddingDocument biddingDocument = biddingDocumentRepository.findByBid(id, username)
         .orElseThrow(() -> new NotFoundException("Bidding document is not found."));
     return biddingDocument;
+  }
+
+  @Override
+  public Page<BiddingDocument> getBiddingDocumentsExistCombined(Long id, PaginationRequest request) {
+    if(!biddingDocumentRepository.existsById(id) || !forwarderRepository.existsById(id)) {
+      throw new NotFoundException("User or Bidding document is not found.");
+    }
+    PageRequest page = PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Direction.DESC, "createdAt"));
+    Page<BiddingDocument> biddingDocuments = biddingDocumentRepository.findByExistCombined(id, page);
+    return biddingDocuments;
   }
 
   @Override

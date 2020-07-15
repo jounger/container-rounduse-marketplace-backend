@@ -32,6 +32,7 @@ import com.crm.payload.request.EvidenceRequest;
 import com.crm.payload.request.PaginationRequest;
 import com.crm.payload.response.MessageResponse;
 import com.crm.payload.response.PaginationResponse;
+import com.crm.security.services.UserDetailsImpl;
 import com.crm.services.EvidenceService;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
@@ -60,6 +61,28 @@ public class EvidenceController {
     String username = userDetails.getUsername();
 
     Page<Evidence> pages = evidenceService.getEvidencesByUser(username, request);
+
+    PaginationResponse<EvidenceDto> response = new PaginationResponse<>();
+    response.setPageNumber(request.getPage());
+    response.setPageSize(request.getLimit());
+    response.setTotalElements(pages.getTotalElements());
+    response.setTotalPages(pages.getTotalPages());
+
+    List<Evidence> evidences = pages.getContent();
+    List<EvidenceDto> evidencesDto = new ArrayList<>();
+    evidences.forEach(evidence -> evidencesDto.add(EvidenceMapper.toEvidenceDto(evidence)));
+    response.setContents(evidencesDto);
+
+    return ResponseEntity.ok(response);
+  }
+  
+  @PreAuthorize("hasRole('MODERATOR') or hasRole('MERCHANT') or hasRole('FORWARDER')")
+  @GetMapping("/contract/{id}")
+  public ResponseEntity<?> getEvidencesByContract(@PathVariable("id") Long id, @Valid PaginationRequest request) {
+    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    Long userId = userDetails.getId();
+
+    Page<Evidence> pages = evidenceService.getEvidencesByContract(id, userId, request);
 
     PaginationResponse<EvidenceDto> response = new PaginationResponse<>();
     response.setPageNumber(request.getPage());

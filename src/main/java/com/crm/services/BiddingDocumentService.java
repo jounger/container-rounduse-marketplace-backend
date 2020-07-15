@@ -16,6 +16,8 @@ public interface BiddingDocumentService {
 
   BiddingDocument getBiddingDocumentByBid(Long id, String username);
 
+  Page<BiddingDocument> getBiddingDocumentsExistCombined(Long id, PaginationRequest request);
+
   Page<BiddingDocument> getBiddingDocuments(Long id, PaginationRequest request);
 
   // update full biddingDocument

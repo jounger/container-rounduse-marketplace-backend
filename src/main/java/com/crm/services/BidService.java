@@ -17,6 +17,8 @@ public interface BidService {
   Bid getBidByBiddingDocumentAndForwarder(Long biddingDocument, String username);
 
   Page<Bid> getBidsByBiddingDocument(Long id, PaginationRequest request);
+  
+  Page<Bid> getBidsByBiddingDocumentAndExistCombined(Long id, Long userId, PaginationRequest request);
 
   Page<Bid> getBidsByForwarder(Long id, PaginationRequest request);
 

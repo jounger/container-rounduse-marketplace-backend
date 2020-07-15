@@ -21,11 +21,13 @@ import com.crm.exception.NotFoundException;
 import com.crm.models.Contract;
 import com.crm.models.Payment;
 import com.crm.models.Supplier;
+import com.crm.models.User;
 import com.crm.payload.request.PaginationRequest;
 import com.crm.payload.request.PaymentRequest;
 import com.crm.repository.ContractRepository;
 import com.crm.repository.PaymentRepository;
 import com.crm.repository.SupplierRepository;
+import com.crm.repository.UserRepository;
 import com.crm.services.PaymentService;
 import com.crm.specification.builder.PaymentSpecificationsBuilder;
 
@@ -40,6 +42,9 @@ public class PaymentServiceImpl implements PaymentService {
 
   @Autowired
   private ContractRepository contractRepository;
+  
+  @Autowired
+  private UserRepository userRepository;
 
   @Override
   public Payment createPayment(Long id, String username, PaymentRequest request) {
@@ -84,6 +89,24 @@ public class PaymentServiceImpl implements PaymentService {
   public Page<Payment> getPaymentsByUser(String username, PaginationRequest request) {
     PageRequest page = PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Direction.DESC, "createdAt"));
     Page<Payment> payments = paymentRepository.findByUser(username, page);
+    return payments;
+  }
+
+  @Override
+  public Page<Payment> getPaymentsByContract(Long id, Long userId, PaginationRequest request) {
+    if (!contractRepository.existsById(id)) {
+      throw new NotFoundException("Contract is not found.");
+    }
+    Page<Payment> payments = null;
+    PageRequest page = PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt"));
+    User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User is not found."));
+    String role = user.getRoles().iterator().next().getName();
+
+    if (role.equalsIgnoreCase("ROLE_MODERATOR")) {
+      payments = paymentRepository.findByContract(id, page);
+    } else {
+      payments = paymentRepository.findByContract(id, userId, page);
+    }
     return payments;
   }
 

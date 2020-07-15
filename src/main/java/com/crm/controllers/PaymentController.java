@@ -32,6 +32,7 @@ import com.crm.payload.request.PaginationRequest;
 import com.crm.payload.request.PaymentRequest;
 import com.crm.payload.response.MessageResponse;
 import com.crm.payload.response.PaginationResponse;
+import com.crm.security.services.UserDetailsImpl;
 import com.crm.services.PaymentService;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
@@ -53,6 +54,28 @@ public class PaymentController {
     return ResponseEntity.ok(paymentDto);
   }
 
+  @PreAuthorize("hasRole('MODERATOR') or hasRole('MERCHANT') or hasRole('FORWARDER')")
+  @GetMapping("/contract/{id}")
+  public ResponseEntity<?> getPaymentsByContract(@PathVariable("id") Long id, @Valid PaginationRequest request) {
+    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    Long userId = userDetails.getId();
+
+    Page<Payment> pages = paymentService.getPaymentsByContract(id, userId, request);
+
+    PaginationResponse<PaymentDto> response = new PaginationResponse<>();
+    response.setPageNumber(request.getPage());
+    response.setPageSize(request.getLimit());
+    response.setTotalElements(pages.getTotalElements());
+    response.setTotalPages(pages.getTotalPages());
+
+    List<Payment> payments = pages.getContent();
+    List<PaymentDto> paymentsDto = new ArrayList<>();
+    payments.forEach(payment -> paymentsDto.add(PaymentMapper.toPaymentDto(payment)));
+    response.setContents(paymentsDto);
+
+    return ResponseEntity.ok(response);
+  }
+  
   @PreAuthorize("hasRole('MERCHANT') or hasRole('FORWARDER')")
   @GetMapping("/user")
   public ResponseEntity<?> getPaymentsByUser(@Valid PaginationRequest request) {

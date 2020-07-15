@@ -13,6 +13,8 @@ public interface EvidenceService {
   Evidence createEvidence(Long id, String username, EvidenceRequest request);
 
   Page<Evidence> getEvidencesByUser(String username, PaginationRequest request);
+  
+  Page<Evidence> getEvidencesByContract(Long id, Long userId, PaginationRequest request);
 
   Page<Evidence> searchEvidences(PaginationRequest request, String search);
 

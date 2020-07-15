@@ -15,4 +15,10 @@ public interface PaymentRepository extends JpaRepository<Payment, Long>, JpaSpec
 
   @Query(value = "FROM Payment p WHERE p.sender.username = :username OR p.recipient.username = :username")
   Page<Payment> findByUser(@Param("username") String username, Pageable pageable);
+
+  @Query(value = "FROM Payment p WHERE p.contract.id = :id")
+  Page<Payment> findByContract(@Param("id") Long id, Pageable pageable);
+
+  @Query(value = "FROM Payment p WHERE p.contract.id = :id AND (p.sender.id = :userId OR p.recipient.id = :userId)")
+  Page<Payment> findByContract(@Param("id") Long id, @Param("userId") Long userId, Pageable pageable);
 }

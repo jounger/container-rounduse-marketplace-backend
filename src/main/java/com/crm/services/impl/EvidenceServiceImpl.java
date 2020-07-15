@@ -21,16 +21,18 @@ import com.crm.models.Combined;
 import com.crm.models.Contract;
 import com.crm.models.Evidence;
 import com.crm.models.Supplier;
+import com.crm.models.User;
 import com.crm.payload.request.EvidenceRequest;
 import com.crm.payload.request.PaginationRequest;
 import com.crm.repository.ContractRepository;
 import com.crm.repository.EvidenceRepository;
 import com.crm.repository.SupplierRepository;
+import com.crm.repository.UserRepository;
 import com.crm.services.EvidenceService;
 import com.crm.specification.builder.EvidenceSpecificationsBuilder;
 
 @Service
-public class EvidenceSeriviceImpl implements EvidenceService {
+public class EvidenceServiceImpl implements EvidenceService {
 
   @Autowired
   private EvidenceRepository evidenceRepository;
@@ -40,6 +42,9 @@ public class EvidenceSeriviceImpl implements EvidenceService {
 
   @Autowired
   private SupplierRepository supplierRepository;
+
+  @Autowired
+  private UserRepository userRepository;
 
   @Override
   public Evidence createEvidence(Long id, String username, EvidenceRequest request) {
@@ -78,6 +83,24 @@ public class EvidenceSeriviceImpl implements EvidenceService {
     }
     PageRequest page = PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt"));
     Page<Evidence> evidences = evidenceRepository.findByUser(username, page);
+    return evidences;
+  }
+
+  @Override
+  public Page<Evidence> getEvidencesByContract(Long id, Long userId, PaginationRequest request) {
+    if (!contractRepository.existsById(id)) {
+      throw new NotFoundException("Contract is not found.");
+    }
+    Page<Evidence> evidences = null;
+    PageRequest page = PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt"));
+    User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User is not found."));
+    String role = user.getRoles().iterator().next().getName();
+
+    if (role.equalsIgnoreCase("ROLE_MODERATOR")) {
+      evidences = evidenceRepository.findByContract(id, page);
+    } else {
+      evidences = evidenceRepository.findByContract(id, userId, page);
+    }
     return evidences;
   }
 

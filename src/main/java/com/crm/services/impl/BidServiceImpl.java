@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 
 import com.crm.common.Constant;
@@ -33,6 +34,7 @@ import com.crm.repository.BidRepository;
 import com.crm.repository.BiddingDocumentRepository;
 import com.crm.repository.ContainerRepository;
 import com.crm.repository.ForwarderRepository;
+import com.crm.repository.MerchantRepository;
 import com.crm.repository.OutboundRepository;
 import com.crm.repository.UserRepository;
 import com.crm.services.BidService;
@@ -48,6 +50,9 @@ public class BidServiceImpl implements BidService {
 
   @Autowired
   private ForwarderRepository forwarderRepository;
+
+  @Autowired
+  private MerchantRepository merchantRepository;
 
   @Autowired
   private ContainerRepository containerRepository;
@@ -148,7 +153,17 @@ public class BidServiceImpl implements BidService {
   @Override
   public Page<Bid> getBidsByBiddingDocument(Long id, PaginationRequest request) {
     Page<Bid> bids = bidRepository.findByBiddingDocument(id,
-        PageRequest.of(request.getPage(), request.getLimit(), Sort.by("id").descending()));
+        PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Direction.DESC, "id")));
+    return bids;
+  }
+
+  @Override
+  public Page<Bid> getBidsByBiddingDocumentAndExistCombined(Long id, Long userId, PaginationRequest request) {
+    if (!biddingDocumentRepository.existsById(id) || !merchantRepository.existsById(userId)) {
+      throw new NotFoundException("User or Bidding document is not found.");
+    }
+    PageRequest page = PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Direction.DESC, "id"));
+    Page<Bid> bids = bidRepository.findByBiddingDocumentAndExistCombined(id, userId, page);
     return bids;
   }
 
@@ -351,7 +366,7 @@ public class BidServiceImpl implements BidService {
           container.setStatus(EnumSupplyStatus.COMBINED.name());
           containerRepository.save(container);
         });
-        if(bidRepository.isAllAcceptedByBiddingDocument(biddingDocument.getId())) {
+        if (bidRepository.isAllAcceptedByBiddingDocument(biddingDocument.getId())) {
           outbound.setStatus(EnumSupplyStatus.COMBINED.name());
           outboundRepository.save(outbound);
         }

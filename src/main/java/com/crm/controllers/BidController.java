@@ -81,6 +81,28 @@ public class BidController {
     BidDto bidDto = BidMapper.toBidDto(bid);
     return ResponseEntity.ok(bidDto);
   }
+  
+  @PreAuthorize("hasRole('MERCHANT')")
+  @GetMapping("/combined/bidding-document/{id}")
+  public ResponseEntity<?> getBidByBiddingDocumentAndExistCombined(@PathVariable Long id, @Valid PaginationRequest request) {
+    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    Long userId = userDetails.getId();
+
+    Page<Bid> pages = bidService.getBidsByBiddingDocumentAndExistCombined(id, userId, request);
+    
+    PaginationResponse<BidDto> response = new PaginationResponse<>();
+    response.setPageNumber(request.getPage());
+    response.setPageSize(request.getLimit());
+    response.setTotalElements(pages.getTotalElements());
+    response.setTotalPages(pages.getTotalPages());
+
+    List<Bid> bids = pages.getContent();
+    List<BidDto> bidsDto = new ArrayList<>();
+    bids.forEach(bid -> bidsDto.add(BidMapper.toBidDto(bid)));
+    response.setContents(bidsDto);
+
+    return ResponseEntity.ok(response);
+  }
 
   @PreAuthorize("hasRole('MERCHANT')")
   @GetMapping("/merchant/{id}")

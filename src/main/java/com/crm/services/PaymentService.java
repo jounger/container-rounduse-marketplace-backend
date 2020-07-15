@@ -14,6 +14,8 @@ public interface PaymentService {
   
   Page<Payment> getPaymentsByUser(String username, PaginationRequest request);
   
+  Page<Payment> getPaymentsByContract(Long id, Long userId, PaginationRequest request);
+  
   Page<Payment> searchPayments(PaginationRequest request, String search);
   
   Payment editPayment(Long id, String username, Map<String, Object> updates);

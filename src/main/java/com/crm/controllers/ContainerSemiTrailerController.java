@@ -118,6 +118,16 @@ public class ContainerSemiTrailerController {
     return ResponseEntity.ok(containerSemiTrailerDto);
   }
 
+  @PreAuthorize("hasRole('FORWARDER') or hasRole('MERCHANT')")
+  @RequestMapping(method = RequestMethod.GET, params = { "licensePlate" })
+  public ResponseEntity<?> getContainerSemiTrailerByLicensePlate(@RequestParam String licensePlate) {
+    ContainerSemiTrailer containerSemiTrailer = containerSemiTrailerService
+        .getContainerSemiTrailerByLicensePlate(licensePlate);
+    ContainerSemiTrailerDto containerSemiTrailerDto = new ContainerSemiTrailerDto();
+    containerSemiTrailerDto = ContainerSemiTrailerMapper.toContainerSemiTrailerDto(containerSemiTrailer);
+    return ResponseEntity.ok(containerSemiTrailerDto);
+  }
+
   @Transactional
   @PostMapping("")
   @PreAuthorize("hasRole('FORWARDER')")

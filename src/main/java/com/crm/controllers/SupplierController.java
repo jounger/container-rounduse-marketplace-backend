@@ -24,10 +24,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.crm.models.Supplier;
-import com.crm.models.Supplier;
 import com.crm.models.dto.SupplierDto;
-import com.crm.models.dto.SupplierDto;
-import com.crm.models.mapper.SupplierMapper;
 import com.crm.models.mapper.SupplierMapper;
 import com.crm.payload.request.PaginationRequest;
 import com.crm.payload.request.SupplierRequest;

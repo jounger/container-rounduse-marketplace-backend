@@ -159,8 +159,8 @@ public class ContainerSemiTrailerServiceImpl implements ContainerSemiTrailerServ
         throw new InternalException(String.format("Forwarder %s not owned containerSemiTrailer", userId));
       }
 
-      Collection<Container> containers = containerRepository.findByTrailer(id,
-          EnumSupplyStatus.COMBINED.name(), EnumSupplyStatus.BIDDING.name());
+      Collection<Container> containers = containerRepository.findByTrailer(id, EnumSupplyStatus.COMBINED.name(),
+          EnumSupplyStatus.BIDDING.name());
       if (containers != null) {
         containers.forEach(item -> {
           if (item.getStatus().equalsIgnoreCase(EnumSupplyStatus.COMBINED.name())
@@ -222,8 +222,8 @@ public class ContainerSemiTrailerServiceImpl implements ContainerSemiTrailerServ
         throw new InternalException(String.format("Forwarder %s not owned containerSemiTrailer", userId));
       }
 
-      Collection<Container> containers = containerRepository.findByTrailer(id,
-          EnumSupplyStatus.COMBINED.name(), EnumSupplyStatus.BIDDING.name());
+      Collection<Container> containers = containerRepository.findByTrailer(id, EnumSupplyStatus.COMBINED.name(),
+          EnumSupplyStatus.BIDDING.name());
       if (containers != null) {
         containers.forEach(item -> {
           if (item.getStatus().equalsIgnoreCase(EnumSupplyStatus.COMBINED.name())
@@ -268,6 +268,13 @@ public class ContainerSemiTrailerServiceImpl implements ContainerSemiTrailerServ
     Page<ContainerSemiTrailer> pages = containerSemiTrailerRepository.findAll(spec, page);
     // Return result
     return pages;
+  }
+
+  @Override
+  public ContainerSemiTrailer getContainerSemiTrailerByLicensePlate(String licensePlate) {
+    ContainerSemiTrailer containerSemiTrailer = containerSemiTrailerRepository.findByLicensePlate(licensePlate)
+        .orElseThrow(() -> new NotFoundException("ERROR: ContainerSemiTrailer is not found."));
+    return containerSemiTrailer;
   }
 
 }

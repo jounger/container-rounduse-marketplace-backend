@@ -78,9 +78,9 @@ public class FeedbackServiceImpl implements FeedbackService {
         Sort.by(Direction.DESC, "createdAt"));
     User sender = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User is not found."));
     String role = sender.getRoles().iterator().next().getName();
-    if (role.equals("ROLE_MODERATOR")) {
+    if (role.equals("ROLE_FORWARDER")) {
       feedbacks = feedbackRepository.findByReport(reportId, userId, pageRequest);
-    } else if (role.equals("ROLE_FORWARDER")) {
+    } else if (role.equals("ROLE_MODERATOR")) {
       feedbacks = feedbackRepository.findByReport(reportId, pageRequest);
     }
     return feedbacks;

@@ -29,9 +29,9 @@ import com.crm.repository.BidRepository;
 import com.crm.repository.BiddingDocumentRepository;
 import com.crm.repository.ContainerRepository;
 import com.crm.repository.DiscountRepository;
-import com.crm.repository.ForwarderRepository;
 import com.crm.repository.MerchantRepository;
 import com.crm.repository.OutboundRepository;
+import com.crm.repository.SupplierRepository;
 import com.crm.repository.UserRepository;
 import com.crm.services.BiddingDocumentService;
 
@@ -60,7 +60,7 @@ public class BiddingDocumentServiceImpl implements BiddingDocumentService {
   private BidRepository bidRepository;
   
   @Autowired
-  private ForwarderRepository forwarderRepository;
+  private SupplierRepository supplierRepository;
 
   @Override
   public BiddingDocument createBiddingDocument(Long id, BiddingDocumentRequest request) {
@@ -137,8 +137,8 @@ public class BiddingDocumentServiceImpl implements BiddingDocumentService {
   }
 
   @Override
-  public Page<BiddingDocument> getBiddingDocumentsExistCombined(Long id, PaginationRequest request) {
-    if(!biddingDocumentRepository.existsById(id) || !forwarderRepository.existsById(id)) {
+  public Page<BiddingDocument> getBiddingDocumentsByExistCombined(Long id, PaginationRequest request) {
+    if(!biddingDocumentRepository.existsById(id) || !supplierRepository.existsById(id)) {
       throw new NotFoundException("User or Bidding document is not found.");
     }
     PageRequest page = PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Direction.DESC, "createdAt"));

@@ -9,7 +9,7 @@ public class ReportMapper {
 
     reportDto.setId(report.getId());
     reportDto.setSender(report.getSender().getUsername());
-    reportDto.setReport(report.getReport().getId());
+    reportDto.setReport(BiddingDocumentMapper.toBiddingDocumentDto(report.getReport()));
     reportDto.setTitle(report.getTitle());
     reportDto.setDetail(report.getDetail());
     reportDto.setStatus(report.getStatus());

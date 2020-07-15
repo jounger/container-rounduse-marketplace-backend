@@ -82,7 +82,7 @@ public class BidController {
     return ResponseEntity.ok(bidDto);
   }
   
-  @PreAuthorize("hasRole('MERCHANT')")
+  @PreAuthorize("hasRole('MERCHANT') or hasRole('FORWARDER')")
   @GetMapping("/combined/bidding-document/{id}")
   public ResponseEntity<?> getBidByBiddingDocumentAndExistCombined(@PathVariable Long id, @Valid PaginationRequest request) {
     UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();

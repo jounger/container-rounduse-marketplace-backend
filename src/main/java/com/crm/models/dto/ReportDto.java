@@ -15,7 +15,7 @@ public class ReportDto {
   
   private String sender;
   
-  private Long report;
+  private BiddingDocumentDto report;
   
   private String title;
   

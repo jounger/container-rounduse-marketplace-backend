@@ -31,10 +31,6 @@ public class Inbound extends Supply {
   @JoinColumn(name = "forwarder_id")
   private Forwarder forwarder;
 
-  @OneToOne(cascade = CascadeType.ALL)
-  @JoinColumn(name = "bill_of_lading_id")
-  private BillOfLading billOfLading;
-
   @Column(name = "empty_time")
   private LocalDateTime emptyTime;
 
@@ -43,5 +39,8 @@ public class Inbound extends Supply {
 
   @Column(name = "return_station")
   private String returnStation;
+
+  @OneToOne(mappedBy = "inbound", cascade = CascadeType.ALL)
+  private BillOfLading billOfLading;
 
 }

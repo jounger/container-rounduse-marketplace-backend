@@ -9,11 +9,13 @@ import com.crm.payload.request.PaginationRequest;
 import com.crm.payload.request.SignUpRequest;
 
 public interface UserService {
-  
+
   void createUser(SignUpRequest request);
 
   Page<User> getUsers(PaginationRequest request);
+  
+  Page<User> searchUsers(PaginationRequest request, String search);
 
   User changeStatus(Long id, Map<String, Object> updates);
-  
+
 }

@@ -3,11 +3,13 @@ package com.crm.models;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 import javax.validation.constraints.NotBlank;
@@ -43,7 +45,8 @@ public class Driver extends User {
   @JoinColumn(name = "forwarder_id")
   private Forwarder forwarder;
 
-  private String location;
+  @OneToOne(mappedBy = "driver", cascade = CascadeType.ALL)
+  private Geolocation location;
 
   @OneToMany(mappedBy = "driver")
   private Collection<Container> containers = new ArrayList<>();

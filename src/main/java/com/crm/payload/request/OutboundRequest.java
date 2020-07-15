@@ -15,7 +15,9 @@ public class OutboundRequest extends SupplyRequest {
 
   private String packingStation;
 
-  private Double payload;
+  private Double grossWeight;
+
+  private String deliveryTime;
 
   private String unitOfMeasurement;
 

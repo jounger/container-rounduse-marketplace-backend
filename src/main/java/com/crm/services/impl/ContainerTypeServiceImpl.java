@@ -1,13 +1,18 @@
 package com.crm.services.impl;
 
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import com.crm.common.Constant;
+import com.crm.enums.EnumUnit;
 import com.crm.exception.DuplicateRecordException;
 import com.crm.exception.NotFoundException;
 import com.crm.models.ContainerType;
@@ -15,6 +20,7 @@ import com.crm.payload.request.ContainerTypeRequest;
 import com.crm.payload.request.PaginationRequest;
 import com.crm.repository.ContainerTypeRepository;
 import com.crm.services.ContainerTypeService;
+import com.crm.specification.builder.ContainerTypeSpecificationsBuilder;
 
 @Service
 public class ContainerTypeServiceImpl implements ContainerTypeService {
@@ -64,6 +70,11 @@ public class ContainerTypeServiceImpl implements ContainerTypeService {
     containerType.setInternalWidth(request.getInternalWidth());
     containerType.setDoorOpeningHeight(request.getDoorOpeningHeight());
     containerType.setDoorOpeningWidth(request.getDoorOpeningWidth());
+    try {
+      containerType.setUnitOfMeasurement(EnumUnit.findByName(request.getUnitOfMeasurement()).name());
+    } catch (Exception e) {
+      throw new NotFoundException("ERROR: UnitOfMeasurement is not found.");
+    }
     containerTypeRepository.save(containerType);
     return containerType;
   }
@@ -91,6 +102,11 @@ public class ContainerTypeServiceImpl implements ContainerTypeService {
     containerType.setInternalWidth(request.getInternalWidth());
     containerType.setDoorOpeningHeight(request.getDoorOpeningHeight());
     containerType.setDoorOpeningWidth(request.getDoorOpeningWidth());
+    try {
+      containerType.setUnitOfMeasurement(EnumUnit.findByName(request.getUnitOfMeasurement()).name());
+    } catch (Exception e) {
+      throw new NotFoundException("ERROR: UnitOfMeasurement is not found.");
+    }
     containerTypeRepository.save(containerType);
     return containerType;
   }
@@ -126,47 +142,74 @@ public class ContainerTypeServiceImpl implements ContainerTypeService {
     }
 
     String tareWeight = (String) updates.get("tareWeight");
-    if (tareWeight != null) {
+    if (tareWeight != null && !tareWeight.isEmpty()) {
       containerType.setTareWeight(Double.valueOf(tareWeight));
     }
 
     String payloadCapacity = (String) updates.get("payloadCapacity");
-    if (payloadCapacity != null) {
+    if (payloadCapacity != null && !payloadCapacity.isEmpty()) {
       containerType.setPayloadCapacity(Double.valueOf(payloadCapacity));
     }
 
     String cubicCapacity = (String) updates.get("cubicCapacity");
-    if (cubicCapacity != null) {
+    if (cubicCapacity != null && !cubicCapacity.isEmpty()) {
       containerType.setCubicCapacity(Double.valueOf(cubicCapacity));
     }
 
     String internalLength = (String) updates.get("internalLength");
-    if (internalLength != null) {
+    if (internalLength != null && !internalLength.isEmpty()) {
       containerType.setInternalLength(Double.valueOf(internalLength));
     }
 
     String internalHeight = (String) updates.get("internalHeight");
-    if (internalHeight != null) {
+    if (internalHeight != null && !internalHeight.isEmpty()) {
       containerType.setInternalHeight(Double.valueOf(internalHeight));
     }
 
     String internalWidth = (String) updates.get("internalWidth");
-    if (internalWidth != null) {
+    if (internalWidth != null && !internalWidth.isEmpty()) {
       containerType.setInternalWidth(Double.valueOf(internalWidth));
     }
 
     String doorOpeningHeight = (String) updates.get("doorOpeningHeight");
-    if (doorOpeningHeight != null) {
+    if (doorOpeningHeight != null && !doorOpeningHeight.isEmpty()) {
       containerType.setDoorOpeningHeight(Double.valueOf(doorOpeningHeight));
     }
 
     String doorOpeningWidth = (String) updates.get("doorOpeningWidth");
-    if (doorOpeningWidth != null) {
+    if (doorOpeningWidth != null && !doorOpeningWidth.isEmpty()) {
       containerType.setDoorOpeningWidth(Double.valueOf(doorOpeningWidth));
+    }
+
+    String unitOfMeasurement = (String) updates.get("unitOfMeasurement");
+    if (unitOfMeasurement != null && !unitOfMeasurement.isEmpty()) {
+      try {
+        containerType.setUnitOfMeasurement(EnumUnit.findByName(unitOfMeasurement).name());
+      } catch (Exception e) {
+        throw new NotFoundException("ERROR: UnitOfMeasurement is not found.");
+      }
     }
 
     containerTypeRepository.save(containerType);
     return containerType;
+  }
+
+  @Override
+  public Page<ContainerType> searchContainerTypes(PaginationRequest request, String search) {
+    ContainerTypeSpecificationsBuilder builder = new ContainerTypeSpecificationsBuilder();
+    Pattern pattern = Pattern.compile(Constant.SEARCH_REGEX, Pattern.UNICODE_CHARACTER_CLASS);
+    Matcher matcher = pattern.matcher(search + ",");
+    while (matcher.find()) {
+      // Chaining criteria
+      builder.with(matcher.group(1), matcher.group(2), matcher.group(3));
+    }
+    // Build specification
+    Specification<ContainerType> spec = builder.build();
+    PageRequest page = PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt"));
+    // Filter with repository
+    Page<ContainerType> pages = containerTypeRepository.findAll(spec, page);
+    // Return result
+    return pages;
   }
 
 }

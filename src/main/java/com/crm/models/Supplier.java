@@ -31,15 +31,12 @@ import lombok.ToString;
 public class Supplier extends User {
 
   @Column(name = "website", length = 50)
-  @NotBlank
-  @Size(min = 5, max = 100)
   private String website;
 
   @Column(name = "contact_person", length = 100)
   @Size(min = 5, max = 50)
   private String contactPerson;
 
-  
   @Column(name = "company_name", length = 100)
   @NotBlank
   @Size(min = 5, max = 100)
@@ -50,7 +47,7 @@ public class Supplier extends User {
   @Size(min = 2, max = 10)
   private String companyCode;
 
-  @Column(name = "description", length = 100)
+  @Column(name = "company_description", length = 100)
   @NotBlank
   @Size(min = 5, max = 200)
   private String companyDescription;
@@ -59,15 +56,11 @@ public class Supplier extends User {
   @NotBlank
   @Size(min = 5, max = 200)
   private String companyAddress;
-  
+
   @Column(name = "tin", length = 20)
-  @NotBlank
-  @Size(min = 5, max = 20)
   private String tin;
 
   @Column(name = "fax", length = 20)
-  @NotBlank
-  @Size(min = 5, max = 20)
   private String fax;
 
   @Column(name = "rating_value")
@@ -78,4 +71,16 @@ public class Supplier extends User {
 
   @OneToMany(mappedBy = "sender")
   private Collection<Rating> sentRatings = new ArrayList<>();
+
+  @OneToMany(mappedBy = "sender")
+  private Collection<Evidence> evidences = new ArrayList<>();
+
+  @OneToMany(mappedBy = "sender")
+  private Collection<Report> reports = new ArrayList<>();
+  
+  @OneToMany(mappedBy = "recipient")
+  private Collection<Payment> receivedPayments = new ArrayList<>();
+  
+  @OneToMany(mappedBy = "sender")
+  private Collection<Payment> sentPayments = new ArrayList<>();
 }

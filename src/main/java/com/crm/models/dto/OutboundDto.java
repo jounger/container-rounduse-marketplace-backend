@@ -15,9 +15,11 @@ public class OutboundDto extends SupplyDto {
 
   private String packingTime;
 
+  private String deliveryTime;
+
   private String packingStation;
 
-  private Double payload;
+  private Double grossWeight;
 
   private String unitOfMeasurement;
 

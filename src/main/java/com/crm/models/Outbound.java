@@ -31,10 +31,6 @@ public class Outbound extends Supply {
   @JoinColumn(name = "merchant_id")
   private Merchant merchant;
 
-  @OneToOne(cascade = CascadeType.ALL)
-  @JoinColumn(name = "booking_id")
-  private Booking booking;
-
   @Column(name = "goods_description")
   private String goodsDescription;
 
@@ -44,13 +40,20 @@ public class Outbound extends Supply {
   @Column(name = "packing_station")
   private String packingStation;
 
-  @Column(name = "payload")
-  private Double payload;
+  @Column(name = "gross_weight")
+  private Double grossWeight;
+
+  @Column(name = "delivery_time")
+  private LocalDateTime deliveryTime;
 
   // EnumUnit
   @Column(name = "unit_of_measurment")
   private String unitOfMeasurement;
 
   // EnumSupplyStatus
+  @Column(name = "status")
   private String status;
+
+  @OneToOne(mappedBy = "outbound", cascade = CascadeType.ALL)
+  private Booking booking;
 }

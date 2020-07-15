@@ -16,6 +16,8 @@ public interface ContainerTypeService {
 
   ContainerType getContainerTypeByName(String name);
 
+  Page<ContainerType> searchContainerTypes(PaginationRequest request, String search);
+
   ContainerType createContainerType(ContainerTypeRequest request);
 
   ContainerType updateContainerType(ContainerTypeRequest request);

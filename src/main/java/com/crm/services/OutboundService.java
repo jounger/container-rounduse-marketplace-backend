@@ -14,14 +14,16 @@ public interface OutboundService {
 
   Page<Outbound> getOutbounds(PaginationRequest request);
 
-  Page<Outbound> getOutboundsByMerchant(Long id, PaginationRequest request);
+  Page<Outbound> getOutboundsByMerchant(Long userId, PaginationRequest request);
 
-  Outbound createOutbound(Long id, OutboundRequest request);
+  Page<Outbound> searchOutbounds(PaginationRequest request, String search);
 
-  Outbound updateOutbound(OutboundRequest request);
+  Outbound createOutbound(Long userId, OutboundRequest request);
 
-  Outbound editOutbound(Map<String, Object> updates, Long id);
+  Outbound updateOutbound(Long userId, OutboundRequest request);
 
-  void removeOutbound(Long id);
+  Outbound editOutbound(Map<String, Object> updates, Long id, Long userId);
+
+  void removeOutbound(Long id, Long userId);
 
 }

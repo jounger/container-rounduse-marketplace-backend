@@ -1,9 +1,9 @@
 package com.crm.models;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -13,8 +13,9 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -44,6 +45,7 @@ public class Bid {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column(name = "id", updatable = false, nullable = false)
   private Long id;
 
   @ManyToOne
@@ -54,9 +56,9 @@ public class Bid {
   @JoinColumn(name = "forwarder_id")
   private Forwarder bidder;
 
-  @OneToMany
+  @ManyToMany
   @JoinTable(name = "bid_container", joinColumns = @JoinColumn(name = "bid_id"), inverseJoinColumns = @JoinColumn(name = "container_id"))
-  private Set<Container> containers = new HashSet<>();
+  private Collection<Container> containers = new ArrayList<>();
 
   @Column(name = "bid_price")
   private Double bidPrice;
@@ -71,6 +73,7 @@ public class Bid {
   private LocalDateTime dateOfDecision;
 
   // EnumBidStatus
+  @Column(name = "status")
   private String status;
 
   @Column(name = "created_at", nullable = false, updatable = false)
@@ -82,4 +85,7 @@ public class Bid {
   @Temporal(TemporalType.TIMESTAMP)
   @LastModifiedDate
   private Date updatedAt;
+  
+  @OneToOne(mappedBy = "bid")
+  private Combined combined;
 }

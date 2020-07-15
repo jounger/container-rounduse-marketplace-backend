@@ -10,11 +10,10 @@ public class ContainerMapper {
     ContainerDto containerDto = new ContainerDto();
     containerDto.setId(container.getId());
     containerDto.setDriver(container.getDriver().getUsername());
-    containerDto.setTractor(container.getTractor());
-    containerDto.setTrailer(container.getTrailer());
     containerDto.setContainerNumber(container.getContainerNumber());
-    containerDto.setLicensePlate(container.getLicensePlate());
     containerDto.setStatus(container.getStatus());
+    containerDto.setTractor(ContainerTractorMapper.toContainerTractorDto(container.getTractor()));
+    containerDto.setTrailer(ContainerSemiTrailerMapper.toContainerSemiTrailerDto(container.getTrailer()));
     return containerDto;
   }
 

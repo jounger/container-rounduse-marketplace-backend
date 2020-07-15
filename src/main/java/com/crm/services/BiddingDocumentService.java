@@ -9,19 +9,23 @@ import com.crm.payload.request.BiddingDocumentRequest;
 import com.crm.payload.request.PaginationRequest;
 
 public interface BiddingDocumentService {
-  
+
   BiddingDocument createBiddingDocument(Long id, BiddingDocumentRequest request);
-  
+
   BiddingDocument getBiddingDocument(Long id);
-  
+
+  BiddingDocument getBiddingDocumentByBid(Long id, String username);
+
+  Page<BiddingDocument> getBiddingDocumentsExistCombined(Long id, PaginationRequest request);
+
   Page<BiddingDocument> getBiddingDocuments(Long id, PaginationRequest request);
-  
-  //update full biddingDocument
+
+  // update full biddingDocument
   BiddingDocument updateBiddingDocument(BiddingDocumentRequest request);
-  
-  //update part biddingDocument
+
+  // update part biddingDocument
   BiddingDocument editBiddingDocument(Long id, Map<String, Object> updates);
-  
+
   void removeBiddingDocument(Long id);
-  
+
 }

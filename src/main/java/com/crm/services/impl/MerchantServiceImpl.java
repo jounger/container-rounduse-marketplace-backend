@@ -11,6 +11,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.crm.common.Tool;
 import com.crm.enums.EnumUserStatus;
 import com.crm.exception.DuplicateRecordException;
 import com.crm.exception.NotFoundException;
@@ -21,6 +22,7 @@ import com.crm.payload.request.PaginationRequest;
 import com.crm.payload.request.SupplierRequest;
 import com.crm.repository.MerchantRepository;
 import com.crm.repository.RoleRepository;
+import com.crm.repository.SupplierRepository;
 import com.crm.repository.UserRepository;
 import com.crm.services.MerchantService;
 
@@ -35,6 +37,9 @@ public class MerchantServiceImpl implements MerchantService {
 
   @Autowired
   private MerchantRepository merchantRepository;
+  
+  @Autowired
+  private SupplierRepository supplierRepository;
 
   @Autowired
   private PasswordEncoder passwordEncoder;
@@ -42,7 +47,7 @@ public class MerchantServiceImpl implements MerchantService {
   @Override
   public Merchant createMerchant(SupplierRequest request) {
     if (userRepository.existsByUsername(request.getUsername()) || userRepository.existsByEmail(request.getEmail())
-        || userRepository.existsByPhone(request.getPhone())) {
+        || userRepository.existsByPhone(request.getPhone()) || supplierRepository.existsByCompanyCode(request.getCompanyCode())) {
       throw new DuplicateRecordException("Error: User has been existed");
     }
     Merchant merchant = new Merchant();
@@ -59,6 +64,7 @@ public class MerchantServiceImpl implements MerchantService {
     merchant.setContactPerson(request.getContactPerson());
     merchant.setTin(request.getTin());
     merchant.setFax(request.getFax());
+    merchant.setRatingValue(0D);
 
     Set<Role> roles = new HashSet<>();
     Role userRole = roleRepository.findByName("ROLE_MERCHANT")
@@ -94,9 +100,9 @@ public class MerchantServiceImpl implements MerchantService {
         .orElseThrow(() -> new NotFoundException("Merchant is not found."));
 
     /*
-    String encoder = passwordEncoder.encode(request.getPassword());
-    merchant.setPassword(encoder);
-    */
+     * String encoder = passwordEncoder.encode(request.getPassword());
+     * merchant.setPassword(encoder);
+     */
 
     Set<Role> roles = new HashSet<>();
     Role userRole = roleRepository.findByName("ROLE_FORWARDER")
@@ -131,12 +137,10 @@ public class MerchantServiceImpl implements MerchantService {
         .orElseThrow(() -> new NotFoundException("Merchant is not found."));
 
     /*
-    String password = (String) updates.get("password");
-    if (password != null) {
-      String encoder = passwordEncoder.encode(password);
-      merchant.setPassword(encoder);
-    }
-    */
+     * String password = (String) updates.get("password"); if (password != null) {
+     * String encoder = passwordEncoder.encode(password);
+     * merchant.setPassword(encoder); }
+     */
 
     String email = (String) updates.get("email");
     if (email != null && UserServiceImpl.isEmailChange(email, merchant) && !email.isEmpty()) {
@@ -144,55 +148,60 @@ public class MerchantServiceImpl implements MerchantService {
     }
 
     String phone = (String) updates.get("phone");
-    if (phone != null && !phone.isEmpty()) {
+    if (!Tool.isEqual(merchant.getPhone(), phone) && !userRepository.existsByPhone(phone)) {
       merchant.setPhone(phone);
+    }else {
+      throw new DuplicateRecordException("Phone number has been existed.");
     }
 
     String address = (String) updates.get("address");
-    if (address != null  && !address.isEmpty()) {
+    if (!Tool.isEqual(merchant.getAddress(), address)) {
       merchant.setAddress(address);
     }
 
+    String status = (String) updates.get("status");
+    if (!Tool.isEqual(merchant.getStatus(), status)) {
+      EnumUserStatus eStatus = EnumUserStatus.findByName(status);
+      merchant.setStatus(eStatus.name());
+    }
+
     String website = (String) updates.get("website");
-    if (website != null && !email.isEmpty()) {
+    if (!Tool.isEqual(merchant.getWebsite(), website)) {
       merchant.setWebsite(website);
     }
 
     String contactPerson = (String) updates.get("contactPerson");
-    if (contactPerson != null && !contactPerson.isEmpty()) {
+    if (!Tool.isEqual(merchant.getContactPerson(), contactPerson)) {
       merchant.setContactPerson(contactPerson);
     }
 
     String companyName = (String) updates.get("companyName");
-    if (companyName != null && !companyName.isEmpty()) {
+    if (!Tool.isEqual(merchant.getCompanyName(), companyName)) {
       merchant.setCompanyName(companyName);
     }
 
     String companyCode = (String) updates.get("companyCode");
-    if (companyCode != null && !companyCode.isEmpty()) {
+    if (!Tool.isEqual(merchant.getCompanyCode(), companyCode) && !supplierRepository.existsByCompanyCode(companyCode)) {
       merchant.setCompanyCode(companyCode);
+    }else {
+      throw new DuplicateRecordException("Company code has been existed.");
     }
 
     String companyDescription = (String) updates.get("companyDescription");
-    if (companyDescription != null && !companyDescription.isEmpty()) {
+    if (!Tool.isEqual(merchant.getCompanyDescription(), companyDescription)) {
       merchant.setCompanyDescription(companyDescription);
     }
 
-    String companyAddress = (String) updates.get("companyAddress");
-    if (companyAddress != null && !companyAddress.isEmpty()) {
-      merchant.setCompanyAddress(companyAddress);
-    }
-
     String tin = (String) updates.get("tin");
-    if (tin != null && !tin.isEmpty()) {
+    if (!Tool.isEqual(merchant.getTin(), tin)) {
       merchant.setTin(tin);
     }
 
     String fax = (String) updates.get("fax");
-    if (fax != null && !fax.isEmpty()) {
+    if (!Tool.isEqual(merchant.getFax(), fax)) {
       merchant.setFax(fax);
     }
-    
+
     merchantRepository.save(merchant);
     return merchant;
   }

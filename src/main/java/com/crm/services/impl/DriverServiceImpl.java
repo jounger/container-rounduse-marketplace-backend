@@ -11,11 +11,14 @@ import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.crm.common.Constant;
 import com.crm.enums.EnumUserStatus;
 import com.crm.exception.DuplicateRecordException;
+import com.crm.exception.InternalException;
 import com.crm.exception.NotFoundException;
 import com.crm.models.Driver;
 import com.crm.models.Forwarder;
+import com.crm.models.Geolocation;
 import com.crm.models.Role;
 import com.crm.payload.request.DriverRequest;
 import com.crm.payload.request.PaginationRequest;
@@ -44,7 +47,7 @@ public class DriverServiceImpl implements DriverService {
   private ForwarderRepository forwarderRepository;
 
   @Override
-  public Driver createDriver(Long id, DriverRequest request) {
+  public Driver createDriver(Long userId, DriverRequest request) {
     if (userRepository.existsByUsername(request.getUsername()) || userRepository.existsByEmail(request.getEmail())
         || userRepository.existsByPhone(request.getPhone())) {
       throw new DuplicateRecordException("Error: User has been existed");
@@ -69,10 +72,16 @@ public class DriverServiceImpl implements DriverService {
     driver.setFullname(request.getFullname());
     driver.setDriverLicense(request.getDriverLicense());
 
-    Forwarder forwarder = forwarderRepository.findById(id)
+    Forwarder forwarder = forwarderRepository.findById(userId)
         .orElseThrow(() -> new NotFoundException("Forwarder is not found"));
     driver.setForwarder(forwarder);
 
+    Geolocation location = new Geolocation();
+    location.setLatitude(Constant.EMPTY_STRING);
+    location.setLongitude(Constant.EMPTY_STRING);
+    location.setDriver(driver);
+
+    driver.setLocation(location);
     driverRepository.save(driver);
 
     return driver;
@@ -99,98 +108,113 @@ public class DriverServiceImpl implements DriverService {
   }
 
   @Override
-  public Driver updateDriver(DriverRequest request) {
-    Driver driver = driverRepository.findById(request.getId())
-        .orElseThrow(() -> new NotFoundException("Driver is not found."));
+  public Driver updateDriver(Long userId, DriverRequest request) {
+    if (forwarderRepository.existsById(userId)) {
+      Driver driver = driverRepository.findById(request.getId())
+          .orElseThrow(() -> new NotFoundException("Driver is not found."));
 
-    /*
-     * String encoder = passwordEncoder.encode(request.getPassword());
-     * driver.setPassword(encoder);
-     */
+      if (!driver.getForwarder().getId().equals(userId)) {
+        throw new InternalException(String.format("Forwarder %s not owned Driver", userId));
+      }
 
-    driver.setPhone(request.getPhone());
+      /*
+       * String encoder = passwordEncoder.encode(request.getPassword());
+       * driver.setPassword(encoder);
+       */
 
-    if (UserServiceImpl.isEmailChange(request.getEmail(), driver)) {
-      driver.setEmail(request.getEmail());
-    }
+      driver.setPhone(request.getPhone());
 
-    EnumUserStatus status = EnumUserStatus.findByName(request.getStatus());
-    if (status != null) {
-      driver.setStatus(status.name());
-    }
+      if (UserServiceImpl.isEmailChange(request.getEmail(), driver)) {
+        driver.setEmail(request.getEmail());
+      }
 
-    Set<String> rolesString = request.getRoles();
-    Set<Role> roles = new HashSet<Role>();
-    if (rolesString == null) {
-      Role userRole = roleRepository.findByName("ROLE_DRIVER")
-          .orElseThrow(() -> new NotFoundException("Error: Role is not found"));
-      roles.add(userRole);
-    } else {
-      rolesString.forEach(role -> {
-        Role userRole = roleRepository.findByName(role)
+      EnumUserStatus status = EnumUserStatus.findByName(request.getStatus());
+      if (status != null) {
+        driver.setStatus(status.name());
+      }
+
+      Set<String> rolesString = request.getRoles();
+      Set<Role> roles = new HashSet<Role>();
+      if (rolesString == null) {
+        Role userRole = roleRepository.findByName("ROLE_DRIVER")
             .orElseThrow(() -> new NotFoundException("Error: Role is not found"));
         roles.add(userRole);
-      });
-    }
-    driver.setRoles(roles);
-    driver.setFullname(request.getFullname());
-    driver.setDriverLicense(request.getDriverLicense());
-    driverRepository.save(driver);
-    return driver;
-  }
-
-  @Override
-  public Driver editDriver(Long id, Map<String, Object> updates) {
-    Driver driver = driverRepository.findById(id).orElseThrow(() -> new NotFoundException("Driver is not found."));
-
-    /*
-     * String password = (String) updates.get("password"); if (password != null) {
-     * String encoder = passwordEncoder.encode(password);
-     * driver.setPassword(encoder); }
-     */
-
-    String email = (String) updates.get("email");
-    if (email != null && UserServiceImpl.isEmailChange(email, driver) && !email.isEmpty()) {
-      driver.setEmail(email);
-    }
-
-    String phone = (String) updates.get("phone");
-    if (phone != null && !phone.isEmpty()) {
-      driver.setPhone(phone);
-    }
-
-    String address = (String) updates.get("address");
-    if (address != null && !address.isEmpty()) {
-      driver.setAddress(address);
-    }
-
-    String fullname = (String) updates.get("fullname");
-    if (fullname != null && !fullname.isEmpty()) {
-      driver.setFullname(fullname);
-    }
-
-    String driverLicense = (String) updates.get("driverLicense");
-    if (driverLicense != null && !driverLicense.isEmpty()) {
-      driver.setDriverLicense(driverLicense);
-    }
-
-    String location = (String) updates.get("location");
-    if (location != null && !location.isEmpty()) {
-      driver.setLocation(location);
-    }
-
-    driverRepository.save(driver);
-    return driver;
-  }
-
-  @Override
-  public void removeDriver(Long id) {
-    if (driverRepository.existsById(id)) {
-      driverRepository.deleteById(id);
+      } else {
+        rolesString.forEach(role -> {
+          Role userRole = roleRepository.findByName(role)
+              .orElseThrow(() -> new NotFoundException("Error: Role is not found"));
+          roles.add(userRole);
+        });
+      }
+      driver.setRoles(roles);
+      driver.setFullname(request.getFullname());
+      driver.setDriverLicense(request.getDriverLicense());
+      driverRepository.save(driver);
+      return driver;
     } else {
-      throw new NotFoundException("Driver is not found.");
+      throw new NotFoundException("Error: Forwarder is not found");
     }
+  }
 
+  @Override
+  public Driver editDriver(Long id, Long userId, Map<String, Object> updates) {
+    if (forwarderRepository.existsById(userId)) {
+      Driver driver = driverRepository.findById(id).orElseThrow(() -> new NotFoundException("Driver is not found."));
+
+      if (!driver.getForwarder().getId().equals(userId)) {
+        throw new InternalException(String.format("Forwarder %s not owned Driver", userId));
+      }
+
+      /*
+       * String password = (String) updates.get("password"); if (password != null) {
+       * String encoder = passwordEncoder.encode(password);
+       * driver.setPassword(encoder); }
+       */
+
+      String email = (String) updates.get("email");
+      if (email != null && UserServiceImpl.isEmailChange(email, driver) && !email.isEmpty()) {
+        driver.setEmail(email);
+      }
+
+      String phone = (String) updates.get("phone");
+      if (phone != null && !phone.isEmpty()) {
+        driver.setPhone(phone);
+      }
+
+      String address = (String) updates.get("address");
+      if (address != null && !address.isEmpty()) {
+        driver.setAddress(address);
+      }
+
+      String fullname = (String) updates.get("fullname");
+      if (fullname != null && !fullname.isEmpty()) {
+        driver.setFullname(fullname);
+      }
+
+      String driverLicense = (String) updates.get("driverLicense");
+      if (driverLicense != null && !driverLicense.isEmpty()) {
+        driver.setDriverLicense(driverLicense);
+      }
+
+      driverRepository.save(driver);
+      return driver;
+    } else {
+      throw new NotFoundException("Error: Forwarder is not found");
+    }
+  }
+
+  @Override
+  public void removeDriver(Long id, Long userId) {
+    if (forwarderRepository.existsById(userId)) {
+
+      Driver driver = driverRepository.findById(id).orElseThrow(() -> new NotFoundException("Driver is not found."));
+
+      if (!driver.getForwarder().getId().equals(userId)) {
+        throw new InternalException(String.format("Forwarder %s not owned Driver", userId));
+      }
+    } else {
+      throw new NotFoundException("Error: Forwarder is not found");
+    }
   }
 
 }

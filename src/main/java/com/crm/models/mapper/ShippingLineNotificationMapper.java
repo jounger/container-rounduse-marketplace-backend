@@ -1,6 +1,7 @@
 package com.crm.models.mapper;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -21,7 +22,7 @@ public class ShippingLineNotificationMapper {
     BidDto bidDto = BidMapper.toBidDto(bid);
     String merchant = biddingNotification.getRelatedResource().getOfferee().getUsername();
     String forwarder = bidDto.getBidder();
-    Set<Container> setContainer = bid.getContainers();
+    Set<Container> setContainer = new HashSet<>(bid.getContainers());
     List<ContainerDto> containersdto = new ArrayList<>();
     setContainer.forEach(container -> {
       ContainerDto containerDto = ContainerMapper.toContainerDto(container);

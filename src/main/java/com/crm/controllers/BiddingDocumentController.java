@@ -33,7 +33,7 @@ import com.crm.payload.response.MessageResponse;
 import com.crm.payload.response.PaginationResponse;
 import com.crm.security.services.UserDetailsImpl;
 import com.crm.services.BiddingDocumentService;
-import com.crm.websocket.controller.NotificationController;
+import com.crm.websocket.controller.NotificationBroadcast;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -56,10 +56,34 @@ public class BiddingDocumentController {
     BiddingDocumentDto biddingDocumentDto = BiddingDocumentMapper.toBiddingDocumentDto(biddingDocument);
 
     // CREATE NOTIFICATION
-    NotificationController.broadcastCreateBiddingDocumentToForwarder(biddingDocument);
+    NotificationBroadcast.broadcastCreateBiddingDocumentToForwarder(biddingDocument);
     // END NOTIFICATION
 
     return ResponseEntity.ok(biddingDocumentDto);
+  }
+  
+  @PreAuthorize("hasRole('FORWARDER')")
+  @GetMapping("/combined")
+  public ResponseEntity<?> getBiddingDocumentsByExistCombined(@Valid PaginationRequest request) {
+
+    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
+        .getPrincipal();
+    Long id = userDetails.getId();
+    Page<BiddingDocument> pages = biddingDocumentService.getBiddingDocumentsExistCombined(id, request);
+
+    PaginationResponse<BiddingDocumentDto> response = new PaginationResponse<>();
+    response.setPageNumber(request.getPage());
+    response.setPageSize(request.getLimit());
+    response.setTotalElements(pages.getTotalElements());
+    response.setTotalPages(pages.getTotalPages());
+
+    List<BiddingDocument> biddingDocuments = pages.getContent();
+    List<BiddingDocumentDto> biddingDocumentsDto = new ArrayList<>();
+    biddingDocuments.forEach(
+        biddingDocument -> biddingDocumentsDto.add(BiddingDocumentMapper.toBiddingDocumentDto(biddingDocument)));
+    response.setContents(biddingDocumentsDto);
+
+    return ResponseEntity.ok(response);
   }
 
   @PreAuthorize("hasRole('MERCHANT') or hasRole('FORWARDER')")
@@ -90,6 +114,17 @@ public class BiddingDocumentController {
   @GetMapping("/{id}")
   public ResponseEntity<?> getBiddingDocument(@PathVariable Long id) {
     BiddingDocument biddingDocument = biddingDocumentService.getBiddingDocument(id);
+    BiddingDocumentDto biddingDocumentDto = BiddingDocumentMapper.toBiddingDocumentDto(biddingDocument);
+    return ResponseEntity.ok(biddingDocumentDto);
+  }
+
+  @PreAuthorize("hasRole('MERCHANT') or hasRole('FORWARDER')")
+  @GetMapping("/bid/{id}")
+  public ResponseEntity<?> getBiddingDocumentByBid(@PathVariable Long id) {
+    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
+        .getPrincipal();
+    String username = userDetails.getUsername();
+    BiddingDocument biddingDocument = biddingDocumentService.getBiddingDocumentByBid(id, username);
     BiddingDocumentDto biddingDocumentDto = BiddingDocumentMapper.toBiddingDocumentDto(biddingDocument);
     return ResponseEntity.ok(biddingDocumentDto);
   }

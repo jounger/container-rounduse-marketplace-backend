@@ -29,7 +29,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.crm.exception.NotFoundException;
+import com.crm.models.dto.SupplierDto;
 import com.crm.models.dto.UserDto;
+import com.crm.models.mapper.SupplierMapper;
 import com.crm.payload.request.SignInRequest;
 import com.crm.payload.request.SupplierRequest;
 import com.crm.payload.response.JwtResponse;
@@ -46,140 +48,141 @@ import com.crm.services.MerchantService;
 @RequestMapping("/api/auth")
 public class AuthController {
 
-	private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
+  private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
 
-	@Autowired
-	private AuthenticationManager authenticationManager;
+  @Autowired
+  private AuthenticationManager authenticationManager;
 
-	@Autowired
-	private UserDetailsServiceImpl userDetailsService;
+  @Autowired
+  private UserDetailsServiceImpl userDetailsService;
 
-	@Autowired
-	private MerchantService merchantService;
+  @Autowired
+  private MerchantService merchantService;
 
-	@Autowired
-	private ForwarderService forwarderService;
+  @Autowired
+  private ForwarderService forwarderService;
 
-	@Autowired
-	private JwtUntils jwtUntils;
+  @Autowired
+  private JwtUntils jwtUntils;
 
-	@PostMapping("/signin")
-	public ResponseEntity<?> authenticateUser(@Valid @RequestBody SignInRequest request) {
-		logger.info(request.getUsername());
-		Authentication authentication = authenticationManager
-				.authenticate(new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
-		SecurityContextHolder.getContext().setAuthentication(authentication);
-		String jwt = jwtUntils.generateJwtToken(authentication);
-		UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-		Set<String> roles = userDetails.getAuthorities().stream().map(role -> role.getAuthority())
-				.collect(Collectors.toSet());
-		logger.info("JWT: {}", jwt);
+  @PostMapping("/signin")
+  public ResponseEntity<?> authenticateUser(@Valid @RequestBody SignInRequest request) {
+    logger.info(request.getUsername());
+    Authentication authentication = authenticationManager
+        .authenticate(new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
+    SecurityContextHolder.getContext().setAuthentication(authentication);
+    String jwt = jwtUntils.generateJwtToken(authentication);
+    UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+    Set<String> roles = userDetails.getAuthorities().stream().map(role -> role.getAuthority())
+        .collect(Collectors.toSet());
+    logger.info("JWT: {}", jwt);
 
-		UserDto userInfo = new UserDto();
-		userInfo.setId(userDetails.getId());
-		userInfo.setUsername(userDetails.getUsername());
-		userInfo.setPhone(userDetails.getPhone());
-		userInfo.setRoles(roles);
-		userInfo.setEmail(userDetails.getEmail());
-		userInfo.setStatus(userDetails.getStatus());
-		userInfo.setAddress(userDetails.getAddress());
-		
-		JwtResponse response = new JwtResponse();
-		response.setIdToken(jwt);
-		response.setUserInfo(userInfo);
+    UserDto userInfo = new UserDto();
+    userInfo.setId(userDetails.getId());
+    userInfo.setUsername(userDetails.getUsername());
+    userInfo.setPhone(userDetails.getPhone());
+    userInfo.setRoles(roles);
+    userInfo.setEmail(userDetails.getEmail());
+    userInfo.setStatus(userDetails.getStatus());
+    userInfo.setAddress(userDetails.getAddress());
 
-		HttpHeaders responseHeaders = new HttpHeaders();
-		responseHeaders.set("Access-Control-Expose-Headers", "Authorization");
-		responseHeaders.set("Authorization", "Bearer " + jwt);
-		return ResponseEntity.ok().headers(responseHeaders).body(response);
-	}
+    JwtResponse response = new JwtResponse();
+    response.setIdToken(jwt);
+    response.setUserInfo(userInfo);
 
-	@PostMapping("/signup")
-	public ResponseEntity<?> registerUser(@Valid @RequestBody SupplierRequest request) {
-		String role = request.getRoles().iterator().next();
-		switch (role.toUpperCase()) {
-		case "FORWARDER":
-			forwarderService.createForwarder(request);
-			break;
-		case "MERCHANT":
-			merchantService.createMerchant(request);
-			break;
-		default:
-		  throw new NotFoundException("Role is not found.");
-		}
+    HttpHeaders responseHeaders = new HttpHeaders();
+    responseHeaders.set("Access-Control-Expose-Headers", "Authorization");
+    responseHeaders.set("Authorization", "Bearer " + jwt);
+    return ResponseEntity.ok().headers(responseHeaders).body(response);
+  }
 
-		return ResponseEntity.ok(new MessageResponse("User registered succesfully"));
-	}
+  @PostMapping("/signup")
+  public ResponseEntity<?> registerUser(@Valid @RequestBody SupplierRequest request) {
+    String role = request.getRoles().iterator().next();
+    SupplierDto supplierDto = null;
+    switch (role.toUpperCase()) {
+    case "FORWARDER":
+      supplierDto = SupplierMapper.toSupplierDto(forwarderService.createForwarder(request));
+      break;
+    case "MERCHANT":
+      supplierDto = SupplierMapper.toSupplierDto(merchantService.createMerchant(request));
+      break;
+    default:
+      throw new NotFoundException("Role is not found.");
+    }
 
-	@GetMapping("/refresh")
-	public ResponseEntity<?> refreshToken(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException {
-		try {
-			UsernamePasswordAuthenticationToken authentication = authUserByToken(request);
-			if (authentication != null) {
-				String jwtRefresh = jwtUntils.generateJwtToken(authentication);
-				JwtResponse responseJwt = new JwtResponse();
-				responseJwt.setIdToken(jwtRefresh);
+    return ResponseEntity.ok(supplierDto);
+  }
 
-				HttpHeaders responseHeaders = new HttpHeaders();
-				responseHeaders.set("Access-Control-Expose-Headers", "Authorization");
-				responseHeaders.set("Authorization", "Bearer " + jwtRefresh);
-				return ResponseEntity.ok().headers(responseHeaders).body(responseJwt);
-			}
-		} catch (Exception e) {
-			logger.error("Cannot set user authentication: {}", e);
-		}
-		return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new MessageResponse("Cannot authenticate this JWT"));
-	}
+  @GetMapping("/refresh")
+  public ResponseEntity<?> refreshToken(HttpServletRequest request, HttpServletResponse response)
+      throws ServletException, IOException {
+    try {
+      UsernamePasswordAuthenticationToken authentication = authUserByToken(request);
+      if (authentication != null) {
+        String jwtRefresh = jwtUntils.generateJwtToken(authentication);
+        JwtResponse responseJwt = new JwtResponse();
+        responseJwt.setIdToken(jwtRefresh);
 
-	@GetMapping("/user")
-	public ResponseEntity<?> fetchUser(HttpServletRequest request, HttpServletResponse response) {
-		try {
-			UsernamePasswordAuthenticationToken authentication = authUserByToken(request);
-			if (authentication != null) {
-				UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+        HttpHeaders responseHeaders = new HttpHeaders();
+        responseHeaders.set("Access-Control-Expose-Headers", "Authorization");
+        responseHeaders.set("Authorization", "Bearer " + jwtRefresh);
+        return ResponseEntity.ok().headers(responseHeaders).body(responseJwt);
+      }
+    } catch (Exception e) {
+      logger.error("Cannot set user authentication: {}", e);
+    }
+    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new MessageResponse("Cannot authenticate this JWT"));
+  }
 
-				Set<String> roles = userDetails.getAuthorities().stream().map(role -> role.getAuthority())
-						.collect(Collectors.toSet());
+  @GetMapping("/user")
+  public ResponseEntity<?> fetchUser(HttpServletRequest request, HttpServletResponse response) {
+    try {
+      UsernamePasswordAuthenticationToken authentication = authUserByToken(request);
+      if (authentication != null) {
+        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
 
-				UserDto userInfo = new UserDto();
-				userInfo.setId(userDetails.getId());
-				userInfo.setUsername(userDetails.getUsername());
-				userInfo.setPhone(userDetails.getPhone());
-				userInfo.setRoles(roles);
-				userInfo.setEmail(userDetails.getEmail());
-				userInfo.setStatus(userDetails.getStatus());
-				userInfo.setAddress(userDetails.getAddress());
-				
-				JwtResponse responseJwt = new JwtResponse();
-				responseJwt.setUserInfo(userInfo);
+        Set<String> roles = userDetails.getAuthorities().stream().map(role -> role.getAuthority())
+            .collect(Collectors.toSet());
 
-				return ResponseEntity.ok().body(responseJwt);
-			}
-		} catch (Exception e) {
-			logger.error("Cannot set user authentication: {}", e);
-		}
-		return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new MessageResponse("Cannot authenticate this JWT"));
-	}
+        UserDto userInfo = new UserDto();
+        userInfo.setId(userDetails.getId());
+        userInfo.setUsername(userDetails.getUsername());
+        userInfo.setPhone(userDetails.getPhone());
+        userInfo.setRoles(roles);
+        userInfo.setEmail(userDetails.getEmail());
+        userInfo.setStatus(userDetails.getStatus());
+        userInfo.setAddress(userDetails.getAddress());
 
-	private UsernamePasswordAuthenticationToken authUserByToken(HttpServletRequest request)
-			throws ServletException, IOException {
-		try {
-			logger.info("doFilterInternal {}", request.getHeader("Authorization"));
-			String jwt = AuthTokenFilter.parseJwt(request);
-			if (jwt != null && jwtUntils.validateJwtToken(jwt) != null) {
-				String username = jwtUntils.getUsernameFromJwtToken(jwt);
-				UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-				UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-						userDetails, null, userDetails.getAuthorities());
-				authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-				SecurityContextHolder.getContext().setAuthentication(authentication);
-				return authentication;
-			}
-		} catch (Exception e) {
-			logger.error("Cannot set user authentication: {}", e);
-		}
-		return null;
-	}
+        JwtResponse responseJwt = new JwtResponse();
+        responseJwt.setUserInfo(userInfo);
+
+        return ResponseEntity.ok().body(responseJwt);
+      }
+    } catch (Exception e) {
+      logger.error("Cannot set user authentication: {}", e);
+    }
+    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new MessageResponse("Cannot authenticate this JWT"));
+  }
+
+  private UsernamePasswordAuthenticationToken authUserByToken(HttpServletRequest request)
+      throws ServletException, IOException {
+    try {
+      logger.info("doFilterInternal {}", request.getHeader("Authorization"));
+      String jwt = AuthTokenFilter.parseJwt(request);
+      if (jwt != null && jwtUntils.validateJwtToken(jwt) != null) {
+        String username = jwtUntils.getUsernameFromJwtToken(jwt);
+        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null,
+            userDetails.getAuthorities());
+        authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        return authentication;
+      }
+    } catch (Exception e) {
+      logger.error("Cannot set user authentication: {}", e);
+    }
+    return null;
+  }
 
 }

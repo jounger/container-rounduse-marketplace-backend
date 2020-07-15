@@ -4,14 +4,10 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -47,6 +43,7 @@ public class BiddingDocument {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column(name = "id", updatable = false, nullable = false)
   private Long id;
 
   @ManyToOne
@@ -59,7 +56,7 @@ public class BiddingDocument {
 
   @ManyToOne
   @JoinColumn(name = "discount_id")
-  private Discount bidDiscountCode;
+  private Discount discount;
 
   @Column(name = "is_multiple_award")
   private Boolean isMultipleAward;
@@ -82,7 +79,8 @@ public class BiddingDocument {
 
   @Column(name = "price_leadership")
   private Double priceLeadership;
-  
+
+  @Column(name = "status")
   private String status;
 
   @Column(name = "created_at", nullable = false, updatable = false)
@@ -95,12 +93,12 @@ public class BiddingDocument {
   @LastModifiedDate
   private Date updatedAt;
 
-  @OneToMany(fetch = FetchType.LAZY, mappedBy = "biddingDocument")
-  private List<Bid> bids = new ArrayList<>();
+  @OneToMany(mappedBy = "biddingDocument")
+  private Collection<Bid> bids = new ArrayList<>();
 
   @OneToMany(mappedBy = "report")
   private Collection<Report> reports = new ArrayList<>();
-  
+
   @OneToMany(mappedBy = "relatedResource")
-  private Set<BiddingNotification> biddingNotifications = new HashSet<>();
+  private Collection<BiddingNotification> biddingNotifications = new ArrayList<>();
 }

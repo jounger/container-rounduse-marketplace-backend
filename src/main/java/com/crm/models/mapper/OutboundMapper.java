@@ -28,8 +28,13 @@ public class OutboundMapper {
       dto.setPackingTime(packingTime);
     }
 
+    if (outbound.getDeliveryTime() != null) {
+      String deliveryTime = Tool.convertLocalDateTimeToString(outbound.getDeliveryTime());
+      dto.setDeliveryTime(deliveryTime);
+    }
+
     dto.setPackingStation(outbound.getPackingStation());
-    dto.setPayload(outbound.getPayload());
+    dto.setGrossWeight(outbound.getGrossWeight());
     dto.setUnitOfMeasurement(outbound.getUnitOfMeasurement());
 
     return dto;

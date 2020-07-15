@@ -34,7 +34,7 @@ import com.crm.payload.response.MessageResponse;
 import com.crm.payload.response.PaginationResponse;
 import com.crm.security.services.UserDetailsImpl;
 import com.crm.services.BidService;
-import com.crm.websocket.controller.NotificationController;
+import com.crm.websocket.controller.NotificationBroadcast;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -57,7 +57,7 @@ public class BidController {
     BidDto bidDto = BidMapper.toBidDto(bid);
 
     // CREATE NOTIFICATION
-    NotificationController.broadcastCreateBidToMerchant(bid);
+    NotificationBroadcast.broadcastCreateBidToMerchant(bid);
     // END NOTIFICATION
 
     return ResponseEntity.ok(bidDto);
@@ -80,6 +80,28 @@ public class BidController {
     Bid bid = bidService.getBidByBiddingDocumentAndForwarder(id, username);
     BidDto bidDto = BidMapper.toBidDto(bid);
     return ResponseEntity.ok(bidDto);
+  }
+  
+  @PreAuthorize("hasRole('MERCHANT')")
+  @GetMapping("/combined/bidding-document/{id}")
+  public ResponseEntity<?> getBidByBiddingDocumentAndExistCombined(@PathVariable Long id, @Valid PaginationRequest request) {
+    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    Long userId = userDetails.getId();
+
+    Page<Bid> pages = bidService.getBidsByBiddingDocumentAndExistCombined(id, userId, request);
+    
+    PaginationResponse<BidDto> response = new PaginationResponse<>();
+    response.setPageNumber(request.getPage());
+    response.setPageSize(request.getLimit());
+    response.setTotalElements(pages.getTotalElements());
+    response.setTotalPages(pages.getTotalPages());
+
+    List<Bid> bids = pages.getContent();
+    List<BidDto> bidsDto = new ArrayList<>();
+    bids.forEach(bid -> bidsDto.add(BidMapper.toBidDto(bid)));
+    response.setContents(bidsDto);
+
+    return ResponseEntity.ok(response);
   }
 
   @PreAuthorize("hasRole('MERCHANT')")
@@ -126,7 +148,9 @@ public class BidController {
   @PreAuthorize("hasRole('FORWARDER')")
   @PutMapping("")
   public ResponseEntity<?> updateBid(@Valid @RequestBody BidRequest request) {
-    Bid bid = bidService.updateBid(request);
+    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    String username = userDetails.getUsername();
+    Bid bid = bidService.updateBid(username, request);
     BidDto bidDto = BidMapper.toBidDto(bid);
     return ResponseEntity.ok(bidDto);
   }
@@ -135,13 +159,15 @@ public class BidController {
   @PreAuthorize("hasRole('MERCHANT') or hasRole('FORWARDER')")
   @RequestMapping(value = "/{id}", method = RequestMethod.PATCH, consumes = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<?> editBid(@PathVariable("id") Long id, @RequestBody Map<String, Object> updates) {
+    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    String username = userDetails.getUsername();
     Bid bid = bidService.getBid(id);
     String status = bid.getStatus();
-    Bid bidEdit = bidService.editBid(id, updates);
+    Bid bidEdit = bidService.editBid(id, username, updates);
     BidDto BidDto = BidMapper.toBidDto(bidEdit);
 
     // CREATE NOTIFICATION
-    NotificationController.broadcastEditBidToMerchantOrForwarder(status, bidEdit);
+    NotificationBroadcast.broadcastEditBidToMerchantOrForwarder(status, bidEdit);
     // END NOTIFICATION
 
     return ResponseEntity.ok(BidDto);
@@ -155,7 +181,7 @@ public class BidController {
     bidService.removeBid(id);
 
     // CREATE NOTIFICATION
-    NotificationController.broadcastRemoveBidToMerchant(bid);
+    NotificationBroadcast.broadcastRemoveBidToMerchant(bid);
     // END NOTIFICATION
 
     return ResponseEntity.ok(new MessageResponse("Bidding document deleted successfully."));

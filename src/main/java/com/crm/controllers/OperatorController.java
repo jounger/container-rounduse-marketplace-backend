@@ -79,12 +79,12 @@ public class OperatorController {
   @Transactional
   @PutMapping("")
   @PreAuthorize("hasRole('ADMIN') or hasRole('MODERATOR')")
-  public ResponseEntity<?> updateOperator(@Valid @RequestBody OperatorRequest request){
+  public ResponseEntity<?> updateOperator(@Valid @RequestBody OperatorRequest request) {
     Operator operator = operatorService.updateOperator(request);
     OperatorDto operatorDto = OperatorMapper.toOperatorDto(operator);
     return ResponseEntity.ok(operatorDto);
   }
-  
+
   @Transactional
   @PreAuthorize("hasRole('ADMIN') or hasRole('MODERATOR')")
   @RequestMapping(value = "/{id}", method = RequestMethod.PATCH, consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -93,11 +93,11 @@ public class OperatorController {
     OperatorDto operatorDto = OperatorMapper.toOperatorDto(operator);
     return ResponseEntity.ok(operatorDto);
   }
-  
+
   @Transactional
   @DeleteMapping("/{id}")
   @PreAuthorize("hasRole('ADMIN')")
-  public ResponseEntity<?> removeOperator(@PathVariable Long id){       
+  public ResponseEntity<?> removeOperator(@PathVariable Long id) {
     operatorService.removeOperator(id);
     return ResponseEntity.ok(new MessageResponse("Operator has remove successfully"));
   }

@@ -1,10 +1,9 @@
 package com.crm.models;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.Collection;
 
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
@@ -25,12 +24,15 @@ import lombok.ToString;
 @PrimaryKeyJoinColumn(name = "user_id")
 public class Forwarder extends Supplier {
 
-  @OneToMany(mappedBy = "forwarder", fetch = FetchType.LAZY)
-  private Set<Driver> drivers = new HashSet<>();
+  @OneToMany(mappedBy = "forwarder")
+  private Collection<Driver> drivers = new ArrayList<>();
 
-  @OneToMany(mappedBy = "bidder", fetch = FetchType.LAZY)
-  private Set<Bid> bids = new HashSet<Bid>();
+  @OneToMany(mappedBy = "bidder")
+  private Collection<Bid> bids = new ArrayList<>();
 
   @OneToMany(mappedBy = "forwarder")
-  private Set<Inbound> inbounds = new HashSet<>();
+  private Collection<Inbound> inbounds = new ArrayList<>();
+
+  @OneToMany(mappedBy = "forwarder")
+  private Collection<Vehicle> vehicles = new ArrayList<>();
 }

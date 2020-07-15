@@ -9,9 +9,12 @@ import org.springframework.stereotype.Service;
 import com.crm.common.Constant;
 import com.crm.models.Bid;
 import com.crm.models.BiddingNotification;
+import com.crm.models.DriverNotification;
 import com.crm.models.dto.BiddingNotificationDto;
+import com.crm.models.dto.DriverNotificationDto;
 import com.crm.models.dto.ShippingLineNotificationDto;
 import com.crm.models.mapper.BiddingNotificationMapper;
+import com.crm.models.mapper.DriverNotificationMapper;
 import com.crm.models.mapper.ShippingLineNotificationMapper;
 import com.crm.websocket.service.BiddingWebSocketService;
 
@@ -38,7 +41,16 @@ public class BiddingWebSocketServiceImpl implements BiddingWebSocketService {
         .toShippingLineNotificationDto(notification, bid);
     logger.info("Send to: {}", shippingLineNotificationDto.getRecipient());
     logger.info("shippingLineNotification: {}", shippingLineNotificationDto.toString());
-    messagingTemplate.convertAndSendToUser(shippingLineNotificationDto.getRecipient(), Constant.BIDDING_NOTIFICATION,
+    messagingTemplate.convertAndSendToUser(shippingLineNotificationDto.getRecipient(), Constant.SHIPPING_LINE_NOTIFICATION,
         shippingLineNotificationDto);
+  }
+
+  @Override
+  public void sendBiddingNotifyToDriver(DriverNotification notification) {
+    DriverNotificationDto driverNotificationDto = DriverNotificationMapper.toDriverNotificationDto(notification);
+    logger.info("Send to: {}", driverNotificationDto.getRecipient());
+    logger.info("shippingLineNotification: {}", driverNotificationDto.toString());
+    messagingTemplate.convertAndSendToUser(driverNotificationDto.getRecipient(), Constant.DRIVER_NOTIFICATION,
+        driverNotificationDto);
   }
 }

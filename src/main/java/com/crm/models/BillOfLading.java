@@ -1,9 +1,9 @@
 package com.crm.models;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -45,7 +45,12 @@ public class BillOfLading {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column(name = "id", updatable = false, nullable = false)
   private Long id;
+
+  @OneToOne
+  @JoinColumn(name = "inbound_id")
+  private Inbound inbound;
 
   @ManyToOne
   @JoinColumn(name = "port_id")
@@ -53,6 +58,9 @@ public class BillOfLading {
 
   @Column(name = "bill_of_lading_number")
   private String billOfLadingNumber;
+
+  @Column(name = "unit")
+  private Integer unit;
 
   @Column(name = "free_time")
   private LocalDateTime freeTime;
@@ -67,9 +75,6 @@ public class BillOfLading {
   @LastModifiedDate
   private Date updatedAt;
 
-  @OneToOne(mappedBy = "billOfLading")
-  private Inbound inbound;
-
   @OneToMany(mappedBy = "billOfLading", cascade = CascadeType.ALL)
-  private Set<Container> containers = new HashSet<>();
+  private Collection<Container> containers = new ArrayList<>();
 }

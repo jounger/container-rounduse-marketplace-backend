@@ -38,10 +38,15 @@ import lombok.ToString;
 @EntityListeners(AuditingEntityListener.class)
 @JsonIgnoreProperties(value = { "createdAt", "updatedAt" }, allowGetters = true)
 public class Booking {
-  
+
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column(name = "id", updatable = false, nullable = false)
   private Long id;
+
+  @OneToOne
+  @JoinColumn(name = "outbound_id")
+  private Outbound outbound;
 
   @ManyToOne
   @JoinColumn(name = "port_id")
@@ -49,15 +54,16 @@ public class Booking {
 
   @Column(name = "booking_number")
   private String bookingNumber;
-  
+
+  @Column(name = "unit")
   private Integer unit;
-  
+
   @Column(name = "cut_off_time")
   private LocalDateTime cutOffTime;
-  
+
   @Column(name = "is_fcl")
   private Boolean isFcl;
-  
+
   @Column(name = "created_at", nullable = false, updatable = false)
   @Temporal(TemporalType.TIMESTAMP)
   @CreatedDate
@@ -67,7 +73,5 @@ public class Booking {
   @Temporal(TemporalType.TIMESTAMP)
   @LastModifiedDate
   private Date updatedAt;
-  
-  @OneToOne(mappedBy = "booking")
-  private Outbound outbound;
+
 }

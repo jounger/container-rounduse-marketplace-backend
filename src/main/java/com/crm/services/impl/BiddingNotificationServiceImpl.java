@@ -76,10 +76,10 @@ public class BiddingNotificationServiceImpl implements BiddingNotificationServic
     String status = request.getStatus();
     Page<BiddingNotification> biddingNotifications = null;
     if (status != null && !status.isEmpty()) {
-      biddingNotifications = biddingNotificationRepository.findBiddingNotificationsByUserAndStatus(id, status,
+      biddingNotifications = biddingNotificationRepository.findByUserAndStatus(id, status,
           PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt")));
     } else {
-      biddingNotifications = biddingNotificationRepository.findBiddingNotificationsByUser(id,
+      biddingNotifications = biddingNotificationRepository.findByUser(id,
           PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt")));
     }
     return biddingNotifications;
@@ -90,10 +90,10 @@ public class BiddingNotificationServiceImpl implements BiddingNotificationServic
     String status = request.getStatus();
     Page<BiddingNotification> biddingNotifications = null;
     if (status != null && !status.isEmpty()) {
-      biddingNotifications = biddingNotificationRepository.findBiddingNotificationsByUserAndStatus(recipient, status,
+      biddingNotifications = biddingNotificationRepository.findByUserAndStatus(recipient, status,
           PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt")));
     } else {
-      biddingNotifications = biddingNotificationRepository.findBiddingNotificationsByUser(recipient,
+      biddingNotifications = biddingNotificationRepository.findByUser(recipient,
           PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt")));
     }
     return biddingNotifications;
@@ -110,7 +110,7 @@ public class BiddingNotificationServiceImpl implements BiddingNotificationServic
     } else {
       throw new NotFoundException("Is Read is not found.");
     }
-    
+
     biddingNotificationRepository.save(biddingNotification);
     return biddingNotification;
   }

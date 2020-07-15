@@ -117,6 +117,15 @@ public class ContainerTractorController {
     return ResponseEntity.ok(containerTractorDto);
   }
 
+  @PreAuthorize("hasRole('FORWARDER') or hasRole('MERCHANT')")
+  @RequestMapping(method = RequestMethod.GET, params = { "licensePlate" })
+  public ResponseEntity<?> getContainerTractorByLicensePlate(@RequestParam String licensePlate) {
+    ContainerTractor containerTractor = containerTractorService.getContainerTractorByLicensePlate(licensePlate);
+    ContainerTractorDto containerTractorDto = new ContainerTractorDto();
+    containerTractorDto = ContainerTractorMapper.toContainerTractorDto(containerTractor);
+    return ResponseEntity.ok(containerTractorDto);
+  }
+
   @Transactional
   @PostMapping("")
   @PreAuthorize("hasRole('FORWARDER')")

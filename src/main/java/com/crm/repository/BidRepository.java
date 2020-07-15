@@ -33,7 +33,7 @@ public interface BidRepository extends JpaRepository<Bid, Long> {
   @Query(value = "SELECT CASE WHEN COUNT(b) = 0 THEN TRUE ELSE FALSE END "
       + "FROM Bid b JOIN b.containers c WHERE b.biddingDocument.id = :id AND c.status != 'DONE'")
   boolean isAllCombinedByBiddingDocument(@Param("id") Long id);
-
+  
   @Query(value = "SELECT CASE WHEN COUNT(b) = 0 THEN TRUE ELSE FALSE END "
       + "FROM Bid b JOIN b.containers c WHERE b.biddingDocument.id = :id AND c.status != 'COMBINED'")
   boolean isAllAcceptedByBiddingDocument(@Param("id") Long id);

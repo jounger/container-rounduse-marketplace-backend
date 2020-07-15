@@ -69,7 +69,7 @@ public class BiddingDocumentController {
     UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
         .getPrincipal();
     Long id = userDetails.getId();
-    Page<BiddingDocument> pages = biddingDocumentService.getBiddingDocumentsExistCombined(id, request);
+    Page<BiddingDocument> pages = biddingDocumentService.getBiddingDocumentsByExistCombined(id, request);
 
     PaginationResponse<BiddingDocumentDto> response = new PaginationResponse<>();
     response.setPageNumber(request.getPage());

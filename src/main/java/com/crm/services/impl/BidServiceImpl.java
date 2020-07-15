@@ -34,8 +34,8 @@ import com.crm.repository.BidRepository;
 import com.crm.repository.BiddingDocumentRepository;
 import com.crm.repository.ContainerRepository;
 import com.crm.repository.ForwarderRepository;
-import com.crm.repository.MerchantRepository;
 import com.crm.repository.OutboundRepository;
+import com.crm.repository.SupplierRepository;
 import com.crm.repository.UserRepository;
 import com.crm.services.BidService;
 
@@ -52,9 +52,6 @@ public class BidServiceImpl implements BidService {
   private ForwarderRepository forwarderRepository;
 
   @Autowired
-  private MerchantRepository merchantRepository;
-
-  @Autowired
   private ContainerRepository containerRepository;
 
   @Autowired
@@ -62,6 +59,9 @@ public class BidServiceImpl implements BidService {
 
   @Autowired
   private UserRepository userRepository;
+  
+  @Autowired
+  private SupplierRepository supplierRepository;
 
   @Override
   public Bid createBid(Long bidDocId, Long id, BidRequest request) {
@@ -159,7 +159,7 @@ public class BidServiceImpl implements BidService {
 
   @Override
   public Page<Bid> getBidsByBiddingDocumentAndExistCombined(Long id, Long userId, PaginationRequest request) {
-    if (!biddingDocumentRepository.existsById(id) || !merchantRepository.existsById(userId)) {
+    if (!biddingDocumentRepository.existsById(id) || !supplierRepository.existsById(userId)) {
       throw new NotFoundException("User or Bidding document is not found.");
     }
     PageRequest page = PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Direction.DESC, "id"));

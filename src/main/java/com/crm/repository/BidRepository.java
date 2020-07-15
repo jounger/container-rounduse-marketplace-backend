@@ -18,7 +18,7 @@ public interface BidRepository extends JpaRepository<Bid, Long> {
   Page<Bid> findByBiddingDocument(@Param("id") Long id, Pageable pageable);
 
   @Query(value = "SELECT b FROM Bid b LEFT JOIN b.biddingDocument bd WHERE bd.id = :id "
-      + "AND bd.offeree.id = :userId AND b.combined IS NOT NULL")
+      + "AND (bd.offeree.id = :userId or b.bidder = :userId) AND b.combined IS NOT NULL")
   Page<Bid> findByBiddingDocumentAndExistCombined(@Param("id") Long id, @Param("userId") Long userId, Pageable pageable);
 
   @Query(value = "SELECT b FROM Bid b WHERE b.bidder.id = :id")

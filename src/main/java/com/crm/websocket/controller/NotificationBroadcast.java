@@ -14,6 +14,7 @@ import com.crm.controllers.BiddingDocumentController;
 import com.crm.enums.EnumBidStatus;
 import com.crm.enums.EnumBiddingNotificationType;
 import com.crm.enums.EnumDriverNotificationType;
+import com.crm.enums.EnumReportNotificationType;
 import com.crm.models.Bid;
 import com.crm.models.BiddingDocument;
 import com.crm.models.BiddingNotification;
@@ -21,13 +22,20 @@ import com.crm.models.Container;
 import com.crm.models.DriverNotification;
 import com.crm.models.Forwarder;
 import com.crm.models.Merchant;
+import com.crm.models.Report;
+import com.crm.models.ReportNotification;
+import com.crm.models.User;
 import com.crm.payload.request.BiddingNotificationRequest;
 import com.crm.payload.request.DriverNotificationRequest;
 import com.crm.payload.request.PaginationRequest;
+import com.crm.payload.request.ReportNotificationRequest;
 import com.crm.services.BiddingNotificationService;
 import com.crm.services.DriverNotificationService;
 import com.crm.services.ForwarderService;
+import com.crm.services.ReportNotificationService;
+import com.crm.services.UserService;
 import com.crm.websocket.service.BiddingWebSocketService;
+import com.crm.websocket.service.ReportWebSocketService;
 
 @Component
 public class NotificationBroadcast {
@@ -42,14 +50,24 @@ public class NotificationBroadcast {
 
   private static DriverNotificationService driverNotificationService;
 
+  private static ReportNotificationService reportNotificationService;
+
+  private static UserService userService;
+
+  private static ReportWebSocketService reportWebSocketService;
+
   @Autowired
   public NotificationBroadcast(BiddingNotificationService biddingNotificationService,
       BiddingWebSocketService biddingWebSocketService, ForwarderService forwarderService,
-      DriverNotificationService driverNotificationService) {
+      DriverNotificationService driverNotificationService, ReportNotificationService reportNotificationService,
+      UserService userService, ReportWebSocketService reportWebSocketService) {
     NotificationBroadcast.biddingNotificationService = biddingNotificationService;
     NotificationBroadcast.biddingWebSocketService = biddingWebSocketService;
     NotificationBroadcast.forwarderService = forwarderService;
     NotificationBroadcast.driverNotificationService = driverNotificationService;
+    NotificationBroadcast.reportNotificationService = reportNotificationService;
+    NotificationBroadcast.userService = userService;
+    NotificationBroadcast.reportWebSocketService = reportWebSocketService;
   }
 
   public static void broadcastCreateBidToMerchant(Bid bid) {
@@ -205,6 +223,30 @@ public class NotificationBroadcast {
         biddingWebSocketService.sendBiddingNotifyToDriver(driverNotification);
       });
     }
+  }
+
+  public static void broadcastCreateReportToModerator(Report report) {
+
+    String roleName = "ROLE_MODERATOR";
+
+    List<User> moderators = userService.getUsersByRole(roleName);
+    moderators.forEach(moderator -> {
+      ReportNotificationRequest notifyRequest = new ReportNotificationRequest();
+
+      // Create new message notifications and save to Database
+
+      notifyRequest.setRecipient(moderator.getUsername());
+      notifyRequest.setRelatedResource(report.getId());
+      notifyRequest.setMessage(String.format("You got a new Report from %s", report.getSender().getUsername()));
+      notifyRequest.setType(EnumReportNotificationType.NEW.name());
+      ReportNotification notification = reportNotificationService.createReportNotification(notifyRequest);
+
+      // Asynchronous send notification to merchant
+
+      logger.info("notification : {}", notification.getId());
+      reportWebSocketService.sendReportNotifyToModerator(notification);
+    });
+
   }
 
 }

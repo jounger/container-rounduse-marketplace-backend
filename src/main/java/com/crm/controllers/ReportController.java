@@ -33,6 +33,7 @@ import com.crm.payload.request.ReportRequest;
 import com.crm.payload.response.MessageResponse;
 import com.crm.payload.response.PaginationResponse;
 import com.crm.services.ReportService;
+import com.crm.websocket.controller.NotificationBroadcast;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -50,6 +51,11 @@ public class ReportController {
     String username = userDetails.getUsername();
     Report report = reportService.createReport(username, request);
     ReportDto reportDto = ReportMapper.toReportDto(report);
+
+    // CREATE NOTIFICATION
+    NotificationBroadcast.broadcastCreateReportToModerator(report);
+    // END NOTIFICATION
+
     return ResponseEntity.ok(reportDto);
   }
 

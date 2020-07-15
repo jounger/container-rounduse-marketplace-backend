@@ -27,7 +27,7 @@ public interface BiddingDocumentRepository extends JpaRepository<BiddingDocument
   Page<BiddingDocument> findByForwarder(@Param("id") Long forwarderId, @Param("status") String status,
       Pageable pageable);
 
-  @Query(value = "FROM BiddingDocument bd LEFT JOIN bd.bids b WHERE (bd.offeree.username = :username "
+  @Query(value = "SELECT bd FROM BiddingDocument bd LEFT JOIN bd.bids b WHERE (bd.offeree.username = :username "
       + "OR b.bidder.username = :username) AND b.id = :id")
   Optional<BiddingDocument> findByBid(@Param("id") Long bid, @Param("username") String username);
 

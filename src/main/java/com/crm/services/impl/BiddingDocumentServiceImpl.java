@@ -128,7 +128,7 @@ public class BiddingDocumentServiceImpl implements BiddingDocumentService {
 
   @Override
   public BiddingDocument getBiddingDocumentByBid(Long id, String username) {
-    if (bidRepository.existsById(id)) {
+    if (!bidRepository.existsById(id)) {
       throw new NotFoundException("Bid is not found");
     }
     BiddingDocument biddingDocument = biddingDocumentRepository.findByBid(id, username)

@@ -62,7 +62,7 @@ public class BiddingDocumentController {
     return ResponseEntity.ok(biddingDocumentDto);
   }
   
-  @PreAuthorize("hasRole('FORWARDER')")
+  @PreAuthorize("hasRole('MERCHANT') or hasRole('FORWARDER')")
   @GetMapping("/combined")
   public ResponseEntity<?> getBiddingDocumentsByExistCombined(@Valid PaginationRequest request) {
 

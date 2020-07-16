@@ -142,7 +142,7 @@ public class ShippingLineServiceImpl implements ShippingLineService {
      */
 
     String email = (String) updates.get("email");
-    if (email != null && UserServiceImpl.isEmailChange(email, shippingLine) && !email.isEmpty()) {
+    if (!Tool.isEqual(shippingLine.getEmail(), email)) {
       shippingLine.setEmail(email);
     }
 

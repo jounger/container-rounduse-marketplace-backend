@@ -150,7 +150,7 @@ public class ForwarderServiceImpl implements ForwarderService {
      */
 
     String email = (String) updates.get("email");
-    if (email != null && UserServiceImpl.isEmailChange(email, forwarder) && !email.isEmpty()) {
+    if (!Tool.isEqual(forwarder.getEmail(), email)) {
       forwarder.setEmail(email);
     }
 

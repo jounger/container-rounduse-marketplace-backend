@@ -116,12 +116,12 @@ public class DiscountServiceImpl implements DiscountService {
     }
 
     String detail = (String) updates.get("detail");
-    if (detail != null && !detail.isEmpty()) {
+    if (!Tool.isEqual(discount.getDetail(), detail)) {
       discount.setDetail(detail);
     }
 
     String currency = (String) updates.get("currency");
-    if (currency != null && !currency.isEmpty()) {
+    if (!Tool.isEqual(discount.getCurrency(), currency)) {
       String currencyName = EnumCurrency.findByName(currency).name();
       if (currencyName != null && !currencyName.isEmpty()) {
         discount.setCurrency(currencyName);
@@ -131,19 +131,18 @@ public class DiscountServiceImpl implements DiscountService {
     }
 
     String percent = (String) updates.get("percent");
-    if (percent != null && !percent.isEmpty()) {
+    if (!Tool.isEqual(discount.getPercent(), percent)) {
       discount.setPercent(Double.valueOf(percent));
     }
 
     String maximumDiscount = (String) updates.get("maximumDiscount");
-    if (maximumDiscount != null && !maximumDiscount.isEmpty()) {
+    if (!Tool.isEqual(discount.getMaximumDiscount(), maximumDiscount)) {
       discount.setMaximumDiscount(Double.valueOf(maximumDiscount));
     }
 
     String expiredDateString = (String) updates.get("expiredDate");
-    if (expiredDateString != null && !expiredDateString.isEmpty()) {
-      LocalDateTime expiredDate = Tool.convertToLocalDateTime(expiredDateString);
-      discount.setExpiredDate(expiredDate);
+    if (!Tool.isEqual(discount.getExpiredDate().toString(), expiredDateString)) {
+      discount.setExpiredDate(Tool.convertToLocalDateTime(expiredDateString));
     }
 
     discountRepository.save(discount);

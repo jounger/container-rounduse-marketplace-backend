@@ -55,7 +55,7 @@ INSERT INTO crm_db.bidding_notification VALUES ('ADDED',1,1),('ADDED',2,1),('ACC
 
 # Combined, Contract AND Evidence
 INSERT INTO crm_db.combined VALUES (1,'2020-07-09 00:03:30','INFO_RECEIVED','2020-07-09 00:03:30',1);
-INSERT INTO crm_db.contract VALUES (1,'2020-07-09 00:03:54',50,_binary '\0','2020-07-09 00:03:54',1);
+INSERT INTO crm_db.contract VALUES (1,'2020-07-09 00:03:54',50,_binary '\1','2020-07-09 00:03:54',1);
 INSERT INTO crm_db.evidence VALUES (1,'2020-07-09 00:04:04','chan qua',_binary '','2020-07-09 00:13:02',1,4);
 
 # Payment

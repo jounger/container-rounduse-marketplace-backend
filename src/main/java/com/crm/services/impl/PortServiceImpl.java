@@ -8,6 +8,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import com.crm.common.Tool;
 import com.crm.exception.DuplicateRecordException;
 import com.crm.exception.NotFoundException;
 import com.crm.models.Port;
@@ -83,17 +84,17 @@ public class PortServiceImpl implements PortService {
     Port port = portRepository.findById(id).orElseThrow(() -> new NotFoundException("ERROR: Port is not found."));
 
     String fullname = (String) updates.get("fullname");
-    if (fullname != null && !fullname.isEmpty()) {
+    if (!Tool.isEqual(port.getFullname(), fullname)) {
       port.setFullname(fullname);
     }
 
     String address = (String) updates.get("address");
-    if (address != null && !address.isEmpty()) {
+    if (!Tool.isEqual(port.getAddress(), address)) {
       port.setAddress(address);
     }
 
     String nameCode = (String) updates.get("nameCode");
-    if (nameCode != null && !nameCode.isEmpty()) {
+    if (!Tool.isEqual(port.getNameCode(), nameCode)) {
       if (portRepository.existsByNameCode(nameCode)) {
         if (nameCode.equals(port.getNameCode())) {
         } else {

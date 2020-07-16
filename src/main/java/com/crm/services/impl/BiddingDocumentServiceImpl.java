@@ -58,7 +58,7 @@ public class BiddingDocumentServiceImpl implements BiddingDocumentService {
 
   @Autowired
   private BidRepository bidRepository;
-  
+
   @Autowired
   private SupplierRepository supplierRepository;
 
@@ -138,7 +138,7 @@ public class BiddingDocumentServiceImpl implements BiddingDocumentService {
 
   @Override
   public Page<BiddingDocument> getBiddingDocumentsByExistCombined(Long id, PaginationRequest request) {
-    if(!biddingDocumentRepository.existsById(id) || !supplierRepository.existsById(id)) {
+    if (!biddingDocumentRepository.existsById(id) || !supplierRepository.existsById(id)) {
       throw new NotFoundException("User or Bidding document is not found.");
     }
     PageRequest page = PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Direction.DESC, "createdAt"));
@@ -216,7 +216,7 @@ public class BiddingDocumentServiceImpl implements BiddingDocumentService {
     LocalDateTime packingTime = outbound.getPackingTime();
 
     String bidClosing = (String) updates.get("bidClosing");
-    if (bidClosing != null && !bidClosing.isEmpty()) {
+    if (!Tool.isBlank(bidClosing)) {
       LocalDateTime bidClosingTime = Tool.convertToLocalDateTime(bidClosing);
       if (bidClosingTime.isBefore(LocalDateTime.now()) || bidClosingTime.isAfter(packingTime)) {
         throw new InternalException("Bid closing time must be after now.");
@@ -225,7 +225,7 @@ public class BiddingDocumentServiceImpl implements BiddingDocumentService {
     }
 
     String currency = (String) updates.get("currentOfPayment");
-    if (currency != null && !currency.isEmpty()) {
+    if (!Tool.isEqual(biddingDocument.getCurrencyOfPayment(), currency)) {
       EnumCurrency currencyOfPayment = EnumCurrency.findByName(currency);
       if (currencyOfPayment == null) {
         currencyOfPayment = EnumCurrency.VND;
@@ -235,30 +235,23 @@ public class BiddingDocumentServiceImpl implements BiddingDocumentService {
       biddingDocument.setCurrencyOfPayment(EnumCurrency.VND.name());
     }
 
-    try {
-      String packagePriceString = (String) updates.get("bidPackagePrice");
-      if (packagePriceString != null && !packagePriceString.isEmpty()) {
-        Double bidPackagePrice = Double.parseDouble(packagePriceString);
-        biddingDocument.setBidPackagePrice(bidPackagePrice);
-      }
+    String packagePriceString = (String) updates.get("bidPackagePrice");
+    if (!Tool.isEqual(biddingDocument.getBidPackagePrice(), packagePriceString)) {
+      biddingDocument.setBidPackagePrice(Double.parseDouble(packagePriceString));
+    }
 
-      String floorPriceString = (String) updates.get("bidFloorPrice");
-      if (floorPriceString != null && !floorPriceString.isEmpty()) {
-        Double bidFloorPrice = Double.parseDouble(floorPriceString);
-        biddingDocument.setBidFloorPrice(bidFloorPrice);
-      }
+    String floorPriceString = (String) updates.get("bidFloorPrice");
+    if (!Tool.isEqual(biddingDocument.getBidFloorPrice(), floorPriceString)) {
+      biddingDocument.setBidFloorPrice(Double.parseDouble(floorPriceString));
+    }
 
-      String priceLeadershipString = (String) updates.get("priceLeadership");
-      if (priceLeadershipString != null && !priceLeadershipString.isEmpty()) {
-        Double priceLeadership = Double.parseDouble(priceLeadershipString);
-        biddingDocument.setPriceLeadership(priceLeadership);
-      }
-    } catch (Exception e) {
-      throw new InternalException("Parameters must be double.");
+    String priceLeadershipString = (String) updates.get("priceLeadership");
+    if (!Tool.isEqual(biddingDocument.getPriceLeadership(), priceLeadershipString)) {
+      biddingDocument.setPriceLeadership(Double.parseDouble(priceLeadershipString));
     }
 
     String status = (String) updates.get("status");
-    if (status != null && !status.isEmpty()) {
+    if (!Tool.isBlank(status)) {
       EnumBiddingStatus eStatus = EnumBiddingStatus.findByName(status);
       if (eStatus != null) {
         biddingDocument.setStatus(eStatus.name());

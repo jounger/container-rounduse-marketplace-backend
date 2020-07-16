@@ -60,6 +60,9 @@ public class BidServiceImpl implements BidService {
 
   @Autowired
   private UserRepository userRepository;
+  
+  @Autowired
+  private SupplierRepository supplierRepository;
 
   @Autowired
   private SupplierRepository supplierRepository;

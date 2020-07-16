@@ -28,12 +28,13 @@ import org.springframework.web.bind.annotation.RestController;
 import com.crm.models.Feedback;
 import com.crm.models.dto.FeedbackDto;
 import com.crm.models.mapper.FeedbackMapper;
-import com.crm.payload.request.PaginationRequest;
 import com.crm.payload.request.FeedbackRequest;
+import com.crm.payload.request.PaginationRequest;
 import com.crm.payload.response.MessageResponse;
 import com.crm.payload.response.PaginationResponse;
 import com.crm.security.services.UserDetailsImpl;
 import com.crm.services.FeedbackService;
+import com.crm.websocket.controller.NotificationBroadcast;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -45,19 +46,44 @@ public class FeedbackController {
 
   @Transactional
   @PostMapping("/report/{id}")
-  @PreAuthorize("hasRole('MODERATOR') or hasRole('FORWARDER')")
+  @PreAuthorize("hasRole('MODERATOR')")
   public ResponseEntity<?> createFeedback(@PathVariable("id") Long id, @Valid @RequestBody FeedbackRequest request) {
-    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
+        .getPrincipal();
     Long userId = userDetails.getId();
     Feedback payment = paymentService.createFeedback(id, userId, request);
     FeedbackDto paymentDto = FeedbackMapper.toFeedbackDto(payment);
+
+    // CREATE NOTIFICATION
+    NotificationBroadcast.broadcastCreateFeedbackToUser(payment);
+    // END NOTIFICATION
+
+    return ResponseEntity.ok(paymentDto);
+  }
+
+  @Transactional
+  @RequestMapping(method = RequestMethod.POST, params = { "id", "name" })
+  @PreAuthorize("hasRole('FORWARDER')")
+  public ResponseEntity<?> createFeedbackToModerator(@RequestParam Long id, @RequestParam String name,
+      @Valid @RequestBody FeedbackRequest request) {
+    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
+        .getPrincipal();
+    Long userId = userDetails.getId();
+    Feedback payment = paymentService.createFeedback(id, userId, request);
+    FeedbackDto paymentDto = FeedbackMapper.toFeedbackDto(payment);
+
+    // CREATE NOTIFICATION
+    NotificationBroadcast.broadcastCreateFeedbackToModerator(name, payment);
+    // END NOTIFICATION
+
     return ResponseEntity.ok(paymentDto);
   }
 
   @PreAuthorize("hasRole('MODERATOR') or hasRole('FORWARDER')")
   @GetMapping("/report/{id}")
   public ResponseEntity<?> getFeedbacksByReport(@PathVariable Long id, @Valid PaginationRequest request) {
-    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
+        .getPrincipal();
     Long userId = userDetails.getId();
 
     Page<Feedback> pages = paymentService.getFeedbacksByReport(id, userId, request);
@@ -121,7 +147,8 @@ public class FeedbackController {
   @PreAuthorize("hasRole('MODERATOR') or hasRole('FORWARDER')")
   @RequestMapping(value = "/{id}", method = RequestMethod.PATCH, consumes = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<?> editFeedback(@PathVariable("id") Long id, @RequestBody Map<String, Object> updates) {
-    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
+        .getPrincipal();
     Long userId = userDetails.getId();
     Feedback payment = paymentService.editFeedback(id, userId, updates);
     FeedbackDto paymentDto = FeedbackMapper.toFeedbackDto(payment);
@@ -132,7 +159,8 @@ public class FeedbackController {
   @PreAuthorize("hasRole('MODERATOR') or hasRole('FORWARDER')")
   @DeleteMapping("/{id}")
   public ResponseEntity<?> deleteFeedback(@PathVariable Long id) {
-    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
+        .getPrincipal();
     Long userId = userDetails.getId();
     paymentService.removeFeedback(id, userId);
     return ResponseEntity.ok(new MessageResponse("Feedback deleted successfully."));

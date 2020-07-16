@@ -17,7 +17,7 @@ public class ReportWebSocketServiceImpl implements ReportWebSocketService {
   SimpMessagingTemplate messagingTemplate;
 
   @Override
-  public void sendReportNotifyToModerator(ReportNotification notification) {
+  public void sendReportNotifyToModeratorOrUser(ReportNotification notification) {
     ReportNotificationDto notificationDto = ReportNotificationMapper.toReportNotificationDto(notification);
     messagingTemplate.convertAndSendToUser(notificationDto.getRecipient(), Constant.BIDDING_NOTIFICATION,
         notificationDto);

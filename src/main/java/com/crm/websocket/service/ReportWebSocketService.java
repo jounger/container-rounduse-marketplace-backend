@@ -4,5 +4,5 @@ import com.crm.models.ReportNotification;
 
 public interface ReportWebSocketService {
 
-  void sendReportNotifyToModerator(ReportNotification notification);
+  void sendReportNotifyToModeratorOrUser(ReportNotification notification);
 }

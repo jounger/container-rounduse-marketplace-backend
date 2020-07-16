@@ -124,8 +124,17 @@ public class ReportController {
   public ResponseEntity<?> editReport(@PathVariable("id") Long id, @RequestBody Map<String, Object> updates) {
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
-    Report report = reportService.editReport(id, username, updates);
-    ReportDto reportDto = ReportMapper.toReportDto(report);
+
+    Report report = reportService.getReport(id);
+    String status = report.getStatus();
+
+    Report editReport = reportService.editReport(id, username, updates);
+    ReportDto reportDto = ReportMapper.toReportDto(editReport);
+
+    // CREATE NOTIFICATION
+    NotificationBroadcast.broadcastUpdateReportToModerator(status, editReport);
+    // END NOTIFICATION
+
     return ResponseEntity.ok(reportDto);
   }
 

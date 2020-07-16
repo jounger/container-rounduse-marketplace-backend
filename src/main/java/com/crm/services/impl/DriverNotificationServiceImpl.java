@@ -42,6 +42,8 @@ public class DriverNotificationServiceImpl implements DriverNotificationService 
     driverNotification.setRecipient(recipient);
 
     driverNotification.setIsRead(false);
+    driverNotification.setIsHide(false);
+    driverNotification.setTitle(request.getTitle());
 
     Outbound relatedResource = outboundRepository.findById(request.getRelatedResource())
         .orElseThrow(() -> new NotFoundException("Related resource is not found."));
@@ -109,6 +111,13 @@ public class DriverNotificationServiceImpl implements DriverNotificationService 
       driverNotification.setIsRead(isRead);
     } else {
       throw new NotFoundException("Is Read is not found.");
+    }
+
+    Boolean isHide = (Boolean) updates.get("isHide");
+    if (isHide != null) {
+      driverNotification.setIsHide(isHide);
+    } else {
+      throw new NotFoundException("Is Hide is not found.");
     }
 
     driverNotificationRepository.save(driverNotification);

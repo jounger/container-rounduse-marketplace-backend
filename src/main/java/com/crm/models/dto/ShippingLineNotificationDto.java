@@ -1,18 +1,15 @@
 package com.crm.models.dto;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-public class ShippingLineNotificationDto extends NotificationDto{
+public class ShippingLineNotificationDto extends NotificationDto {
 
-  private String merchant;
+  private CombinedDto relatedResource;
 
-  private String forwarder;
+  private String message;
 
-  private List<ContainerDto> containers = new ArrayList<>();
+  private String type;
 }

@@ -42,6 +42,8 @@ public class BiddingNotificationServiceImpl implements BiddingNotificationServic
     biddingNotification.setRecipient(recipient);
 
     biddingNotification.setIsRead(false);
+    biddingNotification.setIsHide(false);
+    biddingNotification.setTitle(request.getTitle());
 
     BiddingDocument relatedResource = biddingDocumentRepository.findById(request.getRelatedResource())
         .orElseThrow(() -> new NotFoundException("Related resource is not found."));
@@ -109,6 +111,13 @@ public class BiddingNotificationServiceImpl implements BiddingNotificationServic
       biddingNotification.setIsRead(isRead);
     } else {
       throw new NotFoundException("Is Read is not found.");
+    }
+
+    Boolean isHide = (Boolean) updates.get("isHide");
+    if (isHide != null) {
+      biddingNotification.setIsHide(isHide);
+    } else {
+      throw new NotFoundException("Is Hide is not found.");
     }
 
     biddingNotificationRepository.save(biddingNotification);

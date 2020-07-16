@@ -53,7 +53,7 @@ public class CombinedController {
     CombinedDto combinedDto = CombinedMapper.toCombinedDto(combined);
 
     // CREATE NOTIFICATION
-    NotificationBroadcast.broadcastCreateCombinedToDriver(combined.getBid());
+    NotificationBroadcast.broadcastCreateCombinedToDriver(combined);
     // END NOTIFICATION
 
     return ResponseEntity.ok(combinedDto);

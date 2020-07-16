@@ -2,7 +2,7 @@ package com.crm.enums;
 
 public enum EnumReportNotificationType {
 
-  NEW, FEEDBACK, UPDATE;
+  NEW, FEEDBACK, UPDATE, RESOLVED, REJECTED, CLOSED;
 
   public static EnumReportNotificationType findByName(String name) {
     for (EnumReportNotificationType status : EnumReportNotificationType.values()) {

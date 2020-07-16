@@ -42,6 +42,8 @@ public class ReportNotificationServiceImpl implements ReportNotificationService 
     reportNotification.setRecipient(recipient);
 
     reportNotification.setIsRead(false);
+    reportNotification.setIsHide(false);
+    reportNotification.setTitle(request.getTitle());
 
     Report relatedResource = reportRepository.findById(request.getRelatedResource())
         .orElseThrow(() -> new NotFoundException("Related resource is not found."));
@@ -109,6 +111,13 @@ public class ReportNotificationServiceImpl implements ReportNotificationService 
       reportNotification.setIsRead(isRead);
     } else {
       throw new NotFoundException("Is Read is not found.");
+    }
+
+    Boolean isHide = (Boolean) updates.get("isHide");
+    if (isHide != null) {
+      reportNotification.setIsHide(isHide);
+    } else {
+      throw new NotFoundException("Is Hide is not found.");
     }
 
     reportNotificationRepository.save(reportNotification);

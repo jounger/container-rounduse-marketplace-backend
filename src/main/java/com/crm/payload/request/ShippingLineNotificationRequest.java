@@ -8,7 +8,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class DriverNotificationRequest {
+public class ShippingLineNotificationRequest {
 
   private Long id;
 

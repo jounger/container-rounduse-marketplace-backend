@@ -18,6 +18,10 @@ public class ReportNotificationRequest {
 
   private Boolean isRead;
 
+  private String title;
+
+  private Boolean isHide;
+
   @NotNull
   private Long relatedResource;
 

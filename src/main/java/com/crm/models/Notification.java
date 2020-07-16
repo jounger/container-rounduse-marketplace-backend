@@ -62,6 +62,9 @@ public class Notification {
   @Column(name = "is_read")
   private Boolean isRead;
 
+  @Column(name = "is_hide")
+  private Boolean isHide;
+
   @Column(name = "send_date")
   private LocalDateTime sendDate;
 

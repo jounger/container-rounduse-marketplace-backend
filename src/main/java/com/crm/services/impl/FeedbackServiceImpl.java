@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import com.crm.common.Constant;
 import com.crm.common.Tool;
+import com.crm.enums.EnumReportStatus;
 import com.crm.exception.InternalException;
 import com.crm.exception.NotFoundException;
 import com.crm.models.Feedback;
@@ -44,6 +45,14 @@ public class FeedbackServiceImpl implements FeedbackService {
     Feedback feedback = new Feedback();
 
     Report report = reportRepository.findById(id).orElseThrow(() -> new NotFoundException("Report is not found."));
+
+    if (report.getStatus().equals(EnumReportStatus.RESOLVED.name())
+        || report.getStatus().equals(EnumReportStatus.REJECTED.name())
+        || report.getStatus().equals(EnumReportStatus.CLOSED.name())) {
+      throw new InternalException("You can not create feedBack now.");
+    }
+
+    report.setStatus(EnumReportStatus.UPDATED.name());
     feedback.setReport(report);
     User sender = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User is not found."));
     String role = sender.getRoles().iterator().next().getName();

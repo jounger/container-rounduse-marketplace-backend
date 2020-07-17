@@ -83,17 +83,17 @@ public class PortServiceImpl implements PortService {
   public Port editPort(Map<String, Object> updates, Long id) {
     Port port = portRepository.findById(id).orElseThrow(() -> new NotFoundException("ERROR: Port is not found."));
 
-    String fullname = (String) updates.get("fullname");
+    String fullname = String.valueOf(updates.get("fullname"));
     if (!Tool.isEqual(port.getFullname(), fullname)) {
       port.setFullname(fullname);
     }
 
-    String address = (String) updates.get("address");
+    String address = String.valueOf(updates.get("address"));
     if (!Tool.isEqual(port.getAddress(), address)) {
       port.setAddress(address);
     }
 
-    String nameCode = (String) updates.get("nameCode");
+    String nameCode = String.valueOf(updates.get("nameCode"));
     if (!Tool.isEqual(port.getNameCode(), nameCode)) {
       if (portRepository.existsByNameCode(nameCode)) {
         if (nameCode.equals(port.getNameCode())) {

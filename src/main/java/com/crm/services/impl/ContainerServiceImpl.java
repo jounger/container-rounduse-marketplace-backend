@@ -310,12 +310,12 @@ public class ContainerServiceImpl implements ContainerService {
 
       BillOfLading billOfLading = (BillOfLading) container.getBillOfLading();
 
-      String containerNumber = (String) updates.get("containerNumber");
+      String containerNumber = String.valueOf(updates.get("containerNumber"));
       if (containerNumber != null && !containerNumber.isEmpty()) {
         container.setContainerNumber(containerNumber);
       }
 
-      String driverRequest = (String) updates.get("driver");
+      String driverRequest = String.valueOf(updates.get("driver"));
       if (driverRequest != null && !driverRequest.isEmpty()) {
         Driver driver = driverRepository.findByUsername(driverRequest)
             .orElseThrow(() -> new NotFoundException("ERROR: Driver is not found."));
@@ -331,7 +331,7 @@ public class ContainerServiceImpl implements ContainerService {
         container.setDriver(driver);
       }
 
-      String trailerRequest = (String) updates.get("trailer");
+      String trailerRequest = String.valueOf(updates.get("trailer"));
       if (trailerRequest != null && !trailerRequest.isEmpty()) {
 
         ContainerSemiTrailer containerSemiTrailer = containerSemiTrailerRepository.findByLicensePlate(trailerRequest)
@@ -348,7 +348,7 @@ public class ContainerServiceImpl implements ContainerService {
         container.setTrailer(containerSemiTrailer);
       }
 
-      String tractorRequest = (String) updates.get("tractor");
+      String tractorRequest = String.valueOf(updates.get("tractor"));
       if (tractorRequest != null && !tractorRequest.isEmpty()) {
 
         ContainerTractor containerTractor = containerTractorRepository.findByLicensePlate(tractorRequest)
@@ -365,7 +365,7 @@ public class ContainerServiceImpl implements ContainerService {
         container.setTractor(containerTractor);
       }
 
-      String status = (String) updates.get("status");
+      String status = String.valueOf(updates.get("status"));
       if (status != null && !status.isEmpty()) {
         container.setStatus(status);
       }

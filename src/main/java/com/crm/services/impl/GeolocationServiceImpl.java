@@ -51,12 +51,12 @@ public class GeolocationServiceImpl implements GeolocationService {
         throw new InternalException(String.format("Forwarder %s not owned", userId));
       }
 
-      String latitude = (String) updates.get("latitude");
+      String latitude = String.valueOf(updates.get("latitude"));
       if (latitude != null && !latitude.isEmpty() && !latitude.equals(geolocation.getLatitude())) {
         geolocation.setLatitude(latitude);
       }
 
-      String longitude = (String) updates.get("longitude");
+      String longitude = String.valueOf(updates.get("longitude"));
       if (longitude != null && !longitude.isEmpty() && !longitude.equals(geolocation.getLongitude())) {
         geolocation.setLongitude(longitude);
       }

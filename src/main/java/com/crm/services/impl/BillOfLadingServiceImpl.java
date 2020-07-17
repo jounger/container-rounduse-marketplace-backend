@@ -159,7 +159,7 @@ public class BillOfLadingServiceImpl implements BillOfLadingService {
         throw new InternalException(String.format("Forwarder %s not owned BillOfLading", userId));
       }
 
-      String portOfDelivery = (String) updates.get("portOfDelivery");
+      String portOfDelivery = String.valueOf(updates.get("portOfDelivery"));
       if (portOfDelivery != null && !portOfDelivery.isEmpty()
           && !portOfDelivery.equals(billOfLading.getPortOfDelivery().getNameCode())) {
         Port port = portRepository.findByNameCode(portOfDelivery)
@@ -167,7 +167,7 @@ public class BillOfLadingServiceImpl implements BillOfLadingService {
         billOfLading.setPortOfDelivery(port);
       }
 
-      String billOfLadingNumber = (String) updates.get("billOfLadingNumber");
+      String billOfLadingNumber = String.valueOf(updates.get("billOfLadingNumber"));
       if (billOfLadingNumber != null && !billOfLadingNumber.isEmpty()
           && !billOfLadingNumber.equals(billOfLading.getBillOfLadingNumber())) {
         if (billOfLadingRepository.existsByBillOfLadingNumber(billOfLadingNumber)) {
@@ -176,7 +176,7 @@ public class BillOfLadingServiceImpl implements BillOfLadingService {
         billOfLading.setBillOfLadingNumber(billOfLadingNumber);
       }
 
-      String unitRequest = (String) updates.get("unit");
+      String unitRequest = String.valueOf(updates.get("unit"));
       if (unitRequest != null && !unitRequest.isEmpty()
           && !unitRequest.equals(String.valueOf(billOfLading.getUnit()))) {
         int unit = Integer.parseInt(unitRequest);
@@ -186,7 +186,7 @@ public class BillOfLadingServiceImpl implements BillOfLadingService {
         billOfLading.setUnit(unit);
       }
 
-      String freeTimeReq = (String) updates.get("freeTime");
+      String freeTimeReq = String.valueOf(updates.get("freeTime"));
       if (freeTimeReq != null && !freeTimeReq.isEmpty()
           && !freeTimeReq.equals(String.valueOf(billOfLading.getFreeTime()))) {
 

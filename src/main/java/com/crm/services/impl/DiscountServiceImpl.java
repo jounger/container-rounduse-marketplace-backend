@@ -104,7 +104,7 @@ public class DiscountServiceImpl implements DiscountService {
     Discount discount = discountRepository.findById(id)
         .orElseThrow(() -> new NotFoundException("ERROR: Discount is not found."));
 
-    String code = (String) updates.get("code");
+    String code = String.valueOf(updates.get("code"));
     if (code != null && !code.isEmpty()) {
       if (discountRepository.existsByCode(code)) {
         if (code.equals(discount.getCode())) {
@@ -115,12 +115,12 @@ public class DiscountServiceImpl implements DiscountService {
       discount.setCode(code);
     }
 
-    String detail = (String) updates.get("detail");
+    String detail = String.valueOf(updates.get("detail"));
     if (!Tool.isEqual(discount.getDetail(), detail)) {
       discount.setDetail(detail);
     }
 
-    String currency = (String) updates.get("currency");
+    String currency = String.valueOf(updates.get("currency"));
     if (!Tool.isEqual(discount.getCurrency(), currency)) {
       String currencyName = EnumCurrency.findByName(currency).name();
       if (currencyName != null && !currencyName.isEmpty()) {
@@ -130,17 +130,17 @@ public class DiscountServiceImpl implements DiscountService {
       }
     }
 
-    String percent = (String) updates.get("percent");
+    String percent = String.valueOf(updates.get("percent"));
     if (!Tool.isEqual(discount.getPercent(), percent)) {
       discount.setPercent(Double.valueOf(percent));
     }
 
-    String maximumDiscount = (String) updates.get("maximumDiscount");
+    String maximumDiscount = String.valueOf(updates.get("maximumDiscount"));
     if (!Tool.isEqual(discount.getMaximumDiscount(), maximumDiscount)) {
       discount.setMaximumDiscount(Double.valueOf(maximumDiscount));
     }
 
-    String expiredDateString = (String) updates.get("expiredDate");
+    String expiredDateString = String.valueOf(updates.get("expiredDate"));
     if (!Tool.isEqual(discount.getExpiredDate().toString(), expiredDateString)) {
       discount.setExpiredDate(Tool.convertToLocalDateTime(expiredDateString));
     }

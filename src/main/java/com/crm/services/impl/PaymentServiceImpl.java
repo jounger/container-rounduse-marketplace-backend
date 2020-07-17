@@ -42,7 +42,7 @@ public class PaymentServiceImpl implements PaymentService {
 
   @Autowired
   private ContractRepository contractRepository;
-  
+
   @Autowired
   private UserRepository userRepository;
 
@@ -133,19 +133,19 @@ public class PaymentServiceImpl implements PaymentService {
     Payment payment = paymentRepository.findById(id).orElseThrow(() -> new NotFoundException("Payment is not found."));
 
     if (payment.getSender().getUsername().equals(username)) {
-      String detail = (String) updates.get("detail");
+      String detail = String.valueOf(updates.get("detail"));
       if (!Tool.isBlank(detail)) {
         payment.setDetail(detail);
       }
 
-      String amount = (String) updates.get("amount");
+      String amount = String.valueOf(updates.get("amount"));
       if (!Tool.isEqual(payment.getAmount(), amount)) {
         payment.setAmount(Double.valueOf(amount));
       }
     }
 
     if (payment.getRecipient().getUsername().equals(username)) {
-      String isPaidString = (String) updates.get("isPaid");
+      String isPaidString = String.valueOf(updates.get("isPaid"));
       Boolean isPaid = Boolean.valueOf(isPaidString);
       payment.setIsPaid(isPaid);
     }

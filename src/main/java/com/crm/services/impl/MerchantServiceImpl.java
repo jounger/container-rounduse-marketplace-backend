@@ -37,7 +37,7 @@ public class MerchantServiceImpl implements MerchantService {
 
   @Autowired
   private MerchantRepository merchantRepository;
-  
+
   @Autowired
   private SupplierRepository supplierRepository;
 
@@ -47,7 +47,8 @@ public class MerchantServiceImpl implements MerchantService {
   @Override
   public Merchant createMerchant(SupplierRequest request) {
     if (userRepository.existsByUsername(request.getUsername()) || userRepository.existsByEmail(request.getEmail())
-        || userRepository.existsByPhone(request.getPhone()) || supplierRepository.existsByCompanyCode(request.getCompanyCode())) {
+        || userRepository.existsByPhone(request.getPhone())
+        || supplierRepository.existsByCompanyCode(request.getCompanyCode())) {
       throw new DuplicateRecordException("Error: User has been existed");
     }
     Merchant merchant = new Merchant();
@@ -137,67 +138,67 @@ public class MerchantServiceImpl implements MerchantService {
         .orElseThrow(() -> new NotFoundException("Merchant is not found."));
 
     /*
-     * String password = (String) updates.get("password"); if (password != null) {
-     * String encoder = passwordEncoder.encode(password);
+     * String password = String.valueOf( updates.get("password")); if (password !=
+     * null) { String encoder = passwordEncoder.encode(password);
      * merchant.setPassword(encoder); }
      */
 
-    String email = (String) updates.get("email");
+    String email = String.valueOf(updates.get("email"));
     if (email != null && UserServiceImpl.isEmailChange(email, merchant) && !email.isEmpty()) {
       merchant.setEmail(email);
     }
 
-    String phone = (String) updates.get("phone");
+    String phone = String.valueOf(updates.get("phone"));
     if (!Tool.isEqual(merchant.getPhone(), phone) && !userRepository.existsByPhone(phone)) {
       merchant.setPhone(phone);
-    }else {
+    } else {
       throw new DuplicateRecordException("Phone number has been existed.");
     }
 
-    String address = (String) updates.get("address");
+    String address = String.valueOf(updates.get("address"));
     if (!Tool.isEqual(merchant.getAddress(), address)) {
       merchant.setAddress(address);
     }
 
-    String status = (String) updates.get("status");
+    String status = String.valueOf(updates.get("status"));
     if (!Tool.isEqual(merchant.getStatus(), status)) {
       EnumUserStatus eStatus = EnumUserStatus.findByName(status);
       merchant.setStatus(eStatus.name());
     }
 
-    String website = (String) updates.get("website");
+    String website = String.valueOf(updates.get("website"));
     if (!Tool.isEqual(merchant.getWebsite(), website)) {
       merchant.setWebsite(website);
     }
 
-    String contactPerson = (String) updates.get("contactPerson");
+    String contactPerson = String.valueOf(updates.get("contactPerson"));
     if (!Tool.isEqual(merchant.getContactPerson(), contactPerson)) {
       merchant.setContactPerson(contactPerson);
     }
 
-    String companyName = (String) updates.get("companyName");
+    String companyName = String.valueOf(updates.get("companyName"));
     if (!Tool.isEqual(merchant.getCompanyName(), companyName)) {
       merchant.setCompanyName(companyName);
     }
 
-    String companyCode = (String) updates.get("companyCode");
+    String companyCode = String.valueOf(updates.get("companyCode"));
     if (!Tool.isEqual(merchant.getCompanyCode(), companyCode) && !supplierRepository.existsByCompanyCode(companyCode)) {
       merchant.setCompanyCode(companyCode);
-    }else {
+    } else {
       throw new DuplicateRecordException("Company code has been existed.");
     }
 
-    String companyDescription = (String) updates.get("companyDescription");
+    String companyDescription = String.valueOf(updates.get("companyDescription"));
     if (!Tool.isEqual(merchant.getCompanyDescription(), companyDescription)) {
       merchant.setCompanyDescription(companyDescription);
     }
 
-    String tin = (String) updates.get("tin");
+    String tin = String.valueOf(updates.get("tin"));
     if (!Tool.isEqual(merchant.getTin(), tin)) {
       merchant.setTin(tin);
     }
 
-    String fax = (String) updates.get("fax");
+    String fax = String.valueOf(updates.get("fax"));
     if (!Tool.isEqual(merchant.getFax(), fax)) {
       merchant.setFax(fax);
     }

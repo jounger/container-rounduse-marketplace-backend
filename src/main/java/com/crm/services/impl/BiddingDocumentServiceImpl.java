@@ -215,7 +215,7 @@ public class BiddingDocumentServiceImpl implements BiddingDocumentService {
     Outbound outbound = biddingDocument.getOutbound();
     LocalDateTime packingTime = outbound.getPackingTime();
 
-    String bidClosing = (String) updates.get("bidClosing");
+    String bidClosing = String.valueOf(updates.get("bidClosing"));
     if (!Tool.isBlank(bidClosing)) {
       LocalDateTime bidClosingTime = Tool.convertToLocalDateTime(bidClosing);
       if (bidClosingTime.isBefore(LocalDateTime.now()) || bidClosingTime.isAfter(packingTime)) {
@@ -224,7 +224,7 @@ public class BiddingDocumentServiceImpl implements BiddingDocumentService {
       biddingDocument.setBidClosing(bidClosingTime);
     }
 
-    String currency = (String) updates.get("currentOfPayment");
+    String currency = String.valueOf(updates.get("currentOfPayment"));
     if (!Tool.isEqual(biddingDocument.getCurrencyOfPayment(), currency)) {
       EnumCurrency currencyOfPayment = EnumCurrency.findByName(currency);
       if (currencyOfPayment == null) {
@@ -235,22 +235,22 @@ public class BiddingDocumentServiceImpl implements BiddingDocumentService {
       biddingDocument.setCurrencyOfPayment(EnumCurrency.VND.name());
     }
 
-    String packagePriceString = (String) updates.get("bidPackagePrice");
+    String packagePriceString = String.valueOf(updates.get("bidPackagePrice"));
     if (!Tool.isEqual(biddingDocument.getBidPackagePrice(), packagePriceString)) {
       biddingDocument.setBidPackagePrice(Double.parseDouble(packagePriceString));
     }
 
-    String floorPriceString = (String) updates.get("bidFloorPrice");
+    String floorPriceString = String.valueOf(updates.get("bidFloorPrice"));
     if (!Tool.isEqual(biddingDocument.getBidFloorPrice(), floorPriceString)) {
       biddingDocument.setBidFloorPrice(Double.parseDouble(floorPriceString));
     }
 
-    String priceLeadershipString = (String) updates.get("priceLeadership");
+    String priceLeadershipString = String.valueOf(updates.get("priceLeadership"));
     if (!Tool.isEqual(biddingDocument.getPriceLeadership(), priceLeadershipString)) {
       biddingDocument.setPriceLeadership(Double.parseDouble(priceLeadershipString));
     }
 
-    String status = (String) updates.get("status");
+    String status = String.valueOf(updates.get("status"));
     if (!Tool.isBlank(status)) {
       EnumBiddingStatus eStatus = EnumBiddingStatus.findByName(status);
       if (eStatus != null) {

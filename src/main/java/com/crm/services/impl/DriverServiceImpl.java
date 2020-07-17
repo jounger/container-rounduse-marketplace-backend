@@ -167,32 +167,32 @@ public class DriverServiceImpl implements DriverService {
       }
 
       /*
-       * String password = (String) updates.get("password"); if (password != null) {
-       * String encoder = passwordEncoder.encode(password);
+       * String password = String.valueOf( updates.get("password")); if (password !=
+       * null) { String encoder = passwordEncoder.encode(password);
        * driver.setPassword(encoder); }
        */
 
-      String email = (String) updates.get("email");
+      String email = String.valueOf(updates.get("email"));
       if (!Tool.isEqual(driver.getEmail(), email)) {
         driver.setEmail(email);
       }
 
-      String phone = (String) updates.get("phone");
+      String phone = String.valueOf(updates.get("phone"));
       if (!Tool.isEqual(driver.getPhone(), phone)) {
         driver.setPhone(phone);
       }
 
-      String address = (String) updates.get("address");
+      String address = String.valueOf(updates.get("address"));
       if (!Tool.isEqual(driver.getAddress(), address)) {
         driver.setAddress(address);
       }
 
-      String fullname = (String) updates.get("fullname");
+      String fullname = String.valueOf(updates.get("fullname"));
       if (!Tool.isEqual(driver.getFullname(), fullname)) {
         driver.setFullname(fullname);
       }
 
-      String driverLicense = (String) updates.get("driverLicense");
+      String driverLicense = String.valueOf(updates.get("driverLicense"));
       if (!Tool.isEqual(driver.getDriverLicense(), driverLicense)) {
         driver.setDriverLicense(driverLicense);
       }

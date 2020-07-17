@@ -145,7 +145,11 @@ public class ShippingLineServiceImpl implements ShippingLineService {
 
     String email = String.valueOf(updates.get("email"));
     if (!Tool.isEqual(shippingLine.getEmail(), email)) {
-      shippingLine.setEmail(email);
+      if(!userRepository.existsByEmail(email)) {
+        shippingLine.setEmail(email);
+      }else {
+        throw new DuplicateRecordException("Email has been existed.");
+      }
     }
 
     String phone = String.valueOf(updates.get("phone"));

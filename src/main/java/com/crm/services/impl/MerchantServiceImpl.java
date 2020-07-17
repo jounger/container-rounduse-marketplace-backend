@@ -143,6 +143,7 @@ public class MerchantServiceImpl implements MerchantService {
      * merchant.setPassword(encoder); }
      */
 
+ 
     String email = String.valueOf(updates.get("email"));
     if (email != null && UserServiceImpl.isEmailChange(email, merchant) && !email.isEmpty()) {
       merchant.setEmail(email);

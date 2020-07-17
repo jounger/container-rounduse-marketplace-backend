@@ -40,7 +40,7 @@ public class ForwarderServiceImpl implements ForwarderService {
 
   @Autowired
   private PasswordEncoder passwordEncoder;
-  
+
   @Autowired
   private SupplierRepository supplierRepository;
 
@@ -53,7 +53,8 @@ public class ForwarderServiceImpl implements ForwarderService {
   @Override
   public Forwarder createForwarder(SupplierRequest request) {
     if (userRepository.existsByUsername(request.getUsername()) || userRepository.existsByEmail(request.getEmail())
-        || userRepository.existsByPhone(request.getPhone()) || supplierRepository.existsByCompanyCode(request.getCompanyCode())) {
+        || userRepository.existsByPhone(request.getPhone())
+        || supplierRepository.existsByCompanyCode(request.getCompanyCode())) {
       throw new DuplicateRecordException("Error: User has been existed");
     }
     Forwarder forwarder = new Forwarder();
@@ -144,12 +145,12 @@ public class ForwarderServiceImpl implements ForwarderService {
         .orElseThrow(() -> new NotFoundException("Forwarder is not found."));
 
     /*
-     * String password = (String) updates.get("password"); if (password != null) {
-     * String encoder = passwordEncoder.encode(password);
+     * String password = String.valueOf( updates.get("password")); if (password !=
+     * null) { String encoder = passwordEncoder.encode(password);
      * forwarder.setPassword(encoder); }
      */
 
-    String email = (String) updates.get("email");
+    String email = String.valueOf(updates.get("email"));
     if (!Tool.isEqual(forwarder.getEmail(), email)) {
       if(!userRepository.existsByEmail(email)) {
         forwarder.setEmail(email);
@@ -158,61 +159,58 @@ public class ForwarderServiceImpl implements ForwarderService {
       }
     }
 
-    String phone = (String) updates.get("phone");
-    if (!Tool.isEqual(forwarder.getPhone(), phone)) {
-      if (!userRepository.existsByPhone(phone)) {
-        forwarder.setPhone(phone);
-      } else {
-        throw new DuplicateRecordException("Phone number has been existed.");
-      }
+    String phone = String.valueOf(updates.get("phone"));
+    if (!Tool.isEqual(forwarder.getPhone(), phone) && !userRepository.existsByPhone(phone)) {
+      forwarder.setPhone(phone);
+    } else {
+      throw new DuplicateRecordException("Phone number has been existed.");
     }
 
-    String address = (String) updates.get("address");
+    String address = String.valueOf(updates.get("address"));
     if (!Tool.isEqual(forwarder.getAddress(), address)) {
       forwarder.setAddress(address);
     }
 
-    String status = (String) updates.get("status");
+    String status = String.valueOf(updates.get("status"));
     if (!Tool.isEqual(forwarder.getStatus(), status)) {
       EnumUserStatus eStatus = EnumUserStatus.findByName(status);
       forwarder.setStatus(eStatus.name());
     }
 
-    String website = (String) updates.get("website");
+    String website = String.valueOf(updates.get("website"));
     if (!Tool.isEqual(forwarder.getWebsite(), website)) {
       forwarder.setWebsite(website);
     }
 
-    String contactPerson = (String) updates.get("contactPerson");
+    String contactPerson = String.valueOf(updates.get("contactPerson"));
     if (!Tool.isEqual(forwarder.getContactPerson(), contactPerson)) {
       forwarder.setContactPerson(contactPerson);
     }
 
-    String companyName = (String) updates.get("companyName");
+    String companyName = String.valueOf(updates.get("companyName"));
     if (!Tool.isEqual(forwarder.getCompanyName(), companyName)) {
       forwarder.setCompanyName(companyName);
     }
 
-    String companyCode = (String) updates.get("companyCode");
-    if (!Tool.isEqual(forwarder.getCompanyCode(), companyCode)) {
-      if (!supplierRepository.existsByCompanyCode(companyCode)) {
-        forwarder.setCompanyCode(companyCode);
-      } else {
-        throw new DuplicateRecordException("Company code has been existed.");
-      }
+    String companyCode = String.valueOf(updates.get("companyCode"));
+    if (!Tool.isEqual(forwarder.getCompanyCode(), companyCode)
+        && !supplierRepository.existsByCompanyCode(companyCode)) {
+      forwarder.setCompanyCode(companyCode);
+    } else {
+      throw new DuplicateRecordException("Company code has been existed.");
     }
 
-    String companyDescription = (String) updates.get("companyDescription");
+    String companyDescription = String.valueOf(updates.get("companyDescription"));
     if (!Tool.isEqual(forwarder.getCompanyDescription(), companyDescription)) {
       forwarder.setCompanyDescription(companyDescription);
     }
 
-    String tin = (String) updates.get("tin");
+    String tin = String.valueOf(updates.get("tin"));
     if (!Tool.isEqual(forwarder.getTin(), tin)) {
       forwarder.setTin(tin);
     }
 
-    String fax = (String) updates.get("fax");
+    String fax = String.valueOf(updates.get("fax"));
     if (!Tool.isEqual(forwarder.getFax(), fax)) {
       forwarder.setFax(fax);
     }
@@ -241,8 +239,8 @@ public class ForwarderServiceImpl implements ForwarderService {
     String containerType = outbound.getContainerType().getName();
     Booking booking = outbound.getBooking();
 
-    Page<Forwarder> forwarders = forwarderRepository.findByOutbound(forwarder, containerType,
-        outbound.getPackingTime(), booking.getCutOffTime(), pageRequest);
+    Page<Forwarder> forwarders = forwarderRepository.findByOutbound(forwarder, containerType, outbound.getPackingTime(),
+        booking.getCutOffTime(), pageRequest);
     return forwarders;
   }
 

@@ -133,12 +133,12 @@ public class OperatorServiceImpl implements OperatorService {
         .orElseThrow(() -> new NotFoundException("Operator is not found."));
 
     /*
-     * String password = (String) updates.get("password"); if (password != null &&
-     * !password.isEmpty()) { String encoder = passwordEncoder.encode(password);
-     * operator.setPassword(encoder); }
+     * String password = String.valueOf( updates.get("password")); if (password !=
+     * null && !password.isEmpty()) { String encoder =
+     * passwordEncoder.encode(password); operator.setPassword(encoder); }
      */
 
-    String email = (String) updates.get("email");
+    String email = String.valueOf(updates.get("email"));
     if (!Tool.isEqual(operator.getEmail(), email)) {
       if(!userRepository.existsByEmail(email)) {
         operator.setEmail(email);
@@ -147,7 +147,7 @@ public class OperatorServiceImpl implements OperatorService {
       }
     }
 
-    String phone = (String) updates.get("phone");
+    String phone = String.valueOf(updates.get("phone"));
     if (!Tool.isEqual(operator.getPhone(), phone)) {
       if (!userRepository.existsByPhone(phone)) {
         operator.setPhone(phone);
@@ -156,12 +156,12 @@ public class OperatorServiceImpl implements OperatorService {
       }
     }
 
-    String address = (String) updates.get("address");
+    String address = String.valueOf(updates.get("address"));
     if (!Tool.isEqual(operator.getAddress(), address)) {
       operator.setAddress(address);
     }
 
-    String status = (String) updates.get("status");
+    String status = String.valueOf(updates.get("status"));
     if (!Tool.isEqual(operator.getStatus(), status)) {
       EnumUserStatus eStatus = EnumUserStatus.findByName(status);
       operator.setStatus(eStatus.name());
@@ -169,7 +169,7 @@ public class OperatorServiceImpl implements OperatorService {
       throw new NotFoundException("Status is not found.");
     }
 
-    String fullname = (String) updates.get("fullname");
+    String fullname = String.valueOf(updates.get("fullname"));
     if (!Tool.isEqual(operator.getFullname(), fullname)) {
       operator.setFullname(fullname);
     }

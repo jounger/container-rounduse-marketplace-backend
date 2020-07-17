@@ -18,8 +18,8 @@ import com.crm.services.NotificationService;
 import com.crm.specification.builder.NotificationSpecificationsBuilder;
 
 @Service
-public class NotificationServiceImpl implements NotificationService{
-  
+public class NotificationServiceImpl implements NotificationService {
+
   @Autowired
   NotificationRepository notificationRepository;
 
@@ -39,6 +39,20 @@ public class NotificationServiceImpl implements NotificationService{
     Page<Notification> pages = notificationRepository.findAll(spec, page);
     // Return result
     return pages;
+  }
+
+  @Override
+  public Page<Notification> getNotificationsByUser(Long recipient, PaginationRequest request) {
+    String status = request.getStatus();
+    Page<Notification> notifications = null;
+    if (status != null && !status.isEmpty()) {
+      notifications = notificationRepository.findByUserAndStatus(recipient, status,
+          PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt")));
+    } else {
+      notifications = notificationRepository.findByUser(recipient,
+          PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt")));
+    }
+    return notifications;
   }
 
 }

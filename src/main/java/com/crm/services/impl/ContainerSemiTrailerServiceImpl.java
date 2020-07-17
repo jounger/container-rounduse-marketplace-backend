@@ -171,7 +171,7 @@ public class ContainerSemiTrailerServiceImpl implements ContainerSemiTrailerServ
         });
       }
 
-      String licensePlate = (String) updates.get("licensePlate");
+      String licensePlate = String.valueOf(updates.get("licensePlate"));
       if (licensePlate != null && !licensePlate.isEmpty()
           && !licensePlate.equals(containerSemiTrailer.getLicensePlate())) {
         if (vehicleRepository.existsByLicensePlate(licensePlate)) {
@@ -181,12 +181,12 @@ public class ContainerSemiTrailerServiceImpl implements ContainerSemiTrailerServ
         }
       }
 
-      String numberOfAxles = (String) updates.get("numberOfAxles");
+      String numberOfAxles = String.valueOf(updates.get("numberOfAxles"));
       if (numberOfAxles != null && !numberOfAxles.isEmpty()) {
         containerSemiTrailer.setNumberOfAxles(Integer.valueOf(numberOfAxles));
       }
 
-      String type = (String) updates.get("type");
+      String type = String.valueOf(updates.get("type"));
       if (type != null && !type.isEmpty() && !type.equals(containerSemiTrailer.getType())) {
         try {
           containerSemiTrailer.setType(EnumTrailerType.findByName(type).name());
@@ -195,7 +195,7 @@ public class ContainerSemiTrailerServiceImpl implements ContainerSemiTrailerServ
         }
       }
 
-      String unitOfMeasurement = (String) updates.get("unitOfMeasurement");
+      String unitOfMeasurement = String.valueOf(updates.get("unitOfMeasurement"));
       if (unitOfMeasurement != null && !unitOfMeasurement.isEmpty()
           && !unitOfMeasurement.equals(containerSemiTrailer.getUnitOfMeasurement())) {
         try {

@@ -137,13 +137,13 @@ public class EvidenceServiceImpl implements EvidenceService {
     if (!username.equals(bidder.getUsername()) && !username.equals(offeree.getUsername())) {
       throw new NotFoundException("You must be Offeree or Biddier to edit Evidence.");
     }
-    String evidenceString = (String) updates.get("evidence");
+    String evidenceString = String.valueOf(updates.get("evidence"));
     if (!Tool.isBlank(evidenceString)) {
       evidence.setEvidence(evidenceString);
     } else {
       throw new InternalException("Evidence is not valid.");
     }
-    String isValid = (String) updates.get("isValid");
+    String isValid = String.valueOf(updates.get("isValid"));
     if (!Tool.isEqual(evidence.getIsValid(), isValid)) {
       evidence.setIsValid(Boolean.valueOf(isValid));
     } else {

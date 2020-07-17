@@ -113,7 +113,7 @@ public class UserServiceImpl implements UserService {
 
   @Override
   public User changeStatus(Long id, Map<String, Object> updates) {
-    String status = (String) updates.get("status");
+    String status = String.valueOf(updates.get("status"));
     EnumUserStatus eStatus = EnumUserStatus.findByName(status);
     if (status != null && eStatus != null) {
       User user = userRepository.findById(id).orElseThrow(() -> new NotFoundException("Error: User is not found"));

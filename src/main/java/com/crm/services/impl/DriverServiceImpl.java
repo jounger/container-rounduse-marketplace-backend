@@ -167,12 +167,12 @@ public class DriverServiceImpl implements DriverService {
       }
 
       /*
-       * String password = (String) updates.get("password"); if (password != null) {
-       * String encoder = passwordEncoder.encode(password);
+       * String password = String.valueOf( updates.get("password")); if (password !=
+       * null) { String encoder = passwordEncoder.encode(password);
        * driver.setPassword(encoder); }
        */
 
-      String email = (String) updates.get("email");
+      String email = String.valueOf(updates.get("email"));
       if (!Tool.isEqual(driver.getEmail(), email)) {
         if(!userRepository.existsByEmail(email)) {
           driver.setEmail(email);
@@ -181,7 +181,7 @@ public class DriverServiceImpl implements DriverService {
         }
       }
 
-      String phone = (String) updates.get("phone");
+      String phone = String.valueOf(updates.get("phone"));
       if (!Tool.isEqual(driver.getPhone(), phone)) {
         if (!userRepository.existsByPhone(phone)) {
           driver.setPhone(phone);
@@ -190,23 +190,23 @@ public class DriverServiceImpl implements DriverService {
         }
       }
 
-      String address = (String) updates.get("address");
+      String address = String.valueOf(updates.get("address"));
       if (!Tool.isEqual(driver.getAddress(), address)) {
         driver.setAddress(address);
       }
 
-      String status = (String) updates.get("status");
+      String status = String.valueOf(updates.get("status"));
       if (!Tool.isEqual(driver.getStatus(), status)) {
         EnumUserStatus eStatus = EnumUserStatus.findByName(status);
         driver.setStatus(eStatus.name());
       }
 
-      String fullname = (String) updates.get("fullname");
+      String fullname = String.valueOf(updates.get("fullname"));
       if (!Tool.isEqual(driver.getFullname(), fullname)) {
         driver.setFullname(fullname);
       }
 
-      String driverLicense = (String) updates.get("driverLicense");
+      String driverLicense = String.valueOf(updates.get("driverLicense"));
       if (!Tool.isEqual(driver.getDriverLicense(), driverLicense)) {
         driver.setDriverLicense(driverLicense);
       }

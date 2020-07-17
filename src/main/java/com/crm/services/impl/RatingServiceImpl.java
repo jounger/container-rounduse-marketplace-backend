@@ -48,21 +48,23 @@ public class RatingServiceImpl implements RatingService {
     Supplier receiver = supplierRepository.findById(request.getReceiver())
         .orElseThrow(() -> new NotFoundException("Receiver is not found."));
     rating.setReceiver(receiver);
-    
-    Contract contract = contractRepository.findById(request.getContract()).orElseThrow(() -> new NotFoundException("Sender is not found."));
+
+    Contract contract = contractRepository.findById(request.getContract())
+        .orElseThrow(() -> new NotFoundException("Sender is not found."));
     rating.setContract(contract);
-    if(!contractRepository.existsByUserAndContract(request.getContract(), id)) {
+    if (!contractRepository.existsByUserAndContract(request.getContract(), id)) {
       throw new NotFoundException("User must be ralate to the contract.");
     }
 
-    if(ratingRepository.existsByUserAndContract(request.getContract(), id)) {
+    if (ratingRepository.existsByUserAndContract(request.getContract(), id)) {
       throw new NotFoundException("User can only create 1 rating per contract.");
     }
     rating.setRatingValue(request.getRatingValue());
     ratingRepository.save(rating);
 
     LocalDateTime rewind = LocalDateTime.now().minusMonths(Constant.REWIND_MONTH);
-    Double ratingValue = ratingRepository.calcAvgRatingValueByReceiver(request.getReceiver(), Timestamp.valueOf(rewind));
+    Double ratingValue = ratingRepository.calcAvgRatingValueByReceiver(request.getReceiver(),
+        Timestamp.valueOf(rewind));
     receiver.setRatingValue(ratingValue);
     supplierRepository.save(receiver);
 
@@ -102,7 +104,7 @@ public class RatingServiceImpl implements RatingService {
     }
     return ratings;
   }
-  
+
   @Override
   public Page<Rating> getRatingsBySender(Long id, PaginationRequest request) {
     if (!supplierRepository.existsById(id)) {
@@ -113,7 +115,7 @@ public class RatingServiceImpl implements RatingService {
     Page<Rating> ratings = ratingRepository.findBySender(id, Timestamp.valueOf(rewind), page);
     return ratings;
   }
-  
+
   @Override
   public Page<Rating> getRatingsByReceiver(Long id, PaginationRequest request) {
     if (!supplierRepository.existsById(id)) {
@@ -153,7 +155,8 @@ public class RatingServiceImpl implements RatingService {
     ratingRepository.save(rating);
 
     LocalDateTime rewind = LocalDateTime.now().minusMonths(Constant.REWIND_MONTH);
-    Double ratingValue = ratingRepository.calcAvgRatingValueByReceiver(request.getReceiver(), Timestamp.valueOf(rewind));
+    Double ratingValue = ratingRepository.calcAvgRatingValueByReceiver(request.getReceiver(),
+        Timestamp.valueOf(rewind));
     receiver.setRatingValue(ratingValue);
 
     supplierRepository.save(receiver);
@@ -169,14 +172,15 @@ public class RatingServiceImpl implements RatingService {
       throw new NotFoundException("You must be sender to edit this rating.");
     }
 
-    String ratingValue = (String) updates.get("ratingValue");
+    String ratingValue = String.valueOf(updates.get("ratingValue"));
     if (!Tool.isEqual(rating.getRatingValue(), ratingValue)) {
       rating.setRatingValue(Integer.valueOf(ratingValue));
       ratingRepository.save(rating);
 
       Supplier receiver = rating.getReceiver();
       LocalDateTime rewind = LocalDateTime.now().minusMonths(Constant.REWIND_MONTH);
-      Double receiverRatingValue = ratingRepository.calcAvgRatingValueByReceiver(receiver.getId(), Timestamp.valueOf(rewind));
+      Double receiverRatingValue = ratingRepository.calcAvgRatingValueByReceiver(receiver.getId(),
+          Timestamp.valueOf(rewind));
       receiver.setRatingValue(receiverRatingValue);
       supplierRepository.save(receiver);
     }
@@ -194,7 +198,8 @@ public class RatingServiceImpl implements RatingService {
     }
     Supplier receiver = rating.getReceiver();
     LocalDateTime rewind = LocalDateTime.now().minusMonths(Constant.REWIND_MONTH);
-    Double receiverRatingValue = ratingRepository.calcAvgRatingValueByReceiver(receiver.getId(), Timestamp.valueOf(rewind));
+    Double receiverRatingValue = ratingRepository.calcAvgRatingValueByReceiver(receiver.getId(),
+        Timestamp.valueOf(rewind));
     receiver.setRatingValue(receiverRatingValue);
     supplierRepository.save(receiver);
   }

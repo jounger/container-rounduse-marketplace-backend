@@ -122,14 +122,14 @@ public class BookingServiceImpl implements BookingService {
             booking.getBookingNumber(), booking.getOutbound().getStatus()));
       }
 
-      String portOfLoadingRequest = (String) updates.get("portOfLoading");
+      String portOfLoadingRequest = String.valueOf(updates.get("portOfLoading"));
       if (portOfLoadingRequest != null && !portOfLoadingRequest.isEmpty()) {
         Port portOfLoading = portRepository.findByNameCode(portOfLoadingRequest)
             .orElseThrow(() -> new NotFoundException("ERROR: PortOfLoading is not found."));
         booking.setPortOfLoading(portOfLoading);
       }
 
-      String bookingNumberRequest = (String) updates.get("bookingNumber");
+      String bookingNumberRequest = String.valueOf(updates.get("bookingNumber"));
       if (bookingNumberRequest != null && !bookingNumberRequest.isEmpty()) {
         if (bookingRepository.existsByBookingNumber(bookingNumberRequest)) {
           if (bookingNumberRequest.equals(booking.getBookingNumber())) {
@@ -140,12 +140,12 @@ public class BookingServiceImpl implements BookingService {
         booking.setBookingNumber(bookingNumberRequest);
       }
 
-      Integer unit = (Integer) updates.get("unit");
-      if (unit != null) {
-        booking.setUnit(unit);
+      String unit = String.valueOf(updates.get("unit"));
+      if (unit != null && !unit.isEmpty()) {
+        booking.setUnit(Integer.parseInt(unit));
       }
 
-      String cutOffTimeRequest = (String) updates.get("cutOffTime");
+      String cutOffTimeRequest = String.valueOf(updates.get("cutOffTime"));
       if (cutOffTimeRequest != null && !cutOffTimeRequest.isEmpty()) {
         LocalDateTime cutOffTime = Tool.convertToLocalDateTime(cutOffTimeRequest);
         booking.setCutOffTime(cutOffTime);

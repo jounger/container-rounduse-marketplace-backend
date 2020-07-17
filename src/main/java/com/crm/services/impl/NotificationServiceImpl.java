@@ -1,5 +1,6 @@
 package com.crm.services.impl;
 
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -11,6 +12,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import com.crm.common.Constant;
+import com.crm.exception.NotFoundException;
 import com.crm.models.Notification;
 import com.crm.payload.request.PaginationRequest;
 import com.crm.repository.NotificationRepository;
@@ -53,6 +55,38 @@ public class NotificationServiceImpl implements NotificationService {
           PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt")));
     }
     return notifications;
+  }
+
+  @Override
+  public Notification editNotification(Long id, Map<String, Object> updates) {
+    Notification notification = notificationRepository.findById(id)
+        .orElseThrow(() -> new NotFoundException("Notification is not found."));
+
+    Boolean isRead = (Boolean) updates.get("isRead");
+    if (isRead != null) {
+      notification.setIsRead(isRead);
+    } else {
+      throw new NotFoundException("Is Read is not found.");
+    }
+
+    Boolean isHide = (Boolean) updates.get("isHide");
+    if (isHide != null) {
+      notification.setIsHide(isHide);
+    } else {
+      throw new NotFoundException("Is Hide is not found.");
+    }
+
+    notificationRepository.save(notification);
+    return notification;
+  }
+
+  @Override
+  public void removeNotification(Long id) {
+    if (notificationRepository.existsById(id)) {
+      notificationRepository.deleteById(id);
+    } else {
+      throw new NotFoundException("Notification is not found.");
+    }
   }
 
 }

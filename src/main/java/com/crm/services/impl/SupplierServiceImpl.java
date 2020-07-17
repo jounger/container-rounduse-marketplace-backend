@@ -79,7 +79,7 @@ public class SupplierServiceImpl implements SupplierService {
   @Override
   public Supplier editSupplier(Map<String, Object> updates, Long id) {
     Supplier supplier = supplierRepository.findById(id).orElseThrow(() -> new NotFoundException("User is not found"));
-    String status = (String) updates.get("status");
+    String status = String.valueOf(updates.get("status"));
     if (!Tool.isEqual(supplier.getStatus(), status)) {
       EnumUserStatus eStatus = EnumUserStatus.findByName(status.toUpperCase());
       supplier.setStatus(eStatus.name());

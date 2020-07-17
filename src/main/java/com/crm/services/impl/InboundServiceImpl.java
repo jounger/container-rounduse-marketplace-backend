@@ -299,7 +299,7 @@ public class InboundServiceImpl implements InboundService {
         }
       });
 
-      String shippingLineRequest = (String) updates.get("shippingLine");
+      String shippingLineRequest = String.valueOf(updates.get("shippingLine"));
       if (shippingLineRequest != null && !shippingLineRequest.isEmpty()
           && !shippingLineRequest.equals(inbound.getShippingLine().getCompanyCode())) {
         ShippingLine shippingLine = shippingLineRepository.findByCompanyCode(shippingLineRequest)
@@ -307,7 +307,7 @@ public class InboundServiceImpl implements InboundService {
         inbound.setShippingLine(shippingLine);
       }
 
-      String containerTypeRequest = (String) updates.get("containerType");
+      String containerTypeRequest = String.valueOf(updates.get("containerType"));
       if (containerTypeRequest != null && !containerTypeRequest.isEmpty()
           && !containerTypeRequest.equals(inbound.getContainerType().getName())) {
         ContainerType containerType = containerTypeRepository.findByName(containerTypeRequest)
@@ -315,13 +315,13 @@ public class InboundServiceImpl implements InboundService {
         inbound.setContainerType(containerType);
       }
 
-      String returnStationRequest = (String) updates.get("returnStation");
+      String returnStationRequest = String.valueOf(updates.get("returnStation"));
       if (returnStationRequest != null && !returnStationRequest.isEmpty()
           && !returnStationRequest.equals(inbound.getReturnStation())) {
         inbound.setReturnStation(returnStationRequest);
       }
 
-      String pickupTimeRequest = (String) updates.get("pickupTime");
+      String pickupTimeRequest = String.valueOf(updates.get("pickupTime"));
       if (pickupTimeRequest != null && !pickupTimeRequest.isEmpty()
           && !pickupTimeRequest.equals(Tool.convertLocalDateTimeToString(inbound.getPickupTime()))) {
         LocalDateTime pickupTime = Tool.convertToLocalDateTime(pickupTimeRequest);
@@ -371,7 +371,7 @@ public class InboundServiceImpl implements InboundService {
         }
       }
 
-      String emptyTimeRequest = (String) updates.get("emptyTime");
+      String emptyTimeRequest = String.valueOf(updates.get("emptyTime"));
       if (emptyTimeRequest != null && !emptyTimeRequest.isEmpty()
           && !emptyTimeRequest.equals(Tool.convertLocalDateTimeToString(inbound.getEmptyTime()))) {
         LocalDateTime emptyTime = Tool.convertToLocalDateTime(emptyTimeRequest);

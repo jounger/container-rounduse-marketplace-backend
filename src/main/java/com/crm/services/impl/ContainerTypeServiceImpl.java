@@ -126,7 +126,7 @@ public class ContainerTypeServiceImpl implements ContainerTypeService {
     ContainerType containerType = containerTypeRepository.findById(id)
         .orElseThrow(() -> new NotFoundException("ERROR: ContainerType is not found."));
 
-    String name = (String) updates.get("name");
+    String name = String.valueOf(updates.get("name"));
     if (name != null && !name.isEmpty()) {
       if (containerTypeRepository.existsByName(name)) {
         if (name.equals(containerType.getName())) {
@@ -136,52 +136,52 @@ public class ContainerTypeServiceImpl implements ContainerTypeService {
       }
     }
 
-    String description = (String) updates.get("description");
+    String description = String.valueOf(updates.get("description"));
     if (description != null && !description.isEmpty()) {
       containerType.setDescription(description);
     }
 
-    String tareWeight = (String) updates.get("tareWeight");
+    String tareWeight = String.valueOf(updates.get("tareWeight"));
     if (tareWeight != null && !tareWeight.isEmpty()) {
       containerType.setTareWeight(Double.valueOf(tareWeight));
     }
 
-    String payloadCapacity = (String) updates.get("payloadCapacity");
+    String payloadCapacity = String.valueOf(updates.get("payloadCapacity"));
     if (payloadCapacity != null && !payloadCapacity.isEmpty()) {
       containerType.setPayloadCapacity(Double.valueOf(payloadCapacity));
     }
 
-    String cubicCapacity = (String) updates.get("cubicCapacity");
+    String cubicCapacity = String.valueOf(updates.get("cubicCapacity"));
     if (cubicCapacity != null && !cubicCapacity.isEmpty()) {
       containerType.setCubicCapacity(Double.valueOf(cubicCapacity));
     }
 
-    String internalLength = (String) updates.get("internalLength");
+    String internalLength = String.valueOf(updates.get("internalLength"));
     if (internalLength != null && !internalLength.isEmpty()) {
       containerType.setInternalLength(Double.valueOf(internalLength));
     }
 
-    String internalHeight = (String) updates.get("internalHeight");
+    String internalHeight = String.valueOf(updates.get("internalHeight"));
     if (internalHeight != null && !internalHeight.isEmpty()) {
       containerType.setInternalHeight(Double.valueOf(internalHeight));
     }
 
-    String internalWidth = (String) updates.get("internalWidth");
+    String internalWidth = String.valueOf(updates.get("internalWidth"));
     if (internalWidth != null && !internalWidth.isEmpty()) {
       containerType.setInternalWidth(Double.valueOf(internalWidth));
     }
 
-    String doorOpeningHeight = (String) updates.get("doorOpeningHeight");
+    String doorOpeningHeight = String.valueOf(updates.get("doorOpeningHeight"));
     if (doorOpeningHeight != null && !doorOpeningHeight.isEmpty()) {
       containerType.setDoorOpeningHeight(Double.valueOf(doorOpeningHeight));
     }
 
-    String doorOpeningWidth = (String) updates.get("doorOpeningWidth");
+    String doorOpeningWidth = String.valueOf(updates.get("doorOpeningWidth"));
     if (doorOpeningWidth != null && !doorOpeningWidth.isEmpty()) {
       containerType.setDoorOpeningWidth(Double.valueOf(doorOpeningWidth));
     }
 
-    String unitOfMeasurement = (String) updates.get("unitOfMeasurement");
+    String unitOfMeasurement = String.valueOf(updates.get("unitOfMeasurement"));
     if (unitOfMeasurement != null && !unitOfMeasurement.isEmpty()) {
       try {
         containerType.setUnitOfMeasurement(EnumUnit.findByName(unitOfMeasurement).name());

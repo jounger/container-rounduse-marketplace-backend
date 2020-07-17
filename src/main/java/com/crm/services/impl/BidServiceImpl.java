@@ -60,7 +60,7 @@ public class BidServiceImpl implements BidService {
 
   @Autowired
   private UserRepository userRepository;
-  
+
   @Autowired
   private SupplierRepository supplierRepository;
 
@@ -330,13 +330,13 @@ public class BidServiceImpl implements BidService {
 
     }
 
-    String bidPriceString = (String) updates.get("bidPrice");
+    String bidPriceString = String.valueOf(updates.get("bidPrice"));
     if (!Tool.isEqual(bid.getBidPrice(), bidPriceString)) {
       bid.setBidPrice(Double.parseDouble(bidPriceString));
       bid.setBidValidityPeriod(LocalDateTime.now().plusHours(Constant.BID_VALIDITY_PERIOD));
     }
 
-    String statusString = (String) updates.get("status");
+    String statusString = String.valueOf(updates.get("status"));
     if (!Tool.isEqual(bid.getStatus(), statusString)) {
       EnumBidStatus status = EnumBidStatus.findByName(statusString);
       bid.setStatus(status.name());

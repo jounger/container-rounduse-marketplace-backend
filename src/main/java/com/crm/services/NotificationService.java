@@ -6,5 +6,8 @@ import com.crm.models.Notification;
 import com.crm.payload.request.PaginationRequest;
 
 public interface NotificationService {
+
   Page<Notification> searchNotifications(PaginationRequest request, String search);
+
+  Page<Notification> getNotificationsByUser(Long recipient, PaginationRequest request);
 }

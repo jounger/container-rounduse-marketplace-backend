@@ -136,12 +136,12 @@ public class FeedbackServiceImpl implements FeedbackService {
       throw new NotFoundException("Access denied, This feedback can be only edited by its onwer.");
     }
 
-    String message = (String) updates.get("message");
+    String message = String.valueOf(updates.get("message"));
     if (!Tool.isEqual(feedback.getMessage(), message)) {
       feedback.setMessage(message);
     }
 
-    String satisfactionPoints = (String) updates.get("satisfactionPoints");
+    String satisfactionPoints = String.valueOf(updates.get("satisfactionPoints"));
     if (!Tool.isEqual(feedback.getSatisfactionPoints(), satisfactionPoints)) {
       feedback.setSatisfactionPoints(Integer.valueOf(satisfactionPoints));
     }

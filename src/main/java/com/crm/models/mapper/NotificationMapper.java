@@ -14,6 +14,7 @@ public class NotificationMapper {
     notificationDto.setIsHide(notification.getIsHide());
     notificationDto.setMessage(notification.getMessage());
     notificationDto.setTitle(notification.getTitle());
+    notificationDto.setType(notification.getType());
 
     notificationDto.setSendDate(Tool.convertLocalDateTimeToString(notification.getSendDate()));
 

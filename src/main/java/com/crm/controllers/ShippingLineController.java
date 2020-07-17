@@ -42,7 +42,7 @@ public class ShippingLineController {
 
   @Transactional
   @PostMapping("")
-  @PreAuthorize("hasRole('ADMIN')")
+  @PreAuthorize("hasRole('MODERATOR')")
   public ResponseEntity<?> createShippingLine(@Valid @RequestBody ShippingLineRequest request) {
     ShippingLine shippingLine = shippingLineService.createShippingLine(request);
     ShippingLineDto shippingLineDto = ShippingLineMapper.toShippingLineDto(shippingLine);

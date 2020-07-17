@@ -152,7 +152,11 @@ public class ForwarderServiceImpl implements ForwarderService {
 
     String email = String.valueOf(updates.get("email"));
     if (!Tool.isEqual(forwarder.getEmail(), email)) {
-      forwarder.setEmail(email);
+      if(!userRepository.existsByEmail(email)) {
+        forwarder.setEmail(email);
+      }else {
+        throw new DuplicateRecordException("Email has been existed.");
+      }
     }
 
     String phone = String.valueOf(updates.get("phone"));

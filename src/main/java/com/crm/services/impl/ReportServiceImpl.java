@@ -128,7 +128,7 @@ public class ReportServiceImpl implements ReportService {
       if (report.getStatus().equals(EnumReportStatus.RESOLVED.name())
           || report.getStatus().equals(EnumReportStatus.REJECTED.name())
           || report.getStatus().equals(EnumReportStatus.CLOSED.name())) {
-        throw new InternalException("Rreport was resolved, rejected or closed");
+        throw new InternalException("Report was resolved, rejected or closed");
       }
       String title = (String) updates.get("title");
       report.setTitle(title);
@@ -136,10 +136,19 @@ public class ReportServiceImpl implements ReportService {
       String detail = (String) updates.get("detail");
       report.setDetail(detail);
 
-      report.setStatus(EnumReportStatus.UPDATED.name());
+      String statusString = (String) updates.get("status");
+      EnumReportStatus status = EnumReportStatus.findByName(statusString);
+      if (status != null) {
+        report.setStatus(status.name());
+      } else {
+        throw new NotFoundException("Status is not found.");
+      }
     }
 
     if (role.equals("ROLE_MODERATOR")) {
+      if (!report.getStatus().equals(EnumReportStatus.RESOLVED.name())) {
+        throw new InternalException("Report must be Resolved");
+      }
       String statusString = (String) updates.get("status");
       EnumReportStatus status = EnumReportStatus.findByName(statusString);
       if (status != null) {
@@ -161,6 +170,12 @@ public class ReportServiceImpl implements ReportService {
     } else {
       throw new NotFoundException("Access denied.");
     }
+  }
+
+  @Override
+  public Report getReport(Long id) {
+    Report report = reportRepository.findById(id).orElseThrow(() -> new NotFoundException("Report is not found."));
+    return report;
   }
 
 }

@@ -18,6 +18,7 @@ public class DriverNotificationMapper {
     driverNotificationDto.setRelatedResource(relatedResource);
 
     driverNotificationDto.setMessage(driverNotification.getMessage());
+    driverNotificationDto.setAction(driverNotification.getAction());
     driverNotificationDto.setType(driverNotification.getType());
 
     driverNotificationDto.setSendDate(Tool.convertLocalDateTimeToString(driverNotification.getSendDate()));

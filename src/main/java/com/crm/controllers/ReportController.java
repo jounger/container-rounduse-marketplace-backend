@@ -33,6 +33,7 @@ import com.crm.payload.request.ReportRequest;
 import com.crm.payload.response.MessageResponse;
 import com.crm.payload.response.PaginationResponse;
 import com.crm.services.ReportService;
+import com.crm.websocket.controller.NotificationBroadcast;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -50,6 +51,11 @@ public class ReportController {
     String username = userDetails.getUsername();
     Report report = reportService.createReport(username, request);
     ReportDto reportDto = ReportMapper.toReportDto(report);
+
+    // CREATE NOTIFICATION
+    NotificationBroadcast.broadcastCreateReportToModerator(report);
+    // END NOTIFICATION
+
     return ResponseEntity.ok(reportDto);
   }
 
@@ -118,8 +124,17 @@ public class ReportController {
   public ResponseEntity<?> editReport(@PathVariable("id") Long id, @RequestBody Map<String, Object> updates) {
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
-    Report report = reportService.editReport(id, username, updates);
-    ReportDto reportDto = ReportMapper.toReportDto(report);
+
+    Report report = reportService.getReport(id);
+    String status = report.getStatus();
+
+    Report editReport = reportService.editReport(id, username, updates);
+    ReportDto reportDto = ReportMapper.toReportDto(editReport);
+
+    // CREATE NOTIFICATION
+    NotificationBroadcast.broadcastUpdateReportToModerator(status, editReport);
+    // END NOTIFICATION
+
     return ResponseEntity.ok(reportDto);
   }
 

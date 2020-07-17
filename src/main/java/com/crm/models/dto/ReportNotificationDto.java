@@ -5,9 +5,9 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class ShippingLineNotificationDto extends NotificationDto {
+public class ReportNotificationDto extends NotificationDto {
 
-  private CombinedDto relatedResource;
+  private ReportDto relatedResource;
 
   private String message;
 

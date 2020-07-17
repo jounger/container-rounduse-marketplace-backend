@@ -8,7 +8,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class BiddingNotificationRequest {
+public class ShippingLineNotificationRequest {
 
   private Long id;
 
@@ -33,5 +33,4 @@ public class BiddingNotificationRequest {
 
   @NotBlank
   private String type;
-
 }

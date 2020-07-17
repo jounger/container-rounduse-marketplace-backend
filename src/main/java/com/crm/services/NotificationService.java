@@ -1,5 +1,7 @@
 package com.crm.services;
 
+import java.util.Map;
+
 import org.springframework.data.domain.Page;
 
 import com.crm.models.Notification;
@@ -10,4 +12,8 @@ public interface NotificationService {
   Page<Notification> searchNotifications(PaginationRequest request, String search);
 
   Page<Notification> getNotificationsByUser(Long recipient, PaginationRequest request);
+
+  Notification editNotification(Long id, Map<String, Object> updates);
+
+  void removeNotification(Long id);
 }

@@ -32,7 +32,7 @@ import com.crm.services.ShippingLineNotificationService;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
-@RequestMapping("/api/shipping_line-notification")
+@RequestMapping("/api/shipping-line-notification")
 public class ShippingLineNotificationController {
 
   @Autowired

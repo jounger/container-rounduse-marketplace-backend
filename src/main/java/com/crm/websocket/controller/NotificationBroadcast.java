@@ -12,22 +12,40 @@ import org.springframework.stereotype.Component;
 
 import com.crm.controllers.BiddingDocumentController;
 import com.crm.enums.EnumBidStatus;
-import com.crm.enums.EnumBiddingNotificationType;
-import com.crm.enums.EnumDriverNotificationType;
+import com.crm.enums.EnumBiddingNotification;
+import com.crm.enums.EnumDriverNotification;
+import com.crm.enums.EnumNotificationType;
+import com.crm.enums.EnumReportNotification;
+import com.crm.enums.EnumReportStatus;
+import com.crm.enums.EnumShippingLineNotification;
 import com.crm.models.Bid;
 import com.crm.models.BiddingDocument;
 import com.crm.models.BiddingNotification;
+import com.crm.models.Combined;
 import com.crm.models.Container;
 import com.crm.models.DriverNotification;
+import com.crm.models.Feedback;
 import com.crm.models.Forwarder;
 import com.crm.models.Merchant;
+import com.crm.models.Report;
+import com.crm.models.ReportNotification;
+import com.crm.models.ShippingLineNotification;
+import com.crm.models.User;
 import com.crm.payload.request.BiddingNotificationRequest;
 import com.crm.payload.request.DriverNotificationRequest;
 import com.crm.payload.request.PaginationRequest;
+import com.crm.payload.request.ReportNotificationRequest;
+import com.crm.payload.request.ShippingLineNotificationRequest;
 import com.crm.services.BiddingNotificationService;
 import com.crm.services.DriverNotificationService;
 import com.crm.services.ForwarderService;
+import com.crm.services.ReportNotificationService;
+import com.crm.services.ShippingLineNotificationService;
+import com.crm.services.UserService;
 import com.crm.websocket.service.BiddingWebSocketService;
+import com.crm.websocket.service.DriverWebSocketService;
+import com.crm.websocket.service.ReportWebSocketService;
+import com.crm.websocket.service.ShippingLineWebSocketService;
 
 @Component
 public class NotificationBroadcast {
@@ -42,14 +60,35 @@ public class NotificationBroadcast {
 
   private static DriverNotificationService driverNotificationService;
 
+  private static ReportNotificationService reportNotificationService;
+
+  private static UserService userService;
+
+  private static ReportWebSocketService reportWebSocketService;
+
+  private static ShippingLineNotificationService shippingLineNotificationService;
+
+  private static ShippingLineWebSocketService shippingLineWebSocketService;
+
+  private static DriverWebSocketService driverWebSocketService;
+
   @Autowired
   public NotificationBroadcast(BiddingNotificationService biddingNotificationService,
       BiddingWebSocketService biddingWebSocketService, ForwarderService forwarderService,
-      DriverNotificationService driverNotificationService) {
+      DriverNotificationService driverNotificationService, ReportNotificationService reportNotificationService,
+      UserService userService, ReportWebSocketService reportWebSocketService,
+      ShippingLineNotificationService shippingLineNotificationService,
+      ShippingLineWebSocketService shippingLineWebSocketService, DriverWebSocketService driverWebSocketService) {
     NotificationBroadcast.biddingNotificationService = biddingNotificationService;
     NotificationBroadcast.biddingWebSocketService = biddingWebSocketService;
     NotificationBroadcast.forwarderService = forwarderService;
     NotificationBroadcast.driverNotificationService = driverNotificationService;
+    NotificationBroadcast.reportNotificationService = reportNotificationService;
+    NotificationBroadcast.userService = userService;
+    NotificationBroadcast.reportWebSocketService = reportWebSocketService;
+    NotificationBroadcast.shippingLineNotificationService = shippingLineNotificationService;
+    NotificationBroadcast.shippingLineWebSocketService = shippingLineWebSocketService;
+    NotificationBroadcast.driverWebSocketService = driverWebSocketService;
   }
 
   public static void broadcastCreateBidToMerchant(Bid bid) {
@@ -62,7 +101,8 @@ public class NotificationBroadcast {
     notifyRequest.setRecipient(offeree.getUsername());
     notifyRequest.setRelatedResource(bid.getBiddingDocument().getId());
     notifyRequest.setMessage(String.format("You got a new Bid from %s", bid.getBidder().getUsername()));
-    notifyRequest.setType(EnumBiddingNotificationType.ADDED.name());
+    notifyRequest.setAction(EnumBiddingNotification.ADDED.name());
+    notifyRequest.setType(EnumNotificationType.BIDDING.name());
     BiddingNotification notification = biddingNotificationService.createBiddingNotification(notifyRequest);
 
     // Asynchronous send notification to merchant
@@ -83,7 +123,8 @@ public class NotificationBroadcast {
       notifyRequest.setRecipient(offeree.getUsername());
       notifyRequest.setRelatedResource(bidNew.getBiddingDocument().getId());
       notifyRequest.setMessage(String.format("Bid have been MODIFIED by %s", bidNew.getBidder().getUsername()));
-      notifyRequest.setType(EnumBiddingNotificationType.MODIFIED.name());
+      notifyRequest.setAction(EnumBiddingNotification.MODIFIED.name());
+      notifyRequest.setType(EnumNotificationType.BIDDING.name());
       notification = biddingNotificationService.createBiddingNotification(notifyRequest);
 
       // Asynchronous send notification to merchant
@@ -96,7 +137,8 @@ public class NotificationBroadcast {
       notifyRequest.setRecipient(bidNew.getBidder().getUsername());
       notifyRequest.setRelatedResource(bidNew.getBiddingDocument().getId());
       notifyRequest.setMessage(String.format("Your Bid have REJECTED from %s", offeree.getUsername()));
-      notifyRequest.setType(EnumBiddingNotificationType.REJECTED.name());
+      notifyRequest.setAction(EnumBiddingNotification.REJECTED.name());
+      notifyRequest.setType(EnumNotificationType.BIDDING.name());
       notification = biddingNotificationService.createBiddingNotification(notifyRequest);
 
       // Asynchronous send notification to forwarders
@@ -117,7 +159,8 @@ public class NotificationBroadcast {
     notifyRequest.setRecipient(offeree.getUsername());
     notifyRequest.setRelatedResource(bid.getBiddingDocument().getId());
     notifyRequest.setMessage(String.format("Bid have been REMOVED by %s", bid.getBidder().getUsername()));
-    notifyRequest.setType(EnumBiddingNotificationType.REMOVED.name());
+    notifyRequest.setAction(EnumBiddingNotification.REMOVED.name());
+    notifyRequest.setType(EnumNotificationType.BIDDING.name());
     BiddingNotification notification = biddingNotificationService.createBiddingNotification(notifyRequest);
 
     // Asynchronous send notification to merchant
@@ -144,7 +187,8 @@ public class NotificationBroadcast {
       notifyRequest.setRelatedResource(biddingDocument.getId());
       notifyRequest.setMessage(
           String.format("You got a new Bidding Document from %s", biddingDocument.getOfferee().getUsername()));
-      notifyRequest.setType(EnumBiddingNotificationType.ADDED.name());
+      notifyRequest.setAction(EnumBiddingNotification.ADDED.name());
+      notifyRequest.setType(EnumNotificationType.BIDDING.name());
       BiddingNotification notification = biddingNotificationService.createBiddingNotification(notifyRequest);
       notifications.add(notification);
     }
@@ -155,8 +199,8 @@ public class NotificationBroadcast {
     });
   }
 
-  public static void broadcastCreateCombinedToDriver(Bid bidNew) {
-
+  public static void broadcastCreateCombinedToDriver(Combined combined) {
+    Bid bidNew = combined.getBid();
     BiddingNotification notification = new BiddingNotification();
     BiddingNotificationRequest notifyRequest = new BiddingNotificationRequest();
     Merchant offeree = bidNew.getBiddingDocument().getOfferee();
@@ -164,7 +208,8 @@ public class NotificationBroadcast {
     notifyRequest.setRecipient(bidNew.getBidder().getUsername());
     notifyRequest.setRelatedResource(bidNew.getBiddingDocument().getId());
     notifyRequest.setMessage(String.format("Your Bid have ACCEPTED from %s", offeree.getUsername()));
-    notifyRequest.setType(EnumBiddingNotificationType.ACCEPTED.name());
+    notifyRequest.setAction(EnumBiddingNotification.ACCEPTED.name());
+    notifyRequest.setType(EnumNotificationType.BIDDING.name());
     notification = biddingNotificationService.createBiddingNotification(notifyRequest);
 
     // Asynchronous send notification to forwarders
@@ -172,18 +217,22 @@ public class NotificationBroadcast {
     logger.info("notification : {}", notification.getId());
     biddingWebSocketService.sendBiddingNotifyToUser(notification);
 
+    ShippingLineNotification shippingLineNotification = new ShippingLineNotification();
+    ShippingLineNotificationRequest shippingLineNotificationRequest = new ShippingLineNotificationRequest();
     String numberOfContainer = String.valueOf(bidNew.getContainers().size());
     String shippingLine = bidNew.getBiddingDocument().getOutbound().getShippingLine().getUsername();
-    notifyRequest.setRecipient(shippingLine);
-    notifyRequest.setRelatedResource(bidNew.getBiddingDocument().getId());
-    notifyRequest.setMessage(String.format("%s and %s want to borrow %s container from you", offeree.getUsername(),
-        bidNew.getBidder().getUsername(), numberOfContainer));
-    notifyRequest.setType(EnumBiddingNotificationType.ACCEPTED.name());
-    notification = biddingNotificationService.createBiddingNotification(notifyRequest);
+    shippingLineNotificationRequest.setRecipient(shippingLine);
+    shippingLineNotificationRequest.setRelatedResource(combined.getId());
+    shippingLineNotificationRequest.setMessage(String.format("%s and %s want to borrow %s container from you",
+        offeree.getUsername(), bidNew.getBidder().getUsername(), numberOfContainer));
+    shippingLineNotificationRequest.setAction(EnumShippingLineNotification.REQUEST.name());
+    shippingLineNotification.setType(EnumNotificationType.SHPIPPINGLINE.name());
+    shippingLineNotification = shippingLineNotificationService
+        .createShippingLineNotification(shippingLineNotificationRequest);
 
     // Asynchronous send notification to ShippingLine
 
-    biddingWebSocketService.sendBiddingNotifyToShippingLine(notification, bidNew);
+    shippingLineWebSocketService.sendCombinedNotifyToShippingLine(shippingLineNotification);
 
     Collection<Container> collectionContainers = bidNew.getContainers();
     List<Container> containers = new ArrayList<Container>(collectionContainers);
@@ -196,15 +245,137 @@ public class NotificationBroadcast {
         driverNotifyRequest.setRelatedResource(bidNew.getBiddingDocument().getOutbound().getId());
         driverNotifyRequest.setMessage(String.format("%s and %s want you driver container %s", offeree.getUsername(),
             bidNew.getBidder().getUsername(), container.getContainerNumber()));
-        driverNotifyRequest.setType(EnumDriverNotificationType.TASK.name());
+        driverNotifyRequest.setType(EnumNotificationType.DRIVER.name());
+        driverNotifyRequest.setAction(EnumDriverNotification.TASK.name());
 
         driverNotification = driverNotificationService.createDriverNotification(driverNotifyRequest);
 
         // Asynchronous send notification to Driver
 
-        biddingWebSocketService.sendBiddingNotifyToDriver(driverNotification);
+        driverWebSocketService.sendBiddingNotifyToDriver(driverNotification);
       });
     }
   }
 
+  public static void broadcastCreateReportToModerator(Report report) {
+
+    String roleName = "ROLE_MODERATOR";
+
+    List<User> moderators = userService.getUsersByRole(roleName);
+    moderators.forEach(moderator -> {
+      ReportNotificationRequest notifyRequest = new ReportNotificationRequest();
+
+      // Create new message notifications and save to Database
+
+      notifyRequest.setRecipient(moderator.getUsername());
+      notifyRequest.setTitle(report.getTitle());
+      notifyRequest.setRelatedResource(report.getId());
+      notifyRequest.setMessage(String.format("You got a new Report from %s", report.getSender().getUsername()));
+      notifyRequest.setAction(EnumReportNotification.NEW.name());
+      notifyRequest.setType(EnumNotificationType.REPORT.name());
+      ReportNotification notification = reportNotificationService.createReportNotification(notifyRequest);
+
+      // Asynchronous send notification to moderator
+
+      logger.info("notification : {}", notification.getId());
+      reportWebSocketService.sendReportNotifyToModeratorOrUser(notification);
+    });
+
+  }
+
+  public static void broadcastUpdateReportToModerator(String status, Report report) {
+
+    String roleName = "ROLE_MODERATOR";
+
+    if (status.equals(report.getStatus()) || report.getStatus().equals(EnumReportStatus.RESOLVED.name())) {
+
+      List<User> moderators = userService.getUsersByRole(roleName);
+      moderators.forEach(moderator -> {
+        ReportNotificationRequest notifyRequest = new ReportNotificationRequest();
+
+        // Create new message notifications and save to Database
+
+        notifyRequest.setRecipient(moderator.getUsername());
+        notifyRequest.setTitle(report.getTitle());
+        notifyRequest.setRelatedResource(report.getId());
+        if (report.getStatus().equals(EnumReportStatus.RESOLVED.name())) {
+          notifyRequest.setMessage(
+              String.format("Report %s has been RESOLVED by %s", report.getId(), report.getSender().getUsername()));
+          notifyRequest.setAction(EnumReportNotification.RESOLVED.name());
+        } else {
+          notifyRequest.setMessage(
+              String.format("Report %s has been Updated by %s", report.getId(), report.getSender().getUsername()));
+          notifyRequest.setAction(EnumReportNotification.UPDATE.name());
+        }
+        notifyRequest.setType(EnumNotificationType.REPORT.name());
+        ReportNotification notification = reportNotificationService.createReportNotification(notifyRequest);
+
+        // Asynchronous send notification to moderator
+
+        logger.info("notification : {}", notification.getId());
+        reportWebSocketService.sendReportNotifyToModeratorOrUser(notification);
+      });
+
+    } else {
+
+      ReportNotificationRequest notifyRequest = new ReportNotificationRequest();
+
+      // Create new message notifications and save to Database
+
+      notifyRequest.setRecipient(report.getSender().getUsername());
+      notifyRequest.setTitle(report.getTitle());
+      notifyRequest.setRelatedResource(report.getId());
+      notifyRequest.setMessage(String.format("Report %s has been %s", report.getId(), report.getStatus()));
+      notifyRequest.setAction(report.getStatus());
+      notifyRequest.setType(EnumNotificationType.REPORT.name());
+      ReportNotification notification = reportNotificationService.createReportNotification(notifyRequest);
+
+      // Asynchronous send notification to forwarder
+
+      logger.info("notification : {}", notification.getId());
+      reportWebSocketService.sendReportNotifyToModeratorOrUser(notification);
+
+    }
+
+  }
+
+  public static void broadcastCreateFeedbackToUser(Feedback feedback) {
+
+    ReportNotificationRequest notifyRequest = new ReportNotificationRequest();
+
+    // Create new message notifications and save to Database
+
+    notifyRequest.setRecipient(feedback.getReport().getSender().getUsername());
+    notifyRequest.setTitle(feedback.getReport().getTitle());
+    notifyRequest.setRelatedResource(feedback.getReport().getId());
+    notifyRequest.setMessage(String.format("You got a new Feedback from %s", feedback.getSender().getUsername()));
+    notifyRequest.setAction(EnumReportNotification.FEEDBACK.name());
+    notifyRequest.setType(EnumNotificationType.REPORT.name());
+    ReportNotification notification = reportNotificationService.createReportNotification(notifyRequest);
+
+    // Asynchronous send notification to forwarder
+
+    logger.info("notification : {}", notification.getId());
+    reportWebSocketService.sendReportNotifyToModeratorOrUser(notification);
+
+  }
+
+  public static void broadcastCreateFeedbackToModerator(String name, Feedback feedback) {
+
+    ReportNotificationRequest notifyRequest = new ReportNotificationRequest();
+    // Create new message notifications and save to Database
+
+    notifyRequest.setRecipient(name);
+    notifyRequest.setTitle(feedback.getReport().getTitle());
+    notifyRequest.setRelatedResource(feedback.getReport().getId());
+    notifyRequest.setMessage(String.format("You got a new Feedback from %s", feedback.getSender().getUsername()));
+    notifyRequest.setAction(EnumReportNotification.FEEDBACK.name());
+    ReportNotification notification = reportNotificationService.createReportNotification(notifyRequest);
+
+    // Asynchronous send notification to Moderator
+
+    logger.info("notification : {}", notification.getId());
+    reportWebSocketService.sendReportNotifyToModeratorOrUser(notification);
+
+  }
 }

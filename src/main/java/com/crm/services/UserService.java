@@ -1,5 +1,6 @@
 package com.crm.services;
 
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.data.domain.Page;
@@ -13,9 +14,11 @@ public interface UserService {
   void createUser(SignUpRequest request);
 
   Page<User> getUsers(PaginationRequest request);
-  
+
   Page<User> searchUsers(PaginationRequest request, String search);
 
   User changeStatus(Long id, Map<String, Object> updates);
+
+  List<User> getUsersByRole(String roleName);
 
 }

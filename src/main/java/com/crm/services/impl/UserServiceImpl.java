@@ -1,6 +1,7 @@
 package com.crm.services.impl;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -129,5 +130,14 @@ public class UserServiceImpl implements UserService {
       return false;
     }
     return true;
+  }
+
+  @Override
+  public List<User> getUsersByRole(String roleName) {
+    List<User> users = userRepository.findByRole(roleName);
+    if (users == null) {
+      throw new NotFoundException("Error: User is not found");
+    }
+    return users;
   }
 }

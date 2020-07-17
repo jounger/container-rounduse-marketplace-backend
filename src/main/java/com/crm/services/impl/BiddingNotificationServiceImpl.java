@@ -9,7 +9,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import com.crm.enums.EnumBiddingNotificationType;
+import com.crm.enums.EnumBiddingNotification;
+import com.crm.enums.EnumNotificationType;
 import com.crm.exception.NotFoundException;
 import com.crm.models.BiddingDocument;
 import com.crm.models.BiddingNotification;
@@ -42,14 +43,18 @@ public class BiddingNotificationServiceImpl implements BiddingNotificationServic
     biddingNotification.setRecipient(recipient);
 
     biddingNotification.setIsRead(false);
+    biddingNotification.setIsHide(false);
+    biddingNotification.setTitle(request.getTitle());
 
     BiddingDocument relatedResource = biddingDocumentRepository.findById(request.getRelatedResource())
         .orElseThrow(() -> new NotFoundException("Related resource is not found."));
     biddingNotification.setRelatedResource(relatedResource);
 
     biddingNotification.setMessage(request.getMessage());
-    EnumBiddingNotificationType type = EnumBiddingNotificationType.findByName(request.getType());
-    biddingNotification.setType(type.name());
+    EnumBiddingNotification action = EnumBiddingNotification.findByName(request.getAction());
+    biddingNotification.setAction(action.name());
+    EnumNotificationType type = EnumNotificationType.findByName(request.getAction());
+    biddingNotification.setAction(type.name());
 
     biddingNotification.setSendDate(LocalDateTime.now());
 
@@ -109,6 +114,13 @@ public class BiddingNotificationServiceImpl implements BiddingNotificationServic
       biddingNotification.setIsRead(isRead);
     } else {
       throw new NotFoundException("Is Read is not found.");
+    }
+
+    Boolean isHide = (Boolean) updates.get("isHide");
+    if (isHide != null) {
+      biddingNotification.setIsHide(isHide);
+    } else {
+      throw new NotFoundException("Is Hide is not found.");
     }
 
     biddingNotificationRepository.save(biddingNotification);

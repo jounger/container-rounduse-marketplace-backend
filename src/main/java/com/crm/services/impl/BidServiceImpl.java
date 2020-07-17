@@ -64,6 +64,9 @@ public class BidServiceImpl implements BidService {
   @Autowired
   private SupplierRepository supplierRepository;
 
+  @Autowired
+  private SupplierRepository supplierRepository;
+
   @Override
   public Bid createBid(Long bidDocId, Long id, BidRequest request) {
     Bid bid = new Bid();

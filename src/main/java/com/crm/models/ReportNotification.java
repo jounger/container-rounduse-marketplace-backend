@@ -23,15 +23,16 @@ import lombok.ToString;
 @NoArgsConstructor
 @ToString
 @Entity
-@Table(name = "bidding_notification")
+@Table(name = "report_notification")
 @Inheritance(strategy = InheritanceType.JOINED)
 @PrimaryKeyJoinColumn(name = "notification_id")
-public class BiddingNotification extends Notification {
+public class ReportNotification extends Notification {
 
   @ManyToOne
-  @JoinColumn(name = "bidding_document_id")
-  private BiddingDocument relatedResource;
+  @JoinColumn(name = "report_id")
+  private Report relatedResource;
 
+  // EnumReportNotification
   @Column(name = "action")
   @NotBlank
   @Size(min = 2, max = 20)

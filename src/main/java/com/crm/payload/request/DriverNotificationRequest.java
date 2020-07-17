@@ -18,11 +18,18 @@ public class DriverNotificationRequest {
 
   private Boolean isRead;
 
+  private String title;
+
+  private Boolean isHide;
+
   @NotNull
   private Long relatedResource;
 
   @NotBlank
   private String message;
+
+  @NotBlank
+  private String action;
 
   @NotBlank
   private String type;

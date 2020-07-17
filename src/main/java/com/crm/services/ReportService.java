@@ -12,6 +12,8 @@ public interface ReportService {
 
   Report createReport(String username, ReportRequest request);
 
+  Report getReport(Long id);
+
   Page<Report> getReportsByUser(String username, PaginationRequest request);
 
   Page<Report> searchReports(PaginationRequest request, String search);

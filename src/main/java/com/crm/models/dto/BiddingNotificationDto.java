@@ -5,11 +5,11 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class BiddingNotificationDto extends NotificationDto{
+public class BiddingNotificationDto extends NotificationDto {
 
   private BiddingDocumentDto relatedResource;
-  
+
   private String message;
-  
-  private String type;
+
+  private String action;
 }

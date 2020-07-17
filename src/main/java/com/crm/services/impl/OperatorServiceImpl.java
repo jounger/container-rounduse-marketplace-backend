@@ -165,6 +165,8 @@ public class OperatorServiceImpl implements OperatorService {
     if (!Tool.isEqual(operator.getStatus(), status)) {
       EnumUserStatus eStatus = EnumUserStatus.findByName(status);
       operator.setStatus(eStatus.name());
+    } else {
+      throw new NotFoundException("Status is not found.");
     }
 
     String fullname = (String) updates.get("fullname");

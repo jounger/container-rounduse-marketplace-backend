@@ -17,6 +17,10 @@ public class NotificationDto {
 
   private Boolean isRead;
 
+  private Boolean isHide;
+
   private String sendDate;
+
+  private String type;
 
 }

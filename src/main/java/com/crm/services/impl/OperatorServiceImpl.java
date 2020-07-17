@@ -140,12 +140,20 @@ public class OperatorServiceImpl implements OperatorService {
 
     String email = (String) updates.get("email");
     if (!Tool.isEqual(operator.getEmail(), email)) {
-      operator.setEmail(email);
+      if(!userRepository.existsByEmail(email)) {
+        operator.setEmail(email);
+      }else {
+        throw new DuplicateRecordException("Email has been existed.");
+      }
     }
 
     String phone = (String) updates.get("phone");
     if (!Tool.isEqual(operator.getPhone(), phone)) {
-      operator.setPhone(phone);
+      if (!userRepository.existsByPhone(phone)) {
+        operator.setPhone(phone);
+      } else {
+        throw new DuplicateRecordException("Phone number has been existed.");
+      }
     }
 
     String address = (String) updates.get("address");
@@ -154,11 +162,9 @@ public class OperatorServiceImpl implements OperatorService {
     }
 
     String status = (String) updates.get("status");
-    EnumUserStatus eStatus = EnumUserStatus.findByName(status);
-    if (eStatus != null) {
+    if (!Tool.isEqual(operator.getStatus(), status)) {
+      EnumUserStatus eStatus = EnumUserStatus.findByName(status);
       operator.setStatus(eStatus.name());
-    } else {
-      throw new NotFoundException("Status is not found.");
     }
 
     String fullname = (String) updates.get("fullname");

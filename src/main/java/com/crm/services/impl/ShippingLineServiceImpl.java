@@ -143,14 +143,20 @@ public class ShippingLineServiceImpl implements ShippingLineService {
 
     String email = (String) updates.get("email");
     if (!Tool.isEqual(shippingLine.getEmail(), email)) {
-      shippingLine.setEmail(email);
+      if(!userRepository.existsByEmail(email)) {
+        shippingLine.setEmail(email);
+      }else {
+        throw new DuplicateRecordException("Email has been existed.");
+      }
     }
 
     String phone = (String) updates.get("phone");
-    if (!Tool.isEqual(shippingLine.getPhone(), phone) && !userRepository.existsByPhone(phone)) {
-      shippingLine.setPhone(phone);
-    }else {
-      throw new DuplicateRecordException("Phone number has been existed.");
+    if (!Tool.isEqual(shippingLine.getPhone(), phone)) {
+      if (!userRepository.existsByPhone(phone)) {
+        shippingLine.setPhone(phone);
+      } else {
+        throw new DuplicateRecordException("Phone number has been existed.");
+      }
     }
 
     String address = (String) updates.get("address");
@@ -180,10 +186,12 @@ public class ShippingLineServiceImpl implements ShippingLineService {
     }
 
     String companyCode = (String) updates.get("companyCode");
-    if (!Tool.isEqual(shippingLine.getCompanyCode(), companyCode) && !supplierRepository.existsByCompanyCode(companyCode)) {
-      shippingLine.setCompanyCode(companyCode);
-    }else {
-      throw new DuplicateRecordException("Company code has been existed.");
+    if (!Tool.isEqual(shippingLine.getCompanyCode(), companyCode)) {
+      if (!supplierRepository.existsByCompanyCode(companyCode)) {
+        shippingLine.setCompanyCode(companyCode);
+      } else {
+        throw new DuplicateRecordException("Company code has been existed.");
+      }
     }
 
     String companyDescription = (String) updates.get("companyDescription");

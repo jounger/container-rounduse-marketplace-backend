@@ -39,14 +39,18 @@ public class Tool {
   }
 
   public static boolean isEqual(String valOld, String valNew) {
-    valNew = valNew.trim();
-    if (!valNew.isEmpty() && valNew.equals(valOld)) {
-      return true;
+    if (valNew != null) {
+      valNew = valNew.trim();
+      if (!valNew.isEmpty() && valNew.equals(valOld)) {
+        return true;
+      } else {
+        return false;
+      }
     } else {
-      return false;
+      return true;
     }
   }
-  
+
   public static boolean isEqual(Boolean valOld, String valNew) {
     valNew = valNew.trim();
     if (!valNew.isEmpty() && valOld.equals(Boolean.valueOf(valNew))) {
@@ -70,7 +74,7 @@ public class Tool {
     }
     return false;
   }
-  
+
   public static boolean isEqual(Integer valOld, String valNew) {
     valNew = valNew.trim();
     if (!isBlank(valNew)) {

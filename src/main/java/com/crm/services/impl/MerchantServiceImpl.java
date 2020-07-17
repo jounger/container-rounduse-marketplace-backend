@@ -37,7 +37,7 @@ public class MerchantServiceImpl implements MerchantService {
 
   @Autowired
   private MerchantRepository merchantRepository;
-  
+
   @Autowired
   private SupplierRepository supplierRepository;
 
@@ -47,7 +47,8 @@ public class MerchantServiceImpl implements MerchantService {
   @Override
   public Merchant createMerchant(SupplierRequest request) {
     if (userRepository.existsByUsername(request.getUsername()) || userRepository.existsByEmail(request.getEmail())
-        || userRepository.existsByPhone(request.getPhone()) || supplierRepository.existsByCompanyCode(request.getCompanyCode())) {
+        || userRepository.existsByPhone(request.getPhone())
+        || supplierRepository.existsByCompanyCode(request.getCompanyCode())) {
       throw new DuplicateRecordException("Error: User has been existed");
     }
     Merchant merchant = new Merchant();
@@ -143,15 +144,21 @@ public class MerchantServiceImpl implements MerchantService {
      */
 
     String email = (String) updates.get("email");
-    if (email != null && UserServiceImpl.isEmailChange(email, merchant) && !email.isEmpty()) {
-      merchant.setEmail(email);
+    if (!Tool.isEqual(merchant.getEmail(), email)) {
+      if(!userRepository.existsByEmail(email)) {
+        merchant.setEmail(email);
+      }else {
+        throw new DuplicateRecordException("Email has been existed.");
+      }
     }
 
     String phone = (String) updates.get("phone");
-    if (!Tool.isEqual(merchant.getPhone(), phone) && !userRepository.existsByPhone(phone)) {
-      merchant.setPhone(phone);
-    }else {
-      throw new DuplicateRecordException("Phone number has been existed.");
+    if (!Tool.isEqual(merchant.getPhone(), phone)) {
+      if (!userRepository.existsByPhone(phone)) {
+        merchant.setPhone(phone);
+      } else {
+        throw new DuplicateRecordException("Phone number has been existed.");
+      }
     }
 
     String address = (String) updates.get("address");
@@ -181,10 +188,12 @@ public class MerchantServiceImpl implements MerchantService {
     }
 
     String companyCode = (String) updates.get("companyCode");
-    if (!Tool.isEqual(merchant.getCompanyCode(), companyCode) && !supplierRepository.existsByCompanyCode(companyCode)) {
-      merchant.setCompanyCode(companyCode);
-    }else {
-      throw new DuplicateRecordException("Company code has been existed.");
+    if (!Tool.isEqual(merchant.getCompanyCode(), companyCode)) {
+      if (!supplierRepository.existsByCompanyCode(companyCode)) {
+        merchant.setCompanyCode(companyCode);
+      } else {
+        throw new DuplicateRecordException("Company code has been existed.");
+      }
     }
 
     String companyDescription = (String) updates.get("companyDescription");

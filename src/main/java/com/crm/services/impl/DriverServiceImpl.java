@@ -174,17 +174,31 @@ public class DriverServiceImpl implements DriverService {
 
       String email = (String) updates.get("email");
       if (!Tool.isEqual(driver.getEmail(), email)) {
-        driver.setEmail(email);
+        if(!userRepository.existsByEmail(email)) {
+          driver.setEmail(email);
+        }else {
+          throw new DuplicateRecordException("Email has been existed.");
+        }
       }
 
       String phone = (String) updates.get("phone");
       if (!Tool.isEqual(driver.getPhone(), phone)) {
-        driver.setPhone(phone);
+        if (!userRepository.existsByPhone(phone)) {
+          driver.setPhone(phone);
+        } else {
+          throw new DuplicateRecordException("Phone number has been existed.");
+        }
       }
 
       String address = (String) updates.get("address");
       if (!Tool.isEqual(driver.getAddress(), address)) {
         driver.setAddress(address);
+      }
+
+      String status = (String) updates.get("status");
+      if (!Tool.isEqual(driver.getStatus(), status)) {
+        EnumUserStatus eStatus = EnumUserStatus.findByName(status);
+        driver.setStatus(eStatus.name());
       }
 
       String fullname = (String) updates.get("fullname");

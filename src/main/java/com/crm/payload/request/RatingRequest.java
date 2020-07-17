@@ -10,9 +10,11 @@ public class RatingRequest {
   
   private Long id;
   
-  private Long senderId;
+  private Long sender;
   
-  private Long receiverId;
+  private Long receiver;
+  
+  private Long contract;
   
   private Integer ratingValue;
 }

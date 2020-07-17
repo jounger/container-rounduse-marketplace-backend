@@ -12,6 +12,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import com.crm.common.Constant;
+import com.crm.common.Tool;
 import com.crm.enums.EnumUserStatus;
 import com.crm.exception.NotFoundException;
 import com.crm.models.Supplier;
@@ -79,7 +80,7 @@ public class SupplierServiceImpl implements SupplierService {
   public Supplier editSupplier(Map<String, Object> updates, Long id) {
     Supplier supplier = supplierRepository.findById(id).orElseThrow(() -> new NotFoundException("User is not found"));
     String status = (String) updates.get("status");
-    if (status != null) {
+    if (!Tool.isEqual(supplier.getStatus(), status)) {
       EnumUserStatus eStatus = EnumUserStatus.findByName(status.toUpperCase());
       supplier.setStatus(eStatus.name());
     }

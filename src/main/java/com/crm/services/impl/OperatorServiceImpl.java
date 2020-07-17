@@ -9,6 +9,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.crm.common.Tool;
 import com.crm.enums.EnumUserStatus;
 import com.crm.exception.DuplicateRecordException;
 import com.crm.exception.NotFoundException;
@@ -54,11 +55,11 @@ public class OperatorServiceImpl implements OperatorService {
       Role userRole = roleRepository.findByName("ROLE_MODERATOR")
           .orElseThrow(() -> new NotFoundException("Error: Role is not found"));
       operator.getRoles().add(userRole);
-    }else if (role.equalsIgnoreCase("ROLE_ADMIN")) {
+    } else if (role.equalsIgnoreCase("ROLE_ADMIN")) {
       Role userRole = roleRepository.findByName("ROLE_ADMIN")
           .orElseThrow(() -> new NotFoundException("Error: Role is not found"));
       operator.getRoles().add(userRole);
-    }else {
+    } else {
       throw new NotFoundException("Error: Role is not found");
     }
 
@@ -138,28 +139,30 @@ public class OperatorServiceImpl implements OperatorService {
      */
 
     String email = (String) updates.get("email");
-    if (email != null && UserServiceImpl.isEmailChange(email, operator) && !email.isEmpty()) {
+    if (!Tool.isEqual(operator.getEmail(), email)) {
       operator.setEmail(email);
     }
 
     String phone = (String) updates.get("phone");
-    if (phone != null && !phone.isEmpty()) {
+    if (!Tool.isEqual(operator.getPhone(), phone)) {
       operator.setPhone(phone);
     }
 
     String address = (String) updates.get("address");
-    if (address != null && !address.isEmpty()) {
+    if (!Tool.isEqual(operator.getAddress(), address)) {
       operator.setAddress(address);
     }
 
     String status = (String) updates.get("status");
-    if (status != null && !status.isEmpty()) {
-      EnumUserStatus eStatus = EnumUserStatus.findByName(status);
+    EnumUserStatus eStatus = EnumUserStatus.findByName(status);
+    if (eStatus != null) {
       operator.setStatus(eStatus.name());
+    } else {
+      throw new NotFoundException("Status is not found.");
     }
 
     String fullname = (String) updates.get("fullname");
-    if (fullname != null && !fullname.isEmpty()) {
+    if (!Tool.isEqual(operator.getFullname(), fullname)) {
       operator.setFullname(fullname);
     }
 

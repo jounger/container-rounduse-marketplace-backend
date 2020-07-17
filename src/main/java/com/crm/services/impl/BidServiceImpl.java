@@ -14,6 +14,7 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 
 import com.crm.common.Constant;
+import com.crm.common.Tool;
 import com.crm.enums.EnumBidStatus;
 import com.crm.enums.EnumBiddingStatus;
 import com.crm.enums.EnumSupplyStatus;
@@ -34,8 +35,8 @@ import com.crm.repository.BidRepository;
 import com.crm.repository.BiddingDocumentRepository;
 import com.crm.repository.ContainerRepository;
 import com.crm.repository.ForwarderRepository;
-import com.crm.repository.MerchantRepository;
 import com.crm.repository.OutboundRepository;
+import com.crm.repository.SupplierRepository;
 import com.crm.repository.UserRepository;
 import com.crm.services.BidService;
 
@@ -52,9 +53,6 @@ public class BidServiceImpl implements BidService {
   private ForwarderRepository forwarderRepository;
 
   @Autowired
-  private MerchantRepository merchantRepository;
-
-  @Autowired
   private ContainerRepository containerRepository;
 
   @Autowired
@@ -62,6 +60,12 @@ public class BidServiceImpl implements BidService {
 
   @Autowired
   private UserRepository userRepository;
+  
+  @Autowired
+  private SupplierRepository supplierRepository;
+
+  @Autowired
+  private SupplierRepository supplierRepository;
 
   @Override
   public Bid createBid(Long bidDocId, Long id, BidRequest request) {
@@ -159,7 +163,7 @@ public class BidServiceImpl implements BidService {
 
   @Override
   public Page<Bid> getBidsByBiddingDocumentAndExistCombined(Long id, Long userId, PaginationRequest request) {
-    if (!biddingDocumentRepository.existsById(id) || !merchantRepository.existsById(userId)) {
+    if (!biddingDocumentRepository.existsById(id) || !supplierRepository.existsById(userId)) {
       throw new NotFoundException("User or Bidding document is not found.");
     }
     PageRequest page = PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Direction.DESC, "id"));
@@ -326,19 +330,14 @@ public class BidServiceImpl implements BidService {
 
     }
 
-    try {
-      String bidPriceString = (String) updates.get("bidPrice");
-      if (bidPriceString != null && !bidPriceString.isEmpty()) {
-        Double bidPrice = Double.parseDouble(bidPriceString);
-        bid.setBidPrice(bidPrice);
-        bid.setBidValidityPeriod(LocalDateTime.now().plusHours(Constant.BID_VALIDITY_PERIOD));
-      }
-    } catch (Exception e) {
-      throw new InternalException("Parameter must be Double");
+    String bidPriceString = (String) updates.get("bidPrice");
+    if (!Tool.isEqual(bid.getBidPrice(), bidPriceString)) {
+      bid.setBidPrice(Double.parseDouble(bidPriceString));
+      bid.setBidValidityPeriod(LocalDateTime.now().plusHours(Constant.BID_VALIDITY_PERIOD));
     }
 
     String statusString = (String) updates.get("status");
-    if (statusString != null && !statusString.isEmpty()) {
+    if (!Tool.isEqual(bid.getStatus(), statusString)) {
       EnumBidStatus status = EnumBidStatus.findByName(statusString);
       bid.setStatus(status.name());
 

@@ -12,6 +12,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.crm.common.Constant;
+import com.crm.common.Tool;
 import com.crm.enums.EnumUserStatus;
 import com.crm.exception.DuplicateRecordException;
 import com.crm.exception.InternalException;
@@ -172,27 +173,27 @@ public class DriverServiceImpl implements DriverService {
        */
 
       String email = (String) updates.get("email");
-      if (email != null && UserServiceImpl.isEmailChange(email, driver) && !email.isEmpty()) {
+      if (!Tool.isEqual(driver.getEmail(), email)) {
         driver.setEmail(email);
       }
 
       String phone = (String) updates.get("phone");
-      if (phone != null && !phone.isEmpty()) {
+      if (!Tool.isEqual(driver.getPhone(), phone)) {
         driver.setPhone(phone);
       }
 
       String address = (String) updates.get("address");
-      if (address != null && !address.isEmpty()) {
+      if (!Tool.isEqual(driver.getAddress(), address)) {
         driver.setAddress(address);
       }
 
       String fullname = (String) updates.get("fullname");
-      if (fullname != null && !fullname.isEmpty()) {
+      if (!Tool.isEqual(driver.getFullname(), fullname)) {
         driver.setFullname(fullname);
       }
 
       String driverLicense = (String) updates.get("driverLicense");
-      if (driverLicense != null && !driverLicense.isEmpty()) {
+      if (!Tool.isEqual(driver.getDriverLicense(), driverLicense)) {
         driver.setDriverLicense(driverLicense);
       }
 

@@ -9,18 +9,14 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ReportDto {
-  
+public class RatingDto {
   private Long id;
   
   private String sender;
   
-  private BiddingDocumentDto report;
+  private String receiver;
   
-  private String title;
+  private ContractDto contract;
   
-  private String detail;
-  
-  private String status;
-
+  private Integer ratingValue;
 }

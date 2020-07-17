@@ -62,14 +62,14 @@ public class BiddingDocumentController {
     return ResponseEntity.ok(biddingDocumentDto);
   }
   
-  @PreAuthorize("hasRole('FORWARDER')")
+  @PreAuthorize("hasRole('MERCHANT') or hasRole('FORWARDER')")
   @GetMapping("/combined")
   public ResponseEntity<?> getBiddingDocumentsByExistCombined(@Valid PaginationRequest request) {
 
     UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
         .getPrincipal();
     Long id = userDetails.getId();
-    Page<BiddingDocument> pages = biddingDocumentService.getBiddingDocumentsExistCombined(id, request);
+    Page<BiddingDocument> pages = biddingDocumentService.getBiddingDocumentsByExistCombined(id, request);
 
     PaginationResponse<BiddingDocumentDto> response = new PaginationResponse<>();
     response.setPageNumber(request.getPage());

@@ -18,6 +18,7 @@ public class ReportNotificationMapper {
     reportNotificationDto.setRelatedResource(relatedResource);
 
     reportNotificationDto.setMessage(reportNotification.getMessage());
+    reportNotificationDto.setAction(reportNotification.getAction());
     reportNotificationDto.setType(reportNotification.getType());
 
     reportNotificationDto.setSendDate(Tool.convertLocalDateTimeToString(reportNotification.getSendDate()));

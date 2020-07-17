@@ -21,4 +21,6 @@ public class NotificationDto {
 
   private String sendDate;
 
+  private String type;
+
 }

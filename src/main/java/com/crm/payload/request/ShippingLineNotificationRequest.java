@@ -29,5 +29,8 @@ public class ShippingLineNotificationRequest {
   private String message;
 
   @NotBlank
+  private String action;
+
+  @NotBlank
   private String type;
 }

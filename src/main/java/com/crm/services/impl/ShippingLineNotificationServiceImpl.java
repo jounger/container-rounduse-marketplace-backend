@@ -9,7 +9,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import com.crm.enums.EnumShippingLineNotificationType;
+import com.crm.enums.EnumNotificationType;
+import com.crm.enums.EnumShippingLineNotification;
 import com.crm.exception.NotFoundException;
 import com.crm.models.Combined;
 import com.crm.models.ShippingLineNotification;
@@ -50,8 +51,10 @@ public class ShippingLineNotificationServiceImpl implements ShippingLineNotifica
     shippingLineNotification.setRelatedResource(relatedResource);
 
     shippingLineNotification.setMessage(request.getMessage());
-    EnumShippingLineNotificationType type = EnumShippingLineNotificationType.findByName(request.getType());
-    shippingLineNotification.setType(type.name());
+    EnumShippingLineNotification action = EnumShippingLineNotification.findByName(request.getAction());
+    shippingLineNotification.setAction(action.name());
+    EnumNotificationType type = EnumNotificationType.findByName(request.getAction());
+    shippingLineNotification.setAction(type.name());
 
     shippingLineNotification.setSendDate(LocalDateTime.now());
 

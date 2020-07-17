@@ -125,9 +125,10 @@ public class ReportServiceImpl implements ReportService {
 
     if (report.getSender().getUsername().equals(username)) {
 
-      if (report.getStatus().equals(EnumReportStatus.REJECTED.name())
+      if (report.getStatus().equals(EnumReportStatus.RESOLVED.name())
+          || report.getStatus().equals(EnumReportStatus.REJECTED.name())
           || report.getStatus().equals(EnumReportStatus.CLOSED.name())) {
-        throw new InternalException("Report was rejected or closed");
+        throw new InternalException("Report was resolved, rejected or closed");
       }
       String title = (String) updates.get("title");
       report.setTitle(title);

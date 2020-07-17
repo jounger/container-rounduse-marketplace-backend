@@ -33,8 +33,8 @@ public class ReportNotification extends Notification {
   private Report relatedResource;
 
   // EnumReportNotification
-  @Column(name = "type")
+  @Column(name = "action")
   @NotBlank
   @Size(min = 2, max = 20)
-  private String type;
+  private String action;
 }

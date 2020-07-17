@@ -9,7 +9,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import com.crm.enums.EnumDriverNotificationType;
+import com.crm.enums.EnumDriverNotification;
+import com.crm.enums.EnumNotificationType;
 import com.crm.exception.NotFoundException;
 import com.crm.models.DriverNotification;
 import com.crm.models.Outbound;
@@ -50,8 +51,10 @@ public class DriverNotificationServiceImpl implements DriverNotificationService 
     driverNotification.setRelatedResource(relatedResource);
 
     driverNotification.setMessage(request.getMessage());
-    EnumDriverNotificationType type = EnumDriverNotificationType.findByName(request.getType());
-    driverNotification.setType(type.name());
+    EnumDriverNotification action = EnumDriverNotification.findByName(request.getAction());
+    driverNotification.setAction(action.name());
+    EnumNotificationType type = EnumNotificationType.findByName(request.getAction());
+    driverNotification.setAction(type.name());
 
     driverNotification.setSendDate(LocalDateTime.now());
 

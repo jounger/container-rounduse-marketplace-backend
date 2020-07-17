@@ -12,11 +12,12 @@ import org.springframework.stereotype.Component;
 
 import com.crm.controllers.BiddingDocumentController;
 import com.crm.enums.EnumBidStatus;
-import com.crm.enums.EnumBiddingNotificationType;
-import com.crm.enums.EnumDriverNotificationType;
-import com.crm.enums.EnumReportNotificationType;
+import com.crm.enums.EnumBiddingNotification;
+import com.crm.enums.EnumDriverNotification;
+import com.crm.enums.EnumNotificationType;
+import com.crm.enums.EnumReportNotification;
 import com.crm.enums.EnumReportStatus;
-import com.crm.enums.EnumShippingLineNotificationType;
+import com.crm.enums.EnumShippingLineNotification;
 import com.crm.models.Bid;
 import com.crm.models.BiddingDocument;
 import com.crm.models.BiddingNotification;
@@ -100,7 +101,8 @@ public class NotificationBroadcast {
     notifyRequest.setRecipient(offeree.getUsername());
     notifyRequest.setRelatedResource(bid.getBiddingDocument().getId());
     notifyRequest.setMessage(String.format("You got a new Bid from %s", bid.getBidder().getUsername()));
-    notifyRequest.setType(EnumBiddingNotificationType.ADDED.name());
+    notifyRequest.setAction(EnumBiddingNotification.ADDED.name());
+    notifyRequest.setType(EnumNotificationType.BIDDING.name());
     BiddingNotification notification = biddingNotificationService.createBiddingNotification(notifyRequest);
 
     // Asynchronous send notification to merchant
@@ -121,7 +123,8 @@ public class NotificationBroadcast {
       notifyRequest.setRecipient(offeree.getUsername());
       notifyRequest.setRelatedResource(bidNew.getBiddingDocument().getId());
       notifyRequest.setMessage(String.format("Bid have been MODIFIED by %s", bidNew.getBidder().getUsername()));
-      notifyRequest.setType(EnumBiddingNotificationType.MODIFIED.name());
+      notifyRequest.setAction(EnumBiddingNotification.MODIFIED.name());
+      notifyRequest.setType(EnumNotificationType.BIDDING.name());
       notification = biddingNotificationService.createBiddingNotification(notifyRequest);
 
       // Asynchronous send notification to merchant
@@ -134,7 +137,8 @@ public class NotificationBroadcast {
       notifyRequest.setRecipient(bidNew.getBidder().getUsername());
       notifyRequest.setRelatedResource(bidNew.getBiddingDocument().getId());
       notifyRequest.setMessage(String.format("Your Bid have REJECTED from %s", offeree.getUsername()));
-      notifyRequest.setType(EnumBiddingNotificationType.REJECTED.name());
+      notifyRequest.setAction(EnumBiddingNotification.REJECTED.name());
+      notifyRequest.setType(EnumNotificationType.BIDDING.name());
       notification = biddingNotificationService.createBiddingNotification(notifyRequest);
 
       // Asynchronous send notification to forwarders
@@ -155,7 +159,8 @@ public class NotificationBroadcast {
     notifyRequest.setRecipient(offeree.getUsername());
     notifyRequest.setRelatedResource(bid.getBiddingDocument().getId());
     notifyRequest.setMessage(String.format("Bid have been REMOVED by %s", bid.getBidder().getUsername()));
-    notifyRequest.setType(EnumBiddingNotificationType.REMOVED.name());
+    notifyRequest.setAction(EnumBiddingNotification.REMOVED.name());
+    notifyRequest.setType(EnumNotificationType.BIDDING.name());
     BiddingNotification notification = biddingNotificationService.createBiddingNotification(notifyRequest);
 
     // Asynchronous send notification to merchant
@@ -182,7 +187,8 @@ public class NotificationBroadcast {
       notifyRequest.setRelatedResource(biddingDocument.getId());
       notifyRequest.setMessage(
           String.format("You got a new Bidding Document from %s", biddingDocument.getOfferee().getUsername()));
-      notifyRequest.setType(EnumBiddingNotificationType.ADDED.name());
+      notifyRequest.setAction(EnumBiddingNotification.ADDED.name());
+      notifyRequest.setType(EnumNotificationType.BIDDING.name());
       BiddingNotification notification = biddingNotificationService.createBiddingNotification(notifyRequest);
       notifications.add(notification);
     }
@@ -202,7 +208,8 @@ public class NotificationBroadcast {
     notifyRequest.setRecipient(bidNew.getBidder().getUsername());
     notifyRequest.setRelatedResource(bidNew.getBiddingDocument().getId());
     notifyRequest.setMessage(String.format("Your Bid have ACCEPTED from %s", offeree.getUsername()));
-    notifyRequest.setType(EnumBiddingNotificationType.ACCEPTED.name());
+    notifyRequest.setAction(EnumBiddingNotification.ACCEPTED.name());
+    notifyRequest.setType(EnumNotificationType.BIDDING.name());
     notification = biddingNotificationService.createBiddingNotification(notifyRequest);
 
     // Asynchronous send notification to forwarders
@@ -218,7 +225,8 @@ public class NotificationBroadcast {
     shippingLineNotificationRequest.setRelatedResource(combined.getId());
     shippingLineNotificationRequest.setMessage(String.format("%s and %s want to borrow %s container from you",
         offeree.getUsername(), bidNew.getBidder().getUsername(), numberOfContainer));
-    shippingLineNotificationRequest.setType(EnumShippingLineNotificationType.REQUEST.name());
+    shippingLineNotificationRequest.setAction(EnumShippingLineNotification.REQUEST.name());
+    shippingLineNotification.setType(EnumNotificationType.SHPIPPINGLINE.name());
     shippingLineNotification = shippingLineNotificationService
         .createShippingLineNotification(shippingLineNotificationRequest);
 
@@ -237,7 +245,8 @@ public class NotificationBroadcast {
         driverNotifyRequest.setRelatedResource(bidNew.getBiddingDocument().getOutbound().getId());
         driverNotifyRequest.setMessage(String.format("%s and %s want you driver container %s", offeree.getUsername(),
             bidNew.getBidder().getUsername(), container.getContainerNumber()));
-        driverNotifyRequest.setType(EnumDriverNotificationType.TASK.name());
+        driverNotifyRequest.setType(EnumNotificationType.DRIVER.name());
+        driverNotifyRequest.setAction(EnumDriverNotification.TASK.name());
 
         driverNotification = driverNotificationService.createDriverNotification(driverNotifyRequest);
 
@@ -262,7 +271,8 @@ public class NotificationBroadcast {
       notifyRequest.setTitle(report.getTitle());
       notifyRequest.setRelatedResource(report.getId());
       notifyRequest.setMessage(String.format("You got a new Report from %s", report.getSender().getUsername()));
-      notifyRequest.setType(EnumReportNotificationType.NEW.name());
+      notifyRequest.setAction(EnumReportNotification.NEW.name());
+      notifyRequest.setType(EnumNotificationType.REPORT.name());
       ReportNotification notification = reportNotificationService.createReportNotification(notifyRequest);
 
       // Asynchronous send notification to moderator
@@ -291,12 +301,13 @@ public class NotificationBroadcast {
         if (report.getStatus().equals(EnumReportStatus.RESOLVED.name())) {
           notifyRequest.setMessage(
               String.format("Report %s has been RESOLVED by %s", report.getId(), report.getSender().getUsername()));
-          notifyRequest.setType(EnumReportNotificationType.RESOLVED.name());
+          notifyRequest.setAction(EnumReportNotification.RESOLVED.name());
         } else {
           notifyRequest.setMessage(
               String.format("Report %s has been Updated by %s", report.getId(), report.getSender().getUsername()));
-          notifyRequest.setType(EnumReportNotificationType.UPDATE.name());
+          notifyRequest.setAction(EnumReportNotification.UPDATE.name());
         }
+        notifyRequest.setType(EnumNotificationType.REPORT.name());
         ReportNotification notification = reportNotificationService.createReportNotification(notifyRequest);
 
         // Asynchronous send notification to moderator
@@ -315,7 +326,8 @@ public class NotificationBroadcast {
       notifyRequest.setTitle(report.getTitle());
       notifyRequest.setRelatedResource(report.getId());
       notifyRequest.setMessage(String.format("Report %s has been %s", report.getId(), report.getStatus()));
-      notifyRequest.setType(report.getStatus());
+      notifyRequest.setAction(report.getStatus());
+      notifyRequest.setType(EnumNotificationType.REPORT.name());
       ReportNotification notification = reportNotificationService.createReportNotification(notifyRequest);
 
       // Asynchronous send notification to forwarder
@@ -337,7 +349,8 @@ public class NotificationBroadcast {
     notifyRequest.setTitle(feedback.getReport().getTitle());
     notifyRequest.setRelatedResource(feedback.getReport().getId());
     notifyRequest.setMessage(String.format("You got a new Feedback from %s", feedback.getSender().getUsername()));
-    notifyRequest.setType(EnumReportNotificationType.FEEDBACK.name());
+    notifyRequest.setAction(EnumReportNotification.FEEDBACK.name());
+    notifyRequest.setType(EnumNotificationType.REPORT.name());
     ReportNotification notification = reportNotificationService.createReportNotification(notifyRequest);
 
     // Asynchronous send notification to forwarder
@@ -356,7 +369,7 @@ public class NotificationBroadcast {
     notifyRequest.setTitle(feedback.getReport().getTitle());
     notifyRequest.setRelatedResource(feedback.getReport().getId());
     notifyRequest.setMessage(String.format("You got a new Feedback from %s", feedback.getSender().getUsername()));
-    notifyRequest.setType(EnumReportNotificationType.FEEDBACK.name());
+    notifyRequest.setAction(EnumReportNotification.FEEDBACK.name());
     ReportNotification notification = reportNotificationService.createReportNotification(notifyRequest);
 
     // Asynchronous send notification to Moderator

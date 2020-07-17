@@ -19,6 +19,7 @@ public class ShippingLineNotificationMapper {
     shippingLineNotificationDto.setRelatedResource(relatedResource);
 
     shippingLineNotificationDto.setMessage(shippingLineNotification.getMessage());
+    shippingLineNotificationDto.setAction(shippingLineNotification.getAction());
     shippingLineNotificationDto.setType(shippingLineNotification.getType());
 
     shippingLineNotificationDto.setSendDate(Tool.convertLocalDateTimeToString(shippingLineNotification.getSendDate()));

@@ -9,7 +9,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import com.crm.enums.EnumBiddingNotificationType;
+import com.crm.enums.EnumBiddingNotification;
+import com.crm.enums.EnumNotificationType;
 import com.crm.exception.NotFoundException;
 import com.crm.models.BiddingDocument;
 import com.crm.models.BiddingNotification;
@@ -50,8 +51,10 @@ public class BiddingNotificationServiceImpl implements BiddingNotificationServic
     biddingNotification.setRelatedResource(relatedResource);
 
     biddingNotification.setMessage(request.getMessage());
-    EnumBiddingNotificationType type = EnumBiddingNotificationType.findByName(request.getType());
-    biddingNotification.setType(type.name());
+    EnumBiddingNotification action = EnumBiddingNotification.findByName(request.getAction());
+    biddingNotification.setAction(action.name());
+    EnumNotificationType type = EnumNotificationType.findByName(request.getAction());
+    biddingNotification.setAction(type.name());
 
     biddingNotification.setSendDate(LocalDateTime.now());
 

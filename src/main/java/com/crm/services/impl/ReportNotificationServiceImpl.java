@@ -9,7 +9,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import com.crm.enums.EnumReportNotificationType;
+import com.crm.enums.EnumNotificationType;
+import com.crm.enums.EnumReportNotification;
 import com.crm.exception.NotFoundException;
 import com.crm.models.Report;
 import com.crm.models.ReportNotification;
@@ -50,8 +51,10 @@ public class ReportNotificationServiceImpl implements ReportNotificationService 
     reportNotification.setRelatedResource(relatedResource);
 
     reportNotification.setMessage(request.getMessage());
-    EnumReportNotificationType type = EnumReportNotificationType.findByName(request.getType());
-    reportNotification.setType(type.name());
+    EnumReportNotification action = EnumReportNotification.findByName(request.getAction());
+    reportNotification.setAction(action.name());
+    EnumNotificationType type = EnumNotificationType.findByName(request.getAction());
+    reportNotification.setAction(type.name());
 
     reportNotification.setSendDate(LocalDateTime.now());
 

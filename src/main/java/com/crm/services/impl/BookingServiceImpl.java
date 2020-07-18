@@ -123,36 +123,35 @@ public class BookingServiceImpl implements BookingService {
       }
 
       String portOfLoadingRequest = String.valueOf(updates.get("portOfLoading"));
-      if (portOfLoadingRequest != null && !portOfLoadingRequest.isEmpty()) {
+      if (updates.get("portOfLoading") != null
+          && !Tool.isEqual(booking.getPortOfLoading().getNameCode(), portOfLoadingRequest)) {
         Port portOfLoading = portRepository.findByNameCode(portOfLoadingRequest)
             .orElseThrow(() -> new NotFoundException("ERROR: PortOfLoading is not found."));
         booking.setPortOfLoading(portOfLoading);
       }
 
       String bookingNumberRequest = String.valueOf(updates.get("bookingNumber"));
-      if (bookingNumberRequest != null && !bookingNumberRequest.isEmpty()) {
-        if (bookingRepository.existsByBookingNumber(bookingNumberRequest)) {
-          if (bookingNumberRequest.equals(booking.getBookingNumber())) {
-          } else {
-            throw new DuplicateRecordException("Error: Booking has been existed");
-          }
-        }
+      if (updates.get("bookingNumber") != null && !Tool.isEqual(booking.getBookingNumber(), bookingNumberRequest)
+          && !bookingRepository.existsByBookingNumber(bookingNumberRequest)) {
         booking.setBookingNumber(bookingNumberRequest);
+      } else {
+        throw new DuplicateRecordException("Error: Booking has been existed");
       }
 
       String unit = String.valueOf(updates.get("unit"));
-      if (unit != null && !unit.isEmpty()) {
+      if (updates.get("unit") != null && !Tool.isEqual(booking.getUnit(), unit)) {
         booking.setUnit(Integer.parseInt(unit));
       }
 
       String cutOffTimeRequest = String.valueOf(updates.get("cutOffTime"));
-      if (cutOffTimeRequest != null && !cutOffTimeRequest.isEmpty()) {
+      if (updates.get("cutOffTime") != null
+          && !Tool.isEqual(String.valueOf(booking.getCutOffTime()), cutOffTimeRequest)) {
         LocalDateTime cutOffTime = Tool.convertToLocalDateTime(cutOffTimeRequest);
         booking.setCutOffTime(cutOffTime);
       }
 
       Boolean isFcl = (Boolean) updates.get("isFcl");
-      if (isFcl != null) {
+      if (updates.get("isFcl") != null && isFcl != null) {
         booking.setIsFcl(isFcl);
       }
 

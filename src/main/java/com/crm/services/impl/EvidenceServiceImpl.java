@@ -138,13 +138,13 @@ public class EvidenceServiceImpl implements EvidenceService {
       throw new NotFoundException("You must be Offeree or Biddier to edit Evidence.");
     }
     String evidenceString = String.valueOf(updates.get("evidence"));
-    if (!Tool.isBlank(evidenceString)) {
+    if (updates.get("evidence") != null && !Tool.isBlank(evidenceString)) {
       evidence.setEvidence(evidenceString);
     } else {
       throw new InternalException("Evidence is not valid.");
     }
     String isValid = String.valueOf(updates.get("isValid"));
-    if (!Tool.isEqual(evidence.getIsValid(), isValid)) {
+    if (updates.get("isValid") != null && !Tool.isEqual(evidence.getIsValid(), isValid)) {
       evidence.setIsValid(Boolean.valueOf(isValid));
     } else {
       throw new InternalException("Is valid is not valid.");

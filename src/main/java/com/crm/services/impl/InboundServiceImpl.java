@@ -300,30 +300,29 @@ public class InboundServiceImpl implements InboundService {
       });
 
       String shippingLineRequest = String.valueOf(updates.get("shippingLine"));
-      if (shippingLineRequest != null && !shippingLineRequest.isEmpty()
-          && !shippingLineRequest.equals(inbound.getShippingLine().getCompanyCode())) {
+      if (updates.get("shippingLine") != null
+          && !Tool.isEqual(inbound.getShippingLine().getCompanyCode(), shippingLineRequest)) {
         ShippingLine shippingLine = shippingLineRepository.findByCompanyCode(shippingLineRequest)
             .orElseThrow(() -> new NotFoundException("ERROR: Shipping Line is not found."));
         inbound.setShippingLine(shippingLine);
       }
 
       String containerTypeRequest = String.valueOf(updates.get("containerType"));
-      if (containerTypeRequest != null && !containerTypeRequest.isEmpty()
-          && !containerTypeRequest.equals(inbound.getContainerType().getName())) {
+      if (updates.get("containerType") != null
+          && !Tool.isEqual(inbound.getContainerType().getName(), containerTypeRequest)) {
         ContainerType containerType = containerTypeRepository.findByName(containerTypeRequest)
             .orElseThrow(() -> new NotFoundException("ERROR: Container Type is not found."));
         inbound.setContainerType(containerType);
       }
 
       String returnStationRequest = String.valueOf(updates.get("returnStation"));
-      if (returnStationRequest != null && !returnStationRequest.isEmpty()
-          && !returnStationRequest.equals(inbound.getReturnStation())) {
+      if (updates.get("returnStation") != null && !Tool.isEqual(inbound.getReturnStation(), returnStationRequest)) {
         inbound.setReturnStation(returnStationRequest);
       }
 
       String pickupTimeRequest = String.valueOf(updates.get("pickupTime"));
-      if (pickupTimeRequest != null && !pickupTimeRequest.isEmpty()
-          && !pickupTimeRequest.equals(Tool.convertLocalDateTimeToString(inbound.getPickupTime()))) {
+      if (updates.get("pickupTime") != null
+          && !Tool.isEqual(String.valueOf(inbound.getPickupTime()), pickupTimeRequest)) {
         LocalDateTime pickupTime = Tool.convertToLocalDateTime(pickupTimeRequest);
 
         LocalDateTime emptyTime = pickupTime.plusDays(1);
@@ -372,8 +371,7 @@ public class InboundServiceImpl implements InboundService {
       }
 
       String emptyTimeRequest = String.valueOf(updates.get("emptyTime"));
-      if (emptyTimeRequest != null && !emptyTimeRequest.isEmpty()
-          && !emptyTimeRequest.equals(Tool.convertLocalDateTimeToString(inbound.getEmptyTime()))) {
+      if (updates.get("emptyTime") != null && !Tool.isEqual(String.valueOf(inbound.getEmptyTime()), emptyTimeRequest)) {
         LocalDateTime emptyTime = Tool.convertToLocalDateTime(emptyTimeRequest);
         inbound.setEmptyTime(emptyTime);
       }

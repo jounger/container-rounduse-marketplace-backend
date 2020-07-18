@@ -151,49 +151,50 @@ public class ForwarderServiceImpl implements ForwarderService {
      */
 
     String email = String.valueOf(updates.get("email"));
-    if (!Tool.isEqual(forwarder.getEmail(), email)) {
-      if(!userRepository.existsByEmail(email)) {
+    if (updates.get("email") != null && !Tool.isEqual(forwarder.getEmail(), email)) {
+      if (!userRepository.existsByEmail(email)) {
         forwarder.setEmail(email);
-      }else {
+      } else {
         throw new DuplicateRecordException("Email has been existed.");
       }
     }
 
     String phone = String.valueOf(updates.get("phone"));
-    if (!Tool.isEqual(forwarder.getPhone(), phone) && !userRepository.existsByPhone(phone)) {
+    if (updates.get("phone") != null && !Tool.isEqual(forwarder.getPhone(), phone)
+        && !userRepository.existsByPhone(phone)) {
       forwarder.setPhone(phone);
     } else {
       throw new DuplicateRecordException("Phone number has been existed.");
     }
 
     String address = String.valueOf(updates.get("address"));
-    if (!Tool.isEqual(forwarder.getAddress(), address)) {
+    if (updates.get("address") != null && !Tool.isEqual(forwarder.getAddress(), address)) {
       forwarder.setAddress(address);
     }
 
     String status = String.valueOf(updates.get("status"));
-    if (!Tool.isEqual(forwarder.getStatus(), status)) {
+    if (updates.get("status") != null && !Tool.isEqual(forwarder.getStatus(), status)) {
       EnumUserStatus eStatus = EnumUserStatus.findByName(status);
       forwarder.setStatus(eStatus.name());
     }
 
     String website = String.valueOf(updates.get("website"));
-    if (!Tool.isEqual(forwarder.getWebsite(), website)) {
+    if (updates.get("website") != null && !Tool.isEqual(forwarder.getWebsite(), website)) {
       forwarder.setWebsite(website);
     }
 
     String contactPerson = String.valueOf(updates.get("contactPerson"));
-    if (!Tool.isEqual(forwarder.getContactPerson(), contactPerson)) {
+    if (updates.get("contactPerson") != null && !Tool.isEqual(forwarder.getContactPerson(), contactPerson)) {
       forwarder.setContactPerson(contactPerson);
     }
 
     String companyName = String.valueOf(updates.get("companyName"));
-    if (!Tool.isEqual(forwarder.getCompanyName(), companyName)) {
+    if (updates.get("companyName") != null && !Tool.isEqual(forwarder.getCompanyName(), companyName)) {
       forwarder.setCompanyName(companyName);
     }
 
     String companyCode = String.valueOf(updates.get("companyCode"));
-    if (!Tool.isEqual(forwarder.getCompanyCode(), companyCode)
+    if (updates.get("companyCode") != null && !Tool.isEqual(forwarder.getCompanyCode(), companyCode)
         && !supplierRepository.existsByCompanyCode(companyCode)) {
       forwarder.setCompanyCode(companyCode);
     } else {
@@ -201,17 +202,18 @@ public class ForwarderServiceImpl implements ForwarderService {
     }
 
     String companyDescription = String.valueOf(updates.get("companyDescription"));
-    if (!Tool.isEqual(forwarder.getCompanyDescription(), companyDescription)) {
+    if (updates.get("companyDescription") != null
+        && !Tool.isEqual(forwarder.getCompanyDescription(), companyDescription)) {
       forwarder.setCompanyDescription(companyDescription);
     }
 
     String tin = String.valueOf(updates.get("tin"));
-    if (!Tool.isEqual(forwarder.getTin(), tin)) {
+    if (updates.get("tin") != null && !Tool.isEqual(forwarder.getTin(), tin)) {
       forwarder.setTin(tin);
     }
 
     String fax = String.valueOf(updates.get("fax"));
-    if (!Tool.isEqual(forwarder.getFax(), fax)) {
+    if (updates.get("fax") != null && !Tool.isEqual(forwarder.getFax(), fax)) {
       forwarder.setFax(fax);
     }
 

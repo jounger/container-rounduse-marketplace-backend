@@ -259,53 +259,59 @@ public class OutboundServiceImpl implements OutboundService {
       }
 
       String shippingLineRequest = String.valueOf(updates.get("shippingLine"));
-      if (shippingLineRequest != null && !shippingLineRequest.isEmpty()) {
+      if (updates.get("shippingLine") != null
+          && !Tool.isEqual(outbound.getShippingLine().getCompanyCode(), shippingLineRequest)) {
         ShippingLine shippingLine = shippingLineRepository.findByCompanyCode(shippingLineRequest)
             .orElseThrow(() -> new NotFoundException("ERROR: Shipping Line is not found."));
         outbound.setShippingLine(shippingLine);
       }
 
       String containerTypeRequest = String.valueOf(updates.get("containerType"));
-      if (containerTypeRequest != null && !containerTypeRequest.isEmpty()) {
+      if (updates.get("containerType") != null
+          && !Tool.isEqual(outbound.getContainerType().getName(), containerTypeRequest)) {
         ContainerType containerType = containerTypeRepository.findByName(containerTypeRequest)
             .orElseThrow(() -> new NotFoundException("ERROR: Container Type is not found."));
         outbound.setContainerType(containerType);
       }
 
       String statusRequest = String.valueOf(updates.get("status"));
-      if (statusRequest != null && !statusRequest.isEmpty()) {
+      if (updates.get("status") != null && !Tool.isEqual(outbound.getStatus(), statusRequest)) {
         outbound.setStatus(EnumSupplyStatus.findByName(statusRequest).name());
       }
 
       String packingTimeRequest = String.valueOf(updates.get("packingTime"));
-      if (packingTimeRequest != null && !packingTimeRequest.isEmpty()) {
+      if (updates.get("packingTime") != null
+          && !Tool.isEqual(String.valueOf(outbound.getPackingTime()), packingTimeRequest)) {
         LocalDateTime packingTime = Tool.convertToLocalDateTime(packingTimeRequest);
         outbound.setPackingTime(packingTime);
       }
 
       String packingStationRequest = String.valueOf(updates.get("packingStation"));
-      if (packingStationRequest != null && !packingStationRequest.isEmpty()) {
+      if (updates.get("packingStation") != null && !Tool.isEqual(outbound.getPackingStation(), packingStationRequest)) {
         outbound.setPackingStation(packingStationRequest);
       }
 
       String goodsDescriptionRequest = String.valueOf(updates.get("goodsDescription"));
-      if (goodsDescriptionRequest != null && !goodsDescriptionRequest.isEmpty()) {
+      if (updates.get("goodsDescription") != null
+          && !Tool.isEqual(outbound.getGoodsDescription(), goodsDescriptionRequest)) {
         outbound.setGoodsDescription(goodsDescriptionRequest);
       }
 
       String grossWeightRequest = String.valueOf(updates.get("grossWeight"));
-      if (grossWeightRequest != null && !grossWeightRequest.isEmpty()) {
+      if (updates.get("grossWeight") != null && !Tool.isEqual(outbound.getGrossWeight(), grossWeightRequest)) {
         outbound.setGrossWeight(Double.valueOf(grossWeightRequest));
       }
 
       String deliveryTimeRequest = String.valueOf(updates.get("deliveryTime"));
-      if (deliveryTimeRequest != null && !deliveryTimeRequest.isEmpty()) {
+      if (updates.get("deliveryTime") != null
+          && !Tool.isEqual(String.valueOf(outbound.getDeliveryTime()), deliveryTimeRequest)) {
         LocalDateTime deliveryTime = Tool.convertToLocalDateTime(deliveryTimeRequest);
         outbound.setDeliveryTime(deliveryTime);
       }
 
       String unitOfMeasurementRequest = String.valueOf(updates.get("unitOfMeasurement"));
-      if (unitOfMeasurementRequest != null && !unitOfMeasurementRequest.isEmpty()) {
+      if (updates.get("unitOfMeasurement") != null
+          && !Tool.isEqual(outbound.getUnitOfMeasurement(), unitOfMeasurementRequest)) {
         outbound.setUnitOfMeasurement(unitOfMeasurementRequest);
       }
 

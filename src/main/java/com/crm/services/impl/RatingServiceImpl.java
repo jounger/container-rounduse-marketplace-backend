@@ -173,7 +173,7 @@ public class RatingServiceImpl implements RatingService {
     }
 
     String ratingValue = String.valueOf(updates.get("ratingValue"));
-    if (!Tool.isEqual(rating.getRatingValue(), ratingValue)) {
+    if (updates.get("ratingValue") != null && !Tool.isEqual(rating.getRatingValue(), ratingValue)) {
       rating.setRatingValue(Integer.valueOf(ratingValue));
       ratingRepository.save(rating);
 

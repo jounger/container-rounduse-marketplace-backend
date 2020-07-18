@@ -297,7 +297,7 @@ public class BidServiceImpl implements BidService {
     List<String> containersId = (List<String>) updates.get("containers");
     Outbound outbound = biddingDocument.getOutbound();
     Booking booking = outbound.getBooking();
-    if (containersId != null) {
+    if (updates.get("containers") != null && containersId != null) {
       if (containersId.size() > booking.getUnit()) {
         throw new InternalException("Number of containers is more than needed.");
       }
@@ -328,13 +328,13 @@ public class BidServiceImpl implements BidService {
     }
 
     String bidPriceString = String.valueOf(updates.get("bidPrice"));
-    if (!Tool.isEqual(bid.getBidPrice(), bidPriceString)) {
+    if (updates.get("bidPrice") != null && !Tool.isEqual(bid.getBidPrice(), bidPriceString)) {
       bid.setBidPrice(Double.parseDouble(bidPriceString));
       bid.setBidValidityPeriod(LocalDateTime.now().plusHours(Constant.BID_VALIDITY_PERIOD));
     }
 
     String statusString = String.valueOf(updates.get("status"));
-    if (!Tool.isEqual(bid.getStatus(), statusString)) {
+    if (updates.get("status") != null && !Tool.isEqual(bid.getStatus(), statusString)) {
       EnumBidStatus status = EnumBidStatus.findByName(statusString);
       bid.setStatus(status.name());
 

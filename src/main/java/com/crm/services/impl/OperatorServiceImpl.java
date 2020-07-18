@@ -139,16 +139,16 @@ public class OperatorServiceImpl implements OperatorService {
      */
 
     String email = String.valueOf(updates.get("email"));
-    if (!Tool.isEqual(operator.getEmail(), email)) {
-      if(!userRepository.existsByEmail(email)) {
+    if (updates.get("email") != null && !Tool.isEqual(operator.getEmail(), email)) {
+      if (!userRepository.existsByEmail(email)) {
         operator.setEmail(email);
-      }else {
+      } else {
         throw new DuplicateRecordException("Email has been existed.");
       }
     }
 
     String phone = String.valueOf(updates.get("phone"));
-    if (!Tool.isEqual(operator.getPhone(), phone)) {
+    if (updates.get("phone") != null && !Tool.isEqual(operator.getPhone(), phone)) {
       if (!userRepository.existsByPhone(phone)) {
         operator.setPhone(phone);
       } else {
@@ -157,12 +157,12 @@ public class OperatorServiceImpl implements OperatorService {
     }
 
     String address = String.valueOf(updates.get("address"));
-    if (!Tool.isEqual(operator.getAddress(), address)) {
+    if (updates.get("address") != null && !Tool.isEqual(operator.getAddress(), address)) {
       operator.setAddress(address);
     }
 
     String status = String.valueOf(updates.get("status"));
-    if (!Tool.isEqual(operator.getStatus(), status)) {
+    if (updates.get("status") != null && !Tool.isEqual(operator.getStatus(), status)) {
       EnumUserStatus eStatus = EnumUserStatus.findByName(status);
       operator.setStatus(eStatus.name());
     } else {
@@ -170,7 +170,7 @@ public class OperatorServiceImpl implements OperatorService {
     }
 
     String fullname = String.valueOf(updates.get("fullname"));
-    if (!Tool.isEqual(operator.getFullname(), fullname)) {
+    if (updates.get("fullname") != null && !Tool.isEqual(operator.getFullname(), fullname)) {
       operator.setFullname(fullname);
     }
 

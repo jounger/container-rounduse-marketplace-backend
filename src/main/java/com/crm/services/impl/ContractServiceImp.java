@@ -118,7 +118,7 @@ public class ContractServiceImp implements ContractService {
 
     if (username.equals(offeree.getUsername())) {
       String requiredString = String.valueOf(updates.get("required"));
-      if (!Tool.isEqual(contract.getRequired(), requiredString)) {
+      if (updates.get("required") != null && !Tool.isEqual(contract.getRequired(), requiredString)) {
         contract.setRequired(Boolean.valueOf(requiredString));
         ;
       }

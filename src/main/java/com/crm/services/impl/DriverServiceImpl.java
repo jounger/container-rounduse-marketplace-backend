@@ -173,16 +173,16 @@ public class DriverServiceImpl implements DriverService {
        */
 
       String email = String.valueOf(updates.get("email"));
-      if (!Tool.isEqual(driver.getEmail(), email)) {
-        if(!userRepository.existsByEmail(email)) {
+      if (updates.get("email") != null && !Tool.isEqual(driver.getEmail(), email)) {
+        if (!userRepository.existsByEmail(email)) {
           driver.setEmail(email);
-        }else {
+        } else {
           throw new DuplicateRecordException("Email has been existed.");
         }
       }
 
       String phone = String.valueOf(updates.get("phone"));
-      if (!Tool.isEqual(driver.getPhone(), phone)) {
+      if (updates.get("phone") != null && !Tool.isEqual(driver.getPhone(), phone)) {
         if (!userRepository.existsByPhone(phone)) {
           driver.setPhone(phone);
         } else {
@@ -191,23 +191,23 @@ public class DriverServiceImpl implements DriverService {
       }
 
       String address = String.valueOf(updates.get("address"));
-      if (!Tool.isEqual(driver.getAddress(), address)) {
+      if (updates.get("address") != null && !Tool.isEqual(driver.getAddress(), address)) {
         driver.setAddress(address);
       }
 
       String status = String.valueOf(updates.get("status"));
-      if (!Tool.isEqual(driver.getStatus(), status)) {
+      if (updates.get("status") != null && !Tool.isEqual(driver.getStatus(), status)) {
         EnumUserStatus eStatus = EnumUserStatus.findByName(status);
         driver.setStatus(eStatus.name());
       }
 
       String fullname = String.valueOf(updates.get("fullname"));
-      if (!Tool.isEqual(driver.getFullname(), fullname)) {
+      if (updates.get("fullname") != null && !Tool.isEqual(driver.getFullname(), fullname)) {
         driver.setFullname(fullname);
       }
 
       String driverLicense = String.valueOf(updates.get("driverLicense"));
-      if (!Tool.isEqual(driver.getDriverLicense(), driverLicense)) {
+      if (updates.get("driverLicense") != null && !Tool.isEqual(driver.getDriverLicense(), driverLicense)) {
         driver.setDriverLicense(driverLicense);
       }
 

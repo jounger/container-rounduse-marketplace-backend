@@ -134,20 +134,21 @@ public class PaymentServiceImpl implements PaymentService {
 
     if (payment.getSender().getUsername().equals(username)) {
       String detail = String.valueOf(updates.get("detail"));
-      if (!Tool.isBlank(detail)) {
+      if (updates.get("detail") != null && !Tool.isBlank(detail)) {
         payment.setDetail(detail);
       }
 
       String amount = String.valueOf(updates.get("amount"));
-      if (!Tool.isEqual(payment.getAmount(), amount)) {
+      if (updates.get("amount") != null && !Tool.isEqual(payment.getAmount(), amount)) {
         payment.setAmount(Double.valueOf(amount));
       }
     }
 
     if (payment.getRecipient().getUsername().equals(username)) {
-      String isPaidString = String.valueOf(updates.get("isPaid"));
-      Boolean isPaid = Boolean.valueOf(isPaidString);
-      payment.setIsPaid(isPaid);
+      Boolean isPaidString = (Boolean) updates.get("isPaid");
+      if (updates.get("isPaid") != null && isPaidString != null) {
+        payment.setIsPaid(isPaidString);
+      }
     }
 
     paymentRepository.save(payment);

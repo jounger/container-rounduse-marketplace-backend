@@ -12,6 +12,8 @@ public interface InboundService {
 
   Inbound getInboundById(Long id);
 
+  Inbound getInboundByContainer(Long id);
+
   Page<Inbound> getInbounds(PaginationRequest request);
 
   Page<Inbound> getInboundsByOutbound(Long id, PaginationRequest request);

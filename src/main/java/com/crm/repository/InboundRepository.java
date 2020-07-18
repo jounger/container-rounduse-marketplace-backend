@@ -2,6 +2,7 @@ package com.crm.repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -18,6 +19,9 @@ public interface InboundRepository extends JpaRepository<Inbound, Long>, JpaSpec
 
   @Query(value = "SELECT i FROM Inbound i WHERE i.forwarder.id = :id")
   Page<Inbound> findByFowarder(@Param("id") Long id, Pageable pageable);
+
+  @Query(value = "SELECT i FROM Inbound i LEFT JOIN i.billOfLading.containers c WHERE c.id = :id")
+  Optional<Inbound> findInboundByContainer(@Param("id") Long id);
 
   @Query(value = "SELECT i FROM Inbound i LEFT JOIN i.billOfLading.containers c " + "WHERE i.forwarder.id = :id "
       + "AND (i.billOfLading.freeTime < :freeTime OR i.pickupTime > :pickupTime) "

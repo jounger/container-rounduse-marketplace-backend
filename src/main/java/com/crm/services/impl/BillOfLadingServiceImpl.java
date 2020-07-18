@@ -160,25 +160,23 @@ public class BillOfLadingServiceImpl implements BillOfLadingService {
       }
 
       String portOfDelivery = String.valueOf(updates.get("portOfDelivery"));
-      if (portOfDelivery != null && !portOfDelivery.isEmpty()
-          && !portOfDelivery.equals(billOfLading.getPortOfDelivery().getNameCode())) {
+      if (updates.get("portOfDelivery") != null
+          && !Tool.isEqual(billOfLading.getPortOfDelivery().getNameCode(), portOfDelivery)) {
         Port port = portRepository.findByNameCode(portOfDelivery)
             .orElseThrow(() -> new NotFoundException("ERROR: Port is not found."));
         billOfLading.setPortOfDelivery(port);
       }
 
       String billOfLadingNumber = String.valueOf(updates.get("billOfLadingNumber"));
-      if (billOfLadingNumber != null && !billOfLadingNumber.isEmpty()
-          && !billOfLadingNumber.equals(billOfLading.getBillOfLadingNumber())) {
-        if (billOfLadingRepository.existsByBillOfLadingNumber(billOfLadingNumber)) {
-          throw new DuplicateRecordException("Error: BillOfLading has been existed");
-        }
+      if (updates.get("billOfLadingNumber") != null
+          && !Tool.isEqual(billOfLading.getBillOfLadingNumber(), billOfLadingNumber)
+          && !billOfLadingRepository.existsByBillOfLadingNumber(billOfLadingNumber)) {
+      } else {
         billOfLading.setBillOfLadingNumber(billOfLadingNumber);
       }
 
       String unitRequest = String.valueOf(updates.get("unit"));
-      if (unitRequest != null && !unitRequest.isEmpty()
-          && !unitRequest.equals(String.valueOf(billOfLading.getUnit()))) {
+      if (updates.get("unit") != null && !Tool.isEqual(billOfLading.getUnit(), unitRequest)) {
         int unit = Integer.parseInt(unitRequest);
         if (unit < billOfLading.getContainers().size()) {
           throw new InternalException("unit must be more or equal number of container");
@@ -187,8 +185,7 @@ public class BillOfLadingServiceImpl implements BillOfLadingService {
       }
 
       String freeTimeReq = String.valueOf(updates.get("freeTime"));
-      if (freeTimeReq != null && !freeTimeReq.isEmpty()
-          && !freeTimeReq.equals(String.valueOf(billOfLading.getFreeTime()))) {
+      if (updates.get("freeTime") != null && !Tool.isEqual(String.valueOf(billOfLading.getFreeTime()), freeTimeReq)) {
 
         LocalDateTime freeTime = Tool.convertToLocalDateTime(freeTimeReq);
 

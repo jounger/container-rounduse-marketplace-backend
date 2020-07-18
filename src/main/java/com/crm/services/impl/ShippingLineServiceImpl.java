@@ -144,49 +144,50 @@ public class ShippingLineServiceImpl implements ShippingLineService {
      */
 
     String email = String.valueOf(updates.get("email"));
-    if (!Tool.isEqual(shippingLine.getEmail(), email)) {
-      if(!userRepository.existsByEmail(email)) {
+    if (updates.get("email") != null && !Tool.isEqual(shippingLine.getEmail(), email)) {
+      if (!userRepository.existsByEmail(email)) {
         shippingLine.setEmail(email);
-      }else {
+      } else {
         throw new DuplicateRecordException("Email has been existed.");
       }
     }
 
     String phone = String.valueOf(updates.get("phone"));
-    if (!Tool.isEqual(shippingLine.getPhone(), phone) && !userRepository.existsByPhone(phone)) {
+    if (updates.get("phone") != null && !Tool.isEqual(shippingLine.getPhone(), phone)
+        && !userRepository.existsByPhone(phone)) {
       shippingLine.setPhone(phone);
     } else {
       throw new DuplicateRecordException("Phone number has been existed.");
     }
 
     String address = String.valueOf(updates.get("address"));
-    if (!Tool.isEqual(shippingLine.getAddress(), address)) {
+    if (updates.get("address") != null && !Tool.isEqual(shippingLine.getAddress(), address)) {
       shippingLine.setAddress(address);
     }
 
     String status = String.valueOf(updates.get("status"));
-    if (!Tool.isEqual(shippingLine.getStatus(), status)) {
+    if (updates.get("status") != null && !Tool.isEqual(shippingLine.getStatus(), status)) {
       EnumUserStatus eStatus = EnumUserStatus.findByName(status);
       shippingLine.setStatus(eStatus.name());
     }
 
     String website = String.valueOf(updates.get("website"));
-    if (!Tool.isEqual(shippingLine.getWebsite(), website)) {
+    if (updates.get("website") != null && !Tool.isEqual(shippingLine.getWebsite(), website)) {
       shippingLine.setWebsite(website);
     }
 
     String contactPerson = String.valueOf(updates.get("contactPerson"));
-    if (!Tool.isEqual(shippingLine.getContactPerson(), contactPerson)) {
+    if (updates.get("contactPerson") != null && !Tool.isEqual(shippingLine.getContactPerson(), contactPerson)) {
       shippingLine.setContactPerson(contactPerson);
     }
 
     String companyName = String.valueOf(updates.get("companyName"));
-    if (!Tool.isEqual(shippingLine.getCompanyName(), companyName)) {
+    if (updates.get("companyName") != null && !Tool.isEqual(shippingLine.getCompanyName(), companyName)) {
       shippingLine.setCompanyName(companyName);
     }
 
     String companyCode = String.valueOf(updates.get("companyCode"));
-    if (!Tool.isEqual(shippingLine.getCompanyCode(), companyCode)
+    if (updates.get("companyCode") != null && !Tool.isEqual(shippingLine.getCompanyCode(), companyCode)
         && !supplierRepository.existsByCompanyCode(companyCode)) {
       shippingLine.setCompanyCode(companyCode);
     } else {
@@ -194,17 +195,18 @@ public class ShippingLineServiceImpl implements ShippingLineService {
     }
 
     String companyDescription = String.valueOf(updates.get("companyDescription"));
-    if (!Tool.isEqual(shippingLine.getCompanyDescription(), companyDescription)) {
+    if (updates.get("companyDescription") != null
+        && !Tool.isEqual(shippingLine.getCompanyDescription(), companyDescription)) {
       shippingLine.setCompanyDescription(companyDescription);
     }
 
     String tin = String.valueOf(updates.get("tin"));
-    if (!Tool.isEqual(shippingLine.getTin(), tin)) {
+    if (updates.get("tin") != null && !Tool.isEqual(shippingLine.getTin(), tin)) {
       shippingLine.setTin(tin);
     }
 
     String fax = String.valueOf(updates.get("fax"));
-    if (!Tool.isEqual(shippingLine.getFax(), fax)) {
+    if (updates.get("fax") != null && !Tool.isEqual(shippingLine.getFax(), fax)) {
       shippingLine.setFax(fax);
     }
 

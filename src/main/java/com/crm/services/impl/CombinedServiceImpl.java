@@ -157,7 +157,7 @@ public class CombinedServiceImpl implements CombinedService {
     BiddingDocument biddingDocument = bid.getBiddingDocument();
     String statusString = String.valueOf(updates.get("status"));
     EnumCombinedStatus status = EnumCombinedStatus.findByName(statusString);
-    if (!Tool.isBlank(statusString) && status != null) {
+    if (updates.get("status") != null && !Tool.isBlank(statusString) && status != null) {
       combined.setStatus(status.name());
       if (status.equals(EnumCombinedStatus.CANCELED)) {
         Map<String, Object> updatesBid = new HashMap<>();

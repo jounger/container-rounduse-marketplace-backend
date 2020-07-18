@@ -110,14 +110,14 @@ public class DriverNotificationServiceImpl implements DriverNotificationService 
         .orElseThrow(() -> new NotFoundException("Driver Notification is not found."));
 
     Boolean isRead = (Boolean) updates.get("isRead");
-    if (isRead != null) {
+    if (updates.get("isRead") != null && isRead != null) {
       driverNotification.setIsRead(isRead);
     } else {
       throw new NotFoundException("Is Read is not found.");
     }
 
     Boolean isHide = (Boolean) updates.get("isHide");
-    if (isHide != null) {
+    if (updates.get("isHide") != null && isHide != null) {
       driverNotification.setIsHide(isHide);
     } else {
       throw new NotFoundException("Is Hide is not found.");

@@ -124,6 +124,15 @@ public class InboundController {
     return ResponseEntity.ok(response);
   }
 
+  @GetMapping("/container/{id}")
+  @PreAuthorize("hasRole('FORWARDER') or hasRole('MERCHANT')")
+  public ResponseEntity<?> getInboundsByContainer(@PathVariable Long id) {
+    Inbound inbound = inboundService.getInboundByContainer(id);
+    InboundDto inboundDto = new InboundDto();
+    inboundDto = InboundMapper.toInboundDto(inbound);
+    return ResponseEntity.ok(inboundDto);
+  }
+
   @GetMapping("/outbound-match/{id}")
   @PreAuthorize("hasRole('FORWARDER')")
   public ResponseEntity<?> getInboundsByOutboundAndForwarder(@PathVariable Long id, @Valid PaginationRequest request) {

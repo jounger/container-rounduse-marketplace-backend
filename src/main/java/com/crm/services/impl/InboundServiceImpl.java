@@ -439,4 +439,11 @@ public class InboundServiceImpl implements InboundService {
     return pages;
   }
 
+  @Override
+  public Inbound getInboundByContainer(Long id) {
+    Inbound inbound = inboundRepository.findInboundByContainer(id)
+        .orElseThrow(() -> new NotFoundException("ERROR: Inbound is not found."));
+    return inbound;
+  }
+
 }

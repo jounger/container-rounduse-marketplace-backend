@@ -53,8 +53,8 @@ public class ReportNotificationServiceImpl implements ReportNotificationService 
     reportNotification.setMessage(request.getMessage());
     EnumReportNotification action = EnumReportNotification.findByName(request.getAction());
     reportNotification.setAction(action.name());
-    EnumNotificationType type = EnumNotificationType.findByName(request.getAction());
-    reportNotification.setAction(type.name());
+    EnumNotificationType type = EnumNotificationType.findByName(request.getType());
+    reportNotification.setType(type.name());
 
     reportNotification.setSendDate(LocalDateTime.now());
 

@@ -53,8 +53,8 @@ public class ShippingLineNotificationServiceImpl implements ShippingLineNotifica
     shippingLineNotification.setMessage(request.getMessage());
     EnumShippingLineNotification action = EnumShippingLineNotification.findByName(request.getAction());
     shippingLineNotification.setAction(action.name());
-    EnumNotificationType type = EnumNotificationType.findByName(request.getAction());
-    shippingLineNotification.setAction(type.name());
+    EnumNotificationType type = EnumNotificationType.findByName(request.getType());
+    shippingLineNotification.setType(type.name());
 
     shippingLineNotification.setSendDate(LocalDateTime.now());
 

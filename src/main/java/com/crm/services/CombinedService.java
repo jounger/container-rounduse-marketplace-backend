@@ -10,7 +10,7 @@ import com.crm.payload.request.PaginationRequest;
 
 public interface CombinedService {
 
-  Combined createCombined(Long bidId, String username, CombinedRequest request);
+  Combined createCombined(Long bidId, Long userId, CombinedRequest request);
 
   Combined getCombined(Long id);
 
@@ -22,7 +22,7 @@ public interface CombinedService {
 
   Combined updateCombined(CombinedRequest request);
 
-  Combined editCombined(Long id, String username, Map<String, Object> updates);
+  Combined editCombined(Long id, Long userId, Map<String, Object> updates);
 
   void removeCombined(Long id);
 }

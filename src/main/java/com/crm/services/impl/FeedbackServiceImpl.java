@@ -84,7 +84,7 @@ public class FeedbackServiceImpl implements FeedbackService {
     }
 
     PageRequest pageRequest = PageRequest.of(request.getPage(), request.getLimit(),
-        Sort.by(Direction.DESC, "createdAt"));
+        Sort.by(Direction.ASC, "createdAt"));
     User sender = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User is not found."));
     String role = sender.getRoles().iterator().next().getName();
     if (role.equals("ROLE_FORWARDER")) {
@@ -137,12 +137,13 @@ public class FeedbackServiceImpl implements FeedbackService {
     }
 
     String message = String.valueOf(updates.get("message"));
-    if (!Tool.isEqual(feedback.getMessage(), message)) {
+    if (updates.get("message") != null && !Tool.isEqual(feedback.getMessage(), message)) {
       feedback.setMessage(message);
     }
 
     String satisfactionPoints = String.valueOf(updates.get("satisfactionPoints"));
-    if (!Tool.isEqual(feedback.getSatisfactionPoints(), satisfactionPoints)) {
+    if (updates.get("satisfactionPoints") != null
+        && !Tool.isEqual(feedback.getSatisfactionPoints(), satisfactionPoints)) {
       feedback.setSatisfactionPoints(Integer.valueOf(satisfactionPoints));
     }
 

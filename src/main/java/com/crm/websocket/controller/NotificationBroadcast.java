@@ -226,7 +226,7 @@ public class NotificationBroadcast {
     shippingLineNotificationRequest.setMessage(String.format("%s and %s want to borrow %s container from you",
         offeree.getUsername(), bidNew.getBidder().getUsername(), numberOfContainer));
     shippingLineNotificationRequest.setAction(EnumShippingLineNotification.REQUEST.name());
-    shippingLineNotification.setType(EnumNotificationType.SHPIPPINGLINE.name());
+    shippingLineNotificationRequest.setType(EnumNotificationType.SHPIPPINGLINE.name());
     shippingLineNotification = shippingLineNotificationService
         .createShippingLineNotification(shippingLineNotificationRequest);
 
@@ -370,6 +370,7 @@ public class NotificationBroadcast {
     notifyRequest.setRelatedResource(feedback.getReport().getId());
     notifyRequest.setMessage(String.format("You got a new Feedback from %s", feedback.getSender().getUsername()));
     notifyRequest.setAction(EnumReportNotification.FEEDBACK.name());
+    notifyRequest.setType(EnumNotificationType.REPORT.name());
     ReportNotification notification = reportNotificationService.createReportNotification(notifyRequest);
 
     // Asynchronous send notification to Moderator

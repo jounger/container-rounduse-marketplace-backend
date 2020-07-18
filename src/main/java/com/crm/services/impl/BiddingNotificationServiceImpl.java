@@ -53,8 +53,8 @@ public class BiddingNotificationServiceImpl implements BiddingNotificationServic
     biddingNotification.setMessage(request.getMessage());
     EnumBiddingNotification action = EnumBiddingNotification.findByName(request.getAction());
     biddingNotification.setAction(action.name());
-    EnumNotificationType type = EnumNotificationType.findByName(request.getAction());
-    biddingNotification.setAction(type.name());
+    EnumNotificationType type = EnumNotificationType.findByName(request.getType());
+    biddingNotification.setType(type.name());
 
     biddingNotification.setSendDate(LocalDateTime.now());
 
@@ -110,14 +110,14 @@ public class BiddingNotificationServiceImpl implements BiddingNotificationServic
         .orElseThrow(() -> new NotFoundException("Bidding notification is not found."));
 
     Boolean isRead = (Boolean) updates.get("isRead");
-    if (isRead != null) {
+    if (updates.get("isRead") != null && isRead != null) {
       biddingNotification.setIsRead(isRead);
     } else {
       throw new NotFoundException("Is Read is not found.");
     }
 
     Boolean isHide = (Boolean) updates.get("isHide");
-    if (isHide != null) {
+    if (updates.get("isHide") != null && isHide != null) {
       biddingNotification.setIsHide(isHide);
     } else {
       throw new NotFoundException("Is Hide is not found.");

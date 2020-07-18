@@ -84,24 +84,21 @@ public class PortServiceImpl implements PortService {
     Port port = portRepository.findById(id).orElseThrow(() -> new NotFoundException("ERROR: Port is not found."));
 
     String fullname = String.valueOf(updates.get("fullname"));
-    if (!Tool.isEqual(port.getFullname(), fullname)) {
+    if (updates.get("fullname") != null && !Tool.isEqual(port.getFullname(), fullname)) {
       port.setFullname(fullname);
     }
 
     String address = String.valueOf(updates.get("address"));
-    if (!Tool.isEqual(port.getAddress(), address)) {
+    if (updates.get("address") != null && !Tool.isEqual(port.getAddress(), address)) {
       port.setAddress(address);
     }
 
     String nameCode = String.valueOf(updates.get("nameCode"));
-    if (!Tool.isEqual(port.getNameCode(), nameCode)) {
-      if (portRepository.existsByNameCode(nameCode)) {
-        if (nameCode.equals(port.getNameCode())) {
-        } else {
-          throw new DuplicateRecordException("ERROR: Port already exists.");
-        }
-      }
+    if (updates.get("nameCode") != null && !Tool.isEqual(port.getNameCode(), nameCode)
+        && !portRepository.existsByNameCode(nameCode)) {
       port.setNameCode(nameCode);
+    } else {
+      throw new DuplicateRecordException("ERROR: Port already exists.");
     }
 
     portRepository.save(port);

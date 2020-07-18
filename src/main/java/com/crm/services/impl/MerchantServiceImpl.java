@@ -145,62 +145,66 @@ public class MerchantServiceImpl implements MerchantService {
 
  
     String email = String.valueOf(updates.get("email"));
-    if (email != null && UserServiceImpl.isEmailChange(email, merchant) && !email.isEmpty()) {
+    if (updates.get("email") != null && email != null && UserServiceImpl.isEmailChange(email, merchant)
+        && !email.isEmpty()) {
       merchant.setEmail(email);
     }
 
     String phone = String.valueOf(updates.get("phone"));
-    if (!Tool.isEqual(merchant.getPhone(), phone) && !userRepository.existsByPhone(phone)) {
+    if (updates.get("phone") != null && !Tool.isEqual(merchant.getPhone(), phone)
+        && !userRepository.existsByPhone(phone)) {
       merchant.setPhone(phone);
     } else {
       throw new DuplicateRecordException("Phone number has been existed.");
     }
 
     String address = String.valueOf(updates.get("address"));
-    if (!Tool.isEqual(merchant.getAddress(), address)) {
+    if (updates.get("address") != null && !Tool.isEqual(merchant.getAddress(), address)) {
       merchant.setAddress(address);
     }
 
     String status = String.valueOf(updates.get("status"));
-    if (!Tool.isEqual(merchant.getStatus(), status)) {
+    if (updates.get("status") != null && !Tool.isEqual(merchant.getStatus(), status)) {
       EnumUserStatus eStatus = EnumUserStatus.findByName(status);
       merchant.setStatus(eStatus.name());
     }
 
     String website = String.valueOf(updates.get("website"));
-    if (!Tool.isEqual(merchant.getWebsite(), website)) {
+    if (updates.get("website") != null && !Tool.isEqual(merchant.getWebsite(), website)) {
       merchant.setWebsite(website);
     }
 
     String contactPerson = String.valueOf(updates.get("contactPerson"));
-    if (!Tool.isEqual(merchant.getContactPerson(), contactPerson)) {
+    if (updates.get("contactPerson") != null && !Tool.isEqual(merchant.getContactPerson(), contactPerson)) {
       merchant.setContactPerson(contactPerson);
     }
 
     String companyName = String.valueOf(updates.get("companyName"));
-    if (!Tool.isEqual(merchant.getCompanyName(), companyName)) {
+    if (updates.get("companyName") != null && !Tool.isEqual(merchant.getCompanyName(), companyName)) {
       merchant.setCompanyName(companyName);
     }
 
     String companyCode = String.valueOf(updates.get("companyCode"));
-    if (!Tool.isEqual(merchant.getCompanyCode(), companyCode) && !supplierRepository.existsByCompanyCode(companyCode)) {
+    if (updates.get("companyCode") != null && !Tool.isEqual(merchant.getCompanyCode(), companyCode)
+        && !supplierRepository.existsByCompanyCode(companyCode)) {
       merchant.setCompanyCode(companyCode);
     } else {
       throw new DuplicateRecordException("Company code has been existed.");
     }
 
     String companyDescription = String.valueOf(updates.get("companyDescription"));
-    if (!Tool.isEqual(merchant.getCompanyDescription(), companyDescription)) {
+    if (updates.get("companyDescription") != null
+        && !Tool.isEqual(merchant.getCompanyDescription(), companyDescription)) {
       merchant.setCompanyDescription(companyDescription);
     }
 
     String tin = String.valueOf(updates.get("tin"));
-    if (!Tool.isEqual(merchant.getTin(), tin)) {
+    if (updates.get("tin") != null && !Tool.isEqual(merchant.getTin(), tin)) {
       merchant.setTin(tin);
     }
 
     String fax = String.valueOf(updates.get("fax"));
-    if (!Tool.isEqual(merchant.getFax(), fax)) {
+    if (updates.get("fax") != null && !Tool.isEqual(merchant.getFax(), fax)) {
       merchant.setFax(fax);
     }
 

@@ -31,7 +31,6 @@ import com.crm.repository.ContainerRepository;
 import com.crm.repository.DiscountRepository;
 import com.crm.repository.MerchantRepository;
 import com.crm.repository.OutboundRepository;
-import com.crm.repository.SupplierRepository;
 import com.crm.repository.UserRepository;
 import com.crm.services.BiddingDocumentService;
 
@@ -59,15 +58,11 @@ public class BiddingDocumentServiceImpl implements BiddingDocumentService {
   @Autowired
   private BidRepository bidRepository;
 
-  @Autowired
-  private SupplierRepository supplierRepository;
-
   @Override
   public BiddingDocument createBiddingDocument(Long id, BiddingDocumentRequest request) {
     BiddingDocument biddingDocument = new BiddingDocument();
 
-    Merchant merchant = new Merchant();
-    merchant = merchantRepository.findById(id).orElseThrow(() -> new NotFoundException("Merchant is not found"));
+    Merchant merchant = merchantRepository.findById(id).orElseThrow(() -> new NotFoundException("Merchant is not found"));
     biddingDocument.setOfferee(merchant);
 
     Outbound outbound = outboundRepository.findById(request.getOutbound())
@@ -138,9 +133,6 @@ public class BiddingDocumentServiceImpl implements BiddingDocumentService {
 
   @Override
   public Page<BiddingDocument> getBiddingDocumentsByExistCombined(Long id, PaginationRequest request) {
-    if (!biddingDocumentRepository.existsById(id) || !supplierRepository.existsById(id)) {
-      throw new NotFoundException("User or Bidding document is not found.");
-    }
     PageRequest page = PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Direction.DESC, "createdAt"));
     Page<BiddingDocument> biddingDocuments = biddingDocumentRepository.findByExistCombined(id, page);
     return biddingDocuments;
@@ -216,7 +208,7 @@ public class BiddingDocumentServiceImpl implements BiddingDocumentService {
     LocalDateTime packingTime = outbound.getPackingTime();
 
     String bidClosing = String.valueOf(updates.get("bidClosing"));
-    if (!Tool.isBlank(bidClosing)) {
+    if (updates.get("bidClosing") != null && !Tool.isBlank(bidClosing)) {
       LocalDateTime bidClosingTime = Tool.convertToLocalDateTime(bidClosing);
       if (bidClosingTime.isBefore(LocalDateTime.now()) || bidClosingTime.isAfter(packingTime)) {
         throw new InternalException("Bid closing time must be after now.");
@@ -225,7 +217,7 @@ public class BiddingDocumentServiceImpl implements BiddingDocumentService {
     }
 
     String currency = String.valueOf(updates.get("currentOfPayment"));
-    if (!Tool.isEqual(biddingDocument.getCurrencyOfPayment(), currency)) {
+    if (updates.get("currentOfPayment") != null && !Tool.isEqual(biddingDocument.getCurrencyOfPayment(), currency)) {
       EnumCurrency currencyOfPayment = EnumCurrency.findByName(currency);
       if (currencyOfPayment == null) {
         currencyOfPayment = EnumCurrency.VND;
@@ -236,22 +228,24 @@ public class BiddingDocumentServiceImpl implements BiddingDocumentService {
     }
 
     String packagePriceString = String.valueOf(updates.get("bidPackagePrice"));
-    if (!Tool.isEqual(biddingDocument.getBidPackagePrice(), packagePriceString)) {
+    if (updates.get("bidPackagePrice") != null
+        && !Tool.isEqual(biddingDocument.getBidPackagePrice(), packagePriceString)) {
       biddingDocument.setBidPackagePrice(Double.parseDouble(packagePriceString));
     }
 
     String floorPriceString = String.valueOf(updates.get("bidFloorPrice"));
-    if (!Tool.isEqual(biddingDocument.getBidFloorPrice(), floorPriceString)) {
+    if (updates.get("bidFloorPrice") != null && !Tool.isEqual(biddingDocument.getBidFloorPrice(), floorPriceString)) {
       biddingDocument.setBidFloorPrice(Double.parseDouble(floorPriceString));
     }
 
     String priceLeadershipString = String.valueOf(updates.get("priceLeadership"));
-    if (!Tool.isEqual(biddingDocument.getPriceLeadership(), priceLeadershipString)) {
+    if (updates.get("priceLeadership") != null
+        && !Tool.isEqual(biddingDocument.getPriceLeadership(), priceLeadershipString)) {
       biddingDocument.setPriceLeadership(Double.parseDouble(priceLeadershipString));
     }
 
     String status = String.valueOf(updates.get("status"));
-    if (!Tool.isBlank(status)) {
+    if (updates.get("status") != null && !Tool.isBlank(status)) {
       EnumBiddingStatus eStatus = EnumBiddingStatus.findByName(status);
       if (eStatus != null) {
         biddingDocument.setStatus(eStatus.name());
@@ -280,9 +274,13 @@ public class BiddingDocumentServiceImpl implements BiddingDocumentService {
   }
 
   @Override
-  public void removeBiddingDocument(Long id) {
+  public void removeBiddingDocument(Long id, Long userId) {
+    Merchant merchant = merchantRepository.findById(userId).orElseThrow(() -> new NotFoundException("Merchant is not found."));
     BiddingDocument biddingDocument = biddingDocumentRepository.findById(id)
         .orElseThrow(() -> new NotFoundException("Bidding document is not found"));
+    if(!biddingDocument.getOfferee().equals(merchant)) {
+      throw new NotFoundException("Bidding document can only be deleted by this owner.");
+    }
     if (!biddingDocument.getStatus().equalsIgnoreCase(EnumBiddingStatus.CANCELED.name())) {
       throw new InternalException("Bidding document is in a transaction.");
     }

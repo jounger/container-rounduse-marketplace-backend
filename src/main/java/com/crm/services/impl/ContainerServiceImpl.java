@@ -10,6 +10,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import com.crm.common.Tool;
 import com.crm.enums.EnumSupplyStatus;
 import com.crm.exception.DuplicateRecordException;
 import com.crm.exception.InternalException;
@@ -311,12 +312,12 @@ public class ContainerServiceImpl implements ContainerService {
       BillOfLading billOfLading = (BillOfLading) container.getBillOfLading();
 
       String containerNumber = String.valueOf(updates.get("containerNumber"));
-      if (containerNumber != null && !containerNumber.isEmpty()) {
+      if (updates.get("containerNumber") != null && !Tool.isEqual(container.getContainerNumber(), containerNumber)) {
         container.setContainerNumber(containerNumber);
       }
 
       String driverRequest = String.valueOf(updates.get("driver"));
-      if (driverRequest != null && !driverRequest.isEmpty()) {
+      if (updates.get("driver") != null && !Tool.isEqual(container.getDriver().getUsername(), driverRequest)) {
         Driver driver = driverRepository.findByUsername(driverRequest)
             .orElseThrow(() -> new NotFoundException("ERROR: Driver is not found."));
         if (!driver.getForwarder().getId().equals(billOfLading.getInbound().getForwarder().getId())) {
@@ -332,7 +333,7 @@ public class ContainerServiceImpl implements ContainerService {
       }
 
       String trailerRequest = String.valueOf(updates.get("trailer"));
-      if (trailerRequest != null && !trailerRequest.isEmpty()) {
+      if (updates.get("trailer") != null && !Tool.isEqual(container.getTrailer().getLicensePlate(), trailerRequest)) {
 
         ContainerSemiTrailer containerSemiTrailer = containerSemiTrailerRepository.findByLicensePlate(trailerRequest)
             .orElseThrow(() -> new NotFoundException("ERROR: ContainerSemiTrailer is not found."));
@@ -349,7 +350,7 @@ public class ContainerServiceImpl implements ContainerService {
       }
 
       String tractorRequest = String.valueOf(updates.get("tractor"));
-      if (tractorRequest != null && !tractorRequest.isEmpty()) {
+      if (updates.get("tractor") != null && !Tool.isEqual(container.getTractor().getLicensePlate(), tractorRequest)) {
 
         ContainerTractor containerTractor = containerTractorRepository.findByLicensePlate(tractorRequest)
             .orElseThrow(() -> new NotFoundException("ERROR: ContainerTractor is not found."));
@@ -366,7 +367,7 @@ public class ContainerServiceImpl implements ContainerService {
       }
 
       String status = String.valueOf(updates.get("status"));
-      if (status != null && !status.isEmpty()) {
+      if (updates.get("status") != null && !Tool.isEqual(container.getStatus(), status)) {
         container.setStatus(status);
       }
 

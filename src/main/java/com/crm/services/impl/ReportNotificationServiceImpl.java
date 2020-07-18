@@ -53,8 +53,8 @@ public class ReportNotificationServiceImpl implements ReportNotificationService 
     reportNotification.setMessage(request.getMessage());
     EnumReportNotification action = EnumReportNotification.findByName(request.getAction());
     reportNotification.setAction(action.name());
-    EnumNotificationType type = EnumNotificationType.findByName(request.getAction());
-    reportNotification.setAction(type.name());
+    EnumNotificationType type = EnumNotificationType.findByName(request.getType());
+    reportNotification.setType(type.name());
 
     reportNotification.setSendDate(LocalDateTime.now());
 
@@ -110,14 +110,14 @@ public class ReportNotificationServiceImpl implements ReportNotificationService 
         .orElseThrow(() -> new NotFoundException("Report Notification is not found."));
 
     Boolean isRead = (Boolean) updates.get("isRead");
-    if (isRead != null) {
+    if (updates.get("isRead") != null && isRead != null) {
       reportNotification.setIsRead(isRead);
     } else {
       throw new NotFoundException("Is Read is not found.");
     }
 
     Boolean isHide = (Boolean) updates.get("isHide");
-    if (isHide != null) {
+    if (updates.get("isHide") != null && isHide != null) {
       reportNotification.setIsHide(isHide);
     } else {
       throw new NotFoundException("Is Hide is not found.");

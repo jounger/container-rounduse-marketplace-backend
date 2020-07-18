@@ -13,6 +13,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import com.crm.common.Constant;
+import com.crm.common.Tool;
 import com.crm.enums.EnumSupplyStatus;
 import com.crm.enums.EnumTrailerType;
 import com.crm.enums.EnumUnit;
@@ -172,22 +173,21 @@ public class ContainerSemiTrailerServiceImpl implements ContainerSemiTrailerServ
       }
 
       String licensePlate = String.valueOf(updates.get("licensePlate"));
-      if (licensePlate != null && !licensePlate.isEmpty()
-          && !licensePlate.equals(containerSemiTrailer.getLicensePlate())) {
-        if (vehicleRepository.existsByLicensePlate(licensePlate)) {
-          throw new DuplicateRecordException("Error: LicensePlate has been existed");
-        } else {
-          containerSemiTrailer.setLicensePlate(licensePlate);
-        }
+      if (updates.get("licensePlate") != null && !Tool.isEqual(containerSemiTrailer.getLicensePlate(), licensePlate)
+          && !vehicleRepository.existsByLicensePlate(licensePlate)) {
+        containerSemiTrailer.setLicensePlate(licensePlate);
+      } else {
+        throw new DuplicateRecordException("Error: LicensePlate has been existed");
       }
 
       String numberOfAxles = String.valueOf(updates.get("numberOfAxles"));
-      if (numberOfAxles != null && !numberOfAxles.isEmpty()) {
+      if (updates.get("numberOfAxles") != null
+          && !Tool.isEqual(containerSemiTrailer.getNumberOfAxles(), numberOfAxles)) {
         containerSemiTrailer.setNumberOfAxles(Integer.valueOf(numberOfAxles));
       }
 
       String type = String.valueOf(updates.get("type"));
-      if (type != null && !type.isEmpty() && !type.equals(containerSemiTrailer.getType())) {
+      if (updates.get("type") != null && !Tool.isEqual(containerSemiTrailer.getType(), type)) {
         try {
           containerSemiTrailer.setType(EnumTrailerType.findByName(type).name());
         } catch (Exception e) {
@@ -196,8 +196,8 @@ public class ContainerSemiTrailerServiceImpl implements ContainerSemiTrailerServ
       }
 
       String unitOfMeasurement = String.valueOf(updates.get("unitOfMeasurement"));
-      if (unitOfMeasurement != null && !unitOfMeasurement.isEmpty()
-          && !unitOfMeasurement.equals(containerSemiTrailer.getUnitOfMeasurement())) {
+      if (updates.get("unitOfMeasurement") != null
+          && !Tool.isEqual(containerSemiTrailer.getUnitOfMeasurement(), unitOfMeasurement)) {
         try {
           containerSemiTrailer.setUnitOfMeasurement(EnumUnit.findByName(unitOfMeasurement).name());
         } catch (Exception e) {

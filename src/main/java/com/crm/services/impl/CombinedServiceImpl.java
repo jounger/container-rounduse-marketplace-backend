@@ -55,14 +55,14 @@ public class CombinedServiceImpl implements CombinedService {
   private OutboundRepository outboundRepository;
 
   @Override
-  public Combined createCombined(Long bidId, String username, CombinedRequest request) {
+  public Combined createCombined(Long bidId, Long userId, CombinedRequest request) {
     Combined combined = new Combined();
 
     Bid bid = bidRepository.findById(bidId).orElseThrow(() -> new NotFoundException("Bidding document is not found."));
     combined.setBid(bid);
     Map<String, Object> updates = new HashMap<>();
     updates.put("status", EnumBidStatus.ACCEPTED.name());
-    bidService.editBid(bidId, username, updates);
+    bidService.editBid(bidId, userId, updates);
 
     combined.setStatus(EnumCombinedStatus.INFO_RECEIVED.name());
     bid = combined.getBid();
@@ -73,14 +73,14 @@ public class CombinedServiceImpl implements CombinedService {
     Boolean required = contracRequest.getRequired();
     contract.setRequired(required);
     contract.setFinesAgainstContractViolations(0D);
-    if (username.equals(offeree.getUsername()) && required == true) {
+    if (userId.equals(offeree.getId()) && required == true) {
       Double fines = contracRequest.getFinesAgainstContractViolations();
       if (fines > 0) {
         contract.setFinesAgainstContractViolations(fines);
       } else {
         throw new InternalException("Fines against contract violation must be greater than zero.");
       }
-    } else if (!username.equals(offeree.getUsername())) {
+    } else if (!userId.equals(offeree.getId())) {
       throw new NotFoundException("You must be Offeree to create Contract.");
     }
 
@@ -149,7 +149,7 @@ public class CombinedServiceImpl implements CombinedService {
   }
 
   @Override
-  public Combined editCombined(Long id, String username, Map<String, Object> updates) {
+  public Combined editCombined(Long id, Long userId, Map<String, Object> updates) {
     Combined combined = combinedRepository.findById(id)
         .orElseThrow(() -> new NotFoundException("Combined is not found."));
 
@@ -157,12 +157,12 @@ public class CombinedServiceImpl implements CombinedService {
     BiddingDocument biddingDocument = bid.getBiddingDocument();
     String statusString = String.valueOf(updates.get("status"));
     EnumCombinedStatus status = EnumCombinedStatus.findByName(statusString);
-    if (!Tool.isBlank(statusString) && status != null) {
+    if (updates.get("status") != null && !Tool.isBlank(statusString) && status != null) {
       combined.setStatus(status.name());
       if (status.equals(EnumCombinedStatus.CANCELED)) {
         Map<String, Object> updatesBid = new HashMap<>();
         updatesBid.put("status", EnumBidStatus.REJECTED.name());
-        bidService.editBid(bid.getId(), username, updatesBid);
+        bidService.editBid(bid.getId(), userId, updatesBid);
       }
 
       if (status.equals(EnumCombinedStatus.DELIVERED)) {

@@ -138,15 +138,17 @@ public class BidServiceImpl implements BidService {
   }
 
   @Override
-  public Bid getBid(Long id) {
-    Bid bid = new Bid();
-    bid = bidRepository.findById(id).orElseThrow(() -> new NotFoundException("Bid is not found."));
+  public Bid getBid(Long id, Long userId) {
+    Bid bid = bidRepository.findById(id).orElseThrow(() -> new NotFoundException("Bid is not found."));
+    if(bid.getBidder().getId() != userId) {
+      throw new NotFoundException("Access denied.");
+    }
     return bid;
   }
 
   @Override
-  public Bid getBidByBiddingDocumentAndForwarder(Long biddingDocumentId, String username) {
-    Bid bid = bidRepository.findByBiddingDocumentAndForwarder(biddingDocumentId, username)
+  public Bid getBidByBiddingDocumentAndForwarder(Long biddingDocumentId, Long userId) {
+    Bid bid = bidRepository.findByBiddingDocumentAndForwarder(biddingDocumentId, userId)
         .orElseThrow(() -> new NotFoundException("Bid is not found."));
     return bid;
   }
@@ -183,12 +185,12 @@ public class BidServiceImpl implements BidService {
   }
 
   @Override
-  public Bid updateBid(String username, BidRequest request) {
+  public Bid updateBid(Long userId, BidRequest request) {
     Bid bid = bidRepository.findById(request.getId()).orElseThrow(() -> new NotFoundException("Bid is not found."));
 
     BiddingDocument biddingDocument = bid.getBiddingDocument();
 
-    User user = userRepository.findByUsername(username).orElseThrow(() -> new NotFoundException("Bid is not found."));
+    User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User is not found."));
     Role role = user.getRoles().iterator().next();
     if (role.getName().equalsIgnoreCase("ROLE_FORWARDER")) {
       String bidStatus = bid.getStatus();
@@ -266,9 +268,9 @@ public class BidServiceImpl implements BidService {
   }
 
   @Override
-  public Bid editBid(Long id, String username, Map<String, Object> updates) {
+  public Bid editBid(Long id, Long userId, Map<String, Object> updates) {
     Bid bid = bidRepository.findById(id).orElseThrow(() -> new NotFoundException("Bid is not found."));
-    User user = userRepository.findByUsername(username).orElseThrow(() -> new NotFoundException("Bid is not found."));
+    User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("Bid is not found."));
     Role role = user.getRoles().iterator().next();
 
     if (role.getName().equalsIgnoreCase("ROLE_FORWARDER")) {
@@ -297,7 +299,7 @@ public class BidServiceImpl implements BidService {
     List<String> containersId = (List<String>) updates.get("containers");
     Outbound outbound = biddingDocument.getOutbound();
     Booking booking = outbound.getBooking();
-    if (containersId != null) {
+    if (updates.get("containers") != null && containersId != null) {
       if (containersId.size() > booking.getUnit()) {
         throw new InternalException("Number of containers is more than needed.");
       }
@@ -328,13 +330,13 @@ public class BidServiceImpl implements BidService {
     }
 
     String bidPriceString = String.valueOf(updates.get("bidPrice"));
-    if (!Tool.isEqual(bid.getBidPrice(), bidPriceString)) {
+    if (updates.get("bidPrice") != null && !Tool.isEqual(bid.getBidPrice(), bidPriceString)) {
       bid.setBidPrice(Double.parseDouble(bidPriceString));
       bid.setBidValidityPeriod(LocalDateTime.now().plusHours(Constant.BID_VALIDITY_PERIOD));
     }
 
     String statusString = String.valueOf(updates.get("status"));
-    if (!Tool.isEqual(bid.getStatus(), statusString)) {
+    if (updates.get("status") != null && !Tool.isEqual(bid.getStatus(), statusString)) {
       EnumBidStatus status = EnumBidStatus.findByName(statusString);
       bid.setStatus(status.name());
 
@@ -384,8 +386,11 @@ public class BidServiceImpl implements BidService {
   }
 
   @Override
-  public void removeBid(Long id) {
+  public void removeBid(Long id, Long userId) {
     Bid bid = bidRepository.findById(id).orElseThrow(() -> new NotFoundException("Bid is not found."));
+    if(bid.getBidder().getId() != userId) {
+      throw new NotFoundException("Access denied.");
+    }
     if (!bid.getStatus().equalsIgnoreCase(EnumBidStatus.ACCEPTED.name())) {
       List<Container> containers = new ArrayList<>(bid.getContainers());
       containers.forEach(container -> {

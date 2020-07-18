@@ -13,7 +13,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -66,7 +65,10 @@ public class BidController {
   @PreAuthorize("hasRole('MERCHANT') or hasRole('FORWARDER')")
   @GetMapping("/{id}")
   public ResponseEntity<?> getBid(@PathVariable Long id) {
-    Bid bid = bidService.getBid(id);
+    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
+        .getPrincipal();
+    Long userId = userDetails.getId();
+    Bid bid = bidService.getBid(id, userId);
     BidDto bidDto = BidMapper.toBidDto(bid);
     return ResponseEntity.ok(bidDto);
   }
@@ -74,10 +76,10 @@ public class BidController {
   @PreAuthorize("hasRole('FORWARDER')")
   @GetMapping("/bidding-document/{id}")
   public ResponseEntity<?> getBidByBiddingDocumentAndForwarder(@PathVariable Long id) {
-    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    String username = userDetails.getUsername();
-
-    Bid bid = bidService.getBidByBiddingDocumentAndForwarder(id, username);
+    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
+        .getPrincipal();
+    Long userId = userDetails.getId();
+    Bid bid = bidService.getBidByBiddingDocumentAndForwarder(id, userId);
     BidDto bidDto = BidMapper.toBidDto(bid);
     return ResponseEntity.ok(bidDto);
   }
@@ -148,9 +150,10 @@ public class BidController {
   @PreAuthorize("hasRole('FORWARDER')")
   @PutMapping("")
   public ResponseEntity<?> updateBid(@Valid @RequestBody BidRequest request) {
-    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    String username = userDetails.getUsername();
-    Bid bid = bidService.updateBid(username, request);
+    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
+        .getPrincipal();
+    Long userId = userDetails.getId();
+    Bid bid = bidService.updateBid(userId, request);
     BidDto bidDto = BidMapper.toBidDto(bid);
     return ResponseEntity.ok(bidDto);
   }
@@ -159,11 +162,12 @@ public class BidController {
   @PreAuthorize("hasRole('MERCHANT') or hasRole('FORWARDER')")
   @RequestMapping(value = "/{id}", method = RequestMethod.PATCH, consumes = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<?> editBid(@PathVariable("id") Long id, @RequestBody Map<String, Object> updates) {
-    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    String username = userDetails.getUsername();
-    Bid bid = bidService.getBid(id);
+    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
+        .getPrincipal();
+    Long userId = userDetails.getId();
+    Bid bid = bidService.getBid(id, userId);
     String status = bid.getStatus();
-    Bid bidEdit = bidService.editBid(id, username, updates);
+    Bid bidEdit = bidService.editBid(id, userId, updates);
     BidDto BidDto = BidMapper.toBidDto(bidEdit);
 
     // CREATE NOTIFICATION
@@ -177,8 +181,11 @@ public class BidController {
   @PreAuthorize("hasRole('FORWARDER')")
   @DeleteMapping("/{id}")
   public ResponseEntity<?> removeBid(@PathVariable Long id) {
-    Bid bid = bidService.getBid(id);
-    bidService.removeBid(id);
+    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
+        .getPrincipal();
+    Long userId = userDetails.getId();
+    Bid bid = bidService.getBid(id, userId);
+    bidService.removeBid(id, userId);
 
     // CREATE NOTIFICATION
     NotificationBroadcast.broadcastRemoveBidToMerchant(bid);

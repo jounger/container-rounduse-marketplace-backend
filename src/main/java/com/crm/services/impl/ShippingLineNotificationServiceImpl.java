@@ -53,8 +53,8 @@ public class ShippingLineNotificationServiceImpl implements ShippingLineNotifica
     shippingLineNotification.setMessage(request.getMessage());
     EnumShippingLineNotification action = EnumShippingLineNotification.findByName(request.getAction());
     shippingLineNotification.setAction(action.name());
-    EnumNotificationType type = EnumNotificationType.findByName(request.getAction());
-    shippingLineNotification.setAction(type.name());
+    EnumNotificationType type = EnumNotificationType.findByName(request.getType());
+    shippingLineNotification.setType(type.name());
 
     shippingLineNotification.setSendDate(LocalDateTime.now());
 
@@ -111,14 +111,14 @@ public class ShippingLineNotificationServiceImpl implements ShippingLineNotifica
         .orElseThrow(() -> new NotFoundException("ShippingLine Notification is not found."));
 
     Boolean isRead = (Boolean) updates.get("isRead");
-    if (isRead != null) {
+    if (updates.get("isRead") != null && isRead != null) {
       shippingLineNotification.setIsRead(isRead);
     } else {
       throw new NotFoundException("Is Read is not found.");
     }
 
     Boolean isHide = (Boolean) updates.get("isHide");
-    if (isHide != null) {
+    if (updates.get("isHide") != null && isHide != null) {
       shippingLineNotification.setIsHide(isHide);
     } else {
       throw new NotFoundException("Is Hide is not found.");

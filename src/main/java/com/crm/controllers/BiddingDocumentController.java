@@ -151,7 +151,10 @@ public class BiddingDocumentController {
   @PreAuthorize("hasRole('MERCHANT')")
   @DeleteMapping("/{id}")
   public ResponseEntity<?> deleteBiddingDocument(@PathVariable Long id) {
-    biddingDocumentService.removeBiddingDocument(id);
+    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
+        .getPrincipal();
+    Long userId = userDetails.getId();
+    biddingDocumentService.removeBiddingDocument(id, userId);
     return ResponseEntity.ok(new MessageResponse("Bidding document deleted successfully."));
   }
 }

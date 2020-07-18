@@ -309,13 +309,8 @@ public class OutboundServiceImpl implements OutboundService {
         outbound.setUnitOfMeasurement(unitOfMeasurementRequest);
       }
 
-      if (packingTimeRequest != null && !packingTimeRequest.isEmpty() && deliveryTimeRequest != null
-          && !deliveryTimeRequest.isEmpty()) {
-        LocalDateTime packingTime = Tool.convertToLocalDateTime(packingTimeRequest);
-        LocalDateTime deliveryTime = Tool.convertToLocalDateTime(deliveryTimeRequest);
-        if (packingTime.isAfter(deliveryTime)) {
-          throw new InternalException("Error: packingTime must before deliveryTime");
-        }
+      if (outbound.getPackingTime().isAfter(outbound.getDeliveryTime())) {
+        throw new InternalException("Error: packingTime must before deliveryTime");
       }
 
       outboundRepository.save(outbound);

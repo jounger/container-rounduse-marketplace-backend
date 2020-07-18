@@ -53,8 +53,8 @@ public class BiddingNotificationServiceImpl implements BiddingNotificationServic
     biddingNotification.setMessage(request.getMessage());
     EnumBiddingNotification action = EnumBiddingNotification.findByName(request.getAction());
     biddingNotification.setAction(action.name());
-    EnumNotificationType type = EnumNotificationType.findByName(request.getAction());
-    biddingNotification.setAction(type.name());
+    EnumNotificationType type = EnumNotificationType.findByName(request.getType());
+    biddingNotification.setType(type.name());
 
     biddingNotification.setSendDate(LocalDateTime.now());
 

@@ -53,8 +53,8 @@ public class DriverNotificationServiceImpl implements DriverNotificationService 
     driverNotification.setMessage(request.getMessage());
     EnumDriverNotification action = EnumDriverNotification.findByName(request.getAction());
     driverNotification.setAction(action.name());
-    EnumNotificationType type = EnumNotificationType.findByName(request.getAction());
-    driverNotification.setAction(type.name());
+    EnumNotificationType type = EnumNotificationType.findByName(request.getType());
+    driverNotification.setType(type.name());
 
     driverNotification.setSendDate(LocalDateTime.now());
 

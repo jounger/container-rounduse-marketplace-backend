@@ -52,8 +52,8 @@ public class ContainerType {
   @Column(name = "tare_weight")
   private Double tareWeight;
 
-  @Column(name = "payload_capacity")
-  private Double payloadCapacity;
+  @Column(name = "gross_weight")
+  private Double grossWeight;
 
   @Column(name = "cubic_capacity")
   private Double cubicCapacity;

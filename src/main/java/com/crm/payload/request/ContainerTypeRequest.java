@@ -18,7 +18,7 @@ public class ContainerTypeRequest {
 
   private Double tareWeight;
 
-  private Double payloadCapacity;
+  private Double grossWeight;
 
   private Double cubicCapacity;
 

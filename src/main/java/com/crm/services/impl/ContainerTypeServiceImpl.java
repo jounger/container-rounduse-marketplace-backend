@@ -12,6 +12,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import com.crm.common.Constant;
+import com.crm.common.Tool;
 import com.crm.enums.EnumUnit;
 import com.crm.exception.DuplicateRecordException;
 import com.crm.exception.NotFoundException;
@@ -126,63 +127,64 @@ public class ContainerTypeServiceImpl implements ContainerTypeService {
     ContainerType containerType = containerTypeRepository.findById(id)
         .orElseThrow(() -> new NotFoundException("ERROR: ContainerType is not found."));
 
-    String name = (String) updates.get("name");
-    if (name != null && !name.isEmpty()) {
-      if (containerTypeRepository.existsByName(name)) {
-        if (name.equals(containerType.getName())) {
-        } else {
-          throw new DuplicateRecordException("ERROR: ContainerType already exists.");
-        }
-      }
+    String name = String.valueOf(updates.get("name"));
+    if (updates.get("name") != null && !Tool.isEqual(containerType.getName(), name)
+        && !containerTypeRepository.existsByName(name)) {
+      containerType.setName(name);
+    } else {
+      throw new DuplicateRecordException("ERROR: ContainerType already exists.");
     }
 
-    String description = (String) updates.get("description");
-    if (description != null && !description.isEmpty()) {
+    String description = String.valueOf(updates.get("description"));
+    if (updates.get("description") != null && !Tool.isEqual(containerType.getDescription(), description)) {
       containerType.setDescription(description);
     }
 
-    String tareWeight = (String) updates.get("tareWeight");
-    if (tareWeight != null && !tareWeight.isEmpty()) {
+    String tareWeight = String.valueOf(updates.get("tareWeight"));
+    if (updates.get("tareWeight") != null && !Tool.isEqual(containerType.getTareWeight(), tareWeight)) {
       containerType.setTareWeight(Double.valueOf(tareWeight));
     }
 
-    String payloadCapacity = (String) updates.get("payloadCapacity");
-    if (payloadCapacity != null && !payloadCapacity.isEmpty()) {
+    String payloadCapacity = String.valueOf(updates.get("payloadCapacity"));
+    if (updates.get("payloadCapacity") != null && !Tool.isEqual(containerType.getPayloadCapacity(), payloadCapacity)) {
       containerType.setPayloadCapacity(Double.valueOf(payloadCapacity));
     }
 
-    String cubicCapacity = (String) updates.get("cubicCapacity");
-    if (cubicCapacity != null && !cubicCapacity.isEmpty()) {
+    String cubicCapacity = String.valueOf(updates.get("cubicCapacity"));
+    if (updates.get("cubicCapacity") != null && !Tool.isEqual(containerType.getCubicCapacity(), cubicCapacity)) {
       containerType.setCubicCapacity(Double.valueOf(cubicCapacity));
     }
 
-    String internalLength = (String) updates.get("internalLength");
-    if (internalLength != null && !internalLength.isEmpty()) {
+    String internalLength = String.valueOf(updates.get("internalLength"));
+    if (updates.get("internalLength") != null && !Tool.isEqual(containerType.getInternalLength(), internalLength)) {
       containerType.setInternalLength(Double.valueOf(internalLength));
     }
 
-    String internalHeight = (String) updates.get("internalHeight");
-    if (internalHeight != null && !internalHeight.isEmpty()) {
+    String internalHeight = String.valueOf(updates.get("internalHeight"));
+    if (updates.get("internalHeight") != null && !Tool.isEqual(containerType.getInternalHeight(), internalHeight)) {
       containerType.setInternalHeight(Double.valueOf(internalHeight));
     }
 
-    String internalWidth = (String) updates.get("internalWidth");
-    if (internalWidth != null && !internalWidth.isEmpty()) {
+    String internalWidth = String.valueOf(updates.get("internalWidth"));
+    if (updates.get("internalWidth") != null && !Tool.isEqual(containerType.getInternalWidth(), internalWidth)) {
       containerType.setInternalWidth(Double.valueOf(internalWidth));
     }
 
-    String doorOpeningHeight = (String) updates.get("doorOpeningHeight");
-    if (doorOpeningHeight != null && !doorOpeningHeight.isEmpty()) {
+    String doorOpeningHeight = String.valueOf(updates.get("doorOpeningHeight"));
+    if (updates.get("doorOpeningHeight") != null
+        && !Tool.isEqual(containerType.getDoorOpeningHeight(), doorOpeningHeight)) {
       containerType.setDoorOpeningHeight(Double.valueOf(doorOpeningHeight));
     }
 
-    String doorOpeningWidth = (String) updates.get("doorOpeningWidth");
-    if (doorOpeningWidth != null && !doorOpeningWidth.isEmpty()) {
+    String doorOpeningWidth = String.valueOf(updates.get("doorOpeningWidth"));
+    if (updates.get("doorOpeningWidth") != null
+        && !Tool.isEqual(containerType.getDoorOpeningWidth(), doorOpeningWidth)) {
       containerType.setDoorOpeningWidth(Double.valueOf(doorOpeningWidth));
     }
 
-    String unitOfMeasurement = (String) updates.get("unitOfMeasurement");
-    if (unitOfMeasurement != null && !unitOfMeasurement.isEmpty()) {
+    String unitOfMeasurement = String.valueOf(updates.get("unitOfMeasurement"));
+    if (updates.get("unitOfMeasurement") != null
+        && !Tool.isEqual(containerType.getUnitOfMeasurement(), unitOfMeasurement)) {
       try {
         containerType.setUnitOfMeasurement(EnumUnit.findByName(unitOfMeasurement).name());
       } catch (Exception e) {

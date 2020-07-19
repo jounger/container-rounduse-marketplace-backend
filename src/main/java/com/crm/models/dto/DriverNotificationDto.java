@@ -11,5 +11,5 @@ public class DriverNotificationDto extends NotificationDto {
 
   private String message;
 
-  private String type;
+  private String action;
 }

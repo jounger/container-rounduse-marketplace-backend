@@ -9,7 +9,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import com.crm.enums.EnumDriverNotificationType;
+import com.crm.enums.EnumDriverNotification;
+import com.crm.enums.EnumNotificationType;
 import com.crm.exception.NotFoundException;
 import com.crm.models.DriverNotification;
 import com.crm.models.Outbound;
@@ -42,13 +43,17 @@ public class DriverNotificationServiceImpl implements DriverNotificationService 
     driverNotification.setRecipient(recipient);
 
     driverNotification.setIsRead(false);
+    driverNotification.setIsHide(false);
+    driverNotification.setTitle(request.getTitle());
 
     Outbound relatedResource = outboundRepository.findById(request.getRelatedResource())
         .orElseThrow(() -> new NotFoundException("Related resource is not found."));
     driverNotification.setRelatedResource(relatedResource);
 
     driverNotification.setMessage(request.getMessage());
-    EnumDriverNotificationType type = EnumDriverNotificationType.findByName(request.getType());
+    EnumDriverNotification action = EnumDriverNotification.findByName(request.getAction());
+    driverNotification.setAction(action.name());
+    EnumNotificationType type = EnumNotificationType.findByName(request.getType());
     driverNotification.setType(type.name());
 
     driverNotification.setSendDate(LocalDateTime.now());
@@ -105,10 +110,17 @@ public class DriverNotificationServiceImpl implements DriverNotificationService 
         .orElseThrow(() -> new NotFoundException("Driver Notification is not found."));
 
     Boolean isRead = (Boolean) updates.get("isRead");
-    if (isRead != null) {
+    if (updates.get("isRead") != null && isRead != null) {
       driverNotification.setIsRead(isRead);
     } else {
       throw new NotFoundException("Is Read is not found.");
+    }
+
+    Boolean isHide = (Boolean) updates.get("isHide");
+    if (updates.get("isHide") != null && isHide != null) {
+      driverNotification.setIsHide(isHide);
+    } else {
+      throw new NotFoundException("Is Hide is not found.");
     }
 
     driverNotificationRepository.save(driverNotification);

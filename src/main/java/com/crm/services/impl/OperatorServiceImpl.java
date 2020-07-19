@@ -9,6 +9,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.crm.common.Tool;
 import com.crm.enums.EnumUserStatus;
 import com.crm.exception.DuplicateRecordException;
 import com.crm.exception.NotFoundException;
@@ -54,11 +55,11 @@ public class OperatorServiceImpl implements OperatorService {
       Role userRole = roleRepository.findByName("ROLE_MODERATOR")
           .orElseThrow(() -> new NotFoundException("Error: Role is not found"));
       operator.getRoles().add(userRole);
-    }else if (role.equalsIgnoreCase("ROLE_ADMIN")) {
+    } else if (role.equalsIgnoreCase("ROLE_ADMIN")) {
       Role userRole = roleRepository.findByName("ROLE_ADMIN")
           .orElseThrow(() -> new NotFoundException("Error: Role is not found"));
       operator.getRoles().add(userRole);
-    }else {
+    } else {
       throw new NotFoundException("Error: Role is not found");
     }
 
@@ -132,34 +133,44 @@ public class OperatorServiceImpl implements OperatorService {
         .orElseThrow(() -> new NotFoundException("Operator is not found."));
 
     /*
-     * String password = (String) updates.get("password"); if (password != null &&
-     * !password.isEmpty()) { String encoder = passwordEncoder.encode(password);
-     * operator.setPassword(encoder); }
+     * String password = String.valueOf( updates.get("password")); if (password !=
+     * null && !password.isEmpty()) { String encoder =
+     * passwordEncoder.encode(password); operator.setPassword(encoder); }
      */
 
-    String email = (String) updates.get("email");
-    if (email != null && UserServiceImpl.isEmailChange(email, operator) && !email.isEmpty()) {
-      operator.setEmail(email);
+    String email = String.valueOf(updates.get("email"));
+    if (updates.get("email") != null && !Tool.isEqual(operator.getEmail(), email)) {
+      if (!userRepository.existsByEmail(email)) {
+        operator.setEmail(email);
+      } else {
+        throw new DuplicateRecordException("Email has been existed.");
+      }
     }
 
-    String phone = (String) updates.get("phone");
-    if (phone != null && !phone.isEmpty()) {
-      operator.setPhone(phone);
+    String phone = String.valueOf(updates.get("phone"));
+    if (updates.get("phone") != null && !Tool.isEqual(operator.getPhone(), phone)) {
+      if (!userRepository.existsByPhone(phone)) {
+        operator.setPhone(phone);
+      } else {
+        throw new DuplicateRecordException("Phone number has been existed.");
+      }
     }
 
-    String address = (String) updates.get("address");
-    if (address != null && !address.isEmpty()) {
+    String address = String.valueOf(updates.get("address"));
+    if (updates.get("address") != null && !Tool.isEqual(operator.getAddress(), address)) {
       operator.setAddress(address);
     }
 
-    String status = (String) updates.get("status");
-    if (status != null && !status.isEmpty()) {
+    String status = String.valueOf(updates.get("status"));
+    if (updates.get("status") != null && !Tool.isEqual(operator.getStatus(), status)) {
       EnumUserStatus eStatus = EnumUserStatus.findByName(status);
       operator.setStatus(eStatus.name());
+    } else {
+      throw new NotFoundException("Status is not found.");
     }
 
-    String fullname = (String) updates.get("fullname");
-    if (fullname != null && !fullname.isEmpty()) {
+    String fullname = String.valueOf(updates.get("fullname"));
+    if (updates.get("fullname") != null && !Tool.isEqual(operator.getFullname(), fullname)) {
       operator.setFullname(fullname);
     }
 

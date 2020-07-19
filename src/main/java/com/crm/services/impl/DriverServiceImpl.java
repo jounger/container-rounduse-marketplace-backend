@@ -12,6 +12,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.crm.common.Constant;
+import com.crm.common.Tool;
 import com.crm.enums.EnumUserStatus;
 import com.crm.exception.DuplicateRecordException;
 import com.crm.exception.InternalException;
@@ -166,33 +167,47 @@ public class DriverServiceImpl implements DriverService {
       }
 
       /*
-       * String password = (String) updates.get("password"); if (password != null) {
-       * String encoder = passwordEncoder.encode(password);
+       * String password = String.valueOf( updates.get("password")); if (password !=
+       * null) { String encoder = passwordEncoder.encode(password);
        * driver.setPassword(encoder); }
        */
 
-      String email = (String) updates.get("email");
-      if (email != null && UserServiceImpl.isEmailChange(email, driver) && !email.isEmpty()) {
-        driver.setEmail(email);
+      String email = String.valueOf(updates.get("email"));
+      if (updates.get("email") != null && !Tool.isEqual(driver.getEmail(), email)) {
+        if (!userRepository.existsByEmail(email)) {
+          driver.setEmail(email);
+        } else {
+          throw new DuplicateRecordException("Email has been existed.");
+        }
       }
 
-      String phone = (String) updates.get("phone");
-      if (phone != null && !phone.isEmpty()) {
-        driver.setPhone(phone);
+      String phone = String.valueOf(updates.get("phone"));
+      if (updates.get("phone") != null && !Tool.isEqual(driver.getPhone(), phone)) {
+        if (!userRepository.existsByPhone(phone)) {
+          driver.setPhone(phone);
+        } else {
+          throw new DuplicateRecordException("Phone number has been existed.");
+        }
       }
 
-      String address = (String) updates.get("address");
-      if (address != null && !address.isEmpty()) {
+      String address = String.valueOf(updates.get("address"));
+      if (updates.get("address") != null && !Tool.isEqual(driver.getAddress(), address)) {
         driver.setAddress(address);
       }
 
-      String fullname = (String) updates.get("fullname");
-      if (fullname != null && !fullname.isEmpty()) {
+      String status = String.valueOf(updates.get("status"));
+      if (updates.get("status") != null && !Tool.isEqual(driver.getStatus(), status)) {
+        EnumUserStatus eStatus = EnumUserStatus.findByName(status);
+        driver.setStatus(eStatus.name());
+      }
+
+      String fullname = String.valueOf(updates.get("fullname"));
+      if (updates.get("fullname") != null && !Tool.isEqual(driver.getFullname(), fullname)) {
         driver.setFullname(fullname);
       }
 
-      String driverLicense = (String) updates.get("driverLicense");
-      if (driverLicense != null && !driverLicense.isEmpty()) {
+      String driverLicense = String.valueOf(updates.get("driverLicense"));
+      if (updates.get("driverLicense") != null && !Tool.isEqual(driver.getDriverLicense(), driverLicense)) {
         driver.setDriverLicense(driverLicense);
       }
 

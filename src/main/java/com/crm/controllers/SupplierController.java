@@ -110,9 +110,9 @@ public class SupplierController {
   }
 
   @PreAuthorize("hasRole('MODERATOR') or hasRole('FORWARDER') or hasRole('MERCHANT')")
-  @GetMapping("/{id}")
-  public ResponseEntity<?> getSupplier(@PathVariable("id") Long id) {
-    Supplier supplier = supplierService.getSupplier(id);
+  @GetMapping("/{username}")
+  public ResponseEntity<?> getSupplier(@PathVariable("username") String username) {
+    Supplier supplier = supplierService.getSupplier(username);
     SupplierDto supplierDto = SupplierMapper.toSupplierDto(supplier);
     return ResponseEntity.ok(supplierDto);
   }

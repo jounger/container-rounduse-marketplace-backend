@@ -104,24 +104,21 @@ public class DiscountServiceImpl implements DiscountService {
     Discount discount = discountRepository.findById(id)
         .orElseThrow(() -> new NotFoundException("ERROR: Discount is not found."));
 
-    String code = (String) updates.get("code");
-    if (code != null && !code.isEmpty()) {
-      if (discountRepository.existsByCode(code)) {
-        if (code.equals(discount.getCode())) {
-        } else {
-          throw new DuplicateRecordException("ERROR: Discount already exists.");
-        }
-      }
+    String code = String.valueOf(updates.get("code"));
+    if (updates.get("code") != null && !Tool.isEqual(discount.getCode(), code)
+        && !discountRepository.existsByCode(code)) {
       discount.setCode(code);
+    } else {
+      throw new DuplicateRecordException("ERROR: Discount already exists.");
     }
 
-    String detail = (String) updates.get("detail");
-    if (detail != null && !detail.isEmpty()) {
+    String detail = String.valueOf(updates.get("detail"));
+    if (updates.get("detail") != null && !Tool.isEqual(discount.getDetail(), detail)) {
       discount.setDetail(detail);
     }
 
-    String currency = (String) updates.get("currency");
-    if (currency != null && !currency.isEmpty()) {
+    String currency = String.valueOf(updates.get("currency"));
+    if (updates.get("currency") != null && !Tool.isEqual(discount.getCurrency(), currency)) {
       String currencyName = EnumCurrency.findByName(currency).name();
       if (currencyName != null && !currencyName.isEmpty()) {
         discount.setCurrency(currencyName);
@@ -130,20 +127,19 @@ public class DiscountServiceImpl implements DiscountService {
       }
     }
 
-    String percent = (String) updates.get("percent");
-    if (percent != null && !percent.isEmpty()) {
+    String percent = String.valueOf(updates.get("percent"));
+    if (updates.get("percent") != null && !Tool.isEqual(discount.getPercent(), percent)) {
       discount.setPercent(Double.valueOf(percent));
     }
 
-    String maximumDiscount = (String) updates.get("maximumDiscount");
-    if (maximumDiscount != null && !maximumDiscount.isEmpty()) {
+    String maximumDiscount = String.valueOf(updates.get("maximumDiscount"));
+    if (updates.get("maximumDiscount") != null && !Tool.isEqual(discount.getMaximumDiscount(), maximumDiscount)) {
       discount.setMaximumDiscount(Double.valueOf(maximumDiscount));
     }
 
-    String expiredDateString = (String) updates.get("expiredDate");
-    if (expiredDateString != null && !expiredDateString.isEmpty()) {
-      LocalDateTime expiredDate = Tool.convertToLocalDateTime(expiredDateString);
-      discount.setExpiredDate(expiredDate);
+    String expiredDateString = String.valueOf(updates.get("expiredDate"));
+    if (updates.get("expiredDate") != null && !Tool.isEqual(discount.getExpiredDate().toString(), expiredDateString)) {
+      discount.setExpiredDate(Tool.convertToLocalDateTime(expiredDateString));
     }
 
     discountRepository.save(discount);

@@ -47,13 +47,13 @@ public class CombinedController {
   public ResponseEntity<?> createCombined(@PathVariable("id") Long id, @Valid @RequestBody CombinedRequest request) {
     UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
         .getPrincipal();
-    String username = userDetails.getUsername();
+    Long userId = userDetails.getId();
 
-    Combined combined = combinedService.createCombined(id, username, request);
+    Combined combined = combinedService.createCombined(id, userId, request);
     CombinedDto combinedDto = CombinedMapper.toCombinedDto(combined);
 
     // CREATE NOTIFICATION
-    NotificationBroadcast.broadcastCreateCombinedToDriver(combined.getBid());
+    NotificationBroadcast.broadcastCreateCombinedToDriver(combined);
     // END NOTIFICATION
 
     return ResponseEntity.ok(combinedDto);
@@ -153,8 +153,8 @@ public class CombinedController {
   public ResponseEntity<?> editCombined(@PathVariable("id") Long id, @RequestBody Map<String, Object> updates) {
     UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
         .getPrincipal();
-    String username = userDetails.getUsername();
-    Combined Combined = combinedService.editCombined(id, username, updates);
+    Long userId = userDetails.getId();
+    Combined Combined = combinedService.editCombined(id, userId, updates);
     CombinedDto CombinedDto = CombinedMapper.toCombinedDto(Combined);
     return ResponseEntity.ok(CombinedDto);
   }

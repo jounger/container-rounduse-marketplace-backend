@@ -128,21 +128,34 @@ public class ReportServiceImpl implements ReportService {
       if (report.getStatus().equals(EnumReportStatus.RESOLVED.name())
           || report.getStatus().equals(EnumReportStatus.REJECTED.name())
           || report.getStatus().equals(EnumReportStatus.CLOSED.name())) {
-        throw new InternalException("Rreport was resolved, rejected or closed");
+        throw new InternalException("Report was resolved, rejected or closed");
       }
-      String title = (String) updates.get("title");
-      report.setTitle(title);
+      String title = String.valueOf(updates.get("title"));
+      if (updates.get("title") != null && !Tool.isEqual(report.getTitle(), title)) {
+        report.setTitle(title);
+      }
 
-      String detail = (String) updates.get("detail");
-      report.setDetail(detail);
+      String detail = String.valueOf(updates.get("detail"));
+      if (updates.get("detail") != null && !Tool.isEqual(report.getDetail(), detail)) {
+        report.setDetail(detail);
+      }
 
-      report.setStatus(EnumReportStatus.UPDATED.name());
+      String statusString = String.valueOf(updates.get("status"));
+      EnumReportStatus status = EnumReportStatus.findByName(statusString);
+      if (updates.get("status") != null && status != null) {
+        report.setStatus(status.name());
+      } else {
+        throw new NotFoundException("Status is not found.");
+      }
     }
 
     if (role.equals("ROLE_MODERATOR")) {
-      String statusString = (String) updates.get("status");
+      if (!report.getStatus().equals(EnumReportStatus.RESOLVED.name())) {
+        throw new InternalException("Report must be Resolved");
+      }
+      String statusString = String.valueOf(updates.get("status"));
       EnumReportStatus status = EnumReportStatus.findByName(statusString);
-      if (status != null) {
+      if (updates.get("status") != null && status != null) {
         report.setStatus(status.name());
       } else {
         throw new NotFoundException("Status is not found.");
@@ -161,6 +174,12 @@ public class ReportServiceImpl implements ReportService {
     } else {
       throw new NotFoundException("Access denied.");
     }
+  }
+
+  @Override
+  public Report getReport(Long id) {
+    Report report = reportRepository.findById(id).orElseThrow(() -> new NotFoundException("Report is not found."));
+    return report;
   }
 
 }

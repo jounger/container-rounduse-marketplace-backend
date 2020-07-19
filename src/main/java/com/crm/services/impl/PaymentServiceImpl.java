@@ -21,11 +21,13 @@ import com.crm.exception.NotFoundException;
 import com.crm.models.Contract;
 import com.crm.models.Payment;
 import com.crm.models.Supplier;
+import com.crm.models.User;
 import com.crm.payload.request.PaginationRequest;
 import com.crm.payload.request.PaymentRequest;
 import com.crm.repository.ContractRepository;
 import com.crm.repository.PaymentRepository;
 import com.crm.repository.SupplierRepository;
+import com.crm.repository.UserRepository;
 import com.crm.services.PaymentService;
 import com.crm.specification.builder.PaymentSpecificationsBuilder;
 
@@ -40,6 +42,9 @@ public class PaymentServiceImpl implements PaymentService {
 
   @Autowired
   private ContractRepository contractRepository;
+
+  @Autowired
+  private UserRepository userRepository;
 
   @Override
   public Payment createPayment(Long id, String username, PaymentRequest request) {
@@ -88,6 +93,24 @@ public class PaymentServiceImpl implements PaymentService {
   }
 
   @Override
+  public Page<Payment> getPaymentsByContract(Long id, Long userId, PaginationRequest request) {
+    if (!contractRepository.existsById(id)) {
+      throw new NotFoundException("Contract is not found.");
+    }
+    Page<Payment> payments = null;
+    PageRequest page = PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt"));
+    User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User is not found."));
+    String role = user.getRoles().iterator().next().getName();
+
+    if (role.equalsIgnoreCase("ROLE_MODERATOR")) {
+      payments = paymentRepository.findByContract(id, page);
+    } else {
+      payments = paymentRepository.findByContract(id, userId, page);
+    }
+    return payments;
+  }
+
+  @Override
   public Page<Payment> searchPayments(PaginationRequest request, String search) {
     PaymentSpecificationsBuilder builder = new PaymentSpecificationsBuilder();
     Pattern pattern = Pattern.compile(Constant.SEARCH_REGEX, Pattern.UNICODE_CHARACTER_CLASS);
@@ -110,21 +133,22 @@ public class PaymentServiceImpl implements PaymentService {
     Payment payment = paymentRepository.findById(id).orElseThrow(() -> new NotFoundException("Payment is not found."));
 
     if (payment.getSender().getUsername().equals(username)) {
-      String detail = (String) updates.get("detail");
-      if (!Tool.isBlank(detail)) {
+      String detail = String.valueOf(updates.get("detail"));
+      if (updates.get("detail") != null && !Tool.isBlank(detail)) {
         payment.setDetail(detail);
       }
 
-      String amount = (String) updates.get("amount");
-      if (!Tool.isEqual(payment.getAmount(), amount)) {
+      String amount = String.valueOf(updates.get("amount"));
+      if (updates.get("amount") != null && !Tool.isEqual(payment.getAmount(), amount)) {
         payment.setAmount(Double.valueOf(amount));
       }
     }
 
     if (payment.getRecipient().getUsername().equals(username)) {
-      String isPaidString = (String) updates.get("isPaid");
-      Boolean isPaid = Boolean.valueOf(isPaidString);
-      payment.setIsPaid(isPaid);
+      Boolean isPaidString = (Boolean) updates.get("isPaid");
+      if (updates.get("isPaid") != null && isPaidString != null) {
+        payment.setIsPaid(isPaidString);
+      }
     }
 
     paymentRepository.save(payment);

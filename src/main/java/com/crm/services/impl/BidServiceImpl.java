@@ -10,9 +10,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 
 import com.crm.common.Constant;
+import com.crm.common.Tool;
 import com.crm.enums.EnumBidStatus;
 import com.crm.enums.EnumBiddingStatus;
 import com.crm.enums.EnumSupplyStatus;
@@ -34,6 +36,7 @@ import com.crm.repository.BiddingDocumentRepository;
 import com.crm.repository.ContainerRepository;
 import com.crm.repository.ForwarderRepository;
 import com.crm.repository.OutboundRepository;
+import com.crm.repository.SupplierRepository;
 import com.crm.repository.UserRepository;
 import com.crm.services.BidService;
 
@@ -57,6 +60,9 @@ public class BidServiceImpl implements BidService {
 
   @Autowired
   private UserRepository userRepository;
+
+  @Autowired
+  private SupplierRepository supplierRepository;
 
   @Override
   public Bid createBid(Long bidDocId, Long id, BidRequest request) {
@@ -132,15 +138,17 @@ public class BidServiceImpl implements BidService {
   }
 
   @Override
-  public Bid getBid(Long id) {
-    Bid bid = new Bid();
-    bid = bidRepository.findById(id).orElseThrow(() -> new NotFoundException("Bid is not found."));
+  public Bid getBid(Long id, Long userId) {
+    Bid bid = bidRepository.findById(id).orElseThrow(() -> new NotFoundException("Bid is not found."));
+    if(bid.getBidder().getId() != userId) {
+      throw new NotFoundException("Access denied.");
+    }
     return bid;
   }
 
   @Override
-  public Bid getBidByBiddingDocumentAndForwarder(Long biddingDocumentId, String username) {
-    Bid bid = bidRepository.findByBiddingDocumentAndForwarder(biddingDocumentId, username)
+  public Bid getBidByBiddingDocumentAndForwarder(Long biddingDocumentId, Long userId) {
+    Bid bid = bidRepository.findByBiddingDocumentAndForwarder(biddingDocumentId, userId)
         .orElseThrow(() -> new NotFoundException("Bid is not found."));
     return bid;
   }
@@ -148,7 +156,17 @@ public class BidServiceImpl implements BidService {
   @Override
   public Page<Bid> getBidsByBiddingDocument(Long id, PaginationRequest request) {
     Page<Bid> bids = bidRepository.findByBiddingDocument(id,
-        PageRequest.of(request.getPage(), request.getLimit(), Sort.by("id").descending()));
+        PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Direction.DESC, "id")));
+    return bids;
+  }
+
+  @Override
+  public Page<Bid> getBidsByBiddingDocumentAndExistCombined(Long id, Long userId, PaginationRequest request) {
+    if (!biddingDocumentRepository.existsById(id) || !supplierRepository.existsById(userId)) {
+      throw new NotFoundException("User or Bidding document is not found.");
+    }
+    PageRequest page = PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Direction.DESC, "id"));
+    Page<Bid> bids = bidRepository.findByBiddingDocumentAndExistCombined(id, userId, page);
     return bids;
   }
 
@@ -167,12 +185,12 @@ public class BidServiceImpl implements BidService {
   }
 
   @Override
-  public Bid updateBid(String username, BidRequest request) {
+  public Bid updateBid(Long userId, BidRequest request) {
     Bid bid = bidRepository.findById(request.getId()).orElseThrow(() -> new NotFoundException("Bid is not found."));
 
     BiddingDocument biddingDocument = bid.getBiddingDocument();
 
-    User user = userRepository.findByUsername(username).orElseThrow(() -> new NotFoundException("Bid is not found."));
+    User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User is not found."));
     Role role = user.getRoles().iterator().next();
     if (role.getName().equalsIgnoreCase("ROLE_FORWARDER")) {
       String bidStatus = bid.getStatus();
@@ -250,9 +268,9 @@ public class BidServiceImpl implements BidService {
   }
 
   @Override
-  public Bid editBid(Long id, String username, Map<String, Object> updates) {
+  public Bid editBid(Long id, Long userId, Map<String, Object> updates) {
     Bid bid = bidRepository.findById(id).orElseThrow(() -> new NotFoundException("Bid is not found."));
-    User user = userRepository.findByUsername(username).orElseThrow(() -> new NotFoundException("Bid is not found."));
+    User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("Bid is not found."));
     Role role = user.getRoles().iterator().next();
 
     if (role.getName().equalsIgnoreCase("ROLE_FORWARDER")) {
@@ -281,7 +299,7 @@ public class BidServiceImpl implements BidService {
     List<String> containersId = (List<String>) updates.get("containers");
     Outbound outbound = biddingDocument.getOutbound();
     Booking booking = outbound.getBooking();
-    if (containersId != null) {
+    if (updates.get("containers") != null && containersId != null) {
       if (containersId.size() > booking.getUnit()) {
         throw new InternalException("Number of containers is more than needed.");
       }
@@ -311,19 +329,14 @@ public class BidServiceImpl implements BidService {
 
     }
 
-    try {
-      String bidPriceString = (String) updates.get("bidPrice");
-      if (bidPriceString != null && !bidPriceString.isEmpty()) {
-        Double bidPrice = Double.parseDouble(bidPriceString);
-        bid.setBidPrice(bidPrice);
-        bid.setBidValidityPeriod(LocalDateTime.now().plusHours(Constant.BID_VALIDITY_PERIOD));
-      }
-    } catch (Exception e) {
-      throw new InternalException("Parameter must be Double");
+    String bidPriceString = String.valueOf(updates.get("bidPrice"));
+    if (updates.get("bidPrice") != null && !Tool.isEqual(bid.getBidPrice(), bidPriceString)) {
+      bid.setBidPrice(Double.parseDouble(bidPriceString));
+      bid.setBidValidityPeriod(LocalDateTime.now().plusHours(Constant.BID_VALIDITY_PERIOD));
     }
 
-    String statusString = (String) updates.get("status");
-    if (statusString != null && !statusString.isEmpty()) {
+    String statusString = String.valueOf(updates.get("status"));
+    if (updates.get("status") != null && !Tool.isEqual(bid.getStatus(), statusString)) {
       EnumBidStatus status = EnumBidStatus.findByName(statusString);
       bid.setStatus(status.name());
 
@@ -351,7 +364,7 @@ public class BidServiceImpl implements BidService {
           container.setStatus(EnumSupplyStatus.COMBINED.name());
           containerRepository.save(container);
         });
-        if(bidRepository.isAllAcceptedByBiddingDocument(biddingDocument.getId())) {
+        if (bidRepository.isAllAcceptedByBiddingDocument(biddingDocument.getId())) {
           outbound.setStatus(EnumSupplyStatus.COMBINED.name());
           outboundRepository.save(outbound);
         }
@@ -373,8 +386,11 @@ public class BidServiceImpl implements BidService {
   }
 
   @Override
-  public void removeBid(Long id) {
+  public void removeBid(Long id, Long userId) {
     Bid bid = bidRepository.findById(id).orElseThrow(() -> new NotFoundException("Bid is not found."));
+    if(bid.getBidder().getId() != userId) {
+      throw new NotFoundException("Access denied.");
+    }
     if (!bid.getStatus().equalsIgnoreCase(EnumBidStatus.ACCEPTED.name())) {
       List<Container> containers = new ArrayList<>(bid.getContainers());
       containers.forEach(container -> {

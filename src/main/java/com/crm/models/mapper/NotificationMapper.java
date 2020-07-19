@@ -11,9 +11,10 @@ public class NotificationMapper {
     notificationDto.setId(notification.getId());
     notificationDto.setRecipient(notification.getRecipient().getUsername());
     notificationDto.setIsRead(notification.getIsRead());
-
+    notificationDto.setIsHide(notification.getIsHide());
     notificationDto.setMessage(notification.getMessage());
     notificationDto.setTitle(notification.getTitle());
+    notificationDto.setType(notification.getType());
 
     notificationDto.setSendDate(Tool.convertLocalDateTimeToString(notification.getSendDate()));
 

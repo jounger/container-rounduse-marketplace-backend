@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import com.crm.common.Constant;
 import com.crm.common.Tool;
+import com.crm.enums.EnumReportStatus;
 import com.crm.exception.InternalException;
 import com.crm.exception.NotFoundException;
 import com.crm.models.Feedback;
@@ -44,6 +45,14 @@ public class FeedbackServiceImpl implements FeedbackService {
     Feedback feedback = new Feedback();
 
     Report report = reportRepository.findById(id).orElseThrow(() -> new NotFoundException("Report is not found."));
+
+    if (report.getStatus().equals(EnumReportStatus.RESOLVED.name())
+        || report.getStatus().equals(EnumReportStatus.REJECTED.name())
+        || report.getStatus().equals(EnumReportStatus.CLOSED.name())) {
+      throw new InternalException("You can not create feedBack now.");
+    }
+
+    report.setStatus(EnumReportStatus.UPDATED.name());
     feedback.setReport(report);
     User sender = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User is not found."));
     String role = sender.getRoles().iterator().next().getName();
@@ -75,12 +84,12 @@ public class FeedbackServiceImpl implements FeedbackService {
     }
 
     PageRequest pageRequest = PageRequest.of(request.getPage(), request.getLimit(),
-        Sort.by(Direction.DESC, "createdAt"));
+        Sort.by(Direction.ASC, "createdAt"));
     User sender = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User is not found."));
     String role = sender.getRoles().iterator().next().getName();
-    if (role.equals("ROLE_MODERATOR")) {
+    if (role.equals("ROLE_FORWARDER")) {
       feedbacks = feedbackRepository.findByReport(reportId, userId, pageRequest);
-    } else if (role.equals("ROLE_FORWARDER")) {
+    } else if (role.equals("ROLE_MODERATOR")) {
       feedbacks = feedbackRepository.findByReport(reportId, pageRequest);
     }
     return feedbacks;
@@ -127,13 +136,14 @@ public class FeedbackServiceImpl implements FeedbackService {
       throw new NotFoundException("Access denied, This feedback can be only edited by its onwer.");
     }
 
-    String message = (String) updates.get("message");
-    if (!Tool.isEqual(feedback.getMessage(), message)) {
+    String message = String.valueOf(updates.get("message"));
+    if (updates.get("message") != null && !Tool.isEqual(feedback.getMessage(), message)) {
       feedback.setMessage(message);
     }
 
-    String satisfactionPoints = (String) updates.get("satisfactionPoints");
-    if (!Tool.isEqual(feedback.getSatisfactionPoints(), satisfactionPoints)) {
+    String satisfactionPoints = String.valueOf(updates.get("satisfactionPoints"));
+    if (updates.get("satisfactionPoints") != null
+        && !Tool.isEqual(feedback.getSatisfactionPoints(), satisfactionPoints)) {
       feedback.setSatisfactionPoints(Integer.valueOf(satisfactionPoints));
     }
 

@@ -117,8 +117,8 @@ public class ContractServiceImp implements ContractService {
     Supplier offeree = biddingDocument.getOfferee();
 
     if (username.equals(offeree.getUsername())) {
-      String requiredString = (String) updates.get("required");
-      if (!Tool.isEqual(contract.getRequired(), requiredString)) {
+      String requiredString = String.valueOf(updates.get("required"));
+      if (updates.get("required") != null && !Tool.isEqual(contract.getRequired(), requiredString)) {
         contract.setRequired(Boolean.valueOf(requiredString));
         ;
       }

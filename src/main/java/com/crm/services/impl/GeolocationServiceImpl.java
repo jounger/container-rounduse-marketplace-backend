@@ -5,6 +5,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.crm.common.Tool;
 import com.crm.exception.InternalException;
 import com.crm.exception.NotFoundException;
 import com.crm.models.Geolocation;
@@ -51,13 +52,13 @@ public class GeolocationServiceImpl implements GeolocationService {
         throw new InternalException(String.format("Forwarder %s not owned", userId));
       }
 
-      String latitude = (String) updates.get("latitude");
-      if (latitude != null && !latitude.isEmpty() && !latitude.equals(geolocation.getLatitude())) {
+      String latitude = String.valueOf(updates.get("latitude"));
+      if (updates.get("latitude") != null && !Tool.isEqual(geolocation.getLatitude(), latitude)) {
         geolocation.setLatitude(latitude);
       }
 
-      String longitude = (String) updates.get("longitude");
-      if (longitude != null && !longitude.isEmpty() && !longitude.equals(geolocation.getLongitude())) {
+      String longitude = String.valueOf(updates.get("longitude"));
+      if (updates.get("longitude") != null && !Tool.isEqual(geolocation.getLongitude(), longitude)) {
         geolocation.setLongitude(longitude);
       }
       return geolocation;

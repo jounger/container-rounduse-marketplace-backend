@@ -17,14 +17,18 @@ public interface BidRepository extends JpaRepository<Bid, Long> {
   @Query(value = "SELECT b FROM Bid b WHERE b.biddingDocument.id = :id")
   Page<Bid> findByBiddingDocument(@Param("id") Long id, Pageable pageable);
 
+  @Query(value = "SELECT b FROM Bid b LEFT JOIN b.biddingDocument bd WHERE bd.id = :id "
+      + "AND (bd.offeree.id = :userId or b.bidder = :userId) AND b.combined IS NOT NULL")
+  Page<Bid> findByBiddingDocumentAndExistCombined(@Param("id") Long id, @Param("userId") Long userId, Pageable pageable);
+
   @Query(value = "SELECT b FROM Bid b WHERE b.bidder.id = :id")
   Page<Bid> findByForwarder(@Param("id") Long id, Pageable pageable);
 
   @Query(value = "SELECT b FROM Bid b WHERE b.bidder.id = :id AND b.status = :status")
   Page<Bid> findByForwarder(@Param("id") Long id, @Param("status") String status, Pageable pageable);
 
-  @Query(value = "FROM Bid b WHERE b.biddingDocument.id = :id AND b.bidder.username = :username")
-  Optional<Bid> findByBiddingDocumentAndForwarder(@Param("id") Long id, @Param("username") String username);
+  @Query(value = "FROM Bid b WHERE b.biddingDocument.id = :id AND b.bidder.id = :userId")
+  Optional<Bid> findByBiddingDocumentAndForwarder(@Param("id") Long id, @Param("userId") Long userId);
 
   @Query(value = "SELECT CASE WHEN COUNT(b) = 0 THEN TRUE ELSE FALSE END "
       + "FROM Bid b JOIN b.containers c WHERE b.biddingDocument.id = :id AND c.status != 'DELIVERED'")

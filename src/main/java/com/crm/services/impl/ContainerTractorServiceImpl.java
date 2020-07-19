@@ -13,6 +13,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import com.crm.common.Constant;
+import com.crm.common.Tool;
 import com.crm.enums.EnumSupplyStatus;
 import com.crm.exception.DuplicateRecordException;
 import com.crm.exception.InternalException;
@@ -144,17 +145,16 @@ public class ContainerTractorServiceImpl implements ContainerTractorService {
         });
       }
 
-      String licensePlate = (String) updates.get("licensePlate");
-      if (licensePlate != null && !licensePlate.isEmpty() && !licensePlate.equals(containerTractor.getLicensePlate())) {
-        if (vehicleRepository.existsByLicensePlate(licensePlate)) {
-          throw new DuplicateRecordException("Error: LicensePlate has been existed");
-        } else {
-          containerTractor.setLicensePlate(licensePlate);
-        }
+      String licensePlate = String.valueOf(updates.get("licensePlate"));
+      if (updates.get("licensePlate") != null && !Tool.isEqual(containerTractor.getLicensePlate(), licensePlate)
+          && !vehicleRepository.existsByLicensePlate(licensePlate)) {
+        containerTractor.setLicensePlate(licensePlate);
+      } else {
+        throw new DuplicateRecordException("Error: LicensePlate has been existed");
       }
 
-      String numberOfAxles = (String) updates.get("numberOfAxles");
-      if (numberOfAxles != null && !numberOfAxles.isEmpty()) {
+      String numberOfAxles = String.valueOf(updates.get("numberOfAxles"));
+      if (updates.get("numberOfAxles") != null && !Tool.isEqual(containerTractor.getNumberOfAxles(), numberOfAxles)) {
         containerTractor.setNumberOfAxles(Integer.valueOf(numberOfAxles));
       }
 

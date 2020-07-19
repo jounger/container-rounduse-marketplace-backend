@@ -15,7 +15,7 @@ public class ContainerTypeDto {
 
   private Double tareWeight;
 
-  private Double payloadCapacity;
+  private Double grossWeight;
 
   private Double cubicCapacity;
 

@@ -31,7 +31,7 @@ public interface BidRepository extends JpaRepository<Bid, Long> {
   Optional<Bid> findByBiddingDocumentAndForwarder(@Param("id") Long id, @Param("userId") Long userId);
 
   @Query(value = "SELECT CASE WHEN COUNT(b) = 0 THEN TRUE ELSE FALSE END "
-      + "FROM Bid b JOIN b.containers c WHERE b.biddingDocument.id = :id AND c.status != 'DONE'")
+      + "FROM Bid b JOIN b.containers c WHERE b.biddingDocument.id = :id AND c.status != 'DELIVERED'")
   boolean isAllCombinedByBiddingDocument(@Param("id") Long id);
   
   @Query(value = "SELECT CASE WHEN COUNT(b) = 0 THEN TRUE ELSE FALSE END "

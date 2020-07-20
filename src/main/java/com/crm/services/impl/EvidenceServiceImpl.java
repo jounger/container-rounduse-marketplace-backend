@@ -143,8 +143,6 @@ public class EvidenceServiceImpl implements EvidenceService {
     String isValid = String.valueOf(updates.get("isValid"));
     if (updates.get("isValid") != null && !Tool.isEqual(evidence.getIsValid(), isValid)) {
       evidence.setIsValid(Boolean.valueOf(isValid));
-    } else {
-      throw new InternalException("Is valid is not valid.");
     }
 
     evidenceRepository.save(evidence);

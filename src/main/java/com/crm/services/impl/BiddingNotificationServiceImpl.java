@@ -112,15 +112,11 @@ public class BiddingNotificationServiceImpl implements BiddingNotificationServic
     Boolean isRead = (Boolean) updates.get("isRead");
     if (updates.get("isRead") != null && isRead != null) {
       biddingNotification.setIsRead(isRead);
-    } else {
-      throw new NotFoundException("Is Read is not found.");
     }
 
     Boolean isHide = (Boolean) updates.get("isHide");
     if (updates.get("isHide") != null && isHide != null) {
       biddingNotification.setIsHide(isHide);
-    } else {
-      throw new NotFoundException("Is Hide is not found.");
     }
 
     biddingNotificationRepository.save(biddingNotification);

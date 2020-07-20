@@ -164,8 +164,11 @@ public class CombinedServiceImpl implements CombinedService {
     Bid bid = combined.getBid();
     BiddingDocument biddingDocument = bid.getBiddingDocument();
     String statusString = String.valueOf(updates.get("status"));
-    EnumCombinedStatus status = EnumCombinedStatus.findByName(statusString);
-    if (updates.get("status") != null && !Tool.isBlank(statusString) && status != null) {
+    if (updates.get("status") != null && !Tool.isBlank(statusString)) {
+      EnumCombinedStatus status = EnumCombinedStatus.findByName(statusString);
+      if (status == null) {
+        throw new NotFoundException("ERROR: Status is not found.");
+      }
       combined.setStatus(status.name());
       if (status.equals(EnumCombinedStatus.CANCELED)) {
         Map<String, Object> updatesBid = new HashMap<>();
@@ -184,8 +187,6 @@ public class CombinedServiceImpl implements CombinedService {
           outboundRepository.save(outbound);
         }
       }
-    } else {
-      throw new NotFoundException("Chuyển đổi trạng thái của hàng ghép không thành công.");
     }
     combinedRepository.save(combined);
     return combined;

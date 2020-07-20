@@ -146,11 +146,11 @@ public class ContainerTractorServiceImpl implements ContainerTractorService {
       }
 
       String licensePlate = String.valueOf(updates.get("licensePlate"));
-      if (updates.get("licensePlate") != null && !Tool.isEqual(containerTractor.getLicensePlate(), licensePlate)
-          && !vehicleRepository.existsByLicensePlate(licensePlate)) {
+      if (updates.get("licensePlate") != null && !Tool.isEqual(containerTractor.getLicensePlate(), licensePlate)) {
+        if (vehicleRepository.existsByLicensePlate(licensePlate)) {
+          throw new DuplicateRecordException("Error: LicensePlate has been existed");
+        }
         containerTractor.setLicensePlate(licensePlate);
-      } else {
-        throw new DuplicateRecordException("Error: LicensePlate has been existed");
       }
 
       String numberOfAxles = String.valueOf(updates.get("numberOfAxles"));

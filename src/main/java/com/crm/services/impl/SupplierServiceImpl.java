@@ -82,6 +82,9 @@ public class SupplierServiceImpl implements SupplierService {
     String status = String.valueOf(updates.get("status"));
     if (updates.get("status") != null && !Tool.isEqual(supplier.getStatus(), status)) {
       EnumUserStatus eStatus = EnumUserStatus.findByName(status.toUpperCase());
+      if (eStatus == null) {
+        throw new NotFoundException("Status is not found.");
+      }
       supplier.setStatus(eStatus.name());
     }
     supplierRepository.save(supplier);

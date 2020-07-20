@@ -105,11 +105,11 @@ public class DiscountServiceImpl implements DiscountService {
         .orElseThrow(() -> new NotFoundException("ERROR: Discount is not found."));
 
     String code = String.valueOf(updates.get("code"));
-    if (updates.get("code") != null && !Tool.isEqual(discount.getCode(), code)
-        && !discountRepository.existsByCode(code)) {
+    if (updates.get("code") != null && !Tool.isEqual(discount.getCode(), code)) {
+      if (discountRepository.existsByCode(code)) {
+        throw new DuplicateRecordException("ERROR: Discount already exists.");
+      }
       discount.setCode(code);
-    } else {
-      throw new DuplicateRecordException("ERROR: Discount already exists.");
     }
 
     String detail = String.valueOf(updates.get("detail"));

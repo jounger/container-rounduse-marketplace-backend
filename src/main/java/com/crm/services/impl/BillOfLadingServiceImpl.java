@@ -169,9 +169,10 @@ public class BillOfLadingServiceImpl implements BillOfLadingService {
 
       String billOfLadingNumber = String.valueOf(updates.get("billOfLadingNumber"));
       if (updates.get("billOfLadingNumber") != null
-          && !Tool.isEqual(billOfLading.getBillOfLadingNumber(), billOfLadingNumber)
-          && !billOfLadingRepository.existsByBillOfLadingNumber(billOfLadingNumber)) {
-      } else {
+          && !Tool.isEqual(billOfLading.getBillOfLadingNumber(), billOfLadingNumber)) {
+        if (billOfLadingRepository.existsByBillOfLadingNumber(billOfLadingNumber)) {
+          throw new DuplicateRecordException("Error: BillOfLading has been existed");
+        }
         billOfLading.setBillOfLadingNumber(billOfLadingNumber);
       }
 

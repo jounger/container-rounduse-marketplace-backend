@@ -128,11 +128,11 @@ public class ContainerTypeServiceImpl implements ContainerTypeService {
         .orElseThrow(() -> new NotFoundException("ERROR: ContainerType is not found."));
 
     String name = String.valueOf(updates.get("name"));
-    if (updates.get("name") != null && !Tool.isEqual(containerType.getName(), name)
-        && !containerTypeRepository.existsByName(name)) {
+    if (updates.get("name") != null && !Tool.isEqual(containerType.getName(), name)) {
+      if (containerTypeRepository.existsByName(name)) {
+        throw new DuplicateRecordException("ERROR: ContainerType already exists.");
+      }
       containerType.setName(name);
-    } else {
-      throw new DuplicateRecordException("ERROR: ContainerType already exists.");
     }
 
     String description = String.valueOf(updates.get("description"));

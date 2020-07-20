@@ -13,6 +13,7 @@ import com.crm.common.Tool;
 import com.crm.enums.EnumBidStatus;
 import com.crm.enums.EnumCombinedStatus;
 import com.crm.enums.EnumSupplyStatus;
+import com.crm.exception.DuplicateRecordException;
 import com.crm.exception.InternalException;
 import com.crm.exception.NotFoundException;
 import com.crm.models.Bid;
@@ -58,11 +59,18 @@ public class CombinedServiceImpl implements CombinedService {
   public Combined createCombined(Long bidId, Long userId, CombinedRequest request) {
     Combined combined = new Combined();
 
-    Bid bid = bidRepository.findById(bidId).orElseThrow(() -> new NotFoundException("Bidding document is not found."));
-    combined.setBid(bid);
+    Bid bid = bidRepository.findById(bidId).orElseThrow(() -> new NotFoundException("Đơn đấu thầu không tồn tại."));
+    if(bid.getCombined() != null) {
+      throw new DuplicateRecordException("Một đơn đấu thầu chỉ được ghép một lần.");
+    }
     Map<String, Object> updates = new HashMap<>();
     updates.put("status", EnumBidStatus.ACCEPTED.name());
-    bidService.editBid(bidId, userId, updates);
+    if(request.getContainers() != null) {
+      updates.put("combinedContainers", request.getContainers());
+    }
+    
+    bid = bidService.editBid(bidId, userId, updates);
+    combined.setBid(bid);
 
     combined.setStatus(EnumCombinedStatus.INFO_RECEIVED.name());
     bid = combined.getBid();
@@ -78,10 +86,10 @@ public class CombinedServiceImpl implements CombinedService {
       if (fines > 0) {
         contract.setFinesAgainstContractViolations(fines);
       } else {
-        throw new InternalException("Fines against contract violation must be greater than zero.");
+        throw new InternalException("Phần trăm phạt hợp đồng phải lớn hơn 0.");
       }
     } else if (!userId.equals(offeree.getId())) {
-      throw new NotFoundException("You must be Offeree to create Contract.");
+      throw new NotFoundException("Chỉ có người tạo hồ sơ mời thầu mới được tạo hợp đồng.");
     }
 
     combined.setContract(contract);
@@ -102,7 +110,7 @@ public class CombinedServiceImpl implements CombinedService {
   @Override
   public Combined getCombined(Long id) {
     Combined combined = combinedRepository.findById(id)
-        .orElseThrow(() -> new NotFoundException("Combined is not found."));
+        .orElseThrow(() -> new NotFoundException("Không tìm thấy hàng ghép."));
     return combined;
   }
 
@@ -131,17 +139,17 @@ public class CombinedServiceImpl implements CombinedService {
   @Override
   public Combined updateCombined(CombinedRequest request) {
     Combined combined = combinedRepository.findById(request.getId())
-        .orElseThrow(() -> new NotFoundException("Combined is not found."));
+        .orElseThrow(() -> new NotFoundException("Không tìm thấy hàng ghép."));
 
     Bid bid = bidRepository.findById(request.getBid())
-        .orElseThrow(() -> new NotFoundException("Bidding document is not found."));
+        .orElseThrow(() -> new NotFoundException("Không tìm thấy hồ sơ mời thầu."));
     combined.setBid(bid);
 
     EnumCombinedStatus status = EnumCombinedStatus.findByName(request.getStatus());
     if (status != null) {
       combined.setStatus(status.name());
     } else {
-      throw new NotFoundException("Status is not found.");
+      throw new NotFoundException("Chuyển đổi trạng thái của hàng ghép không thành công.");
     }
 
     combinedRepository.save(combined);
@@ -151,7 +159,7 @@ public class CombinedServiceImpl implements CombinedService {
   @Override
   public Combined editCombined(Long id, Long userId, Map<String, Object> updates) {
     Combined combined = combinedRepository.findById(id)
-        .orElseThrow(() -> new NotFoundException("Combined is not found."));
+        .orElseThrow(() -> new NotFoundException("Không tìm thấy hàng ghép."));
 
     Bid bid = combined.getBid();
     BiddingDocument biddingDocument = bid.getBiddingDocument();
@@ -177,7 +185,7 @@ public class CombinedServiceImpl implements CombinedService {
         }
       }
     } else {
-      throw new NotFoundException("Status is not found.");
+      throw new NotFoundException("Chuyển đổi trạng thái của hàng ghép không thành công.");
     }
     combinedRepository.save(combined);
     return combined;
@@ -188,7 +196,7 @@ public class CombinedServiceImpl implements CombinedService {
     if (combinedRepository.existsById(id)) {
       combinedRepository.deleteById(id);
     } else {
-      throw new NotFoundException("Combined is not found.");
+      throw new NotFoundException("Không tìm thấy hàng ghép.");
     }
   }
 

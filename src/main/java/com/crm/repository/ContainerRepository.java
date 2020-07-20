@@ -7,6 +7,7 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -171,4 +172,8 @@ public interface ContainerRepository extends JpaRepository<Container, Long> {
       + "AND c.billOfLading.id != :id")
   boolean findByTractor(@Param("tractorId") Long tractorId, @Param("userId") Long userId,
       @Param("pickupTime") LocalDateTime pickupTime, @Param("freeTime") LocalDateTime freeTime, @Param("id") Long id);
+
+  @Modifying
+  @Query(value = "UPDATE Container c SET c.status = :status WHERE c.id = :id")
+  void updateContainerAsCombined(@Param("id") Long containerId, @Param("status") String status);
 }

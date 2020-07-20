@@ -140,7 +140,7 @@ public class BidServiceImpl implements BidService {
   @Override
   public Bid getBid(Long id, Long userId) {
     Bid bid = bidRepository.findById(id).orElseThrow(() -> new NotFoundException("Bid is not found."));
-    if(bid.getBidder().getId() != userId) {
+    if (bid.getBidder().getId() != userId) {
       throw new NotFoundException("Access denied.");
     }
     return bid;
@@ -267,6 +267,7 @@ public class BidServiceImpl implements BidService {
     return bid;
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public Bid editBid(Long id, Long userId, Map<String, Object> updates) {
     Bid bid = bidRepository.findById(id).orElseThrow(() -> new NotFoundException("Bid is not found."));
@@ -295,7 +296,6 @@ public class BidServiceImpl implements BidService {
       throw new InternalException("Bidding document was time out.");
     }
 
-    @SuppressWarnings("unchecked")
     List<String> containersId = (List<String>) updates.get("containers");
     Outbound outbound = biddingDocument.getOutbound();
     Booking booking = outbound.getBooking();
@@ -359,14 +359,28 @@ public class BidServiceImpl implements BidService {
           biddingDocumentRepository.save(biddingDocument);
         }
         bid.setDateOfDecision(LocalDateTime.now());
-        List<Container> containers = new ArrayList<>(bid.getContainers());
-        containers.forEach(container -> {
-          container.setStatus(EnumSupplyStatus.COMBINED.name());
-          containerRepository.save(container);
-        });
-        if (bidRepository.isAllAcceptedByBiddingDocument(biddingDocument.getId())) {
-          outbound.setStatus(EnumSupplyStatus.COMBINED.name());
-          outboundRepository.save(outbound);
+        if (biddingDocument.getIsMultipleAward()) {
+          containersId = (List<String>) updates.get("combinedContainers");
+          containersId.forEach(conId -> {
+            Long containerId = Long.valueOf(conId);
+            bid.getContainers().forEach(container -> {
+              if(container.getId() == containerId) {
+                container.setStatus(EnumSupplyStatus.COMBINED.name());
+                containerRepository.save(container);
+              }
+            });
+          });
+          
+        } else {
+          List<Container> containers = new ArrayList<>(bid.getContainers());
+          containers.forEach(container -> {
+            container.setStatus(EnumSupplyStatus.COMBINED.name());
+            containerRepository.save(container);
+          });
+          if (bidRepository.isAllAcceptedByBiddingDocument(biddingDocument.getId())) {
+            outbound.setStatus(EnumSupplyStatus.COMBINED.name());
+            outboundRepository.save(outbound);
+          }
         }
       }
 
@@ -388,7 +402,7 @@ public class BidServiceImpl implements BidService {
   @Override
   public void removeBid(Long id, Long userId) {
     Bid bid = bidRepository.findById(id).orElseThrow(() -> new NotFoundException("Bid is not found."));
-    if(bid.getBidder().getId() != userId) {
+    if (bid.getBidder().getId() != userId) {
       throw new NotFoundException("Access denied.");
     }
     if (!bid.getStatus().equalsIgnoreCase(EnumBidStatus.ACCEPTED.name())) {

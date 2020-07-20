@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 
 import com.crm.common.Tool;
@@ -65,15 +66,18 @@ public class BiddingDocumentServiceImpl implements BiddingDocumentService {
     merchant = merchantRepository.findById(id).orElseThrow(() -> new NotFoundException("Merchant is not found"));
     biddingDocument.setOfferee(merchant);
 
-    Outbound outbound = new Outbound();
-    outbound = outboundRepository.findById(request.getOutbound())
+    Outbound outbound = outboundRepository.findById(request.getOutbound())
         .orElseThrow(() -> new NotFoundException("Outbound is not found."));
-    if (outbound.getStatus().equalsIgnoreCase(EnumSupplyStatus.COMBINED.name())
-        || outbound.getStatus().equalsIgnoreCase(EnumSupplyStatus.BIDDING.name())) {
-      throw new DuplicateRecordException("Outbound must be not in any transaction.");
+    if (merchant.getOutbounds().contains(outbound)) {
+      if (outbound.getStatus().equalsIgnoreCase(EnumSupplyStatus.COMBINED.name())
+          || outbound.getStatus().equalsIgnoreCase(EnumSupplyStatus.BIDDING.name())) {
+        throw new DuplicateRecordException("Outbound must be not in any transaction.");
+      }
+      outbound.setStatus(EnumSupplyStatus.BIDDING.name());
+      biddingDocument.setOutbound(outbound);
+    } else {
+      throw new NotFoundException("This outbound must be your outbound.");
     }
-    outbound.setStatus(EnumSupplyStatus.BIDDING.name());
-    biddingDocument.setOutbound(outbound);
 
     biddingDocument.setIsMultipleAward(request.getIsMultipleAward());
 
@@ -82,7 +86,7 @@ public class BiddingDocumentServiceImpl implements BiddingDocumentService {
     LocalDateTime packingTime = outbound.getPackingTime();
     LocalDateTime bidClosing = Tool.convertToLocalDateTime(request.getBidClosing());
     if (bidClosing.isBefore(LocalDateTime.now()) || bidClosing.isAfter(packingTime)) {
-      throw new InternalException("Bid closing time must be after now.");
+      throw new InternalException("Bid closing time must be after now and before packing time.");
     }
     biddingDocument.setBidClosing(bidClosing);
 
@@ -95,7 +99,7 @@ public class BiddingDocumentServiceImpl implements BiddingDocumentService {
 
     biddingDocument.setBidPackagePrice(request.getBidPackagePrice());
     biddingDocument.setBidFloorPrice(request.getBidFloorPrice());
-    biddingDocument.setPriceLeadership(request.getBidFloorPrice());
+    biddingDocument.setPriceLeadership(request.getBidPackagePrice());
 
     String discountCodeString = request.getBidDiscountCode();
     if (discountCodeString != null && !discountCodeString.isEmpty()) {
@@ -119,25 +123,42 @@ public class BiddingDocumentServiceImpl implements BiddingDocumentService {
   }
 
   @Override
+  public BiddingDocument getBiddingDocumentByBid(Long id, String username) {
+    if (!bidRepository.existsById(id)) {
+      throw new NotFoundException("Bid is not found");
+    }
+    BiddingDocument biddingDocument = biddingDocumentRepository.findByBid(id, username)
+        .orElseThrow(() -> new NotFoundException("Bidding document is not found."));
+    return biddingDocument;
+  }
+
+  @Override
+  public Page<BiddingDocument> getBiddingDocumentsByExistCombined(Long id, PaginationRequest request) {
+    PageRequest page = PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Direction.DESC, "createdAt"));
+    Page<BiddingDocument> biddingDocuments = biddingDocumentRepository.findByExistCombined(id, page);
+    return biddingDocuments;
+  }
+
+  @Override
   public Page<BiddingDocument> getBiddingDocuments(Long id, PaginationRequest request) {
     User user = userRepository.findById(id).orElseThrow(() -> new NotFoundException("User is not found."));
     String status = request.getStatus();
     Page<BiddingDocument> biddingDocuments = null;
     if (user.getRoles().iterator().next().getName().equalsIgnoreCase("ROLE_MERCHANT")) {
       if (status != null && !status.isEmpty()) {
-        biddingDocuments = biddingDocumentRepository.findBiddingDocumentByMerchant(id, request.getStatus(),
+        biddingDocuments = biddingDocumentRepository.findByMerchant(id, request.getStatus(),
             PageRequest.of(request.getPage(), request.getLimit(), Sort.by("id").descending()));
       } else {
-        biddingDocuments = biddingDocumentRepository.findBiddingDocumentByMerchant(id,
+        biddingDocuments = biddingDocumentRepository.findByMerchant(id,
             PageRequest.of(request.getPage(), request.getLimit(), Sort.by("id").descending()));
       }
     }
     if (user.getRoles().iterator().next().getName().equalsIgnoreCase("ROLE_FORWARDER")) {
       if (status != null && !status.isEmpty()) {
-        biddingDocuments = biddingDocumentRepository.findBiddingDocumentByForwarder(id, request.getStatus(),
+        biddingDocuments = biddingDocumentRepository.findByForwarder(id, request.getStatus(),
             PageRequest.of(request.getPage(), request.getLimit(), Sort.by("id").descending()));
       } else {
-        biddingDocuments = biddingDocumentRepository.findBiddingDocumentByForwarder(id,
+        biddingDocuments = biddingDocumentRepository.findByForwarder(id,
             PageRequest.of(request.getPage(), request.getLimit(), Sort.by("id").descending()));
       }
     }
@@ -184,12 +205,11 @@ public class BiddingDocumentServiceImpl implements BiddingDocumentService {
     if (biddingDocument.getStatus().equalsIgnoreCase(EnumBiddingStatus.COMBINED.name())) {
       throw new InternalException("CAN NOT edit bidding document if it was combined.");
     }
-
     Outbound outbound = biddingDocument.getOutbound();
     LocalDateTime packingTime = outbound.getPackingTime();
 
-    String bidClosing = (String) updates.get("bidClosing");
-    if (bidClosing != null && !bidClosing.isEmpty()) {
+    String bidClosing = String.valueOf(updates.get("bidClosing"));
+    if (updates.get("bidClosing") != null && !Tool.isBlank(bidClosing)) {
       LocalDateTime bidClosingTime = Tool.convertToLocalDateTime(bidClosing);
       if (bidClosingTime.isBefore(LocalDateTime.now()) || bidClosingTime.isAfter(packingTime)) {
         throw new InternalException("Bid closing time must be after now.");
@@ -197,8 +217,8 @@ public class BiddingDocumentServiceImpl implements BiddingDocumentService {
       biddingDocument.setBidClosing(bidClosingTime);
     }
 
-    String currency = (String) updates.get("currentOfPayment");
-    if (currency != null && !currency.isEmpty()) {
+    String currency = String.valueOf(updates.get("currentOfPayment"));
+    if (updates.get("currentOfPayment") != null && !Tool.isEqual(biddingDocument.getCurrencyOfPayment(), currency)) {
       EnumCurrency currencyOfPayment = EnumCurrency.findByName(currency);
       if (currencyOfPayment == null) {
         currencyOfPayment = EnumCurrency.VND;
@@ -208,30 +228,25 @@ public class BiddingDocumentServiceImpl implements BiddingDocumentService {
       biddingDocument.setCurrencyOfPayment(EnumCurrency.VND.name());
     }
 
-    try {
-      String packagePriceString = (String) updates.get("bidPackagePrice");
-      if (packagePriceString != null && !packagePriceString.isEmpty()) {
-        Double bidPackagePrice = Double.parseDouble(packagePriceString);
-        biddingDocument.setBidPackagePrice(bidPackagePrice);
-      }
-
-      String floorPriceString = (String) updates.get("bidFloorPrice");
-      if (floorPriceString != null && !floorPriceString.isEmpty()) {
-        Double bidFloorPrice = Double.parseDouble(floorPriceString);
-        biddingDocument.setBidFloorPrice(bidFloorPrice);
-      }
-
-      String priceLeadershipString = (String) updates.get("priceLeadership");
-      if (priceLeadershipString != null && !priceLeadershipString.isEmpty()) {
-        Double priceLeadership = Double.parseDouble(priceLeadershipString);
-        biddingDocument.setPriceLeadership(priceLeadership);
-      }
-    } catch (Exception e) {
-      throw new InternalException("Parameters must be double.");
+    String packagePriceString = String.valueOf(updates.get("bidPackagePrice"));
+    if (updates.get("bidPackagePrice") != null
+        && !Tool.isEqual(biddingDocument.getBidPackagePrice(), packagePriceString)) {
+      biddingDocument.setBidPackagePrice(Double.parseDouble(packagePriceString));
     }
 
-    String status = (String) updates.get("status");
-    if (status != null && !status.isEmpty()) {
+    String floorPriceString = String.valueOf(updates.get("bidFloorPrice"));
+    if (updates.get("bidFloorPrice") != null && !Tool.isEqual(biddingDocument.getBidFloorPrice(), floorPriceString)) {
+      biddingDocument.setBidFloorPrice(Double.parseDouble(floorPriceString));
+    }
+
+    String priceLeadershipString = String.valueOf(updates.get("priceLeadership"));
+    if (updates.get("priceLeadership") != null
+        && !Tool.isEqual(biddingDocument.getPriceLeadership(), priceLeadershipString)) {
+      biddingDocument.setPriceLeadership(Double.parseDouble(priceLeadershipString));
+    }
+
+    String status = String.valueOf(updates.get("status"));
+    if (updates.get("status") != null && !Tool.isBlank(status)) {
       EnumBiddingStatus eStatus = EnumBiddingStatus.findByName(status);
       if (eStatus != null) {
         biddingDocument.setStatus(eStatus.name());

@@ -2,7 +2,7 @@ package com.crm.enums;
 
 public enum EnumSupplyStatus {
 
-  CREATED, BIDDING, COMBINED;
+  CREATED, BIDDING, COMBINED, DELIVERED;
 
   public static EnumSupplyStatus findByName(String name) {
     for (EnumSupplyStatus status : EnumSupplyStatus.values()) {

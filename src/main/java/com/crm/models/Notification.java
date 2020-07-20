@@ -52,7 +52,6 @@ public class Notification {
   @JoinColumn(name = "user_id")
   private User recipient;
 
-  @NotBlank
   @Size(min = 2, max = 50)
   private String title;
 
@@ -62,6 +61,12 @@ public class Notification {
 
   @Column(name = "is_read")
   private Boolean isRead;
+
+  @Column(name = "is_hide")
+  private Boolean isHide;
+
+  // EnumNotificationType
+  private String type;
 
   @Column(name = "send_date")
   private LocalDateTime sendDate;

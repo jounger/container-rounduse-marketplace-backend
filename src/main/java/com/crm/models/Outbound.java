@@ -2,6 +2,7 @@ package com.crm.models;
 
 import java.time.LocalDateTime;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
@@ -53,6 +54,6 @@ public class Outbound extends Supply {
   @Column(name = "status")
   private String status;
 
-  @OneToOne(mappedBy = "outbound")
+  @OneToOne(mappedBy = "outbound", cascade = CascadeType.ALL)
   private Booking booking;
 }

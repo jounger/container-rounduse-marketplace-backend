@@ -49,6 +49,10 @@ public class Rating {
   @JoinColumn(name = "receiver_supplier_id")
   private Supplier receiver;
 
+  @ManyToOne
+  @JoinColumn(name = "contract_id")
+  private Contract contract;
+
   @Column(name = "rating_value")
   private Integer ratingValue;
 

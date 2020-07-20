@@ -10,6 +10,8 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -44,9 +46,16 @@ public class Vehicle {
   @Column(name = "id", updatable = false, nullable = false)
   private Long id;
 
+  @ManyToOne
+  @JoinColumn(name = "user_id")
+  private Forwarder forwarder;
+
   @Column(name = "license_plate")
   @Size(min = 2, max = 20)
   private String licensePlate;
+
+  @Column(name = "number_of_axles")
+  private Integer numberOfAxles;
 
   @Column(name = "created_at", nullable = false, updatable = false)
   @Temporal(TemporalType.TIMESTAMP)

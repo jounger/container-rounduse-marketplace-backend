@@ -8,4 +8,5 @@ import com.crm.models.Vehicle;
 @Repository
 public interface VehicleRepository extends JpaRepository<Vehicle, Long> {
 
+  Boolean existsByLicensePlate(String licensePlate);
 }

@@ -64,9 +64,6 @@ public class Container {
   @JoinColumn(name = "container_tractor_id")
   private ContainerTractor tractor;
 
-  @Column(name = "license_plate")
-  private String licensePlate;
-
   // EnumSupplyStatus
   @Column(name = "status")
   private String status;

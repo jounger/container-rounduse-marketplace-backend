@@ -9,6 +9,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.crm.common.Tool;
 import com.crm.enums.EnumUserStatus;
 import com.crm.exception.DuplicateRecordException;
 import com.crm.exception.NotFoundException;
@@ -18,6 +19,7 @@ import com.crm.payload.request.PaginationRequest;
 import com.crm.payload.request.ShippingLineRequest;
 import com.crm.repository.RoleRepository;
 import com.crm.repository.ShippingLineRepository;
+import com.crm.repository.SupplierRepository;
 import com.crm.repository.UserRepository;
 import com.crm.services.ShippingLineService;
 
@@ -34,12 +36,16 @@ public class ShippingLineServiceImpl implements ShippingLineService {
   private ShippingLineRepository shippingLineRepository;
 
   @Autowired
+  private SupplierRepository supplierRepository;
+
+  @Autowired
   private PasswordEncoder passwordEncoder;
 
   @Override
   public ShippingLine createShippingLine(ShippingLineRequest request) {
     if (userRepository.existsByUsername(request.getUsername()) || userRepository.existsByEmail(request.getEmail())
-        || userRepository.existsByPhone(request.getPhone())) {
+        || userRepository.existsByPhone(request.getPhone())
+        || supplierRepository.existsByCompanyCode(request.getCompanyCode())) {
       throw new DuplicateRecordException("Error: User has been existed");
     }
     ShippingLine shippingLine = new ShippingLine();
@@ -111,7 +117,13 @@ public class ShippingLineServiceImpl implements ShippingLineService {
     shippingLine.setWebsite(request.getWebsite());
     shippingLine.setContactPerson(request.getContactPerson());
     shippingLine.setCompanyName(request.getCompanyName());
-    shippingLine.setCompanyCode(request.getCompanyCode());
+    if (!shippingLine.getCompanyCode().equals(request.getCompanyCode())
+        && !supplierRepository.existsByCompanyCode(request.getCompanyCode())) {
+      shippingLine.setCompanyCode(request.getCompanyCode());
+    } else {
+      throw new DuplicateRecordException("Company code has been existed.");
+    }
+
     shippingLine.setCompanyDescription(request.getCompanyDescription());
     shippingLine.setTin(request.getTin());
     shippingLine.setFax(request.getFax());
@@ -126,64 +138,75 @@ public class ShippingLineServiceImpl implements ShippingLineService {
         .orElseThrow(() -> new NotFoundException("Shipping Line is not found."));
 
     /*
-     * String password = (String) updates.get("password"); if (password != null &&
-     * !password.isEmpty()) { String encoder = passwordEncoder.encode(password);
-     * shippingLine.setPassword(encoder); }
+     * String password = String.valueOf( updates.get("password")); if (password !=
+     * null && !password.isEmpty()) { String encoder =
+     * passwordEncoder.encode(password); shippingLine.setPassword(encoder); }
      */
 
-    String email = (String) updates.get("email");
-    if (email != null && UserServiceImpl.isEmailChange(email, shippingLine) && !email.isEmpty()) {
-      shippingLine.setEmail(email);
+    String email = String.valueOf(updates.get("email"));
+    if (updates.get("email") != null && !Tool.isEqual(shippingLine.getEmail(), email)) {
+      if (!userRepository.existsByEmail(email)) {
+        shippingLine.setEmail(email);
+      } else {
+        throw new DuplicateRecordException("Email has been existed.");
+      }
     }
 
-    String phone = (String) updates.get("phone");
-    if (phone != null && !phone.isEmpty()) {
+    String phone = String.valueOf(updates.get("phone"));
+    if (updates.get("phone") != null && !Tool.isEqual(shippingLine.getPhone(), phone)
+        && !userRepository.existsByPhone(phone)) {
       shippingLine.setPhone(phone);
+    } else {
+      throw new DuplicateRecordException("Phone number has been existed.");
     }
 
-    String address = (String) updates.get("address");
-    if (address != null && !address.isEmpty()) {
+    String address = String.valueOf(updates.get("address"));
+    if (updates.get("address") != null && !Tool.isEqual(shippingLine.getAddress(), address)) {
       shippingLine.setAddress(address);
     }
 
-    String status = (String) updates.get("status");
-    if (status != null && !status.isEmpty()) {
+    String status = String.valueOf(updates.get("status"));
+    if (updates.get("status") != null && !Tool.isEqual(shippingLine.getStatus(), status)) {
       EnumUserStatus eStatus = EnumUserStatus.findByName(status);
       shippingLine.setStatus(eStatus.name());
     }
 
-    String website = (String) updates.get("website");
-    if (website != null && !website.isEmpty()) {
+    String website = String.valueOf(updates.get("website"));
+    if (updates.get("website") != null && !Tool.isEqual(shippingLine.getWebsite(), website)) {
       shippingLine.setWebsite(website);
     }
 
-    String contactPerson = (String) updates.get("contactPerson");
-    if (contactPerson != null && !contactPerson.isEmpty()) {
+    String contactPerson = String.valueOf(updates.get("contactPerson"));
+    if (updates.get("contactPerson") != null && !Tool.isEqual(shippingLine.getContactPerson(), contactPerson)) {
       shippingLine.setContactPerson(contactPerson);
     }
 
-    String companyName = (String) updates.get("companyName");
-    if (companyName != null && !companyName.isEmpty()) {
+    String companyName = String.valueOf(updates.get("companyName"));
+    if (updates.get("companyName") != null && !Tool.isEqual(shippingLine.getCompanyName(), companyName)) {
       shippingLine.setCompanyName(companyName);
     }
 
-    String companyCode = (String) updates.get("companyCode");
-    if (companyCode != null && !companyCode.isEmpty()) {
+    String companyCode = String.valueOf(updates.get("companyCode"));
+    if (updates.get("companyCode") != null && !Tool.isEqual(shippingLine.getCompanyCode(), companyCode)
+        && !supplierRepository.existsByCompanyCode(companyCode)) {
       shippingLine.setCompanyCode(companyCode);
+    } else {
+      throw new DuplicateRecordException("Company code has been existed.");
     }
 
-    String companyDescription = (String) updates.get("companyDescription");
-    if (companyDescription != null && !companyDescription.isEmpty()) {
+    String companyDescription = String.valueOf(updates.get("companyDescription"));
+    if (updates.get("companyDescription") != null
+        && !Tool.isEqual(shippingLine.getCompanyDescription(), companyDescription)) {
       shippingLine.setCompanyDescription(companyDescription);
     }
 
-    String tin = (String) updates.get("tin");
-    if (tin != null && !tin.isEmpty()) {
+    String tin = String.valueOf(updates.get("tin"));
+    if (updates.get("tin") != null && !Tool.isEqual(shippingLine.getTin(), tin)) {
       shippingLine.setTin(tin);
     }
 
-    String fax = (String) updates.get("fax");
-    if (fax != null && !fax.isEmpty()) {
+    String fax = String.valueOf(updates.get("fax"));
+    if (updates.get("fax") != null && !Tool.isEqual(shippingLine.getFax(), fax)) {
       shippingLine.setFax(fax);
     }
 

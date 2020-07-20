@@ -2,6 +2,7 @@ package com.crm.models;
 
 import java.time.LocalDateTime;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
@@ -39,7 +40,7 @@ public class Inbound extends Supply {
   @Column(name = "return_station")
   private String returnStation;
 
-  @OneToOne(mappedBy = "inbound")
+  @OneToOne(mappedBy = "inbound", cascade = CascadeType.ALL)
   private BillOfLading billOfLading;
 
 }

@@ -20,12 +20,12 @@ public interface ContainerService {
 
   Page<Container> getContainers(PaginationRequest request);
 
-  Container createContainer(Long id, ContainerRequest request);
+  Container createContainer(Long id, Long userId, ContainerRequest request);
 
-  Container updateContainer(ContainerRequest request);
+  Container updateContainer(Long userId, ContainerRequest request);
 
-  Container editContainer(Map<String, Object> updates, Long id);
+  Container editContainer(Map<String, Object> updates, Long id, Long userId);
 
-  void removeContainer(Long id);
+  void removeContainer(Long id, Long userId);
 
 }

@@ -18,5 +18,7 @@ public class BillOfLadingDto {
 
   private String freeTime;
 
+  private Integer unit;
+
   private Set<ContainerDto> containers = new HashSet<>();
 }

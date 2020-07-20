@@ -51,11 +51,6 @@ public class Feedback {
   @JoinColumn(name = "report_id")
   private Report report;
 
-  @Column(name = "title")
-  @NotBlank
-  @Size(min = 2, max = 50)
-  private String title;
-
   @Column(name = "message")
   @NotBlank
   @Size(min = 2)

@@ -12,6 +12,8 @@ public interface InboundService {
 
   Inbound getInboundById(Long id);
 
+  Inbound getInboundByContainer(Long id);
+
   Page<Inbound> getInbounds(PaginationRequest request);
 
   Page<Inbound> getInboundsByOutbound(Long id, PaginationRequest request);
@@ -20,11 +22,13 @@ public interface InboundService {
 
   Page<Inbound> getInboundsForwarder(Long id, PaginationRequest request);
 
+  Page<Inbound> searchInbounds(PaginationRequest request, String search);
+
   Inbound createInbound(Long id, InboundRequest request);
 
-  Inbound updateInbound(InboundRequest request);
+  Inbound updateInbound(Long id, InboundRequest request);
 
-  Inbound editInbound(Map<String, Object> updates, Long id);
+  Inbound editInbound(Map<String, Object> updates, Long id, Long userId);
 
-  void removeInbound(Long id);
+  void removeInbound(Long id, Long userId);
 }

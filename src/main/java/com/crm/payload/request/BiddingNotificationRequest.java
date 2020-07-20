@@ -9,21 +9,28 @@ import lombok.Setter;
 @Getter
 @Setter
 public class BiddingNotificationRequest {
-  
+
   private Long id;
-  
-  //recipient as User.username
+
+  // recipient as User.username
   @NotNull
   private String recipient;
-  
+
   private Boolean isRead;
-  
+
+  private String title;
+
+  private Boolean isHide;
+
   @NotNull
   private Long relatedResource;
-  
+
   @NotBlank
   private String message;
-  
+
+  @NotBlank
+  private String action;
+
   @NotBlank
   private String type;
 

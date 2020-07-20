@@ -44,8 +44,12 @@ public class Payment {
   private Long id;
   
   @ManyToOne
-  @JoinColumn(name = "user_id")
+  @JoinColumn(name = "recipient_id")
   private Supplier recipient;
+  
+  @ManyToOne
+  @JoinColumn(name = "sender_id")
+  private Supplier sender;
 
   @ManyToOne
   @JoinColumn(name = "contract_id")

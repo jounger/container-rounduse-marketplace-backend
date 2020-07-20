@@ -61,6 +61,27 @@ public class ContainerTypeController {
 
   }
 
+  @GetMapping("/filter")
+  public ResponseEntity<?> searchContainerTypes(@Valid PaginationRequest request,
+      @RequestParam(value = "search") String search) {
+
+    Page<ContainerType> pages = containerTypeService.searchContainerTypes(request, search);
+    PaginationResponse<ContainerTypeDto> response = new PaginationResponse<>();
+    response.setPageNumber(request.getPage());
+    response.setPageSize(request.getLimit());
+    response.setTotalElements(pages.getTotalElements());
+    response.setTotalPages(pages.getTotalPages());
+
+    List<ContainerType> containerTypes = pages.getContent();
+    List<ContainerTypeDto> containerTypeDto = new ArrayList<>();
+    containerTypes
+        .forEach(containerType -> containerTypeDto.add(ContainerTypeMapper.toContainerTypeDto(containerType)));
+    response.setContents(containerTypeDto);
+
+    return ResponseEntity.ok(response);
+
+  }
+
   @GetMapping("/{id}")
   public ResponseEntity<?> getContainerType(@PathVariable Long id) {
     ContainerType containerType = containerTypeService.getContainerTypeById(id);
@@ -69,7 +90,7 @@ public class ContainerTypeController {
     return ResponseEntity.ok(containerTypeDto);
   }
 
-  @RequestMapping(method = RequestMethod.GET, params = {"name"})
+  @RequestMapping(method = RequestMethod.GET, params = { "name" })
   public ResponseEntity<?> getContainerTypeByName(@RequestParam String name) {
     ContainerType containerType = containerTypeService.getContainerTypeByName(name);
     ContainerTypeDto containerTypeDto = new ContainerTypeDto();

@@ -17,6 +17,7 @@ public class ContainerTypeMapper {
     containerTypeDto.setInternalHeight(containerType.getInternalHeight());
     containerTypeDto.setDoorOpeningWidth(containerType.getDoorOpeningWidth());
     containerTypeDto.setDoorOpeningHeight(containerType.getDoorOpeningHeight());
-    return containerTypeDto;    
+    containerTypeDto.setUnitOfMeasurement(containerType.getUnitOfMeasurement());
+    return containerTypeDto;
   }
 }

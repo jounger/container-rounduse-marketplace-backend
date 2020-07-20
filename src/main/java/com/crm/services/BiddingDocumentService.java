@@ -26,6 +26,6 @@ public interface BiddingDocumentService {
   // update part biddingDocument
   BiddingDocument editBiddingDocument(Long id, Map<String, Object> updates);
 
-  void removeBiddingDocument(Long id);
+  void removeBiddingDocument(Long id, Long userId);
 
 }

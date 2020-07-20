@@ -153,11 +153,11 @@ public class ShippingLineServiceImpl implements ShippingLineService {
     }
 
     String phone = String.valueOf(updates.get("phone"));
-    if (updates.get("phone") != null && !Tool.isEqual(shippingLine.getPhone(), phone)
-        && !userRepository.existsByPhone(phone)) {
+    if (updates.get("phone") != null && !Tool.isEqual(shippingLine.getPhone(), phone)) {
+      if (userRepository.existsByPhone(phone)) {
+        throw new DuplicateRecordException("Phone number has been existed.");
+      }
       shippingLine.setPhone(phone);
-    } else {
-      throw new DuplicateRecordException("Phone number has been existed.");
     }
 
     String address = String.valueOf(updates.get("address"));
@@ -187,11 +187,11 @@ public class ShippingLineServiceImpl implements ShippingLineService {
     }
 
     String companyCode = String.valueOf(updates.get("companyCode"));
-    if (updates.get("companyCode") != null && !Tool.isEqual(shippingLine.getCompanyCode(), companyCode)
-        && !supplierRepository.existsByCompanyCode(companyCode)) {
+    if (updates.get("companyCode") != null && !Tool.isEqual(shippingLine.getCompanyCode(), companyCode)) {
+      if (supplierRepository.existsByCompanyCode(companyCode)) {
+        throw new DuplicateRecordException("Company code has been existed.");
+      }
       shippingLine.setCompanyCode(companyCode);
-    } else {
-      throw new DuplicateRecordException("Company code has been existed.");
     }
 
     String companyDescription = String.valueOf(updates.get("companyDescription"));

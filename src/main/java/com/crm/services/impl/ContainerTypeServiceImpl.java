@@ -62,7 +62,7 @@ public class ContainerTypeServiceImpl implements ContainerTypeService {
 
     containerType.setTareWeight(request.getTareWeight());
 
-    containerType.setPayloadCapacity(request.getPayloadCapacity());
+    containerType.setGrossWeight(request.getGrossWeight());
 
     containerType.setCubicCapacity(request.getCubicCapacity());
 
@@ -96,7 +96,7 @@ public class ContainerTypeServiceImpl implements ContainerTypeService {
 
     containerType.setDescription(request.getDescription());
     containerType.setTareWeight(request.getTareWeight());
-    containerType.setPayloadCapacity(request.getPayloadCapacity());
+    containerType.setGrossWeight(request.getGrossWeight());
     containerType.setCubicCapacity(request.getCubicCapacity());
     containerType.setInternalLength(request.getInternalLength());
     containerType.setInternalHeight(request.getInternalHeight());
@@ -128,11 +128,11 @@ public class ContainerTypeServiceImpl implements ContainerTypeService {
         .orElseThrow(() -> new NotFoundException("ERROR: ContainerType is not found."));
 
     String name = String.valueOf(updates.get("name"));
-    if (updates.get("name") != null && !Tool.isEqual(containerType.getName(), name)
-        && !containerTypeRepository.existsByName(name)) {
+    if (updates.get("name") != null && !Tool.isEqual(containerType.getName(), name)) {
+      if (containerTypeRepository.existsByName(name)) {
+        throw new DuplicateRecordException("ERROR: ContainerType already exists.");
+      }
       containerType.setName(name);
-    } else {
-      throw new DuplicateRecordException("ERROR: ContainerType already exists.");
     }
 
     String description = String.valueOf(updates.get("description"));
@@ -145,9 +145,9 @@ public class ContainerTypeServiceImpl implements ContainerTypeService {
       containerType.setTareWeight(Double.valueOf(tareWeight));
     }
 
-    String payloadCapacity = String.valueOf(updates.get("payloadCapacity"));
-    if (updates.get("payloadCapacity") != null && !Tool.isEqual(containerType.getPayloadCapacity(), payloadCapacity)) {
-      containerType.setPayloadCapacity(Double.valueOf(payloadCapacity));
+    String grossWeight = String.valueOf(updates.get("grossWeight"));
+    if (updates.get("grossWeight") != null && !Tool.isEqual(containerType.getGrossWeight(), grossWeight)) {
+      containerType.setGrossWeight(Double.valueOf(grossWeight));
     }
 
     String cubicCapacity = String.valueOf(updates.get("cubicCapacity"));

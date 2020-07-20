@@ -10,7 +10,7 @@ public class ContainerTypeMapper {
     containerTypeDto.setName(containerType.getName());
     containerTypeDto.setDescription(containerType.getDescription());
     containerTypeDto.setTareWeight(containerType.getTareWeight());
-    containerTypeDto.setPayloadCapacity(containerType.getPayloadCapacity());
+    containerTypeDto.setGrossWeight(containerType.getGrossWeight());
     containerTypeDto.setCubicCapacity(containerType.getCubicCapacity());
     containerTypeDto.setInternalLength(containerType.getInternalLength());
     containerTypeDto.setInternalWidth(containerType.getInternalWidth());

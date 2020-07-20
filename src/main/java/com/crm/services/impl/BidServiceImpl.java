@@ -138,15 +138,17 @@ public class BidServiceImpl implements BidService {
   }
 
   @Override
-  public Bid getBid(Long id) {
-    Bid bid = new Bid();
-    bid = bidRepository.findById(id).orElseThrow(() -> new NotFoundException("Bid is not found."));
+  public Bid getBid(Long id, Long userId) {
+    Bid bid = bidRepository.findById(id).orElseThrow(() -> new NotFoundException("Bid is not found."));
+    if(bid.getBidder().getId() != userId) {
+      throw new NotFoundException("Access denied.");
+    }
     return bid;
   }
 
   @Override
-  public Bid getBidByBiddingDocumentAndForwarder(Long biddingDocumentId, String username) {
-    Bid bid = bidRepository.findByBiddingDocumentAndForwarder(biddingDocumentId, username)
+  public Bid getBidByBiddingDocumentAndForwarder(Long biddingDocumentId, Long userId) {
+    Bid bid = bidRepository.findByBiddingDocumentAndForwarder(biddingDocumentId, userId)
         .orElseThrow(() -> new NotFoundException("Bid is not found."));
     return bid;
   }
@@ -183,12 +185,12 @@ public class BidServiceImpl implements BidService {
   }
 
   @Override
-  public Bid updateBid(String username, BidRequest request) {
+  public Bid updateBid(Long userId, BidRequest request) {
     Bid bid = bidRepository.findById(request.getId()).orElseThrow(() -> new NotFoundException("Bid is not found."));
 
     BiddingDocument biddingDocument = bid.getBiddingDocument();
 
-    User user = userRepository.findByUsername(username).orElseThrow(() -> new NotFoundException("Bid is not found."));
+    User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User is not found."));
     Role role = user.getRoles().iterator().next();
     if (role.getName().equalsIgnoreCase("ROLE_FORWARDER")) {
       String bidStatus = bid.getStatus();
@@ -266,9 +268,9 @@ public class BidServiceImpl implements BidService {
   }
 
   @Override
-  public Bid editBid(Long id, String username, Map<String, Object> updates) {
+  public Bid editBid(Long id, Long userId, Map<String, Object> updates) {
     Bid bid = bidRepository.findById(id).orElseThrow(() -> new NotFoundException("Bid is not found."));
-    User user = userRepository.findByUsername(username).orElseThrow(() -> new NotFoundException("Bid is not found."));
+    User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("Bid is not found."));
     Role role = user.getRoles().iterator().next();
 
     if (role.getName().equalsIgnoreCase("ROLE_FORWARDER")) {
@@ -384,8 +386,11 @@ public class BidServiceImpl implements BidService {
   }
 
   @Override
-  public void removeBid(Long id) {
+  public void removeBid(Long id, Long userId) {
     Bid bid = bidRepository.findById(id).orElseThrow(() -> new NotFoundException("Bid is not found."));
+    if(bid.getBidder().getId() != userId) {
+      throw new NotFoundException("Access denied.");
+    }
     if (!bid.getStatus().equalsIgnoreCase(EnumBidStatus.ACCEPTED.name())) {
       List<Container> containers = new ArrayList<>(bid.getContainers());
       containers.forEach(container -> {

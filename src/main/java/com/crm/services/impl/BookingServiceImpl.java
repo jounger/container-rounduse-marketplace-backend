@@ -131,11 +131,11 @@ public class BookingServiceImpl implements BookingService {
       }
 
       String bookingNumberRequest = String.valueOf(updates.get("bookingNumber"));
-      if (updates.get("bookingNumber") != null && !Tool.isEqual(booking.getBookingNumber(), bookingNumberRequest)
-          && !bookingRepository.existsByBookingNumber(bookingNumberRequest)) {
+      if (updates.get("bookingNumber") != null && !Tool.isEqual(booking.getBookingNumber(), bookingNumberRequest)) {
+        if (bookingRepository.existsByBookingNumber(bookingNumberRequest)) {
+          throw new DuplicateRecordException("Error: Booking has been existed");
+        }
         booking.setBookingNumber(bookingNumberRequest);
-      } else {
-        throw new DuplicateRecordException("Error: Booking has been existed");
       }
 
       String unit = String.valueOf(updates.get("unit"));

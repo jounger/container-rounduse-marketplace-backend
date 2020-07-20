@@ -13,7 +13,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -47,9 +46,9 @@ public class EvidenceController {
   @PostMapping("/contract/{id}")
   @PreAuthorize("hasRole('MERCHANT') or hasRole('FORWARDER')")
   public ResponseEntity<?> createEvidence(@PathVariable("id") Long id, @Valid @RequestBody EvidenceRequest request) {
-    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    String username = userDetails.getUsername();
-    Evidence evidence = evidenceService.createEvidence(id, username, request);
+    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    Long userId = userDetails.getId();
+    Evidence evidence = evidenceService.createEvidence(id, userId, request);
     EvidenceDto evidenceDto = EvidenceMapper.toEvidenceDto(evidence);
     return ResponseEntity.ok(evidenceDto);
   }
@@ -57,10 +56,10 @@ public class EvidenceController {
   @PreAuthorize("hasRole('MERCHANT') or hasRole('FORWARDER')")
   @GetMapping("/user")
   public ResponseEntity<?> getEvidencesByUser(@Valid PaginationRequest request) {
-    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    String username = userDetails.getUsername();
+    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    Long userId = userDetails.getId();
 
-    Page<Evidence> pages = evidenceService.getEvidencesByUser(username, request);
+    Page<Evidence> pages = evidenceService.getEvidencesByUser(userId, request);
 
     PaginationResponse<EvidenceDto> response = new PaginationResponse<>();
     response.setPageNumber(request.getPage());
@@ -121,9 +120,9 @@ public class EvidenceController {
   @PreAuthorize("hasRole('MERCHANT') or hasRole('FORWARDER')")
   @RequestMapping(value = "/{id}", method = RequestMethod.PATCH, consumes = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<?> editEvidence(@PathVariable("id") Long id, @RequestBody Map<String, Object> updates) {
-    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    String username = userDetails.getUsername();
-    Evidence evidence = evidenceService.editEvidence(id, username, updates);
+    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    Long userId = userDetails.getId();
+    Evidence evidence = evidenceService.editEvidence(id, userId, updates);
     EvidenceDto evidenceDto = EvidenceMapper.toEvidenceDto(evidence);
     return ResponseEntity.ok(evidenceDto);
   }
@@ -132,9 +131,9 @@ public class EvidenceController {
   @PreAuthorize("hasRole('MERCHANT') or hasRole('FORWARDER')")
   @DeleteMapping("/{id}")
   public ResponseEntity<?> deleteEvidence(@PathVariable Long id) {
-    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    String username = userDetails.getUsername();
-    evidenceService.removeEvidence(id, username);
+    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    Long userId = userDetails.getId();
+    evidenceService.removeEvidence(id, userId);
     return ResponseEntity.ok(new MessageResponse("Evidence deleted successfully."));
   }
 }

@@ -33,30 +33,20 @@ INSERT INTO crm_db.driver (driver_license,fullname,user_id,forwarder_id) VALUES 
 INSERT INTO crm_db.port (address,fullname,name_code,created_at,updated_at) VALUES ('Hai Phong, Viet Nam','Port Of Haiphong Joint Stock Company','HAIPHONGPORT',CURDATE(),CURDATE());
 
 # CONTAINER TYPE
-INSERT INTO crm_db.container_type(cubic_capacity,description,door_open_height,door_open_width,internal_height,internal_length,internal_width,name,payload_capacity,tare_weight,created_at,updated_at) VALUES ('67.72','40ft High Cube','2.35','2.22','2.46','12.03','2.28','40HC','24000','5920',CURDATE(),CURDATE());
+INSERT INTO crm_db.container_type(cubic_capacity,description,door_open_height,door_open_width,internal_height,internal_length,internal_width,name,gross_weight,tare_weight,unit_of_measurement,created_at,updated_at) VALUES ('9.95','8ft Container Dimensions','1.95','2.11','2.06','2.29','2.11','8CD','6000','950','KG',CURDATE(),CURDATE());
+INSERT INTO crm_db.container_type(cubic_capacity,description,door_open_height,door_open_width,internal_height,internal_length,internal_width,name,gross_weight,tare_weight,unit_of_measurement,created_at,updated_at) VALUES ('15.95','10ft Container Dimensions','2.28','2.34','2.39','2.84','2.35','10CD','10000','1000','KG',CURDATE(),CURDATE());
+INSERT INTO crm_db.container_type(cubic_capacity,description,door_open_height,door_open_width,internal_height,internal_length,internal_width,name,gross_weight,tare_weight,unit_of_measurement,created_at,updated_at) VALUES ('33.2','20ft Container Dimensions','2.28','2.34','2.39','5.9','2.35','20CD','30480','2000','KG',CURDATE(),CURDATE());
+INSERT INTO crm_db.container_type(cubic_capacity,description,door_open_height,door_open_width,internal_height,internal_length,internal_width,name,gross_weight,tare_weight,unit_of_measurement,created_at,updated_at) VALUES ('67.6','40ft Container Dimensions','2.28','2.34','2.39','12.03','2.35','40CD','30480','3470','KG',CURDATE(),CURDATE());
+INSERT INTO crm_db.container_type(cubic_capacity,description,door_open_height,door_open_width,internal_height,internal_length,internal_width,name,gross_weight,tare_weight,unit_of_measurement,created_at,updated_at) VALUES ('32.8','20ft Tunnel Dimensions','2.28','2.34','2.39','5.84','2.35','20TD','30480','2180','KG',CURDATE(),CURDATE());
+INSERT INTO crm_db.container_type(cubic_capacity,description,door_open_height,door_open_width,internal_height,internal_length,internal_width,name,gross_weight,tare_weight,unit_of_measurement,created_at,updated_at) VALUES ('31','20ft Open-sider Dimensions','2.19','2.22','2.30','5.9','2.29','20OSD','30480','3170','KG',CURDATE(),CURDATE());
+INSERT INTO crm_db.container_type(cubic_capacity,description,door_open_height,door_open_width,internal_height,internal_length,internal_width,name,gross_weight,tare_weight,unit_of_measurement,created_at,updated_at) VALUES ('76.4','40ft High Cube Dimensions','2.58','2.34','2.69','12.03','2.35','40HCD','30480','3660','KG',CURDATE(),CURDATE());
+INSERT INTO crm_db.container_type(cubic_capacity,description,door_open_height,door_open_width,internal_height,internal_length,internal_width,name,gross_weight,tare_weight,unit_of_measurement,created_at,updated_at) VALUES ('33','20ft Open-top Dimensions','2.28','2.34','2.28','5.96','2.35','20OTD','30480','3000','KG',CURDATE(),CURDATE());
+INSERT INTO crm_db.container_type(cubic_capacity,description,door_open_height,door_open_width,internal_height,internal_length,internal_width,name,gross_weight,tare_weight,unit_of_measurement,created_at,updated_at) VALUES ('66.8','40ft Open-top Dimensions','2.28','2.34','2.39','12.03','2.35','40OTD','32500','4050','KG',CURDATE(),CURDATE());
+INSERT INTO crm_db.container_type(cubic_capacity,description,door_open_height,door_open_width,internal_height,internal_length,internal_width,name,gross_weight,tare_weight,unit_of_measurement,created_at,updated_at) VALUES ('67.4','40ft Tunnel Dimensions','2.28','2.34','2.39','11.98','2.35','40TD','30480','3680','KG',CURDATE(),CURDATE());
+INSERT INTO crm_db.container_type(cubic_capacity,description,door_open_height,door_open_width,internal_height,internal_length,internal_width,name,gross_weight,tare_weight,unit_of_measurement,created_at,updated_at) VALUES ('67.72','40ft High Cube Open Sider Dimensions','2.35','2.22','2.46','12.03','2.28','40HCOSD','24000','5920','KG',CURDATE(),CURDATE());
+INSERT INTO crm_db.container_type(cubic_capacity,description,door_open_height,door_open_width,internal_height,internal_length,internal_width,name,gross_weight,tare_weight,unit_of_measurement,created_at,updated_at) VALUES ('37.4','20ft High Cube Dimensions','2.58','2.34','2.69','5.96','2.35','20HCD','30480','2100','KG',CURDATE(),CURDATE());
 
-# Outbound AND Inbound
-INSERT INTO crm_db.supply VALUES (1,'2020-07-09 00:00:59','2020-07-09 00:00:59',1,3),(2,'2020-07-09 00:01:34','2020-07-09 00:02:17',1,3);
-INSERT INTO crm_db.outbound VALUES ('2020-10-10 20:22:00','very good',1111,'DaNang city','2020-10-10 10:22:00','BIDDING','KG',2,5);
-INSERT INTO crm_db.booking VALUES (1,'15351','2020-07-09 00:01:34','2020-11-10 20:22:00',_binary '',1,'2020-07-09 00:01:34',2,1);
+# TRAILER & TRACTOR
 INSERT INTO crm_db.vehicle VALUES (1,'2020-07-12 00:48:56','112222',2,'2020-07-12 00:48:56',4),(2,'2020-07-12 00:49:22','1122223',2,'2020-07-12 00:49:22',4);
 INSERT INTO crm_db.container_semi_trailer VALUES ('T36','FT',2);
 INSERT INTO crm_db.container_tractor VALUES (1);
-INSERT INTO crm_db.bidding_document VALUES (1,'2020-08-08 23:22:00',2000000,'2020-07-09 00:02:17',5000000,'2020-07-09 00:02:17','VND',_binary '\0',4800000,'COMBINED','2020-07-09 00:03:30',NULL,5,2);
-INSERT INTO crm_db.inbound VALUES ('2020-08-11 20:22:00','2020-08-10 20:22:00','Hai phong',1,4);
-INSERT INTO crm_db.bill_of_lading VALUES (1,'C16251CGCS','2020-07-09 00:00:59','2020-12-10 20:22:00',1,'2020-07-09 00:00:59',1,1);
-INSERT INTO crm_db.container VALUES (1,'124322CCC','2020-07-09 00:00:59','COMBINED','2020-07-09 00:03:30',1,6,1,2);
-
-# Bidding
-INSERT INTO crm_db.bid VALUES (1,'2020-07-09 00:03:16',4800000,'2020-07-09 01:03:16','2020-07-09 00:03:16','2020-07-09 00:03:30','ACCEPTED','2020-07-09 00:03:30',4,1);
-INSERT INTO crm_db.bid_container VALUES (1,1);
-INSERT INTO crm_db.notification VALUES (1,'2020-07-09 00:02:17',_binary '\0','You got a new Bidding Document from merchant','2020-07-09 00:02:17',NULL,'2020-07-09 00:02:17',4),(2,'2020-07-09 00:03:16',_binary '\0','You got a new Bid from forwarder','2020-07-09 00:03:16',NULL,'2020-07-09 00:03:16',5),(3,'2020-07-09 00:03:30',_binary '\0','Your Bid have ACCEPTED from merchant','2020-07-09 00:03:30',NULL,'2020-07-09 00:03:30',4),(4,'2020-07-09 00:03:30',_binary '\0','merchant and forwarder want to borrow 1 container from you','2020-07-09 00:03:30',NULL,'2020-07-09 00:03:30',3);
-INSERT INTO crm_db.bidding_notification VALUES ('ADDED',1,1),('ADDED',2,1),('ACCEPTED',3,1),('ACCEPTED',4,1);
-
-# Combined, Contract AND Evidence
-INSERT INTO crm_db.combined VALUES (1,'2020-07-09 00:03:30','INFO_RECEIVED','2020-07-09 00:03:30',1);
-INSERT INTO crm_db.contract VALUES (1,'2020-07-09 00:03:54',50,_binary '\1','2020-07-09 00:03:54',1);
-INSERT INTO crm_db.evidence VALUES (1,'2020-07-09 00:04:04','chan qua',_binary '','2020-07-09 00:13:02',1,4);
-
-# Payment
-INSERT INTO crm_db.payment VALUES (1,5000000,'2020-07-09 00:04:14','Tao tra tien do',_binary '\0','2020-07-09 00:04:14','PAYMENT',1,4,5);

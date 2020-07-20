@@ -65,15 +65,11 @@ public class NotificationServiceImpl implements NotificationService {
     Boolean isRead = (Boolean) updates.get("isRead");
     if (updates.get("isRead") != null && isRead != null) {
       notification.setIsRead(isRead);
-    } else {
-      throw new NotFoundException("Is Read is not found.");
     }
 
     Boolean isHide = (Boolean) updates.get("isHide");
     if (updates.get("isHide") != null && isHide != null) {
       notification.setIsHide(isHide);
-    } else {
-      throw new NotFoundException("Is Hide is not found.");
     }
 
     notificationRepository.save(notification);

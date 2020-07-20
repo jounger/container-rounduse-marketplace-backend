@@ -12,9 +12,9 @@ public interface BidService {
 
   Bid createBid(Long bidDocId, Long id, BidRequest request);
 
-  Bid getBid(Long id);
+  Bid getBid(Long id, Long userId);
 
-  Bid getBidByBiddingDocumentAndForwarder(Long biddingDocument, String username);
+  Bid getBidByBiddingDocumentAndForwarder(Long biddingDocument, Long userId);
 
   Page<Bid> getBidsByBiddingDocument(Long id, PaginationRequest request);
   
@@ -23,11 +23,11 @@ public interface BidService {
   Page<Bid> getBidsByForwarder(Long id, PaginationRequest request);
 
   // update full biddingDocument
-  Bid updateBid(String username, BidRequest request);
+  Bid updateBid(Long userId, BidRequest request);
 
   // update part biddingDocument
-  Bid editBid(Long id, String username, Map<String, Object> updates);
+  Bid editBid(Long id, Long userId, Map<String, Object> updates);
 
-  void removeBid(Long id);
+  void removeBid(Long id, Long userId);
 
 }

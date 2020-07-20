@@ -141,11 +141,12 @@ public class ReportServiceImpl implements ReportService {
       }
 
       String statusString = String.valueOf(updates.get("status"));
-      EnumReportStatus status = EnumReportStatus.findByName(statusString);
-      if (updates.get("status") != null && status != null) {
+      if (updates.get("status") != null && !Tool.isEqual(report.getStatus(), statusString)) {
+        EnumReportStatus status = EnumReportStatus.findByName(statusString);
+        if (status == null) {
+          throw new NotFoundException("Status is not found.");
+        }
         report.setStatus(status.name());
-      } else {
-        throw new NotFoundException("Status is not found.");
       }
     }
 
@@ -154,11 +155,12 @@ public class ReportServiceImpl implements ReportService {
         throw new InternalException("Report must be Resolved");
       }
       String statusString = String.valueOf(updates.get("status"));
-      EnumReportStatus status = EnumReportStatus.findByName(statusString);
-      if (updates.get("status") != null && status != null) {
+      if (updates.get("status") != null && !Tool.isEqual(report.getStatus(), statusString)) {
+        EnumReportStatus status = EnumReportStatus.findByName(statusString);
+        if (status == null) {
+          throw new NotFoundException("Status is not found.");
+        }
         report.setStatus(status.name());
-      } else {
-        throw new NotFoundException("Status is not found.");
       }
     }
 

@@ -62,8 +62,7 @@ public class BiddingDocumentServiceImpl implements BiddingDocumentService {
   public BiddingDocument createBiddingDocument(Long id, BiddingDocumentRequest request) {
     BiddingDocument biddingDocument = new BiddingDocument();
 
-    Merchant merchant = new Merchant();
-    merchant = merchantRepository.findById(id).orElseThrow(() -> new NotFoundException("Merchant is not found"));
+    Merchant merchant = merchantRepository.findById(id).orElseThrow(() -> new NotFoundException("Merchant is not found"));
     biddingDocument.setOfferee(merchant);
 
     Outbound outbound = outboundRepository.findById(request.getOutbound())
@@ -275,9 +274,13 @@ public class BiddingDocumentServiceImpl implements BiddingDocumentService {
   }
 
   @Override
-  public void removeBiddingDocument(Long id) {
+  public void removeBiddingDocument(Long id, Long userId) {
+    Merchant merchant = merchantRepository.findById(userId).orElseThrow(() -> new NotFoundException("Merchant is not found."));
     BiddingDocument biddingDocument = biddingDocumentRepository.findById(id)
         .orElseThrow(() -> new NotFoundException("Bidding document is not found"));
+    if(!biddingDocument.getOfferee().equals(merchant)) {
+      throw new NotFoundException("Bidding document can only be deleted by this owner.");
+    }
     if (!biddingDocument.getStatus().equalsIgnoreCase(EnumBiddingStatus.CANCELED.name())) {
       throw new InternalException("Bidding document is in a transaction.");
     }

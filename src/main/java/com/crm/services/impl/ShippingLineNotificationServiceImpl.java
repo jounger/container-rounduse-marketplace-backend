@@ -113,15 +113,11 @@ public class ShippingLineNotificationServiceImpl implements ShippingLineNotifica
     Boolean isRead = (Boolean) updates.get("isRead");
     if (updates.get("isRead") != null && isRead != null) {
       shippingLineNotification.setIsRead(isRead);
-    } else {
-      throw new NotFoundException("Is Read is not found.");
     }
 
     Boolean isHide = (Boolean) updates.get("isHide");
     if (updates.get("isHide") != null && isHide != null) {
       shippingLineNotification.setIsHide(isHide);
-    } else {
-      throw new NotFoundException("Is Hide is not found.");
     }
 
     shippingLineNotificationRepository.save(shippingLineNotification);

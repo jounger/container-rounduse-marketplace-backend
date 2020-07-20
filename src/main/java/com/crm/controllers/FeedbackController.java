@@ -44,6 +44,9 @@ public class FeedbackController {
   @Autowired
   private FeedbackService paymentService;
 
+  @Autowired
+  private NotificationBroadcast notificationBroadcast;
+
   @Transactional
   @PostMapping("/report/{id}")
   @PreAuthorize("hasRole('MODERATOR')")
@@ -55,7 +58,7 @@ public class FeedbackController {
     FeedbackDto paymentDto = FeedbackMapper.toFeedbackDto(payment);
 
     // CREATE NOTIFICATION
-    NotificationBroadcast.broadcastCreateFeedbackToUser(payment);
+    notificationBroadcast.broadcastCreateFeedbackToUser(payment);
     // END NOTIFICATION
 
     return ResponseEntity.ok(paymentDto);
@@ -73,7 +76,7 @@ public class FeedbackController {
     FeedbackDto paymentDto = FeedbackMapper.toFeedbackDto(payment);
 
     // CREATE NOTIFICATION
-    NotificationBroadcast.broadcastCreateFeedbackToModerator(name, payment);
+    notificationBroadcast.broadcastCreateFeedbackToModerator(name, payment);
     // END NOTIFICATION
 
     return ResponseEntity.ok(paymentDto);

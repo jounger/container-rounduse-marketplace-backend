@@ -4,5 +4,5 @@ import com.crm.models.DriverNotification;
 
 public interface DriverWebSocketService {
 
-  public void sendBiddingNotifyToDriver(DriverNotification notification);
+  void sendBiddingNotifyToDriver(DriverNotification notification);
 }

@@ -43,6 +43,9 @@ public class BiddingDocumentController {
   @Autowired
   private BiddingDocumentService biddingDocumentService;
 
+  @Autowired
+  private NotificationBroadcast notificationBroadcast;
+
   @Transactional
   @PreAuthorize("hasRole('MERCHANT')")
   @PostMapping("")
@@ -56,12 +59,12 @@ public class BiddingDocumentController {
     BiddingDocumentDto biddingDocumentDto = BiddingDocumentMapper.toBiddingDocumentDto(biddingDocument);
 
     // CREATE NOTIFICATION
-    NotificationBroadcast.broadcastCreateBiddingDocumentToForwarder(biddingDocument);
+    notificationBroadcast.broadcastCreateBiddingDocumentToForwarder(biddingDocument);
     // END NOTIFICATION
 
     return ResponseEntity.ok(biddingDocumentDto);
   }
-  
+
   @PreAuthorize("hasRole('MERCHANT') or hasRole('FORWARDER')")
   @GetMapping("/combined")
   public ResponseEntity<?> getBiddingDocumentsByExistCombined(@Valid PaginationRequest request) {

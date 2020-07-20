@@ -94,11 +94,11 @@ public class PortServiceImpl implements PortService {
     }
 
     String nameCode = String.valueOf(updates.get("nameCode"));
-    if (updates.get("nameCode") != null && !Tool.isEqual(port.getNameCode(), nameCode)
-        && !portRepository.existsByNameCode(nameCode)) {
+    if (updates.get("nameCode") != null && !Tool.isEqual(port.getNameCode(), nameCode)) {
+      if (portRepository.existsByNameCode(nameCode)) {
+        throw new DuplicateRecordException("ERROR: Port already exists.");
+      }
       port.setNameCode(nameCode);
-    } else {
-      throw new DuplicateRecordException("ERROR: Port already exists.");
     }
 
     portRepository.save(port);

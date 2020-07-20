@@ -120,7 +120,6 @@ public class ContractServiceImp implements ContractService {
       String requiredString = String.valueOf(updates.get("required"));
       if (updates.get("required") != null && !Tool.isEqual(contract.getRequired(), requiredString)) {
         contract.setRequired(Boolean.valueOf(requiredString));
-        ;
       }
     } else {
       throw new NotFoundException("You must be Offeree to edit Contract.");

@@ -16,6 +16,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.crm.common.Constant;
+import com.crm.common.ErrorConstant;
 import com.crm.enums.EnumUserStatus;
 import com.crm.exception.DuplicateRecordException;
 import com.crm.exception.NotFoundException;
@@ -44,7 +45,7 @@ public class UserServiceImpl implements UserService {
   public void createUser(SignUpRequest request) {
     if (userRepository.existsByUsername(request.getUsername()) || userRepository.existsByEmail(request.getEmail())
         || userRepository.existsByPhone(request.getPhone())) {
-      throw new DuplicateRecordException("Error: User has been existed");
+      throw new DuplicateRecordException(ErrorConstant.USER_ALREADY_EXISTS);
     }
     User user = new User();
     user.setUsername(request.getUsername());
@@ -56,13 +57,13 @@ public class UserServiceImpl implements UserService {
 
     if (rolesString == null) {
       Role userRole = roleRepository.findByName("ROLE_OTHER")
-          .orElseThrow(() -> new NotFoundException("Error: Role is not found"));
+          .orElseThrow(() -> new NotFoundException(ErrorConstant.ROLE_NOT_FOUND));
       roles.add(userRole);
     } else {
       rolesString.forEach(role -> {
         for (int i = 0; i < rolesString.size(); i++) {
           Role userRole = roleRepository.findByName(role)
-              .orElseThrow(() -> new NotFoundException("Error: Role is not found"));
+              .orElseThrow(() -> new NotFoundException(ErrorConstant.ROLE_NOT_FOUND));
           roles.add(userRole);
         }
       });
@@ -70,7 +71,7 @@ public class UserServiceImpl implements UserService {
     user.setRoles(roles);
     String address = request.getAddress();
     if (address == null) {
-      throw new NotFoundException("Error: Address is not found");
+      throw new NotFoundException(ErrorConstant.USER_ADDRESS_NOT_FOUND);
     } else {
       user.setAddress(address);
     }
@@ -116,7 +117,7 @@ public class UserServiceImpl implements UserService {
     String status = String.valueOf(updates.get("status"));
     EnumUserStatus eStatus = EnumUserStatus.findByName(status);
     if (status != null && eStatus != null) {
-      User user = userRepository.findById(id).orElseThrow(() -> new NotFoundException("Error: User is not found"));
+      User user = userRepository.findById(id).orElseThrow(() -> new NotFoundException(ErrorConstant.USER_NOT_FOUND));
       user.setStatus(eStatus.name());
       userRepository.save(user);
       return user;

@@ -9,6 +9,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import com.crm.common.ErrorConstant;
 import com.crm.enums.EnumNotificationType;
 import com.crm.enums.EnumReportNotification;
 import com.crm.exception.NotFoundException;
@@ -39,7 +40,7 @@ public class ReportNotificationServiceImpl implements ReportNotificationService 
     ReportNotification reportNotification = new ReportNotification();
 
     User recipient = userRepositoty.findByUsername(request.getRecipient())
-        .orElseThrow(() -> new NotFoundException("Recipient is not found."));
+        .orElseThrow(() -> new NotFoundException(ErrorConstant.RECIPIENT_NOT_FOUND));
     reportNotification.setRecipient(recipient);
 
     reportNotification.setIsRead(false);
@@ -47,7 +48,7 @@ public class ReportNotificationServiceImpl implements ReportNotificationService 
     reportNotification.setTitle(request.getTitle());
 
     Report relatedResource = reportRepository.findById(request.getRelatedResource())
-        .orElseThrow(() -> new NotFoundException("Related resource is not found."));
+        .orElseThrow(() -> new NotFoundException(ErrorConstant.NOTIFICATION_RELATED_RESOURCE_NOT_FOUND));
     reportNotification.setRelatedResource(relatedResource);
 
     reportNotification.setMessage(request.getMessage());
@@ -65,7 +66,7 @@ public class ReportNotificationServiceImpl implements ReportNotificationService 
   @Override
   public ReportNotification getReportNotification(Long id) {
     ReportNotification reportNotification = reportNotificationRepository.findById(id)
-        .orElseThrow(() -> new NotFoundException("Report Notification is not found."));
+        .orElseThrow(() -> new NotFoundException(ErrorConstant.NOTIFICATION_NOT_FOUND));
     return reportNotification;
   }
 
@@ -107,7 +108,7 @@ public class ReportNotificationServiceImpl implements ReportNotificationService 
   @Override
   public ReportNotification editReportNotification(Long id, Map<String, Object> updates) {
     ReportNotification reportNotification = reportNotificationRepository.findById(id)
-        .orElseThrow(() -> new NotFoundException("Report Notification is not found."));
+        .orElseThrow(() -> new NotFoundException(ErrorConstant.NOTIFICATION_NOT_FOUND));
 
     Boolean isRead = (Boolean) updates.get("isRead");
     if (updates.get("isRead") != null && isRead != null) {
@@ -128,7 +129,7 @@ public class ReportNotificationServiceImpl implements ReportNotificationService 
     if (reportNotificationRepository.existsById(id)) {
       reportNotificationRepository.deleteById(id);
     } else {
-      throw new NotFoundException("Report Notification is not found.");
+      throw new NotFoundException(ErrorConstant.NOTIFICATION_NOT_FOUND);
     }
   }
 

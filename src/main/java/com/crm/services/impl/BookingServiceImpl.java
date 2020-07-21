@@ -13,6 +13,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import com.crm.common.Constant;
+import com.crm.common.ErrorConstant;
 import com.crm.common.Tool;
 import com.crm.enums.EnumSupplyStatus;
 import com.crm.exception.DuplicateRecordException;
@@ -53,7 +54,7 @@ public class BookingServiceImpl implements BookingService {
       return pages;
 
     } else {
-      throw new NotFoundException("ERROR: Outbound is not found.");
+      throw new NotFoundException(ErrorConstant.OUTBOUND_NOT_FOUND);
     }
   }
 
@@ -62,16 +63,15 @@ public class BookingServiceImpl implements BookingService {
     if (merchantRepository.existsById(id)) {
 
       Booking booking = bookingRepository.findById(request.getId())
-          .orElseThrow(() -> new NotFoundException("ERROR: Booking is not found."));
+          .orElseThrow(() -> new NotFoundException(ErrorConstant.BOOKING_NOT_FOUND));
 
       if (!booking.getOutbound().getMerchant().getId().equals(id)) {
-        throw new InternalException(String.format("Merchant %s not owned Booking", id));
+        throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
       }
 
       if (booking.getOutbound().getStatus().equals(EnumSupplyStatus.COMBINED.name())
           || booking.getOutbound().getStatus().equals(EnumSupplyStatus.BIDDING.name())) {
-        throw new InternalException(String.format("Outbound with bookingNumber %s has been %s",
-            booking.getBookingNumber(), booking.getOutbound().getStatus()));
+        throw new InternalException(ErrorConstant.OUTBOUND_IS_IN_TRANSACTION);
       }
 
       String bookingNumber = request.getBookingNumber();
@@ -79,14 +79,14 @@ public class BookingServiceImpl implements BookingService {
         if (bookingRepository.existsByBookingNumber(bookingNumber)) {
           if (bookingNumber.equals(booking.getBookingNumber())) {
           } else {
-            throw new DuplicateRecordException("Error: Booking has been existed");
+            throw new DuplicateRecordException(ErrorConstant.BOOKING_ALREADY_EXISTS);
           }
         }
         booking.setBookingNumber(bookingNumber);
       }
 
       Port portOfLoading = portRepository.findByNameCode(request.getPortOfLoading())
-          .orElseThrow(() -> new NotFoundException("ERROR: PortOfLoading is not found."));
+          .orElseThrow(() -> new NotFoundException(ErrorConstant.PORT_NOT_FOUND));
       booking.setPortOfLoading(portOfLoading);
 
       booking.setUnit(request.getUnit());
@@ -101,7 +101,7 @@ public class BookingServiceImpl implements BookingService {
       bookingRepository.save(booking);
       return booking;
     } else {
-      throw new NotFoundException("ERROR: Forwarder is not found.");
+      throw new NotFoundException(ErrorConstant.FORWARDER_NOT_FOUND);
     }
   }
 
@@ -110,30 +110,29 @@ public class BookingServiceImpl implements BookingService {
 
     if (merchantRepository.existsById(userId)) {
       Booking booking = bookingRepository.findById(id)
-          .orElseThrow(() -> new NotFoundException("ERROR: Booking is not found."));
+          .orElseThrow(() -> new NotFoundException(ErrorConstant.BOOKING_NOT_FOUND));
 
       if (!booking.getOutbound().getMerchant().getId().equals(userId)) {
-        throw new InternalException(String.format("Merchant %s not owned Booking", id));
+        throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
       }
 
       if (booking.getOutbound().getStatus().equals(EnumSupplyStatus.COMBINED.name())
           || booking.getOutbound().getStatus().equals(EnumSupplyStatus.BIDDING.name())) {
-        throw new InternalException(String.format("Outbound with bookingNumber %s has been %s",
-            booking.getBookingNumber(), booking.getOutbound().getStatus()));
+        throw new InternalException(ErrorConstant.OUTBOUND_IS_IN_TRANSACTION);
       }
 
       String portOfLoadingRequest = String.valueOf(updates.get("portOfLoading"));
       if (updates.get("portOfLoading") != null
           && !Tool.isEqual(booking.getPortOfLoading().getNameCode(), portOfLoadingRequest)) {
         Port portOfLoading = portRepository.findByNameCode(portOfLoadingRequest)
-            .orElseThrow(() -> new NotFoundException("ERROR: PortOfLoading is not found."));
+            .orElseThrow(() -> new NotFoundException(ErrorConstant.PORT_NOT_FOUND));
         booking.setPortOfLoading(portOfLoading);
       }
 
       String bookingNumberRequest = String.valueOf(updates.get("bookingNumber"));
       if (updates.get("bookingNumber") != null && !Tool.isEqual(booking.getBookingNumber(), bookingNumberRequest)) {
         if (bookingRepository.existsByBookingNumber(bookingNumberRequest)) {
-          throw new DuplicateRecordException("Error: Booking has been existed");
+          throw new DuplicateRecordException(ErrorConstant.BOOKING_ALREADY_EXISTS);
         }
         booking.setBookingNumber(bookingNumberRequest);
       }
@@ -158,21 +157,21 @@ public class BookingServiceImpl implements BookingService {
       bookingRepository.save(booking);
       return booking;
     } else {
-      throw new NotFoundException("ERROR: Forwarder is not found.");
+      throw new NotFoundException(ErrorConstant.FORWARDER_NOT_FOUND);
     }
   }
 
   @Override
   public Booking getBookingById(Long id) {
     Booking booking = bookingRepository.findById(id)
-        .orElseThrow(() -> new NotFoundException("ERROR: Booking is not found."));
+        .orElseThrow(() -> new NotFoundException(ErrorConstant.BOOKING_NOT_FOUND));
     return booking;
   }
 
   @Override
   public Booking getBookingsByBookingNumber(String bookingNumber) {
     Booking booking = bookingRepository.findByBookingNumber(bookingNumber)
-        .orElseThrow(() -> new NotFoundException("ERROR: Booking is not found."));
+        .orElseThrow(() -> new NotFoundException(ErrorConstant.BOOKING_NOT_FOUND));
     return booking;
   }
 

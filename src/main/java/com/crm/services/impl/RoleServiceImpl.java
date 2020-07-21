@@ -9,6 +9,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import com.crm.common.ErrorConstant;
 import com.crm.exception.DuplicateRecordException;
 import com.crm.exception.NotFoundException;
 import com.crm.models.Permission;
@@ -32,13 +33,13 @@ public class RoleServiceImpl implements RoleService {
   public Role createRole(RoleRequest request) {
     Role role = new Role();
     if (roleRepository.existsByName(request.getName())) {
-      throw new DuplicateRecordException("Role already exists.");
+      throw new DuplicateRecordException(ErrorConstant.ROLE_ALREADY_EXISTS);
     }
     role.setName(request.getName());
     List<String> permissionsString = request.getPermissions();
     permissionsString.forEach(permission -> {
       Permission rolePermission = permissionRepository.findByName(permission)
-          .orElseThrow(() -> new NotFoundException("Permission is not found."));
+          .orElseThrow(() -> new NotFoundException(ErrorConstant.PERMISSION_NOT_FOUND));
       role.getPermissions().add(rolePermission);
     });
 
@@ -56,19 +57,19 @@ public class RoleServiceImpl implements RoleService {
 
   @Override
   public void removeRole(Long id) {
-    Role role = roleRepository.findById(id).orElseThrow(() -> new NotFoundException("Role is not found"));
+    Role role = roleRepository.findById(id).orElseThrow(() -> new NotFoundException(ErrorConstant.ROLE_NOT_FOUND));
     roleRepository.delete(role);
   }
 
   @Override
   public Role updateRole(RoleRequest request) {
-    Role role = roleRepository.findById(request.getId()).orElseThrow(() -> new NotFoundException("Role is not found"));
+    Role role = roleRepository.findById(request.getId()).orElseThrow(() -> new NotFoundException(ErrorConstant.ROLE_NOT_FOUND));
 
     role.setPermissions(new HashSet<>());
     List<String> permissionsString = request.getPermissions();
     permissionsString.forEach(permission -> {
       Permission rolePermission = permissionRepository.findByName(permission)
-          .orElseThrow(() -> new NotFoundException("Permission is not found."));
+          .orElseThrow(() -> new NotFoundException(ErrorConstant.PERMISSION_NOT_FOUND));
       role.getPermissions().add(rolePermission);
     });
 

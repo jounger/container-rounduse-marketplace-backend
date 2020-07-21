@@ -43,6 +43,9 @@ public class ReportController {
   @Autowired
   private ReportService reportService;
 
+  @Autowired
+  private NotificationBroadcast notificationBroadcast;
+
   @Transactional
   @PostMapping("")
   @PreAuthorize("hasRole('FORWARDER')")
@@ -53,7 +56,7 @@ public class ReportController {
     ReportDto reportDto = ReportMapper.toReportDto(report);
 
     // CREATE NOTIFICATION
-    NotificationBroadcast.broadcastCreateReportToModerator(report);
+    notificationBroadcast.broadcastCreateReportToModerator(report);
     // END NOTIFICATION
 
     return ResponseEntity.ok(reportDto);
@@ -132,7 +135,7 @@ public class ReportController {
     ReportDto reportDto = ReportMapper.toReportDto(editReport);
 
     // CREATE NOTIFICATION
-    NotificationBroadcast.broadcastUpdateReportToModerator(status, editReport);
+    notificationBroadcast.broadcastUpdateReportToModerator(status, editReport);
     // END NOTIFICATION
 
     return ResponseEntity.ok(reportDto);

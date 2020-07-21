@@ -43,6 +43,9 @@ public class BidController {
   @Autowired
   private BidService bidService;
 
+  @Autowired
+  private NotificationBroadcast notificationBroadcast;
+
   @Transactional
   @PreAuthorize("hasRole('FORWARDER')")
   @PostMapping("/bidding-document/{id}")
@@ -56,7 +59,7 @@ public class BidController {
     BidDto bidDto = BidMapper.toBidDto(bid);
 
     // CREATE NOTIFICATION
-    NotificationBroadcast.broadcastCreateBidToMerchant(bid);
+    notificationBroadcast.broadcastCreateBidToMerchant(bid);
     // END NOTIFICATION
 
     return ResponseEntity.ok(bidDto);
@@ -83,15 +86,17 @@ public class BidController {
     BidDto bidDto = BidMapper.toBidDto(bid);
     return ResponseEntity.ok(bidDto);
   }
-  
+
   @PreAuthorize("hasRole('MERCHANT') or hasRole('FORWARDER')")
   @GetMapping("/combined/bidding-document/{id}")
-  public ResponseEntity<?> getBidByBiddingDocumentAndExistCombined(@PathVariable Long id, @Valid PaginationRequest request) {
-    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+  public ResponseEntity<?> getBidByBiddingDocumentAndExistCombined(@PathVariable Long id,
+      @Valid PaginationRequest request) {
+    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
+        .getPrincipal();
     Long userId = userDetails.getId();
 
     Page<Bid> pages = bidService.getBidsByBiddingDocumentAndExistCombined(id, userId, request);
-    
+
     PaginationResponse<BidDto> response = new PaginationResponse<>();
     response.setPageNumber(request.getPage());
     response.setPageSize(request.getLimit());
@@ -171,7 +176,7 @@ public class BidController {
     BidDto BidDto = BidMapper.toBidDto(bidEdit);
 
     // CREATE NOTIFICATION
-    NotificationBroadcast.broadcastEditBidToMerchantOrForwarder(status, bidEdit);
+    notificationBroadcast.broadcastEditBidToMerchantOrForwarder(status, bidEdit);
     // END NOTIFICATION
 
     return ResponseEntity.ok(BidDto);
@@ -188,7 +193,7 @@ public class BidController {
     bidService.removeBid(id, userId);
 
     // CREATE NOTIFICATION
-    NotificationBroadcast.broadcastRemoveBidToMerchant(bid);
+    notificationBroadcast.broadcastRemoveBidToMerchant(bid);
     // END NOTIFICATION
 
     return ResponseEntity.ok(new MessageResponse("Bidding document deleted successfully."));

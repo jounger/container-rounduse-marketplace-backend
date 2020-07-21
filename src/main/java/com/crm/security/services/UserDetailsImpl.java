@@ -13,8 +13,10 @@ import com.crm.models.User;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 
 @AllArgsConstructor
+@NoArgsConstructor
 public class UserDetailsImpl implements UserDetails {
   private static final long serialVersionUID = 1L;
 
@@ -27,21 +29,14 @@ public class UserDetailsImpl implements UserDetails {
   private String phone;
   private String address;
   private String status;
-  
+
   private Collection<? extends GrantedAuthority> authorities;
 
   public static UserDetailsImpl build(User user) {
-    List<GrantedAuthority> authorities = user.getRoles()
-        .stream().map(role -> new SimpleGrantedAuthority(role.getName()))
-        .collect(Collectors.toList());
-    return new UserDetailsImpl(user.getId(), 
-        user.getUsername(), 
-        user.getPassword(), 
-        user.getEmail(), 
-        user.getPhone(), 
-        user.getAddress(),
-        user.getStatus().toString(),
-        authorities);
+    List<GrantedAuthority> authorities = user.getRoles().stream()
+        .map(role -> new SimpleGrantedAuthority(role.getName())).collect(Collectors.toList());
+    return new UserDetailsImpl(user.getId(), user.getUsername(), user.getPassword(), user.getEmail(), user.getPhone(),
+        user.getAddress(), user.getStatus().toString(), authorities);
 
   }
 
@@ -58,11 +53,11 @@ public class UserDetailsImpl implements UserDetails {
   }
 
   public String getAddress() {
-	  return address;
+    return address;
   }
 
   public String getStatus() {
-	  return status;
+    return status;
   }
 
   @Override
@@ -109,9 +104,9 @@ public class UserDetailsImpl implements UserDetails {
 
   @Override
   public boolean equals(Object o) {
-    if(this == o)
+    if (this == o)
       return true;
-    if(o == null || getClass() != o.getClass())
+    if (o == null || getClass() != o.getClass())
       return false;
     UserDetailsImpl userDetails = (UserDetailsImpl) o;
     return Objects.equals(id, userDetails.id);

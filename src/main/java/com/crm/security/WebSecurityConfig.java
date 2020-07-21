@@ -22,59 +22,54 @@ import com.crm.security.services.UserDetailsServiceImpl;
 
 @Configuration
 @EnableWebSecurity
-@EnableGlobalMethodSecurity(
-    prePostEnabled=true)
-public class WebSecurityConfig extends WebSecurityConfigurerAdapter{
+@EnableGlobalMethodSecurity(prePostEnabled = true)
+public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
   @Autowired
-  private UserDetailsServiceImpl userDetailsService;
-  
+  private UserDetailsServiceImpl userDetailsServiceImpl;
+
   @Autowired
   private AuthEntryPointJwt authEntryPointJwt;
-  
+
   @Bean
   public AuthTokenFilter authenticationJwtTokenFilter() {
     return new AuthTokenFilter();
   }
-  
+
   @Bean
   public WebMvcConfigurer corsConfigurer() {
-      return new WebMvcConfigurer() {
-          @Override
-          public void addCorsMappings(CorsRegistry registry) {
-              registry.addMapping("/api/**").allowedOrigins("http://localhost:8080"); // base on frontend server port
-          }
-      };
+    return new WebMvcConfigurer() {
+      @Override
+      public void addCorsMappings(CorsRegistry registry) {
+        registry.addMapping("/api/**").allowedOrigins("http://localhost:8080"); // base on frontend server port
+      }
+    };
   }
-  
+
   @Override
   public void configure(AuthenticationManagerBuilder authenticationManagerBuilder) throws Exception {
-    authenticationManagerBuilder.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder());
+    authenticationManagerBuilder.userDetailsService(userDetailsServiceImpl).passwordEncoder(passwordEncoder());
   }
-  
+
   @Bean
   @Override
   public AuthenticationManager authenticationManagerBean() throws Exception {
     return super.authenticationManagerBean();
   }
-  
+
   @Bean
   public PasswordEncoder passwordEncoder() {
     return new BCryptPasswordEncoder();
   }
-  
+
   @Override
   protected void configure(HttpSecurity http) throws Exception {
-    http.cors().and().csrf().disable()
-      .exceptionHandling().authenticationEntryPoint(authEntryPointJwt).and()
-      .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
-      .authorizeRequests().antMatchers("/api/auth/**").permitAll()
-      .antMatchers("/stomp/**").permitAll()
-      .antMatchers("/api/test/**").permitAll()
-      .antMatchers("/api/admin/**").authenticated()
-      .anyRequest().authenticated();
-    
+    http.cors().and().csrf().disable().exceptionHandling().authenticationEntryPoint(authEntryPointJwt).and()
+        .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and().authorizeRequests()
+        .antMatchers("/api/auth/**").permitAll().antMatchers("/stomp/**").permitAll().antMatchers("/api/test/**")
+        .permitAll().antMatchers("/api/admin/**").authenticated().anyRequest().authenticated();
+
     http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
   }
-  
+
 }

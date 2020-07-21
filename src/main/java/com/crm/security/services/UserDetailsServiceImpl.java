@@ -22,6 +22,4 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     
     return UserDetailsImpl.build(user);
   }
-  
-  
 }

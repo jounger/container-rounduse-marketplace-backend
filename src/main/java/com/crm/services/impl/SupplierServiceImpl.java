@@ -12,6 +12,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import com.crm.common.Constant;
+import com.crm.common.ErrorConstant;
 import com.crm.common.Tool;
 import com.crm.enums.EnumUserStatus;
 import com.crm.exception.NotFoundException;
@@ -37,13 +38,13 @@ public class SupplierServiceImpl implements SupplierService {
   @Override
   public Supplier getSupplier(String username) {
     Supplier supplier = supplierRepository.findByUsername(username)
-        .orElseThrow(() -> new NotFoundException("User is not found"));
+        .orElseThrow(() -> new NotFoundException(ErrorConstant.USER_NOT_FOUND));
     return supplier;
   }
 
   @Override
   public Supplier getSupplier(Long id) {
-    Supplier supplier = supplierRepository.findById(id).orElseThrow(() -> new NotFoundException("User is not found"));
+    Supplier supplier = supplierRepository.findById(id).orElseThrow(() -> new NotFoundException(ErrorConstant.USER_NOT_FOUND));
     return supplier;
   }
 
@@ -51,7 +52,7 @@ public class SupplierServiceImpl implements SupplierService {
   public Page<Supplier> getSuppliersByStatus(PaginationRequest request) {
     EnumUserStatus userStatus = EnumUserStatus.findByName(request.getStatus().toString());
     if (userStatus == null) {
-      throw new NotFoundException("Status is not found.");
+      throw new NotFoundException(ErrorConstant.USER_STATUS_NOT_FOUND);
     }
     Page<Supplier> pages = supplierRepository.findByStatus(userStatus.name(),
         PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt")));
@@ -83,7 +84,7 @@ public class SupplierServiceImpl implements SupplierService {
     if (updates.get("status") != null && !Tool.isEqual(supplier.getStatus(), status)) {
       EnumUserStatus eStatus = EnumUserStatus.findByName(status.toUpperCase());
       if (eStatus == null) {
-        throw new NotFoundException("Status is not found.");
+        throw new NotFoundException(ErrorConstant.USER_STATUS_NOT_FOUND);
       }
       supplier.setStatus(eStatus.name());
     }

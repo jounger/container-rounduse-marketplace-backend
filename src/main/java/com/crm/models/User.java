@@ -87,7 +87,7 @@ public class User {
   @Size(min = 2, max = 20)
   private String status;
   
-  @ManyToMany(cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REMOVE},fetch = FetchType.EAGER)
+  @ManyToMany(cascade = {CascadeType.MERGE, CascadeType.PERSIST},fetch = FetchType.EAGER)
   @JoinTable(name = "user_role", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
   private Collection<Role> roles = new ArrayList<>();
 

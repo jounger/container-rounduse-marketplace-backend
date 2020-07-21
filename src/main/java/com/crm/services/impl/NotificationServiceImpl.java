@@ -12,6 +12,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import com.crm.common.Constant;
+import com.crm.common.ErrorConstant;
 import com.crm.exception.NotFoundException;
 import com.crm.models.Notification;
 import com.crm.payload.request.PaginationRequest;
@@ -60,7 +61,7 @@ public class NotificationServiceImpl implements NotificationService {
   @Override
   public Notification editNotification(Long id, Map<String, Object> updates) {
     Notification notification = notificationRepository.findById(id)
-        .orElseThrow(() -> new NotFoundException("Notification is not found."));
+        .orElseThrow(() -> new NotFoundException(ErrorConstant.NOTIFICATION_NOT_FOUND));
 
     Boolean isRead = (Boolean) updates.get("isRead");
     if (updates.get("isRead") != null && isRead != null) {
@@ -81,7 +82,7 @@ public class NotificationServiceImpl implements NotificationService {
     if (notificationRepository.existsById(id)) {
       notificationRepository.deleteById(id);
     } else {
-      throw new NotFoundException("Notification is not found.");
+      throw new NotFoundException(ErrorConstant.NOTIFICATION_NOT_FOUND);
     }
   }
 

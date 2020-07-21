@@ -13,6 +13,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import com.crm.common.Constant;
+import com.crm.common.ErrorConstant;
 import com.crm.common.Tool;
 import com.crm.enums.EnumReportStatus;
 import com.crm.exception.InternalException;
@@ -44,17 +45,17 @@ public class FeedbackServiceImpl implements FeedbackService {
   public Feedback createFeedback(Long id, Long userId, FeedbackRequest request) {
     Feedback feedback = new Feedback();
 
-    Report report = reportRepository.findById(id).orElseThrow(() -> new NotFoundException("Report is not found."));
+    Report report = reportRepository.findById(id).orElseThrow(() -> new NotFoundException(ErrorConstant.REPORT_NOT_FOUND));
 
     if (report.getStatus().equals(EnumReportStatus.RESOLVED.name())
         || report.getStatus().equals(EnumReportStatus.REJECTED.name())
         || report.getStatus().equals(EnumReportStatus.CLOSED.name())) {
-      throw new InternalException("You can not create feedBack now.");
+      throw new InternalException(ErrorConstant.FEEDBACK_INVALID_TIME);
     }
 
     report.setStatus(EnumReportStatus.UPDATED.name());
     feedback.setReport(report);
-    User sender = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User is not found."));
+    User sender = userRepository.findById(userId).orElseThrow(() -> new NotFoundException(ErrorConstant.SENDER_NOT_FOUND));
     String role = sender.getRoles().iterator().next().getName();
     if (role.equals("ROLE_MODERATOR") || userId.equals(report.getSender().getId())) {
       feedback.setSender(sender);
@@ -67,7 +68,7 @@ public class FeedbackServiceImpl implements FeedbackService {
 
     Integer satisfactionPoints = request.getSatisfactionPoints();
     if (satisfactionPoints < 0 || satisfactionPoints > 5) {
-      throw new InternalException("Satisfaction Points must be greater than zero and less than five.");
+      throw new InternalException(ErrorConstant.FEEDBACK_INVALID_SATISFACTION_POINTS);
     }
     feedback.setSatisfactionPoints(satisfactionPoints);
 
@@ -80,12 +81,12 @@ public class FeedbackServiceImpl implements FeedbackService {
     Page<Feedback> feedbacks = null;
 
     if (!reportRepository.existsById(reportId)) {
-      throw new NotFoundException("Report is not found.");
+      throw new NotFoundException(ErrorConstant.REPORT_NOT_FOUND);
     }
 
     PageRequest pageRequest = PageRequest.of(request.getPage(), request.getLimit(),
         Sort.by(Direction.ASC, "createdAt"));
-    User sender = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User is not found."));
+    User sender = userRepository.findById(userId).orElseThrow(() -> new NotFoundException(ErrorConstant.SENDER_NOT_FOUND));
     String role = sender.getRoles().iterator().next().getName();
     if (role.equals("ROLE_FORWARDER")) {
       feedbacks = feedbackRepository.findByReport(reportId, userId, pageRequest);
@@ -101,7 +102,7 @@ public class FeedbackServiceImpl implements FeedbackService {
     PageRequest pageRequest = PageRequest.of(request.getPage(), request.getLimit(),
         Sort.by(Direction.DESC, "createdAt"));
     User sender = userRepository.findByUsername(username)
-        .orElseThrow(() -> new NotFoundException("User is not found."));
+        .orElseThrow(() -> new NotFoundException(ErrorConstant.SENDER_NOT_FOUND));
     String role = sender.getRoles().iterator().next().getName();
     if (role.equals("ROLE_MODERATOR") || role.equals("ROLE_FORWARDER")) {
       feedbacks = feedbackRepository.findBySender(sender, pageRequest);
@@ -131,9 +132,9 @@ public class FeedbackServiceImpl implements FeedbackService {
   @Override
   public Feedback editFeedback(Long id, Long userId, Map<String, Object> updates) {
     Feedback feedback = feedbackRepository.findById(id)
-        .orElseThrow(() -> new NotFoundException("Feedback is not found."));
+        .orElseThrow(() -> new NotFoundException(ErrorConstant.FEEDBACK_NOT_FOUND));
     if (feedback.getSender().getId() != userId) {
-      throw new NotFoundException("Access denied, This feedback can be only edited by its onwer.");
+      throw new NotFoundException(ErrorConstant.USER_ACCESS_DENIED);
     }
 
     String message = String.valueOf(updates.get("message"));
@@ -154,11 +155,11 @@ public class FeedbackServiceImpl implements FeedbackService {
   @Override
   public void removeFeedback(Long id, Long userId) {
     Feedback feedback = feedbackRepository.findById(id)
-        .orElseThrow(() -> new NotFoundException("Feedback is not found."));
+        .orElseThrow(() -> new NotFoundException(ErrorConstant.FEEDBACK_NOT_FOUND));
     if (feedback.getSender().getId().equals(userId)) {
       feedbackRepository.deleteById(id);
     } else {
-      throw new NotFoundException("Access denied.");
+      throw new NotFoundException(ErrorConstant.USER_ACCESS_DENIED);
     }
   }
 

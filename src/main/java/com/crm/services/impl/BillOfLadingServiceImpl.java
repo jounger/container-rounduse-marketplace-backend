@@ -15,6 +15,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import com.crm.common.Constant;
+import com.crm.common.ErrorConstant;
 import com.crm.common.Tool;
 import com.crm.enums.EnumSupplyStatus;
 import com.crm.exception.DuplicateRecordException;
@@ -59,7 +60,7 @@ public class BillOfLadingServiceImpl implements BillOfLadingService {
       Page<BillOfLading> pages = billOfLadingRepository.findByInbound(id, pageRequest);
       return pages;
     } else {
-      throw new NotFoundException("ERROR: Inbound is not found.");
+      throw new NotFoundException(ErrorConstant.INBOUND_NOT_FOUND);
     }
   }
 
@@ -67,14 +68,14 @@ public class BillOfLadingServiceImpl implements BillOfLadingService {
   public BillOfLading updateBillOfLading(Long userId, BillOfLadingRequest request) {
     if (forwarderRepository.existsById(userId)) {
       BillOfLading billOfLading = billOfLadingRepository.findById(request.getId())
-          .orElseThrow(() -> new NotFoundException("ERROR: BillOfLading is not found."));
+          .orElseThrow(() -> new NotFoundException(ErrorConstant.BILLOFLADING_NOT_FOUND));
 
       if (!billOfLading.getInbound().getForwarder().getId().equals(userId)) {
-        throw new InternalException(String.format("Forwarder %s not owned BillOfLading", userId));
+        throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
       }
 
       Port port = portRepository.findByNameCode(request.getPortOfDelivery())
-          .orElseThrow(() -> new NotFoundException("ERROR: Port is not found."));
+          .orElseThrow(() -> new NotFoundException(ErrorConstant.PORT_NOT_FOUND));
       billOfLading.setPortOfDelivery(port);
 
       String billOfLadingNumber = request.getBillOfLadingNumber();
@@ -82,14 +83,14 @@ public class BillOfLadingServiceImpl implements BillOfLadingService {
         if (billOfLadingRepository.existsByBillOfLadingNumber(billOfLadingNumber)) {
           if (billOfLadingNumber.equals(billOfLading.getBillOfLadingNumber())) {
           } else {
-            throw new DuplicateRecordException("Error: BillOfLading has been existed");
+            throw new DuplicateRecordException(ErrorConstant.BILLOFLADING_ALREADY_EXISTS);
           }
         }
         billOfLading.setBillOfLadingNumber(billOfLadingNumber);
       }
 
       if (request.getUnit() < billOfLading.getContainers().size()) {
-        throw new InternalException("unit must be more or equal number of container");
+        throw new InternalException(ErrorConstant.CONTAINER_MORE_OR_LESS_THAN_NEEDED);
       }
       billOfLading.setUnit(request.getUnit());
 
@@ -100,36 +101,35 @@ public class BillOfLadingServiceImpl implements BillOfLadingService {
         containers.forEach(item -> {
           if (item.getStatus().equalsIgnoreCase(EnumSupplyStatus.COMBINED.name())
               || item.getStatus().equalsIgnoreCase(EnumSupplyStatus.BIDDING.name())) {
-            throw new InternalException(
-                String.format("Container %s has been %s", item.getContainerNumber(), item.getStatus()));
+            throw new InternalException(ErrorConstant.CONTAINER_BUSY);
           }
 
           String containerNumber = item.getContainerNumber();
           boolean isContainer = containerRepository.findByContainerNumber(billOfLading.getId(), userId, containerNumber,
               billOfLading.getInbound().getPickupTime(), freeTime);
           if (!isContainer) {
-            throw new InternalException(String.format("Container %s has been busy", containerNumber));
+            throw new InternalException(ErrorConstant.CONTAINER_BUSY);
           }
 
           Long driverId = item.getDriver().getId();
           boolean listContainer = containerRepository.findByDriver(driverId, userId,
               billOfLading.getInbound().getPickupTime(), freeTime, billOfLading.getId());
           if (!listContainer) {
-            throw new InternalException(String.format("Driver %s has been busy", item.getDriver().getUsername()));
+            throw new InternalException(ErrorConstant.DRIVER_BUSY);
           }
 
           Long tractorId = item.getTractor().getId();
           boolean listContainerByTracTor = containerRepository.findByTractor(tractorId, userId,
               billOfLading.getInbound().getPickupTime(), freeTime, billOfLading.getId());
           if (!listContainerByTracTor) {
-            throw new InternalException(String.format("Tractor %s has been busy", item.getTractor().getLicensePlate()));
+            throw new InternalException(ErrorConstant.TRACTOR_BUSY);
           }
 
           Long trailerId = item.getTrailer().getId();
           boolean listContainerByTrailer = containerRepository.findByTrailer(trailerId, userId,
               billOfLading.getInbound().getPickupTime(), freeTime, billOfLading.getId());
           if (!listContainerByTrailer) {
-            throw new InternalException(String.format("Trailer %s has been busy", item.getTrailer().getLicensePlate()));
+            throw new InternalException(ErrorConstant.TRAILER_BUSY);
           }
 
         });
@@ -137,7 +137,7 @@ public class BillOfLadingServiceImpl implements BillOfLadingService {
         if (freeTime.isAfter(billOfLading.getInbound().getPickupTime())) {
           billOfLading.setFreeTime(freeTime);
         } else {
-          throw new InternalException("Error: pickupTime must before freeTime");
+          throw new InternalException(ErrorConstant.BILLOFLADING_INVALID_FREE_TIME);
         }
       }
 
@@ -145,7 +145,7 @@ public class BillOfLadingServiceImpl implements BillOfLadingService {
 
       return billOfLading;
     } else {
-      throw new NotFoundException("ERROR: Forwarder is not found.");
+      throw new NotFoundException(ErrorConstant.FORWARDER_NOT_FOUND);
     }
   }
 
@@ -153,17 +153,17 @@ public class BillOfLadingServiceImpl implements BillOfLadingService {
   public BillOfLading editBillOfLading(Map<String, Object> updates, Long id, Long userId) {
     if (forwarderRepository.existsById(userId)) {
       BillOfLading billOfLading = billOfLadingRepository.findById(id)
-          .orElseThrow(() -> new NotFoundException("ERROR: BillOfLading is not found."));
+          .orElseThrow(() -> new NotFoundException(ErrorConstant.BILLOFLADING_NOT_FOUND));
 
       if (!billOfLading.getInbound().getForwarder().getId().equals(userId)) {
-        throw new InternalException(String.format("Forwarder %s not owned BillOfLading", userId));
+        throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
       }
 
       String portOfDelivery = String.valueOf(updates.get("portOfDelivery"));
       if (updates.get("portOfDelivery") != null
           && !Tool.isEqual(billOfLading.getPortOfDelivery().getNameCode(), portOfDelivery)) {
         Port port = portRepository.findByNameCode(portOfDelivery)
-            .orElseThrow(() -> new NotFoundException("ERROR: Port is not found."));
+            .orElseThrow(() -> new NotFoundException(ErrorConstant.PORT_NOT_FOUND));
         billOfLading.setPortOfDelivery(port);
       }
 
@@ -171,7 +171,7 @@ public class BillOfLadingServiceImpl implements BillOfLadingService {
       if (updates.get("billOfLadingNumber") != null
           && !Tool.isEqual(billOfLading.getBillOfLadingNumber(), billOfLadingNumber)) {
         if (billOfLadingRepository.existsByBillOfLadingNumber(billOfLadingNumber)) {
-          throw new DuplicateRecordException("Error: BillOfLading has been existed");
+          throw new DuplicateRecordException(ErrorConstant.BILLOFLADING_ALREADY_EXISTS);
         }
         billOfLading.setBillOfLadingNumber(billOfLadingNumber);
       }
@@ -180,7 +180,7 @@ public class BillOfLadingServiceImpl implements BillOfLadingService {
       if (updates.get("unit") != null && !Tool.isEqual(billOfLading.getUnit(), unitRequest)) {
         int unit = Integer.parseInt(unitRequest);
         if (unit < billOfLading.getContainers().size()) {
-          throw new InternalException("unit must be more or equal number of container");
+          throw new InternalException(ErrorConstant.CONTAINER_MORE_OR_LESS_THAN_NEEDED);
         }
         billOfLading.setUnit(unit);
       }
@@ -195,43 +195,42 @@ public class BillOfLadingServiceImpl implements BillOfLadingService {
 
           if (item.getStatus().equalsIgnoreCase(EnumSupplyStatus.COMBINED.name())
               || item.getStatus().equalsIgnoreCase(EnumSupplyStatus.BIDDING.name())) {
-            throw new InternalException(
-                String.format("Container %s has been %s", item.getContainerNumber(), item.getStatus()));
+            throw new InternalException(ErrorConstant.CONTAINER_BUSY);
           }
 
           String containerNumber = item.getContainerNumber();
           boolean isContainer = containerRepository.findByContainerNumber(billOfLading.getId(), userId, containerNumber,
               billOfLading.getInbound().getPickupTime(), freeTime);
           if (!isContainer) {
-            throw new InternalException(String.format("Container %s has been busy", containerNumber));
+            throw new InternalException(ErrorConstant.CONTAINER_BUSY);
           }
 
           Long driverId = item.getDriver().getId();
           boolean listContainerByDriver = containerRepository.findByDriver(driverId, userId,
               billOfLading.getInbound().getPickupTime(), freeTime, billOfLading.getId());
           if (!listContainerByDriver) {
-            throw new InternalException(String.format("Driver %s has been busy", item.getDriver().getUsername()));
+            throw new InternalException(ErrorConstant.DRIVER_BUSY);
           }
 
           Long tractorId = item.getTractor().getId();
           boolean listContainerByTracTor = containerRepository.findByTractor(tractorId, userId,
               billOfLading.getInbound().getPickupTime(), freeTime, billOfLading.getId());
           if (!listContainerByTracTor) {
-            throw new InternalException(String.format("Tractor %s has been busy", item.getTractor().getLicensePlate()));
+            throw new InternalException(ErrorConstant.TRACTOR_BUSY);
           }
 
           Long trailerId = item.getTrailer().getId();
           boolean listContainerByTrailer = containerRepository.findByTrailer(trailerId, userId,
               billOfLading.getInbound().getPickupTime(), freeTime, billOfLading.getId());
           if (!listContainerByTrailer) {
-            throw new InternalException(String.format("Trailer %s has been busy", item.getTrailer().getLicensePlate()));
+            throw new InternalException(ErrorConstant.TRAILER_BUSY);
           }
         });
 
         if (freeTime.isAfter(billOfLading.getInbound().getPickupTime())) {
           billOfLading.setFreeTime(freeTime);
         } else {
-          throw new InternalException("Error: pickupTime must before freeTime");
+          throw new InternalException(ErrorConstant.BILLOFLADING_INVALID_FREE_TIME);
         }
       }
 
@@ -239,21 +238,21 @@ public class BillOfLadingServiceImpl implements BillOfLadingService {
 
       return billOfLading;
     } else {
-      throw new NotFoundException("ERROR: Forwarder is not found.");
+      throw new NotFoundException(ErrorConstant.FORWARDER_NOT_FOUND);
     }
   }
 
   @Override
   public BillOfLading getBillOfLadingByBillOfLadingNumber(String billOfLadingNumber) {
     BillOfLading billOfLading = billOfLadingRepository.findByBillOfLadingNumber(billOfLadingNumber)
-        .orElseThrow(() -> new NotFoundException("ERROR: BillOfLading is not found."));
+        .orElseThrow(() -> new NotFoundException(ErrorConstant.BILLOFLADING_NOT_FOUND));
     return billOfLading;
   }
 
   @Override
   public BillOfLading getBillOfLadingById(Long id) {
     BillOfLading billOfLading = billOfLadingRepository.findById(id)
-        .orElseThrow(() -> new NotFoundException("ERROR: BillOfLading is not found."));
+        .orElseThrow(() -> new NotFoundException(ErrorConstant.BILLOFLADING_NOT_FOUND));
     return billOfLading;
   }
 

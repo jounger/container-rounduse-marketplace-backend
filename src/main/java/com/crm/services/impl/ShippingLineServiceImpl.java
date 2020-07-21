@@ -9,6 +9,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.crm.common.ErrorConstant;
 import com.crm.common.Tool;
 import com.crm.enums.EnumUserStatus;
 import com.crm.exception.DuplicateRecordException;
@@ -46,7 +47,7 @@ public class ShippingLineServiceImpl implements ShippingLineService {
     if (userRepository.existsByUsername(request.getUsername()) || userRepository.existsByEmail(request.getEmail())
         || userRepository.existsByPhone(request.getPhone())
         || supplierRepository.existsByCompanyCode(request.getCompanyCode())) {
-      throw new DuplicateRecordException("Error: User has been existed");
+      throw new DuplicateRecordException(ErrorConstant.USER_ALREADY_EXISTS);
     }
     ShippingLine shippingLine = new ShippingLine();
     shippingLine.setUsername(request.getUsername());
@@ -55,7 +56,7 @@ public class ShippingLineServiceImpl implements ShippingLineService {
     shippingLine.setPassword(encoder);
 
     Role userRole = roleRepository.findByName("ROLE_SHIPPINGLINE")
-        .orElseThrow(() -> new NotFoundException("Error: Role is not found"));
+        .orElseThrow(() -> new NotFoundException(ErrorConstant.ROLE_NOT_FOUND));
     shippingLine.getRoles().add(userRole);
 
     shippingLine.setEmail(request.getEmail());
@@ -79,7 +80,7 @@ public class ShippingLineServiceImpl implements ShippingLineService {
   @Override
   public ShippingLine getShippingLine(Long id) {
     ShippingLine shippingLine = shippingLineRepository.findById(id)
-        .orElseThrow(() -> new NotFoundException("Shipping Line is not found."));
+        .orElseThrow(() -> new NotFoundException(ErrorConstant.SHIPPINGLINE_NOT_FOUND));
     return shippingLine;
   }
 
@@ -93,7 +94,7 @@ public class ShippingLineServiceImpl implements ShippingLineService {
   @Override
   public ShippingLine updateShippingLine(ShippingLineRequest request) {
     ShippingLine shippingLine = shippingLineRepository.findById(request.getId())
-        .orElseThrow(() -> new NotFoundException("Shipping Line is not found."));
+        .orElseThrow(() -> new NotFoundException(ErrorConstant.SHIPPINGLINE_NOT_FOUND));
 
     /*
      * String encoder = passwordEncoder.encode(request.getPassword());
@@ -101,7 +102,7 @@ public class ShippingLineServiceImpl implements ShippingLineService {
      */
 
     Role userRole = roleRepository.findByName(request.getRoles().iterator().next())
-        .orElseThrow(() -> new NotFoundException("Error: Role is not found"));
+        .orElseThrow(() -> new NotFoundException(ErrorConstant.ROLE_NOT_FOUND));
     shippingLine.getRoles().add(userRole);
 
     if (UserServiceImpl.isEmailChange(request.getEmail(), shippingLine)) {
@@ -121,7 +122,7 @@ public class ShippingLineServiceImpl implements ShippingLineService {
         && !supplierRepository.existsByCompanyCode(request.getCompanyCode())) {
       shippingLine.setCompanyCode(request.getCompanyCode());
     } else {
-      throw new DuplicateRecordException("Company code has been existed.");
+      throw new DuplicateRecordException(ErrorConstant.COMPANY_CODE_ALREADY_EXISTS);
     }
 
     shippingLine.setCompanyDescription(request.getCompanyDescription());
@@ -135,7 +136,7 @@ public class ShippingLineServiceImpl implements ShippingLineService {
   @Override
   public ShippingLine editShippingLine(Long id, Map<String, Object> updates) {
     ShippingLine shippingLine = shippingLineRepository.findById(id)
-        .orElseThrow(() -> new NotFoundException("Shipping Line is not found."));
+        .orElseThrow(() -> new NotFoundException(ErrorConstant.SHIPPINGLINE_NOT_FOUND));
 
     /*
      * String password = String.valueOf( updates.get("password")); if (password !=
@@ -148,14 +149,14 @@ public class ShippingLineServiceImpl implements ShippingLineService {
       if (!userRepository.existsByEmail(email)) {
         shippingLine.setEmail(email);
       } else {
-        throw new DuplicateRecordException("Email has been existed.");
+        throw new DuplicateRecordException(ErrorConstant.USER_EMAIL_ALREADY_EXISTS);
       }
     }
 
     String phone = String.valueOf(updates.get("phone"));
     if (updates.get("phone") != null && !Tool.isEqual(shippingLine.getPhone(), phone)) {
       if (userRepository.existsByPhone(phone)) {
-        throw new DuplicateRecordException("Phone number has been existed.");
+        throw new DuplicateRecordException(ErrorConstant.USER_PHONE_ALREADY_EXISTS);
       }
       shippingLine.setPhone(phone);
     }
@@ -189,7 +190,7 @@ public class ShippingLineServiceImpl implements ShippingLineService {
     String companyCode = String.valueOf(updates.get("companyCode"));
     if (updates.get("companyCode") != null && !Tool.isEqual(shippingLine.getCompanyCode(), companyCode)) {
       if (supplierRepository.existsByCompanyCode(companyCode)) {
-        throw new DuplicateRecordException("Company code has been existed.");
+        throw new DuplicateRecordException(ErrorConstant.COMPANY_CODE_ALREADY_EXISTS);
       }
       shippingLine.setCompanyCode(companyCode);
     }
@@ -220,7 +221,7 @@ public class ShippingLineServiceImpl implements ShippingLineService {
     if (shippingLineRepository.existsById(id)) {
       shippingLineRepository.deleteById(id);
     } else {
-      throw new NotFoundException("Shipping Line is not found.");
+      throw new NotFoundException(ErrorConstant.SHIPPINGLINE_NOT_FOUND);
     }
 
   }

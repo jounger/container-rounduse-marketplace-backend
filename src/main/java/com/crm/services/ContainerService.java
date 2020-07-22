@@ -1,5 +1,6 @@
 package com.crm.services;
 
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.data.domain.Page;
@@ -17,6 +18,8 @@ public interface ContainerService {
   Page<Container> getContainersByInbound(Long id, PaginationRequest request);
 
   Page<Container> getContainersByBid(Long id, PaginationRequest request);
+
+  List<Container> getContainersByBidAndStatus(Long id, String status);
 
   Page<Container> getContainers(PaginationRequest request);
 

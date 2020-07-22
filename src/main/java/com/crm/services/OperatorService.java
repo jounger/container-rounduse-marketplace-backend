@@ -21,4 +21,6 @@ public interface OperatorService {
   Operator editOperator(Long id, Map<String, Object> updates);
 
   void removeOperator(Long id);
+
+  Operator getOperatorByUsername(String username);
 }

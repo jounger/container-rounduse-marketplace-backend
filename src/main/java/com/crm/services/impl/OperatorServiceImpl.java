@@ -95,6 +95,13 @@ public class OperatorServiceImpl implements OperatorService {
   }
 
   @Override
+  public Operator getOperatorByUsername(String username) {
+    Operator operator = operatorRepository.findByUsername(username)
+        .orElseThrow(() -> new NotFoundException(ErrorConstant.OPERATOR_NOT_FOUND));
+    return operator;
+  }
+
+  @Override
   public Operator updateOperator(OperatorRequest request) {
     Operator operator = operatorRepository.findById(request.getId())
         .orElseThrow(() -> new NotFoundException(ErrorConstant.OPERATOR_NOT_FOUND));

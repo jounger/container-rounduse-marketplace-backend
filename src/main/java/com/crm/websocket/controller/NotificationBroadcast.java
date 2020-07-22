@@ -1,8 +1,10 @@
 package com.crm.websocket.controller;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -216,8 +218,10 @@ public class NotificationBroadcast {
         BiddingNotification notification = new BiddingNotification();
         BiddingNotificationRequest notifyRequest = new BiddingNotificationRequest();
         Merchant offeree = bidNew.getBiddingDocument().getOfferee();
-        List<Container> listContainerBid = containerService.getContainersByBidAndStatus(bidNew.getId(),
-            EnumSupplyStatus.COMBINED.name());
+//        List<Container> listContainerBid = containerService.getContainersByBidAndStatus(bidNew.getId(),
+//            EnumSupplyStatus.COMBINED.name());
+        Collection<Container> listContainerBid = bidNew.getContainers().stream()
+            .filter(ex -> ex.getStatus().equals(EnumSupplyStatus.COMBINED.name())).collect(Collectors.toList());
 
         notifyRequest.setRecipient(bidNew.getBidder().getUsername());
         notifyRequest.setRelatedResource(bidNew.getBiddingDocument().getId());
@@ -225,10 +229,6 @@ public class NotificationBroadcast {
         notifyRequest.setAction(EnumBiddingNotification.ACCEPTED.name());
         notifyRequest.setType(EnumNotificationType.BIDDING.name());
         notification = biddingNotificationService.createBiddingNotification(notifyRequest);
-
-        // Send notification to forwarders
-        logger.info("notification : {}", notification.getId());
-        biddingWebSocketService.sendBiddingNotifyToUser(notification);
 
         ShippingLineNotification shippingLineNotification = new ShippingLineNotification();
         ShippingLineNotificationRequest shippingLineNotificationRequest = new ShippingLineNotificationRequest();
@@ -243,10 +243,8 @@ public class NotificationBroadcast {
         shippingLineNotification = shippingLineNotificationService
             .createShippingLineNotification(shippingLineNotificationRequest);
 
-        // Send notification to ShippingLine
-        shippingLineWebSocketService.sendCombinedNotifyToShippingLine(shippingLineNotification);
-
-        if (listContainerBid != null) {
+        if (listContainerBid.size() > 0) {
+          List<DriverNotification> driverNotifications = new ArrayList<>();
           listContainerBid.forEach(container -> {
             DriverNotification driverNotification = new DriverNotification();
             DriverNotificationRequest driverNotifyRequest = new DriverNotificationRequest();
@@ -258,11 +256,21 @@ public class NotificationBroadcast {
             driverNotifyRequest.setType(EnumNotificationType.DRIVER.name());
             driverNotifyRequest.setAction(EnumDriverNotification.TASK.name());
             driverNotification = driverNotificationService.createDriverNotification(driverNotifyRequest);
+            driverNotifications.add(driverNotification);
+          });
 
-            // Asynchronous send notification to Driver
+          // Asynchronous send notification to Driver
+          driverNotifications.parallelStream().forEach(driverNotification -> {
             driverWebSocketService.sendBiddingNotifyToDriver(driverNotification);
           });
         }
+
+        // Send notification to Forwarder
+        logger.info("notification : {}", notification.getId());
+        biddingWebSocketService.sendBiddingNotifyToUser(notification);
+
+        // Send notification to ShippingLine
+        shippingLineWebSocketService.sendCombinedNotifyToShippingLine(shippingLineNotification);
       }
     });
   }

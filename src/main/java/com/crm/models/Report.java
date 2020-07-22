@@ -1,5 +1,6 @@
 package com.crm.models;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -70,6 +71,9 @@ public class Report {
   @NotBlank
   @Size(min = 2, max = 20)
   private String status;
+
+  @Column(name = "send_date")
+  private LocalDateTime sendDate;
 
   @Column(name = "created_at", nullable = false, updatable = false)
   @Temporal(TemporalType.TIMESTAMP)

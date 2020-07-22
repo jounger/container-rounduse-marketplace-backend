@@ -1,5 +1,6 @@
 package com.crm.models.mapper;
 
+import com.crm.common.Tool;
 import com.crm.models.Feedback;
 import com.crm.models.User;
 import com.crm.models.dto.FeedbackDto;
@@ -17,6 +18,7 @@ public class FeedbackMapper {
 
     feedbackDto.setMessage(feedback.getMessage());
     feedbackDto.setSatisfactionPoints(feedback.getSatisfactionPoints());
+    feedbackDto.setSendDate(Tool.convertLocalDateTimeToString(feedback.getSendDate()));
 
     return feedbackDto;
   }

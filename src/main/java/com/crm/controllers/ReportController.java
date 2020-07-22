@@ -63,6 +63,16 @@ public class ReportController {
   }
 
   @PreAuthorize("hasRole('MODERATOR') or hasRole('FORWARDER')")
+  @GetMapping("/{id}")
+  public ResponseEntity<?> getReport(@PathVariable Long id) {
+    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    String username = userDetails.getUsername();
+    Report report = reportService.getReport(id, username);
+    ReportDto reportDto = ReportMapper.toReportDto(report);
+    return ResponseEntity.ok(reportDto);
+  }
+
+  @PreAuthorize("hasRole('MODERATOR') or hasRole('FORWARDER')")
   @GetMapping("/user")
   public ResponseEntity<?> getReportsByUser(@Valid PaginationRequest request) {
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -128,7 +138,7 @@ public class ReportController {
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
 
-    Report report = reportService.getReport(id);
+    Report report = reportService.getReport(id, username);
     String status = report.getStatus();
 
     Report editReport = reportService.editReport(id, username, updates);

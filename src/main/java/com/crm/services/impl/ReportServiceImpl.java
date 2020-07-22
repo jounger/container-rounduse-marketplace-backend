@@ -77,6 +77,18 @@ public class ReportServiceImpl implements ReportService {
   }
 
   @Override
+  public Report getReport(Long id, String username) {
+    Report report = reportRepository.findById(id)
+        .orElseThrow(() -> new NotFoundException(ErrorConstant.REPORT_NOT_FOUND));
+    User user = userRepository.findById(id).orElseThrow(() -> new NotFoundException(ErrorConstant.USER_NOT_FOUND));
+    String role = user.getRoles().iterator().next().getName();
+    if (!report.getSender().getUsername().equals(username) && !role.equalsIgnoreCase("ROLE_MODERATOR")) {
+      throw new NotFoundException(ErrorConstant.USER_ACCESS_DENIED);
+    }
+    return report;
+  }
+
+  @Override
   public Page<Report> getReportsByUser(String username, PaginationRequest request) {
     Supplier sender = supplierRepository.findByUsername(username)
         .orElseThrow(() -> new NotFoundException(ErrorConstant.SENDER_NOT_FOUND));
@@ -113,7 +125,8 @@ public class ReportServiceImpl implements ReportService {
 
   @Override
   public Report editReport(Long id, String username, Map<String, Object> updates) {
-    Report report = reportRepository.findById(id).orElseThrow(() -> new NotFoundException(ErrorConstant.REPORT_NOT_FOUND));
+    Report report = reportRepository.findById(id)
+        .orElseThrow(() -> new NotFoundException(ErrorConstant.REPORT_NOT_FOUND));
 
     User user = userRepository.findByUsername(username)
         .orElseThrow(() -> new NotFoundException("Supplier is not found."));
@@ -171,18 +184,13 @@ public class ReportServiceImpl implements ReportService {
 
   @Override
   public void removeReport(Long id, String username) {
-    Report report = reportRepository.findById(id).orElseThrow(() -> new NotFoundException(ErrorConstant.REPORT_NOT_FOUND));
+    Report report = reportRepository.findById(id)
+        .orElseThrow(() -> new NotFoundException(ErrorConstant.REPORT_NOT_FOUND));
     if (report.getSender().getUsername().equals(username)) {
       reportRepository.delete(report);
     } else {
-      throw new NotFoundException("Access denied.");
+      throw new NotFoundException(ErrorConstant.USER_ACCESS_DENIED);
     }
-  }
-
-  @Override
-  public Report getReport(Long id) {
-    Report report = reportRepository.findById(id).orElseThrow(() -> new NotFoundException(ErrorConstant.REPORT_NOT_FOUND));
-    return report;
   }
 
 }

@@ -171,4 +171,7 @@ public interface ContainerRepository extends JpaRepository<Container, Long> {
       + "AND c.billOfLading.id != :id")
   boolean findByTractor(@Param("tractorId") Long tractorId, @Param("userId") Long userId,
       @Param("pickupTime") LocalDateTime pickupTime, @Param("freeTime") LocalDateTime freeTime, @Param("id") Long id);
+
+  @Query(value = "SELECT c FROM Container c LEFT JOIN c.bids b WHERE b.id = :id AND c.status = :status")
+  List<Container> findByBidAndStatus(@Param("id") Long id, @Param("status") String status);
 }

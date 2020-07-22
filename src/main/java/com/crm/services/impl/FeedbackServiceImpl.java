@@ -1,5 +1,6 @@
 package com.crm.services.impl;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -45,7 +46,8 @@ public class FeedbackServiceImpl implements FeedbackService {
   public Feedback createFeedback(Long id, Long userId, FeedbackRequest request) {
     Feedback feedback = new Feedback();
 
-    Report report = reportRepository.findById(id).orElseThrow(() -> new NotFoundException(ErrorConstant.REPORT_NOT_FOUND));
+    Report report = reportRepository.findById(id)
+        .orElseThrow(() -> new NotFoundException(ErrorConstant.REPORT_NOT_FOUND));
 
     if (report.getStatus().equals(EnumReportStatus.RESOLVED.name())
         || report.getStatus().equals(EnumReportStatus.REJECTED.name())
@@ -55,7 +57,8 @@ public class FeedbackServiceImpl implements FeedbackService {
 
     report.setStatus(EnumReportStatus.UPDATED.name());
     feedback.setReport(report);
-    User sender = userRepository.findById(userId).orElseThrow(() -> new NotFoundException(ErrorConstant.SENDER_NOT_FOUND));
+    User sender = userRepository.findById(userId)
+        .orElseThrow(() -> new NotFoundException(ErrorConstant.SENDER_NOT_FOUND));
     String role = sender.getRoles().iterator().next().getName();
     if (role.equals("ROLE_MODERATOR") || userId.equals(report.getSender().getId())) {
       feedback.setSender(sender);
@@ -71,6 +74,7 @@ public class FeedbackServiceImpl implements FeedbackService {
       throw new InternalException(ErrorConstant.FEEDBACK_INVALID_SATISFACTION_POINTS);
     }
     feedback.setSatisfactionPoints(satisfactionPoints);
+    feedback.setSendDate(LocalDateTime.now());
 
     feedbackRepository.save(feedback);
     return feedback;
@@ -86,7 +90,8 @@ public class FeedbackServiceImpl implements FeedbackService {
 
     PageRequest pageRequest = PageRequest.of(request.getPage(), request.getLimit(),
         Sort.by(Direction.ASC, "createdAt"));
-    User sender = userRepository.findById(userId).orElseThrow(() -> new NotFoundException(ErrorConstant.SENDER_NOT_FOUND));
+    User sender = userRepository.findById(userId)
+        .orElseThrow(() -> new NotFoundException(ErrorConstant.SENDER_NOT_FOUND));
     String role = sender.getRoles().iterator().next().getName();
     if (role.equals("ROLE_FORWARDER")) {
       feedbacks = feedbackRepository.findByReport(reportId, userId, pageRequest);

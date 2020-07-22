@@ -1,5 +1,6 @@
 package com.crm.services.impl;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -71,6 +72,7 @@ public class ReportServiceImpl implements ReportService {
     }
 
     report.setStatus(EnumReportStatus.PENDING.name());
+    report.setSendDate(LocalDateTime.now());
 
     reportRepository.save(report);
     return report;

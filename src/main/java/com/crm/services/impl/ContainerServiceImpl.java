@@ -1,6 +1,7 @@
 package com.crm.services.impl;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -409,5 +410,12 @@ public class ContainerServiceImpl implements ContainerService {
       pages = containerRepository.findByBid(id, pageRequest);
     }
     return pages;
+  }
+
+  @Override
+  public List<Container> getContainersByBidAndStatus(Long id, String status) {
+
+    List<Container> containers = containerRepository.findByBidAndStatus(id, status);
+    return containers;
   }
 }

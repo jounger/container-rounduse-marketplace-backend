@@ -353,17 +353,17 @@ public class BidServiceImpl implements BidService {
       }
 
       if (bid.getStatus().equalsIgnoreCase(EnumBidStatus.ACCEPTED.name())) {
-        Long combinedContainer = containerRepository.countCombinedContainersByBiddingDocument(biddingDocument.getId());
-        if (booking.getUnit() < combinedContainer + bid.getContainers().size()) {
-          throw new InternalException(ErrorConstant.CONTAINER_MORE_OR_LESS_THAN_NEEDED);
-        }
-        if (booking.getUnit() == combinedContainer + bid.getContainers().size()) {
-          biddingDocument.setStatus(EnumBiddingStatus.COMBINED.name());
-          biddingDocumentRepository.save(biddingDocument);
-        }
         bid.setDateOfDecision(LocalDateTime.now());
         if (biddingDocument.getIsMultipleAward()) {
           containersId = (List<String>) updates.get("combinedContainers");
+          Long combinedContainers = containerRepository.countCombinedContainersByBiddingDocument(biddingDocument.getId());
+          if (booking.getUnit() < combinedContainers + containersId.size()) {
+            throw new InternalException(ErrorConstant.CONTAINER_MORE_OR_LESS_THAN_NEEDED);
+          }
+          if (booking.getUnit() == combinedContainers + containersId.size()) {
+            biddingDocument.setStatus(EnumBiddingStatus.COMBINED.name());
+            biddingDocumentRepository.save(biddingDocument);
+          }
           containersId.forEach(conId -> {
             Long containerId = Long.valueOf(conId);
             bid.getContainers().forEach(container -> {
@@ -375,6 +375,14 @@ public class BidServiceImpl implements BidService {
           });
           
         } else {
+          Long combinedContainers = containerRepository.countCombinedContainersByBiddingDocument(biddingDocument.getId());
+          if (booking.getUnit() < combinedContainers + bid.getContainers().size()) {
+            throw new InternalException(ErrorConstant.CONTAINER_MORE_OR_LESS_THAN_NEEDED);
+          }
+          if (booking.getUnit() == combinedContainers + bid.getContainers().size()) {
+            biddingDocument.setStatus(EnumBiddingStatus.COMBINED.name());
+            biddingDocumentRepository.save(biddingDocument);
+          }
           List<Container> containers = new ArrayList<>(bid.getContainers());
           containers.forEach(container -> {
             container.setStatus(EnumSupplyStatus.COMBINED.name());

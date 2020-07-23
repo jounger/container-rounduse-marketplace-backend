@@ -11,7 +11,7 @@ import com.crm.payload.request.SignUpRequest;
 
 public interface UserService {
 
-  void createUser(SignUpRequest request);
+  User createUser(SignUpRequest request);
 
   Page<User> getUsers(PaginationRequest request);
 

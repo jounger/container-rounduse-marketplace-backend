@@ -42,7 +42,7 @@ public class UserServiceImpl implements UserService {
   private PasswordEncoder passwordEncoder;
 
   @Override
-  public void createUser(SignUpRequest request) {
+  public User createUser(SignUpRequest request) {
     if (userRepository.existsByUsername(request.getUsername()) || userRepository.existsByEmail(request.getEmail())
         || userRepository.existsByPhone(request.getPhone())) {
       throw new DuplicateRecordException(ErrorConstant.USER_ALREADY_EXISTS);
@@ -78,6 +78,7 @@ public class UserServiceImpl implements UserService {
     String encoder = passwordEncoder.encode(request.getPassword());
     user.setPassword(encoder);
     userRepository.save(user);
+    return user;
   }
 
   @Override

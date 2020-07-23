@@ -12,12 +12,14 @@ import lombok.Setter;
 public class FeedbackDto {
 
   private Long id;
-  
+
   private Long report;
-  
+
   private String sender;
-  
+
   private String message;
-  
+
   private Integer satisfactionPoints;
+
+  private String sendDate;
 }

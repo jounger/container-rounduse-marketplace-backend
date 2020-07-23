@@ -1,5 +1,6 @@
 package com.crm.models;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -58,6 +59,9 @@ public class Feedback {
 
   @Column(name = "satisfaction_points")
   private Integer satisfactionPoints;
+
+  @Column(name = "send_date")
+  private LocalDateTime sendDate;
 
   @Column(name = "created_at", nullable = false, updatable = false)
   @Temporal(TemporalType.TIMESTAMP)

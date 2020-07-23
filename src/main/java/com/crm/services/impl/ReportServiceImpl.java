@@ -1,5 +1,6 @@
 package com.crm.services.impl;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -71,6 +72,7 @@ public class ReportServiceImpl implements ReportService {
     }
 
     report.setStatus(EnumReportStatus.PENDING.name());
+    report.setSendDate(LocalDateTime.now());
 
     reportRepository.save(report);
     return report;
@@ -80,7 +82,8 @@ public class ReportServiceImpl implements ReportService {
   public Report getReport(Long id, String username) {
     Report report = reportRepository.findById(id)
         .orElseThrow(() -> new NotFoundException(ErrorConstant.REPORT_NOT_FOUND));
-    User user = userRepository.findById(id).orElseThrow(() -> new NotFoundException(ErrorConstant.USER_NOT_FOUND));
+    User user = userRepository.findByUsername(username)
+        .orElseThrow(() -> new NotFoundException(ErrorConstant.USER_NOT_FOUND));
     String role = user.getRoles().iterator().next().getName();
     if (!report.getSender().getUsername().equals(username) && !role.equalsIgnoreCase("ROLE_MODERATOR")) {
       throw new NotFoundException(ErrorConstant.USER_ACCESS_DENIED);

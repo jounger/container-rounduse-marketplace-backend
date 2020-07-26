@@ -41,6 +41,9 @@ public class CombinedController {
   @Autowired
   private CombinedService combinedService;
 
+  @Autowired
+  private NotificationBroadcast notificationBroadcast;
+
   @Transactional
   @PreAuthorize("hasRole('MERCHANT')")
   @PostMapping("/bid/{id}")
@@ -53,7 +56,7 @@ public class CombinedController {
     CombinedDto combinedDto = CombinedMapper.toCombinedDto(combined);
 
     // CREATE NOTIFICATION
-    NotificationBroadcast.broadcastCreateCombinedToDriver(combined);
+    notificationBroadcast.broadcastCreateCombinedToDriver(combined);
     // END NOTIFICATION
 
     return ResponseEntity.ok(combinedDto);

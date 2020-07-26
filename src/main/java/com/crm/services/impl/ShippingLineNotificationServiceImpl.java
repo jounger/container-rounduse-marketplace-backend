@@ -9,6 +9,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import com.crm.common.ErrorConstant;
 import com.crm.enums.EnumNotificationType;
 import com.crm.enums.EnumShippingLineNotification;
 import com.crm.exception.NotFoundException;
@@ -39,7 +40,7 @@ public class ShippingLineNotificationServiceImpl implements ShippingLineNotifica
     ShippingLineNotification shippingLineNotification = new ShippingLineNotification();
 
     User recipient = userRepositoty.findByUsername(request.getRecipient())
-        .orElseThrow(() -> new NotFoundException("Recipient is not found."));
+        .orElseThrow(() -> new NotFoundException(ErrorConstant.RECIPIENT_NOT_FOUND));
     shippingLineNotification.setRecipient(recipient);
 
     shippingLineNotification.setIsRead(false);
@@ -47,7 +48,7 @@ public class ShippingLineNotificationServiceImpl implements ShippingLineNotifica
     shippingLineNotification.setTitle(request.getTitle());
 
     Combined relatedResource = combinedRepository.findById(request.getRelatedResource())
-        .orElseThrow(() -> new NotFoundException("Related resource is not found."));
+        .orElseThrow(() -> new NotFoundException(ErrorConstant.NOTIFICATION_RELATED_RESOURCE_NOT_FOUND));
     shippingLineNotification.setRelatedResource(relatedResource);
 
     shippingLineNotification.setMessage(request.getMessage());
@@ -65,7 +66,7 @@ public class ShippingLineNotificationServiceImpl implements ShippingLineNotifica
   @Override
   public ShippingLineNotification getShippingLineNotification(Long id) {
     ShippingLineNotification shippingLineNotification = shippingLineNotificationRepository.findById(id)
-        .orElseThrow(() -> new NotFoundException("ShippingLine Notification is not found."));
+        .orElseThrow(() -> new NotFoundException(ErrorConstant.NOTIFICATION_NOT_FOUND));
     return shippingLineNotification;
   }
 
@@ -108,7 +109,7 @@ public class ShippingLineNotificationServiceImpl implements ShippingLineNotifica
   @Override
   public ShippingLineNotification editShippingLineNotification(Long id, Map<String, Object> updates) {
     ShippingLineNotification shippingLineNotification = shippingLineNotificationRepository.findById(id)
-        .orElseThrow(() -> new NotFoundException("ShippingLine Notification is not found."));
+        .orElseThrow(() -> new NotFoundException(ErrorConstant.NOTIFICATION_NOT_FOUND));
 
     Boolean isRead = (Boolean) updates.get("isRead");
     if (updates.get("isRead") != null && isRead != null) {
@@ -129,7 +130,7 @@ public class ShippingLineNotificationServiceImpl implements ShippingLineNotifica
     if (shippingLineNotificationRepository.existsById(id)) {
       shippingLineNotificationRepository.deleteById(id);
     } else {
-      throw new NotFoundException("ShippingLine Notification is not found.");
+      throw new NotFoundException(ErrorConstant.NOTIFICATION_NOT_FOUND);
     }
   }
 

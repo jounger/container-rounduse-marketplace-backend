@@ -12,7 +12,7 @@ public interface ReportService {
 
   Report createReport(String username, ReportRequest request);
 
-  Report getReport(Long id);
+  Report getReport(Long id, String username);
 
   Page<Report> getReportsByUser(String username, PaginationRequest request);
 

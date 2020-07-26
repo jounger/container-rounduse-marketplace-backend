@@ -29,6 +29,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.crm.exception.NotFoundException;
+import com.crm.models.Forwarder;
+import com.crm.models.Merchant;
 import com.crm.models.dto.SupplierDto;
 import com.crm.models.dto.UserDto;
 import com.crm.models.mapper.SupplierMapper;
@@ -98,16 +100,15 @@ public class AuthController {
 
   @PostMapping("/signup")
   public ResponseEntity<?> registerUser(@Valid @RequestBody SupplierRequest request) {
-    String role = request.getRoles().iterator().next();
+    String role = request.getRoles().iterator().next().toUpperCase();
     SupplierDto supplierDto = null;
-    switch (role.toUpperCase()) {
-    case "FORWARDER":
-      supplierDto = SupplierMapper.toSupplierDto(forwarderService.createForwarder(request));
-      break;
-    case "MERCHANT":
-      supplierDto = SupplierMapper.toSupplierDto(merchantService.createMerchant(request));
-      break;
-    default:
+    if (role.equals("FORWARDER") || role.equals("ROLE_FORWARDER")) {
+      Forwarder forwarder = forwarderService.createForwarder(request);
+      supplierDto = SupplierMapper.toSupplierDto(forwarder);
+    } else if (role.equals("MERCHANT") || role.equals("ROLE_MERCHANT")) {
+      Merchant merchant = merchantService.createMerchant(request);
+      supplierDto = SupplierMapper.toSupplierDto(merchant);
+    } else {
       throw new NotFoundException("Role is not found.");
     }
 

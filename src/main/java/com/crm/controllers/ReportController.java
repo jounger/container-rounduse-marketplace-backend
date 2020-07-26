@@ -43,6 +43,9 @@ public class ReportController {
   @Autowired
   private ReportService reportService;
 
+  @Autowired
+  private NotificationBroadcast notificationBroadcast;
+
   @Transactional
   @PostMapping("")
   @PreAuthorize("hasRole('FORWARDER')")
@@ -53,9 +56,19 @@ public class ReportController {
     ReportDto reportDto = ReportMapper.toReportDto(report);
 
     // CREATE NOTIFICATION
-    NotificationBroadcast.broadcastCreateReportToModerator(report);
+    notificationBroadcast.broadcastCreateReportToModerator(report);
     // END NOTIFICATION
 
+    return ResponseEntity.ok(reportDto);
+  }
+
+  @PreAuthorize("hasRole('MODERATOR') or hasRole('FORWARDER')")
+  @GetMapping("/{id}")
+  public ResponseEntity<?> getReport(@PathVariable Long id) {
+    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    String username = userDetails.getUsername();
+    Report report = reportService.getReport(id, username);
+    ReportDto reportDto = ReportMapper.toReportDto(report);
     return ResponseEntity.ok(reportDto);
   }
 
@@ -125,14 +138,14 @@ public class ReportController {
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
 
-    Report report = reportService.getReport(id);
+    Report report = reportService.getReport(id, username);
     String status = report.getStatus();
 
     Report editReport = reportService.editReport(id, username, updates);
     ReportDto reportDto = ReportMapper.toReportDto(editReport);
 
     // CREATE NOTIFICATION
-    NotificationBroadcast.broadcastUpdateReportToModerator(status, editReport);
+    notificationBroadcast.broadcastUpdateReportToModerator(status, editReport);
     // END NOTIFICATION
 
     return ResponseEntity.ok(reportDto);

@@ -12,6 +12,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.crm.common.Constant;
+import com.crm.common.ErrorConstant;
 import com.crm.common.Tool;
 import com.crm.enums.EnumUserStatus;
 import com.crm.exception.DuplicateRecordException;
@@ -51,7 +52,7 @@ public class DriverServiceImpl implements DriverService {
   public Driver createDriver(Long userId, DriverRequest request) {
     if (userRepository.existsByUsername(request.getUsername()) || userRepository.existsByEmail(request.getEmail())
         || userRepository.existsByPhone(request.getPhone())) {
-      throw new DuplicateRecordException("Error: User has been existed");
+      throw new DuplicateRecordException(ErrorConstant.USER_ALREADY_EXISTS);
     }
     Driver driver = new Driver();
     driver.setUsername(request.getUsername());
@@ -66,7 +67,7 @@ public class DriverServiceImpl implements DriverService {
 
     Set<Role> roles = new HashSet<>();
     Role userRole = roleRepository.findByName("ROLE_DRIVER")
-        .orElseThrow(() -> new NotFoundException("Error: Role is not found"));
+        .orElseThrow(() -> new NotFoundException(ErrorConstant.ROLE_NOT_FOUND));
     roles.add(userRole);
     driver.setRoles(roles);
 
@@ -74,7 +75,7 @@ public class DriverServiceImpl implements DriverService {
     driver.setDriverLicense(request.getDriverLicense());
 
     Forwarder forwarder = forwarderRepository.findById(userId)
-        .orElseThrow(() -> new NotFoundException("Forwarder is not found"));
+        .orElseThrow(() -> new NotFoundException(ErrorConstant.FORWARDER_NOT_FOUND));
     driver.setForwarder(forwarder);
 
     Geolocation location = new Geolocation();
@@ -90,7 +91,7 @@ public class DriverServiceImpl implements DriverService {
 
   @Override
   public Driver getDriver(Long id) {
-    Driver driver = driverRepository.findById(id).orElseThrow(() -> new NotFoundException("Driver is not found."));
+    Driver driver = driverRepository.findById(id).orElseThrow(() -> new NotFoundException(ErrorConstant.DRIVER_NOT_FOUND));
     return driver;
   }
 
@@ -112,10 +113,10 @@ public class DriverServiceImpl implements DriverService {
   public Driver updateDriver(Long userId, DriverRequest request) {
     if (forwarderRepository.existsById(userId)) {
       Driver driver = driverRepository.findById(request.getId())
-          .orElseThrow(() -> new NotFoundException("Driver is not found."));
+          .orElseThrow(() -> new NotFoundException(ErrorConstant.DRIVER_NOT_FOUND));
 
       if (!driver.getForwarder().getId().equals(userId)) {
-        throw new InternalException(String.format("Forwarder %s not owned Driver", userId));
+        throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
       }
 
       /*
@@ -138,12 +139,12 @@ public class DriverServiceImpl implements DriverService {
       Set<Role> roles = new HashSet<Role>();
       if (rolesString == null) {
         Role userRole = roleRepository.findByName("ROLE_DRIVER")
-            .orElseThrow(() -> new NotFoundException("Error: Role is not found"));
+            .orElseThrow(() -> new NotFoundException(ErrorConstant.ROLE_NOT_FOUND));
         roles.add(userRole);
       } else {
         rolesString.forEach(role -> {
           Role userRole = roleRepository.findByName(role)
-              .orElseThrow(() -> new NotFoundException("Error: Role is not found"));
+              .orElseThrow(() -> new NotFoundException(ErrorConstant.ROLE_NOT_FOUND));
           roles.add(userRole);
         });
       }
@@ -153,17 +154,17 @@ public class DriverServiceImpl implements DriverService {
       driverRepository.save(driver);
       return driver;
     } else {
-      throw new NotFoundException("Error: Forwarder is not found");
+      throw new NotFoundException(ErrorConstant.FORWARDER_NOT_FOUND);
     }
   }
 
   @Override
   public Driver editDriver(Long id, Long userId, Map<String, Object> updates) {
     if (forwarderRepository.existsById(userId)) {
-      Driver driver = driverRepository.findById(id).orElseThrow(() -> new NotFoundException("Driver is not found."));
+      Driver driver = driverRepository.findById(id).orElseThrow(() -> new NotFoundException(ErrorConstant.DRIVER_NOT_FOUND));
 
       if (!driver.getForwarder().getId().equals(userId)) {
-        throw new InternalException(String.format("Forwarder %s not owned Driver", userId));
+        throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
       }
 
       /*
@@ -177,7 +178,7 @@ public class DriverServiceImpl implements DriverService {
         if (!userRepository.existsByEmail(email)) {
           driver.setEmail(email);
         } else {
-          throw new DuplicateRecordException("Email has been existed.");
+          throw new DuplicateRecordException(ErrorConstant.USER_EMAIL_ALREADY_EXISTS);
         }
       }
 
@@ -186,7 +187,7 @@ public class DriverServiceImpl implements DriverService {
         if (!userRepository.existsByPhone(phone)) {
           driver.setPhone(phone);
         } else {
-          throw new DuplicateRecordException("Phone number has been existed.");
+          throw new DuplicateRecordException(ErrorConstant.USER_PHONE_ALREADY_EXISTS);
         }
       }
 
@@ -214,7 +215,7 @@ public class DriverServiceImpl implements DriverService {
       driverRepository.save(driver);
       return driver;
     } else {
-      throw new NotFoundException("Error: Forwarder is not found");
+      throw new NotFoundException(ErrorConstant.FORWARDER_NOT_FOUND);
     }
   }
 
@@ -222,13 +223,13 @@ public class DriverServiceImpl implements DriverService {
   public void removeDriver(Long id, Long userId) {
     if (forwarderRepository.existsById(userId)) {
 
-      Driver driver = driverRepository.findById(id).orElseThrow(() -> new NotFoundException("Driver is not found."));
+      Driver driver = driverRepository.findById(id).orElseThrow(() -> new NotFoundException(ErrorConstant.DRIVER_NOT_FOUND));
 
       if (!driver.getForwarder().getId().equals(userId)) {
-        throw new InternalException(String.format("Forwarder %s not owned Driver", userId));
+        throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
       }
     } else {
-      throw new NotFoundException("Error: Forwarder is not found");
+      throw new NotFoundException(ErrorConstant.FORWARDER_NOT_FOUND);
     }
   }
 

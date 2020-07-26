@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.crm.models.Driver;
@@ -68,6 +69,22 @@ public class DriverController {
 
     return ResponseEntity.ok(response);
 
+  }
+
+  @PreAuthorize("hasRole('FORWARDER')")
+  @GetMapping("/{id}")
+  public ResponseEntity<?> getSupplierById(@PathVariable Long id) {
+    Driver driver = driverService.getDriver(id);
+    DriverDto driverDto = DriverMapper.toDriverDto(driver);
+    return ResponseEntity.ok(driverDto);
+  }
+
+  @PreAuthorize("hasRole('FORWARDER')")
+  @RequestMapping(method = RequestMethod.GET, params = { "username" })
+  public ResponseEntity<?> getSupplier(@RequestParam String username) {
+    Driver driver = driverService.getDriverByUserName(username);
+    DriverDto driverDto = DriverMapper.toDriverDto(driver);
+    return ResponseEntity.ok(driverDto);
   }
 
   @GetMapping("")

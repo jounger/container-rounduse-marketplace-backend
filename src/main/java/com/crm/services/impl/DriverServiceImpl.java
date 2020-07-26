@@ -91,7 +91,8 @@ public class DriverServiceImpl implements DriverService {
 
   @Override
   public Driver getDriver(Long id) {
-    Driver driver = driverRepository.findById(id).orElseThrow(() -> new NotFoundException(ErrorConstant.DRIVER_NOT_FOUND));
+    Driver driver = driverRepository.findById(id)
+        .orElseThrow(() -> new NotFoundException(ErrorConstant.DRIVER_NOT_FOUND));
     return driver;
   }
 
@@ -161,7 +162,8 @@ public class DriverServiceImpl implements DriverService {
   @Override
   public Driver editDriver(Long id, Long userId, Map<String, Object> updates) {
     if (forwarderRepository.existsById(userId)) {
-      Driver driver = driverRepository.findById(id).orElseThrow(() -> new NotFoundException(ErrorConstant.DRIVER_NOT_FOUND));
+      Driver driver = driverRepository.findById(id)
+          .orElseThrow(() -> new NotFoundException(ErrorConstant.DRIVER_NOT_FOUND));
 
       if (!driver.getForwarder().getId().equals(userId)) {
         throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
@@ -223,7 +225,8 @@ public class DriverServiceImpl implements DriverService {
   public void removeDriver(Long id, Long userId) {
     if (forwarderRepository.existsById(userId)) {
 
-      Driver driver = driverRepository.findById(id).orElseThrow(() -> new NotFoundException(ErrorConstant.DRIVER_NOT_FOUND));
+      Driver driver = driverRepository.findById(id)
+          .orElseThrow(() -> new NotFoundException(ErrorConstant.DRIVER_NOT_FOUND));
 
       if (!driver.getForwarder().getId().equals(userId)) {
         throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
@@ -231,6 +234,13 @@ public class DriverServiceImpl implements DriverService {
     } else {
       throw new NotFoundException(ErrorConstant.FORWARDER_NOT_FOUND);
     }
+  }
+
+  @Override
+  public Driver getDriverByUserName(String username) {
+    Driver driver = driverRepository.findByUsername(username)
+        .orElseThrow(() -> new NotFoundException(ErrorConstant.DRIVER_NOT_FOUND));
+    return driver;
   }
 
 }

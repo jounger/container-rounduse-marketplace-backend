@@ -14,6 +14,8 @@ public interface DriverService {
 
   Driver getDriver(Long id);
 
+  Driver getDriverByUserName(String username);
+
   Page<Driver> getDrivers(PaginationRequest request);
 
   Page<Driver> getDriversByForwarder(Long id, PaginationRequest request);

@@ -71,24 +71,24 @@ public class DriverController {
 
   }
 
-  @PreAuthorize("hasRole('FORWARDER')")
+  @PreAuthorize("hasRole('FORWARDER') or hasRole('DRIVER')")
   @GetMapping("/{id}")
-  public ResponseEntity<?> getSupplierById(@PathVariable Long id) {
+  public ResponseEntity<?> getDriverById(@PathVariable Long id) {
     Driver driver = driverService.getDriver(id);
     DriverDto driverDto = DriverMapper.toDriverDto(driver);
     return ResponseEntity.ok(driverDto);
   }
 
-  @PreAuthorize("hasRole('FORWARDER')")
+  @PreAuthorize("hasRole('FORWARDER') or hasRole('DRIVER')")
   @RequestMapping(method = RequestMethod.GET, params = { "username" })
-  public ResponseEntity<?> getSupplier(@RequestParam String username) {
+  public ResponseEntity<?> getDriver(@RequestParam String username) {
     Driver driver = driverService.getDriverByUserName(username);
     DriverDto driverDto = DriverMapper.toDriverDto(driver);
     return ResponseEntity.ok(driverDto);
   }
 
   @GetMapping("")
-  @PreAuthorize("hasRole('MODERATOR')")
+  @PreAuthorize("hasRole('FORWARDER')")
   public ResponseEntity<?> getDrivers(@Valid PaginationRequest request) {
 
     Page<Driver> pages = driverService.getDrivers(request);

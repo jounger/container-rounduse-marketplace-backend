@@ -41,9 +41,11 @@ public class UserController {
   private UserService userService;
 
   /*
-   * REF: https://www.baeldung.com/rest-api-search-language-spring-data-specifications
-   * TODO: Spring Data JPA Specifications
-   * EXAMPLE: http://localhost:8085/api/user/filter?page=0&limit=10&search=phone:0967390098,email~crm,status!active
+   * REF:
+   * https://www.baeldung.com/rest-api-search-language-spring-data-specifications
+   * TODO: Spring Data JPA Specifications EXAMPLE:
+   * http://localhost:8085/api/user/filter?page=0&limit=10&search=phone:0967390098
+   * ,email~crm,status!active
    */
   @GetMapping("/filter")
   public ResponseEntity<?> searchUsers(@Valid PaginationRequest request,
@@ -66,7 +68,7 @@ public class UserController {
   }
 
   @GetMapping("")
-  @PreAuthorize("hasRole('OPERATOR') or hasRole('ADMIN')")
+  @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN')")
   public ResponseEntity<?> getUsers(@Valid PaginationRequest request) {
     logger.info("Page request: {}", request.getPage());
     Page<User> pages = userService.getUsers(request);

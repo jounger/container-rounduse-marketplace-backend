@@ -32,6 +32,6 @@ public interface BiddingDocumentRepository extends JpaRepository<BiddingDocument
   Optional<BiddingDocument> findByBid(@Param("id") Long bid, @Param("username") String username);
 
   @Query(value = "SELECT DISTINCT bd FROM BiddingDocument bd LEFT JOIN bd.bids b "
-      + "WHERE (bd.offeree.username = :username OR b.bidder.username = :username) AND b.combined IS NOT NULL")
+      + "WHERE (bd.offeree.username = :username OR b.bidder.username = :username) AND b.combined.id IS NOT NULL")
   Page<BiddingDocument> findByExistCombined(@Param("username") String username, Pageable pageable);
 }

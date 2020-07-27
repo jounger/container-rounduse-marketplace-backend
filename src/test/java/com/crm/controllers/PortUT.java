@@ -2,7 +2,6 @@ package com.crm.controllers;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import java.time.LocalDateTime;
 import java.util.Date;
 
 import org.junit.jupiter.api.Test;

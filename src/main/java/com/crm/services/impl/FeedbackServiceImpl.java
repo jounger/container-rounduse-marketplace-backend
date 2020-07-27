@@ -43,7 +43,7 @@ public class FeedbackServiceImpl implements FeedbackService {
   private ReportRepository reportRepository;
 
   @Override
-  public Feedback createFeedback(Long id, Long userId, FeedbackRequest request) {
+  public Feedback createFeedback(Long id, String username, FeedbackRequest request) {
     Feedback feedback = new Feedback();
 
     Report report = reportRepository.findById(id)
@@ -57,10 +57,10 @@ public class FeedbackServiceImpl implements FeedbackService {
 
     report.setStatus(EnumReportStatus.UPDATED.name());
     feedback.setReport(report);
-    User sender = userRepository.findById(userId)
+    User sender = userRepository.findByUsername(username)
         .orElseThrow(() -> new NotFoundException(ErrorConstant.SENDER_NOT_FOUND));
     String role = sender.getRoles().iterator().next().getName();
-    if (role.equals("ROLE_MODERATOR") || userId.equals(report.getSender().getId())) {
+    if (role.equals("ROLE_MODERATOR") || username.equals(report.getSender().getId())) {
       feedback.setSender(sender);
     } else {
       throw new NotFoundException("Access denied.");
@@ -81,7 +81,7 @@ public class FeedbackServiceImpl implements FeedbackService {
   }
 
   @Override
-  public Page<Feedback> getFeedbacksByReport(Long reportId, Long userId, PaginationRequest request) {
+  public Page<Feedback> getFeedbacksByReport(Long reportId, String username, PaginationRequest request) {
     Page<Feedback> feedbacks = null;
 
     if (!reportRepository.existsById(reportId)) {
@@ -90,11 +90,11 @@ public class FeedbackServiceImpl implements FeedbackService {
 
     PageRequest pageRequest = PageRequest.of(request.getPage(), request.getLimit(),
         Sort.by(Direction.ASC, "createdAt"));
-    User sender = userRepository.findById(userId)
+    User sender = userRepository.findByUsername(username)
         .orElseThrow(() -> new NotFoundException(ErrorConstant.SENDER_NOT_FOUND));
     String role = sender.getRoles().iterator().next().getName();
     if (role.equals("ROLE_FORWARDER")) {
-      feedbacks = feedbackRepository.findByReport(reportId, userId, pageRequest);
+      feedbacks = feedbackRepository.findByReport(reportId, username, pageRequest);
     } else if (role.equals("ROLE_MODERATOR")) {
       feedbacks = feedbackRepository.findByReport(reportId, pageRequest);
     }
@@ -135,10 +135,10 @@ public class FeedbackServiceImpl implements FeedbackService {
   }
 
   @Override
-  public Feedback editFeedback(Long id, Long userId, Map<String, Object> updates) {
+  public Feedback editFeedback(Long id, String username, Map<String, Object> updates) {
     Feedback feedback = feedbackRepository.findById(id)
         .orElseThrow(() -> new NotFoundException(ErrorConstant.FEEDBACK_NOT_FOUND));
-    if (feedback.getSender().getId() != userId) {
+    if (!feedback.getSender().getUsername().equals(username)) {
       throw new NotFoundException(ErrorConstant.USER_ACCESS_DENIED);
     }
 
@@ -158,10 +158,10 @@ public class FeedbackServiceImpl implements FeedbackService {
   }
 
   @Override
-  public void removeFeedback(Long id, Long userId) {
+  public void removeFeedback(Long id, String username) {
     Feedback feedback = feedbackRepository.findById(id)
         .orElseThrow(() -> new NotFoundException(ErrorConstant.FEEDBACK_NOT_FOUND));
-    if (feedback.getSender().getId().equals(userId)) {
+    if (feedback.getSender().getUsername().equals(username)) {
       feedbackRepository.deleteById(id);
     } else {
       throw new NotFoundException(ErrorConstant.USER_ACCESS_DENIED);

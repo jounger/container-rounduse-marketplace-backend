@@ -13,6 +13,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -29,7 +30,6 @@ import com.crm.models.mapper.CombinedMapper;
 import com.crm.payload.request.CombinedRequest;
 import com.crm.payload.request.PaginationRequest;
 import com.crm.payload.response.PaginationResponse;
-import com.crm.security.services.UserDetailsImpl;
 import com.crm.services.CombinedService;
 import com.crm.websocket.controller.NotificationBroadcast;
 
@@ -48,11 +48,11 @@ public class CombinedController {
   @PreAuthorize("hasRole('MERCHANT')")
   @PostMapping("/bid/{id}")
   public ResponseEntity<?> createCombined(@PathVariable("id") Long id, @Valid @RequestBody CombinedRequest request) {
-    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
+    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
         .getPrincipal();
-    Long userId = userDetails.getId();
+    String username = userDetails.getUsername();
 
-    Combined combined = combinedService.createCombined(id, userId, request);
+    Combined combined = combinedService.createCombined(id, username, request);
     CombinedDto combinedDto = CombinedMapper.toCombinedDto(combined);
 
     // CREATE NOTIFICATION
@@ -74,11 +74,11 @@ public class CombinedController {
   @GetMapping("/user")
   public ResponseEntity<?> getCombinedsByUser(@Valid PaginationRequest request) {
 
-    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
+    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
         .getPrincipal();
-    Long id = userDetails.getId();
+    String username = userDetails.getUsername();
 
-    Page<Combined> pages = combinedService.getCombinedsByUser(id, request);
+    Page<Combined> pages = combinedService.getCombinedsByUser(username, request);
 
     PaginationResponse<CombinedDto> response = new PaginationResponse<>();
     response.setPageNumber(request.getPage());
@@ -99,11 +99,11 @@ public class CombinedController {
   public ResponseEntity<?> getCombinedsByBiddingDocument(@PathVariable("id") Long id,
       @Valid PaginationRequest request) {
 
-    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
+    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
         .getPrincipal();
-    Long userId = userDetails.getId();
+    String username = userDetails.getUsername();
 
-    Page<Combined> pages = combinedService.getCombinedsByBiddingDocument(id, userId, request);
+    Page<Combined> pages = combinedService.getCombinedsByBiddingDocument(id, username, request);
 
     PaginationResponse<CombinedDto> response = new PaginationResponse<>();
     response.setPageNumber(request.getPage());
@@ -154,10 +154,10 @@ public class CombinedController {
   @PreAuthorize("hasRole('FORWARDER') or hasRole('MERCHANT') or hasRole('DRIVER')")
   @RequestMapping(value = "/{id}", method = RequestMethod.PATCH, consumes = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<?> editCombined(@PathVariable("id") Long id, @RequestBody Map<String, Object> updates) {
-    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
+    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
         .getPrincipal();
-    Long userId = userDetails.getId();
-    Combined Combined = combinedService.editCombined(id, userId, updates);
+    String username = userDetails.getUsername();
+    Combined Combined = combinedService.editCombined(id, username, updates);
     CombinedDto CombinedDto = CombinedMapper.toCombinedDto(Combined);
     return ResponseEntity.ok(CombinedDto);
   }

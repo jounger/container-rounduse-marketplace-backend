@@ -64,11 +64,11 @@ public class ContainerSemiTrailerServiceImpl implements ContainerSemiTrailerServ
   }
 
   @Override
-  public ContainerSemiTrailer createContainerSemiTrailer(Long userId, ContainerSemiTrailerRequest request) {
+  public ContainerSemiTrailer createContainerSemiTrailer(String username, ContainerSemiTrailerRequest request) {
 
     ContainerSemiTrailer containerSemiTrailer = new ContainerSemiTrailer();
 
-    Forwarder forwarder = forwarderRepository.findById(userId)
+    Forwarder forwarder = forwarderRepository.findByUsername(username)
         .orElseThrow(() -> new NotFoundException(ErrorConstant.FORWARDER_NOT_FOUND));
 
     if (vehicleRepository.existsByLicensePlate(request.getLicensePlate())) {
@@ -98,14 +98,14 @@ public class ContainerSemiTrailerServiceImpl implements ContainerSemiTrailerServ
   }
 
   @Override
-  public ContainerSemiTrailer updateContainerSemiTrailer(Long userId, ContainerSemiTrailerRequest request) {
+  public ContainerSemiTrailer updateContainerSemiTrailer(String username, ContainerSemiTrailerRequest request) {
 
-    if (forwarderRepository.existsById(userId)) {
+    if (forwarderRepository.existsByUsername(username)) {
 
       ContainerSemiTrailer containerSemiTrailer = containerSemiTrailerRepository.findById(request.getId())
           .orElseThrow(() -> new NotFoundException(ErrorConstant.TRAILER_NOT_FOUND));
 
-      if (!containerSemiTrailer.getForwarder().getId().equals(userId)) {
+      if (!containerSemiTrailer.getForwarder().getId().equals(username)) {
         throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
       }
 
@@ -149,14 +149,14 @@ public class ContainerSemiTrailerServiceImpl implements ContainerSemiTrailerServ
   }
 
   @Override
-  public ContainerSemiTrailer editContainerSemiTrailer(Map<String, Object> updates, Long id, Long userId) {
+  public ContainerSemiTrailer editContainerSemiTrailer(Map<String, Object> updates, Long id, String username) {
 
-    if (forwarderRepository.existsById(userId)) {
+    if (forwarderRepository.existsByUsername(username)) {
 
       ContainerSemiTrailer containerSemiTrailer = containerSemiTrailerRepository.findById(id)
           .orElseThrow(() -> new NotFoundException(ErrorConstant.TRAILER_NOT_FOUND));
 
-      if (!containerSemiTrailer.getForwarder().getId().equals(userId)) {
+      if (!containerSemiTrailer.getForwarder().getId().equals(username)) {
         throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
       }
 
@@ -211,13 +211,13 @@ public class ContainerSemiTrailerServiceImpl implements ContainerSemiTrailerServ
   }
 
   @Override
-  public void removeContainerSemiTrailer(Long id, Long userId) {
+  public void removeContainerSemiTrailer(Long id, String username) {
 
-    if (forwarderRepository.existsById(userId)) {
+    if (forwarderRepository.existsByUsername(username)) {
       ContainerSemiTrailer containerSemiTrailer = containerSemiTrailerRepository.findById(id)
           .orElseThrow(() -> new NotFoundException(ErrorConstant.TRAILER_NOT_FOUND));
 
-      if (!containerSemiTrailer.getForwarder().getId().equals(userId)) {
+      if (!containerSemiTrailer.getForwarder().getId().equals(username)) {
         throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
       }
 
@@ -239,11 +239,11 @@ public class ContainerSemiTrailerServiceImpl implements ContainerSemiTrailerServ
   }
 
   @Override
-  public Page<ContainerSemiTrailer> getContainerSemiTrailersByForwarder(Long userId, PaginationRequest request) {
-    if (forwarderRepository.existsById(userId)) {
+  public Page<ContainerSemiTrailer> getContainerSemiTrailersByForwarder(String username, PaginationRequest request) {
+    if (forwarderRepository.existsByUsername(username)) {
       PageRequest pageRequest = PageRequest.of(request.getPage(), request.getLimit(),
           Sort.by(Sort.Direction.DESC, "createdAt"));
-      Page<ContainerSemiTrailer> pages = containerSemiTrailerRepository.findByForwarder(userId, pageRequest);
+      Page<ContainerSemiTrailer> pages = containerSemiTrailerRepository.findByForwarder(username, pageRequest);
       return pages;
     } else {
       throw new NotFoundException(ErrorConstant.FORWARDER_NOT_FOUND);

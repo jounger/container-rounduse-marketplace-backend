@@ -18,17 +18,17 @@ public interface InboundService {
 
   Page<Inbound> getInboundsByOutbound(Long id, PaginationRequest request);
 
-  Page<Inbound> getInboundsByOutboundAndForwarder(Long id, Long userId, PaginationRequest request);
+  Page<Inbound> getInboundsByOutboundAndForwarder(Long id, String username, PaginationRequest request);
 
-  Page<Inbound> getInboundsForwarder(Long id, PaginationRequest request);
+  Page<Inbound> getInboundsForwarder(String username, PaginationRequest request);
 
   Page<Inbound> searchInbounds(PaginationRequest request, String search);
 
-  Inbound createInbound(Long id, InboundRequest request);
+  Inbound createInbound(String username, InboundRequest request);
 
-  Inbound updateInbound(Long id, InboundRequest request);
+  Inbound updateInbound(String username, InboundRequest request);
 
-  Inbound editInbound(Map<String, Object> updates, Long id, Long userId);
+  Inbound editInbound(Map<String, Object> updates, Long id, String username);
 
-  void removeInbound(Long id, Long userId);
+  void removeInbound(Long id, String username);
 }

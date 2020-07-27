@@ -65,12 +65,12 @@ public class BillOfLadingServiceImpl implements BillOfLadingService {
   }
 
   @Override
-  public BillOfLading updateBillOfLading(Long userId, BillOfLadingRequest request) {
-    if (forwarderRepository.existsById(userId)) {
+  public BillOfLading updateBillOfLading(String username, BillOfLadingRequest request) {
+    if (forwarderRepository.existsByUsername(username)) {
       BillOfLading billOfLading = billOfLadingRepository.findById(request.getId())
           .orElseThrow(() -> new NotFoundException(ErrorConstant.BILLOFLADING_NOT_FOUND));
 
-      if (!billOfLading.getInbound().getForwarder().getId().equals(userId)) {
+      if (!billOfLading.getInbound().getForwarder().getId().equals(username)) {
         throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
       }
 
@@ -105,28 +105,28 @@ public class BillOfLadingServiceImpl implements BillOfLadingService {
           }
 
           String containerNumber = item.getContainerNumber();
-          boolean isContainer = containerRepository.findByContainerNumber(billOfLading.getId(), userId, containerNumber,
+          boolean isContainer = containerRepository.findByContainerNumber(billOfLading.getId(), username, containerNumber,
               billOfLading.getInbound().getPickupTime(), freeTime);
           if (!isContainer) {
             throw new InternalException(ErrorConstant.CONTAINER_BUSY);
           }
 
           Long driverId = item.getDriver().getId();
-          boolean listContainer = containerRepository.findByDriver(driverId, userId,
+          boolean listContainer = containerRepository.findByDriver(driverId, username,
               billOfLading.getInbound().getPickupTime(), freeTime, billOfLading.getId());
           if (!listContainer) {
             throw new InternalException(ErrorConstant.DRIVER_BUSY);
           }
 
           Long tractorId = item.getTractor().getId();
-          boolean listContainerByTracTor = containerRepository.findByTractor(tractorId, userId,
+          boolean listContainerByTracTor = containerRepository.findByTractor(tractorId, username,
               billOfLading.getInbound().getPickupTime(), freeTime, billOfLading.getId());
           if (!listContainerByTracTor) {
             throw new InternalException(ErrorConstant.TRACTOR_BUSY);
           }
 
           Long trailerId = item.getTrailer().getId();
-          boolean listContainerByTrailer = containerRepository.findByTrailer(trailerId, userId,
+          boolean listContainerByTrailer = containerRepository.findByTrailer(trailerId, username,
               billOfLading.getInbound().getPickupTime(), freeTime, billOfLading.getId());
           if (!listContainerByTrailer) {
             throw new InternalException(ErrorConstant.TRAILER_BUSY);
@@ -150,12 +150,12 @@ public class BillOfLadingServiceImpl implements BillOfLadingService {
   }
 
   @Override
-  public BillOfLading editBillOfLading(Map<String, Object> updates, Long id, Long userId) {
-    if (forwarderRepository.existsById(userId)) {
+  public BillOfLading editBillOfLading(Map<String, Object> updates, Long id, String username) {
+    if (forwarderRepository.existsByUsername(username)) {
       BillOfLading billOfLading = billOfLadingRepository.findById(id)
           .orElseThrow(() -> new NotFoundException(ErrorConstant.BILLOFLADING_NOT_FOUND));
 
-      if (!billOfLading.getInbound().getForwarder().getId().equals(userId)) {
+      if (!billOfLading.getInbound().getForwarder().getUsername().equals(username)) {
         throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
       }
 
@@ -199,28 +199,28 @@ public class BillOfLadingServiceImpl implements BillOfLadingService {
           }
 
           String containerNumber = item.getContainerNumber();
-          boolean isContainer = containerRepository.findByContainerNumber(billOfLading.getId(), userId, containerNumber,
+          boolean isContainer = containerRepository.findByContainerNumber(billOfLading.getId(), username, containerNumber,
               billOfLading.getInbound().getPickupTime(), freeTime);
           if (!isContainer) {
             throw new InternalException(ErrorConstant.CONTAINER_BUSY);
           }
 
           Long driverId = item.getDriver().getId();
-          boolean listContainerByDriver = containerRepository.findByDriver(driverId, userId,
+          boolean listContainerByDriver = containerRepository.findByDriver(driverId, username,
               billOfLading.getInbound().getPickupTime(), freeTime, billOfLading.getId());
           if (!listContainerByDriver) {
             throw new InternalException(ErrorConstant.DRIVER_BUSY);
           }
 
           Long tractorId = item.getTractor().getId();
-          boolean listContainerByTracTor = containerRepository.findByTractor(tractorId, userId,
+          boolean listContainerByTracTor = containerRepository.findByTractor(tractorId, username,
               billOfLading.getInbound().getPickupTime(), freeTime, billOfLading.getId());
           if (!listContainerByTracTor) {
             throw new InternalException(ErrorConstant.TRACTOR_BUSY);
           }
 
           Long trailerId = item.getTrailer().getId();
-          boolean listContainerByTrailer = containerRepository.findByTrailer(trailerId, userId,
+          boolean listContainerByTrailer = containerRepository.findByTrailer(trailerId, username,
               billOfLading.getInbound().getPickupTime(), freeTime, billOfLading.getId());
           if (!listContainerByTrailer) {
             throw new InternalException(ErrorConstant.TRAILER_BUSY);

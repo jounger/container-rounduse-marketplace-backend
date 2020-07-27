@@ -49,7 +49,7 @@ public class DriverServiceImpl implements DriverService {
   private ForwarderRepository forwarderRepository;
 
   @Override
-  public Driver createDriver(Long userId, DriverRequest request) {
+  public Driver createDriver(String username, DriverRequest request) {
     if (userRepository.existsByUsername(request.getUsername()) || userRepository.existsByEmail(request.getEmail())
         || userRepository.existsByPhone(request.getPhone())) {
       throw new DuplicateRecordException(ErrorConstant.USER_ALREADY_EXISTS);
@@ -74,7 +74,7 @@ public class DriverServiceImpl implements DriverService {
     driver.setFullname(request.getFullname());
     driver.setDriverLicense(request.getDriverLicense());
 
-    Forwarder forwarder = forwarderRepository.findById(userId)
+    Forwarder forwarder = forwarderRepository.findByUsername(username)
         .orElseThrow(() -> new NotFoundException(ErrorConstant.FORWARDER_NOT_FOUND));
     driver.setForwarder(forwarder);
 
@@ -104,19 +104,19 @@ public class DriverServiceImpl implements DriverService {
   }
 
   @Override
-  public Page<Driver> getDriversByForwarder(Long id, PaginationRequest request) {
-    Page<Driver> drivers = driverRepository.findByForwarder(id,
+  public Page<Driver> getDriversByForwarder(String username, PaginationRequest request) {
+    Page<Driver> drivers = driverRepository.findByForwarder(username,
         PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt")));
     return drivers;
   }
 
   @Override
-  public Driver updateDriver(Long userId, DriverRequest request) {
-    if (forwarderRepository.existsById(userId)) {
+  public Driver updateDriver(String username, DriverRequest request) {
+    if (forwarderRepository.existsByUsername(username)) {
       Driver driver = driverRepository.findById(request.getId())
           .orElseThrow(() -> new NotFoundException(ErrorConstant.DRIVER_NOT_FOUND));
 
-      if (!driver.getForwarder().getId().equals(userId)) {
+      if (!driver.getForwarder().getId().equals(username)) {
         throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
       }
 
@@ -160,12 +160,12 @@ public class DriverServiceImpl implements DriverService {
   }
 
   @Override
-  public Driver editDriver(Long id, Long userId, Map<String, Object> updates) {
-    if (forwarderRepository.existsById(userId)) {
+  public Driver editDriver(Long id, String username, Map<String, Object> updates) {
+    if (forwarderRepository.existsByUsername(username)) {
       Driver driver = driverRepository.findById(id)
           .orElseThrow(() -> new NotFoundException(ErrorConstant.DRIVER_NOT_FOUND));
 
-      if (!driver.getForwarder().getId().equals(userId)) {
+      if (!driver.getForwarder().getId().equals(username)) {
         throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
       }
 
@@ -222,13 +222,13 @@ public class DriverServiceImpl implements DriverService {
   }
 
   @Override
-  public void removeDriver(Long id, Long userId) {
-    if (forwarderRepository.existsById(userId)) {
+  public void removeDriver(Long id, String username) {
+    if (forwarderRepository.existsByUsername(username)) {
 
       Driver driver = driverRepository.findById(id)
           .orElseThrow(() -> new NotFoundException(ErrorConstant.DRIVER_NOT_FOUND));
 
-      if (!driver.getForwarder().getId().equals(userId)) {
+      if (!driver.getForwarder().getUsername().equals(username)) {
         throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
       }
     } else {

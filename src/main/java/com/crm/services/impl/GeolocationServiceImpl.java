@@ -29,11 +29,11 @@ public class GeolocationServiceImpl implements GeolocationService {
   ForwarderRepository forwarderRepository;
 
   @Override
-  public Geolocation updateGeolocation(Long userId, GeolocationRequest request) {
-    if (forwarderRepository.existsById(userId)) {
+  public Geolocation updateGeolocation(String username, GeolocationRequest request) {
+    if (forwarderRepository.existsByUsername(username)) {
       Geolocation geolocation = geolocationRepository.findById(request.getId())
           .orElseThrow(() -> new NotFoundException(ErrorConstant.GEOLOCATION_NOT_FOUND));
-      if (!geolocation.getDriver().getForwarder().getId().equals(userId)) {
+      if (!geolocation.getDriver().getForwarder().getUsername().equals(username)) {
         throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
       }
       geolocation.setLatitude(request.getLatitude());
@@ -45,11 +45,11 @@ public class GeolocationServiceImpl implements GeolocationService {
   }
 
   @Override
-  public Geolocation editGeolocation(Long id, Long userId, Map<String, Object> updates) {
-    if (forwarderRepository.existsById(userId)) {
+  public Geolocation editGeolocation(Long id, String username, Map<String, Object> updates) {
+    if (forwarderRepository.existsByUsername(username)) {
       Geolocation geolocation = geolocationRepository.findById(id)
           .orElseThrow(() -> new NotFoundException(ErrorConstant.GEOLOCATION_NOT_FOUND));
-      if (!geolocation.getDriver().getForwarder().getId().equals(userId)) {
+      if (!geolocation.getDriver().getForwarder().getUsername().equals(username)) {
         throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
       }
 

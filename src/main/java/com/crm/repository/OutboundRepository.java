@@ -15,10 +15,10 @@ public interface OutboundRepository extends JpaRepository<Outbound, Long>, JpaSp
 
   Page<Outbound> findByStatus(String status, Pageable pageable);
 
-  @Query(value = "SELECT o FROM Outbound o WHERE o.merchant.id = :id")
-  Page<Outbound> findByMerchantId(@Param("id") Long id, Pageable pageable);
+  @Query(value = "SELECT o FROM Outbound o WHERE o.merchant.username = :username")
+  Page<Outbound> findByMerchant(@Param("username") String username, Pageable pageable);
 
-  @Query(value = "SELECT o FROM Outbound o WHERE o.merchant.id = :id AND o.status = :status")
-  Page<Outbound> findByMerchantId(@Param("id") Long id, @Param("status") String status, Pageable pageable);
+  @Query(value = "SELECT o FROM Outbound o WHERE o.merchant.username = :username AND o.status = :status")
+  Page<Outbound> findByMerchant(@Param("username") String username, @Param("status") String status, Pageable pageable);
 
 }

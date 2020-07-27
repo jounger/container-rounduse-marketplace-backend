@@ -18,7 +18,7 @@ public interface BookingService {
 
   Page<Booking> searchBookings(PaginationRequest request, String search);
 
-  Booking updateBooking(Long id, BookingRequest request);
+  Booking updateBooking(String username, BookingRequest request);
 
-  Booking editBooking(Map<String, Object> updates, Long id, Long userId);
+  Booking editBooking(Map<String, Object> updates, Long id, String username);
 }

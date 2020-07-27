@@ -10,6 +10,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 
+import com.crm.common.ErrorConstant;
 import com.crm.common.Tool;
 import com.crm.enums.EnumBidStatus;
 import com.crm.enums.EnumBiddingStatus;
@@ -59,23 +60,23 @@ public class BiddingDocumentServiceImpl implements BiddingDocumentService {
   private BidRepository bidRepository;
 
   @Override
-  public BiddingDocument createBiddingDocument(Long id, BiddingDocumentRequest request) {
+  public BiddingDocument createBiddingDocument(String username, BiddingDocumentRequest request) {
     BiddingDocument biddingDocument = new BiddingDocument();
 
-    Merchant merchant = merchantRepository.findById(id).orElseThrow(() -> new NotFoundException("Merchant is not found"));
+    Merchant merchant = merchantRepository.findByUsername(username).orElseThrow(() -> new NotFoundException(ErrorConstant.BIDDINGDOCUMENT_NOT_FOUND));
     biddingDocument.setOfferee(merchant);
 
     Outbound outbound = outboundRepository.findById(request.getOutbound())
-        .orElseThrow(() -> new NotFoundException("Outbound is not found."));
+        .orElseThrow(() -> new NotFoundException(ErrorConstant.OUTBOUND_NOT_FOUND));
     if (merchant.getOutbounds().contains(outbound)) {
       if (outbound.getStatus().equalsIgnoreCase(EnumSupplyStatus.COMBINED.name())
           || outbound.getStatus().equalsIgnoreCase(EnumSupplyStatus.BIDDING.name())) {
-        throw new DuplicateRecordException("Outbound must be not in any transaction.");
+        throw new DuplicateRecordException(ErrorConstant.OUTBOUND_IS_IN_TRANSACTION);
       }
       outbound.setStatus(EnumSupplyStatus.BIDDING.name());
       biddingDocument.setOutbound(outbound);
     } else {
-      throw new NotFoundException("This outbound must be your outbound.");
+      throw new NotFoundException(ErrorConstant.OUTBOUND_IS_NOT_YOUR);
     }
 
     biddingDocument.setIsMultipleAward(request.getIsMultipleAward());
@@ -85,7 +86,7 @@ public class BiddingDocumentServiceImpl implements BiddingDocumentService {
     LocalDateTime packingTime = outbound.getPackingTime();
     LocalDateTime bidClosing = Tool.convertToLocalDateTime(request.getBidClosing());
     if (bidClosing.isBefore(LocalDateTime.now()) || bidClosing.isAfter(packingTime)) {
-      throw new InternalException("Bid closing time must be after now and before packing time.");
+      throw new InternalException(ErrorConstant.BIDDINGDOCUMENT_INVALID_CLOSING_TIME);
     }
     biddingDocument.setBidClosing(bidClosing);
 
@@ -103,7 +104,7 @@ public class BiddingDocumentServiceImpl implements BiddingDocumentService {
     String discountCodeString = request.getBidDiscountCode();
     if (discountCodeString != null && !discountCodeString.isEmpty()) {
       Discount bidDiscountCode = discountRepository.findByCode(discountCodeString)
-          .orElseThrow(() -> new NotFoundException("Discount is not found."));
+          .orElseThrow(() -> new NotFoundException(ErrorConstant.DISCOUNT_NOT_FOUND));
       biddingDocument.setDiscount(bidDiscountCode);
     }
 
@@ -117,47 +118,47 @@ public class BiddingDocumentServiceImpl implements BiddingDocumentService {
   public BiddingDocument getBiddingDocument(Long id) {
     BiddingDocument biddingDocument = new BiddingDocument();
     biddingDocument = biddingDocumentRepository.findById(id)
-        .orElseThrow(() -> new NotFoundException("Document bidding is not found."));
+        .orElseThrow(() -> new NotFoundException(ErrorConstant.BIDDINGDOCUMENT_NOT_FOUND));
     return biddingDocument;
   }
 
   @Override
   public BiddingDocument getBiddingDocumentByBid(Long id, String username) {
     if (!bidRepository.existsById(id)) {
-      throw new NotFoundException("Bid is not found");
+      throw new NotFoundException(ErrorConstant.BID_NOT_FOUND);
     }
     BiddingDocument biddingDocument = biddingDocumentRepository.findByBid(id, username)
-        .orElseThrow(() -> new NotFoundException("Bidding document is not found."));
+        .orElseThrow(() -> new NotFoundException(ErrorConstant.BIDDINGDOCUMENT_NOT_FOUND));
     return biddingDocument;
   }
 
   @Override
-  public Page<BiddingDocument> getBiddingDocumentsByExistCombined(Long id, PaginationRequest request) {
+  public Page<BiddingDocument> getBiddingDocumentsByExistCombined(String username, PaginationRequest request) {
     PageRequest page = PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Direction.DESC, "createdAt"));
-    Page<BiddingDocument> biddingDocuments = biddingDocumentRepository.findByExistCombined(id, page);
+    Page<BiddingDocument> biddingDocuments = biddingDocumentRepository.findByExistCombined(username, page);
     return biddingDocuments;
   }
 
   @Override
-  public Page<BiddingDocument> getBiddingDocuments(Long id, PaginationRequest request) {
-    User user = userRepository.findById(id).orElseThrow(() -> new NotFoundException("User is not found."));
+  public Page<BiddingDocument> getBiddingDocuments(String username, PaginationRequest request) {
+    User user = userRepository.findByUsername(username).orElseThrow(() -> new NotFoundException(ErrorConstant.USER_NOT_FOUND));
     String status = request.getStatus();
     Page<BiddingDocument> biddingDocuments = null;
     if (user.getRoles().iterator().next().getName().equalsIgnoreCase("ROLE_MERCHANT")) {
       if (status != null && !status.isEmpty()) {
-        biddingDocuments = biddingDocumentRepository.findByMerchant(id, request.getStatus(),
+        biddingDocuments = biddingDocumentRepository.findByMerchant(username, request.getStatus(),
             PageRequest.of(request.getPage(), request.getLimit(), Sort.by("id").descending()));
       } else {
-        biddingDocuments = biddingDocumentRepository.findByMerchant(id,
+        biddingDocuments = biddingDocumentRepository.findByMerchant(username,
             PageRequest.of(request.getPage(), request.getLimit(), Sort.by("id").descending()));
       }
     }
     if (user.getRoles().iterator().next().getName().equalsIgnoreCase("ROLE_FORWARDER")) {
       if (status != null && !status.isEmpty()) {
-        biddingDocuments = biddingDocumentRepository.findByForwarder(id, request.getStatus(),
+        biddingDocuments = biddingDocumentRepository.findByForwarder(username, request.getStatus(),
             PageRequest.of(request.getPage(), request.getLimit(), Sort.by("id").descending()));
       } else {
-        biddingDocuments = biddingDocumentRepository.findByForwarder(id,
+        biddingDocuments = biddingDocumentRepository.findByForwarder(username,
             PageRequest.of(request.getPage(), request.getLimit(), Sort.by("id").descending()));
       }
     }
@@ -167,17 +168,17 @@ public class BiddingDocumentServiceImpl implements BiddingDocumentService {
   @Override
   public BiddingDocument updateBiddingDocument(BiddingDocumentRequest request) {
     BiddingDocument biddingDocument = biddingDocumentRepository.findById(request.getId())
-        .orElseThrow(() -> new NotFoundException("Bidding document is not found."));
+        .orElseThrow(() -> new NotFoundException(ErrorConstant.BIDDINGDOCUMENT_NOT_FOUND));
 
     if (biddingDocument.getStatus().equalsIgnoreCase(EnumBiddingStatus.COMBINED.name())) {
-      throw new InternalException("CAN NOT edit bidding document if it was combined.");
+      throw new InternalException(ErrorConstant.BIDDINGDOCUMENT_IS_IN_TRANSACTION);
     }
 
     Outbound outbound = biddingDocument.getOutbound();
     LocalDateTime packingTime = outbound.getPackingTime();
     LocalDateTime bidClosingTime = Tool.convertToLocalDateTime(request.getBidClosing());
     if (bidClosingTime.isBefore(LocalDateTime.now()) || bidClosingTime.isAfter(packingTime)) {
-      throw new InternalException("Bid closing time must be after now.");
+      throw new InternalException(ErrorConstant.BIDDINGDOCUMENT_INVALID_CLOSING_TIME);
     }
     biddingDocument.setBidClosing(bidClosingTime);
 
@@ -199,10 +200,10 @@ public class BiddingDocumentServiceImpl implements BiddingDocumentService {
   @Override
   public BiddingDocument editBiddingDocument(Long id, Map<String, Object> updates) {
     BiddingDocument biddingDocument = biddingDocumentRepository.findById(id)
-        .orElseThrow(() -> new NotFoundException("Bidding document is not found."));
+        .orElseThrow(() -> new NotFoundException(ErrorConstant.BIDDINGDOCUMENT_NOT_FOUND));
 
     if (biddingDocument.getStatus().equalsIgnoreCase(EnumBiddingStatus.COMBINED.name())) {
-      throw new InternalException("CAN NOT edit bidding document if it was combined.");
+      throw new InternalException(ErrorConstant.BIDDINGDOCUMENT_IS_IN_TRANSACTION);
     }
     Outbound outbound = biddingDocument.getOutbound();
     LocalDateTime packingTime = outbound.getPackingTime();
@@ -211,7 +212,7 @@ public class BiddingDocumentServiceImpl implements BiddingDocumentService {
     if (updates.get("bidClosing") != null && !Tool.isBlank(bidClosing)) {
       LocalDateTime bidClosingTime = Tool.convertToLocalDateTime(bidClosing);
       if (bidClosingTime.isBefore(LocalDateTime.now()) || bidClosingTime.isAfter(packingTime)) {
-        throw new InternalException("Bid closing time must be after now.");
+        throw new InternalException(ErrorConstant.BIDDINGDOCUMENT_INVALID_CLOSING_TIME);
       }
       biddingDocument.setBidClosing(bidClosingTime);
     }
@@ -250,7 +251,7 @@ public class BiddingDocumentServiceImpl implements BiddingDocumentService {
       if (eStatus != null) {
         biddingDocument.setStatus(eStatus.name());
       } else {
-        throw new NotFoundException("Status is not found.");
+        throw new NotFoundException(ErrorConstant.BIDDINGDOCUMENT_STATUS_NOT_FOUND);
       }
       if (eStatus.name().equalsIgnoreCase(EnumBiddingStatus.CANCELED.name())) {
         outbound = biddingDocument.getOutbound();
@@ -274,15 +275,15 @@ public class BiddingDocumentServiceImpl implements BiddingDocumentService {
   }
 
   @Override
-  public void removeBiddingDocument(Long id, Long userId) {
-    Merchant merchant = merchantRepository.findById(userId).orElseThrow(() -> new NotFoundException("Merchant is not found."));
+  public void removeBiddingDocument(Long id, String username) {
+    Merchant merchant = merchantRepository.findByUsername(username).orElseThrow(() -> new NotFoundException(ErrorConstant.MERCHANT_NOT_FOUND));
     BiddingDocument biddingDocument = biddingDocumentRepository.findById(id)
-        .orElseThrow(() -> new NotFoundException("Bidding document is not found"));
+        .orElseThrow(() -> new NotFoundException(ErrorConstant.BIDDINGDOCUMENT_NOT_FOUND));
     if(!biddingDocument.getOfferee().equals(merchant)) {
-      throw new NotFoundException("Bidding document can only be deleted by this owner.");
+      throw new NotFoundException(ErrorConstant.BIDDINGDOCUMENT_NOT_OWNER);
     }
     if (!biddingDocument.getStatus().equalsIgnoreCase(EnumBiddingStatus.CANCELED.name())) {
-      throw new InternalException("Bidding document is in a transaction.");
+      throw new InternalException(ErrorConstant.BIDDINGDOCUMENT_IS_IN_TRANSACTION);
     }
     biddingDocumentRepository.deleteById(id);
   }

@@ -10,15 +10,15 @@ import com.crm.payload.request.PaginationRequest;
 
 public interface EvidenceService {
 
-  Evidence createEvidence(Long id, Long userId, EvidenceRequest request);
+  Evidence createEvidence(Long id, String username, EvidenceRequest request);
 
-  Page<Evidence> getEvidencesByUser(Long userId, PaginationRequest request);
+  Page<Evidence> getEvidencesByUser(String username, PaginationRequest request);
   
-  Page<Evidence> getEvidencesByContract(Long id, Long userId, PaginationRequest request);
+  Page<Evidence> getEvidencesByContract(Long id, String username, PaginationRequest request);
 
   Page<Evidence> searchEvidences(PaginationRequest request, String search);
 
-  Evidence editEvidence(Long id, Long userId, Map<String, Object> updates);
+  Evidence editEvidence(Long id, String username, Map<String, Object> updates);
 
-  void removeEvidence(Long id, Long userId);
+  void removeEvidence(Long id, String username);
 }

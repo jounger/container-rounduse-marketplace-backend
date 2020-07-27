@@ -9,10 +9,12 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import com.crm.common.ErrorConstant;
 import com.crm.common.Tool;
 import com.crm.enums.EnumBidStatus;
 import com.crm.enums.EnumCombinedStatus;
 import com.crm.enums.EnumSupplyStatus;
+import com.crm.exception.DuplicateRecordException;
 import com.crm.exception.InternalException;
 import com.crm.exception.NotFoundException;
 import com.crm.models.Bid;
@@ -55,14 +57,21 @@ public class CombinedServiceImpl implements CombinedService {
   private OutboundRepository outboundRepository;
 
   @Override
-  public Combined createCombined(Long bidId, Long userId, CombinedRequest request) {
+  public Combined createCombined(Long bidId, String username, CombinedRequest request) {
     Combined combined = new Combined();
 
-    Bid bid = bidRepository.findById(bidId).orElseThrow(() -> new NotFoundException("Bidding document is not found."));
-    combined.setBid(bid);
+    Bid bid = bidRepository.findById(bidId).orElseThrow(() -> new NotFoundException(ErrorConstant.BID_NOT_FOUND));
+    if(bid.getCombined() != null) {
+      throw new DuplicateRecordException(ErrorConstant.BID_INVALID_CREATE);
+    }
     Map<String, Object> updates = new HashMap<>();
     updates.put("status", EnumBidStatus.ACCEPTED.name());
-    bidService.editBid(bidId, userId, updates);
+    if(request.getContainers() != null) {
+      updates.put("combinedContainers", request.getContainers());
+    }
+    
+    bid = bidService.editBid(bidId, username, updates);
+    combined.setBid(bid);
 
     combined.setStatus(EnumCombinedStatus.INFO_RECEIVED.name());
     bid = combined.getBid();
@@ -73,15 +82,15 @@ public class CombinedServiceImpl implements CombinedService {
     Boolean required = contracRequest.getRequired();
     contract.setRequired(required);
     contract.setFinesAgainstContractViolations(0D);
-    if (userId.equals(offeree.getId()) && required == true) {
+    if (username.equals(offeree.getUsername()) && required == true) {
       Double fines = contracRequest.getFinesAgainstContractViolations();
       if (fines > 0) {
         contract.setFinesAgainstContractViolations(fines);
       } else {
-        throw new InternalException("Fines against contract violation must be greater than zero.");
+        throw new InternalException(ErrorConstant.CONTRACT_INVALID_FINES);
       }
-    } else if (!userId.equals(offeree.getId())) {
-      throw new NotFoundException("You must be Offeree to create Contract.");
+    } else if (!username.equals(offeree.getUsername())) {
+      throw new NotFoundException(ErrorConstant.USER_ACCESS_DENIED);
     }
 
     combined.setContract(contract);
@@ -93,29 +102,29 @@ public class CombinedServiceImpl implements CombinedService {
   }
 
   @Override
-  public Page<Combined> getCombinedsByBiddingDocument(Long id, Long userId, PaginationRequest request) {
+  public Page<Combined> getCombinedsByBiddingDocument(Long id, String username, PaginationRequest request) {
     PageRequest page = PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt"));
-    Page<Combined> combines = combinedRepository.findByBiddingDocument(id, userId, page);
+    Page<Combined> combines = combinedRepository.findByBiddingDocument(id, username, page);
     return combines;
   }
 
   @Override
   public Combined getCombined(Long id) {
     Combined combined = combinedRepository.findById(id)
-        .orElseThrow(() -> new NotFoundException("Combined is not found."));
+        .orElseThrow(() -> new NotFoundException(ErrorConstant.COMBINED_NOT_FOUND));
     return combined;
   }
 
   @Override
-  public Page<Combined> getCombinedsByUser(Long id, PaginationRequest request) {
-    User user = userRepository.findById(id).orElseThrow(() -> new NotFoundException("User is not found."));
+  public Page<Combined> getCombinedsByUser(String username, PaginationRequest request) {
+    User user = userRepository.findByUsername(username).orElseThrow(() -> new NotFoundException(ErrorConstant.USER_NOT_FOUND));
     String role = user.getRoles().iterator().next().getName();
     Page<Combined> combineds = null;
     if (role.equalsIgnoreCase("ROLE_MERCHANT")) {
-      combineds = combinedRepository.findByMerchant(id,
+      combineds = combinedRepository.findByMerchant(username,
           PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt")));
     } else if (role.equalsIgnoreCase("ROLE_FORWARDER")) {
-      combineds = combinedRepository.findByForwarder(id,
+      combineds = combinedRepository.findByForwarder(username,
           PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt")));
     }
     return combineds;
@@ -131,17 +140,17 @@ public class CombinedServiceImpl implements CombinedService {
   @Override
   public Combined updateCombined(CombinedRequest request) {
     Combined combined = combinedRepository.findById(request.getId())
-        .orElseThrow(() -> new NotFoundException("Combined is not found."));
+        .orElseThrow(() -> new NotFoundException(ErrorConstant.COMBINED_NOT_FOUND));
 
     Bid bid = bidRepository.findById(request.getBid())
-        .orElseThrow(() -> new NotFoundException("Bidding document is not found."));
+        .orElseThrow(() -> new NotFoundException(ErrorConstant.BID_NOT_FOUND));
     combined.setBid(bid);
 
     EnumCombinedStatus status = EnumCombinedStatus.findByName(request.getStatus());
     if (status != null) {
       combined.setStatus(status.name());
     } else {
-      throw new NotFoundException("Status is not found.");
+      throw new NotFoundException(ErrorConstant.BID_STATUS_NOT_FOUND);
     }
 
     combinedRepository.save(combined);
@@ -149,9 +158,9 @@ public class CombinedServiceImpl implements CombinedService {
   }
 
   @Override
-  public Combined editCombined(Long id, Long userId, Map<String, Object> updates) {
+  public Combined editCombined(Long id, String username, Map<String, Object> updates) {
     Combined combined = combinedRepository.findById(id)
-        .orElseThrow(() -> new NotFoundException("Combined is not found."));
+        .orElseThrow(() -> new NotFoundException(ErrorConstant.COMBINED_NOT_FOUND));
 
     Bid bid = combined.getBid();
     BiddingDocument biddingDocument = bid.getBiddingDocument();
@@ -159,13 +168,13 @@ public class CombinedServiceImpl implements CombinedService {
     if (updates.get("status") != null && !Tool.isBlank(statusString)) {
       EnumCombinedStatus status = EnumCombinedStatus.findByName(statusString);
       if (status == null) {
-        throw new NotFoundException("ERROR: Status is not found.");
+        throw new NotFoundException(ErrorConstant.BID_STATUS_NOT_FOUND);
       }
       combined.setStatus(status.name());
       if (status.equals(EnumCombinedStatus.CANCELED)) {
         Map<String, Object> updatesBid = new HashMap<>();
         updatesBid.put("status", EnumBidStatus.REJECTED.name());
-        bidService.editBid(bid.getId(), userId, updatesBid);
+        bidService.editBid(bid.getId(), username, updatesBid);
       }
 
       if (status.equals(EnumCombinedStatus.DELIVERED)) {
@@ -189,7 +198,7 @@ public class CombinedServiceImpl implements CombinedService {
     if (combinedRepository.existsById(id)) {
       combinedRepository.deleteById(id);
     } else {
-      throw new NotFoundException("Combined is not found.");
+      throw new NotFoundException(ErrorConstant.COMBINED_NOT_FOUND);
     }
   }
 

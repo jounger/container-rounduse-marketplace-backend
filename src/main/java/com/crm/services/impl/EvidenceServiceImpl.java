@@ -12,6 +12,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import com.crm.common.Constant;
+import com.crm.common.ErrorConstant;
 import com.crm.common.Tool;
 import com.crm.exception.InternalException;
 import com.crm.exception.NotFoundException;
@@ -47,11 +48,11 @@ public class EvidenceServiceImpl implements EvidenceService {
   private UserRepository userRepository;
 
   @Override
-  public Evidence createEvidence(Long id, Long userId, EvidenceRequest request) {
+  public Evidence createEvidence(Long id, String username, EvidenceRequest request) {
     Evidence evidence = new Evidence();
 
     Contract contract = contractRepository.findById(id)
-        .orElseThrow(() -> new NotFoundException("Combined is not found."));
+        .orElseThrow(() -> new NotFoundException(ErrorConstant.COMBINED_NOT_FOUND));
     evidence.setContract(contract);
 
     Combined combined = contract.getCombined();
@@ -59,18 +60,18 @@ public class EvidenceServiceImpl implements EvidenceService {
     Supplier bidder = bid.getBidder();
     BiddingDocument biddingDocument = bid.getBiddingDocument();
     Supplier offeree = biddingDocument.getOfferee();
-    if (userId.equals(bidder.getId()) || userId.equals(offeree.getId())) {
-      Supplier supplier = supplierRepository.findById(userId).orElseThrow(() -> new NotFoundException("Supplier is not found."));
+    if (username.equals(bidder.getUsername()) || username.equals(offeree.getUsername())) {
+      Supplier supplier = supplierRepository.findByUsername(username).orElseThrow(() -> new NotFoundException(ErrorConstant.SENDER_NOT_FOUND));
       evidence.setSender(supplier);
       String evidenceString = request.getEvidence();
       if (!Tool.isBlank(evidenceString)) {
         evidence.setEvidence(evidenceString);
       } else {
-        throw new InternalException("Evidence is not valid.");
+        throw new InternalException(ErrorConstant.EVIDENCE_INVALID);
       }
       evidence.setIsValid(false);
     } else {
-      throw new NotFoundException("You must be Offeree or Biddier to create Evidence.");
+      throw new NotFoundException(ErrorConstant.USER_ACCESS_DENIED);
     }
 
     evidenceRepository.save(evidence);
@@ -78,26 +79,26 @@ public class EvidenceServiceImpl implements EvidenceService {
   }
 
   @Override
-  public Page<Evidence> getEvidencesByUser(Long userId, PaginationRequest request) {
+  public Page<Evidence> getEvidencesByUser(String username, PaginationRequest request) {
     PageRequest page = PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt"));
-    Page<Evidence> evidences = evidenceRepository.findByUser(userId, page);
+    Page<Evidence> evidences = evidenceRepository.findByUser(username, page);
     return evidences;
   }
 
   @Override
-  public Page<Evidence> getEvidencesByContract(Long id, Long userId, PaginationRequest request) {
+  public Page<Evidence> getEvidencesByContract(Long id, String username, PaginationRequest request) {
     if (!contractRepository.existsById(id)) {
-      throw new NotFoundException("Contract is not found.");
+      throw new NotFoundException(ErrorConstant.CONTRACT_NOT_FOUND);
     }
     Page<Evidence> evidences = null;
     PageRequest page = PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt"));
-    User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User is not found."));
+    User user = userRepository.findByUsername(username).orElseThrow(() -> new NotFoundException(ErrorConstant.USER_NOT_FOUND));
     String role = user.getRoles().iterator().next().getName();
 
     if (role.equalsIgnoreCase("ROLE_MODERATOR")) {
       evidences = evidenceRepository.findByContract(id, page);
     } else {
-      evidences = evidenceRepository.findByContract(id, userId, page);
+      evidences = evidenceRepository.findByContract(id, username, page);
     }
     return evidences;
   }
@@ -122,9 +123,9 @@ public class EvidenceServiceImpl implements EvidenceService {
   }
 
   @Override
-  public Evidence editEvidence(Long id, Long userId, Map<String, Object> updates) {
+  public Evidence editEvidence(Long id, String username, Map<String, Object> updates) {
     Evidence evidence = evidenceRepository.findById(id)
-        .orElseThrow(() -> new NotFoundException("Evidence is not found."));
+        .orElseThrow(() -> new NotFoundException(ErrorConstant.EVIDENCE_NOT_FOUND));
     Contract contract = evidence.getContract();
     Combined combined = contract.getCombined();
     Bid bid = combined.getBid();
@@ -132,13 +133,14 @@ public class EvidenceServiceImpl implements EvidenceService {
     BiddingDocument biddingDocument = bid.getBiddingDocument();
     Supplier offeree = biddingDocument.getOfferee();
 
-    if (!userId.equals(bidder.getId()) && !userId.equals(offeree.getId())) {
-      throw new NotFoundException("You must be Offeree or Biddier to edit Evidence.");
+    if (!username.equals(bidder.getUsername()) && !username.equals(offeree.getUsername())) {
+      throw new NotFoundException(ErrorConstant.USER_ACCESS_DENIED);
     }
     String evidenceString = String.valueOf(updates.get("evidence"));
     if (updates.get("evidence") != null && !Tool.isBlank(evidenceString)) {
       evidence.setEvidence(evidenceString);
     }
+    
     String isValid = String.valueOf(updates.get("isValid"));
     if (updates.get("isValid") != null && !Tool.isEqual(evidence.getIsValid(), isValid)) {
       evidence.setIsValid(Boolean.valueOf(isValid));
@@ -150,9 +152,9 @@ public class EvidenceServiceImpl implements EvidenceService {
   }
 
   @Override
-  public void removeEvidence(Long id, Long userId) {
+  public void removeEvidence(Long id, String username) {
     Evidence evidence = evidenceRepository.findById(id)
-        .orElseThrow(() -> new NotFoundException("Evidence is not found."));
+        .orElseThrow(() -> new NotFoundException(ErrorConstant.EVIDENCE_NOT_FOUND));
     Contract contract = evidence.getContract();
     Combined combined = contract.getCombined();
 
@@ -160,10 +162,10 @@ public class EvidenceServiceImpl implements EvidenceService {
     Supplier bidder = bid.getBidder();
     BiddingDocument biddingDocument = bid.getBiddingDocument();
     Supplier offeree = biddingDocument.getOfferee();
-    if (userId.equals(bidder.getId()) || userId.equals(offeree.getId())) {
+    if (username.equals(bidder.getUsername()) || username.equals(offeree.getUsername())) {
       evidenceRepository.deleteById(id);
     } else {
-      throw new NotFoundException("You must be Offeree or Biddier to create Evidence.");
+      throw new NotFoundException(ErrorConstant.USER_ACCESS_DENIED);
     }
 
   }

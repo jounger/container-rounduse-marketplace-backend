@@ -100,20 +100,15 @@ public class AuthController {
 
   @PostMapping("/signup")
   public ResponseEntity<?> registerUser(@Valid @RequestBody SupplierRequest request) {
-    String role = request.getRoles().iterator().next();
+    String role = request.getRoles().iterator().next().toUpperCase();
     SupplierDto supplierDto = null;
-    switch (role.toUpperCase()) {
-    case "FORWARDER": {
+    if (role.equals("FORWARDER") || role.equals("ROLE_FORWARDER")) {
       Forwarder forwarder = forwarderService.createForwarder(request);
       supplierDto = SupplierMapper.toSupplierDto(forwarder);
-    }
-      break;
-    case "MERCHANT": {
+    } else if (role.equals("MERCHANT") || role.equals("ROLE_MERCHANT")) {
       Merchant merchant = merchantService.createMerchant(request);
       supplierDto = SupplierMapper.toSupplierDto(merchant);
-    }
-      break;
-    default:
+    } else {
       throw new NotFoundException("Role is not found.");
     }
 

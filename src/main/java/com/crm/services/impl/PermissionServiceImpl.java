@@ -6,6 +6,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import com.crm.common.ErrorConstant;
 import com.crm.exception.DuplicateRecordException;
 import com.crm.exception.NotFoundException;
 import com.crm.models.Permission;
@@ -24,7 +25,7 @@ public class PermissionServiceImpl implements PermissionService {
   public Permission createPermission(PermissionRequest request) {
     Permission permission = new Permission();
     if (permissionRepository.existsByName(request.getName())) {
-      throw new DuplicateRecordException("Permission already exists.");
+      throw new DuplicateRecordException(ErrorConstant.PERMISSION_ALREADY_EXISTS);
     } else {
       permission.setName(request.getName());
       permission.setDescription(request.getDescription());
@@ -44,14 +45,14 @@ public class PermissionServiceImpl implements PermissionService {
   @Override
   public void removePermission(Long id) {
     Permission permission = permissionRepository.findById(id)
-        .orElseThrow(() -> new NotFoundException("Permission is not found."));
+        .orElseThrow(() -> new NotFoundException(ErrorConstant.PERMISSION_NOT_FOUND));
     permissionRepository.delete(permission);
   }
 
   @Override
   public Permission updatePermission(PermissionRequest request) {
     Permission permission = permissionRepository.findById(request.getId())
-        .orElseThrow(() -> new NotFoundException("Permission is not found."));
+        .orElseThrow(() -> new NotFoundException(ErrorConstant.PERMISSION_NOT_FOUND));
     permission.setName(request.getName());
     permission.setDescription(request.getDescription());
     permissionRepository.save(permission);

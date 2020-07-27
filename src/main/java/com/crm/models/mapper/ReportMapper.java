@@ -1,5 +1,6 @@
 package com.crm.models.mapper;
 
+import com.crm.common.Tool;
 import com.crm.models.Report;
 import com.crm.models.dto.ReportDto;
 
@@ -13,6 +14,7 @@ public class ReportMapper {
     reportDto.setTitle(report.getTitle());
     reportDto.setDetail(report.getDetail());
     reportDto.setStatus(report.getStatus());
+    reportDto.setSendDate(Tool.convertLocalDateTimeToString(report.getSendDate()));
 
     return reportDto;
   }

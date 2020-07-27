@@ -18,6 +18,6 @@ public interface ContainerSemiTrailerRepository
 
   Optional<ContainerSemiTrailer> findByLicensePlate(String licensePlate);
 
-  @Query(value = "FROM ContainerSemiTrailer c WHERE c.forwarder.id = :id")
-  Page<ContainerSemiTrailer> findByForwarder(@Param("id") Long id, Pageable pageable);
+  @Query(value = "FROM ContainerSemiTrailer c WHERE c.forwarder.username = :username")
+  Page<ContainerSemiTrailer> findByForwarder(@Param("username") String username, Pageable pageable);
 }

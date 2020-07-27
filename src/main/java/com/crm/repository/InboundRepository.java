@@ -17,8 +17,8 @@ import com.crm.models.Inbound;
 @Repository
 public interface InboundRepository extends JpaRepository<Inbound, Long>, JpaSpecificationExecutor<Inbound> {
 
-  @Query(value = "SELECT i FROM Inbound i WHERE i.forwarder.id = :id")
-  Page<Inbound> findByFowarder(@Param("id") Long id, Pageable pageable);
+  @Query(value = "SELECT i FROM Inbound i WHERE i.forwarder.username = :username")
+  Page<Inbound> findByFowarder(@Param("username") String username, Pageable pageable);
 
   @Query(value = "SELECT i FROM Inbound i LEFT JOIN i.billOfLading.containers c WHERE c.id = :id")
   Optional<Inbound> findInboundByContainer(@Param("id") Long id);
@@ -55,7 +55,7 @@ public interface InboundRepository extends JpaRepository<Inbound, Long>, JpaSpec
    * @param
    * 
    */
-  @Query(value = "SELECT i FROM Inbound i WHERE i.forwarder.id = :userId AND i.shippingLine.companyCode = :shippingLine AND i.containerType.name = :containerType")
-  Page<Inbound> findByOutboundAndForwarder(@Param("userId") Long userId, @Param("shippingLine") String shippingLine,
+  @Query(value = "SELECT i FROM Inbound i WHERE i.forwarder.username = :username AND i.shippingLine.companyCode = :shippingLine AND i.containerType.name = :containerType")
+  Page<Inbound> findByOutboundAndForwarder(@Param("username") String username, @Param("shippingLine") String shippingLine,
       @Param("containerType") String containerType, Pageable pageable);
 }

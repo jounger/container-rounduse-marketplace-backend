@@ -20,6 +20,6 @@ public interface DriverRepository extends JpaRepository<Driver, Long>{
 	
 	Optional<Driver> findByUsername(String username);
 	
-	@Query(value = "FROM Driver d WHERE d.forwarder.id = :id")
-	Page<Driver> findByForwarder(@Param("id") Long id, Pageable pageable);
+	@Query(value = "FROM Driver d WHERE d.forwarder.username = :username")
+	Page<Driver> findByForwarder(@Param("username") String username, Pageable pageable);
 }

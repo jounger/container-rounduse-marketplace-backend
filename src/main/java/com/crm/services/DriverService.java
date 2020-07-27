@@ -10,17 +10,19 @@ import com.crm.payload.request.PaginationRequest;
 
 public interface DriverService {
 
-  Driver createDriver(Long userId, DriverRequest request);
+  Driver createDriver(String username, DriverRequest request);
 
   Driver getDriver(Long id);
 
+  Driver getDriverByUserName(String username);
+
   Page<Driver> getDrivers(PaginationRequest request);
 
-  Page<Driver> getDriversByForwarder(Long id, PaginationRequest request);
+  Page<Driver> getDriversByForwarder(String username, PaginationRequest request);
 
-  Driver updateDriver(Long userId, DriverRequest request);
+  Driver updateDriver(String username, DriverRequest request);
 
-  Driver editDriver(Long id, Long userId, Map<String, Object> updates);
+  Driver editDriver(Long id, String username, Map<String, Object> updates);
 
-  void removeDriver(Long id, Long userId);
+  void removeDriver(Long id, String username);
 }

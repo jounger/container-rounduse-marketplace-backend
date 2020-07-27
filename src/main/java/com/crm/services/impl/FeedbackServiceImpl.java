@@ -1,5 +1,6 @@
 package com.crm.services.impl;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -13,6 +14,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import com.crm.common.Constant;
+import com.crm.common.ErrorConstant;
 import com.crm.common.Tool;
 import com.crm.enums.EnumReportStatus;
 import com.crm.exception.InternalException;
@@ -41,22 +43,24 @@ public class FeedbackServiceImpl implements FeedbackService {
   private ReportRepository reportRepository;
 
   @Override
-  public Feedback createFeedback(Long id, Long userId, FeedbackRequest request) {
+  public Feedback createFeedback(Long id, String username, FeedbackRequest request) {
     Feedback feedback = new Feedback();
 
-    Report report = reportRepository.findById(id).orElseThrow(() -> new NotFoundException("Report is not found."));
+    Report report = reportRepository.findById(id)
+        .orElseThrow(() -> new NotFoundException(ErrorConstant.REPORT_NOT_FOUND));
 
     if (report.getStatus().equals(EnumReportStatus.RESOLVED.name())
         || report.getStatus().equals(EnumReportStatus.REJECTED.name())
         || report.getStatus().equals(EnumReportStatus.CLOSED.name())) {
-      throw new InternalException("You can not create feedBack now.");
+      throw new InternalException(ErrorConstant.FEEDBACK_INVALID_TIME);
     }
 
     report.setStatus(EnumReportStatus.UPDATED.name());
     feedback.setReport(report);
-    User sender = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User is not found."));
+    User sender = userRepository.findByUsername(username)
+        .orElseThrow(() -> new NotFoundException(ErrorConstant.SENDER_NOT_FOUND));
     String role = sender.getRoles().iterator().next().getName();
-    if (role.equals("ROLE_MODERATOR") || userId.equals(report.getSender().getId())) {
+    if (role.equals("ROLE_MODERATOR") || username.equals(report.getSender().getId())) {
       feedback.setSender(sender);
     } else {
       throw new NotFoundException("Access denied.");
@@ -67,28 +71,30 @@ public class FeedbackServiceImpl implements FeedbackService {
 
     Integer satisfactionPoints = request.getSatisfactionPoints();
     if (satisfactionPoints < 0 || satisfactionPoints > 5) {
-      throw new InternalException("Satisfaction Points must be greater than zero and less than five.");
+      throw new InternalException(ErrorConstant.FEEDBACK_INVALID_SATISFACTION_POINTS);
     }
     feedback.setSatisfactionPoints(satisfactionPoints);
+    feedback.setSendDate(LocalDateTime.now());
 
     feedbackRepository.save(feedback);
     return feedback;
   }
 
   @Override
-  public Page<Feedback> getFeedbacksByReport(Long reportId, Long userId, PaginationRequest request) {
+  public Page<Feedback> getFeedbacksByReport(Long reportId, String username, PaginationRequest request) {
     Page<Feedback> feedbacks = null;
 
     if (!reportRepository.existsById(reportId)) {
-      throw new NotFoundException("Report is not found.");
+      throw new NotFoundException(ErrorConstant.REPORT_NOT_FOUND);
     }
 
     PageRequest pageRequest = PageRequest.of(request.getPage(), request.getLimit(),
         Sort.by(Direction.ASC, "createdAt"));
-    User sender = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User is not found."));
+    User sender = userRepository.findByUsername(username)
+        .orElseThrow(() -> new NotFoundException(ErrorConstant.SENDER_NOT_FOUND));
     String role = sender.getRoles().iterator().next().getName();
     if (role.equals("ROLE_FORWARDER")) {
-      feedbacks = feedbackRepository.findByReport(reportId, userId, pageRequest);
+      feedbacks = feedbackRepository.findByReport(reportId, username, pageRequest);
     } else if (role.equals("ROLE_MODERATOR")) {
       feedbacks = feedbackRepository.findByReport(reportId, pageRequest);
     }
@@ -101,7 +107,7 @@ public class FeedbackServiceImpl implements FeedbackService {
     PageRequest pageRequest = PageRequest.of(request.getPage(), request.getLimit(),
         Sort.by(Direction.DESC, "createdAt"));
     User sender = userRepository.findByUsername(username)
-        .orElseThrow(() -> new NotFoundException("User is not found."));
+        .orElseThrow(() -> new NotFoundException(ErrorConstant.SENDER_NOT_FOUND));
     String role = sender.getRoles().iterator().next().getName();
     if (role.equals("ROLE_MODERATOR") || role.equals("ROLE_FORWARDER")) {
       feedbacks = feedbackRepository.findBySender(sender, pageRequest);
@@ -129,11 +135,11 @@ public class FeedbackServiceImpl implements FeedbackService {
   }
 
   @Override
-  public Feedback editFeedback(Long id, Long userId, Map<String, Object> updates) {
+  public Feedback editFeedback(Long id, String username, Map<String, Object> updates) {
     Feedback feedback = feedbackRepository.findById(id)
-        .orElseThrow(() -> new NotFoundException("Feedback is not found."));
-    if (feedback.getSender().getId() != userId) {
-      throw new NotFoundException("Access denied, This feedback can be only edited by its onwer.");
+        .orElseThrow(() -> new NotFoundException(ErrorConstant.FEEDBACK_NOT_FOUND));
+    if (!feedback.getSender().getUsername().equals(username)) {
+      throw new NotFoundException(ErrorConstant.USER_ACCESS_DENIED);
     }
 
     String message = String.valueOf(updates.get("message"));
@@ -152,13 +158,13 @@ public class FeedbackServiceImpl implements FeedbackService {
   }
 
   @Override
-  public void removeFeedback(Long id, Long userId) {
+  public void removeFeedback(Long id, String username) {
     Feedback feedback = feedbackRepository.findById(id)
-        .orElseThrow(() -> new NotFoundException("Feedback is not found."));
-    if (feedback.getSender().getId().equals(userId)) {
+        .orElseThrow(() -> new NotFoundException(ErrorConstant.FEEDBACK_NOT_FOUND));
+    if (feedback.getSender().getUsername().equals(username)) {
       feedbackRepository.deleteById(id);
     } else {
-      throw new NotFoundException("Access denied.");
+      throw new NotFoundException(ErrorConstant.USER_ACCESS_DENIED);
     }
   }
 

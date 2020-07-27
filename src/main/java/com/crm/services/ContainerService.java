@@ -1,5 +1,6 @@
 package com.crm.services;
 
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.data.domain.Page;
@@ -18,14 +19,16 @@ public interface ContainerService {
 
   Page<Container> getContainersByBid(Long id, PaginationRequest request);
 
+  List<Container> getContainersByBidAndStatus(Long id, String status);
+
   Page<Container> getContainers(PaginationRequest request);
 
-  Container createContainer(Long id, Long userId, ContainerRequest request);
+  Container createContainer(Long id, String username, ContainerRequest request);
 
-  Container updateContainer(Long userId, ContainerRequest request);
+  Container updateContainer(String username, ContainerRequest request);
 
-  Container editContainer(Map<String, Object> updates, Long id, Long userId);
+  Container editContainer(Map<String, Object> updates, Long id, String username);
 
-  void removeContainer(Long id, Long userId);
+  void removeContainer(Long id, String username);
 
 }

@@ -13,6 +13,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import com.crm.common.Constant;
+import com.crm.common.ErrorConstant;
 import com.crm.common.Tool;
 import com.crm.enums.EnumSupplyStatus;
 import com.crm.exception.DuplicateRecordException;
@@ -48,7 +49,7 @@ public class ContainerTractorServiceImpl implements ContainerTractorService {
   @Override
   public ContainerTractor getContainerTractorById(Long id) {
     ContainerTractor containerTractor = containerTractorRepository.findById(id)
-        .orElseThrow(() -> new NotFoundException("ERROR: containerTractor is not found."));
+        .orElseThrow(() -> new NotFoundException(ErrorConstant.TRACTOR_NOT_FOUND));
     return containerTractor;
   }
 
@@ -61,15 +62,15 @@ public class ContainerTractorServiceImpl implements ContainerTractorService {
   }
 
   @Override
-  public ContainerTractor createContainerTractor(Long id, ContainerTractorRequest request) {
+  public ContainerTractor createContainerTractor(String username, ContainerTractorRequest request) {
 
     ContainerTractor containerTractor = new ContainerTractor();
 
-    Forwarder forwarder = forwarderRepository.findById(id)
-        .orElseThrow(() -> new NotFoundException("ERROR: Forwarder is not found."));
+    Forwarder forwarder = forwarderRepository.findByUsername(username)
+        .orElseThrow(() -> new NotFoundException(ErrorConstant.FORWARDER_NOT_FOUND));
 
     if (vehicleRepository.existsByLicensePlate(request.getLicensePlate())) {
-      throw new DuplicateRecordException("Error: LicensePlate has been existed");
+      throw new DuplicateRecordException(ErrorConstant.VEHICLE_LICENSE_PLATE_ALREADY_EXISTS);
     } else {
       containerTractor.setLicensePlate(request.getLicensePlate());
     }
@@ -83,15 +84,15 @@ public class ContainerTractorServiceImpl implements ContainerTractorService {
   }
 
   @Override
-  public ContainerTractor updateContainerTractor(Long userId, ContainerTractorRequest request) {
+  public ContainerTractor updateContainerTractor(String username, ContainerTractorRequest request) {
 
-    if (forwarderRepository.existsById(userId)) {
+    if (forwarderRepository.existsByUsername(username)) {
 
       ContainerTractor containerTractor = containerTractorRepository.findById(request.getId())
-          .orElseThrow(() -> new NotFoundException("ERROR: ContainerTractor is not found."));
+          .orElseThrow(() -> new NotFoundException(ErrorConstant.TRACTOR_NOT_FOUND));
 
-      if (!containerTractor.getForwarder().getId().equals(userId)) {
-        throw new InternalException(String.format("Forwarder %s not owned containerTractor", userId));
+      if (!containerTractor.getForwarder().getId().equals(username)) {
+        throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
       }
 
       Collection<Container> containers = containerRepository.findByTractor(request.getId(),
@@ -100,15 +101,14 @@ public class ContainerTractorServiceImpl implements ContainerTractorService {
         containers.forEach(item -> {
           if (item.getStatus().equalsIgnoreCase(EnumSupplyStatus.COMBINED.name())
               || item.getStatus().equalsIgnoreCase(EnumSupplyStatus.BIDDING.name())) {
-            throw new InternalException(
-                String.format("Container %s has been %s", item.getContainerNumber(), item.getStatus()));
+            throw new InternalException(ErrorConstant.TRACTOR_BUSY);
           }
         });
       }
 
       if (vehicleRepository.existsByLicensePlate(request.getLicensePlate())
           && !request.getLicensePlate().equals(containerTractor.getLicensePlate())) {
-        throw new DuplicateRecordException("Error: LicensePlate has been existed");
+        throw new DuplicateRecordException(ErrorConstant.VEHICLE_LICENSE_PLATE_ALREADY_EXISTS);
       } else {
         containerTractor.setLicensePlate(request.getLicensePlate());
       }
@@ -118,19 +118,19 @@ public class ContainerTractorServiceImpl implements ContainerTractorService {
       containerTractorRepository.save(containerTractor);
       return containerTractor;
     } else {
-      throw new NotFoundException("ERROR: Forwarder is not found.");
+      throw new NotFoundException(ErrorConstant.FORWARDER_NOT_FOUND);
     }
   }
 
   @Override
-  public ContainerTractor editContainerTractor(Map<String, Object> updates, Long id, Long userId) {
-    if (forwarderRepository.existsById(userId)) {
+  public ContainerTractor editContainerTractor(Map<String, Object> updates, Long id, String username) {
+    if (forwarderRepository.existsByUsername(username)) {
 
       ContainerTractor containerTractor = containerTractorRepository.findById(id)
-          .orElseThrow(() -> new NotFoundException("ERROR: ContainerTractor is not found."));
+          .orElseThrow(() -> new NotFoundException(ErrorConstant.TRACTOR_NOT_FOUND));
 
-      if (!containerTractor.getForwarder().getId().equals(userId)) {
-        throw new InternalException(String.format("Forwarder %s not owned containerTractor", userId));
+      if (!containerTractor.getForwarder().getId().equals(username)) {
+        throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
       }
 
       Collection<Container> containers = containerRepository.findByTractor(id, EnumSupplyStatus.COMBINED.name(),
@@ -139,8 +139,7 @@ public class ContainerTractorServiceImpl implements ContainerTractorService {
         containers.forEach(item -> {
           if (item.getStatus().equalsIgnoreCase(EnumSupplyStatus.COMBINED.name())
               || item.getStatus().equalsIgnoreCase(EnumSupplyStatus.BIDDING.name())) {
-            throw new InternalException(
-                String.format("Container %s has been %s", item.getContainerNumber(), item.getStatus()));
+            throw new InternalException(ErrorConstant.CONTAINER_BUSY);
           }
         });
       }
@@ -148,7 +147,7 @@ public class ContainerTractorServiceImpl implements ContainerTractorService {
       String licensePlate = String.valueOf(updates.get("licensePlate"));
       if (updates.get("licensePlate") != null && !Tool.isEqual(containerTractor.getLicensePlate(), licensePlate)) {
         if (vehicleRepository.existsByLicensePlate(licensePlate)) {
-          throw new DuplicateRecordException("Error: LicensePlate has been existed");
+          throw new DuplicateRecordException(ErrorConstant.VEHICLE_LICENSE_PLATE_ALREADY_EXISTS);
         }
         containerTractor.setLicensePlate(licensePlate);
       }
@@ -161,19 +160,19 @@ public class ContainerTractorServiceImpl implements ContainerTractorService {
       containerTractorRepository.save(containerTractor);
       return containerTractor;
     } else {
-      throw new NotFoundException("ERROR: Forwarder is not found.");
+      throw new NotFoundException(ErrorConstant.FORWARDER_NOT_FOUND);
     }
   }
 
   @Override
-  public void removeContainerTractor(Long id, Long userId) {
+  public void removeContainerTractor(Long id, String username) {
 
-    if (forwarderRepository.existsById(userId)) {
+    if (forwarderRepository.existsByUsername(username)) {
       ContainerTractor containerTractor = containerTractorRepository.findById(id)
-          .orElseThrow(() -> new NotFoundException("ERROR: ContainerTractor is not found."));
+          .orElseThrow(() -> new NotFoundException(ErrorConstant.TRACTOR_NOT_FOUND));
 
-      if (!containerTractor.getForwarder().getId().equals(userId)) {
-        throw new InternalException(String.format("Forwarder %s not owned containerTractor", userId));
+      if (!containerTractor.getForwarder().getId().equals(username)) {
+        throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
       }
 
       Collection<Container> containers = containerRepository.findByTractor(id, EnumSupplyStatus.COMBINED.name(),
@@ -182,27 +181,26 @@ public class ContainerTractorServiceImpl implements ContainerTractorService {
         containers.forEach(item -> {
           if (item.getStatus().equalsIgnoreCase(EnumSupplyStatus.COMBINED.name())
               || item.getStatus().equalsIgnoreCase(EnumSupplyStatus.BIDDING.name())) {
-            throw new InternalException(
-                String.format("Container %s has been %s", item.getContainerNumber(), item.getStatus()));
+            throw new InternalException(ErrorConstant.CONTAINER_BUSY);
           }
         });
       }
       containerTractorRepository.delete(containerTractor);
     } else {
-      throw new NotFoundException("ERROR: Forwarder is not found.");
+      throw new NotFoundException(ErrorConstant.FORWARDER_NOT_FOUND);
     }
 
   }
 
   @Override
-  public Page<ContainerTractor> getContainerTractorsByForwarder(Long userId, PaginationRequest request) {
-    if (forwarderRepository.existsById(userId)) {
+  public Page<ContainerTractor> getContainerTractorsByForwarder(String username, PaginationRequest request) {
+    if (forwarderRepository.existsByUsername(username)) {
       PageRequest pageRequest = PageRequest.of(request.getPage(), request.getLimit(),
           Sort.by(Sort.Direction.DESC, "createdAt"));
-      Page<ContainerTractor> pages = containerTractorRepository.findByForwarder(userId, pageRequest);
+      Page<ContainerTractor> pages = containerTractorRepository.findByForwarder(username, pageRequest);
       return pages;
     } else {
-      throw new NotFoundException("ERROR: Forwarder is not found.");
+      throw new NotFoundException(ErrorConstant.FORWARDER_NOT_FOUND);
     }
   }
 
@@ -227,7 +225,7 @@ public class ContainerTractorServiceImpl implements ContainerTractorService {
   @Override
   public ContainerTractor getContainerTractorByLicensePlate(String licensePlate) {
     ContainerTractor containerTractor = containerTractorRepository.findByLicensePlate(licensePlate)
-        .orElseThrow(() -> new NotFoundException("ERROR: containerTractor is not found."));
+        .orElseThrow(() -> new NotFoundException(ErrorConstant.TRACTOR_BUSY));
     return containerTractor;
   }
 

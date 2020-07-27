@@ -79,7 +79,7 @@ public interface ContainerRepository extends JpaRepository<Container, Long> {
   /* Check time busy Container */
 
   @Query(value = "SELECT CASE WHEN COUNT(c) = 0 THEN TRUE ELSE FALSE END "
-      + "FROM Container c WHERE c.billOfLading.inbound.forwarder.id = :userId "
+      + "FROM Container c WHERE c.billOfLading.inbound.forwarder.username = :username "
       + "AND c.containerNumber = :containerNumber "
       + "AND ((c.billOfLading.freeTime > :freeTime AND c.billOfLading.inbound.pickupTime < :freeTime) "
       + "OR (c.billOfLading.freeTime > :pickupTime AND c.billOfLading.inbound.pickupTime < :pickupTime) "
@@ -88,10 +88,10 @@ public interface ContainerRepository extends JpaRepository<Container, Long> {
       + "OR (c.billOfLading.inbound.pickupTime = :freeTime) " + "OR (c.billOfLading.freeTime = :pickupTime))")
   boolean findByContainerNumber(@Param("containerNumber") String containerNumber,
       @Param("pickupTime") LocalDateTime pickupTime, @Param("freeTime") LocalDateTime freeTime,
-      @Param("userId") Long userId);
+      @Param("username") String username);
 
   @Query(value = "SELECT CASE WHEN COUNT(c) = 0 THEN TRUE ELSE FALSE END "
-      + "FROM Container c WHERE c.billOfLading.inbound.forwarder.id = :userId "
+      + "FROM Container c WHERE c.billOfLading.inbound.forwarder.username = :username "
       + "AND c.containerNumber = :containerNumber "
       + "AND ((c.billOfLading.freeTime > :freeTime AND c.billOfLading.inbound.pickupTime < :freeTime) "
       + "OR (c.billOfLading.freeTime > :pickupTime AND c.billOfLading.inbound.pickupTime < :pickupTime) "
@@ -99,76 +99,79 @@ public interface ContainerRepository extends JpaRepository<Container, Long> {
       + "OR (c.billOfLading.freeTime = :freeTime) " + "OR (c.billOfLading.inbound.pickupTime = :pickupTime) "
       + "OR (c.billOfLading.inbound.pickupTime = :freeTime) " + "OR (c.billOfLading.freeTime = :pickupTime)) "
       + "AND c.billOfLading.id != :id")
-  boolean findByContainerNumber(@Param("id") Long id, @Param("userId") Long userId,
+  boolean findByContainerNumber(@Param("id") Long id, @Param("username") String username,
       @Param("containerNumber") String containerNumber, @Param("pickupTime") LocalDateTime pickupTime,
       @Param("freeTime") LocalDateTime freeTime);
 
   /* Check time busy Driver */
 
   @Query(value = "SELECT CASE WHEN COUNT(c) = 0 THEN TRUE ELSE FALSE END "
-      + "FROM Container c WHERE c.billOfLading.inbound.forwarder.id = :userId " + "AND c.driver.id = :driverId "
+      + "FROM Container c WHERE c.billOfLading.inbound.forwarder.username = :username " + "AND c.driver.id = :driverId "
       + "AND ((c.billOfLading.freeTime > :freeTime AND c.billOfLading.inbound.pickupTime < :freeTime) "
       + "OR (c.billOfLading.freeTime > :pickupTime AND c.billOfLading.inbound.pickupTime < :pickupTime) "
       + "OR (c.billOfLading.freeTime < :freeTime AND c.billOfLading.inbound.pickupTime > :pickupTime) "
       + "OR (c.billOfLading.freeTime = :freeTime) " + "OR (c.billOfLading.inbound.pickupTime = :pickupTime) "
       + "OR (c.billOfLading.inbound.pickupTime = :freeTime) " + "OR (c.billOfLading.freeTime = :pickupTime)) ")
-  boolean findByDriver(@Param("driverId") Long driverId, @Param("userId") Long userId,
+  boolean findByDriver(@Param("driverId") Long driverId, @Param("username") String username,
       @Param("pickupTime") LocalDateTime pickupTime, @Param("freeTime") LocalDateTime freeTime);
 
   @Query(value = "SELECT CASE WHEN COUNT(c) = 0 THEN TRUE ELSE FALSE END "
-      + "FROM Container c WHERE c.billOfLading.inbound.forwarder.id = :userId " + "AND c.driver.id = :driverId "
+      + "FROM Container c WHERE c.billOfLading.inbound.forwarder.username = :username " + "AND c.driver.id = :driverId "
       + "AND ((c.billOfLading.freeTime > :freeTime AND c.billOfLading.inbound.pickupTime < :freeTime) "
       + "OR (c.billOfLading.freeTime > :pickupTime AND c.billOfLading.inbound.pickupTime < :pickupTime) "
       + "OR (c.billOfLading.freeTime < :freeTime AND c.billOfLading.inbound.pickupTime > :pickupTime) "
       + "OR (c.billOfLading.freeTime = :freeTime) " + "OR (c.billOfLading.inbound.pickupTime = :pickupTime) "
       + "OR (c.billOfLading.inbound.pickupTime = :freeTime) " + "OR (c.billOfLading.freeTime = :pickupTime)) "
       + "AND c.billOfLading.id != :id")
-  boolean findByDriver(@Param("driverId") Long driverId, @Param("userId") Long userId,
+  boolean findByDriver(@Param("driverId") Long driverId, @Param("username") String username,
       @Param("pickupTime") LocalDateTime pickupTime, @Param("freeTime") LocalDateTime freeTime, @Param("id") Long id);
 
   /* Check time busy Trailer */
 
   @Query(value = "SELECT CASE WHEN COUNT(c) = 0 THEN TRUE ELSE FALSE END "
-      + "FROM Container c WHERE c.billOfLading.inbound.forwarder.id = :userId " + "AND c.trailer.id = :trailerId "
+      + "FROM Container c WHERE c.billOfLading.inbound.forwarder.username = :username " + "AND c.trailer.id = :trailerId "
       + "AND ((c.billOfLading.freeTime > :freeTime AND c.billOfLading.inbound.pickupTime < :freeTime) "
       + "OR (c.billOfLading.freeTime > :pickupTime AND c.billOfLading.inbound.pickupTime < :pickupTime) "
       + "OR (c.billOfLading.freeTime < :freeTime AND c.billOfLading.inbound.pickupTime > :pickupTime) "
       + "OR (c.billOfLading.freeTime = :freeTime) " + "OR (c.billOfLading.inbound.pickupTime = :pickupTime) "
       + "OR (c.billOfLading.inbound.pickupTime = :freeTime) " + "OR (c.billOfLading.freeTime = :pickupTime)) ")
-  boolean findByTrailer(@Param("trailerId") Long trailerId, @Param("userId") Long userId,
+  boolean findByTrailer(@Param("trailerId") Long trailerId, @Param("username") String username,
       @Param("pickupTime") LocalDateTime pickupTime, @Param("freeTime") LocalDateTime freeTime);
 
   @Query(value = "SELECT CASE WHEN COUNT(c) = 0 THEN TRUE ELSE FALSE END "
-      + "FROM Container c WHERE c.billOfLading.inbound.forwarder.id = :userId " + "AND c.trailer.id = :trailerId "
+      + "FROM Container c WHERE c.billOfLading.inbound.forwarder.username = :username " + "AND c.trailer.id = :trailerId "
       + "AND ((c.billOfLading.freeTime > :freeTime AND c.billOfLading.inbound.pickupTime < :freeTime) "
       + "OR (c.billOfLading.freeTime > :pickupTime AND c.billOfLading.inbound.pickupTime < :pickupTime) "
       + "OR (c.billOfLading.freeTime < :freeTime AND c.billOfLading.inbound.pickupTime > :pickupTime) "
       + "OR (c.billOfLading.freeTime = :freeTime) " + "OR (c.billOfLading.inbound.pickupTime = :pickupTime) "
       + "OR (c.billOfLading.inbound.pickupTime = :freeTime) " + "OR (c.billOfLading.freeTime = :pickupTime)) "
       + "AND c.billOfLading.id != :id")
-  boolean findByTrailer(@Param("trailerId") Long trailerId, @Param("userId") Long userId,
+  boolean findByTrailer(@Param("trailerId") Long trailerId, @Param("username") String username,
       @Param("pickupTime") LocalDateTime pickupTime, @Param("freeTime") LocalDateTime freeTime, @Param("id") Long id);
 
   /* Check time busy Tractor */
 
   @Query(value = "SELECT CASE WHEN COUNT(c) = 0 THEN TRUE ELSE FALSE END "
-      + "FROM Container c WHERE c.billOfLading.inbound.forwarder.id = :userId " + "AND c.tractor.id = :tractorId "
+      + "FROM Container c WHERE c.billOfLading.inbound.forwarder.username = :username " + "AND c.tractor.id = :tractorId "
       + "AND ((c.billOfLading.freeTime > :freeTime AND c.billOfLading.inbound.pickupTime < :freeTime) "
       + "OR (c.billOfLading.freeTime > :pickupTime AND c.billOfLading.inbound.pickupTime < :pickupTime) "
       + "OR (c.billOfLading.freeTime < :freeTime AND c.billOfLading.inbound.pickupTime > :pickupTime) "
       + "OR (c.billOfLading.freeTime = :freeTime) " + "OR (c.billOfLading.inbound.pickupTime = :pickupTime) "
       + "OR (c.billOfLading.inbound.pickupTime = :freeTime) " + "OR (c.billOfLading.freeTime = :pickupTime)) ")
-  boolean findByTractor(@Param("tractorId") Long tractorId, @Param("userId") Long userId,
+  boolean findByTractor(@Param("tractorId") Long tractorId, @Param("username") String username,
       @Param("pickupTime") LocalDateTime pickupTime, @Param("freeTime") LocalDateTime freeTime);
 
   @Query(value = "SELECT CASE WHEN COUNT(c) = 0 THEN TRUE ELSE FALSE END "
-      + "FROM Container c WHERE c.billOfLading.inbound.forwarder.id = :userId " + "AND c.tractor.id = :tractorId "
+      + "FROM Container c WHERE c.billOfLading.inbound.forwarder.username = :username " + "AND c.tractor.id = :tractorId "
       + "AND ((c.billOfLading.freeTime > :freeTime AND c.billOfLading.inbound.pickupTime < :freeTime) "
       + "OR (c.billOfLading.freeTime > :pickupTime AND c.billOfLading.inbound.pickupTime < :pickupTime) "
       + "OR (c.billOfLading.freeTime < :freeTime AND c.billOfLading.inbound.pickupTime > :pickupTime) "
       + "OR (c.billOfLading.freeTime = :freeTime) " + "OR (c.billOfLading.inbound.pickupTime = :pickupTime) "
       + "OR (c.billOfLading.inbound.pickupTime = :freeTime) " + "OR (c.billOfLading.freeTime = :pickupTime)) "
       + "AND c.billOfLading.id != :id")
-  boolean findByTractor(@Param("tractorId") Long tractorId, @Param("userId") Long userId,
+  boolean findByTractor(@Param("tractorId") Long tractorId, @Param("username") String username,
       @Param("pickupTime") LocalDateTime pickupTime, @Param("freeTime") LocalDateTime freeTime, @Param("id") Long id);
+
+  @Query(value = "SELECT c FROM Container c LEFT JOIN c.bids b WHERE b.id = :id AND c.status = :status")
+  List<Container> findByBidAndStatus(@Param("id") Long id, @Param("status") String status);
 }

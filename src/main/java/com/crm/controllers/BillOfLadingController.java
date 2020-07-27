@@ -12,6 +12,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,7 +30,6 @@ import com.crm.models.mapper.BillOfLadingMapper;
 import com.crm.payload.request.BillOfLadingRequest;
 import com.crm.payload.request.PaginationRequest;
 import com.crm.payload.response.PaginationResponse;
-import com.crm.security.services.UserDetailsImpl;
 import com.crm.services.BillOfLadingService;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
@@ -102,11 +102,11 @@ public class BillOfLadingController {
   @PreAuthorize("hasRole('FORWARDER')")
   public ResponseEntity<?> updateBillOfLading(@Valid @RequestBody BillOfLadingRequest request) {
 
-    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
+    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
         .getPrincipal();
-    Long userId = userDetails.getId();
+    String username = userDetails.getUsername();
 
-    BillOfLading billOfLading = billOfLadingService.updateBillOfLading(userId, request);
+    BillOfLading billOfLading = billOfLadingService.updateBillOfLading(username, request);
     BillOfLadingDto billOfLadingDto = BillOfLadingMapper.toBillOfLadingDto(billOfLading);
     return ResponseEntity.ok(billOfLadingDto);
   }
@@ -115,11 +115,11 @@ public class BillOfLadingController {
   @PreAuthorize("hasRole('FORWARDER')")
   public ResponseEntity<?> editBillOfLading(@RequestBody Map<String, Object> updates, @PathVariable("id") Long id) {
 
-    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
+    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
         .getPrincipal();
-    Long userId = userDetails.getId();
+    String username = userDetails.getUsername();
 
-    BillOfLading billOfLading = billOfLadingService.editBillOfLading(updates, id, userId);
+    BillOfLading billOfLading = billOfLadingService.editBillOfLading(updates, id, username);
     BillOfLadingDto billOfLadingDto = new BillOfLadingDto();
     billOfLadingDto = BillOfLadingMapper.toBillOfLadingDto(billOfLading);
     return ResponseEntity.ok(billOfLadingDto);

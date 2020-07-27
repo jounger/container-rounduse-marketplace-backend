@@ -11,4 +11,6 @@ import com.crm.models.Merchant;
 public interface MerchantRepository extends JpaRepository<Merchant, Long> {
 
   Optional<Merchant> findByUsername(String username);
+  
+  Boolean existsByUsername(String username);
 }

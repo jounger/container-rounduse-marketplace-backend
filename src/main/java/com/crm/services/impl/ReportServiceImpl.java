@@ -1,5 +1,6 @@
 package com.crm.services.impl;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -12,6 +13,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import com.crm.common.Constant;
+import com.crm.common.ErrorConstant;
 import com.crm.common.Tool;
 import com.crm.enums.EnumReportStatus;
 import com.crm.exception.InternalException;
@@ -48,37 +50,51 @@ public class ReportServiceImpl implements ReportService {
   public Report createReport(String username, ReportRequest request) {
     Report report = new Report();
     Supplier sender = supplierRepository.findByUsername(username)
-        .orElseThrow(() -> new NotFoundException("Supplier is not found."));
+        .orElseThrow(() -> new NotFoundException(ErrorConstant.SENDER_NOT_FOUND));
     report.setSender(sender);
 
     BiddingDocument reportBiddingDocument = biddingDocumentRepository.findById(request.getReport())
-        .orElseThrow(() -> new NotFoundException("Bidding Document is not found."));
+        .orElseThrow(() -> new NotFoundException(ErrorConstant.BIDDINGDOCUMENT_NOT_FOUND));
     report.setReport(reportBiddingDocument);
 
     String title = request.getTitle();
     if (!Tool.isBlank(title)) {
       report.setTitle(title);
     } else {
-      throw new NotFoundException("Title is not Valid");
+      throw new NotFoundException(ErrorConstant.REPORT_TITLE_INVALID_TIME);
     }
 
     String detail = request.getDetail();
     if (!Tool.isBlank(detail)) {
       report.setDetail(detail);
     } else {
-      throw new NotFoundException("Detail is not Valid");
+      throw new NotFoundException(ErrorConstant.REPORT_DETAIL_INVALID_TIME);
     }
 
     report.setStatus(EnumReportStatus.PENDING.name());
+    report.setSendDate(LocalDateTime.now());
 
     reportRepository.save(report);
     return report;
   }
 
   @Override
+  public Report getReport(Long id, String username) {
+    Report report = reportRepository.findById(id)
+        .orElseThrow(() -> new NotFoundException(ErrorConstant.REPORT_NOT_FOUND));
+    User user = userRepository.findByUsername(username)
+        .orElseThrow(() -> new NotFoundException(ErrorConstant.USER_NOT_FOUND));
+    String role = user.getRoles().iterator().next().getName();
+    if (!report.getSender().getUsername().equals(username) && !role.equalsIgnoreCase("ROLE_MODERATOR")) {
+      throw new NotFoundException(ErrorConstant.USER_ACCESS_DENIED);
+    }
+    return report;
+  }
+
+  @Override
   public Page<Report> getReportsByUser(String username, PaginationRequest request) {
     Supplier sender = supplierRepository.findByUsername(username)
-        .orElseThrow(() -> new NotFoundException("Supplier is not found."));
+        .orElseThrow(() -> new NotFoundException(ErrorConstant.SENDER_NOT_FOUND));
     PageRequest page = PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt"));
     Page<Report> reports = reportRepository.findBySender(sender, page);
     return reports;
@@ -112,7 +128,8 @@ public class ReportServiceImpl implements ReportService {
 
   @Override
   public Report editReport(Long id, String username, Map<String, Object> updates) {
-    Report report = reportRepository.findById(id).orElseThrow(() -> new NotFoundException("Report is not found."));
+    Report report = reportRepository.findById(id)
+        .orElseThrow(() -> new NotFoundException(ErrorConstant.REPORT_NOT_FOUND));
 
     User user = userRepository.findByUsername(username)
         .orElseThrow(() -> new NotFoundException("Supplier is not found."));
@@ -120,7 +137,7 @@ public class ReportServiceImpl implements ReportService {
     if (report.getSender().getUsername().equals(username) || role.equals("ROLE_MODERATOR")) {
 
     } else {
-      throw new NotFoundException("Access denied.");
+      throw new NotFoundException(ErrorConstant.USER_ACCESS_DENIED);
     }
 
     if (report.getSender().getUsername().equals(username)) {
@@ -128,7 +145,7 @@ public class ReportServiceImpl implements ReportService {
       if (report.getStatus().equals(EnumReportStatus.RESOLVED.name())
           || report.getStatus().equals(EnumReportStatus.REJECTED.name())
           || report.getStatus().equals(EnumReportStatus.CLOSED.name())) {
-        throw new InternalException("Report was resolved, rejected or closed");
+        throw new InternalException(ErrorConstant.REPORT_INVALID_TIME);
       }
       String title = String.valueOf(updates.get("title"));
       if (updates.get("title") != null && !Tool.isEqual(report.getTitle(), title)) {
@@ -144,7 +161,7 @@ public class ReportServiceImpl implements ReportService {
       if (updates.get("status") != null && !Tool.isEqual(report.getStatus(), statusString)) {
         EnumReportStatus status = EnumReportStatus.findByName(statusString);
         if (status == null) {
-          throw new NotFoundException("Status is not found.");
+          throw new NotFoundException(ErrorConstant.REPORT_STATUS_NOT_FOUND);
         }
         report.setStatus(status.name());
       }
@@ -152,13 +169,13 @@ public class ReportServiceImpl implements ReportService {
 
     if (role.equals("ROLE_MODERATOR")) {
       if (!report.getStatus().equals(EnumReportStatus.RESOLVED.name())) {
-        throw new InternalException("Report must be Resolved");
+        throw new InternalException(ErrorConstant.REPORT_INVALID_TIME);
       }
       String statusString = String.valueOf(updates.get("status"));
       if (updates.get("status") != null && !Tool.isEqual(report.getStatus(), statusString)) {
         EnumReportStatus status = EnumReportStatus.findByName(statusString);
         if (status == null) {
-          throw new NotFoundException("Status is not found.");
+          throw new NotFoundException(ErrorConstant.REPORT_STATUS_NOT_FOUND);
         }
         report.setStatus(status.name());
       }
@@ -170,18 +187,13 @@ public class ReportServiceImpl implements ReportService {
 
   @Override
   public void removeReport(Long id, String username) {
-    Report report = reportRepository.findById(id).orElseThrow(() -> new NotFoundException("Report is not found."));
+    Report report = reportRepository.findById(id)
+        .orElseThrow(() -> new NotFoundException(ErrorConstant.REPORT_NOT_FOUND));
     if (report.getSender().getUsername().equals(username)) {
       reportRepository.delete(report);
     } else {
-      throw new NotFoundException("Access denied.");
+      throw new NotFoundException(ErrorConstant.USER_ACCESS_DENIED);
     }
-  }
-
-  @Override
-  public Report getReport(Long id) {
-    Report report = reportRepository.findById(id).orElseThrow(() -> new NotFoundException("Report is not found."));
-    return report;
   }
 
 }

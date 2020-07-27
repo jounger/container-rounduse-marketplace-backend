@@ -13,6 +13,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,7 +32,6 @@ import com.crm.payload.request.BiddingDocumentRequest;
 import com.crm.payload.request.PaginationRequest;
 import com.crm.payload.response.MessageResponse;
 import com.crm.payload.response.PaginationResponse;
-import com.crm.security.services.UserDetailsImpl;
 import com.crm.services.BiddingDocumentService;
 import com.crm.websocket.controller.NotificationBroadcast;
 
@@ -51,11 +51,11 @@ public class BiddingDocumentController {
   @PostMapping("")
   public ResponseEntity<?> createBiddingDocument(@Valid @RequestBody BiddingDocumentRequest request) {
 
-    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
+    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
         .getPrincipal();
-    Long id = userDetails.getId();
+    String username = userDetails.getUsername();
 
-    BiddingDocument biddingDocument = biddingDocumentService.createBiddingDocument(id, request);
+    BiddingDocument biddingDocument = biddingDocumentService.createBiddingDocument(username, request);
     BiddingDocumentDto biddingDocumentDto = BiddingDocumentMapper.toBiddingDocumentDto(biddingDocument);
 
     // CREATE NOTIFICATION
@@ -69,10 +69,10 @@ public class BiddingDocumentController {
   @GetMapping("/combined")
   public ResponseEntity<?> getBiddingDocumentsByExistCombined(@Valid PaginationRequest request) {
 
-    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
+    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
         .getPrincipal();
-    Long id = userDetails.getId();
-    Page<BiddingDocument> pages = biddingDocumentService.getBiddingDocumentsByExistCombined(id, request);
+    String username = userDetails.getUsername();
+    Page<BiddingDocument> pages = biddingDocumentService.getBiddingDocumentsByExistCombined(username, request);
 
     PaginationResponse<BiddingDocumentDto> response = new PaginationResponse<>();
     response.setPageNumber(request.getPage());
@@ -93,10 +93,10 @@ public class BiddingDocumentController {
   @GetMapping("")
   public ResponseEntity<?> getBiddingDocuments(@Valid PaginationRequest request) {
 
-    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
+    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
         .getPrincipal();
-    Long id = userDetails.getId();
-    Page<BiddingDocument> pages = biddingDocumentService.getBiddingDocuments(id, request);
+    String username = userDetails.getUsername();
+    Page<BiddingDocument> pages = biddingDocumentService.getBiddingDocuments(username, request);
 
     PaginationResponse<BiddingDocumentDto> response = new PaginationResponse<>();
     response.setPageNumber(request.getPage());
@@ -124,7 +124,7 @@ public class BiddingDocumentController {
   @PreAuthorize("hasRole('MERCHANT') or hasRole('FORWARDER')")
   @GetMapping("/bid/{id}")
   public ResponseEntity<?> getBiddingDocumentByBid(@PathVariable Long id) {
-    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
+    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
         .getPrincipal();
     String username = userDetails.getUsername();
     BiddingDocument biddingDocument = biddingDocumentService.getBiddingDocumentByBid(id, username);
@@ -154,10 +154,10 @@ public class BiddingDocumentController {
   @PreAuthorize("hasRole('MERCHANT')")
   @DeleteMapping("/{id}")
   public ResponseEntity<?> deleteBiddingDocument(@PathVariable Long id) {
-    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
+    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
         .getPrincipal();
-    Long userId = userDetails.getId();
-    biddingDocumentService.removeBiddingDocument(id, userId);
+    String username = userDetails.getUsername();
+    biddingDocumentService.removeBiddingDocument(id, username);
     return ResponseEntity.ok(new MessageResponse("Bidding document deleted successfully."));
   }
 }

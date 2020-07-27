@@ -85,7 +85,7 @@ public class BidServiceImpl implements BidService {
 
     List<Bid> bids = new ArrayList<>(biddingDocument.getBids());
     bids.forEach(bidOfBidding -> {
-      if (bidOfBidding.getBidder() == bidder) {
+      if (bidOfBidding.getBidder().getId() == bidder.getId()) {
         throw new DuplicateRecordException(ErrorConstant.BID_INVALID_CREATE);
       }
     });

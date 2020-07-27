@@ -45,14 +45,14 @@ public class NotificationServiceImpl implements NotificationService {
   }
 
   @Override
-  public Page<Notification> getNotificationsByUser(Long recipient, PaginationRequest request) {
+  public Page<Notification> getNotificationsByUser(String username, PaginationRequest request) {
     String status = request.getStatus();
     Page<Notification> notifications = null;
     if (status != null && !status.isEmpty()) {
-      notifications = notificationRepository.findByUserAndStatus(recipient, status,
+      notifications = notificationRepository.findByUserAndStatus(username, status,
           PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt")));
     } else {
-      notifications = notificationRepository.findByUser(recipient,
+      notifications = notificationRepository.findByUser(username,
           PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt")));
     }
     return notifications;

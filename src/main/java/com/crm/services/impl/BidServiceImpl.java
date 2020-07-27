@@ -66,7 +66,7 @@ public class BidServiceImpl implements BidService {
   private SupplierRepository supplierRepository;
 
   @Override
-  public Bid createBid(Long bidDocId, Long id, BidRequest request) {
+  public Bid createBid(Long bidDocId, String username, BidRequest request) {
     Bid bid = new Bid();
 
     BiddingDocument biddingDocument = biddingDocumentRepository.findById(bidDocId)
@@ -79,7 +79,7 @@ public class BidServiceImpl implements BidService {
       throw new InternalException(ErrorConstant.BIDDINGDOCUMENT_TIME_OUT);
     }
 
-    Forwarder bidder = forwarderRepository.findById(id)
+    Forwarder bidder = forwarderRepository.findByUsername(username)
         .orElseThrow(() -> new NotFoundException(ErrorConstant.FORWARDER_NOT_FOUND));
     bid.setBidder(bidder);
 
@@ -139,17 +139,17 @@ public class BidServiceImpl implements BidService {
   }
 
   @Override
-  public Bid getBid(Long id, Long userId) {
+  public Bid getBid(Long id, String username) {
     Bid bid = bidRepository.findById(id).orElseThrow(() -> new NotFoundException(ErrorConstant.BID_NOT_FOUND));
-    if (bid.getBidder().getId() != userId) {
+    if (bid.getBidder().getUsername() != username) {
       throw new NotFoundException(ErrorConstant.USER_ACCESS_DENIED);
     }
     return bid;
   }
 
   @Override
-  public Bid getBidByBiddingDocumentAndForwarder(Long biddingDocumentId, Long userId) {
-    Bid bid = bidRepository.findByBiddingDocumentAndForwarder(biddingDocumentId, userId)
+  public Bid getBidByBiddingDocumentAndForwarder(Long biddingDocumentId, String username) {
+    Bid bid = bidRepository.findByBiddingDocumentAndForwarder(biddingDocumentId, username)
         .orElseThrow(() -> new NotFoundException(ErrorConstant.BID_NOT_FOUND));
     return bid;
   }
@@ -162,38 +162,38 @@ public class BidServiceImpl implements BidService {
   }
 
   @Override
-  public Page<Bid> getBidsByBiddingDocumentAndExistCombined(Long id, Long userId, PaginationRequest request) {
+  public Page<Bid> getBidsByBiddingDocumentAndExistCombined(Long id, String username, PaginationRequest request) {
     if (!biddingDocumentRepository.existsById(id)) {
       throw new NotFoundException(ErrorConstant.BIDDINGDOCUMENT_NOT_FOUND);
-    }if(!supplierRepository.existsById(userId)) {
+    }if(!supplierRepository.existsByUsername(username)) {
       throw new NotFoundException(ErrorConstant.USER_NOT_FOUND);
     }
     PageRequest page = PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Direction.DESC, "id"));
-    Page<Bid> bids = bidRepository.findByBiddingDocumentAndExistCombined(id, userId, page);
+    Page<Bid> bids = bidRepository.findByBiddingDocumentAndExistCombined(id, username, page);
     return bids;
   }
 
   @Override
-  public Page<Bid> getBidsByForwarder(Long id, PaginationRequest request) {
+  public Page<Bid> getBidsByForwarder(String username, PaginationRequest request) {
     Page<Bid> bids = null;
     String status = request.getStatus();
     if (status != null && !status.isEmpty()) {
-      bids = bidRepository.findByForwarder(id, status,
+      bids = bidRepository.findByForwarder(username, status,
           PageRequest.of(request.getPage(), request.getLimit(), Sort.by("id").descending()));
     } else {
-      bids = bidRepository.findByForwarder(id,
+      bids = bidRepository.findByForwarder(username,
           PageRequest.of(request.getPage(), request.getLimit(), Sort.by("id").descending()));
     }
     return bids;
   }
 
   @Override
-  public Bid updateBid(Long userId, BidRequest request) {
+  public Bid updateBid(String username, BidRequest request) {
     Bid bid = bidRepository.findById(request.getId()).orElseThrow(() -> new NotFoundException(ErrorConstant.BID_NOT_FOUND));
 
     BiddingDocument biddingDocument = bid.getBiddingDocument();
 
-    User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException(ErrorConstant.USER_NOT_FOUND));
+    User user = userRepository.findByUsername(username).orElseThrow(() -> new NotFoundException(ErrorConstant.USER_NOT_FOUND));
     Role role = user.getRoles().iterator().next();
     if (role.getName().equalsIgnoreCase("ROLE_FORWARDER")) {
       String bidStatus = bid.getStatus();
@@ -272,9 +272,9 @@ public class BidServiceImpl implements BidService {
 
   @SuppressWarnings("unchecked")
   @Override
-  public Bid editBid(Long id, Long userId, Map<String, Object> updates) {
+  public Bid editBid(Long id, String username, Map<String, Object> updates) {
     Bid bid = bidRepository.findById(id).orElseThrow(() -> new NotFoundException(ErrorConstant.BID_NOT_FOUND));
-    User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException(ErrorConstant.USER_NOT_FOUND));
+    User user = userRepository.findByUsername(username).orElseThrow(() -> new NotFoundException(ErrorConstant.USER_NOT_FOUND));
     Role role = user.getRoles().iterator().next();
 
     if (role.getName().equalsIgnoreCase("ROLE_FORWARDER")) {
@@ -411,9 +411,9 @@ public class BidServiceImpl implements BidService {
   }
 
   @Override
-  public void removeBid(Long id, Long userId) {
+  public void removeBid(Long id, String username) {
     Bid bid = bidRepository.findById(id).orElseThrow(() -> new NotFoundException(ErrorConstant.BID_NOT_FOUND));
-    if (bid.getBidder().getId() != userId) {
+    if (bid.getBidder().getUsername() != username) {
       throw new NotFoundException("Access denied.");
     }
     if (!bid.getStatus().equalsIgnoreCase(EnumBidStatus.ACCEPTED.name())) {

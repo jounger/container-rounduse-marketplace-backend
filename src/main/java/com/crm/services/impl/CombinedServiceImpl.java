@@ -57,7 +57,7 @@ public class CombinedServiceImpl implements CombinedService {
   private OutboundRepository outboundRepository;
 
   @Override
-  public Combined createCombined(Long bidId, Long userId, CombinedRequest request) {
+  public Combined createCombined(Long bidId, String username, CombinedRequest request) {
     Combined combined = new Combined();
 
     Bid bid = bidRepository.findById(bidId).orElseThrow(() -> new NotFoundException(ErrorConstant.BID_NOT_FOUND));
@@ -70,7 +70,7 @@ public class CombinedServiceImpl implements CombinedService {
       updates.put("combinedContainers", request.getContainers());
     }
     
-    bid = bidService.editBid(bidId, userId, updates);
+    bid = bidService.editBid(bidId, username, updates);
     combined.setBid(bid);
 
     combined.setStatus(EnumCombinedStatus.INFO_RECEIVED.name());
@@ -82,14 +82,14 @@ public class CombinedServiceImpl implements CombinedService {
     Boolean required = contracRequest.getRequired();
     contract.setRequired(required);
     contract.setFinesAgainstContractViolations(0D);
-    if (userId.equals(offeree.getId()) && required == true) {
+    if (username.equals(offeree.getUsername()) && required == true) {
       Double fines = contracRequest.getFinesAgainstContractViolations();
       if (fines > 0) {
         contract.setFinesAgainstContractViolations(fines);
       } else {
         throw new InternalException(ErrorConstant.CONTRACT_INVALID_FINES);
       }
-    } else if (!userId.equals(offeree.getId())) {
+    } else if (!username.equals(offeree.getUsername())) {
       throw new NotFoundException(ErrorConstant.USER_ACCESS_DENIED);
     }
 
@@ -102,9 +102,9 @@ public class CombinedServiceImpl implements CombinedService {
   }
 
   @Override
-  public Page<Combined> getCombinedsByBiddingDocument(Long id, Long userId, PaginationRequest request) {
+  public Page<Combined> getCombinedsByBiddingDocument(Long id, String username, PaginationRequest request) {
     PageRequest page = PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt"));
-    Page<Combined> combines = combinedRepository.findByBiddingDocument(id, userId, page);
+    Page<Combined> combines = combinedRepository.findByBiddingDocument(id, username, page);
     return combines;
   }
 
@@ -116,15 +116,15 @@ public class CombinedServiceImpl implements CombinedService {
   }
 
   @Override
-  public Page<Combined> getCombinedsByUser(Long id, PaginationRequest request) {
-    User user = userRepository.findById(id).orElseThrow(() -> new NotFoundException(ErrorConstant.USER_NOT_FOUND));
+  public Page<Combined> getCombinedsByUser(String username, PaginationRequest request) {
+    User user = userRepository.findByUsername(username).orElseThrow(() -> new NotFoundException(ErrorConstant.USER_NOT_FOUND));
     String role = user.getRoles().iterator().next().getName();
     Page<Combined> combineds = null;
     if (role.equalsIgnoreCase("ROLE_MERCHANT")) {
-      combineds = combinedRepository.findByMerchant(id,
+      combineds = combinedRepository.findByMerchant(username,
           PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt")));
     } else if (role.equalsIgnoreCase("ROLE_FORWARDER")) {
-      combineds = combinedRepository.findByForwarder(id,
+      combineds = combinedRepository.findByForwarder(username,
           PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt")));
     }
     return combineds;
@@ -158,7 +158,7 @@ public class CombinedServiceImpl implements CombinedService {
   }
 
   @Override
-  public Combined editCombined(Long id, Long userId, Map<String, Object> updates) {
+  public Combined editCombined(Long id, String username, Map<String, Object> updates) {
     Combined combined = combinedRepository.findById(id)
         .orElseThrow(() -> new NotFoundException(ErrorConstant.COMBINED_NOT_FOUND));
 
@@ -174,7 +174,7 @@ public class CombinedServiceImpl implements CombinedService {
       if (status.equals(EnumCombinedStatus.CANCELED)) {
         Map<String, Object> updatesBid = new HashMap<>();
         updatesBid.put("status", EnumBidStatus.REJECTED.name());
-        bidService.editBid(bid.getId(), userId, updatesBid);
+        bidService.editBid(bid.getId(), username, updatesBid);
       }
 
       if (status.equals(EnumCombinedStatus.DELIVERED)) {

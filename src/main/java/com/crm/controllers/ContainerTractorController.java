@@ -12,6 +12,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -32,7 +33,6 @@ import com.crm.payload.request.ContainerTractorRequest;
 import com.crm.payload.request.PaginationRequest;
 import com.crm.payload.response.MessageResponse;
 import com.crm.payload.response.PaginationResponse;
-import com.crm.security.services.UserDetailsImpl;
 import com.crm.services.ContainerTractorService;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
@@ -87,11 +87,11 @@ public class ContainerTractorController {
   @GetMapping("/forwarder")
   @PreAuthorize("hasRole('FORWARDER') or hasRole('MERCHANT')")
   public ResponseEntity<?> getContainerTractorsByForwarder(@Valid PaginationRequest request) {
-    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
+    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
         .getPrincipal();
-    Long userId = userDetails.getId();
+    String username = userDetails.getUsername();
 
-    Page<ContainerTractor> pages = containerTractorService.getContainerTractorsByForwarder(userId, request);
+    Page<ContainerTractor> pages = containerTractorService.getContainerTractorsByForwarder(username, request);
 
     PaginationResponse<ContainerTractorDto> response = new PaginationResponse<>();
     response.setPageNumber(request.getPage());
@@ -130,11 +130,11 @@ public class ContainerTractorController {
   @PostMapping("")
   @PreAuthorize("hasRole('FORWARDER')")
   public ResponseEntity<?> createContainerTractor(@Valid @RequestBody ContainerTractorRequest request) {
-    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
+    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
         .getPrincipal();
-    Long userId = userDetails.getId();
+    String username = userDetails.getUsername();
 
-    ContainerTractor containerTractor = containerTractorService.createContainerTractor(userId, request);
+    ContainerTractor containerTractor = containerTractorService.createContainerTractor(username, request);
     ContainerTractorDto containerTractorDto = new ContainerTractorDto();
     containerTractorDto = ContainerTractorMapper.toContainerTractorDto(containerTractor);
     return ResponseEntity.ok(containerTractorDto);
@@ -144,11 +144,11 @@ public class ContainerTractorController {
   @PutMapping("")
   @PreAuthorize("hasRole('FORWARDER')")
   public ResponseEntity<?> updateContainerTractor(@Valid @RequestBody ContainerTractorRequest request) {
-    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
+    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
         .getPrincipal();
-    Long userId = userDetails.getId();
+    String username = userDetails.getUsername();
 
-    ContainerTractor containerTractor = containerTractorService.updateContainerTractor(userId, request);
+    ContainerTractor containerTractor = containerTractorService.updateContainerTractor(username, request);
     ContainerTractorDto containerTractorDto = new ContainerTractorDto();
     containerTractorDto = ContainerTractorMapper.toContainerTractorDto(containerTractor);
     return ResponseEntity.ok(containerTractorDto);
@@ -158,11 +158,11 @@ public class ContainerTractorController {
   @RequestMapping(value = "/{id}", method = RequestMethod.PATCH, consumes = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<?> editContainerTractor(@RequestBody Map<String, Object> updates, @PathVariable("id") Long id) {
 
-    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
+    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
         .getPrincipal();
-    Long userId = userDetails.getId();
+    String username = userDetails.getUsername();
 
-    ContainerTractor containerTractor = containerTractorService.editContainerTractor(updates, id, userId);
+    ContainerTractor containerTractor = containerTractorService.editContainerTractor(updates, id, username);
     ContainerTractorDto containerTractorDto = new ContainerTractorDto();
     containerTractorDto = ContainerTractorMapper.toContainerTractorDto(containerTractor);
     return ResponseEntity.ok(containerTractorDto);
@@ -173,11 +173,11 @@ public class ContainerTractorController {
   @PreAuthorize("hasRole('FORWARDER')")
   public ResponseEntity<?> removeContainerTractor(@PathVariable Long id) {
 
-    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
+    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
         .getPrincipal();
-    Long userId = userDetails.getId();
+    String username = userDetails.getUsername();
 
-    containerTractorService.removeContainerTractor(id, userId);
+    containerTractorService.removeContainerTractor(id, username);
     return ResponseEntity.ok(new MessageResponse("ContainerTractor has remove successfully"));
   }
 }

@@ -12,6 +12,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -31,7 +32,6 @@ import com.crm.payload.request.ContainerRequest;
 import com.crm.payload.request.PaginationRequest;
 import com.crm.payload.response.MessageResponse;
 import com.crm.payload.response.PaginationResponse;
-import com.crm.security.services.UserDetailsImpl;
 import com.crm.services.ContainerService;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
@@ -134,11 +134,11 @@ public class ContainerController {
   @PreAuthorize("hasRole('FORWARDER')")
   public ResponseEntity<?> createContainer(@PathVariable Long id, @Valid @RequestBody ContainerRequest request) {
 
-    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
+    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
         .getPrincipal();
-    Long userId = userDetails.getId();
+    String username = userDetails.getUsername();
 
-    Container container = containerService.createContainer(id, userId, request);
+    Container container = containerService.createContainer(id, username, request);
     ContainerDto containerDto = ContainerMapper.toContainerDto(container);
     return ResponseEntity.ok(containerDto);
   }
@@ -148,11 +148,11 @@ public class ContainerController {
   @PreAuthorize("hasRole('FORWARDER')")
   public ResponseEntity<?> updateContainer(@Valid @RequestBody ContainerRequest request) {
 
-    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
+    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
         .getPrincipal();
-    Long userId = userDetails.getId();
+    String username = userDetails.getUsername();
 
-    Container container = containerService.updateContainer(userId, request);
+    Container container = containerService.updateContainer(username, request);
     ContainerDto containerDto = ContainerMapper.toContainerDto(container);
     return ResponseEntity.ok(containerDto);
   }
@@ -161,11 +161,11 @@ public class ContainerController {
   @RequestMapping(value = "/{id}", method = RequestMethod.PATCH, consumes = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<?> editContainer(@RequestBody Map<String, Object> updates, @PathVariable("id") Long id) {
 
-    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
+    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
         .getPrincipal();
-    Long userId = userDetails.getId();
+    String username = userDetails.getUsername();
 
-    Container container = containerService.editContainer(updates, id, userId);
+    Container container = containerService.editContainer(updates, id, username);
     ContainerDto containerDto = new ContainerDto();
     containerDto = ContainerMapper.toContainerDto(container);
     return ResponseEntity.ok(containerDto);
@@ -176,11 +176,11 @@ public class ContainerController {
   @PreAuthorize("hasRole('FORWARDER')")
   public ResponseEntity<?> removeContainer(@PathVariable Long id) {
 
-    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
+    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
         .getPrincipal();
-    Long userId = userDetails.getId();
+    String username = userDetails.getUsername();
 
-    containerService.removeContainer(id, userId);
+    containerService.removeContainer(id, username);
     return ResponseEntity.ok(new MessageResponse("Container has remove successfully"));
   }
 

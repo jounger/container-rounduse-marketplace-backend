@@ -81,16 +81,16 @@ public class OutboundServiceImpl implements OutboundService {
   }
 
   @Override
-  public Page<Outbound> getOutboundsByMerchant(Long userId, PaginationRequest request) {
-    if (merchantRepository.existsById(userId)) {
+  public Page<Outbound> getOutboundsByMerchant(String username, PaginationRequest request) {
+    if (merchantRepository.existsByUsername(username)) {
       PageRequest pageRequest = PageRequest.of(request.getPage(), request.getLimit(),
           Sort.by(Sort.Direction.DESC, "createdAt"));
       String status = request.getStatus();
       Page<Outbound> pages = null;
       if (status != null && !status.isEmpty()) {
-        pages = outboundRepository.findByMerchantId(userId, status, pageRequest);
+        pages = outboundRepository.findByMerchant(username, status, pageRequest);
       } else {
-        pages = outboundRepository.findByMerchantId(userId, pageRequest);
+        pages = outboundRepository.findByMerchant(username, pageRequest);
       }
       return pages;
     } else {
@@ -99,10 +99,10 @@ public class OutboundServiceImpl implements OutboundService {
   }
 
   @Override
-  public Outbound createOutbound(Long userId, OutboundRequest request) {
+  public Outbound createOutbound(String username, OutboundRequest request) {
     Outbound outbound = new Outbound();
 
-    Merchant merchant = merchantRepository.findById(userId)
+    Merchant merchant = merchantRepository.findByUsername(username)
         .orElseThrow(() -> new NotFoundException(ErrorConstant.MERCHANT_NOT_FOUND));
     outbound.setMerchant(merchant);
 
@@ -169,13 +169,13 @@ public class OutboundServiceImpl implements OutboundService {
   }
 
   @Override
-  public Outbound updateOutbound(Long userId, OutboundRequest request) {
-    if (merchantRepository.existsById(userId)) {
+  public Outbound updateOutbound(String username, OutboundRequest request) {
+    if (merchantRepository.existsByUsername(username)) {
 
       Outbound outbound = outboundRepository.findById(request.getId())
           .orElseThrow(() -> new NotFoundException(ErrorConstant.OUTBOUND_NOT_FOUND));
 
-      if (!outbound.getMerchant().getId().equals(userId)) {
+      if (!outbound.getMerchant().getUsername().equals(username)) {
         throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
       }
 
@@ -243,12 +243,12 @@ public class OutboundServiceImpl implements OutboundService {
   }
 
   @Override
-  public Outbound editOutbound(Map<String, Object> updates, Long id, Long userId) {
-    if (merchantRepository.existsById(userId)) {
+  public Outbound editOutbound(Map<String, Object> updates, Long id, String username) {
+    if (merchantRepository.existsByUsername(username)) {
       Outbound outbound = outboundRepository.findById(id)
           .orElseThrow(() -> new NotFoundException(ErrorConstant.OUTBOUND_NOT_FOUND));
 
-      if (!outbound.getMerchant().getId().equals(userId)) {
+      if (!outbound.getMerchant().getUsername().equals(username)) {
         throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
       }
 
@@ -326,12 +326,12 @@ public class OutboundServiceImpl implements OutboundService {
   }
 
   @Override
-  public void removeOutbound(Long id, Long userId) {
-    if (merchantRepository.existsById(userId)) {
+  public void removeOutbound(Long id, String username) {
+    if (merchantRepository.existsByUsername(username)) {
       Outbound outbound = outboundRepository.findById(id)
           .orElseThrow(() -> new NotFoundException(ErrorConstant.OUTBOUND_NOT_FOUND));
 
-      if (!outbound.getMerchant().getId().equals(userId)) {
+      if (!outbound.getMerchant().getUsername().equals(username)) {
         throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
       }
 

@@ -16,15 +16,15 @@ public interface ContainerSemiTrailerService {
 
   Page<ContainerSemiTrailer> getContainerSemiTrailers(PaginationRequest request);
 
-  Page<ContainerSemiTrailer> getContainerSemiTrailersByForwarder(Long userId, PaginationRequest request);
+  Page<ContainerSemiTrailer> getContainerSemiTrailersByForwarder(String username, PaginationRequest request);
 
   Page<ContainerSemiTrailer> searchContainerSemiTrailers(PaginationRequest request, String search);
 
-  ContainerSemiTrailer createContainerSemiTrailer(Long userId, ContainerSemiTrailerRequest request);
+  ContainerSemiTrailer createContainerSemiTrailer(String username, ContainerSemiTrailerRequest request);
 
-  ContainerSemiTrailer updateContainerSemiTrailer(Long userId, ContainerSemiTrailerRequest request);
+  ContainerSemiTrailer updateContainerSemiTrailer(String username, ContainerSemiTrailerRequest request);
 
-  ContainerSemiTrailer editContainerSemiTrailer(Map<String, Object> updates, Long id, Long userId);
+  ContainerSemiTrailer editContainerSemiTrailer(Map<String, Object> updates, Long id, String username);
 
-  void removeContainerSemiTrailer(Long id, Long userId);
+  void removeContainerSemiTrailer(Long id, String username);
 }

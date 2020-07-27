@@ -12,6 +12,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -32,7 +33,6 @@ import com.crm.payload.request.ContainerSemiTrailerRequest;
 import com.crm.payload.request.PaginationRequest;
 import com.crm.payload.response.MessageResponse;
 import com.crm.payload.response.PaginationResponse;
-import com.crm.security.services.UserDetailsImpl;
 import com.crm.services.ContainerSemiTrailerService;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
@@ -88,11 +88,11 @@ public class ContainerSemiTrailerController {
   @PreAuthorize("hasRole('FORWARDER')")
   public ResponseEntity<?> getContainerSemiTrailersByForwarder(@Valid PaginationRequest request) {
 
-    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
+    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
         .getPrincipal();
-    Long userId = userDetails.getId();
+    String username = userDetails.getUsername();
 
-    Page<ContainerSemiTrailer> pages = containerSemiTrailerService.getContainerSemiTrailersByForwarder(userId, request);
+    Page<ContainerSemiTrailer> pages = containerSemiTrailerService.getContainerSemiTrailersByForwarder(username, request);
 
     PaginationResponse<ContainerSemiTrailerDto> response = new PaginationResponse<>();
     response.setPageNumber(request.getPage());
@@ -132,11 +132,11 @@ public class ContainerSemiTrailerController {
   @PostMapping("")
   @PreAuthorize("hasRole('FORWARDER')")
   public ResponseEntity<?> createContainerSemiTrailer(@Valid @RequestBody ContainerSemiTrailerRequest request) {
-    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
+    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
         .getPrincipal();
-    Long userId = userDetails.getId();
+    String username = userDetails.getUsername();
 
-    ContainerSemiTrailer containerSemiTrailer = containerSemiTrailerService.createContainerSemiTrailer(userId, request);
+    ContainerSemiTrailer containerSemiTrailer = containerSemiTrailerService.createContainerSemiTrailer(username, request);
     ContainerSemiTrailerDto containerSemiTrailerDto = new ContainerSemiTrailerDto();
     containerSemiTrailerDto = ContainerSemiTrailerMapper.toContainerSemiTrailerDto(containerSemiTrailer);
     return ResponseEntity.ok(containerSemiTrailerDto);
@@ -147,11 +147,11 @@ public class ContainerSemiTrailerController {
   @PreAuthorize("hasRole('FORWARDER')")
   public ResponseEntity<?> updateContainerSemiTrailer(@Valid @RequestBody ContainerSemiTrailerRequest request) {
 
-    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
+    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
         .getPrincipal();
-    Long userId = userDetails.getId();
+    String username = userDetails.getUsername();
 
-    ContainerSemiTrailer containerSemiTrailer = containerSemiTrailerService.updateContainerSemiTrailer(userId, request);
+    ContainerSemiTrailer containerSemiTrailer = containerSemiTrailerService.updateContainerSemiTrailer(username, request);
     ContainerSemiTrailerDto containerSemiTrailerDto = new ContainerSemiTrailerDto();
     containerSemiTrailerDto = ContainerSemiTrailerMapper.toContainerSemiTrailerDto(containerSemiTrailer);
     return ResponseEntity.ok(containerSemiTrailerDto);
@@ -162,12 +162,12 @@ public class ContainerSemiTrailerController {
   public ResponseEntity<?> editContainerSemiTrailer(@RequestBody Map<String, Object> updates,
       @PathVariable("id") Long id) {
 
-    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
+    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
         .getPrincipal();
-    Long userId = userDetails.getId();
+    String username = userDetails.getUsername();
 
     ContainerSemiTrailer containerSemiTrailer = containerSemiTrailerService.editContainerSemiTrailer(updates, id,
-        userId);
+        username);
     ContainerSemiTrailerDto containerSemiTrailerDto = new ContainerSemiTrailerDto();
     containerSemiTrailerDto = ContainerSemiTrailerMapper.toContainerSemiTrailerDto(containerSemiTrailer);
     return ResponseEntity.ok(containerSemiTrailerDto);
@@ -178,11 +178,11 @@ public class ContainerSemiTrailerController {
   @PreAuthorize("hasRole('FORWARDER')")
   public ResponseEntity<?> removeContainerSemiTrailer(@PathVariable Long id) {
 
-    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
+    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
         .getPrincipal();
-    Long userId = userDetails.getId();
+    String username = userDetails.getUsername();
 
-    containerSemiTrailerService.removeContainerSemiTrailer(id, userId);
+    containerSemiTrailerService.removeContainerSemiTrailer(id, username);
     return ResponseEntity.ok(new MessageResponse("ContainerSemiTrailer has remove successfully"));
   }
 

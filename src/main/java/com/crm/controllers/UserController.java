@@ -14,6 +14,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,6 +29,7 @@ import com.crm.models.dto.UserDto;
 import com.crm.models.mapper.UserMapper;
 import com.crm.payload.request.PaginationRequest;
 import com.crm.payload.response.PaginationResponse;
+import com.crm.security.services.UserDetailsImpl;
 import com.crm.services.UserService;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
@@ -65,10 +67,11 @@ public class UserController {
     return ResponseEntity.ok(response);
   }
 
-  @GetMapping("")
+  @GetMapping("")   
   @PreAuthorize("hasRole('OPERATOR') or hasRole('ADMIN')")
   public ResponseEntity<?> getUsers(@Valid PaginationRequest request) {
-    logger.info("Page request: {}", request.getPage());
+    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication();
+    logger.info("Page request: {}", userDetails);
     Page<User> pages = userService.getUsers(request);
     PaginationResponse<UserDto> response = new PaginationResponse<>();
     response.setPageNumber(request.getPage());

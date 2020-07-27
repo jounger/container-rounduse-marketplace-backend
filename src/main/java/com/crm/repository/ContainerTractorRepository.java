@@ -18,6 +18,6 @@ public interface ContainerTractorRepository
 
   Optional<ContainerTractor> findByLicensePlate(String licensePlate);
 
-  @Query(value = "FROM ContainerTractor c WHERE c.forwarder.id = :id")
-  Page<ContainerTractor> findByForwarder(@Param("id") Long id, Pageable pageable);
+  @Query(value = "FROM ContainerTractor c WHERE c.forwarder.username = :username")
+  Page<ContainerTractor> findByForwarder(@Param("username") String username, Pageable pageable);
 }

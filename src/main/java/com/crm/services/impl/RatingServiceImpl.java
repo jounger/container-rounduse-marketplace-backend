@@ -40,10 +40,10 @@ public class RatingServiceImpl implements RatingService {
   private ContractRepository contractRepository;
 
   @Override
-  public Rating createRating(Long id, RatingRequest request) {
+  public Rating createRating(String username, RatingRequest request) {
     Rating rating = new Rating();
 
-    Supplier sender = supplierRepository.findById(id).orElseThrow(() -> new NotFoundException("Sender is not found."));
+    Supplier sender = supplierRepository.findByUsername(username).orElseThrow(() -> new NotFoundException("Sender is not found."));
     rating.setSender(sender);
 
     Supplier receiver = supplierRepository.findById(request.getReceiver())
@@ -53,11 +53,11 @@ public class RatingServiceImpl implements RatingService {
     Contract contract = contractRepository.findById(request.getContract())
         .orElseThrow(() -> new NotFoundException(ErrorConstant.SENDER_NOT_FOUND));
     rating.setContract(contract);
-    if (!contractRepository.existsByUserAndContract(request.getContract(), id)) {
+    if (!contractRepository.existsByUserAndContract(request.getContract(), username)) {
       throw new NotFoundException(ErrorConstant.USER_ACCESS_DENIED);
     }
 
-    if (ratingRepository.existsByUserAndContract(request.getContract(), id)) {
+    if (ratingRepository.existsByUserAndContract(request.getContract(), username)) {
       throw new NotFoundException(ErrorConstant.USER_ACCESS_DENIED);
     }
     rating.setRatingValue(request.getRatingValue());
@@ -74,9 +74,9 @@ public class RatingServiceImpl implements RatingService {
   }
 
   @Override
-  public Rating getRating(Long id, Long userId) {
+  public Rating getRating(Long id, String username) {
     Rating rating = ratingRepository.findById(id).orElseThrow(() -> new NotFoundException(ErrorConstant.RATING_NOT_FOUND));
-    if (rating.getSender().getId() != userId || rating.getReceiver().getId() != userId) {
+    if (!rating.getSender().getUsername().equals(username) || !rating.getReceiver().getUsername().equals(username)) {
       throw new NotFoundException(ErrorConstant.USER_ACCESS_DENIED);
     }
     return rating;
@@ -90,16 +90,16 @@ public class RatingServiceImpl implements RatingService {
   }
 
   @Override
-  public Page<Rating> getRatingsByContract(Long id, Long userId, PaginationRequest request) {
+  public Page<Rating> getRatingsByContract(Long id, String username, PaginationRequest request) {
     Page<Rating> ratings = null;
     Contract contract = contractRepository.findById(id)
         .orElseThrow(() -> new NotFoundException(ErrorConstant.CONTRACT_NOT_FOUND));
     Bid bid = contract.getCombined().getBid();
     BiddingDocument biddingDocument = bid.getBiddingDocument();
-    if (bid.getBidder().getId() == userId || biddingDocument.getOfferee().getId() == userId) {
+    if (bid.getBidder().getUsername().equals(username) || biddingDocument.getOfferee().getUsername().equals(username)) {
       PageRequest page = PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Direction.DESC, "createdAt"));
       LocalDateTime rewind = LocalDateTime.now().minusMonths(Constant.REWIND_MONTH);
-      ratings = ratingRepository.findByContract(id, userId, Timestamp.valueOf(rewind), page);
+      ratings = ratingRepository.findByContract(id, username, Timestamp.valueOf(rewind), page);
     } else {
       throw new NotFoundException(ErrorConstant.USER_ACCESS_DENIED);
     }
@@ -107,40 +107,40 @@ public class RatingServiceImpl implements RatingService {
   }
 
   @Override
-  public Page<Rating> getRatingsBySender(Long id, PaginationRequest request) {
-    if (!supplierRepository.existsById(id)) {
+  public Page<Rating> getRatingsBySender(String username, PaginationRequest request) {
+    if (!supplierRepository.existsByUsername(username)) {
       throw new NotFoundException(ErrorConstant.SENDER_NOT_FOUND);
     }
     LocalDateTime rewind = LocalDateTime.now().minusMonths(Constant.REWIND_MONTH);
     PageRequest page = PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Direction.DESC, "createdAt"));
-    Page<Rating> ratings = ratingRepository.findBySender(id, Timestamp.valueOf(rewind), page);
+    Page<Rating> ratings = ratingRepository.findBySender(username, Timestamp.valueOf(rewind), page);
     return ratings;
   }
 
   @Override
-  public Page<Rating> getRatingsByReceiver(Long id, PaginationRequest request) {
-    if (!supplierRepository.existsById(id)) {
+  public Page<Rating> getRatingsByReceiver(String username, PaginationRequest request) {
+    if (!supplierRepository.existsByUsername(username)) {
       throw new NotFoundException(ErrorConstant.RECIPIENT_NOT_FOUND);
     }
     LocalDateTime rewind = LocalDateTime.now().minusMonths(Constant.REWIND_MONTH);
     PageRequest page = PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Direction.DESC, "createdAt"));
-    Page<Rating> ratings = ratingRepository.findByReceiver(id, Timestamp.valueOf(rewind), page);
+    Page<Rating> ratings = ratingRepository.findByReceiver(username, Timestamp.valueOf(rewind), page);
     return ratings;
   }
 
   @Override
-  public Page<Rating> getRatingsByUser(Long id, PaginationRequest request) {
-    if (!supplierRepository.existsById(id)) {
+  public Page<Rating> getRatingsByUser(String username, PaginationRequest request) {
+    if (!supplierRepository.existsByUsername(username)) {
       throw new NotFoundException(ErrorConstant.USER_NOT_FOUND);
     }
     LocalDateTime rewind = LocalDateTime.now().minusMonths(Constant.REWIND_MONTH);
     PageRequest page = PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Direction.DESC, "createdAt"));
-    Page<Rating> ratings = ratingRepository.findByUser(id, Timestamp.valueOf(rewind), page);
+    Page<Rating> ratings = ratingRepository.findByUser(username, Timestamp.valueOf(rewind), page);
     return ratings;
   }
 
   @Override
-  public Rating updateRating(Long id, Long userId, RatingRequest request) {
+  public Rating updateRating(Long id, String username, RatingRequest request) {
     Rating rating = ratingRepository.findById(request.getId())
         .orElseThrow(() -> new NotFoundException(ErrorConstant.RATING_NOT_FOUND));
 
@@ -166,10 +166,10 @@ public class RatingServiceImpl implements RatingService {
   }
 
   @Override
-  public Rating editRating(Long id, Long userId, Map<String, Object> updates) {
+  public Rating editRating(Long id, String username, Map<String, Object> updates) {
     Rating rating = ratingRepository.findById(id).orElseThrow(() -> new NotFoundException(ErrorConstant.RATING_NOT_FOUND));
 
-    if (rating.getSender().getId() != userId) {
+    if (!rating.getSender().getUsername().equals(username)) {
       throw new NotFoundException(ErrorConstant.USER_ACCESS_DENIED);
     }
 
@@ -190,9 +190,9 @@ public class RatingServiceImpl implements RatingService {
   }
 
   @Override
-  public void removeRating(Long id, Long userId) {
-    Rating rating = ratingRepository.findById(userId).orElseThrow(() -> new NotFoundException(ErrorConstant.RATING_NOT_FOUND));
-    if (rating.getSender().getId() == userId) {
+  public void removeRating(Long id, String username) {
+    Rating rating = ratingRepository.findById(id).orElseThrow(() -> new NotFoundException(ErrorConstant.RATING_NOT_FOUND));
+    if (rating.getSender().getUsername().equals(username)) {
       ratingRepository.deleteById(id);
     } else {
       throw new NotFoundException(ErrorConstant.USER_ACCESS_DENIED);

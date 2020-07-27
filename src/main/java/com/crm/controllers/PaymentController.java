@@ -32,7 +32,6 @@ import com.crm.payload.request.PaginationRequest;
 import com.crm.payload.request.PaymentRequest;
 import com.crm.payload.response.MessageResponse;
 import com.crm.payload.response.PaginationResponse;
-import com.crm.security.services.UserDetailsImpl;
 import com.crm.services.PaymentService;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
@@ -57,10 +56,11 @@ public class PaymentController {
   @PreAuthorize("hasRole('MODERATOR') or hasRole('MERCHANT') or hasRole('FORWARDER')")
   @GetMapping("/contract/{id}")
   public ResponseEntity<?> getPaymentsByContract(@PathVariable("id") Long id, @Valid PaginationRequest request) {
-    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    Long userId = userDetails.getId();
+    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
+        .getPrincipal();
+    String username = userDetails.getUsername();
 
-    Page<Payment> pages = paymentService.getPaymentsByContract(id, userId, request);
+    Page<Payment> pages = paymentService.getPaymentsByContract(id, username, request);
 
     PaginationResponse<PaymentDto> response = new PaginationResponse<>();
     response.setPageNumber(request.getPage());

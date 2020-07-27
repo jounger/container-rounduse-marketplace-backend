@@ -12,6 +12,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -32,7 +33,6 @@ import com.crm.payload.request.InboundRequest;
 import com.crm.payload.request.PaginationRequest;
 import com.crm.payload.response.MessageResponse;
 import com.crm.payload.response.PaginationResponse;
-import com.crm.security.services.UserDetailsImpl;
 import com.crm.services.InboundService;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
@@ -86,11 +86,11 @@ public class InboundController {
   @PreAuthorize("hasRole('FORWARDER')")
   public ResponseEntity<?> getInboundsByForwarder(@Valid PaginationRequest request) {
 
-    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
+    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
         .getPrincipal();
-    Long userId = userDetails.getId();
+    String username = userDetails.getUsername();
 
-    Page<Inbound> pages = inboundService.getInboundsForwarder(userId, request);
+    Page<Inbound> pages = inboundService.getInboundsForwarder(username, request);
     PaginationResponse<InboundDto> response = new PaginationResponse<>();
     response.setPageNumber(request.getPage());
     response.setPageSize(request.getLimit());
@@ -137,11 +137,11 @@ public class InboundController {
   @PreAuthorize("hasRole('FORWARDER')")
   public ResponseEntity<?> getInboundsByOutboundAndForwarder(@PathVariable Long id, @Valid PaginationRequest request) {
 
-    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
+    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
         .getPrincipal();
-    Long userId = userDetails.getId();
+    String username = userDetails.getUsername();
 
-    Page<Inbound> pages = inboundService.getInboundsByOutboundAndForwarder(id, userId, request);
+    Page<Inbound> pages = inboundService.getInboundsByOutboundAndForwarder(id, username, request);
     PaginationResponse<InboundDto> response = new PaginationResponse<>();
     response.setPageNumber(request.getPage());
     response.setPageSize(request.getLimit());
@@ -169,10 +169,10 @@ public class InboundController {
   @PostMapping("")
   @PreAuthorize("hasRole('FORWARDER')")
   public ResponseEntity<?> createInbound(@Valid @RequestBody InboundRequest request) {
-    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
+    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
         .getPrincipal();
-    Long id = userDetails.getId();
-    Inbound inbound = inboundService.createInbound(id, request);
+    String username = userDetails.getUsername();
+    Inbound inbound = inboundService.createInbound(username, request);
     InboundDto inboundDto = new InboundDto();
     inboundDto = InboundMapper.toInboundDto(inbound);
     return ResponseEntity.ok(inboundDto);
@@ -183,11 +183,11 @@ public class InboundController {
   @PreAuthorize("hasRole('FORWARDER')")
   public ResponseEntity<?> updateInbound(@Valid @RequestBody InboundRequest request) {
 
-    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
+    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
         .getPrincipal();
-    Long id = userDetails.getId();
+    String username = userDetails.getUsername();
 
-    Inbound inbound = inboundService.updateInbound(id, request);
+    Inbound inbound = inboundService.updateInbound(username, request);
     InboundDto inboundDto = new InboundDto();
     inboundDto = InboundMapper.toInboundDto(inbound);
     return ResponseEntity.ok(inboundDto);
@@ -198,11 +198,11 @@ public class InboundController {
   @PreAuthorize("hasRole('FORWARDER')")
   public ResponseEntity<?> editInbound(@RequestBody Map<String, Object> updates, @PathVariable("id") Long id) {
 
-    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
+    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
         .getPrincipal();
-    Long userId = userDetails.getId();
+    String username = userDetails.getUsername();
 
-    Inbound inbound = inboundService.editInbound(updates, id, userId);
+    Inbound inbound = inboundService.editInbound(updates, id, username);
     InboundDto inboundDto = new InboundDto();
     inboundDto = InboundMapper.toInboundDto(inbound);
     return ResponseEntity.ok(inboundDto);
@@ -213,11 +213,11 @@ public class InboundController {
   @PreAuthorize("hasRole('FORWARDER')")
   public ResponseEntity<?> removeInbound(@PathVariable Long id) {
 
-    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
+    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
         .getPrincipal();
-    Long userId = userDetails.getId();
+    String username = userDetails.getUsername();
 
-    inboundService.removeInbound(id, userId);
+    inboundService.removeInbound(id, username);
     return ResponseEntity.ok(new MessageResponse("Inbound has remove successfully"));
   }
 

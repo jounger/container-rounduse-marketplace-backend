@@ -15,13 +15,13 @@ public interface EvidenceRepository extends JpaRepository<Evidence, Long>, JpaSp
 
   @Query(value = "SELECT e FROM Evidence e LEFT JOIN e.sender s "
       + "LEFT JOIN s.bids b LEFT JOIN s.biddingDocuments bd "
-      + "WHERE bd.offeree.username = :username or b.bidder.id = :userId")
-  Page<Evidence> findByUser(@Param("userId") Long userId, Pageable pageable);
+      + "WHERE bd.offeree.username = :username or b.bidder.username = :username")
+  Page<Evidence> findByUser(@Param("username") String username, Pageable pageable);
 
   @Query(value = "SELECT e FROM Evidence e LEFT JOIN e.sender s "
       + "LEFT JOIN e.contract c LEFT JOIN c.combined cb LEFT JOIN cb.bid b LEFT JOIN b.biddingDocument bd "
-      + "WHERE c.id = :id AND (bd.offeree.id = :userId or b.bidder.id = :userId)")
-  Page<Evidence> findByContract(@Param("id") Long contractId, @Param("userId") Long userId, Pageable pageable);
+      + "WHERE c.id = :id AND (bd.offeree.username = :username or b.bidder.username = :username)")
+  Page<Evidence> findByContract(@Param("id") Long contractId, @Param("username") String username, Pageable pageable);
 
   @Query(value = "SELECT e FROM Evidence e LEFT JOIN e.contract c WHERE c.id = :id")
   Page<Evidence> findByContract(@Param("id") Long contractId, Pageable pageable);

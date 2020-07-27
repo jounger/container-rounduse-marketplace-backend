@@ -60,10 +60,10 @@ public class BiddingDocumentServiceImpl implements BiddingDocumentService {
   private BidRepository bidRepository;
 
   @Override
-  public BiddingDocument createBiddingDocument(Long id, BiddingDocumentRequest request) {
+  public BiddingDocument createBiddingDocument(String username, BiddingDocumentRequest request) {
     BiddingDocument biddingDocument = new BiddingDocument();
 
-    Merchant merchant = merchantRepository.findById(id).orElseThrow(() -> new NotFoundException(ErrorConstant.BIDDINGDOCUMENT_NOT_FOUND));
+    Merchant merchant = merchantRepository.findByUsername(username).orElseThrow(() -> new NotFoundException(ErrorConstant.BIDDINGDOCUMENT_NOT_FOUND));
     biddingDocument.setOfferee(merchant);
 
     Outbound outbound = outboundRepository.findById(request.getOutbound())
@@ -133,32 +133,32 @@ public class BiddingDocumentServiceImpl implements BiddingDocumentService {
   }
 
   @Override
-  public Page<BiddingDocument> getBiddingDocumentsByExistCombined(Long id, PaginationRequest request) {
+  public Page<BiddingDocument> getBiddingDocumentsByExistCombined(String username, PaginationRequest request) {
     PageRequest page = PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Direction.DESC, "createdAt"));
-    Page<BiddingDocument> biddingDocuments = biddingDocumentRepository.findByExistCombined(id, page);
+    Page<BiddingDocument> biddingDocuments = biddingDocumentRepository.findByExistCombined(username, page);
     return biddingDocuments;
   }
 
   @Override
-  public Page<BiddingDocument> getBiddingDocuments(Long id, PaginationRequest request) {
-    User user = userRepository.findById(id).orElseThrow(() -> new NotFoundException(ErrorConstant.USER_NOT_FOUND));
+  public Page<BiddingDocument> getBiddingDocuments(String username, PaginationRequest request) {
+    User user = userRepository.findByUsername(username).orElseThrow(() -> new NotFoundException(ErrorConstant.USER_NOT_FOUND));
     String status = request.getStatus();
     Page<BiddingDocument> biddingDocuments = null;
     if (user.getRoles().iterator().next().getName().equalsIgnoreCase("ROLE_MERCHANT")) {
       if (status != null && !status.isEmpty()) {
-        biddingDocuments = biddingDocumentRepository.findByMerchant(id, request.getStatus(),
+        biddingDocuments = biddingDocumentRepository.findByMerchant(username, request.getStatus(),
             PageRequest.of(request.getPage(), request.getLimit(), Sort.by("id").descending()));
       } else {
-        biddingDocuments = biddingDocumentRepository.findByMerchant(id,
+        biddingDocuments = biddingDocumentRepository.findByMerchant(username,
             PageRequest.of(request.getPage(), request.getLimit(), Sort.by("id").descending()));
       }
     }
     if (user.getRoles().iterator().next().getName().equalsIgnoreCase("ROLE_FORWARDER")) {
       if (status != null && !status.isEmpty()) {
-        biddingDocuments = biddingDocumentRepository.findByForwarder(id, request.getStatus(),
+        biddingDocuments = biddingDocumentRepository.findByForwarder(username, request.getStatus(),
             PageRequest.of(request.getPage(), request.getLimit(), Sort.by("id").descending()));
       } else {
-        biddingDocuments = biddingDocumentRepository.findByForwarder(id,
+        biddingDocuments = biddingDocumentRepository.findByForwarder(username,
             PageRequest.of(request.getPage(), request.getLimit(), Sort.by("id").descending()));
       }
     }
@@ -275,8 +275,8 @@ public class BiddingDocumentServiceImpl implements BiddingDocumentService {
   }
 
   @Override
-  public void removeBiddingDocument(Long id, Long userId) {
-    Merchant merchant = merchantRepository.findById(userId).orElseThrow(() -> new NotFoundException(ErrorConstant.MERCHANT_NOT_FOUND));
+  public void removeBiddingDocument(Long id, String username) {
+    Merchant merchant = merchantRepository.findByUsername(username).orElseThrow(() -> new NotFoundException(ErrorConstant.MERCHANT_NOT_FOUND));
     BiddingDocument biddingDocument = biddingDocumentRepository.findById(id)
         .orElseThrow(() -> new NotFoundException(ErrorConstant.BIDDINGDOCUMENT_NOT_FOUND));
     if(!biddingDocument.getOfferee().equals(merchant)) {

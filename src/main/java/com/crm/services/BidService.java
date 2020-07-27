@@ -10,24 +10,24 @@ import com.crm.payload.request.PaginationRequest;
 
 public interface BidService {
 
-  Bid createBid(Long bidDocId, Long id, BidRequest request);
+  Bid createBid(Long bidDocId, String username, BidRequest request);
 
-  Bid getBid(Long id, Long userId);
+  Bid getBid(Long id, String username);
 
-  Bid getBidByBiddingDocumentAndForwarder(Long biddingDocument, Long userId);
+  Bid getBidByBiddingDocumentAndForwarder(Long biddingDocument, String username);
 
   Page<Bid> getBidsByBiddingDocument(Long id, PaginationRequest request);
   
-  Page<Bid> getBidsByBiddingDocumentAndExistCombined(Long id, Long userId, PaginationRequest request);
+  Page<Bid> getBidsByBiddingDocumentAndExistCombined(Long id, String username, PaginationRequest request);
 
-  Page<Bid> getBidsByForwarder(Long id, PaginationRequest request);
+  Page<Bid> getBidsByForwarder(String username, PaginationRequest request);
 
   // update full biddingDocument
-  Bid updateBid(Long userId, BidRequest request);
+  Bid updateBid(String username, BidRequest request);
 
   // update part biddingDocument
-  Bid editBid(Long id, Long userId, Map<String, Object> updates);
+  Bid editBid(Long id, String username, Map<String, Object> updates);
 
-  void removeBid(Long id, Long userId);
+  void removeBid(Long id, String username);
 
 }

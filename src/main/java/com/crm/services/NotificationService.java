@@ -11,7 +11,7 @@ public interface NotificationService {
 
   Page<Notification> searchNotifications(PaginationRequest request, String search);
 
-  Page<Notification> getNotificationsByUser(Long recipient, PaginationRequest request);
+  Page<Notification> getNotificationsByUser(String username, PaginationRequest request);
 
   Notification editNotification(Long id, Map<String, Object> updates);
 

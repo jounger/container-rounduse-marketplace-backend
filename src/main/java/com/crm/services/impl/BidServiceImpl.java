@@ -127,7 +127,7 @@ public class BidServiceImpl implements BidService {
     bid.setBidValidityPeriod(LocalDateTime.now().plusHours(Constant.BID_VALIDITY_PERIOD));
     bid.setStatus(EnumBidStatus.PENDING.name());
 
-    bidRepository.save(bid);
+    Bid _bid = bidRepository.save(bid);
 
     biddingDocument.getBids().add(bid);
     if (bid.getBidPrice() < biddingDocument.getPriceLeadership()) {
@@ -135,7 +135,7 @@ public class BidServiceImpl implements BidService {
     }
     biddingDocumentRepository.save(biddingDocument);
 
-    return bid;
+    return _bid;
   }
 
   @Override

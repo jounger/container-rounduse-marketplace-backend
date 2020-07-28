@@ -150,6 +150,10 @@ public class BidServiceImplTest {
     biddingDocument.setPriceLeadership(105D);
     biddingDocument.setBidClosing(LocalDateTime.now().plusDays(1));
 
+    Bid bid = new Bid();
+    bid.setId(1L);
+    bid.setBidPrice(1000D);
+
     // when
     when(biddingDocumentRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(biddingDocument));
     when(forwarderRepository.findByUsername(Mockito.anyString())).thenReturn(Optional.of(bidder));
@@ -157,13 +161,14 @@ public class BidServiceImplTest {
     when(containerRepository.existsByOutbound(Mockito.anyLong(), Mockito.anyString(), Mockito.anyString(),
         Mockito.anyList(), Mockito.any(LocalDateTime.class), Mockito.any(LocalDateTime.class), Mockito.anyString()))
             .thenReturn(true);
-    when(bidRepository.save(Mockito.any(Bid.class))).thenReturn(null);
+    when(bidRepository.save(Mockito.any(Bid.class))).thenReturn(bid);
     when(biddingDocumentRepository.save(Mockito.any(BiddingDocument.class))).thenReturn(null);
 
     // then
     Bid actualResult = bidServiceImpl.createBid(biddingDocument.getId(), bidder.getUsername(), request);
     assertThat(actualResult).isNotNull();
-    assertThat(actualResult.getBidPrice()).isEqualTo(request.getBidPrice());
+    assertThat(actualResult.getId()).isEqualTo(bid.getId());
+    assertThat(actualResult.getBidPrice()).isEqualTo(bid.getBidPrice());
     logger.info("Response: {}", actualResult.getBidPrice());
   }
 

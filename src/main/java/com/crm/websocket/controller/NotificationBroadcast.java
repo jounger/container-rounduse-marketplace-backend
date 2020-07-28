@@ -40,7 +40,6 @@ import com.crm.payload.request.PaginationRequest;
 import com.crm.payload.request.ReportNotificationRequest;
 import com.crm.payload.request.ShippingLineNotificationRequest;
 import com.crm.services.BiddingNotificationService;
-import com.crm.services.ContainerService;
 import com.crm.services.DriverNotificationService;
 import com.crm.services.ForwarderService;
 import com.crm.services.ReportNotificationService;
@@ -91,9 +90,6 @@ public class NotificationBroadcast {
 
   @Autowired
   private DriverWebSocketService driverWebSocketService;
-
-  @Autowired
-  private ContainerService containerService;
 
   public void broadcastCreateBidToMerchant(Bid bid) {
     executorService.submit(new Runnable() {

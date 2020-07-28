@@ -12,7 +12,6 @@ import com.crm.exception.NotFoundException;
 import com.crm.models.Geolocation;
 import com.crm.payload.request.GeolocationRequest;
 import com.crm.repository.DriverRepository;
-import com.crm.repository.ForwarderRepository;
 import com.crm.repository.GeolocationRepository;
 import com.crm.services.GeolocationService;
 
@@ -25,19 +24,18 @@ public class GeolocationServiceImpl implements GeolocationService {
   @Autowired
   DriverRepository driverRepository;
 
-  @Autowired
-  ForwarderRepository forwarderRepository;
-
   @Override
   public Geolocation updateGeolocation(String username, GeolocationRequest request) {
-    if (forwarderRepository.existsByUsername(username)) {
+    if (driverRepository.existsByUsername(username)) {
       Geolocation geolocation = geolocationRepository.findById(request.getId())
           .orElseThrow(() -> new NotFoundException(ErrorConstant.GEOLOCATION_NOT_FOUND));
-      if (!geolocation.getDriver().getForwarder().getUsername().equals(username)) {
+      if (!geolocation.getDriver().getUsername().equals(username)) {
         throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
       }
       geolocation.setLatitude(request.getLatitude());
       geolocation.setLongitude(request.getLongitude());
+
+      geolocationRepository.save(geolocation);
       return geolocation;
     } else {
       throw new NotFoundException(ErrorConstant.FORWARDER_NOT_FOUND);
@@ -46,10 +44,10 @@ public class GeolocationServiceImpl implements GeolocationService {
 
   @Override
   public Geolocation editGeolocation(Long id, String username, Map<String, Object> updates) {
-    if (forwarderRepository.existsByUsername(username)) {
+    if (driverRepository.existsByUsername(username)) {
       Geolocation geolocation = geolocationRepository.findById(id)
           .orElseThrow(() -> new NotFoundException(ErrorConstant.GEOLOCATION_NOT_FOUND));
-      if (!geolocation.getDriver().getForwarder().getUsername().equals(username)) {
+      if (!geolocation.getDriver().getUsername().equals(username)) {
         throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
       }
 
@@ -62,6 +60,8 @@ public class GeolocationServiceImpl implements GeolocationService {
       if (updates.get("longitude") != null && !Tool.isEqual(geolocation.getLongitude(), longitude)) {
         geolocation.setLongitude(longitude);
       }
+
+      geolocationRepository.save(geolocation);
       return geolocation;
 
     } else {

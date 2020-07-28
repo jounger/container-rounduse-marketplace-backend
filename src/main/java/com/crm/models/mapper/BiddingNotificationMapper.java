@@ -13,6 +13,7 @@ public class BiddingNotificationMapper {
     biddingNotificationDto.setId(biddingNotification.getId());
     biddingNotificationDto.setRecipient(biddingNotification.getRecipient().getUsername());
     biddingNotificationDto.setIsRead(biddingNotification.getIsRead());
+    biddingNotificationDto.setIsHide(biddingNotification.getIsHide());
 
     BiddingDocumentDto relatedResource = BiddingDocumentMapper
         .toBiddingDocumentDto(biddingNotification.getRelatedResource());

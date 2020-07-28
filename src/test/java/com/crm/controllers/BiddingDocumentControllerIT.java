@@ -53,7 +53,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @ContextConfiguration
 class BiddingDocumentControllerIT {
 
-  private static final Logger logger = LoggerFactory.getLogger(UserControllerIT.class);
+  private static final Logger logger = LoggerFactory.getLogger(BiddingDocumentControllerIT.class);
 
   @Autowired
   protected MockMvc mockMvc;

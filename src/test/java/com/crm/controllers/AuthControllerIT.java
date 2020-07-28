@@ -5,59 +5,42 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import com.crm.models.Forwarder;
 import com.crm.models.Role;
-import com.crm.payload.request.SignInRequest;
 import com.crm.payload.request.SupplierRequest;
-import com.crm.security.jwt.AuthEntryPointJwt;
-import com.crm.security.jwt.JwtUntils;
-import com.crm.security.services.UserDetailsServiceImpl;
-import com.crm.services.impl.ForwarderServiceImpl;
-import com.crm.services.impl.MerchantServiceImpl;
+import com.crm.services.ForwarderService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-@ExtendWith(SpringExtension.class)
-@WebMvcTest(controllers = AuthController.class)
+@SpringBootTest
+@AutoConfigureMockMvc
+@ContextConfiguration
 public class AuthControllerIT {
+
+  private static final Logger logger = LoggerFactory.getLogger(AuthControllerIT.class);
 
   @Autowired
   private MockMvc mockMvc;
-
-  @MockBean
-  private AuthenticationManager authenticationManager;
-
-  @MockBean
-  private UserDetailsServiceImpl userDetailsService;
-
-  @MockBean
-  private JwtUntils jwtUntils;
-
-  @MockBean
-  private AuthEntryPointJwt authEntryPointJwt;
 
   @MockBean
   private PasswordEncoder passwordEncoder;
@@ -66,14 +49,9 @@ public class AuthControllerIT {
   private ObjectMapper objectMapper;
 
   @MockBean
-  ForwarderServiceImpl forwarderServiceImpl;
-
-  @MockBean
-  MerchantServiceImpl merchantServiceImpl;
+  ForwarderService forwarderService;
 
   Forwarder forwarder;
-
-  Authentication authentication;
 
   String password;
 
@@ -105,6 +83,7 @@ public class AuthControllerIT {
 
   @Test
   void whenValidRegister_thenReturns200() throws Exception {
+    // given
     SupplierRequest request = new SupplierRequest();
     request.setUsername("anvannguyen");
     request.setPassword("123456");
@@ -122,41 +101,19 @@ public class AuthControllerIT {
     request.setCompanyAddress("KCN Yen Phong, Bac Ninh, Viet Nam");
     request.setTin("HYAO293");
     request.setFax("932093209");
-    // MOCK: https://stackoverflow.com/a/37896584/10597062
-    when(forwarderServiceImpl.createForwarder(Mockito.any(SupplierRequest.class))).thenReturn(forwarder);
+
+    when(forwarderService.createForwarder(Mockito.any(SupplierRequest.class))).thenReturn(forwarder);
+
+    // when and then
     MvcResult mvcResult = mockMvc
         .perform(post("/api/auth/signup").contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(request)).accept(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk()).andExpect(jsonPath("$.id").value(1))
         .andExpect(jsonPath("$.username").value("anvannguyen")).andReturn();
-    String actualResponseBody = mvcResult.getResponse().getContentAsString(StandardCharsets.UTF_8);
-    request.setId(1L);
-    String expectedResponseBody = objectMapper.writeValueAsString(request);
-    System.out.println("actual: " + actualResponseBody);
-    System.out.println("expected: " + expectedResponseBody);
-    //assertThat(actualResponseBody).isEqualToIgnoringWhitespace(expectedResponseBody);
+    
+    // print response
+    MockHttpServletResponse response = mvcResult.getResponse();
+    logger.info("Reponse: {}", response.getContentAsString());
   }
 
-  @Disabled
-  @Test
-  void whenValidSignin_thenReturns200() throws Exception {
-    SignInRequest request = new SignInRequest();
-    request.setUsername("anvannguyen");
-    request.setPassword("123456");
-    authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
-    SecurityContextHolder.getContext().setAuthentication(authentication);
-    String jwt = jwtUntils.generateJwtToken(authentication);
-    //authentication.setAuthenticated(true);
-
-    // MOCK: https://stackoverflow.com/a/37896584/10597062
-    when(authenticationManager.authenticate(Mockito.any(UsernamePasswordAuthenticationToken.class)))
-        .thenReturn(authentication);
-    mockMvc
-        .perform(post("/api/auth/signin").contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(request)).accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isOk()).andReturn();
-    // String expectedResponseBody = objectMapper.writeValueAsString(request);
-    // assertThat(authentication.isAuthenticated()).isEqualTo(true);
-    // assertThat(actualResponseBody).isEqualToIgnoringWhitespace(expectedResponseBody);
-  }
 }

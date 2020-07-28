@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -71,15 +70,6 @@ public class ShippingLineController {
   @GetMapping("/{id}")
   public ResponseEntity<?> getShippingLine(@PathVariable Long id) {
     ShippingLine shippingLine = shippingLineService.getShippingLine(id);
-    ShippingLineDto shippingLineDto = ShippingLineMapper.toShippingLineDto(shippingLine);
-    return ResponseEntity.ok(shippingLineDto);
-  }
-
-  @Transactional
-  @PreAuthorize("hasRole('MODERATOR')")
-  @PutMapping("")
-  public ResponseEntity<?> updateShippingLine(@Valid @RequestBody ShippingLineRequest request) {
-    ShippingLine shippingLine = shippingLineService.updateShippingLine(request);
     ShippingLineDto shippingLineDto = ShippingLineMapper.toShippingLineDto(shippingLine);
     return ResponseEntity.ok(shippingLineDto);
   }

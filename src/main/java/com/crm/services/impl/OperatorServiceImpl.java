@@ -65,19 +65,14 @@ public class OperatorServiceImpl implements OperatorService {
     }
 
     operator.setPhone(request.getPhone());
-
-    if (UserServiceImpl.isEmailChange(request.getEmail(), operator)) {
-      operator.setEmail(request.getEmail());
-    }
-
+    operator.setEmail(request.getEmail());
     operator.setAddress(request.getAddress());
     operator.setStatus(EnumUserStatus.ACTIVE.name());
     operator.setFullname(request.getFullname());
     operator.setIsRoot(false);
 
-    operatorRepository.save(operator);
-
-    return operator;
+    Operator _operator = operatorRepository.save(operator);
+    return _operator;
   }
 
   @Override
@@ -102,49 +97,9 @@ public class OperatorServiceImpl implements OperatorService {
   }
 
   @Override
-  public Operator updateOperator(OperatorRequest request) {
-    Operator operator = operatorRepository.findById(request.getId())
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.OPERATOR_NOT_FOUND));
-
-    operator.setUsername(request.getUsername());
-
-    /*
-     * String encoder = passwordEncoder.encode(request.getPassword());
-     * operator.setPassword(encoder);
-     */
-
-    Role userRole = roleRepository.findByName("ROLE_MODERATOR")
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.ROLE_NOT_FOUND));
-    operator.getRoles().add(userRole);
-
-    operator.setPhone(request.getPhone());
-    operator.setEmail(request.getEmail());
-    operator.setAddress(request.getAddress());
-
-    EnumUserStatus status = EnumUserStatus.findByName(request.getStatus());
-    if (status != null) {
-      operator.setStatus(EnumUserStatus.ACTIVE.name());
-    } else {
-      throw new NotFoundException(ErrorConstant.USER_STATUS_NOT_FOUND);
-    }
-
-    operator.setFullname(request.getFullname());
-    operator.setIsRoot(request.getIsRoot());
-    operatorRepository.save(operator);
-
-    return operator;
-  }
-
-  @Override
   public Operator editOperator(Long id, Map<String, Object> updates) {
     Operator operator = operatorRepository.findById(id)
         .orElseThrow(() -> new NotFoundException(ErrorConstant.OPERATOR_NOT_FOUND));
-
-    /*
-     * String password = String.valueOf( updates.get("password")); if (password !=
-     * null && !password.isEmpty()) { String encoder =
-     * passwordEncoder.encode(password); operator.setPassword(encoder); }
-     */
 
     String email = String.valueOf(updates.get("email"));
     if (updates.get("email") != null && !Tool.isEqual(operator.getEmail(), email)) {
@@ -183,8 +138,8 @@ public class OperatorServiceImpl implements OperatorService {
       operator.setFullname(fullname);
     }
 
-    operatorRepository.save(operator);
-    return operator;
+    Operator _operator = operatorRepository.save(operator);
+    return _operator;
   }
 
   @Override

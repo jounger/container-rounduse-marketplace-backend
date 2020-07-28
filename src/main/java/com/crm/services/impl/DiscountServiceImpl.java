@@ -67,8 +67,8 @@ public class DiscountServiceImpl implements DiscountService {
       LocalDateTime expiredDate = Tool.convertToLocalDateTime(request.getExpiredDate());
       discount.setExpiredDate(expiredDate);
     }
-    discountRepository.save(discount);
-    return discount;
+    Discount _discount = discountRepository.save(discount);
+    return _discount;
   }
 
   @Override
@@ -96,8 +96,8 @@ public class DiscountServiceImpl implements DiscountService {
       LocalDateTime expiredDate = Tool.convertToLocalDateTime(request.getExpiredDate());
       discount.setExpiredDate(expiredDate);
     }
-    discountRepository.save(discount);
-    return discount;
+    Discount _discount = discountRepository.save(discount);
+    return _discount;
   }
 
   @Override
@@ -143,8 +143,8 @@ public class DiscountServiceImpl implements DiscountService {
       discount.setExpiredDate(Tool.convertToLocalDateTime(expiredDateString));
     }
 
-    discountRepository.save(discount);
-    return discount;
+    Discount _discount = discountRepository.save(discount);
+    return _discount;
   }
 
   @Override

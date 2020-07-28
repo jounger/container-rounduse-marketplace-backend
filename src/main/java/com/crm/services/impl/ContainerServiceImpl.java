@@ -163,8 +163,8 @@ public class ContainerServiceImpl implements ContainerService {
 
       container.setContainerNumber(request.getContainerNumber());
 
-      containerRepository.save(container);
-      return container;
+      Container _container = containerRepository.save(container);
+      return _container;
 
     } else {
       throw new NotFoundException(ErrorConstant.FORWARDER_NOT_FOUND);
@@ -389,8 +389,8 @@ public class ContainerServiceImpl implements ContainerService {
         throw new InternalException(ErrorConstant.CONTAINER_BUSY);
       }
 
-      containerRepository.save(container);
-      return container;
+      Container _container = containerRepository.save(container);
+      return _container;
     } else {
       throw new NotFoundException(ErrorConstant.FORWARDER_NOT_FOUND);
     }

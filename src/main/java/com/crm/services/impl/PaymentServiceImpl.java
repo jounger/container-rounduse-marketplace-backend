@@ -81,8 +81,8 @@ public class PaymentServiceImpl implements PaymentService {
 
     payment.setPaymentDate(LocalDateTime.now());
 
-    paymentRepository.save(payment);
-    return payment;
+    Payment _payment = paymentRepository.save(payment);
+    return _payment;
 
   }
 
@@ -152,8 +152,8 @@ public class PaymentServiceImpl implements PaymentService {
       }
     }
 
-    paymentRepository.save(payment);
-    return payment;
+    Payment _payment = paymentRepository.save(payment);
+    return _payment;
   }
 
   @Override

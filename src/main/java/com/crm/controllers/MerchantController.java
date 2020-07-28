@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -71,15 +70,6 @@ public class MerchantController {
   @GetMapping("/{id}")
   public ResponseEntity<?> getMerchant(@PathVariable Long id) {
     Merchant merchant = merchantService.getMerchant(id);
-    MerchantDto merchantDto = MerchantMapper.toMerchantDto(merchant);
-    return ResponseEntity.ok(merchantDto);
-  }
-
-  @Transactional
-  @PreAuthorize("hasRole('MERCHANT')")
-  @PutMapping("")
-  public ResponseEntity<?> updateMerchant(@Valid @RequestBody MerchantRequest request) {
-    Merchant merchant = merchantService.updateMerchant(request);
     MerchantDto merchantDto = MerchantMapper.toMerchantDto(merchant);
     return ResponseEntity.ok(merchantDto);
   }

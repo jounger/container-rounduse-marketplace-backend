@@ -20,7 +20,6 @@ import com.crm.models.Booking;
 import com.crm.models.Forwarder;
 import com.crm.models.Outbound;
 import com.crm.models.Role;
-import com.crm.payload.request.ForwarderRequest;
 import com.crm.payload.request.PaginationRequest;
 import com.crm.payload.request.SupplierRequest;
 import com.crm.repository.ForwarderRepository;
@@ -84,9 +83,8 @@ public class ForwarderServiceImpl implements ForwarderService {
     forwarder.setFax(request.getFax());
     forwarder.setRatingValue(0D);
 
-    forwarderRepository.save(forwarder);
-
-    return forwarder;
+    Forwarder _forwarder = forwarderRepository.save(forwarder);
+    return _forwarder;
   }
 
   @Override
@@ -104,52 +102,9 @@ public class ForwarderServiceImpl implements ForwarderService {
   }
 
   @Override
-  public Forwarder updateForwarder(ForwarderRequest request) {
-    Forwarder forwarder = forwarderRepository.findById(request.getId())
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.FORWARDER_NOT_FOUND));
-
-    /*
-     * String encoder = passwordEncoder.encode(request.getPassword());
-     * forwarder.setPassword(encoder);
-     */
-
-    Set<Role> roles = new HashSet<>();
-    Role userRole = roleRepository.findByName("ROLE_FORWARDER")
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.ROLE_NOT_FOUND));
-    roles.add(userRole);
-    forwarder.setRoles(roles);
-
-    if (UserServiceImpl.isEmailChange(request.getEmail(), forwarder)) {
-      forwarder.setEmail(request.getEmail());
-    }
-
-    forwarder.setPhone(request.getPhone());
-    forwarder.setAddress(request.getAddress());
-    forwarder.setStatus(EnumUserStatus.PENDING.name());
-    forwarder.setWebsite(request.getWebsite());
-    forwarder.setCompanyName(request.getCompanyName());
-    forwarder.setCompanyCode(request.getCompanyCode());
-    forwarder.setCompanyDescription(request.getCompanyDescription());
-    forwarder.setCompanyAddress(request.getCompanyAddress());
-    forwarder.setContactPerson(request.getContactPerson());
-    forwarder.setTin(request.getTin());
-    forwarder.setFax(request.getFax());
-
-    forwarderRepository.save(forwarder);
-
-    return forwarder;
-  }
-
-  @Override
   public Forwarder editForwarder(Long id, Map<String, Object> updates) {
     Forwarder forwarder = forwarderRepository.findById(id)
         .orElseThrow(() -> new NotFoundException(ErrorConstant.FORWARDER_NOT_FOUND));
-
-    /*
-     * String password = String.valueOf( updates.get("password")); if (password !=
-     * null) { String encoder = passwordEncoder.encode(password);
-     * forwarder.setPassword(encoder); }
-     */
 
     String email = String.valueOf(updates.get("email"));
     if (updates.get("email") != null && !Tool.isEqual(forwarder.getEmail(), email)) {
@@ -218,8 +173,8 @@ public class ForwarderServiceImpl implements ForwarderService {
       forwarder.setFax(fax);
     }
 
-    forwarderRepository.save(forwarder);
-    return forwarder;
+    Forwarder _forwarder = forwarderRepository.save(forwarder);
+    return _forwarder;
   }
 
   @Override

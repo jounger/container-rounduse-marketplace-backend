@@ -405,9 +405,9 @@ public class BidServiceImpl implements BidService {
       }
     }
 
-    bidRepository.save(bid);
+    Bid bid1 = bidRepository.save(bid);
 
-    return bid;
+    return bid1;
   }
 
   @Override

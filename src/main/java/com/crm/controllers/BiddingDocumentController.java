@@ -158,6 +158,6 @@ public class BiddingDocumentController {
         .getPrincipal();
     String username = userDetails.getUsername();
     biddingDocumentService.removeBiddingDocument(id, username);
-    return ResponseEntity.ok(new MessageResponse("Bidding document deleted successfully."));
+    return ResponseEntity.ok(new MessageResponse("Bidding document deleted successfully"));
   }
 }

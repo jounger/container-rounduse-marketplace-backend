@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -26,8 +25,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.crm.models.Forwarder;
 import com.crm.models.dto.ForwarderDto;
 import com.crm.models.mapper.ForwarderMapper;
-import com.crm.payload.request.PaginationRequest;
 import com.crm.payload.request.ForwarderRequest;
+import com.crm.payload.request.PaginationRequest;
 import com.crm.payload.response.MessageResponse;
 import com.crm.payload.response.PaginationResponse;
 import com.crm.services.ForwarderService;
@@ -90,15 +89,6 @@ public class ForwarderController {
   @GetMapping("/{id}")
   public ResponseEntity<?> getForwarder(@PathVariable Long id) {
     Forwarder forwarder = forwarderService.getForwarder(id);
-    ForwarderDto forwarderDto = ForwarderMapper.toForwarderDto(forwarder);
-    return ResponseEntity.ok(forwarderDto);
-  }
-
-  @Transactional
-  @PreAuthorize("hasRole('MODERATOR') or hasRole('FORWARDER')")
-  @PutMapping("")
-  public ResponseEntity<?> updateForwarder(@Valid @RequestBody ForwarderRequest request) {
-    Forwarder forwarder = forwarderService.updateForwarder(request);
     ForwarderDto forwarderDto = ForwarderMapper.toForwarderDto(forwarder);
     return ResponseEntity.ok(forwarderDto);
   }

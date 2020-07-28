@@ -16,8 +16,6 @@ public interface ShippingLineService {
 
   Page<ShippingLine> getShippingLines(PaginationRequest request);
 
-  ShippingLine updateShippingLine(ShippingLineRequest request);
-
   ShippingLine editShippingLine(Long id, Map<String, Object> updates);
 
   void removeShippingLine(Long id);

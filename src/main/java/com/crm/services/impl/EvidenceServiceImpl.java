@@ -74,8 +74,8 @@ public class EvidenceServiceImpl implements EvidenceService {
       throw new NotFoundException(ErrorConstant.USER_ACCESS_DENIED);
     }
 
-    evidenceRepository.save(evidence);
-    return evidence;
+    Evidence _evidence = evidenceRepository.save(evidence);
+    return _evidence;
   }
 
   @Override
@@ -146,8 +146,8 @@ public class EvidenceServiceImpl implements EvidenceService {
       evidence.setIsValid(Boolean.valueOf(isValid));
     }
 
-    evidenceRepository.save(evidence);
-    return evidence;
+    Evidence _evidence = evidenceRepository.save(evidence);
+    return _evidence;
 
   }
 

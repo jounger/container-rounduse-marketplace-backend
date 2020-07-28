@@ -85,7 +85,7 @@ public class BidServiceImpl implements BidService {
 
     List<Bid> bids = new ArrayList<>(biddingDocument.getBids());
     bids.forEach(bidOfBidding -> {
-      if (bidOfBidding.getBidder() == bidder) {
+      if (bidOfBidding.getBidder().getId() == bidder.getId()) {
         throw new DuplicateRecordException(ErrorConstant.BID_INVALID_CREATE);
       }
     });
@@ -127,7 +127,7 @@ public class BidServiceImpl implements BidService {
     bid.setBidValidityPeriod(LocalDateTime.now().plusHours(Constant.BID_VALIDITY_PERIOD));
     bid.setStatus(EnumBidStatus.PENDING.name());
 
-    bidRepository.save(bid);
+    Bid _bid = bidRepository.save(bid);
 
     biddingDocument.getBids().add(bid);
     if (bid.getBidPrice() < biddingDocument.getPriceLeadership()) {
@@ -135,7 +135,7 @@ public class BidServiceImpl implements BidService {
     }
     biddingDocumentRepository.save(biddingDocument);
 
-    return bid;
+    return _bid;
   }
 
   @Override
@@ -157,7 +157,7 @@ public class BidServiceImpl implements BidService {
   @Override
   public Page<Bid> getBidsByBiddingDocument(Long id, PaginationRequest request) {
     Page<Bid> bids = bidRepository.findByBiddingDocument(id,
-        PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Direction.DESC, "id")));
+        PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Direction.DESC, "createdAt")));
     return bids;
   }
 
@@ -168,7 +168,7 @@ public class BidServiceImpl implements BidService {
     }if(!supplierRepository.existsByUsername(username)) {
       throw new NotFoundException(ErrorConstant.USER_NOT_FOUND);
     }
-    PageRequest page = PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Direction.DESC, "id"));
+    PageRequest page = PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Direction.DESC, "createdAt"));
     Page<Bid> bids = bidRepository.findByBiddingDocumentAndExistCombined(id, username, page);
     return bids;
   }
@@ -179,10 +179,10 @@ public class BidServiceImpl implements BidService {
     String status = request.getStatus();
     if (status != null && !status.isEmpty()) {
       bids = bidRepository.findByForwarder(username, status,
-          PageRequest.of(request.getPage(), request.getLimit(), Sort.by("id").descending()));
+          PageRequest.of(request.getPage(), request.getLimit(), Sort.by("createdAt").descending()));
     } else {
       bids = bidRepository.findByForwarder(username,
-          PageRequest.of(request.getPage(), request.getLimit(), Sort.by("id").descending()));
+          PageRequest.of(request.getPage(), request.getLimit(), Sort.by("createdAt").descending()));
     }
     return bids;
   }
@@ -265,9 +265,9 @@ public class BidServiceImpl implements BidService {
       });
     }
 
-    bidRepository.save(bid);
+    Bid _bid = bidRepository.save(bid);
 
-    return bid;
+    return _bid;
   }
 
   @SuppressWarnings("unchecked")
@@ -405,9 +405,9 @@ public class BidServiceImpl implements BidService {
       }
     }
 
-    bidRepository.save(bid);
+    Bid _bid = bidRepository.save(bid);
 
-    return bid;
+    return _bid;
   }
 
   @Override

@@ -35,8 +35,8 @@ public class GeolocationServiceImpl implements GeolocationService {
       geolocation.setLatitude(request.getLatitude());
       geolocation.setLongitude(request.getLongitude());
 
-      geolocationRepository.save(geolocation);
-      return geolocation;
+      Geolocation _geolocation = geolocationRepository.save(geolocation);
+      return _geolocation;
     } else {
       throw new NotFoundException(ErrorConstant.FORWARDER_NOT_FOUND);
     }
@@ -61,8 +61,8 @@ public class GeolocationServiceImpl implements GeolocationService {
         geolocation.setLongitude(longitude);
       }
 
-      geolocationRepository.save(geolocation);
-      return geolocation;
+      Geolocation _geolocation = geolocationRepository.save(geolocation);
+      return _geolocation;
 
     } else {
       throw new NotFoundException(ErrorConstant.FORWARDER_NOT_FOUND);

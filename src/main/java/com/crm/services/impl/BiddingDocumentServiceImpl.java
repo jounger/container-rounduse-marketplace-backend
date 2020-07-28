@@ -16,7 +16,6 @@ import com.crm.enums.EnumBidStatus;
 import com.crm.enums.EnumBiddingStatus;
 import com.crm.enums.EnumCurrency;
 import com.crm.enums.EnumSupplyStatus;
-import com.crm.exception.DuplicateRecordException;
 import com.crm.exception.InternalException;
 import com.crm.exception.NotFoundException;
 import com.crm.models.BiddingDocument;
@@ -63,7 +62,8 @@ public class BiddingDocumentServiceImpl implements BiddingDocumentService {
   public BiddingDocument createBiddingDocument(String username, BiddingDocumentRequest request) {
     BiddingDocument biddingDocument = new BiddingDocument();
 
-    Merchant merchant = merchantRepository.findByUsername(username).orElseThrow(() -> new NotFoundException(ErrorConstant.BIDDINGDOCUMENT_NOT_FOUND));
+    Merchant merchant = merchantRepository.findByUsername(username)
+        .orElseThrow(() -> new NotFoundException(ErrorConstant.BIDDINGDOCUMENT_NOT_FOUND));
     biddingDocument.setOfferee(merchant);
 
     Outbound outbound = outboundRepository.findById(request.getOutbound())
@@ -71,7 +71,7 @@ public class BiddingDocumentServiceImpl implements BiddingDocumentService {
     if (merchant.getOutbounds().contains(outbound)) {
       if (outbound.getStatus().equalsIgnoreCase(EnumSupplyStatus.COMBINED.name())
           || outbound.getStatus().equalsIgnoreCase(EnumSupplyStatus.BIDDING.name())) {
-        throw new DuplicateRecordException(ErrorConstant.OUTBOUND_IS_IN_TRANSACTION);
+        throw new InternalException(ErrorConstant.OUTBOUND_IS_IN_TRANSACTION);
       }
       outbound.setStatus(EnumSupplyStatus.BIDDING.name());
       biddingDocument.setOutbound(outbound);
@@ -110,8 +110,8 @@ public class BiddingDocumentServiceImpl implements BiddingDocumentService {
 
     biddingDocument.setStatus(EnumBiddingStatus.BIDDING.name());
 
-    biddingDocumentRepository.save(biddingDocument);
-    return biddingDocument;
+    BiddingDocument _biddingDocument = biddingDocumentRepository.save(biddingDocument);
+    return _biddingDocument;
   }
 
   @Override
@@ -141,7 +141,8 @@ public class BiddingDocumentServiceImpl implements BiddingDocumentService {
 
   @Override
   public Page<BiddingDocument> getBiddingDocuments(String username, PaginationRequest request) {
-    User user = userRepository.findByUsername(username).orElseThrow(() -> new NotFoundException(ErrorConstant.USER_NOT_FOUND));
+    User user = userRepository.findByUsername(username)
+        .orElseThrow(() -> new NotFoundException(ErrorConstant.USER_NOT_FOUND));
     String status = request.getStatus();
     Page<BiddingDocument> biddingDocuments = null;
     if (user.getRoles().iterator().next().getName().equalsIgnoreCase("ROLE_MERCHANT")) {
@@ -193,8 +194,8 @@ public class BiddingDocumentServiceImpl implements BiddingDocumentService {
     biddingDocument.setBidFloorPrice(request.getBidFloorPrice());
     biddingDocument.setPriceLeadership(request.getPriceLeadership());
 
-    biddingDocumentRepository.save(biddingDocument);
-    return biddingDocument;
+    BiddingDocument _biddingDocument = biddingDocumentRepository.save(biddingDocument);
+    return _biddingDocument;
   }
 
   @Override
@@ -270,16 +271,17 @@ public class BiddingDocumentServiceImpl implements BiddingDocumentService {
       }
     }
 
-    biddingDocumentRepository.save(biddingDocument);
-    return biddingDocument;
+    BiddingDocument _biddingDocument = biddingDocumentRepository.save(biddingDocument);
+    return _biddingDocument;
   }
 
   @Override
   public void removeBiddingDocument(Long id, String username) {
-    Merchant merchant = merchantRepository.findByUsername(username).orElseThrow(() -> new NotFoundException(ErrorConstant.MERCHANT_NOT_FOUND));
+    Merchant merchant = merchantRepository.findByUsername(username)
+        .orElseThrow(() -> new NotFoundException(ErrorConstant.MERCHANT_NOT_FOUND));
     BiddingDocument biddingDocument = biddingDocumentRepository.findById(id)
         .orElseThrow(() -> new NotFoundException(ErrorConstant.BIDDINGDOCUMENT_NOT_FOUND));
-    if(!biddingDocument.getOfferee().equals(merchant)) {
+    if (!biddingDocument.getOfferee().equals(merchant)) {
       throw new NotFoundException(ErrorConstant.BIDDINGDOCUMENT_NOT_OWNER);
     }
     if (!biddingDocument.getStatus().equalsIgnoreCase(EnumBiddingStatus.CANCELED.name())) {

@@ -98,8 +98,8 @@ public class BookingServiceImpl implements BookingService {
 
       booking.setIsFcl(request.getIsFcl());
 
-      bookingRepository.save(booking);
-      return booking;
+      Booking _booking = bookingRepository.save(booking);
+      return _booking;
     } else {
       throw new NotFoundException(ErrorConstant.FORWARDER_NOT_FOUND);
     }
@@ -154,8 +154,8 @@ public class BookingServiceImpl implements BookingService {
         booking.setIsFcl(isFcl);
       }
 
-      bookingRepository.save(booking);
-      return booking;
+      Booking _booking = bookingRepository.save(booking);
+      return _booking;
     } else {
       throw new NotFoundException(ErrorConstant.FORWARDER_NOT_FOUND);
     }

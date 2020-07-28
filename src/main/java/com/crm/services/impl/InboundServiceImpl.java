@@ -179,8 +179,8 @@ public class InboundServiceImpl implements InboundService {
 
     inbound.setBillOfLading(billOfLading);
 
-    inboundRepository.save(inbound);
-    return inbound;
+    Inbound _inbound = inboundRepository.save(inbound);
+    return _inbound;
   }
 
   @Override
@@ -270,8 +270,8 @@ public class InboundServiceImpl implements InboundService {
           }
         }
       }
-      inboundRepository.save(inbound);
-      return inbound;
+      Inbound _inbound = inboundRepository.save(inbound);
+      return _inbound;
 
     } else {
       throw new NotFoundException(ErrorConstant.FORWARDER_NOT_FOUND);
@@ -375,8 +375,8 @@ public class InboundServiceImpl implements InboundService {
         inbound.setEmptyTime(emptyTime);
       }
 
-      inboundRepository.save(inbound);
-      return inbound;
+      Inbound _inbound = inboundRepository.save(inbound);
+      return _inbound;
     } else {
       throw new NotFoundException(ErrorConstant.FORWARDER_NOT_FOUND);
     }

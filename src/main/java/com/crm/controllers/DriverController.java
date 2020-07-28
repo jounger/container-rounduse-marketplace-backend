@@ -21,7 +21,6 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -116,20 +115,6 @@ public class DriverController {
         .getPrincipal();
     String username = userDetails.getUsername();
     Driver driver = driverService.createDriver(username, request);
-    DriverDto driverDto = DriverMapper.toDriverDto(driver);
-    return ResponseEntity.ok(driverDto);
-  }
-
-  @Transactional
-  @PutMapping("")
-  @PreAuthorize("hasRole('FORWARDER') or hasRole('DRIVER')")
-  public ResponseEntity<?> updateDriver(@Valid @RequestBody DriverRequest request) {
-
-    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
-        .getPrincipal();
-    String username = userDetails.getUsername();
-
-    Driver driver = driverService.updateDriver(username, request);
     DriverDto driverDto = DriverMapper.toDriverDto(driver);
     return ResponseEntity.ok(driverDto);
   }

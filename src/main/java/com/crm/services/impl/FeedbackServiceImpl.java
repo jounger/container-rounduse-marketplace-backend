@@ -60,7 +60,7 @@ public class FeedbackServiceImpl implements FeedbackService {
     User sender = userRepository.findByUsername(username)
         .orElseThrow(() -> new NotFoundException(ErrorConstant.SENDER_NOT_FOUND));
     String role = sender.getRoles().iterator().next().getName();
-    if (role.equals("ROLE_MODERATOR") || username.equals(report.getSender().getId())) {
+    if (role.equals("ROLE_MODERATOR") || username.equals(report.getSender().getUsername())) {
       feedback.setSender(sender);
     } else {
       throw new NotFoundException("Access denied.");
@@ -76,8 +76,8 @@ public class FeedbackServiceImpl implements FeedbackService {
     feedback.setSatisfactionPoints(satisfactionPoints);
     feedback.setSendDate(LocalDateTime.now());
 
-    feedbackRepository.save(feedback);
-    return feedback;
+    Feedback _feedback = feedbackRepository.save(feedback);
+    return _feedback;
   }
 
   @Override
@@ -153,8 +153,8 @@ public class FeedbackServiceImpl implements FeedbackService {
       feedback.setSatisfactionPoints(Integer.valueOf(satisfactionPoints));
     }
 
-    feedbackRepository.save(feedback);
-    return feedback;
+    Feedback _feedback = feedbackRepository.save(feedback);
+    return _feedback;
   }
 
   @Override

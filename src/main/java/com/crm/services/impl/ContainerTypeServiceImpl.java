@@ -77,8 +77,8 @@ public class ContainerTypeServiceImpl implements ContainerTypeService {
     } catch (Exception e) {
       throw new NotFoundException(ErrorConstant.UNIT_OF_MEASUREMENT_NOT_FOUND);
     }
-    containerTypeRepository.save(containerType);
-    return containerType;
+    ContainerType _containerType = containerTypeRepository.save(containerType);
+    return _containerType;
   }
 
   @Override
@@ -109,8 +109,8 @@ public class ContainerTypeServiceImpl implements ContainerTypeService {
     } catch (Exception e) {
       throw new NotFoundException(ErrorConstant.UNIT_OF_MEASUREMENT_NOT_FOUND);
     }
-    containerTypeRepository.save(containerType);
-    return containerType;
+    ContainerType _containerType = containerTypeRepository.save(containerType);
+    return _containerType;
   }
 
   @Override
@@ -193,8 +193,8 @@ public class ContainerTypeServiceImpl implements ContainerTypeService {
       }
     }
 
-    containerTypeRepository.save(containerType);
-    return containerType;
+    ContainerType _containerType = containerTypeRepository.save(containerType);
+    return _containerType;
   }
 
   @Override

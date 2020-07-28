@@ -93,8 +93,8 @@ public class ContainerSemiTrailerServiceImpl implements ContainerSemiTrailerServ
 
     containerSemiTrailer.setNumberOfAxles(request.getNumberOfAxles());
 
-    containerSemiTrailerRepository.save(containerSemiTrailer);
-    return containerSemiTrailer;
+    ContainerSemiTrailer _containerSemiTrailer = containerSemiTrailerRepository.save(containerSemiTrailer);
+    return _containerSemiTrailer;
   }
 
   @Override
@@ -105,7 +105,7 @@ public class ContainerSemiTrailerServiceImpl implements ContainerSemiTrailerServ
       ContainerSemiTrailer containerSemiTrailer = containerSemiTrailerRepository.findById(request.getId())
           .orElseThrow(() -> new NotFoundException(ErrorConstant.TRAILER_NOT_FOUND));
 
-      if (!containerSemiTrailer.getForwarder().getId().equals(username)) {
+      if (!containerSemiTrailer.getForwarder().getUsername().equals(username)) {
         throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
       }
 
@@ -156,7 +156,7 @@ public class ContainerSemiTrailerServiceImpl implements ContainerSemiTrailerServ
       ContainerSemiTrailer containerSemiTrailer = containerSemiTrailerRepository.findById(id)
           .orElseThrow(() -> new NotFoundException(ErrorConstant.TRAILER_NOT_FOUND));
 
-      if (!containerSemiTrailer.getForwarder().getId().equals(username)) {
+      if (!containerSemiTrailer.getForwarder().getUsername().equals(username)) {
         throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
       }
 
@@ -203,8 +203,8 @@ public class ContainerSemiTrailerServiceImpl implements ContainerSemiTrailerServ
           throw new NotFoundException(ErrorConstant.UNIT_OF_MEASUREMENT_NOT_FOUND);
         }
       }
-      containerSemiTrailerRepository.save(containerSemiTrailer);
-      return containerSemiTrailer;
+      ContainerSemiTrailer _containerSemiTrailer = containerSemiTrailerRepository.save(containerSemiTrailer);
+      return _containerSemiTrailer;
     } else {
       throw new NotFoundException(ErrorConstant.FORWARDER_NOT_FOUND);
     }
@@ -217,7 +217,7 @@ public class ContainerSemiTrailerServiceImpl implements ContainerSemiTrailerServ
       ContainerSemiTrailer containerSemiTrailer = containerSemiTrailerRepository.findById(id)
           .orElseThrow(() -> new NotFoundException(ErrorConstant.TRAILER_NOT_FOUND));
 
-      if (!containerSemiTrailer.getForwarder().getId().equals(username)) {
+      if (!containerSemiTrailer.getForwarder().getUsername().equals(username)) {
         throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
       }
 

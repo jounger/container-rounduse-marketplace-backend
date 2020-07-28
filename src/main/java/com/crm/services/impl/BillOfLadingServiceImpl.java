@@ -70,7 +70,7 @@ public class BillOfLadingServiceImpl implements BillOfLadingService {
       BillOfLading billOfLading = billOfLadingRepository.findById(request.getId())
           .orElseThrow(() -> new NotFoundException(ErrorConstant.BILLOFLADING_NOT_FOUND));
 
-      if (!billOfLading.getInbound().getForwarder().getId().equals(username)) {
+      if (!billOfLading.getInbound().getForwarder().getUsername().equals(username)) {
         throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
       }
 
@@ -141,9 +141,9 @@ public class BillOfLadingServiceImpl implements BillOfLadingService {
         }
       }
 
-      billOfLadingRepository.save(billOfLading);
+      BillOfLading _billOfLading = billOfLadingRepository.save(billOfLading);
 
-      return billOfLading;
+      return _billOfLading;
     } else {
       throw new NotFoundException(ErrorConstant.FORWARDER_NOT_FOUND);
     }

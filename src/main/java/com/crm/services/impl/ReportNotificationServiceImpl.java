@@ -59,8 +59,8 @@ public class ReportNotificationServiceImpl implements ReportNotificationService 
 
     reportNotification.setSendDate(LocalDateTime.now());
 
-    reportNotificationRepository.save(reportNotification);
-    return reportNotification;
+    ReportNotification _reportNotification = reportNotificationRepository.save(reportNotification);
+    return _reportNotification;
   }
 
   @Override
@@ -120,8 +120,8 @@ public class ReportNotificationServiceImpl implements ReportNotificationService 
       reportNotification.setIsHide(isHide);
     }
 
-    reportNotificationRepository.save(reportNotification);
-    return reportNotification;
+    ReportNotification _reportNotification = reportNotificationRepository.save(reportNotification);
+    return _reportNotification;
   }
 
   @Override

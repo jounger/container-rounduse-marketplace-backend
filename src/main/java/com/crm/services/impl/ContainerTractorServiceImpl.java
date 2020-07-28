@@ -79,8 +79,8 @@ public class ContainerTractorServiceImpl implements ContainerTractorService {
 
     containerTractor.setForwarder(forwarder);
 
-    containerTractorRepository.save(containerTractor);
-    return containerTractor;
+    ContainerTractor _containerTractor = containerTractorRepository.save(containerTractor);
+    return _containerTractor;
   }
 
   @Override
@@ -115,8 +115,8 @@ public class ContainerTractorServiceImpl implements ContainerTractorService {
 
       containerTractor.setNumberOfAxles(request.getNumberOfAxles());
 
-      containerTractorRepository.save(containerTractor);
-      return containerTractor;
+      ContainerTractor _containerTractor = containerTractorRepository.save(containerTractor);
+      return _containerTractor;
     } else {
       throw new NotFoundException(ErrorConstant.FORWARDER_NOT_FOUND);
     }
@@ -157,8 +157,8 @@ public class ContainerTractorServiceImpl implements ContainerTractorService {
         containerTractor.setNumberOfAxles(Integer.valueOf(numberOfAxles));
       }
 
-      containerTractorRepository.save(containerTractor);
-      return containerTractor;
+      ContainerTractor _containerTractor = containerTractorRepository.save(containerTractor);
+      return _containerTractor;
     } else {
       throw new NotFoundException(ErrorConstant.FORWARDER_NOT_FOUND);
     }

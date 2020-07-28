@@ -26,13 +26,13 @@ public class PermissionServiceImpl implements PermissionService {
     Permission permission = new Permission();
     if (permissionRepository.existsByName(request.getName())) {
       throw new DuplicateRecordException(ErrorConstant.PERMISSION_ALREADY_EXISTS);
-    } else {
-      permission.setName(request.getName());
-      permission.setDescription(request.getDescription());
-      permissionRepository.save(permission);
     }
+    
+    permission.setName(request.getName());
+    permission.setDescription(request.getDescription());
 
-    return permission;
+    Permission _permission = permissionRepository.save(permission);
+    return _permission;
   }
 
   @Override
@@ -55,9 +55,9 @@ public class PermissionServiceImpl implements PermissionService {
         .orElseThrow(() -> new NotFoundException(ErrorConstant.PERMISSION_NOT_FOUND));
     permission.setName(request.getName());
     permission.setDescription(request.getDescription());
-    permissionRepository.save(permission);
-
-    return permission;
+    
+    Permission _permission = permissionRepository.save(permission);
+    return _permission;
   }
 
 }

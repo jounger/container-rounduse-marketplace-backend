@@ -84,9 +84,9 @@ public class DriverServiceImpl implements DriverService {
     location.setDriver(driver);
 
     driver.setLocation(location);
-    driverRepository.save(driver);
+    Driver _driver = driverRepository.save(driver);
 
-    return driver;
+    return _driver;
   }
 
   @Override
@@ -111,69 +111,14 @@ public class DriverServiceImpl implements DriverService {
   }
 
   @Override
-  public Driver updateDriver(String username, DriverRequest request) {
-    if (forwarderRepository.existsByUsername(username)) {
-      Driver driver = driverRepository.findById(request.getId())
-          .orElseThrow(() -> new NotFoundException(ErrorConstant.DRIVER_NOT_FOUND));
-
-      if (!driver.getForwarder().getId().equals(username)) {
-        throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
-      }
-
-      /*
-       * String encoder = passwordEncoder.encode(request.getPassword());
-       * driver.setPassword(encoder);
-       */
-
-      driver.setPhone(request.getPhone());
-
-      if (UserServiceImpl.isEmailChange(request.getEmail(), driver)) {
-        driver.setEmail(request.getEmail());
-      }
-
-      EnumUserStatus status = EnumUserStatus.findByName(request.getStatus());
-      if (status != null) {
-        driver.setStatus(status.name());
-      }
-
-      Set<String> rolesString = request.getRoles();
-      Set<Role> roles = new HashSet<Role>();
-      if (rolesString == null) {
-        Role userRole = roleRepository.findByName("ROLE_DRIVER")
-            .orElseThrow(() -> new NotFoundException(ErrorConstant.ROLE_NOT_FOUND));
-        roles.add(userRole);
-      } else {
-        rolesString.forEach(role -> {
-          Role userRole = roleRepository.findByName(role)
-              .orElseThrow(() -> new NotFoundException(ErrorConstant.ROLE_NOT_FOUND));
-          roles.add(userRole);
-        });
-      }
-      driver.setRoles(roles);
-      driver.setFullname(request.getFullname());
-      driver.setDriverLicense(request.getDriverLicense());
-      driverRepository.save(driver);
-      return driver;
-    } else {
-      throw new NotFoundException(ErrorConstant.FORWARDER_NOT_FOUND);
-    }
-  }
-
-  @Override
   public Driver editDriver(Long id, String username, Map<String, Object> updates) {
     if (forwarderRepository.existsByUsername(username)) {
       Driver driver = driverRepository.findById(id)
           .orElseThrow(() -> new NotFoundException(ErrorConstant.DRIVER_NOT_FOUND));
 
-      if (!driver.getForwarder().getId().equals(username)) {
+      if (!driver.getForwarder().getUsername().equals(username)) {
         throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
       }
-
-      /*
-       * String password = String.valueOf( updates.get("password")); if (password !=
-       * null) { String encoder = passwordEncoder.encode(password);
-       * driver.setPassword(encoder); }
-       */
 
       String email = String.valueOf(updates.get("email"));
       if (updates.get("email") != null && !Tool.isEqual(driver.getEmail(), email)) {
@@ -214,8 +159,9 @@ public class DriverServiceImpl implements DriverService {
         driver.setDriverLicense(driverLicense);
       }
 
-      driverRepository.save(driver);
-      return driver;
+      Driver _driver = driverRepository.save(driver);
+
+      return _driver;
     } else {
       throw new NotFoundException(ErrorConstant.FORWARDER_NOT_FOUND);
     }

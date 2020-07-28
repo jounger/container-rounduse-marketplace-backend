@@ -96,9 +96,9 @@ public class CombinedServiceImpl implements CombinedService {
     combined.setContract(contract);
     contract.setCombined(combined);
 
-    combinedRepository.save(combined);
+    Combined _combined = combinedRepository.save(combined);
 
-    return combined;
+    return _combined;
   }
 
   @Override
@@ -189,8 +189,8 @@ public class CombinedServiceImpl implements CombinedService {
         }
       }
     }
-    combinedRepository.save(combined);
-    return combined;
+    Combined _combined = combinedRepository.save(combined);
+    return _combined;
   }
 
   @Override

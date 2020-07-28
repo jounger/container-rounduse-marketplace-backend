@@ -94,19 +94,19 @@ public class PaymentServiceImpl implements PaymentService {
   }
 
   @Override
-  public Page<Payment> getPaymentsByContract(Long id, Long userId, PaginationRequest request) {
+  public Page<Payment> getPaymentsByContract(Long id, String username, PaginationRequest request) {
     if (!contractRepository.existsById(id)) {
       throw new NotFoundException(ErrorConstant.CONTRACT_NOT_FOUND);
     }
     Page<Payment> payments = null;
     PageRequest page = PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt"));
-    User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException(ErrorConstant.USER_NOT_FOUND));
+    User user = userRepository.findByUsername(username).orElseThrow(() -> new NotFoundException(ErrorConstant.USER_NOT_FOUND));
     String role = user.getRoles().iterator().next().getName();
 
     if (role.equalsIgnoreCase("ROLE_MODERATOR")) {
       payments = paymentRepository.findByContract(id, page);
     } else {
-      payments = paymentRepository.findByContract(id, userId, page);
+      payments = paymentRepository.findByContract(id, username, page);
     }
     return payments;
   }

@@ -14,17 +14,17 @@ import com.crm.models.BiddingDocument;
 @Repository
 public interface BiddingDocumentRepository extends JpaRepository<BiddingDocument, Long> {
 
-  @Query(value = "FROM BiddingDocument bd WHERE bd.offeree.id = :id")
-  Page<BiddingDocument> findByMerchant(@Param("id") Long merchantId, Pageable pageable);
+  @Query(value = "FROM BiddingDocument bd WHERE bd.offeree.username = :username")
+  Page<BiddingDocument> findByMerchant(@Param("username") String username, Pageable pageable);
 
-  @Query(value = "FROM BiddingDocument bd WHERE bd.offeree.id = :id AND bd.status = :status")
-  Page<BiddingDocument> findByMerchant(@Param("id") Long merchantId, @Param("status") String status, Pageable pageable);
+  @Query(value = "FROM BiddingDocument bd WHERE bd.offeree.username = :username AND bd.status = :status")
+  Page<BiddingDocument> findByMerchant(@Param("username") String username, @Param("status") String status, Pageable pageable);
 
-  @Query(value = "SELECT bd FROM BiddingDocument bd LEFT JOIN bd.bids b WHERE b.bidder.id = :id")
-  Page<BiddingDocument> findByForwarder(@Param("id") Long forwarder, Pageable pageable);
+  @Query(value = "SELECT bd FROM BiddingDocument bd LEFT JOIN bd.bids b WHERE b.bidder.username = :username")
+  Page<BiddingDocument> findByForwarder(@Param("username") String username, Pageable pageable);
 
-  @Query(value = "SELECT bd FROM BiddingDocument bd LEFT JOIN bd.bids b WHERE b.bidder.id = :id AND bd.status = :status")
-  Page<BiddingDocument> findByForwarder(@Param("id") Long forwarderId, @Param("status") String status,
+  @Query(value = "SELECT bd FROM BiddingDocument bd LEFT JOIN bd.bids b WHERE b.bidder.username = :username AND bd.status = :status")
+  Page<BiddingDocument> findByForwarder(@Param("username") String username, @Param("status") String status,
       Pageable pageable);
 
   @Query(value = "SELECT bd FROM BiddingDocument bd LEFT JOIN bd.bids b WHERE (bd.offeree.username = :username "
@@ -32,6 +32,6 @@ public interface BiddingDocumentRepository extends JpaRepository<BiddingDocument
   Optional<BiddingDocument> findByBid(@Param("id") Long bid, @Param("username") String username);
 
   @Query(value = "SELECT DISTINCT bd FROM BiddingDocument bd LEFT JOIN bd.bids b "
-      + "WHERE (bd.offeree.id = :id OR b.bidder.id = :id) AND b.combined IS NOT NULL")
-  Page<BiddingDocument> findByExistCombined(@Param("id") Long userId, Pageable pageable);
+      + "WHERE (bd.offeree.username = :username OR b.bidder.username = :username) AND b.combined.id IS NOT NULL")
+  Page<BiddingDocument> findByExistCombined(@Param("username") String username, Pageable pageable);
 }

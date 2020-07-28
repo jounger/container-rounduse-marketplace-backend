@@ -7,7 +7,7 @@ import com.crm.payload.request.GeolocationRequest;
 
 public interface GeolocationService {
 
-  Geolocation updateGeolocation(Long userId, GeolocationRequest request);
+  Geolocation updateGeolocation(String username, GeolocationRequest request);
 
-  Geolocation editGeolocation(Long id, Long userId, Map<String, Object> updates);
+  Geolocation editGeolocation(Long id, String username, Map<String, Object> updates);
 }

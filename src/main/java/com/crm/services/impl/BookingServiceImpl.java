@@ -59,13 +59,13 @@ public class BookingServiceImpl implements BookingService {
   }
 
   @Override
-  public Booking updateBooking(Long id, BookingRequest request) {
-    if (merchantRepository.existsById(id)) {
+  public Booking updateBooking(String username, BookingRequest request) {
+    if (merchantRepository.existsByUsername(username)) {
 
       Booking booking = bookingRepository.findById(request.getId())
           .orElseThrow(() -> new NotFoundException(ErrorConstant.BOOKING_NOT_FOUND));
 
-      if (!booking.getOutbound().getMerchant().getId().equals(id)) {
+      if (!booking.getOutbound().getMerchant().getUsername().equals(username)) {
         throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
       }
 
@@ -106,13 +106,13 @@ public class BookingServiceImpl implements BookingService {
   }
 
   @Override
-  public Booking editBooking(Map<String, Object> updates, Long id, Long userId) {
+  public Booking editBooking(Map<String, Object> updates, Long id, String username) {
 
-    if (merchantRepository.existsById(userId)) {
+    if (merchantRepository.existsByUsername(username)) {
       Booking booking = bookingRepository.findById(id)
           .orElseThrow(() -> new NotFoundException(ErrorConstant.BOOKING_NOT_FOUND));
 
-      if (!booking.getOutbound().getMerchant().getId().equals(userId)) {
+      if (!booking.getOutbound().getMerchant().getUsername().equals(username)) {
         throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
       }
 

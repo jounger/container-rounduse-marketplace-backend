@@ -28,6 +28,6 @@ public interface ContractRepository extends JpaRepository<Contract, Long>, JpaSp
   @Query(value = "SELECT CASE WHEN COUNT(c) > 0 THEN TRUE ELSE FALSE END "
       + "FROM Contract c LEFT JOIN c.combined cb "
       + "LEFT JOIN cb.bid b LEFT JOIN b.biddingDocument bd "
-      + "WHERE c.id = :id AND (bd.offeree.id = :userId OR b.bidder.id = :userId)")
-  Boolean existsByUserAndContract(@Param("id") Long contractId, @Param("userId") Long userId);
+      + "WHERE c.id = :id AND (bd.offeree.id = :username OR b.bidder.username = :username)")
+  Boolean existsByUserAndContract(@Param("id") Long contractId, @Param("username") String username);
 }

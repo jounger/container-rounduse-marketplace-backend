@@ -10,19 +10,19 @@ import com.crm.payload.request.PaginationRequest;
 
 public interface CombinedService {
 
-  Combined createCombined(Long bidId, Long userId, CombinedRequest request);
+  Combined createCombined(Long bidId, String username, CombinedRequest request);
 
   Combined getCombined(Long id);
 
-  Page<Combined> getCombinedsByBiddingDocument(Long id, Long userId, PaginationRequest request);
+  Page<Combined> getCombinedsByBiddingDocument(Long id, String username, PaginationRequest request);
 
-  Page<Combined> getCombinedsByUser(Long id, PaginationRequest request);
+  Page<Combined> getCombinedsByUser(String username, PaginationRequest request);
 
   Page<Combined> getCombineds(PaginationRequest request);
 
   Combined updateCombined(CombinedRequest request);
 
-  Combined editCombined(Long id, Long userId, Map<String, Object> updates);
+  Combined editCombined(Long id, String username, Map<String, Object> updates);
 
   void removeCombined(Long id);
 }

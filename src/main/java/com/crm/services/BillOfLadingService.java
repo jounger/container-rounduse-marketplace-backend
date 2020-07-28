@@ -18,7 +18,7 @@ public interface BillOfLadingService {
 
   Page<BillOfLading> searchBillOfLadings(PaginationRequest request, String search);
 
-  BillOfLading updateBillOfLading(Long userId, BillOfLadingRequest request);
+  BillOfLading updateBillOfLading(String username, BillOfLadingRequest request);
 
-  BillOfLading editBillOfLading(Map<String, Object> updates, Long id, Long userId);
+  BillOfLading editBillOfLading(Map<String, Object> updates, Long id, String username);
 }

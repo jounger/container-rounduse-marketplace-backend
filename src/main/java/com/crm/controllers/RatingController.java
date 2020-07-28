@@ -13,6 +13,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,7 +31,6 @@ import com.crm.payload.request.PaginationRequest;
 import com.crm.payload.request.RatingRequest;
 import com.crm.payload.response.MessageResponse;
 import com.crm.payload.response.PaginationResponse;
-import com.crm.security.services.UserDetailsImpl;
 import com.crm.services.RatingService;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
@@ -45,10 +45,10 @@ public class RatingController {
   @PostMapping("")
   @PreAuthorize("hasRole('MERCHANT') or hasRole('FORWARDER')")
   public ResponseEntity<?> createRating(@Valid @RequestBody RatingRequest request) {
-    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
+    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
         .getPrincipal();
-    Long userId = userDetails.getId();
-    Rating rating = ratingService.createRating(userId, request);
+    String username = userDetails.getUsername();
+    Rating rating = ratingService.createRating(username, request);
     RatingDto ratingDto = RatingMapper.toRatingDto(rating);
     return ResponseEntity.ok(ratingDto);
   }
@@ -56,11 +56,11 @@ public class RatingController {
   @PreAuthorize("hasRole('MERCHANT') or hasRole('FORWARDER')")
   @GetMapping("/sender")
   public ResponseEntity<?> getRatingsBySender(@Valid PaginationRequest request) {
-    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
+    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
         .getPrincipal();
-    Long userId = userDetails.getId();
+    String username = userDetails.getUsername();
 
-    Page<Rating> pages = ratingService.getRatingsBySender(userId, request);
+    Page<Rating> pages = ratingService.getRatingsBySender(username, request);
 
     PaginationResponse<RatingDto> response = new PaginationResponse<>();
     response.setPageNumber(request.getPage());
@@ -79,11 +79,11 @@ public class RatingController {
   @PreAuthorize("hasRole('MERCHANT') or hasRole('FORWARDER')")
   @GetMapping("/receiver")
   public ResponseEntity<?> getRatingsByReceiver(@Valid PaginationRequest request) {
-    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
+    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
         .getPrincipal();
-    Long userId = userDetails.getId();
+    String username = userDetails.getUsername();
 
-    Page<Rating> pages = ratingService.getRatingsByReceiver(userId, request);
+    Page<Rating> pages = ratingService.getRatingsByReceiver(username, request);
 
     PaginationResponse<RatingDto> response = new PaginationResponse<>();
     response.setPageNumber(request.getPage());
@@ -102,11 +102,11 @@ public class RatingController {
   @PreAuthorize("hasRole('MERCHANT') or hasRole('FORWARDER')")
   @GetMapping("/user")
   public ResponseEntity<?> getRatingsByUser(@Valid PaginationRequest request) {
-    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
+    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
         .getPrincipal();
-    Long userId = userDetails.getId();
+    String username = userDetails.getUsername();
 
-    Page<Rating> pages = ratingService.getRatingsByUser(userId, request);
+    Page<Rating> pages = ratingService.getRatingsByUser(username, request);
 
     PaginationResponse<RatingDto> response = new PaginationResponse<>();
     response.setPageNumber(request.getPage());
@@ -125,11 +125,11 @@ public class RatingController {
   @PreAuthorize("hasRole('MERCHANT') or hasRole('FORWARDER')")
   @GetMapping("/contract/{id}")
   public ResponseEntity<?> getRatingsByContract(@PathVariable("id") Long id, @Valid PaginationRequest request) {
-    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
+    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
         .getPrincipal();
-    Long userId = userDetails.getId();
+    String username = userDetails.getUsername();
 
-    Page<Rating> pages = ratingService.getRatingsByContract(id, userId, request);
+    Page<Rating> pages = ratingService.getRatingsByContract(id, username, request);
 
     PaginationResponse<RatingDto> response = new PaginationResponse<>();
     response.setPageNumber(request.getPage());
@@ -167,10 +167,10 @@ public class RatingController {
   @PreAuthorize("hasRole('MERCHANT') or hasRole('FORWARDER')")
   @RequestMapping(value = "/{id}", method = RequestMethod.PATCH, consumes = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<?> editRating(@PathVariable("id") Long id, @RequestBody Map<String, Object> updates) {
-    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
+    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
         .getPrincipal();
-    Long userId = userDetails.getId();
-    Rating rating = ratingService.editRating(id, userId, updates);
+    String username = userDetails.getUsername();
+    Rating rating = ratingService.editRating(id, username, updates);
     RatingDto ratingDto = RatingMapper.toRatingDto(rating);
     return ResponseEntity.ok(ratingDto);
   }
@@ -179,10 +179,10 @@ public class RatingController {
   @PreAuthorize("hasRole('MERCHANT') or hasRole('FORWARDER')")
   @DeleteMapping("/{id}")
   public ResponseEntity<?> deleteRating(@PathVariable Long id) {
-    UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication()
+    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
         .getPrincipal();
-    Long userId = userDetails.getId();
-    ratingService.removeRating(id, userId);
+    String username = userDetails.getUsername();
+    ratingService.removeRating(id, username);
     return ResponseEntity.ok(new MessageResponse("Rating deleted successfully."));
   }
 }

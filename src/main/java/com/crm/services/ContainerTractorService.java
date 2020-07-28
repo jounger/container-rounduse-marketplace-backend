@@ -16,15 +16,15 @@ public interface ContainerTractorService {
 
   Page<ContainerTractor> getContainerTractors(PaginationRequest request);
 
-  Page<ContainerTractor> getContainerTractorsByForwarder(Long userId, PaginationRequest request);
+  Page<ContainerTractor> getContainerTractorsByForwarder(String username, PaginationRequest request);
 
   Page<ContainerTractor> searchContainerTractors(PaginationRequest request, String search);
 
-  ContainerTractor createContainerTractor(Long userId, ContainerTractorRequest request);
+  ContainerTractor createContainerTractor(String username, ContainerTractorRequest request);
 
-  ContainerTractor updateContainerTractor(Long userId, ContainerTractorRequest request);
+  ContainerTractor updateContainerTractor(String username, ContainerTractorRequest request);
 
-  ContainerTractor editContainerTractor(Map<String, Object> updates, Long id, Long userId);
+  ContainerTractor editContainerTractor(Map<String, Object> updates, Long id, String username);
 
-  void removeContainerTractor(Long id, Long userId);
+  void removeContainerTractor(Long id, String username);
 }

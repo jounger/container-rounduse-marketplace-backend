@@ -14,9 +14,9 @@ import com.crm.models.Notification;
 public interface NotificationRepository
     extends JpaRepository<Notification, Long>, JpaSpecificationExecutor<Notification> {
 
-  @Query(value = "FROM Notification n WHERE n.recipient.id = :id")
-  Page<Notification> findByUser(@Param("id") Long id, Pageable pageable);
+  @Query(value = "FROM Notification n WHERE n.recipient.username = :username")
+  Page<Notification> findByUser(@Param("username") String username, Pageable pageable);
 
-  @Query(value = "FROM Notification n WHERE n.recipient.id = :id AND n.type = :status")
-  Page<Notification> findByUserAndStatus(@Param("id") Long id, @Param("status") String status, Pageable pageable);
+  @Query(value = "FROM Notification n WHERE n.recipient.username = :username AND n.type = :status")
+  Page<Notification> findByUserAndStatus(@Param("username") String username, @Param("status") String status, Pageable pageable);
 }

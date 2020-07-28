@@ -12,7 +12,6 @@ import com.crm.exception.NotFoundException;
 import com.crm.models.Geolocation;
 import com.crm.payload.request.GeolocationRequest;
 import com.crm.repository.DriverRepository;
-import com.crm.repository.ForwarderRepository;
 import com.crm.repository.GeolocationRepository;
 import com.crm.services.GeolocationService;
 
@@ -24,9 +23,6 @@ public class GeolocationServiceImpl implements GeolocationService {
 
   @Autowired
   DriverRepository driverRepository;
-
-  @Autowired
-  ForwarderRepository forwarderRepository;
 
   @Override
   public Geolocation updateGeolocation(String username, GeolocationRequest request) {

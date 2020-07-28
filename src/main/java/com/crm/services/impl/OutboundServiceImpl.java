@@ -164,8 +164,8 @@ public class OutboundServiceImpl implements OutboundService {
 
     outbound.setBooking(booking);
 
-    outboundRepository.save(outbound);
-    return outbound;
+    Outbound _outbound = outboundRepository.save(outbound);
+    return _outbound;
   }
 
   @Override
@@ -235,8 +235,8 @@ public class OutboundServiceImpl implements OutboundService {
         outbound.setBooking(booking);
       }
 
-      outboundRepository.save(outbound);
-      return outbound;
+      Outbound _outbound = outboundRepository.save(outbound);
+      return _outbound;
     } else {
       throw new NotFoundException(ErrorConstant.MERCHANT_NOT_FOUND);
     }
@@ -318,8 +318,8 @@ public class OutboundServiceImpl implements OutboundService {
         throw new InternalException(ErrorConstant.OUTBOUND_INVALID_DELIVERY_TIME);
       }
 
-      outboundRepository.save(outbound);
-      return outbound;
+      Outbound _outbound = outboundRepository.save(outbound);
+      return _outbound;
     } else {
       throw new NotFoundException(ErrorConstant.MERCHANT_NOT_FOUND);
     }

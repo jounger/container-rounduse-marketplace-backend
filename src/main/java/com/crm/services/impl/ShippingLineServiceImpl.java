@@ -72,9 +72,8 @@ public class ShippingLineServiceImpl implements ShippingLineService {
     shippingLine.setTin(request.getTin());
     shippingLine.setFax(request.getFax());
 
-    shippingLineRepository.save(shippingLine);
-
-    return shippingLine;
+    ShippingLine _shippingLine = shippingLineRepository.save(shippingLine);
+    return _shippingLine;
   }
 
   @Override
@@ -92,57 +91,9 @@ public class ShippingLineServiceImpl implements ShippingLineService {
   }
 
   @Override
-  public ShippingLine updateShippingLine(ShippingLineRequest request) {
-    ShippingLine shippingLine = shippingLineRepository.findById(request.getId())
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.SHIPPINGLINE_NOT_FOUND));
-
-    /*
-     * String encoder = passwordEncoder.encode(request.getPassword());
-     * shippingLine.setPassword(encoder);
-     */
-
-    Role userRole = roleRepository.findByName(request.getRoles().iterator().next())
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.ROLE_NOT_FOUND));
-    shippingLine.getRoles().add(userRole);
-
-    if (UserServiceImpl.isEmailChange(request.getEmail(), shippingLine)) {
-      shippingLine.setEmail(request.getEmail());
-    }
-
-    shippingLine.setPhone(request.getPhone());
-    shippingLine.setAddress(request.getAddress());
-
-    EnumUserStatus status = EnumUserStatus.findByName(request.getStatus());
-    shippingLine.setStatus(status.name());
-
-    shippingLine.setWebsite(request.getWebsite());
-    shippingLine.setContactPerson(request.getContactPerson());
-    shippingLine.setCompanyName(request.getCompanyName());
-    if (!shippingLine.getCompanyCode().equals(request.getCompanyCode())
-        && !supplierRepository.existsByCompanyCode(request.getCompanyCode())) {
-      shippingLine.setCompanyCode(request.getCompanyCode());
-    } else {
-      throw new DuplicateRecordException(ErrorConstant.COMPANY_CODE_ALREADY_EXISTS);
-    }
-
-    shippingLine.setCompanyDescription(request.getCompanyDescription());
-    shippingLine.setTin(request.getTin());
-    shippingLine.setFax(request.getFax());
-    shippingLineRepository.save(shippingLine);
-
-    return shippingLine;
-  }
-
-  @Override
   public ShippingLine editShippingLine(Long id, Map<String, Object> updates) {
     ShippingLine shippingLine = shippingLineRepository.findById(id)
         .orElseThrow(() -> new NotFoundException(ErrorConstant.SHIPPINGLINE_NOT_FOUND));
-
-    /*
-     * String password = String.valueOf( updates.get("password")); if (password !=
-     * null && !password.isEmpty()) { String encoder =
-     * passwordEncoder.encode(password); shippingLine.setPassword(encoder); }
-     */
 
     String email = String.valueOf(updates.get("email"));
     if (updates.get("email") != null && !Tool.isEqual(shippingLine.getEmail(), email)) {
@@ -211,9 +162,8 @@ public class ShippingLineServiceImpl implements ShippingLineService {
       shippingLine.setFax(fax);
     }
 
-    shippingLineRepository.save(shippingLine);
-
-    return shippingLine;
+    ShippingLine _shippingLine = shippingLineRepository.save(shippingLine);
+    return _shippingLine;
   }
 
   @Override

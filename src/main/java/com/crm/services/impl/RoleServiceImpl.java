@@ -43,9 +43,8 @@ public class RoleServiceImpl implements RoleService {
       role.getPermissions().add(rolePermission);
     });
 
-    roleRepository.save(role);
-
-    return role;
+    Role _role = roleRepository.save(role);
+    return _role;
   }
 
   @Override
@@ -74,8 +73,9 @@ public class RoleServiceImpl implements RoleService {
     });
 
     role.setName(request.getName());
-    roleRepository.save(role);
-    return role;
+    
+    Role _role = roleRepository.save(role);
+    return _role;
   }
 
 }

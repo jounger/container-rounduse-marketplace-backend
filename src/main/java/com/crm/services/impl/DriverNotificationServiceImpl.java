@@ -59,8 +59,8 @@ public class DriverNotificationServiceImpl implements DriverNotificationService 
 
     driverNotification.setSendDate(LocalDateTime.now());
 
-    driverNotificationRepository.save(driverNotification);
-    return driverNotification;
+    DriverNotification _driverNotification = driverNotificationRepository.save(driverNotification);
+    return _driverNotification;
   }
 
   @Override
@@ -120,8 +120,8 @@ public class DriverNotificationServiceImpl implements DriverNotificationService 
       driverNotification.setIsHide(isHide);
     }
 
-    driverNotificationRepository.save(driverNotification);
-    return driverNotification;
+    DriverNotification _driverNotification = driverNotificationRepository.save(driverNotification);
+    return _driverNotification;
   }
 
   @Override

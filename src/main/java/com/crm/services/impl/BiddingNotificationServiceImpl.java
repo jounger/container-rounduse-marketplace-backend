@@ -59,8 +59,8 @@ public class BiddingNotificationServiceImpl implements BiddingNotificationServic
 
     biddingNotification.setSendDate(LocalDateTime.now());
 
-    biddingNotificationRepository.save(biddingNotification);
-    return biddingNotification;
+    BiddingNotification _biddingNotification = biddingNotificationRepository.save(biddingNotification);
+    return _biddingNotification;
   }
 
   @Override
@@ -120,8 +120,8 @@ public class BiddingNotificationServiceImpl implements BiddingNotificationServic
       biddingNotification.setIsHide(isHide);
     }
 
-    biddingNotificationRepository.save(biddingNotification);
-    return biddingNotification;
+    BiddingNotification _biddingNotification = biddingNotificationRepository.save(biddingNotification);
+    return _biddingNotification;
   }
 
   @Override

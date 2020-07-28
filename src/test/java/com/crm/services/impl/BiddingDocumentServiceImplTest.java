@@ -110,11 +110,15 @@ public class BiddingDocumentServiceImplTest {
     request.setBidFloorPrice(100D);
     request.setBidDiscountCode(null);
 
+    BiddingDocument biddingDocument = new BiddingDocument();
+    biddingDocument.setId(1L);
+    biddingDocument.setBidPackagePrice(1000D);
+
     // when
     when(merchantRepository.findByUsername(Mockito.anyString())).thenReturn(Optional.of(offeree));
     when(outboundRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(outbound));
     when(discountRepository.findByCode(Mockito.anyString())).thenReturn(Optional.empty());
-    when(biddingDocumentRepository.save(Mockito.any(BiddingDocument.class))).thenReturn(null);
+    when(biddingDocumentRepository.save(Mockito.any(BiddingDocument.class))).thenReturn(biddingDocument);
 
     // then
     BiddingDocument actualResult = biddingDocumentServiceImpl.createBiddingDocument(offeree.getUsername(), request);

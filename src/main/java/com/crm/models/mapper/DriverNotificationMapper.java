@@ -13,6 +13,7 @@ public class DriverNotificationMapper {
     driverNotificationDto.setId(driverNotification.getId());
     driverNotificationDto.setRecipient(driverNotification.getRecipient().getUsername());
     driverNotificationDto.setIsRead(driverNotification.getIsRead());
+    driverNotificationDto.setIsHide(driverNotificationDto.getIsHide());
 
     OutboundDto relatedResource = OutboundMapper.toOutboundDto(driverNotification.getRelatedResource());
     driverNotificationDto.setRelatedResource(relatedResource);

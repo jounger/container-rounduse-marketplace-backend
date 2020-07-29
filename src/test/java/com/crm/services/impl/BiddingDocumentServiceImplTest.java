@@ -27,6 +27,7 @@ import com.crm.common.Tool;
 import com.crm.enums.EnumBiddingStatus;
 import com.crm.enums.EnumCurrency;
 import com.crm.enums.EnumSupplyStatus;
+import com.crm.exception.InternalException;
 import com.crm.exception.NotFoundException;
 import com.crm.models.Bid;
 import com.crm.models.BiddingDocument;
@@ -268,7 +269,7 @@ public class BiddingDocumentServiceImplTest {
   }
 
   @Test
-  public void whenEditBid_thenReturnBid() {
+  public void whenEditBiddingDocument_thenReturnBiddingDocument() {
     // given
     Outbound outbound = new Outbound();
     outbound.setId(1L);
@@ -288,15 +289,70 @@ public class BiddingDocumentServiceImplTest {
     biddingDocument.setCurrencyOfPayment(EnumCurrency.VND.name());
     biddingDocument.setBidPackagePrice(1000D);
     biddingDocument.setBidFloorPrice(100D);
+    biddingDocument.setStatus(EnumBiddingStatus.CANCELED.name());
 
     Map<String, Object> updates = new HashMap<>();
     updates.put("bidClosing", Tool.convertLocalDateTimeToString(LocalDateTime.now().plusDays(1)));
-    updates.put("status", "ACTIVE");
-    updates.put("bidPrice", 1000);
+    updates.put("currentOfPayment", EnumCurrency.VND.name());
+    updates.put("bidPackagePrice", 1000);
+    updates.put("bidFloorPrice", 100);
+    updates.put("status", EnumBiddingStatus.CANCELED.name());
 
     // when
     when(biddingDocumentRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(biddingDocument));
+    when(biddingDocumentRepository.save(Mockito.any(BiddingDocument.class))).thenReturn(biddingDocument);
 
+    // then
+    BiddingDocument actualResult = biddingDocumentServiceImpl.editBiddingDocument(biddingDocument.getId(), updates);
+    assertThat(actualResult).isNotNull();
+    assertThat(actualResult.getId()).isEqualTo(biddingDocument.getId());
+    assertThat(actualResult.getCurrencyOfPayment()).isEqualTo(biddingDocument.getCurrencyOfPayment());
+    assertThat(actualResult.getBidPackagePrice()).isEqualTo(biddingDocument.getBidPackagePrice());
+    assertThat(actualResult.getBidFloorPrice()).isEqualTo(biddingDocument.getBidFloorPrice());
+    assertThat(actualResult.getStatus()).isEqualTo(biddingDocument.getStatus());
+  }
+
+  @Test
+  public void whenRemoveBiddingDocument_thenReturn404() {
+    // given
+    Merchant offeree = new Merchant();
+    offeree.setId(1L);
+    offeree.setUsername("merchant");
+
+    BiddingDocument biddingDocument = new BiddingDocument();
+    biddingDocument.setId(1L);
+    biddingDocument.setOfferee(offeree);
+
+    // when
+    when(merchantRepository.findByUsername(Mockito.anyString())).thenReturn(Optional.empty());
+    when(biddingDocumentRepository.findById(Mockito.anyLong())).thenReturn(Optional.empty());
+
+    // then
+    Assertions.assertThrows(NotFoundException.class, () -> {
+      biddingDocumentServiceImpl.removeBiddingDocument(biddingDocument.getId(), offeree.getUsername());
+    });
+  }
+
+  @Test
+  public void whenRemoveBiddingDocument_thenReturn500() {
+    // given
+    Merchant offeree = new Merchant();
+    offeree.setId(1L);
+    offeree.setUsername("merchant");
+
+    BiddingDocument biddingDocument = new BiddingDocument();
+    biddingDocument.setId(1L);
+    biddingDocument.setOfferee(offeree);
+    biddingDocument.setStatus(EnumBiddingStatus.BIDDING.name());
+
+    // when
+    when(merchantRepository.findByUsername(Mockito.anyString())).thenReturn(Optional.of(offeree));
+    when(biddingDocumentRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(biddingDocument));
+
+    // then
+    Assertions.assertThrows(InternalException.class, () -> {
+      biddingDocumentServiceImpl.removeBiddingDocument(biddingDocument.getId(), offeree.getUsername());
+    });
   }
 
 }

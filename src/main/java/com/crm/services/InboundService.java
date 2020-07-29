@@ -20,7 +20,7 @@ public interface InboundService {
 
   Page<Inbound> getInboundsByOutboundAndForwarder(Long id, String username, PaginationRequest request);
 
-  Page<Inbound> getInboundsForwarder(String username, PaginationRequest request);
+  Page<Inbound> getInboundsByForwarder(String username, PaginationRequest request);
 
   Page<Inbound> searchInbounds(PaginationRequest request, String search);
 

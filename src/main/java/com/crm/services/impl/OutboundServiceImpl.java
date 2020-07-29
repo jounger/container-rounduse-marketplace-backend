@@ -82,20 +82,18 @@ public class OutboundServiceImpl implements OutboundService {
 
   @Override
   public Page<Outbound> getOutboundsByMerchant(String username, PaginationRequest request) {
-    if (merchantRepository.existsByUsername(username)) {
-      PageRequest pageRequest = PageRequest.of(request.getPage(), request.getLimit(),
-          Sort.by(Sort.Direction.DESC, "createdAt"));
-      String status = request.getStatus();
-      Page<Outbound> pages = null;
-      if (status != null && !status.isEmpty()) {
-        pages = outboundRepository.findByMerchant(username, status, pageRequest);
-      } else {
-        pages = outboundRepository.findByMerchant(username, pageRequest);
-      }
-      return pages;
+
+    PageRequest pageRequest = PageRequest.of(request.getPage(), request.getLimit(),
+        Sort.by(Sort.Direction.DESC, "createdAt"));
+    String status = request.getStatus();
+    Page<Outbound> pages = null;
+    if (status != null && !status.isEmpty()) {
+      pages = outboundRepository.findByMerchant(username, status, pageRequest);
     } else {
-      throw new NotFoundException(ErrorConstant.MERCHANT_NOT_FOUND);
+      pages = outboundRepository.findByMerchant(username, pageRequest);
     }
+    return pages;
+
   }
 
   @Override
@@ -170,179 +168,172 @@ public class OutboundServiceImpl implements OutboundService {
 
   @Override
   public Outbound updateOutbound(String username, OutboundRequest request) {
-    if (merchantRepository.existsByUsername(username)) {
 
-      Outbound outbound = outboundRepository.findById(request.getId())
-          .orElseThrow(() -> new NotFoundException(ErrorConstant.OUTBOUND_NOT_FOUND));
+    Outbound outbound = outboundRepository.findById(request.getId())
+        .orElseThrow(() -> new NotFoundException(ErrorConstant.OUTBOUND_NOT_FOUND));
 
-      if (!outbound.getMerchant().getUsername().equals(username)) {
-        throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
-      }
-
-      if (outbound.getStatus().equals(EnumSupplyStatus.COMBINED.name())
-          || outbound.getStatus().equals(EnumSupplyStatus.BIDDING.name())) {
-        throw new InternalException(ErrorConstant.OUTBOUND_IS_IN_TRANSACTION);
-      }
-
-      ShippingLine shippingLine = shippingLineRepository.findByCompanyCode(request.getShippingLine())
-          .orElseThrow(() -> new NotFoundException(ErrorConstant.SHIPPINGLINE_NOT_FOUND));
-      outbound.setShippingLine(shippingLine);
-
-      ContainerType containerType = containerTypeRepository.findByName(request.getContainerType())
-          .orElseThrow(() -> new NotFoundException(ErrorConstant.CONTAINER_TYPE_NOT_FOUND));
-      outbound.setContainerType(containerType);
-
-      outbound.setStatus(EnumSupplyStatus.findByName(request.getStatus()).name());
-
-      outbound.setGoodsDescription(request.getGoodsDescription());
-
-      LocalDateTime packingTime = Tool.convertToLocalDateTime(request.getPackingTime());
-      outbound.setPackingTime(packingTime);
-
-      LocalDateTime deliveryTime = Tool.convertToLocalDateTime(request.getDeliveryTime());
-      outbound.setDeliveryTime(deliveryTime);
-
-      if (packingTime.isAfter(deliveryTime)) {
-        throw new InternalException(ErrorConstant.OUTBOUND_INVALID_DELIVERY_TIME);
-      }
-
-      outbound.setPackingStation(request.getPackingStation());
-
-      outbound.setGrossWeight(request.getGrossWeight());
-
-      if (request.getUnitOfMeasurement() != null && !request.getUnitOfMeasurement().isEmpty()) {
-        outbound.setUnitOfMeasurement(EnumUnit.findByName(request.getUnitOfMeasurement()).name());
-      }
-
-      Booking booking = (Booking) outbound.getBooking();
-      BookingRequest bookingRequest = (BookingRequest) request.getBooking();
-
-      if (bookingRequest != null) {
-
-        Port portOfLoading = portRepository.findByNameCode(bookingRequest.getPortOfLoading())
-            .orElseThrow(() -> new NotFoundException(ErrorConstant.PORT_NOT_FOUND));
-        booking.setPortOfLoading(portOfLoading);
-
-        booking.setUnit(bookingRequest.getUnit());
-
-        if (bookingRequest.getCutOffTime() != null && !bookingRequest.getCutOffTime().isEmpty()) {
-          LocalDateTime cutOffTime = Tool.convertToLocalDateTime(bookingRequest.getCutOffTime());
-          booking.setCutOffTime(cutOffTime);
-        }
-
-        booking.setIsFcl(bookingRequest.getIsFcl());
-
-        outbound.setBooking(booking);
-      }
-
-      Outbound _outbound = outboundRepository.save(outbound);
-      return _outbound;
-    } else {
-      throw new NotFoundException(ErrorConstant.MERCHANT_NOT_FOUND);
+    if (!outbound.getMerchant().getUsername().equals(username)) {
+      throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
     }
+
+    if (outbound.getStatus().equals(EnumSupplyStatus.COMBINED.name())
+        || outbound.getStatus().equals(EnumSupplyStatus.BIDDING.name())) {
+      throw new InternalException(ErrorConstant.OUTBOUND_IS_IN_TRANSACTION);
+    }
+
+    ShippingLine shippingLine = shippingLineRepository.findByCompanyCode(request.getShippingLine())
+        .orElseThrow(() -> new NotFoundException(ErrorConstant.SHIPPINGLINE_NOT_FOUND));
+    outbound.setShippingLine(shippingLine);
+
+    ContainerType containerType = containerTypeRepository.findByName(request.getContainerType())
+        .orElseThrow(() -> new NotFoundException(ErrorConstant.CONTAINER_TYPE_NOT_FOUND));
+    outbound.setContainerType(containerType);
+
+    outbound.setStatus(EnumSupplyStatus.findByName(request.getStatus()).name());
+
+    outbound.setGoodsDescription(request.getGoodsDescription());
+
+    LocalDateTime packingTime = Tool.convertToLocalDateTime(request.getPackingTime());
+    outbound.setPackingTime(packingTime);
+
+    LocalDateTime deliveryTime = Tool.convertToLocalDateTime(request.getDeliveryTime());
+    outbound.setDeliveryTime(deliveryTime);
+
+    if (packingTime.isAfter(deliveryTime)) {
+      throw new InternalException(ErrorConstant.OUTBOUND_INVALID_DELIVERY_TIME);
+    }
+
+    outbound.setPackingStation(request.getPackingStation());
+
+    outbound.setGrossWeight(request.getGrossWeight());
+
+    if (request.getUnitOfMeasurement() != null && !request.getUnitOfMeasurement().isEmpty()) {
+      outbound.setUnitOfMeasurement(EnumUnit.findByName(request.getUnitOfMeasurement()).name());
+    }
+
+    Booking booking = (Booking) outbound.getBooking();
+    BookingRequest bookingRequest = (BookingRequest) request.getBooking();
+
+    if (bookingRequest != null) {
+
+      Port portOfLoading = portRepository.findByNameCode(bookingRequest.getPortOfLoading())
+          .orElseThrow(() -> new NotFoundException(ErrorConstant.PORT_NOT_FOUND));
+      booking.setPortOfLoading(portOfLoading);
+
+      booking.setUnit(bookingRequest.getUnit());
+
+      if (bookingRequest.getCutOffTime() != null && !bookingRequest.getCutOffTime().isEmpty()) {
+        LocalDateTime cutOffTime = Tool.convertToLocalDateTime(bookingRequest.getCutOffTime());
+        booking.setCutOffTime(cutOffTime);
+      }
+
+      booking.setIsFcl(bookingRequest.getIsFcl());
+
+      outbound.setBooking(booking);
+    }
+
+    Outbound _outbound = outboundRepository.save(outbound);
+    return _outbound;
+
   }
 
   @Override
   public Outbound editOutbound(Map<String, Object> updates, Long id, String username) {
-    if (merchantRepository.existsByUsername(username)) {
-      Outbound outbound = outboundRepository.findById(id)
-          .orElseThrow(() -> new NotFoundException(ErrorConstant.OUTBOUND_NOT_FOUND));
 
-      if (!outbound.getMerchant().getUsername().equals(username)) {
-        throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
-      }
+    Outbound outbound = outboundRepository.findById(id)
+        .orElseThrow(() -> new NotFoundException(ErrorConstant.OUTBOUND_NOT_FOUND));
 
-      if (outbound.getStatus().equals(EnumSupplyStatus.COMBINED.name())
-          || outbound.getStatus().equals(EnumSupplyStatus.BIDDING.name())) {
-        throw new InternalException(ErrorConstant.OUTBOUND_IS_IN_TRANSACTION);
-      }
-
-      String shippingLineRequest = String.valueOf(updates.get("shippingLine"));
-      if (updates.get("shippingLine") != null
-          && !Tool.isEqual(outbound.getShippingLine().getCompanyCode(), shippingLineRequest)) {
-        ShippingLine shippingLine = shippingLineRepository.findByCompanyCode(shippingLineRequest)
-            .orElseThrow(() -> new NotFoundException(ErrorConstant.SHIPPINGLINE_NOT_FOUND));
-        outbound.setShippingLine(shippingLine);
-      }
-
-      String containerTypeRequest = String.valueOf(updates.get("containerType"));
-      if (updates.get("containerType") != null
-          && !Tool.isEqual(outbound.getContainerType().getName(), containerTypeRequest)) {
-        ContainerType containerType = containerTypeRepository.findByName(containerTypeRequest)
-            .orElseThrow(() -> new NotFoundException(ErrorConstant.CONTAINER_TYPE_NOT_FOUND));
-        outbound.setContainerType(containerType);
-      }
-
-      String statusRequest = String.valueOf(updates.get("status"));
-      if (updates.get("status") != null && !Tool.isEqual(outbound.getStatus(), statusRequest)) {
-        outbound.setStatus(EnumSupplyStatus.findByName(statusRequest).name());
-      }
-
-      String packingTimeRequest = String.valueOf(updates.get("packingTime"));
-      if (updates.get("packingTime") != null
-          && !Tool.isEqual(String.valueOf(outbound.getPackingTime()), packingTimeRequest)) {
-        LocalDateTime packingTime = Tool.convertToLocalDateTime(packingTimeRequest);
-        outbound.setPackingTime(packingTime);
-      }
-
-      String packingStationRequest = String.valueOf(updates.get("packingStation"));
-      if (updates.get("packingStation") != null && !Tool.isEqual(outbound.getPackingStation(), packingStationRequest)) {
-        outbound.setPackingStation(packingStationRequest);
-      }
-
-      String goodsDescriptionRequest = String.valueOf(updates.get("goodsDescription"));
-      if (updates.get("goodsDescription") != null
-          && !Tool.isEqual(outbound.getGoodsDescription(), goodsDescriptionRequest)) {
-        outbound.setGoodsDescription(goodsDescriptionRequest);
-      }
-
-      String grossWeightRequest = String.valueOf(updates.get("grossWeight"));
-      if (updates.get("grossWeight") != null && !Tool.isEqual(outbound.getGrossWeight(), grossWeightRequest)) {
-        outbound.setGrossWeight(Double.valueOf(grossWeightRequest));
-      }
-
-      String deliveryTimeRequest = String.valueOf(updates.get("deliveryTime"));
-      if (updates.get("deliveryTime") != null
-          && !Tool.isEqual(String.valueOf(outbound.getDeliveryTime()), deliveryTimeRequest)) {
-        LocalDateTime deliveryTime = Tool.convertToLocalDateTime(deliveryTimeRequest);
-        outbound.setDeliveryTime(deliveryTime);
-      }
-
-      String unitOfMeasurementRequest = String.valueOf(updates.get("unitOfMeasurement"));
-      if (updates.get("unitOfMeasurement") != null
-          && !Tool.isEqual(outbound.getUnitOfMeasurement(), unitOfMeasurementRequest)) {
-        outbound.setUnitOfMeasurement(unitOfMeasurementRequest);
-      }
-
-      if (outbound.getPackingTime().isAfter(outbound.getDeliveryTime())) {
-        throw new InternalException(ErrorConstant.OUTBOUND_INVALID_DELIVERY_TIME);
-      }
-
-      Outbound _outbound = outboundRepository.save(outbound);
-      return _outbound;
-    } else {
-      throw new NotFoundException(ErrorConstant.MERCHANT_NOT_FOUND);
+    if (!outbound.getMerchant().getUsername().equals(username)) {
+      throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
     }
+
+    if (outbound.getStatus().equals(EnumSupplyStatus.COMBINED.name())
+        || outbound.getStatus().equals(EnumSupplyStatus.BIDDING.name())) {
+      throw new InternalException(ErrorConstant.OUTBOUND_IS_IN_TRANSACTION);
+    }
+
+    String shippingLineRequest = String.valueOf(updates.get("shippingLine"));
+    if (updates.get("shippingLine") != null
+        && !Tool.isEqual(outbound.getShippingLine().getCompanyCode(), shippingLineRequest)) {
+      ShippingLine shippingLine = shippingLineRepository.findByCompanyCode(shippingLineRequest)
+          .orElseThrow(() -> new NotFoundException(ErrorConstant.SHIPPINGLINE_NOT_FOUND));
+      outbound.setShippingLine(shippingLine);
+    }
+
+    String containerTypeRequest = String.valueOf(updates.get("containerType"));
+    if (updates.get("containerType") != null
+        && !Tool.isEqual(outbound.getContainerType().getName(), containerTypeRequest)) {
+      ContainerType containerType = containerTypeRepository.findByName(containerTypeRequest)
+          .orElseThrow(() -> new NotFoundException(ErrorConstant.CONTAINER_TYPE_NOT_FOUND));
+      outbound.setContainerType(containerType);
+    }
+
+    String statusRequest = String.valueOf(updates.get("status"));
+    if (updates.get("status") != null && !Tool.isEqual(outbound.getStatus(), statusRequest)) {
+      outbound.setStatus(EnumSupplyStatus.findByName(statusRequest).name());
+    }
+
+    String packingTimeRequest = String.valueOf(updates.get("packingTime"));
+    if (updates.get("packingTime") != null
+        && !Tool.isEqual(String.valueOf(outbound.getPackingTime()), packingTimeRequest)) {
+      LocalDateTime packingTime = Tool.convertToLocalDateTime(packingTimeRequest);
+      outbound.setPackingTime(packingTime);
+    }
+
+    String packingStationRequest = String.valueOf(updates.get("packingStation"));
+    if (updates.get("packingStation") != null && !Tool.isEqual(outbound.getPackingStation(), packingStationRequest)) {
+      outbound.setPackingStation(packingStationRequest);
+    }
+
+    String goodsDescriptionRequest = String.valueOf(updates.get("goodsDescription"));
+    if (updates.get("goodsDescription") != null
+        && !Tool.isEqual(outbound.getGoodsDescription(), goodsDescriptionRequest)) {
+      outbound.setGoodsDescription(goodsDescriptionRequest);
+    }
+
+    String grossWeightRequest = String.valueOf(updates.get("grossWeight"));
+    if (updates.get("grossWeight") != null && !Tool.isEqual(outbound.getGrossWeight(), grossWeightRequest)) {
+      outbound.setGrossWeight(Double.valueOf(grossWeightRequest));
+    }
+
+    String deliveryTimeRequest = String.valueOf(updates.get("deliveryTime"));
+    if (updates.get("deliveryTime") != null
+        && !Tool.isEqual(String.valueOf(outbound.getDeliveryTime()), deliveryTimeRequest)) {
+      LocalDateTime deliveryTime = Tool.convertToLocalDateTime(deliveryTimeRequest);
+      outbound.setDeliveryTime(deliveryTime);
+    }
+
+    String unitOfMeasurementRequest = String.valueOf(updates.get("unitOfMeasurement"));
+    if (updates.get("unitOfMeasurement") != null
+        && !Tool.isEqual(outbound.getUnitOfMeasurement(), unitOfMeasurementRequest)) {
+      outbound.setUnitOfMeasurement(unitOfMeasurementRequest);
+    }
+
+    if (outbound.getPackingTime().isAfter(outbound.getDeliveryTime())) {
+      throw new InternalException(ErrorConstant.OUTBOUND_INVALID_DELIVERY_TIME);
+    }
+
+    Outbound _outbound = outboundRepository.save(outbound);
+    return _outbound;
+
   }
 
   @Override
   public void removeOutbound(Long id, String username) {
-    if (merchantRepository.existsByUsername(username)) {
-      Outbound outbound = outboundRepository.findById(id)
-          .orElseThrow(() -> new NotFoundException(ErrorConstant.OUTBOUND_NOT_FOUND));
 
-      if (!outbound.getMerchant().getUsername().equals(username)) {
-        throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
-      }
+    Outbound outbound = outboundRepository.findById(id)
+        .orElseThrow(() -> new NotFoundException(ErrorConstant.OUTBOUND_NOT_FOUND));
 
-      if (outbound.getStatus().equals(EnumSupplyStatus.COMBINED.name())
-          || outbound.getStatus().equals(EnumSupplyStatus.BIDDING.name())) {
-        throw new InternalException(ErrorConstant.OUTBOUND_IS_IN_TRANSACTION);
-      }
-      outboundRepository.delete(outbound);
-    } else {
-      throw new NotFoundException(ErrorConstant.USER_NOT_FOUND);
+    if (!outbound.getMerchant().getUsername().equals(username)) {
+      throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
     }
+
+    if (outbound.getStatus().equals(EnumSupplyStatus.COMBINED.name())
+        || outbound.getStatus().equals(EnumSupplyStatus.BIDDING.name())) {
+      throw new InternalException(ErrorConstant.OUTBOUND_IS_IN_TRANSACTION);
+    }
+    outboundRepository.delete(outbound);
+
   }
 
   @Override

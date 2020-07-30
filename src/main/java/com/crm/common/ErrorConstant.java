@@ -47,7 +47,7 @@ public class ErrorConstant {
 
   // Container
   public static final String CONTAINER_MORE_OR_LESS_THAN_NEEDED = "Số lượng container vượt quá cho phép hoặc chưa đủ";
-  public static final String CONTAINER_NOT_FOUND = "Không tìm thấy container này";
+  public static final String CONTAINER_NOT_FOUND = "Không tìm thấy container";
   public static final String CONTAINER_NOT_FOUND_IN_BID = "Không tìm thấy container này trong hồ sơ dự thầu";
   public static final String CONTAINER_NOT_SUITABLE = "Container không phù hợp";
   public static final String CONTAINER_BUSY = "Container đã được dùng trong hồ sơ đấu thầu khác";

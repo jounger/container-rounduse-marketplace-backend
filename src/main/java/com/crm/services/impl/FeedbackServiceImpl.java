@@ -57,11 +57,21 @@ public class FeedbackServiceImpl implements FeedbackService {
 
     report.setStatus(EnumReportStatus.UPDATED.name());
     feedback.setReport(report);
+
     User sender = userRepository.findByUsername(username)
         .orElseThrow(() -> new NotFoundException(ErrorConstant.SENDER_NOT_FOUND));
     String role = sender.getRoles().iterator().next().getName();
     if (role.equals("ROLE_MODERATOR") || username.equals(report.getSender().getUsername())) {
       feedback.setSender(sender);
+    } else {
+      throw new NotFoundException("Access denied.");
+    }
+
+    User recipient = userRepository.findByUsername(request.getRecipient())
+        .orElseThrow(() -> new NotFoundException(ErrorConstant.RECIPIENT_NOT_FOUND));
+    String role2 = sender.getRoles().iterator().next().getName();
+    if (role2.equals("ROLE_MODERATOR") || request.getRecipient().equals(report.getSender().getUsername())) {
+      feedback.setRecipient(recipient);
     } else {
       throw new NotFoundException("Access denied.");
     }
@@ -138,7 +148,8 @@ public class FeedbackServiceImpl implements FeedbackService {
   public Feedback editFeedback(Long id, String username, Map<String, Object> updates) {
     Feedback feedback = feedbackRepository.findById(id)
         .orElseThrow(() -> new NotFoundException(ErrorConstant.FEEDBACK_NOT_FOUND));
-    if (!feedback.getSender().getUsername().equals(username)) {
+    if (!feedback.getSender().getUsername().equals(username)
+        || !feedback.getReport().getSender().getUsername().equals(username)) {
       throw new NotFoundException(ErrorConstant.USER_ACCESS_DENIED);
     }
 

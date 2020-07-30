@@ -17,12 +17,12 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.crm.models.Bid;
@@ -169,7 +169,7 @@ public class BidController {
 
   @Transactional
   @PreAuthorize("hasRole('FORWARDER')")
-  @RequestMapping(value = "/{id}/add-container/{conId}", method = RequestMethod.PATCH)
+  @PostMapping(value = "/{id}/container/{conId}")
   public ResponseEntity<?> addContainer(@PathVariable("id") Long id, @PathVariable("conId") Long containerId) {
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
@@ -181,7 +181,7 @@ public class BidController {
 
   @Transactional
   @PreAuthorize("hasRole('FORWARDER')")
-  @RequestMapping(value = "/{id}/remove-container/{conId}", method = RequestMethod.PATCH)
+  @DeleteMapping(value = "/{id}/container/{conId}")
   public ResponseEntity<?> removeContainer(@PathVariable("id") Long id, @PathVariable("conId") Long containerId) {
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
@@ -193,12 +193,11 @@ public class BidController {
 
   @Transactional
   @PreAuthorize("hasRole('FORWARDER')")
-  @RequestMapping(value = "/{id}/replace-container/{conId}", method = RequestMethod.PATCH)
-  public ResponseEntity<?> replaceContainer(@PathVariable("id") Long id, @PathVariable("conId") Long oldContainerId,
-      @RequestParam(value = "newContainerId") Long newContainerId) {
+  @PatchMapping(value = "/{id}/container", consumes = MediaType.APPLICATION_JSON_VALUE)
+  public ResponseEntity<?> replaceContainer(@PathVariable("id") Long id, @RequestBody Map<String, String> updates) {
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
-    Bid bid = bidService.replaceContainer(id, username, oldContainerId, newContainerId);
+    Bid bid = bidService.replaceContainer(id, username, updates);
     BidDto BidDto = BidMapper.toBidDto(bid);
 
     return ResponseEntity.ok(BidDto);

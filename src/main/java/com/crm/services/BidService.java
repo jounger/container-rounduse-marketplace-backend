@@ -22,7 +22,7 @@ public interface BidService {
 
   Page<Bid> getBidsByForwarder(String username, PaginationRequest request);
 
-  Bid replaceContainer(Long id, String username, Long oldContainerId, Long newContainerId);
+  Bid replaceContainer(Long id, String username, Map<String, String> updates);
 
   Bid addContainer(Long id, String username, Long containerId);
 

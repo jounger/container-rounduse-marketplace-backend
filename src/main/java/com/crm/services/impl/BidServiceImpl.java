@@ -321,24 +321,37 @@ public class BidServiceImpl implements BidService {
   }
 
   @Override
-  public Bid replaceContainer(Long id, String username, Long oldContainerId, Long newContainerId) {
+  public Bid replaceContainer(Long id, String username, Map<String, String> updates) {
     Bid bid = bidRepository.findById(id).orElseThrow(() -> new NotFoundException(ErrorConstant.BID_NOT_FOUND));
     if (!bid.getBidder().getUsername().equals(username)) {
       throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
     }
+    String oldContainerId = updates.get("oldContainerId");
+    String newContainerId = updates.get("newContainerId");
+    if(oldContainerId == null || newContainerId == null) {
+      throw new NotFoundException(ErrorConstant.CONTAINER_NOT_FOUND);
+    }
     BiddingDocument biddingDocument = bid.getBiddingDocument();
     Outbound outbound = biddingDocument.getOutbound();
     Booking booking = outbound.getBooking();
-    Container oldContainer = containerRepository.findById(oldContainerId)
+    Long oldContId = null;
+    Long newContId = null;
+    try {
+      oldContId = Long.valueOf(oldContainerId);
+      newContId = Long.valueOf(newContainerId);
+    } catch (NumberFormatException e) {
+      throw new NumberFormatException(ErrorConstant.CONTAINER_NOT_FOUND);
+    }
+    Container oldContainer = containerRepository.findById(oldContId)
         .orElseThrow(() -> new NotFoundException(ErrorConstant.CONTAINER_NOT_FOUND));
-    Container newContainer = containerRepository.findById(newContainerId)
+    Container newContainer = containerRepository.findById(newContId)
         .orElseThrow(() -> new NotFoundException(ErrorConstant.CONTAINER_NOT_FOUND));
 
     bid.getContainers().remove(oldContainer);
     oldContainer.setStatus(EnumSupplyStatus.CREATED.name());
     containerRepository.save(oldContainer);
 
-    if (containerRepository.existsByOutbound(newContainerId, outbound.getShippingLine().getCompanyCode(),
+    if (containerRepository.existsByOutbound(Long.valueOf(newContainerId), outbound.getShippingLine().getCompanyCode(),
         outbound.getContainerType().getName(), Arrays.asList(EnumSupplyStatus.CREATED.name()),
         outbound.getPackingTime(), booking.getCutOffTime(), booking.getPortOfLoading().getNameCode())) {
       bid.getContainers().add(newContainer);

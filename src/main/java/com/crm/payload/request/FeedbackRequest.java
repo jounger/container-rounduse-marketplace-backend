@@ -13,6 +13,8 @@ public class FeedbackRequest {
 
   private String sender;
 
+  private String recipient;
+
   private String message;
 
   private Integer satisfactionPoints;

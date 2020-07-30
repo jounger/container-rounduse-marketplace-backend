@@ -17,6 +17,8 @@ public class FeedbackDto {
 
   private String sender;
 
+  private String recipient;
+
   private String message;
 
   private Integer satisfactionPoints;

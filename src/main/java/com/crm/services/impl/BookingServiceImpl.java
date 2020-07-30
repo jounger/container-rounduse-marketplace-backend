@@ -90,11 +90,8 @@ public class BookingServiceImpl implements BookingService {
 
     booking.setIsFcl(request.getIsFcl());
 
-      Booking _booking = bookingRepository.save(booking);
-      return _booking;
-    } else {
-      throw new NotFoundException(ErrorConstant.FORWARDER_NOT_FOUND);
-    }
+    Booking _booking = bookingRepository.save(booking);
+    return _booking;
   }
 
   @Override

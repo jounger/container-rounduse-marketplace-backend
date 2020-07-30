@@ -44,6 +44,9 @@ public class Supply {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "id", updatable = false, nullable = false)
   private Long id;
+  
+  @Column(name = "code", updatable = false, nullable = false)
+  private String code;
 
   @ManyToOne
   @JoinColumn(name = "shipping_line_id")

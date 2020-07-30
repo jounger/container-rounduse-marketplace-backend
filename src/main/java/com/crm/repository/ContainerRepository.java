@@ -129,7 +129,8 @@ public interface ContainerRepository extends JpaRepository<Container, Long> {
   /* Check time busy Trailer */
 
   @Query(value = "SELECT CASE WHEN COUNT(c) = 0 THEN TRUE ELSE FALSE END "
-      + "FROM Container c WHERE c.billOfLading.inbound.forwarder.username = :username " + "AND c.trailer.id = :trailerId "
+      + "FROM Container c WHERE c.billOfLading.inbound.forwarder.username = :username "
+      + "AND c.trailer.id = :trailerId "
       + "AND ((c.billOfLading.freeTime > :freeTime AND c.billOfLading.inbound.pickupTime < :freeTime) "
       + "OR (c.billOfLading.freeTime > :pickupTime AND c.billOfLading.inbound.pickupTime < :pickupTime) "
       + "OR (c.billOfLading.freeTime < :freeTime AND c.billOfLading.inbound.pickupTime > :pickupTime) "
@@ -139,7 +140,8 @@ public interface ContainerRepository extends JpaRepository<Container, Long> {
       @Param("pickupTime") LocalDateTime pickupTime, @Param("freeTime") LocalDateTime freeTime);
 
   @Query(value = "SELECT CASE WHEN COUNT(c) = 0 THEN TRUE ELSE FALSE END "
-      + "FROM Container c WHERE c.billOfLading.inbound.forwarder.username = :username " + "AND c.trailer.id = :trailerId "
+      + "FROM Container c WHERE c.billOfLading.inbound.forwarder.username = :username "
+      + "AND c.trailer.id = :trailerId "
       + "AND ((c.billOfLading.freeTime > :freeTime AND c.billOfLading.inbound.pickupTime < :freeTime) "
       + "OR (c.billOfLading.freeTime > :pickupTime AND c.billOfLading.inbound.pickupTime < :pickupTime) "
       + "OR (c.billOfLading.freeTime < :freeTime AND c.billOfLading.inbound.pickupTime > :pickupTime) "
@@ -152,7 +154,8 @@ public interface ContainerRepository extends JpaRepository<Container, Long> {
   /* Check time busy Tractor */
 
   @Query(value = "SELECT CASE WHEN COUNT(c) = 0 THEN TRUE ELSE FALSE END "
-      + "FROM Container c WHERE c.billOfLading.inbound.forwarder.username = :username " + "AND c.tractor.id = :tractorId "
+      + "FROM Container c WHERE c.billOfLading.inbound.forwarder.username = :username "
+      + "AND c.tractor.id = :tractorId "
       + "AND ((c.billOfLading.freeTime > :freeTime AND c.billOfLading.inbound.pickupTime < :freeTime) "
       + "OR (c.billOfLading.freeTime > :pickupTime AND c.billOfLading.inbound.pickupTime < :pickupTime) "
       + "OR (c.billOfLading.freeTime < :freeTime AND c.billOfLading.inbound.pickupTime > :pickupTime) "
@@ -162,7 +165,8 @@ public interface ContainerRepository extends JpaRepository<Container, Long> {
       @Param("pickupTime") LocalDateTime pickupTime, @Param("freeTime") LocalDateTime freeTime);
 
   @Query(value = "SELECT CASE WHEN COUNT(c) = 0 THEN TRUE ELSE FALSE END "
-      + "FROM Container c WHERE c.billOfLading.inbound.forwarder.username = :username " + "AND c.tractor.id = :tractorId "
+      + "FROM Container c WHERE c.billOfLading.inbound.forwarder.username = :username "
+      + "AND c.tractor.id = :tractorId "
       + "AND ((c.billOfLading.freeTime > :freeTime AND c.billOfLading.inbound.pickupTime < :freeTime) "
       + "OR (c.billOfLading.freeTime > :pickupTime AND c.billOfLading.inbound.pickupTime < :pickupTime) "
       + "OR (c.billOfLading.freeTime < :freeTime AND c.billOfLading.inbound.pickupTime > :pickupTime) "
@@ -174,4 +178,9 @@ public interface ContainerRepository extends JpaRepository<Container, Long> {
 
   @Query(value = "SELECT c FROM Container c LEFT JOIN c.bids b WHERE b.id = :id AND c.status = :status")
   List<Container> findByBidAndStatus(@Param("id") Long id, @Param("status") String status);
+
+  @Query(value = "SELECT CASE WHEN COUNT(c) = 0 THEN TRUE ELSE FALSE END "
+      + "FROM Container c LEFT JOIN c.bids b WHERE c.id = :id AND b.id = :bidId")
+  boolean isContainedByBid(@Param("id") Long id, @Param("bidId") Long bidId);
+
 }

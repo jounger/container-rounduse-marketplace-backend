@@ -90,7 +90,7 @@ public class InboundController {
         .getPrincipal();
     String username = userDetails.getUsername();
 
-    Page<Inbound> pages = inboundService.getInboundsForwarder(username, request);
+    Page<Inbound> pages = inboundService.getInboundsByForwarder(username, request);
     PaginationResponse<InboundDto> response = new PaginationResponse<>();
     response.setPageNumber(request.getPage());
     response.setPageSize(request.getLimit());

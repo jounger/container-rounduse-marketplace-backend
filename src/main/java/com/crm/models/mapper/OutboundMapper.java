@@ -11,6 +11,7 @@ public class OutboundMapper {
     OutboundDto dto = new OutboundDto();
 
     dto.setId(outbound.getId());
+    dto.setCode(outbound.getCode());
     String shippingLine = outbound.getShippingLine().getCompanyCode();
     dto.setShippingLine(shippingLine);
 

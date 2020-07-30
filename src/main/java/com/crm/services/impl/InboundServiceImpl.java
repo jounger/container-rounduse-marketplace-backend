@@ -49,6 +49,7 @@ import com.crm.repository.InboundRepository;
 import com.crm.repository.OutboundRepository;
 import com.crm.repository.PortRepository;
 import com.crm.repository.ShippingLineRepository;
+import com.crm.repository.SupplyRepository;
 import com.crm.services.InboundService;
 import com.crm.specification.builder.InboundSpecificationsBuilder;
 
@@ -87,6 +88,9 @@ public class InboundServiceImpl implements InboundService {
 
   @Autowired
   private ContainerTractorRepository containerTractorRepository;
+  
+  @Autowired
+  private SupplyRepository supplyRepository;
 
   @Override
   public Page<Inbound> getInbounds(PaginationRequest request) {
@@ -131,6 +135,12 @@ public class InboundServiceImpl implements InboundService {
     Forwarder forwarder = forwarderRepository.findByUsername(username)
         .orElseThrow(() -> new NotFoundException(ErrorConstant.FORWARDER_NOT_FOUND));
     inbound.setForwarder(forwarder);
+    
+    String code = request.getCode();
+    if(supplyRepository.existsByCode(code)) {
+      throw new DuplicateRecordException(ErrorConstant.SUPPLY_CODE_DUPLICATE);
+    }
+    inbound.setCode(code);
 
     ShippingLine shippingLine = shippingLineRepository.findByCompanyCode(request.getShippingLine())
         .orElseThrow(() -> new NotFoundException(ErrorConstant.SHIPPINGLINE_NOT_FOUND));

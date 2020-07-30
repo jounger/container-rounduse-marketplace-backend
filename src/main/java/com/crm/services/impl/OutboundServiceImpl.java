@@ -35,6 +35,7 @@ import com.crm.repository.MerchantRepository;
 import com.crm.repository.OutboundRepository;
 import com.crm.repository.PortRepository;
 import com.crm.repository.ShippingLineRepository;
+import com.crm.repository.SupplyRepository;
 import com.crm.services.OutboundService;
 import com.crm.specification.builder.OutboundSpecificationsBuilder;
 
@@ -58,6 +59,9 @@ public class OutboundServiceImpl implements OutboundService {
 
   @Autowired
   private PortRepository portRepository;
+
+  @Autowired
+  private SupplyRepository supplyRepository;
 
   @Override
   public Outbound getOutboundById(Long id) {
@@ -103,6 +107,12 @@ public class OutboundServiceImpl implements OutboundService {
     Merchant merchant = merchantRepository.findByUsername(username)
         .orElseThrow(() -> new NotFoundException(ErrorConstant.MERCHANT_NOT_FOUND));
     outbound.setMerchant(merchant);
+
+    String code = request.getCode();
+    if (supplyRepository.existsByCode(code)) {
+      throw new DuplicateRecordException(ErrorConstant.SUPPLY_CODE_DUPLICATE);
+    }
+    outbound.setCode(code);
 
     ShippingLine shippingLine = shippingLineRepository.findByCompanyCode(request.getShippingLine())
         .orElseThrow(() -> new NotFoundException(ErrorConstant.SHIPPINGLINE_NOT_FOUND));

@@ -45,8 +45,12 @@ public class Feedback {
   private Long id;
 
   @ManyToOne
-  @JoinColumn(name = "user_id")
+  @JoinColumn(name = "sender_id")
   private User sender;
+  
+  @ManyToOne
+  @JoinColumn(name = "recipient_id")
+  private User recipient;
 
   @ManyToOne
   @JoinColumn(name = "report_id")

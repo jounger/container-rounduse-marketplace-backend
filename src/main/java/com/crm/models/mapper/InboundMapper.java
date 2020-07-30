@@ -9,6 +9,7 @@ public class InboundMapper {
   public static InboundDto toInboundDto(Inbound inbound) {
     InboundDto inboundDto = new InboundDto();
     inboundDto.setId(inbound.getId());
+    inboundDto.setCode(inbound.getCode());
     String shippingLine = inbound.getShippingLine().getCompanyCode();
     inboundDto.setShippingLine(shippingLine);
 

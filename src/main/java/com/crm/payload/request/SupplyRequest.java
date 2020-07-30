@@ -10,7 +10,11 @@ import lombok.Setter;
 public class SupplyRequest {
 
   private Long id;
-
+  
+  //shippingLine as ShippingLine.supplyCode
+  @NotBlank
+  private String code;
+  
   // shippingLine as ShippingLine.companyCode
   @NotBlank
   private String shippingLine;

@@ -29,8 +29,8 @@ import lombok.ToString;
 public class DriverNotification extends Notification {
 
   @ManyToOne
-  @JoinColumn(name = "outbound_id")
-  private Outbound relatedResource;
+  @JoinColumn(name = "shipping_info")
+  private ShippingInfo relatedResource;
 
   // EnumDriverNotification
   @Column(name = "action")

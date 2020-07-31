@@ -133,7 +133,7 @@ public class ContainerServiceImpl implements ContainerService {
 
     String tractor = request.getTractor();
     ContainerTractor containerTractor = containerTractorRepository.findByLicensePlate(tractor)
-        .orElseThrow(() -> new NotFoundException("ERROR: ContainerTractor is not found."));
+        .orElseThrow(() -> new NotFoundException(ErrorConstant.TRACTOR_NOT_FOUND));
     if (!containerTractor.getForwarder().getUsername().equals(billOfLading.getInbound().getForwarder().getUsername())) {
       throw new NotFoundException(ErrorConstant.USER_ACCESS_DENIED);
     }

@@ -99,7 +99,7 @@ public class FeedbackServiceImpl implements FeedbackService {
     }
 
     PageRequest pageRequest = PageRequest.of(request.getPage(), request.getLimit(),
-        Sort.by(Direction.ASC, "createdAt"));
+        Sort.by(Direction.DESC, "createdAt"));
     User sender = userRepository.findByUsername(username)
         .orElseThrow(() -> new NotFoundException(ErrorConstant.SENDER_NOT_FOUND));
     String role = sender.getRoles().iterator().next().getName();

@@ -14,7 +14,7 @@ public class CombinedRequest {
 
   private Long bid;
 
-  private String status;
+  private Boolean isCanceled;
 
   private List<String> containers = new ArrayList<>();
 

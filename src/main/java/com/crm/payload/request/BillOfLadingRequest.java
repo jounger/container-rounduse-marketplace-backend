@@ -20,7 +20,7 @@ public class BillOfLadingRequest {
   private String portOfDelivery;
 
   @NotBlank
-  private String billOfLadingNumber;
+  private String number;
 
   private String freeTime;
 

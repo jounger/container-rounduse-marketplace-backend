@@ -21,7 +21,12 @@ public class ErrorConstant {
   // Combined
   public static final String COMBINED_NOT_FOUND = "Không tìm thấy hàng ghép";
   public static final String COMBINED_STATUS_NOT_FOUND = "Không tìm thấy trạng thái của hàng ghép";
-
+  
+  // ShippingInfo
+  public static final String SHIPPING_INFO_NOT_FOUND = "Không tìm thấy hàng ghép";
+  public static final String SHIPPING_INFO_INVALID_EDIT = "Không thể sửa hồ sơ mời thầu sau khi đã được ghép hoặc hủy bỏ";
+  public static final String SHIPPING_INFO_STATUS_NOT_FOUND = "Không tìm thấy trạng thái của việc vận chuyển hàng";
+  
   // Contract
   public static final String CONTRACT_NOT_FOUND = "Không tìm thấy hợp đồng";
   public static final String CONTRACT_INVALID_FINES = "Phần trăm phạt hợp đồng không hợp lệ";

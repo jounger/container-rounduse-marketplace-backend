@@ -88,7 +88,7 @@ public class InboundServiceImpl implements InboundService {
 
   @Autowired
   private ContainerTractorRepository containerTractorRepository;
-  
+
   @Autowired
   private SupplyRepository supplyRepository;
 
@@ -135,9 +135,9 @@ public class InboundServiceImpl implements InboundService {
     Forwarder forwarder = forwarderRepository.findByUsername(username)
         .orElseThrow(() -> new NotFoundException(ErrorConstant.FORWARDER_NOT_FOUND));
     inbound.setForwarder(forwarder);
-    
+
     String code = request.getCode();
-    if(supplyRepository.existsByCode(code)) {
+    if (supplyRepository.existsByCode(code)) {
       throw new DuplicateRecordException(ErrorConstant.SUPPLY_CODE_DUPLICATE);
     }
     inbound.setCode(code);
@@ -160,12 +160,12 @@ public class InboundServiceImpl implements InboundService {
 
     BillOfLading billOfLading = new BillOfLading();
     BillOfLadingRequest billOfLadingRequest = request.getBillOfLading();
-    String billOfLadingNumber = billOfLadingRequest.getBillOfLadingNumber();
-    if (billOfLadingNumber != null && !billOfLadingNumber.isEmpty()) {
-      if (billOfLadingRepository.existsByBillOfLadingNumber(billOfLadingNumber)) {
+    String number = billOfLadingRequest.getNumber();
+    if (number != null && !number.isEmpty()) {
+      if (billOfLadingRepository.existsByNumber(number)) {
         throw new DuplicateRecordException(ErrorConstant.BILLOFLADING_ALREADY_EXISTS);
       }
-      billOfLading.setBillOfLadingNumber(billOfLadingNumber);
+      billOfLading.setNumber(number);
     } else {
       throw new NotFoundException(ErrorConstant.BILLOFLADING_NOT_FOUND);
     }

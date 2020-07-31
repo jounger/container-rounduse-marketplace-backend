@@ -10,7 +10,7 @@ public class BookingMapper {
 
     dto.setId(booking.getId());
     dto.setPortOfLoading(booking.getPortOfLoading().getNameCode());
-    dto.setBookingNumber(booking.getBookingNumber());
+    dto.setNumber(booking.getNumber());
     dto.setUnit(booking.getUnit());
 
     if (booking.getCutOffTime() != null) {

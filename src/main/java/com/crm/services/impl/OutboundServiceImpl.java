@@ -146,12 +146,12 @@ public class OutboundServiceImpl implements OutboundService {
 
     Booking booking = new Booking();
     BookingRequest bookingRequest = (BookingRequest) request.getBooking();
-    String bookingNumber = bookingRequest.getBookingNumber();
-    if (bookingNumber != null && !bookingNumber.isEmpty()) {
-      if (bookingRepository.existsByBookingNumber(bookingNumber)) {
+    String number = bookingRequest.getNumber();
+    if (number != null && !number.isEmpty()) {
+      if (bookingRepository.existsByNumber(number)) {
         throw new DuplicateRecordException(ErrorConstant.BOOKING_ALREADY_EXISTS);
       }
-      booking.setBookingNumber(bookingNumber);
+      booking.setNumber(number);
     } else {
       throw new NotFoundException(ErrorConstant.BOOKING_NOT_FOUND);
     }

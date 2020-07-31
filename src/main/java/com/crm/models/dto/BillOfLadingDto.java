@@ -14,7 +14,7 @@ public class BillOfLadingDto {
 
   private String portOfDelivery;
 
-  private String billOfLadingNumber;
+  private String number;
 
   private String freeTime;
 

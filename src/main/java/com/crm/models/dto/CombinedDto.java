@@ -11,7 +11,7 @@ public class CombinedDto {
   
   private BidDto bid;
   
-  private String status;
+  private Boolean isCanceled;
   
   private ContractDto contract;
 }

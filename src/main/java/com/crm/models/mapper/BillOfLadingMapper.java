@@ -10,7 +10,7 @@ public class BillOfLadingMapper {
 
     BillOfLadingDto billOfLadingDto = new BillOfLadingDto();
     billOfLadingDto.setId(billOfLading.getId());
-    billOfLadingDto.setBillOfLadingNumber(billOfLading.getBillOfLadingNumber());
+    billOfLadingDto.setNumber(billOfLading.getNumber());
     billOfLadingDto.setFreeTime(Tool.convertLocalDateTimeToString(billOfLading.getFreeTime()));
     String portOfDelivery = billOfLading.getPortOfDelivery().getNameCode();
     billOfLadingDto.setPortOfDelivery(portOfDelivery);

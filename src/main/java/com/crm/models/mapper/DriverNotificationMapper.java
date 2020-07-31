@@ -3,7 +3,7 @@ package com.crm.models.mapper;
 import com.crm.common.Tool;
 import com.crm.models.DriverNotification;
 import com.crm.models.dto.DriverNotificationDto;
-import com.crm.models.dto.OutboundDto;
+import com.crm.models.dto.ShippingInfoDto;
 
 public class DriverNotificationMapper {
 
@@ -15,7 +15,7 @@ public class DriverNotificationMapper {
     driverNotificationDto.setIsRead(driverNotification.getIsRead());
     driverNotificationDto.setIsHide(driverNotificationDto.getIsHide());
 
-    OutboundDto relatedResource = OutboundMapper.toOutboundDto(driverNotification.getRelatedResource());
+    ShippingInfoDto relatedResource = ShippingInfoMapper.toShippingInfoDto(driverNotification.getRelatedResource());
     driverNotificationDto.setRelatedResource(relatedResource);
 
     driverNotificationDto.setMessage(driverNotification.getMessage());

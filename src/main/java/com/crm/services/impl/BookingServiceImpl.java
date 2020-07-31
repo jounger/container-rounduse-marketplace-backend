@@ -66,15 +66,15 @@ public class BookingServiceImpl implements BookingService {
       throw new InternalException(ErrorConstant.OUTBOUND_IS_IN_TRANSACTION);
     }
 
-    String bookingNumber = request.getBookingNumber();
-    if (bookingNumber != null && !bookingNumber.isEmpty()) {
-      if (bookingRepository.existsByBookingNumber(bookingNumber)) {
-        if (bookingNumber.equals(booking.getBookingNumber())) {
+    String number = request.getNumber();
+    if (number != null && !number.isEmpty()) {
+      if (bookingRepository.existsByNumber(number)) {
+        if (number.equals(booking.getNumber())) {
         } else {
           throw new DuplicateRecordException(ErrorConstant.BOOKING_ALREADY_EXISTS);
         }
       }
-      booking.setBookingNumber(bookingNumber);
+      booking.setNumber(number);
     }
 
     Port portOfLoading = portRepository.findByNameCode(request.getPortOfLoading())
@@ -117,12 +117,12 @@ public class BookingServiceImpl implements BookingService {
       booking.setPortOfLoading(portOfLoading);
     }
 
-    String bookingNumberRequest = String.valueOf(updates.get("bookingNumber"));
-    if (updates.get("bookingNumber") != null && !Tool.isEqual(booking.getBookingNumber(), bookingNumberRequest)) {
-      if (bookingRepository.existsByBookingNumber(bookingNumberRequest)) {
+    String numberRequest = String.valueOf(updates.get("number"));
+    if (updates.get("number") != null && !Tool.isEqual(booking.getNumber(), numberRequest)) {
+      if (bookingRepository.existsByNumber(numberRequest)) {
         throw new DuplicateRecordException(ErrorConstant.BOOKING_ALREADY_EXISTS);
       }
-      booking.setBookingNumber(bookingNumberRequest);
+      booking.setNumber(numberRequest);
     }
 
     String unit = String.valueOf(updates.get("unit"));
@@ -155,8 +155,8 @@ public class BookingServiceImpl implements BookingService {
   }
 
   @Override
-  public Booking getBookingsByBookingNumber(String bookingNumber) {
-    Booking booking = bookingRepository.findByBookingNumber(bookingNumber)
+  public Booking getBookingsByNumber(String number) {
+    Booking booking = bookingRepository.findByNumber(number)
         .orElseThrow(() -> new NotFoundException(ErrorConstant.BOOKING_NOT_FOUND));
     return booking;
   }

@@ -1,10 +1,7 @@
 package com.crm.models;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
@@ -12,8 +9,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -28,29 +24,40 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 @Getter
 @Setter
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
+@ToString
 @Entity
-@Table(name = "combined")
+@Table(name = "shipping_info")
 @EntityListeners(AuditingEntityListener.class)
 @JsonIgnoreProperties(value = { "createdAt", "updatedAt" }, allowGetters = true)
-public class Combined {
+public class ShippingInfo {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "id", updatable = false, nullable = false)
   private Long id;
-
-  @OneToOne
-  @JoinColumn(name = "bid_id")
-  private Bid bid;
-
-  @Column(name = "is_canceled")
-  private Boolean isCanceled;
-
+  
+  @ManyToOne
+  @JoinColumn(name = "combined_id")
+  private Combined combined;
+  
+  @ManyToOne
+  @JoinColumn(name = "outbound_id")
+  private Outbound outbound;
+  
+  @ManyToOne
+  @JoinColumn(name = "container_id")
+  private Container container;
+  
+  // EnumShippingStatus
+  @Column(name = "status")
+  private String status;
+  
   @Column(name = "created_at", nullable = false, updatable = false)
   @Temporal(TemporalType.TIMESTAMP)
   @CreatedDate
@@ -60,14 +67,4 @@ public class Combined {
   @Temporal(TemporalType.TIMESTAMP)
   @LastModifiedDate
   private Date updatedAt;
-
-  @OneToMany(mappedBy = "relatedResource")
-  private Collection<ShippingLineNotification> shippingLineNotifications = new ArrayList<>();
-
-  @OneToOne(mappedBy = "combined", cascade = CascadeType.ALL)
-  private Contract contract;
-  
-  @OneToMany(mappedBy = "combined")
-  private Collection<ShippingInfo> shippingInfos = new ArrayList<>();
-
 }

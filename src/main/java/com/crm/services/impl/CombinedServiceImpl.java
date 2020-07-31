@@ -1,6 +1,7 @@
 package com.crm.services.impl;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,28 +13,30 @@ import org.springframework.stereotype.Service;
 import com.crm.common.ErrorConstant;
 import com.crm.common.Tool;
 import com.crm.enums.EnumBidStatus;
-import com.crm.enums.EnumCombinedStatus;
-import com.crm.enums.EnumSupplyStatus;
+import com.crm.enums.EnumShippingStatus;
 import com.crm.exception.DuplicateRecordException;
 import com.crm.exception.InternalException;
 import com.crm.exception.NotFoundException;
 import com.crm.models.Bid;
 import com.crm.models.BiddingDocument;
 import com.crm.models.Combined;
+import com.crm.models.Container;
 import com.crm.models.Contract;
 import com.crm.models.Outbound;
+import com.crm.models.ShippingInfo;
 import com.crm.models.Supplier;
 import com.crm.models.User;
 import com.crm.payload.request.CombinedRequest;
 import com.crm.payload.request.ContractRequest;
 import com.crm.payload.request.PaginationRequest;
+import com.crm.payload.request.ShippingInfoRequest;
 import com.crm.repository.BidRepository;
 import com.crm.repository.CombinedRepository;
 import com.crm.repository.ContainerRepository;
-import com.crm.repository.OutboundRepository;
 import com.crm.repository.UserRepository;
 import com.crm.services.BidService;
 import com.crm.services.CombinedService;
+import com.crm.services.ShippingInfoService;
 
 @Service
 public class CombinedServiceImpl implements CombinedService {
@@ -48,32 +51,32 @@ public class CombinedServiceImpl implements CombinedService {
   private UserRepository userRepository;
 
   @Autowired
-  private BidService bidService;
-
-  @Autowired
   private ContainerRepository containerRepository;
 
   @Autowired
-  private OutboundRepository outboundRepository;
+  private BidService bidService;
+
+  @Autowired
+  private ShippingInfoService shippingInfoService;
 
   @Override
   public Combined createCombined(Long bidId, String username, CombinedRequest request) {
     Combined combined = new Combined();
 
     Bid bid = bidRepository.findById(bidId).orElseThrow(() -> new NotFoundException(ErrorConstant.BID_NOT_FOUND));
-    if(bid.getCombined() != null) {
+    if (bid.getCombined() != null) {
       throw new DuplicateRecordException(ErrorConstant.BID_INVALID_CREATE);
     }
     Map<String, Object> updates = new HashMap<>();
     updates.put("status", EnumBidStatus.ACCEPTED.name());
-    if(request.getContainers() != null) {
+    if (request.getContainers() != null) {
       updates.put("combinedContainers", request.getContainers());
     }
-    
+
     bid = bidService.editBid(bidId, username, updates);
     combined.setBid(bid);
 
-    combined.setStatus(EnumCombinedStatus.INFO_RECEIVED.name());
+    combined.setIsCanceled(false);
     bid = combined.getBid();
     BiddingDocument biddingDocument = bid.getBiddingDocument();
     Supplier offeree = biddingDocument.getOfferee();
@@ -98,6 +101,25 @@ public class CombinedServiceImpl implements CombinedService {
 
     Combined _combined = combinedRepository.save(combined);
 
+    Outbound outbound = biddingDocument.getOutbound();
+    List<String> containers = request.getContainers();
+    ShippingInfoRequest shippingInfoRequest = new ShippingInfoRequest();
+    shippingInfoRequest.setCombined(combined.getId());
+    shippingInfoRequest.setOutbound(outbound.getId());
+    shippingInfoRequest.setStatus(EnumShippingStatus.INFO_RECEIVED.name());
+    containers.forEach(containerId -> {
+      try {
+        Container container = containerRepository.findById(Long.parseLong(containerId))
+            .orElseThrow(() -> new NotFoundException(ErrorConstant.CONTAINER_NOT_FOUND));
+        shippingInfoRequest.setContainer(container.getId());
+        ShippingInfo shippingInfo = shippingInfoService.createShippingInfo(shippingInfoRequest);
+        combined.getShippingInfos().add(shippingInfo);
+      } catch (NumberFormatException e) {
+        throw new NumberFormatException(ErrorConstant.CONTAINER_NOT_FOUND);
+      }
+
+    });
+
     return _combined;
   }
 
@@ -117,7 +139,8 @@ public class CombinedServiceImpl implements CombinedService {
 
   @Override
   public Page<Combined> getCombinedsByUser(String username, PaginationRequest request) {
-    User user = userRepository.findByUsername(username).orElseThrow(() -> new NotFoundException(ErrorConstant.USER_NOT_FOUND));
+    User user = userRepository.findByUsername(username)
+        .orElseThrow(() -> new NotFoundException(ErrorConstant.USER_NOT_FOUND));
     String role = user.getRoles().iterator().next().getName();
     Page<Combined> combineds = null;
     if (role.equalsIgnoreCase("ROLE_MERCHANT")) {
@@ -138,56 +161,16 @@ public class CombinedServiceImpl implements CombinedService {
   }
 
   @Override
-  public Combined updateCombined(CombinedRequest request) {
-    Combined combined = combinedRepository.findById(request.getId())
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.COMBINED_NOT_FOUND));
-
-    Bid bid = bidRepository.findById(request.getBid())
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.BID_NOT_FOUND));
-    combined.setBid(bid);
-
-    EnumCombinedStatus status = EnumCombinedStatus.findByName(request.getStatus());
-    if (status != null) {
-      combined.setStatus(status.name());
-    } else {
-      throw new NotFoundException(ErrorConstant.BID_STATUS_NOT_FOUND);
-    }
-
-    combinedRepository.save(combined);
-    return combined;
-  }
-
-  @Override
-  public Combined editCombined(Long id, String username, Map<String, Object> updates) {
+  public Combined editCombined(Long id, String username, String isCanceled) {
     Combined combined = combinedRepository.findById(id)
         .orElseThrow(() -> new NotFoundException(ErrorConstant.COMBINED_NOT_FOUND));
 
     Bid bid = combined.getBid();
-    BiddingDocument biddingDocument = bid.getBiddingDocument();
-    String statusString = String.valueOf(updates.get("status"));
-    if (updates.get("status") != null && !Tool.isBlank(statusString)) {
-      EnumCombinedStatus status = EnumCombinedStatus.findByName(statusString);
-      if (status == null) {
-        throw new NotFoundException(ErrorConstant.BID_STATUS_NOT_FOUND);
-      }
-      combined.setStatus(status.name());
-      if (status.equals(EnumCombinedStatus.CANCELED)) {
-        Map<String, Object> updatesBid = new HashMap<>();
-        updatesBid.put("status", EnumBidStatus.REJECTED.name());
-        bidService.editBid(bid.getId(), username, updatesBid);
-      }
-
-      if (status.equals(EnumCombinedStatus.DELIVERED)) {
-        bid.getContainers().parallelStream().forEach(container -> {
-          container.setStatus(EnumSupplyStatus.DELIVERED.name());
-          containerRepository.save(container);
-        });
-        if (bidRepository.isAllCombinedByBiddingDocument(biddingDocument.getId())) {
-          Outbound outbound = biddingDocument.getOutbound();
-          outbound.setStatus(EnumSupplyStatus.DELIVERED.name());
-          outboundRepository.save(outbound);
-        }
-      }
+    if (!Tool.isBlank(isCanceled)) {
+      combined.setIsCanceled(Boolean.valueOf(isCanceled));
+      Map<String, Object> updatesBid = new HashMap<>();
+      updatesBid.put("status", EnumBidStatus.REJECTED.name());
+      bidService.editBid(bid.getId(), username, updatesBid);
     }
     Combined _combined = combinedRepository.save(combined);
     return _combined;

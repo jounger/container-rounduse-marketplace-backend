@@ -74,15 +74,15 @@ public class BillOfLadingServiceImpl implements BillOfLadingService {
         .orElseThrow(() -> new NotFoundException(ErrorConstant.PORT_NOT_FOUND));
     billOfLading.setPortOfDelivery(port);
 
-    String billOfLadingNumber = request.getBillOfLadingNumber();
-    if (billOfLadingNumber != null && !billOfLadingNumber.isEmpty()) {
-      if (billOfLadingRepository.existsByBillOfLadingNumber(billOfLadingNumber)) {
-        if (billOfLadingNumber.equals(billOfLading.getBillOfLadingNumber())) {
+    String number = request.getNumber();
+    if (number != null && !number.isEmpty()) {
+      if (billOfLadingRepository.existsByNumber(number)) {
+        if (number.equals(billOfLading.getNumber())) {
         } else {
           throw new DuplicateRecordException(ErrorConstant.BILLOFLADING_ALREADY_EXISTS);
         }
       }
-      billOfLading.setBillOfLadingNumber(billOfLadingNumber);
+      billOfLading.setNumber(number);
     }
 
     if (request.getUnit() < billOfLading.getContainers().size()) {
@@ -159,13 +159,13 @@ public class BillOfLadingServiceImpl implements BillOfLadingService {
       billOfLading.setPortOfDelivery(port);
     }
 
-    String billOfLadingNumber = String.valueOf(updates.get("billOfLadingNumber"));
-    if (updates.get("billOfLadingNumber") != null
-        && !Tool.isEqual(billOfLading.getBillOfLadingNumber(), billOfLadingNumber)) {
-      if (billOfLadingRepository.existsByBillOfLadingNumber(billOfLadingNumber)) {
+    String number = String.valueOf(updates.get("number"));
+    if (updates.get("number") != null
+        && !Tool.isEqual(billOfLading.getNumber(), number)) {
+      if (billOfLadingRepository.existsByNumber(number)) {
         throw new DuplicateRecordException(ErrorConstant.BILLOFLADING_ALREADY_EXISTS);
       }
-      billOfLading.setBillOfLadingNumber(billOfLadingNumber);
+      billOfLading.setNumber(number);
     }
 
     String unitRequest = String.valueOf(updates.get("unit"));
@@ -232,8 +232,8 @@ public class BillOfLadingServiceImpl implements BillOfLadingService {
   }
 
   @Override
-  public BillOfLading getBillOfLadingByBillOfLadingNumber(String billOfLadingNumber) {
-    BillOfLading billOfLading = billOfLadingRepository.findByBillOfLadingNumber(billOfLadingNumber)
+  public BillOfLading getBillOfLadingByNumber(String number) {
+    BillOfLading billOfLading = billOfLadingRepository.findByNumber(number)
         .orElseThrow(() -> new NotFoundException(ErrorConstant.BILLOFLADING_NOT_FOUND));
     return billOfLading;
   }

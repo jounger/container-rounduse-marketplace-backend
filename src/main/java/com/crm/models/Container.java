@@ -13,6 +13,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -80,6 +81,9 @@ public class Container {
 
   @ManyToMany(mappedBy = "containers")
   private Collection<Bid> bids = new ArrayList<>();
+  
+  @OneToMany(mappedBy = "container")
+  private Collection<ShippingInfo> shippingInfos = new ArrayList<>();
 
   // DO NOT DELETE CODE BELLOW
 

@@ -1,7 +1,5 @@
 package com.crm.services;
 
-import java.util.Map;
-
 import org.springframework.data.domain.Page;
 
 import com.crm.models.Combined;
@@ -20,9 +18,7 @@ public interface CombinedService {
 
   Page<Combined> getCombineds(PaginationRequest request);
 
-  Combined updateCombined(CombinedRequest request);
-
-  Combined editCombined(Long id, String username, Map<String, Object> updates);
+  Combined editCombined(Long id, String username, String isCanceled);
 
   void removeCombined(Long id);
 }

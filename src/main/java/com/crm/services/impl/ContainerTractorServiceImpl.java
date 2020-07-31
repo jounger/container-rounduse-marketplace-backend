@@ -89,7 +89,7 @@ public class ContainerTractorServiceImpl implements ContainerTractorService {
     ContainerTractor containerTractor = containerTractorRepository.findById(request.getId())
         .orElseThrow(() -> new NotFoundException(ErrorConstant.TRACTOR_NOT_FOUND));
 
-    if (!containerTractor.getForwarder().getId().equals(username)) {
+    if (!containerTractor.getForwarder().getUsername().equals(username)) {
       throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
     }
 
@@ -124,7 +124,7 @@ public class ContainerTractorServiceImpl implements ContainerTractorService {
     ContainerTractor containerTractor = containerTractorRepository.findById(id)
         .orElseThrow(() -> new NotFoundException(ErrorConstant.TRACTOR_NOT_FOUND));
 
-    if (!containerTractor.getForwarder().getId().equals(username)) {
+    if (!containerTractor.getForwarder().getUsername().equals(username)) {
       throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
     }
 
@@ -162,7 +162,7 @@ public class ContainerTractorServiceImpl implements ContainerTractorService {
     ContainerTractor containerTractor = containerTractorRepository.findById(id)
         .orElseThrow(() -> new NotFoundException(ErrorConstant.TRACTOR_NOT_FOUND));
 
-    if (!containerTractor.getForwarder().getId().equals(username)) {
+    if (!containerTractor.getForwarder().getUsername().equals(username)) {
       throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
     }
 

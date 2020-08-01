@@ -117,7 +117,7 @@ public class BidServiceImplTest {
 
     Booking booking = new Booking();
     booking.setId(1L);
-    booking.setBookingNumber("BL00001");
+    booking.setNumber("BL00001");
     booking.setUnit(1);
     booking.setCutOffTime(LocalDateTime.now().plusDays(5));
     booking.setPortOfLoading(port);
@@ -541,7 +541,7 @@ public class BidServiceImplTest {
 
     Booking booking = new Booking();
     booking.setId(1L);
-    booking.setBookingNumber("BL00001");
+    booking.setNumber("BL00001");
     booking.setUnit(1);
     booking.setCutOffTime(LocalDateTime.now().plusDays(5));
     booking.setPortOfLoading(port);

@@ -32,6 +32,7 @@ import com.crm.models.Forwarder;
 import com.crm.models.Merchant;
 import com.crm.models.Report;
 import com.crm.models.ReportNotification;
+import com.crm.models.ShippingInfo;
 import com.crm.models.ShippingLineNotification;
 import com.crm.models.User;
 import com.crm.payload.request.BiddingNotificationRequest;
@@ -239,16 +240,18 @@ public class NotificationBroadcast {
         shippingLineNotification = shippingLineNotificationService
             .createShippingLineNotification(shippingLineNotificationRequest);
 
+        Collection<ShippingInfo> shippingInfos = combined.getShippingInfos();
+        
         if (listContainerBid.size() > 0) {
           List<DriverNotification> driverNotifications = new ArrayList<>();
-          listContainerBid.forEach(container -> {
+          shippingInfos.forEach(shippingInfo -> {
             DriverNotification driverNotification = new DriverNotification();
             DriverNotificationRequest driverNotifyRequest = new DriverNotificationRequest();
-            String driverUserName = container.getDriver().getUsername();
+            String driverUserName = shippingInfo.getContainer().getDriver().getUsername();
             driverNotifyRequest.setRecipient(driverUserName);
-            driverNotifyRequest.setRelatedResource(bidNew.getBiddingDocument().getOutbound().getId());
+            driverNotifyRequest.setRelatedResource(shippingInfo.getId());
             driverNotifyRequest.setMessage(String.format("%s and %s want you driver container %s",
-                offeree.getUsername(), bidNew.getBidder().getUsername(), container.getContainerNumber()));
+                offeree.getUsername(), bidNew.getBidder().getUsername(), shippingInfo.getContainer().getContainerNumber()));
             driverNotifyRequest.setType(EnumNotificationType.DRIVER.name());
             driverNotifyRequest.setAction(EnumDriverNotification.TASK.name());
             driverNotification = driverNotificationService.createDriverNotification(driverNotifyRequest);

@@ -87,10 +87,10 @@ public class BookingController {
     return ResponseEntity.ok(bookingDto);
   }
 
-  @RequestMapping(method = RequestMethod.GET, params = { "bookingNumber" })
+  @RequestMapping(method = RequestMethod.GET, params = { "number" })
   @PreAuthorize("hasRole('FORWARDER') or hasRole('MERCHANT')")
-  public ResponseEntity<?> getBookingsByBookingNumber(@RequestParam String bookingNumber) {
-    Booking booking = bookingService.getBookingsByBookingNumber(bookingNumber);
+  public ResponseEntity<?> getBookingsByNumber(@RequestParam String number) {
+    Booking booking = bookingService.getBookingsByNumber(number);
     BookingDto bookingDto = BookingMapper.toBookingDto(booking);
     return ResponseEntity.ok(bookingDto);
   }

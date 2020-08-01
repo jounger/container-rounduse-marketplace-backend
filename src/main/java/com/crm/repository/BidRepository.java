@@ -19,7 +19,8 @@ public interface BidRepository extends JpaRepository<Bid, Long> {
 
   @Query(value = "SELECT b FROM Bid b LEFT JOIN b.biddingDocument bd WHERE bd.id = :id "
       + "AND (bd.offeree.username = :username or b.bidder.username = :username) AND b.combined IS NOT NULL")
-  Page<Bid> findByBiddingDocumentAndExistCombined(@Param("id") Long id, @Param("username") String username, Pageable pageable);
+  Page<Bid> findByBiddingDocumentAndExistCombined(@Param("id") Long id, @Param("username") String username,
+      Pageable pageable);
 
   @Query(value = "SELECT b FROM Bid b WHERE b.bidder.username = :username")
   Page<Bid> findByForwarder(@Param("username") String username, Pageable pageable);
@@ -33,7 +34,7 @@ public interface BidRepository extends JpaRepository<Bid, Long> {
   @Query(value = "SELECT CASE WHEN COUNT(b) = 0 THEN TRUE ELSE FALSE END "
       + "FROM Bid b JOIN b.containers c WHERE b.biddingDocument.id = :id AND c.status != 'DELIVERED'")
   boolean isAllCombinedByBiddingDocument(@Param("id") Long id);
-  
+
   @Query(value = "SELECT CASE WHEN COUNT(b) = 0 THEN TRUE ELSE FALSE END "
       + "FROM Bid b JOIN b.containers c WHERE b.biddingDocument.id = :id AND c.status != 'COMBINED'")
   boolean isAllAcceptedByBiddingDocument(@Param("id") Long id);

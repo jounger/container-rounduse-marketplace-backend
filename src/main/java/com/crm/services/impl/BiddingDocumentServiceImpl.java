@@ -225,8 +225,6 @@ public class BiddingDocumentServiceImpl implements BiddingDocumentService {
         currencyOfPayment = EnumCurrency.VND;
       }
       biddingDocument.setCurrencyOfPayment(currencyOfPayment.name());
-    } else {
-      biddingDocument.setCurrencyOfPayment(EnumCurrency.VND.name());
     }
 
     String packagePriceString = String.valueOf(updates.get("bidPackagePrice"));
@@ -240,20 +238,10 @@ public class BiddingDocumentServiceImpl implements BiddingDocumentService {
       biddingDocument.setBidFloorPrice(Double.parseDouble(floorPriceString));
     }
 
-    String priceLeadershipString = String.valueOf(updates.get("priceLeadership"));
-    if (updates.get("priceLeadership") != null
-        && !Tool.isEqual(biddingDocument.getPriceLeadership(), priceLeadershipString)) {
-      biddingDocument.setPriceLeadership(Double.parseDouble(priceLeadershipString));
-    }
-
     String status = String.valueOf(updates.get("status"));
-    if (updates.get("status") != null && !Tool.isBlank(status)) {
-      EnumBiddingStatus eStatus = EnumBiddingStatus.findByName(status);
-      if (eStatus != null) {
+    EnumBiddingStatus eStatus = null;
+    if (updates.get("status") != null && !Tool.isBlank(status) && (eStatus = EnumBiddingStatus.findByName(status)) != null){
         biddingDocument.setStatus(eStatus.name());
-      } else {
-        throw new NotFoundException(ErrorConstant.BIDDINGDOCUMENT_STATUS_NOT_FOUND);
-      }
       if (eStatus.name().equalsIgnoreCase(EnumBiddingStatus.CANCELED.name())) {
         outbound = biddingDocument.getOutbound();
         outbound.setStatus(EnumSupplyStatus.CREATED.name());

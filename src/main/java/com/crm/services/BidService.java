@@ -17,13 +17,16 @@ public interface BidService {
   Bid getBidByBiddingDocumentAndForwarder(Long biddingDocument, String username);
 
   Page<Bid> getBidsByBiddingDocument(Long id, PaginationRequest request);
-  
+
   Page<Bid> getBidsByBiddingDocumentAndExistCombined(Long id, String username, PaginationRequest request);
 
   Page<Bid> getBidsByForwarder(String username, PaginationRequest request);
 
-  // update full biddingDocument
-  Bid updateBid(String username, BidRequest request);
+  Bid replaceContainer(Long id, String username, Map<String, String> updates);
+
+  Bid addContainer(Long id, String username, Long containerId);
+
+  Bid removeContainer(Long id, String username, Long containerId);
 
   // update part biddingDocument
   Bid editBid(Long id, String username, Map<String, Object> updates);

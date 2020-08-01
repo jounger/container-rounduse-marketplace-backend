@@ -15,10 +15,10 @@ import com.crm.models.Booking;
 @Repository
 public interface BookingRepository extends JpaRepository<Booking, Long>, JpaSpecificationExecutor<Booking> {
 
-  Boolean existsByBookingNumber(String bookingNumber);
+  Boolean existsByNumber(String number);
 
   @Query(value = "SELECT b FROM Booking b WHERE b.outbound.id = :id")
   Page<Booking> findByOutbound(@Param("id") Long id, Pageable pageable);
 
-  Optional<Booking> findByBookingNumber(String bookingNumber);
+  Optional<Booking> findByNumber(String number);
 }

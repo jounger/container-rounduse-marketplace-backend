@@ -7,7 +7,7 @@ import lombok.Setter;
 @Setter
 public class DriverNotificationDto extends NotificationDto {
 
-  private OutboundDto relatedResource;
+  private ShippingInfoDto relatedResource;
 
   private String message;
 

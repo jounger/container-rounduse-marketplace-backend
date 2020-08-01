@@ -14,7 +14,7 @@ public interface BookingService {
 
   Booking getBookingById(Long id);
 
-  Booking getBookingsByBookingNumber(String bookingNumber);
+  Booking getBookingsByNumber(String number);
 
   Page<Booking> searchBookings(PaginationRequest request, String search);
 

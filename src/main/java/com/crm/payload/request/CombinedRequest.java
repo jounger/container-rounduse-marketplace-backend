@@ -16,7 +16,7 @@ public class CombinedRequest {
 
   private Boolean isCanceled;
 
-  private List<String> containers = new ArrayList<>();
+  private List<Long> containers = new ArrayList<>();
 
   private ContractRequest contract;
 }

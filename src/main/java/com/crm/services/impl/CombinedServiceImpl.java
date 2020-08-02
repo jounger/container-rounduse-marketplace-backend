@@ -3,8 +3,10 @@ package com.crm.services.impl;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -42,6 +44,10 @@ import com.crm.services.ShippingInfoService;
 public class CombinedServiceImpl implements CombinedService {
 
   @Autowired
+  @Qualifier("cachedThreadPool")
+  private ExecutorService executorService;
+
+  @Autowired
   private CombinedRepository combinedRepository;
 
   @Autowired
@@ -67,13 +73,12 @@ public class CombinedServiceImpl implements CombinedService {
     if (bid.getCombined() != null) {
       throw new DuplicateRecordException(ErrorConstant.BID_INVALID_CREATE);
     }
-    Map<String, Object> updates = new HashMap<>();
-    updates.put("status", EnumBidStatus.ACCEPTED.name());
-    if (request.getContainers() != null) {
-      updates.put("combinedContainers", request.getContainers());
+    List<Long> containersId = request.getContainers();
+    if (request.getContainers() == null || request.getContainers().size() == 0) {
+      throw new NotFoundException(ErrorConstant.CONTAINER_NOT_FOUND);
     }
 
-    bid = bidService.editBid(bidId, username, updates);
+    bid = bidService.editBidWhenCombined(bidId, username, containersId);
     combined.setBid(bid);
 
     combined.setIsCanceled(false);
@@ -102,25 +107,32 @@ public class CombinedServiceImpl implements CombinedService {
     Combined _combined = combinedRepository.save(combined);
 
     Outbound outbound = biddingDocument.getOutbound();
-    List<String> containers = request.getContainers();
-    ShippingInfoRequest shippingInfoRequest = new ShippingInfoRequest();
-    shippingInfoRequest.setCombined(combined.getId());
-    shippingInfoRequest.setOutbound(outbound.getId());
-    shippingInfoRequest.setStatus(EnumShippingStatus.INFO_RECEIVED.name());
-    containers.forEach(containerId -> {
-      try {
-        Container container = containerRepository.findById(Long.parseLong(containerId))
-            .orElseThrow(() -> new NotFoundException(ErrorConstant.CONTAINER_NOT_FOUND));
-        shippingInfoRequest.setContainer(container.getId());
-        ShippingInfo shippingInfo = shippingInfoService.createShippingInfo(shippingInfoRequest);
-        combined.getShippingInfos().add(shippingInfo);
-      } catch (NumberFormatException e) {
-        throw new NumberFormatException(ErrorConstant.CONTAINER_NOT_FOUND);
-      }
-
-    });
+    createShippingInfosForCombined(_combined, outbound, containersId);
 
     return _combined;
+  }
+
+  public void createShippingInfosForCombined(Combined combined, Outbound outbound, List<Long> containers) {
+    executorService.submit(new Runnable() {
+      @Override
+      public void run() {
+        ShippingInfoRequest shippingInfoRequest = new ShippingInfoRequest();
+        shippingInfoRequest.setCombined(combined.getId());
+        shippingInfoRequest.setOutbound(outbound.getId());
+        shippingInfoRequest.setStatus(EnumShippingStatus.INFO_RECEIVED.name());
+        containers.forEach(containerId -> {
+          try {
+            Container container = containerRepository.findById(containerId)
+                .orElseThrow(() -> new NotFoundException(ErrorConstant.CONTAINER_NOT_FOUND));
+            shippingInfoRequest.setContainer(container.getId());
+            ShippingInfo shippingInfo = shippingInfoService.createShippingInfo(shippingInfoRequest);
+            combined.getShippingInfos().add(shippingInfo);
+          } catch (NumberFormatException e) {
+            throw new NumberFormatException(ErrorConstant.CONTAINER_NOT_FOUND);
+          }
+        });
+      }
+    });
   }
 
   @Override

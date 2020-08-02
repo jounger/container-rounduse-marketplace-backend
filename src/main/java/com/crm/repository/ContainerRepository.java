@@ -179,7 +179,7 @@ public interface ContainerRepository extends JpaRepository<Container, Long> {
   @Query(value = "SELECT c FROM Container c LEFT JOIN c.bids b WHERE b.id = :id AND c.status = :status")
   List<Container> findByBidAndStatus(@Param("id") Long id, @Param("status") String status);
 
-  @Query(value = "SELECT CASE WHEN COUNT(c) = 0 THEN TRUE ELSE FALSE END "
+  @Query(value = "SELECT CASE WHEN COUNT(c) > 0 THEN TRUE ELSE FALSE END "
       + "FROM Container c LEFT JOIN c.bids b WHERE c.id = :id AND b.id = :bidId")
   boolean isContainedByBid(@Param("id") Long id, @Param("bidId") Long bidId);
 

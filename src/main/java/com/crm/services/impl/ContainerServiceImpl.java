@@ -302,7 +302,7 @@ public class ContainerServiceImpl implements ContainerService {
       throw new InternalException(ErrorConstant.CONTAINER_BUSY);
     }
 
-    BillOfLading billOfLading = (BillOfLading) container.getBillOfLading();
+    BillOfLading billOfLading = container.getBillOfLading();
 
     String containerNumber = String.valueOf(updates.get("containerNumber"));
     if (updates.get("containerNumber") != null && !Tool.isEqual(container.getContainerNumber(), containerNumber)) {

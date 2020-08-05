@@ -35,6 +35,7 @@ import com.crm.repository.MerchantRepository;
 import com.crm.repository.OutboundRepository;
 import com.crm.repository.PortRepository;
 import com.crm.repository.ShippingLineRepository;
+import com.crm.repository.SupplyRepository;
 import com.crm.services.OutboundService;
 import com.crm.specification.builder.OutboundSpecificationsBuilder;
 
@@ -58,6 +59,9 @@ public class OutboundServiceImpl implements OutboundService {
 
   @Autowired
   private PortRepository portRepository;
+
+  @Autowired
+  private SupplyRepository supplyRepository;
 
   @Override
   public Outbound getOutboundById(Long id) {
@@ -104,6 +108,12 @@ public class OutboundServiceImpl implements OutboundService {
         .orElseThrow(() -> new NotFoundException(ErrorConstant.MERCHANT_NOT_FOUND));
     outbound.setMerchant(merchant);
 
+    String code = request.getCode();
+    if (supplyRepository.existsByCode(code)) {
+      throw new DuplicateRecordException(ErrorConstant.SUPPLY_CODE_DUPLICATE);
+    }
+    outbound.setCode(code);
+
     ShippingLine shippingLine = shippingLineRepository.findByCompanyCode(request.getShippingLine())
         .orElseThrow(() -> new NotFoundException(ErrorConstant.SHIPPINGLINE_NOT_FOUND));
     outbound.setShippingLine(shippingLine);
@@ -136,12 +146,12 @@ public class OutboundServiceImpl implements OutboundService {
 
     Booking booking = new Booking();
     BookingRequest bookingRequest = (BookingRequest) request.getBooking();
-    String bookingNumber = bookingRequest.getBookingNumber();
-    if (bookingNumber != null && !bookingNumber.isEmpty()) {
-      if (bookingRepository.existsByBookingNumber(bookingNumber)) {
+    String number = bookingRequest.getNumber();
+    if (number != null && !number.isEmpty()) {
+      if (bookingRepository.existsByNumber(number)) {
         throw new DuplicateRecordException(ErrorConstant.BOOKING_ALREADY_EXISTS);
       }
-      booking.setBookingNumber(bookingNumber);
+      booking.setNumber(number);
     } else {
       throw new NotFoundException(ErrorConstant.BOOKING_NOT_FOUND);
     }

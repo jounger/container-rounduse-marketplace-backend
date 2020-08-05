@@ -49,6 +49,7 @@ import com.crm.repository.InboundRepository;
 import com.crm.repository.OutboundRepository;
 import com.crm.repository.PortRepository;
 import com.crm.repository.ShippingLineRepository;
+import com.crm.repository.SupplyRepository;
 import com.crm.services.InboundService;
 import com.crm.specification.builder.InboundSpecificationsBuilder;
 
@@ -87,6 +88,9 @@ public class InboundServiceImpl implements InboundService {
 
   @Autowired
   private ContainerTractorRepository containerTractorRepository;
+
+  @Autowired
+  private SupplyRepository supplyRepository;
 
   @Override
   public Page<Inbound> getInbounds(PaginationRequest request) {
@@ -132,6 +136,12 @@ public class InboundServiceImpl implements InboundService {
         .orElseThrow(() -> new NotFoundException(ErrorConstant.FORWARDER_NOT_FOUND));
     inbound.setForwarder(forwarder);
 
+    String code = request.getCode();
+    if (supplyRepository.existsByCode(code)) {
+      throw new DuplicateRecordException(ErrorConstant.SUPPLY_CODE_DUPLICATE);
+    }
+    inbound.setCode(code);
+
     ShippingLine shippingLine = shippingLineRepository.findByCompanyCode(request.getShippingLine())
         .orElseThrow(() -> new NotFoundException(ErrorConstant.SHIPPINGLINE_NOT_FOUND));
     inbound.setShippingLine(shippingLine);
@@ -150,12 +160,12 @@ public class InboundServiceImpl implements InboundService {
 
     BillOfLading billOfLading = new BillOfLading();
     BillOfLadingRequest billOfLadingRequest = request.getBillOfLading();
-    String billOfLadingNumber = billOfLadingRequest.getBillOfLadingNumber();
-    if (billOfLadingNumber != null && !billOfLadingNumber.isEmpty()) {
-      if (billOfLadingRepository.existsByBillOfLadingNumber(billOfLadingNumber)) {
+    String number = billOfLadingRequest.getNumber();
+    if (number != null && !number.isEmpty()) {
+      if (billOfLadingRepository.existsByNumber(number)) {
         throw new DuplicateRecordException(ErrorConstant.BILLOFLADING_ALREADY_EXISTS);
       }
-      billOfLading.setBillOfLadingNumber(billOfLadingNumber);
+      billOfLading.setNumber(number);
     } else {
       throw new NotFoundException(ErrorConstant.BILLOFLADING_NOT_FOUND);
     }

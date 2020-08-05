@@ -17,12 +17,12 @@ import com.crm.models.BillOfLading;
 public interface BillOfLadingRepository
     extends JpaRepository<BillOfLading, Long>, JpaSpecificationExecutor<BillOfLading> {
 
-  Boolean existsByBillOfLadingNumber(String billOfLadingNumber);
+  Boolean existsByNumber(String number);
 
   @Query(value = "SELECT b FROM BillOfLading b WHERE b.inbound.id = :id")
   Page<BillOfLading> findByInbound(@Param("id") Long id, Pageable pageable);
 
-  Optional<BillOfLading> findByBillOfLadingNumber(String billOfLadingNumber);
+  Optional<BillOfLading> findByNumber(String number);
 
   @Query(value = "SELECT b FROM BillOfLading b WHERE b.inbound.forwarder.id = :id")
   List<BillOfLading> findByForwarder(Long id);

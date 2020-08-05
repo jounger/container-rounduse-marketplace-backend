@@ -56,8 +56,8 @@ public class BillOfLading {
   @JoinColumn(name = "port_id")
   private Port portOfDelivery;
 
-  @Column(name = "bill_of_lading_number")
-  private String billOfLadingNumber;
+  @Column(name = "number")
+  private String number;
 
   @Column(name = "unit")
   private Integer unit;

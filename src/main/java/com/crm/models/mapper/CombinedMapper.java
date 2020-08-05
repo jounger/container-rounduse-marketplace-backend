@@ -18,7 +18,7 @@ public class CombinedMapper {
     BidDto bidDto = BidMapper.toBidDto(bid);
     combinedDto.setBid(bidDto);
 
-    combinedDto.setStatus(combined.getStatus());
+    combinedDto.setIsCanceled(combined.getIsCanceled());
 
     Contract contract = combined.getContract();
     ContractDto contractDto = ContractMapper.toContractDto(contract);

@@ -38,7 +38,6 @@ import com.crm.models.ShippingLine;
 import com.crm.payload.request.BillOfLadingRequest;
 import com.crm.payload.request.InboundRequest;
 import com.crm.payload.request.PaginationRequest;
-import com.crm.repository.BillOfLadingRepository;
 import com.crm.repository.ContainerRepository;
 import com.crm.repository.ContainerSemiTrailerRepository;
 import com.crm.repository.ContainerTractorRepository;
@@ -70,9 +69,6 @@ public class InboundServiceImpl implements InboundService {
 
   @Autowired
   private ContainerRepository containerRepository;
-
-  @Autowired
-  private BillOfLadingRepository billOfLadingRepository;
 
   @Autowired
   private PortRepository portRepository;
@@ -162,9 +158,6 @@ public class InboundServiceImpl implements InboundService {
     BillOfLadingRequest billOfLadingRequest = request.getBillOfLading();
     String number = billOfLadingRequest.getNumber();
     if (number != null && !number.isEmpty()) {
-      if (billOfLadingRepository.existsByNumber(number)) {
-        throw new DuplicateRecordException(ErrorConstant.BILLOFLADING_ALREADY_EXISTS);
-      }
       billOfLading.setNumber(number);
     } else {
       throw new NotFoundException(ErrorConstant.BILLOFLADING_NOT_FOUND);

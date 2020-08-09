@@ -16,6 +16,7 @@ import com.crm.common.Constant;
 import com.crm.common.ErrorConstant;
 import com.crm.common.Tool;
 import com.crm.enums.EnumSupplyStatus;
+import com.crm.exception.ForbiddenException;
 import com.crm.exception.InternalException;
 import com.crm.exception.NotFoundException;
 import com.crm.models.Booking;
@@ -57,7 +58,7 @@ public class BookingServiceImpl implements BookingService {
         .orElseThrow(() -> new NotFoundException(ErrorConstant.BOOKING_NOT_FOUND));
 
     if (!booking.getOutbound().getMerchant().getUsername().equals(username)) {
-      throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
+      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
     }
 
     if (booking.getOutbound().getStatus().equals(EnumSupplyStatus.COMBINED.name())
@@ -94,7 +95,7 @@ public class BookingServiceImpl implements BookingService {
         .orElseThrow(() -> new NotFoundException(ErrorConstant.BOOKING_NOT_FOUND));
 
     if (!booking.getOutbound().getMerchant().getUsername().equals(username)) {
-      throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
+      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
     }
 
     if (booking.getOutbound().getStatus().equals(EnumSupplyStatus.COMBINED.name())

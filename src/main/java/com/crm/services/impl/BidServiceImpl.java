@@ -20,6 +20,7 @@ import com.crm.enums.EnumBidStatus;
 import com.crm.enums.EnumBiddingStatus;
 import com.crm.enums.EnumSupplyStatus;
 import com.crm.exception.DuplicateRecordException;
+import com.crm.exception.ForbiddenException;
 import com.crm.exception.InternalException;
 import com.crm.exception.NotFoundException;
 import com.crm.models.Bid;
@@ -147,7 +148,7 @@ public class BidServiceImpl implements BidService {
     Bid bid = bidRepository.findById(id).orElseThrow(() -> new NotFoundException(ErrorConstant.BID_NOT_FOUND));
     if (!bid.getBidder().getUsername().equals(username)
         || !bid.getBiddingDocument().getOfferee().getUsername().equals(username)) {
-      throw new NotFoundException(ErrorConstant.USER_ACCESS_DENIED);
+      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
     }
     return bid;
   }
@@ -262,7 +263,7 @@ public class BidServiceImpl implements BidService {
         .orElseThrow(() -> new NotFoundException(ErrorConstant.USER_NOT_FOUND));
     Role role = user.getRoles().iterator().next();
     if (!role.getName().equalsIgnoreCase("ROLE_MERCHANT")) {
-      throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
+      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
     }
 
     bid.setDateOfDecision(LocalDateTime.now());
@@ -322,7 +323,7 @@ public class BidServiceImpl implements BidService {
   public Bid replaceContainer(Long id, String username, ReplaceContainerRequest request) {
     Bid bid = bidRepository.findById(id).orElseThrow(() -> new NotFoundException(ErrorConstant.BID_NOT_FOUND));
     if (!bid.getBidder().getUsername().equals(username)) {
-      throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
+      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
     }
     BiddingDocument biddingDocument = bid.getBiddingDocument();
     Outbound outbound = biddingDocument.getOutbound();
@@ -357,7 +358,7 @@ public class BidServiceImpl implements BidService {
   public Bid addContainer(Long id, String username, Long containerId) {
     Bid bid = bidRepository.findById(id).orElseThrow(() -> new NotFoundException(ErrorConstant.BID_NOT_FOUND));
     if (!bid.getBidder().getUsername().equals(username)) {
-      throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
+      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
     }
 
     if (!bid.getStatus().equalsIgnoreCase(EnumBidStatus.PENDING.name())) {
@@ -394,7 +395,7 @@ public class BidServiceImpl implements BidService {
   public Bid removeContainer(Long id, String username, Long containerId) {
     Bid bid = bidRepository.findById(id).orElseThrow(() -> new NotFoundException(ErrorConstant.BID_NOT_FOUND));
     if (!bid.getBidder().getUsername().equals(username)) {
-      throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
+      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
     }
 
     if (!bid.getStatus().equalsIgnoreCase(EnumBidStatus.PENDING.name())) {

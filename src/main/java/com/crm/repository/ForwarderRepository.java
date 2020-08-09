@@ -17,7 +17,10 @@ public interface ForwarderRepository extends JpaRepository<Forwarder, Long> {
 
   Optional<Forwarder> findByUsername(String username);
 
-  @Query(value = "SELECT DISTINCT f FROM Forwarder f JOIN f.inbounds i JOIN i.billOfLading b WHERE i.shippingLine.companyCode = :shippingLine AND i.containerType.name = :containerType AND b.freeTime > :cutOffTime AND i.emptyTime < :packingTime AND b.freeTime > :packingTime")
+  @Query(value = "SELECT DISTINCT f FROM Forwarder f JOIN f.inbounds i JOIN i.billOfLading b"
+      + " WHERE i.shippingLine.companyCode = :shippingLine"
+      + " AND i.containerType.name = :containerType AND b.freeTime > :cutOffTime"
+      + " AND i.emptyTime < :packingTime AND b.freeTime > :packingTime")
   Page<Forwarder> findByOutbound(@Param("shippingLine") String shippingLine,
       @Param("containerType") String containerType, @Param("packingTime") LocalDateTime packingTime,
       @Param("cutOffTime") LocalDateTime cutOffTime, Pageable pageable);

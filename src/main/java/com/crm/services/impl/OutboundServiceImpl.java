@@ -18,6 +18,7 @@ import com.crm.common.Tool;
 import com.crm.enums.EnumSupplyStatus;
 import com.crm.enums.EnumUnit;
 import com.crm.exception.DuplicateRecordException;
+import com.crm.exception.ForbiddenException;
 import com.crm.exception.InternalException;
 import com.crm.exception.NotFoundException;
 import com.crm.models.Booking;
@@ -176,7 +177,7 @@ public class OutboundServiceImpl implements OutboundService {
         .orElseThrow(() -> new NotFoundException(ErrorConstant.OUTBOUND_NOT_FOUND));
 
     if (!outbound.getMerchant().getUsername().equals(username)) {
-      throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
+      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
     }
 
     if (outbound.getStatus().equals(EnumSupplyStatus.COMBINED.name())
@@ -247,7 +248,7 @@ public class OutboundServiceImpl implements OutboundService {
         .orElseThrow(() -> new NotFoundException(ErrorConstant.OUTBOUND_NOT_FOUND));
 
     if (!outbound.getMerchant().getUsername().equals(username)) {
-      throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
+      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
     }
 
     if (outbound.getStatus().equals(EnumSupplyStatus.COMBINED.name())
@@ -328,7 +329,7 @@ public class OutboundServiceImpl implements OutboundService {
         .orElseThrow(() -> new NotFoundException(ErrorConstant.OUTBOUND_NOT_FOUND));
 
     if (!outbound.getMerchant().getUsername().equals(username)) {
-      throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
+      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
     }
 
     if (outbound.getStatus().equals(EnumSupplyStatus.COMBINED.name())

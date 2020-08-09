@@ -37,6 +37,16 @@ public class ShippingInfoController {
   @Autowired
   private ShippingInfoService shippingInfoService;
 
+  @PreAuthorize("hasRole('FORWARDER') or hasRole('DRIVER') or hasRole('MERCHANT')")
+  @GetMapping("/{id}")
+  public ResponseEntity<?> getShippingInfo(@PathVariable("id") Long id) {
+    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    String username = userDetails.getUsername();
+    ShippingInfo shippingInfo = shippingInfoService.getShippingInfo(id, username);
+    ShippingInfoDto shippingInfoDto = ShippingInfoMapper.toShippingInfoDto(shippingInfo);
+    return ResponseEntity.ok(shippingInfoDto);
+  }
+
   @PreAuthorize("hasRole('FORWARDER')")
   @GetMapping("/bid/{id}")
   public ResponseEntity<?> getShippingInfosByBid(@PathVariable("id") Long id, @Valid PaginationRequest request) {
@@ -44,6 +54,28 @@ public class ShippingInfoController {
     String username = userDetails.getUsername();
 
     Page<ShippingInfo> pages = shippingInfoService.getShippingInfosByBid(id, username, request);
+
+    PaginationResponse<ShippingInfoDto> response = new PaginationResponse<>();
+    response.setPageNumber(request.getPage());
+    response.setPageSize(request.getLimit());
+    response.setTotalElements(pages.getTotalElements());
+    response.setTotalPages(pages.getTotalPages());
+
+    List<ShippingInfo> shippingInfos = pages.getContent();
+    List<ShippingInfoDto> shippingInfosDto = new ArrayList<>();
+    shippingInfos.forEach(shippingInfo -> shippingInfosDto.add(ShippingInfoMapper.toShippingInfoDto(shippingInfo)));
+    response.setContents(shippingInfosDto);
+
+    return ResponseEntity.ok(response);
+  }
+
+  @PreAuthorize("hasRole('FORWARDER') or hasRole('MERCHANT')")
+  @GetMapping("/combined/{id}")
+  public ResponseEntity<?> getShippingInfosByCombined(@PathVariable("id") Long id, @Valid PaginationRequest request) {
+    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    String username = userDetails.getUsername();
+
+    Page<ShippingInfo> pages = shippingInfoService.getShippingInfosByCombined(id, username, request);
 
     PaginationResponse<ShippingInfoDto> response = new PaginationResponse<>();
     response.setPageNumber(request.getPage());

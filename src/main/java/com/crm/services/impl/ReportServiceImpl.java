@@ -16,6 +16,7 @@ import com.crm.common.Constant;
 import com.crm.common.ErrorConstant;
 import com.crm.common.Tool;
 import com.crm.enums.EnumReportStatus;
+import com.crm.exception.ForbiddenException;
 import com.crm.exception.InternalException;
 import com.crm.exception.NotFoundException;
 import com.crm.models.BiddingDocument;
@@ -86,7 +87,7 @@ public class ReportServiceImpl implements ReportService {
         .orElseThrow(() -> new NotFoundException(ErrorConstant.USER_NOT_FOUND));
     String role = user.getRoles().iterator().next().getName();
     if (!report.getSender().getUsername().equals(username) && !role.equalsIgnoreCase("ROLE_MODERATOR")) {
-      throw new NotFoundException(ErrorConstant.USER_ACCESS_DENIED);
+      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
     }
     return report;
   }
@@ -137,7 +138,7 @@ public class ReportServiceImpl implements ReportService {
     if (report.getSender().getUsername().equals(username) || role.equals("ROLE_MODERATOR")) {
 
     } else {
-      throw new NotFoundException(ErrorConstant.USER_ACCESS_DENIED);
+      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
     }
 
     if (report.getSender().getUsername().equals(username)) {
@@ -192,7 +193,7 @@ public class ReportServiceImpl implements ReportService {
     if (report.getSender().getUsername().equals(username)) {
       reportRepository.delete(report);
     } else {
-      throw new NotFoundException(ErrorConstant.USER_ACCESS_DENIED);
+      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
     }
   }
 

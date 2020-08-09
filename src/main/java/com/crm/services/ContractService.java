@@ -12,7 +12,7 @@ public interface ContractService {
 
   Contract createContract(Long id, String username, ContractRequest request);
   
-  Contract getContractsByCombined(Long id, String username);
+  Contract getContractByCombined(Long id, String username);
   
   Page<Contract> getContractsByUser(String username, PaginationRequest request);
 

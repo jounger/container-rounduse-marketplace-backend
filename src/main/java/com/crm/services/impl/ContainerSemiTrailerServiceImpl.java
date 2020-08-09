@@ -19,6 +19,7 @@ import com.crm.enums.EnumSupplyStatus;
 import com.crm.enums.EnumTrailerType;
 import com.crm.enums.EnumUnit;
 import com.crm.exception.DuplicateRecordException;
+import com.crm.exception.ForbiddenException;
 import com.crm.exception.InternalException;
 import com.crm.exception.NotFoundException;
 import com.crm.models.Container;
@@ -104,7 +105,7 @@ public class ContainerSemiTrailerServiceImpl implements ContainerSemiTrailerServ
         .orElseThrow(() -> new NotFoundException(ErrorConstant.TRAILER_NOT_FOUND));
 
     if (!containerSemiTrailer.getForwarder().getUsername().equals(username)) {
-      throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
+      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
     }
 
     Collection<Container> containers = containerRepository.findByTrailer(request.getId(),
@@ -150,7 +151,7 @@ public class ContainerSemiTrailerServiceImpl implements ContainerSemiTrailerServ
         .orElseThrow(() -> new NotFoundException(ErrorConstant.TRAILER_NOT_FOUND));
 
     if (!containerSemiTrailer.getForwarder().getUsername().equals(username)) {
-      throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
+      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
     }
 
     Collection<Container> containers = containerRepository.findByTrailer(id, EnumSupplyStatus.COMBINED.name(),
@@ -206,7 +207,7 @@ public class ContainerSemiTrailerServiceImpl implements ContainerSemiTrailerServ
         .orElseThrow(() -> new NotFoundException(ErrorConstant.TRAILER_NOT_FOUND));
 
     if (!containerSemiTrailer.getForwarder().getUsername().equals(username)) {
-      throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
+      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
     }
 
     Collection<Container> containers = containerRepository.findByTrailer(id, EnumSupplyStatus.COMBINED.name(),

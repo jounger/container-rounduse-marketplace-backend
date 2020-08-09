@@ -19,6 +19,7 @@ import com.crm.common.ErrorConstant;
 import com.crm.common.Tool;
 import com.crm.enums.EnumSupplyStatus;
 import com.crm.exception.DuplicateRecordException;
+import com.crm.exception.ForbiddenException;
 import com.crm.exception.InternalException;
 import com.crm.exception.NotFoundException;
 import com.crm.models.BillOfLading;
@@ -67,7 +68,7 @@ public class BillOfLadingServiceImpl implements BillOfLadingService {
         .orElseThrow(() -> new NotFoundException(ErrorConstant.BILLOFLADING_NOT_FOUND));
 
     if (!billOfLading.getInbound().getForwarder().getUsername().equals(username)) {
-      throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
+      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
     }
 
     Port port = portRepository.findByNameCode(request.getPortOfDelivery())
@@ -148,7 +149,7 @@ public class BillOfLadingServiceImpl implements BillOfLadingService {
         .orElseThrow(() -> new NotFoundException(ErrorConstant.BILLOFLADING_NOT_FOUND));
 
     if (!billOfLading.getInbound().getForwarder().getUsername().equals(username)) {
-      throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
+      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
     }
 
     String portOfDelivery = String.valueOf(updates.get("portOfDelivery"));

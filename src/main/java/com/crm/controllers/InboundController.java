@@ -126,7 +126,7 @@ public class InboundController {
 
   @GetMapping("/container/{id}")
   @PreAuthorize("hasRole('FORWARDER') or hasRole('MERCHANT')")
-  public ResponseEntity<?> getInboundsByContainer(@PathVariable Long id) {
+  public ResponseEntity<?> getInboundByContainer(@PathVariable Long id) {
     Inbound inbound = inboundService.getInboundByContainer(id);
     InboundDto inboundDto = new InboundDto();
     inboundDto = InboundMapper.toInboundDto(inbound);

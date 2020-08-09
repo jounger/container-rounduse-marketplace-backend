@@ -49,4 +49,16 @@ public class ExceptionController {
     return error;
   }
 
+  @ExceptionHandler(ForbiddenException.class)
+  @ResponseStatus(HttpStatus.FORBIDDEN)
+  public ErrorResponse handlerException(ForbiddenException ex, WebRequest req) {
+
+    logger.error("Forbidden Error: {}", ex.getMessage());
+
+    ErrorResponse error = new ErrorResponse();
+    error.setStatus(HttpStatus.FORBIDDEN);
+    error.setMessage(ex.getMessage());
+    return error;
+  }
+
 }

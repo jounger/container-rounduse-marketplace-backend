@@ -22,6 +22,7 @@ import com.crm.common.ErrorConstant;
 import com.crm.common.Tool;
 import com.crm.enums.EnumSupplyStatus;
 import com.crm.exception.DuplicateRecordException;
+import com.crm.exception.ForbiddenException;
 import com.crm.exception.InternalException;
 import com.crm.exception.NotFoundException;
 import com.crm.models.BillOfLading;
@@ -196,7 +197,7 @@ public class InboundServiceImpl implements InboundService {
         .orElseThrow(() -> new NotFoundException(ErrorConstant.INBOUND_NOT_FOUND));
 
     if (!inbound.getForwarder().getUsername().equals(username)) {
-      throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
+      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
     }
 
     ShippingLine shippingLine = shippingLineRepository.findByCompanyCode(request.getShippingLine())
@@ -215,7 +216,7 @@ public class InboundServiceImpl implements InboundService {
     setContainers.forEach(item -> {
       if (item.getStatus().equalsIgnoreCase(EnumSupplyStatus.COMBINED.name())
           || item.getStatus().equalsIgnoreCase(EnumSupplyStatus.BIDDING.name())) {
-        throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
+        throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
       }
     });
 
@@ -287,7 +288,7 @@ public class InboundServiceImpl implements InboundService {
         .orElseThrow(() -> new NotFoundException(ErrorConstant.INBOUND_NOT_FOUND));
 
     if (!inbound.getForwarder().getUsername().equals(username)) {
-      throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
+      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
     }
 
     BillOfLading billOfLading = inbound.getBillOfLading();
@@ -387,7 +388,7 @@ public class InboundServiceImpl implements InboundService {
         .orElseThrow(() -> new NotFoundException(ErrorConstant.INBOUND_NOT_FOUND));
 
     if (!inbound.getForwarder().getUsername().equals(username)) {
-      throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
+      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
     }
 
     BillOfLading billOfLading = inbound.getBillOfLading();

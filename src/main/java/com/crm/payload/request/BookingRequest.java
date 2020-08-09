@@ -16,7 +16,7 @@ public class BookingRequest {
   private String portOfLoading;
 
   @NotBlank
-  private String bookingNumber;
+  private String number;
   
   @NotNull
   private Integer unit;

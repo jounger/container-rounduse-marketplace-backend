@@ -88,8 +88,8 @@ public class SupplierServiceImpl implements SupplierService {
       }
       supplier.setStatus(eStatus.name());
     }
-    supplierRepository.save(supplier);
-    return supplier;
+    Supplier _supplier = supplierRepository.save(supplier);
+    return _supplier;
   }
 
   @Override

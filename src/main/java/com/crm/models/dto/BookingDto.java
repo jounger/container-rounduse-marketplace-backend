@@ -11,7 +11,7 @@ public class BookingDto {
 
   private String portOfLoading;
 
-  private String bookingNumber;
+  private String number;
 
   private Integer unit;
 

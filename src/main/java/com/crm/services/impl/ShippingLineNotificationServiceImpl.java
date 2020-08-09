@@ -59,8 +59,9 @@ public class ShippingLineNotificationServiceImpl implements ShippingLineNotifica
 
     shippingLineNotification.setSendDate(LocalDateTime.now());
 
-    shippingLineNotificationRepository.save(shippingLineNotification);
-    return shippingLineNotification;
+    ShippingLineNotification _shippingLineNotification = shippingLineNotificationRepository
+        .save(shippingLineNotification);
+    return _shippingLineNotification;
   }
 
   @Override
@@ -121,8 +122,9 @@ public class ShippingLineNotificationServiceImpl implements ShippingLineNotifica
       shippingLineNotification.setIsHide(isHide);
     }
 
-    shippingLineNotificationRepository.save(shippingLineNotification);
-    return shippingLineNotification;
+    ShippingLineNotification _shippingLineNotification = shippingLineNotificationRepository
+        .save(shippingLineNotification);
+    return _shippingLineNotification;
   }
 
   @Override

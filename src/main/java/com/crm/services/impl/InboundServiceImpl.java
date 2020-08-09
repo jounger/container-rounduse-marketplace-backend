@@ -49,6 +49,7 @@ import com.crm.repository.InboundRepository;
 import com.crm.repository.OutboundRepository;
 import com.crm.repository.PortRepository;
 import com.crm.repository.ShippingLineRepository;
+import com.crm.repository.SupplyRepository;
 import com.crm.services.InboundService;
 import com.crm.specification.builder.InboundSpecificationsBuilder;
 
@@ -88,6 +89,9 @@ public class InboundServiceImpl implements InboundService {
   @Autowired
   private ContainerTractorRepository containerTractorRepository;
 
+  @Autowired
+  private SupplyRepository supplyRepository;
+
   @Override
   public Page<Inbound> getInbounds(PaginationRequest request) {
     PageRequest pageRequest = PageRequest.of(request.getPage(), request.getLimit(),
@@ -104,15 +108,11 @@ public class InboundServiceImpl implements InboundService {
   }
 
   @Override
-  public Page<Inbound> getInboundsForwarder(String username, PaginationRequest request) {
-    if (forwarderRepository.existsByUsername(username)) {
-      PageRequest pageRequest = PageRequest.of(request.getPage(), request.getLimit(),
-          Sort.by(Sort.Direction.DESC, "createdAt"));
-      Page<Inbound> pages = inboundRepository.findByFowarder(username, pageRequest);
-      return pages;
-    } else {
-      throw new NotFoundException(ErrorConstant.FORWARDER_NOT_FOUND);
-    }
+  public Page<Inbound> getInboundsByForwarder(String username, PaginationRequest request) {
+    PageRequest pageRequest = PageRequest.of(request.getPage(), request.getLimit(),
+        Sort.by(Sort.Direction.DESC, "createdAt"));
+    Page<Inbound> pages = inboundRepository.findByFowarder(username, pageRequest);
+    return pages;
   }
 
   @Override
@@ -136,6 +136,12 @@ public class InboundServiceImpl implements InboundService {
         .orElseThrow(() -> new NotFoundException(ErrorConstant.FORWARDER_NOT_FOUND));
     inbound.setForwarder(forwarder);
 
+    String code = request.getCode();
+    if (supplyRepository.existsByCode(code)) {
+      throw new DuplicateRecordException(ErrorConstant.SUPPLY_CODE_DUPLICATE);
+    }
+    inbound.setCode(code);
+
     ShippingLine shippingLine = shippingLineRepository.findByCompanyCode(request.getShippingLine())
         .orElseThrow(() -> new NotFoundException(ErrorConstant.SHIPPINGLINE_NOT_FOUND));
     inbound.setShippingLine(shippingLine);
@@ -154,12 +160,12 @@ public class InboundServiceImpl implements InboundService {
 
     BillOfLading billOfLading = new BillOfLading();
     BillOfLadingRequest billOfLadingRequest = request.getBillOfLading();
-    String billOfLadingNumber = billOfLadingRequest.getBillOfLadingNumber();
-    if (billOfLadingNumber != null && !billOfLadingNumber.isEmpty()) {
-      if (billOfLadingRepository.existsByBillOfLadingNumber(billOfLadingNumber)) {
+    String number = billOfLadingRequest.getNumber();
+    if (number != null && !number.isEmpty()) {
+      if (billOfLadingRepository.existsByNumber(number)) {
         throw new DuplicateRecordException(ErrorConstant.BILLOFLADING_ALREADY_EXISTS);
       }
-      billOfLading.setBillOfLadingNumber(billOfLadingNumber);
+      billOfLading.setNumber(number);
     } else {
       throw new NotFoundException(ErrorConstant.BILLOFLADING_NOT_FOUND);
     }
@@ -179,231 +185,220 @@ public class InboundServiceImpl implements InboundService {
 
     inbound.setBillOfLading(billOfLading);
 
-    inboundRepository.save(inbound);
-    return inbound;
+    Inbound _inbound = inboundRepository.save(inbound);
+    return _inbound;
   }
 
   @Override
   public Inbound updateInbound(String username, InboundRequest request) {
 
-    if (forwarderRepository.existsByUsername(username)) {
-      Inbound inbound = inboundRepository.findById(request.getId())
-          .orElseThrow(() -> new NotFoundException(ErrorConstant.INBOUND_NOT_FOUND));
+    Inbound inbound = inboundRepository.findById(request.getId())
+        .orElseThrow(() -> new NotFoundException(ErrorConstant.INBOUND_NOT_FOUND));
 
-      if (!inbound.getForwarder().getUsername().equals(username)) {
+    if (!inbound.getForwarder().getUsername().equals(username)) {
+      throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
+    }
+
+    ShippingLine shippingLine = shippingLineRepository.findByCompanyCode(request.getShippingLine())
+        .orElseThrow(() -> new NotFoundException(ErrorConstant.SHIPPINGLINE_NOT_FOUND));
+    inbound.setShippingLine(shippingLine);
+
+    ContainerType containerType = containerTypeRepository.findByName(request.getContainerType())
+        .orElseThrow(() -> new NotFoundException(ErrorConstant.CONTAINER_TYPE_NOT_FOUND));
+    inbound.setContainerType(containerType);
+
+    inbound.setReturnStation(request.getReturnStation());
+
+    BillOfLading billOfLading = inbound.getBillOfLading();
+
+    Set<Container> setContainers = new HashSet<>(billOfLading.getContainers());
+    setContainers.forEach(item -> {
+      if (item.getStatus().equalsIgnoreCase(EnumSupplyStatus.COMBINED.name())
+          || item.getStatus().equalsIgnoreCase(EnumSupplyStatus.BIDDING.name())) {
         throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
       }
+    });
 
-      ShippingLine shippingLine = shippingLineRepository.findByCompanyCode(request.getShippingLine())
-          .orElseThrow(() -> new NotFoundException(ErrorConstant.SHIPPINGLINE_NOT_FOUND));
-      inbound.setShippingLine(shippingLine);
-
-      ContainerType containerType = containerTypeRepository.findByName(request.getContainerType())
-          .orElseThrow(() -> new NotFoundException(ErrorConstant.CONTAINER_TYPE_NOT_FOUND));
-      inbound.setContainerType(containerType);
-
-      inbound.setReturnStation(request.getReturnStation());
-
-      BillOfLading billOfLading = inbound.getBillOfLading();
-
-      Set<Container> setContainers = new HashSet<>(billOfLading.getContainers());
-      setContainers.forEach(item -> {
-        if (item.getStatus().equalsIgnoreCase(EnumSupplyStatus.COMBINED.name())
-            || item.getStatus().equalsIgnoreCase(EnumSupplyStatus.BIDDING.name())) {
-          throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
-        }
-      });
-
-      LocalDateTime pickupTime = Tool.convertToLocalDateTime(request.getPickupTime());
-      LocalDateTime freeTime = billOfLading.getFreeTime();
-      if (pickupTime.isAfter(freeTime)) {
-        throw new InternalException(ErrorConstant.INBOUND_INVALID_FREETIME);
-      }
-
-      inbound.setPickupTime(pickupTime);
-
-      LocalDateTime emptyTime = pickupTime.plusDays(1);
-      inbound.setEmptyTime(emptyTime);
-
-      Collection<Container> collectionContainers = billOfLading.getContainers();
-      List<Container> containers = new ArrayList<>(collectionContainers);
-
-      if (containers != null) {
-        for (int i = 0; i < containers.size(); i++) {
-          Container container = containerRepository.findById(containers.get(i).getId())
-              .orElseThrow(() -> new NotFoundException(ErrorConstant.CONTAINER_NOT_FOUND));
-
-          boolean listContainer = containerRepository.findByContainerNumber(billOfLading.getId(), username,
-              container.getContainerNumber(), inbound.getPickupTime(), freeTime);
-          if (!listContainer) {
-            throw new InternalException(ErrorConstant.CONTAINER_BUSY);
-          }
-
-          String driverUserName = container.getDriver().getUsername();
-          Driver driver = driverRepository.findByUsername(driverUserName)
-              .orElseThrow(() -> new NotFoundException(ErrorConstant.DRIVER_NOT_FOUND));
-
-          String trailer = container.getTrailer().getLicensePlate();
-          ContainerSemiTrailer containerSemiTrailer = containerSemiTrailerRepository.findByLicensePlate(trailer)
-              .orElseThrow(() -> new NotFoundException(ErrorConstant.TRAILER_NOT_FOUND));
-
-          String tractor = container.getTractor().getLicensePlate();
-          ContainerTractor containerTractor = containerTractorRepository.findByLicensePlate(tractor)
-              .orElseThrow(() -> new NotFoundException(ErrorConstant.TRACTOR_NOT_FOUND));
-
-          boolean containersByDriver = containerRepository.findByDriver(driver.getId(), username, inbound.getPickupTime(),
-              freeTime, billOfLading.getId());
-          if (!containersByDriver) {
-            throw new InternalException(ErrorConstant.DRIVER_BUSY);
-          }
-
-          boolean listContainerByTractor = containerRepository.findByTractor(containerTractor.getId(), username,
-              inbound.getPickupTime(), freeTime, billOfLading.getId());
-          if (!listContainerByTractor) {
-            throw new InternalException(ErrorConstant.TRACTOR_BUSY);
-          }
-
-          boolean listContainerByTrailer = containerRepository.findByTrailer(containerSemiTrailer.getId(), username,
-              inbound.getPickupTime(), freeTime, billOfLading.getId());
-          if (!listContainerByTrailer) {
-            throw new InternalException(ErrorConstant.TRAILER_BUSY);
-          }
-        }
-      }
-      inboundRepository.save(inbound);
-      return inbound;
-
-    } else {
-      throw new NotFoundException(ErrorConstant.FORWARDER_NOT_FOUND);
+    LocalDateTime pickupTime = Tool.convertToLocalDateTime(request.getPickupTime());
+    LocalDateTime freeTime = billOfLading.getFreeTime();
+    if (pickupTime.isAfter(freeTime)) {
+      throw new InternalException(ErrorConstant.INBOUND_INVALID_FREETIME);
     }
+
+    inbound.setPickupTime(pickupTime);
+
+    LocalDateTime emptyTime = pickupTime.plusDays(1);
+    inbound.setEmptyTime(emptyTime);
+
+    Collection<Container> collectionContainers = billOfLading.getContainers();
+    List<Container> containers = new ArrayList<>(collectionContainers);
+
+    if (containers != null) {
+      for (int i = 0; i < containers.size(); i++) {
+        Container container = containerRepository.findById(containers.get(i).getId())
+            .orElseThrow(() -> new NotFoundException(ErrorConstant.CONTAINER_NOT_FOUND));
+
+        boolean listContainer = containerRepository.findByContainerNumber(billOfLading.getId(), username,
+            container.getContainerNumber(), inbound.getPickupTime(), freeTime);
+        if (!listContainer) {
+          throw new InternalException(ErrorConstant.CONTAINER_BUSY);
+        }
+
+        String driverUserName = container.getDriver().getUsername();
+        Driver driver = driverRepository.findByUsername(driverUserName)
+            .orElseThrow(() -> new NotFoundException(ErrorConstant.DRIVER_NOT_FOUND));
+
+        String trailer = container.getTrailer().getLicensePlate();
+        ContainerSemiTrailer containerSemiTrailer = containerSemiTrailerRepository.findByLicensePlate(trailer)
+            .orElseThrow(() -> new NotFoundException(ErrorConstant.TRAILER_NOT_FOUND));
+
+        String tractor = container.getTractor().getLicensePlate();
+        ContainerTractor containerTractor = containerTractorRepository.findByLicensePlate(tractor)
+            .orElseThrow(() -> new NotFoundException(ErrorConstant.TRACTOR_NOT_FOUND));
+
+        boolean containersByDriver = containerRepository.findByDriver(driver.getId(), username, inbound.getPickupTime(),
+            freeTime, billOfLading.getId());
+        if (!containersByDriver) {
+          throw new InternalException(ErrorConstant.DRIVER_BUSY);
+        }
+
+        boolean listContainerByTractor = containerRepository.findByTractor(containerTractor.getId(), username,
+            inbound.getPickupTime(), freeTime, billOfLading.getId());
+        if (!listContainerByTractor) {
+          throw new InternalException(ErrorConstant.TRACTOR_BUSY);
+        }
+
+        boolean listContainerByTrailer = containerRepository.findByTrailer(containerSemiTrailer.getId(), username,
+            inbound.getPickupTime(), freeTime, billOfLading.getId());
+        if (!listContainerByTrailer) {
+          throw new InternalException(ErrorConstant.TRAILER_BUSY);
+        }
+      }
+    }
+    Inbound _inbound = inboundRepository.save(inbound);
+    return _inbound;
 
   }
 
   @Override
   public Inbound editInbound(Map<String, Object> updates, Long id, String username) {
-    if (forwarderRepository.existsByUsername(username)) {
-      Inbound inbound = inboundRepository.findById(id)
-          .orElseThrow(() -> new NotFoundException(ErrorConstant.INBOUND_NOT_FOUND));
 
-      if (!inbound.getForwarder().getUsername().equals(username)) {
-        throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
+    Inbound inbound = inboundRepository.findById(id)
+        .orElseThrow(() -> new NotFoundException(ErrorConstant.INBOUND_NOT_FOUND));
+
+    if (!inbound.getForwarder().getUsername().equals(username)) {
+      throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
+    }
+
+    BillOfLading billOfLading = inbound.getBillOfLading();
+    Set<Container> setContainers = new HashSet<>(billOfLading.getContainers());
+    setContainers.forEach(item -> {
+      if (item.getStatus().equalsIgnoreCase(EnumSupplyStatus.COMBINED.name())
+          || item.getStatus().equalsIgnoreCase(EnumSupplyStatus.BIDDING.name())) {
+        throw new InternalException(ErrorConstant.INBOUND_IS_IN_TRANSACTION);
       }
+    });
 
-      BillOfLading billOfLading = inbound.getBillOfLading();
-      Set<Container> setContainers = new HashSet<>(billOfLading.getContainers());
-      setContainers.forEach(item -> {
-        if (item.getStatus().equalsIgnoreCase(EnumSupplyStatus.COMBINED.name())
-            || item.getStatus().equalsIgnoreCase(EnumSupplyStatus.BIDDING.name())) {
-          throw new InternalException(ErrorConstant.INBOUND_IS_IN_TRANSACTION);
+    String shippingLineRequest = String.valueOf(updates.get("shippingLine"));
+    if (updates.get("shippingLine") != null
+        && !Tool.isEqual(inbound.getShippingLine().getCompanyCode(), shippingLineRequest)) {
+      ShippingLine shippingLine = shippingLineRepository.findByCompanyCode(shippingLineRequest)
+          .orElseThrow(() -> new NotFoundException(ErrorConstant.SHIPPINGLINE_NOT_FOUND));
+      inbound.setShippingLine(shippingLine);
+    }
+
+    String containerTypeRequest = String.valueOf(updates.get("containerType"));
+    if (updates.get("containerType") != null
+        && !Tool.isEqual(inbound.getContainerType().getName(), containerTypeRequest)) {
+      ContainerType containerType = containerTypeRepository.findByName(containerTypeRequest)
+          .orElseThrow(() -> new NotFoundException(ErrorConstant.CONTAINER_TYPE_NOT_FOUND));
+      inbound.setContainerType(containerType);
+    }
+
+    String returnStationRequest = String.valueOf(updates.get("returnStation"));
+    if (updates.get("returnStation") != null && !Tool.isEqual(inbound.getReturnStation(), returnStationRequest)) {
+      inbound.setReturnStation(returnStationRequest);
+    }
+
+    String pickupTimeRequest = String.valueOf(updates.get("pickupTime"));
+    if (updates.get("pickupTime") != null
+        && !Tool.isEqual(String.valueOf(inbound.getPickupTime()), pickupTimeRequest)) {
+      LocalDateTime pickupTime = Tool.convertToLocalDateTime(pickupTimeRequest);
+
+      LocalDateTime emptyTime = pickupTime.plusDays(1);
+      inbound.setEmptyTime(emptyTime);
+
+      Set<Container> containers = new HashSet<>(billOfLading.getContainers());
+      containers.forEach(item -> {
+
+        String containerNumber = item.getContainerNumber();
+        boolean listContainer = containerRepository.findByContainerNumber(billOfLading.getId(), username,
+            containerNumber, pickupTime, billOfLading.getFreeTime());
+        if (!listContainer) {
+          throw new InternalException(ErrorConstant.CONTAINER_BUSY);
         }
+
+        Long driverId = item.getDriver().getId();
+        boolean listContainerByDriver = containerRepository.findByDriver(driverId, username, pickupTime,
+            billOfLading.getFreeTime(), billOfLading.getId());
+        if (!listContainerByDriver) {
+          throw new InternalException(ErrorConstant.DRIVER_BUSY);
+        }
+
+        Long tractorId = item.getTractor().getId();
+        boolean listContainerByTractor = containerRepository.findByTractor(tractorId, username, pickupTime,
+            billOfLading.getFreeTime(), billOfLading.getId());
+        if (!listContainerByTractor) {
+          throw new InternalException(ErrorConstant.TRACTOR_BUSY);
+
+        }
+
+        Long trailerId = item.getTrailer().getId();
+        boolean listContainerByTrailer = containerRepository.findByTrailer(trailerId, username, pickupTime,
+            billOfLading.getFreeTime(), billOfLading.getId());
+        if (!listContainerByTrailer) {
+          throw new InternalException(ErrorConstant.TRAILER_BUSY);
+
+        }
+
       });
 
-      String shippingLineRequest = String.valueOf(updates.get("shippingLine"));
-      if (updates.get("shippingLine") != null
-          && !Tool.isEqual(inbound.getShippingLine().getCompanyCode(), shippingLineRequest)) {
-        ShippingLine shippingLine = shippingLineRepository.findByCompanyCode(shippingLineRequest)
-            .orElseThrow(() -> new NotFoundException(ErrorConstant.SHIPPINGLINE_NOT_FOUND));
-        inbound.setShippingLine(shippingLine);
+      if (inbound.getBillOfLading().getFreeTime().isAfter(pickupTime)) {
+        inbound.setPickupTime(pickupTime);
+      } else {
+        throw new InternalException(ErrorConstant.INBOUND_INVALID_FREETIME);
       }
-
-      String containerTypeRequest = String.valueOf(updates.get("containerType"));
-      if (updates.get("containerType") != null
-          && !Tool.isEqual(inbound.getContainerType().getName(), containerTypeRequest)) {
-        ContainerType containerType = containerTypeRepository.findByName(containerTypeRequest)
-            .orElseThrow(() -> new NotFoundException(ErrorConstant.CONTAINER_TYPE_NOT_FOUND));
-        inbound.setContainerType(containerType);
-      }
-
-      String returnStationRequest = String.valueOf(updates.get("returnStation"));
-      if (updates.get("returnStation") != null && !Tool.isEqual(inbound.getReturnStation(), returnStationRequest)) {
-        inbound.setReturnStation(returnStationRequest);
-      }
-
-      String pickupTimeRequest = String.valueOf(updates.get("pickupTime"));
-      if (updates.get("pickupTime") != null
-          && !Tool.isEqual(String.valueOf(inbound.getPickupTime()), pickupTimeRequest)) {
-        LocalDateTime pickupTime = Tool.convertToLocalDateTime(pickupTimeRequest);
-
-        LocalDateTime emptyTime = pickupTime.plusDays(1);
-        inbound.setEmptyTime(emptyTime);
-
-        Set<Container> containers = new HashSet<>(billOfLading.getContainers());
-        containers.forEach(item -> {
-
-          String containerNumber = item.getContainerNumber();
-          boolean listContainer = containerRepository.findByContainerNumber(billOfLading.getId(), username,
-              containerNumber, pickupTime, billOfLading.getFreeTime());
-          if (!listContainer) {
-            throw new InternalException(ErrorConstant.CONTAINER_BUSY);
-          }
-
-          Long driverId = item.getDriver().getId();
-          boolean listContainerByDriver = containerRepository.findByDriver(driverId, username, pickupTime,
-              billOfLading.getFreeTime(), billOfLading.getId());
-          if (!listContainerByDriver) {
-            throw new InternalException(ErrorConstant.DRIVER_BUSY);
-          }
-
-          Long tractorId = item.getTractor().getId();
-          boolean listContainerByTractor = containerRepository.findByTractor(tractorId, username, pickupTime,
-              billOfLading.getFreeTime(), billOfLading.getId());
-          if (!listContainerByTractor) {
-            throw new InternalException(ErrorConstant.TRACTOR_BUSY);
-
-          }
-
-          Long trailerId = item.getTrailer().getId();
-          boolean listContainerByTrailer = containerRepository.findByTrailer(trailerId, username, pickupTime,
-              billOfLading.getFreeTime(), billOfLading.getId());
-          if (!listContainerByTrailer) {
-            throw new InternalException(ErrorConstant.TRAILER_BUSY);
-
-          }
-
-        });
-
-        if (inbound.getBillOfLading().getFreeTime().isAfter(pickupTime)) {
-          inbound.setPickupTime(pickupTime);
-        } else {
-          throw new InternalException(ErrorConstant.INBOUND_INVALID_FREETIME);
-        }
-      }
-
-      String emptyTimeRequest = String.valueOf(updates.get("emptyTime"));
-      if (updates.get("emptyTime") != null && !Tool.isEqual(String.valueOf(inbound.getEmptyTime()), emptyTimeRequest)) {
-        LocalDateTime emptyTime = Tool.convertToLocalDateTime(emptyTimeRequest);
-        inbound.setEmptyTime(emptyTime);
-      }
-
-      inboundRepository.save(inbound);
-      return inbound;
-    } else {
-      throw new NotFoundException(ErrorConstant.FORWARDER_NOT_FOUND);
     }
+
+    String emptyTimeRequest = String.valueOf(updates.get("emptyTime"));
+    if (updates.get("emptyTime") != null && !Tool.isEqual(String.valueOf(inbound.getEmptyTime()), emptyTimeRequest)) {
+      LocalDateTime emptyTime = Tool.convertToLocalDateTime(emptyTimeRequest);
+      inbound.setEmptyTime(emptyTime);
+    }
+
+    Inbound _inbound = inboundRepository.save(inbound);
+    return _inbound;
   }
 
   @Override
   public void removeInbound(Long id, String username) {
-    if (forwarderRepository.existsByUsername(username)) {
-      Inbound inbound = inboundRepository.findById(id)
-          .orElseThrow(() -> new NotFoundException(ErrorConstant.INBOUND_NOT_FOUND));
 
-      if (!inbound.getForwarder().getUsername().equals(username)) {
-        throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
-      }
+    Inbound inbound = inboundRepository.findById(id)
+        .orElseThrow(() -> new NotFoundException(ErrorConstant.INBOUND_NOT_FOUND));
 
-      BillOfLading billOfLading = inbound.getBillOfLading();
-      Set<Container> containers = new HashSet<>(billOfLading.getContainers());
-      containers.forEach(item -> {
-        if (item.getStatus().equalsIgnoreCase(EnumSupplyStatus.COMBINED.name())
-            || item.getStatus().equalsIgnoreCase(EnumSupplyStatus.BIDDING.name())) {
-          throw new InternalException(ErrorConstant.CONTAINER_BUSY);
-        }
-      });
-      inboundRepository.delete(inbound);
-    } else {
-      throw new NotFoundException(ErrorConstant.FORWARDER_NOT_FOUND);
+    if (!inbound.getForwarder().getUsername().equals(username)) {
+      throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
     }
+
+    BillOfLading billOfLading = inbound.getBillOfLading();
+    Set<Container> containers = new HashSet<>(billOfLading.getContainers());
+    containers.forEach(item -> {
+      if (item.getStatus().equalsIgnoreCase(EnumSupplyStatus.COMBINED.name())
+          || item.getStatus().equalsIgnoreCase(EnumSupplyStatus.BIDDING.name())) {
+        throw new InternalException(ErrorConstant.CONTAINER_BUSY);
+      }
+    });
+    inboundRepository.delete(inbound);
   }
 
   @Override

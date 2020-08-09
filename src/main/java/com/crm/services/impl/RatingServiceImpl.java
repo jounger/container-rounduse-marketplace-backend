@@ -43,7 +43,8 @@ public class RatingServiceImpl implements RatingService {
   public Rating createRating(String username, RatingRequest request) {
     Rating rating = new Rating();
 
-    Supplier sender = supplierRepository.findByUsername(username).orElseThrow(() -> new NotFoundException("Sender is not found."));
+    Supplier sender = supplierRepository.findByUsername(username)
+        .orElseThrow(() -> new NotFoundException("Sender is not found."));
     rating.setSender(sender);
 
     Supplier receiver = supplierRepository.findById(request.getReceiver())
@@ -61,7 +62,7 @@ public class RatingServiceImpl implements RatingService {
       throw new NotFoundException(ErrorConstant.USER_ACCESS_DENIED);
     }
     rating.setRatingValue(request.getRatingValue());
-    ratingRepository.save(rating);
+    Rating _rating = ratingRepository.save(rating);
 
     LocalDateTime rewind = LocalDateTime.now().minusMonths(Constant.REWIND_MONTH);
     Double ratingValue = ratingRepository.calcAvgRatingValueByReceiver(request.getReceiver(),
@@ -69,13 +70,13 @@ public class RatingServiceImpl implements RatingService {
     receiver.setRatingValue(ratingValue);
     supplierRepository.save(receiver);
 
-    supplierRepository.save(receiver);
-    return rating;
+    return _rating;
   }
 
   @Override
   public Rating getRating(Long id, String username) {
-    Rating rating = ratingRepository.findById(id).orElseThrow(() -> new NotFoundException(ErrorConstant.RATING_NOT_FOUND));
+    Rating rating = ratingRepository.findById(id)
+        .orElseThrow(() -> new NotFoundException(ErrorConstant.RATING_NOT_FOUND));
     if (!rating.getSender().getUsername().equals(username) || !rating.getReceiver().getUsername().equals(username)) {
       throw new NotFoundException(ErrorConstant.USER_ACCESS_DENIED);
     }
@@ -153,7 +154,7 @@ public class RatingServiceImpl implements RatingService {
     rating.setReceiver(receiver);
 
     rating.setRatingValue(request.getRatingValue());
-    ratingRepository.save(rating);
+    Rating _rating = ratingRepository.save(rating);
 
     LocalDateTime rewind = LocalDateTime.now().minusMonths(Constant.REWIND_MONTH);
     Double ratingValue = ratingRepository.calcAvgRatingValueByReceiver(request.getReceiver(),
@@ -162,12 +163,13 @@ public class RatingServiceImpl implements RatingService {
 
     supplierRepository.save(receiver);
 
-    return rating;
+    return _rating;
   }
 
   @Override
   public Rating editRating(Long id, String username, Map<String, Object> updates) {
-    Rating rating = ratingRepository.findById(id).orElseThrow(() -> new NotFoundException(ErrorConstant.RATING_NOT_FOUND));
+    Rating rating = ratingRepository.findById(id)
+        .orElseThrow(() -> new NotFoundException(ErrorConstant.RATING_NOT_FOUND));
 
     if (!rating.getSender().getUsername().equals(username)) {
       throw new NotFoundException(ErrorConstant.USER_ACCESS_DENIED);
@@ -176,22 +178,23 @@ public class RatingServiceImpl implements RatingService {
     String ratingValue = String.valueOf(updates.get("ratingValue"));
     if (updates.get("ratingValue") != null && !Tool.isEqual(rating.getRatingValue(), ratingValue)) {
       rating.setRatingValue(Integer.valueOf(ratingValue));
-      ratingRepository.save(rating);
-
-      Supplier receiver = rating.getReceiver();
-      LocalDateTime rewind = LocalDateTime.now().minusMonths(Constant.REWIND_MONTH);
-      Double receiverRatingValue = ratingRepository.calcAvgRatingValueByReceiver(receiver.getId(),
-          Timestamp.valueOf(rewind));
-      receiver.setRatingValue(receiverRatingValue);
-      supplierRepository.save(receiver);
     }
+    Rating _rating = ratingRepository.save(rating);
 
-    return rating;
+    Supplier receiver = rating.getReceiver();
+    LocalDateTime rewind = LocalDateTime.now().minusMonths(Constant.REWIND_MONTH);
+    Double receiverRatingValue = ratingRepository.calcAvgRatingValueByReceiver(receiver.getId(),
+        Timestamp.valueOf(rewind));
+    receiver.setRatingValue(receiverRatingValue);
+    supplierRepository.save(receiver);
+
+    return _rating;
   }
 
   @Override
   public void removeRating(Long id, String username) {
-    Rating rating = ratingRepository.findById(id).orElseThrow(() -> new NotFoundException(ErrorConstant.RATING_NOT_FOUND));
+    Rating rating = ratingRepository.findById(id)
+        .orElseThrow(() -> new NotFoundException(ErrorConstant.RATING_NOT_FOUND));
     if (rating.getSender().getUsername().equals(username)) {
       ratingRepository.deleteById(id);
     } else {

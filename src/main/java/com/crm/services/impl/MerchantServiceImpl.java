@@ -18,7 +18,6 @@ import com.crm.exception.DuplicateRecordException;
 import com.crm.exception.NotFoundException;
 import com.crm.models.Merchant;
 import com.crm.models.Role;
-import com.crm.payload.request.MerchantRequest;
 import com.crm.payload.request.PaginationRequest;
 import com.crm.payload.request.SupplierRequest;
 import com.crm.repository.MerchantRepository;
@@ -77,9 +76,8 @@ public class MerchantServiceImpl implements MerchantService {
     String encoder = passwordEncoder.encode(request.getPassword());
     merchant.setPassword(encoder);
 
-    merchantRepository.save(merchant);
-
-    return merchant;
+    Merchant _merchant = merchantRepository.save(merchant);
+    return _merchant;
   }
 
   @Override
@@ -97,54 +95,10 @@ public class MerchantServiceImpl implements MerchantService {
   }
 
   @Override
-  public Merchant updateMerchant(MerchantRequest request) {
-    Merchant merchant = merchantRepository.findById(request.getId())
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.MERCHANT_NOT_FOUND));
-
-    /*
-     * String encoder = passwordEncoder.encode(request.getPassword());
-     * merchant.setPassword(encoder);
-     */
-
-    Set<Role> roles = new HashSet<>();
-    Role userRole = roleRepository.findByName("ROLE_FORWARDER")
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.ROLE_NOT_FOUND));
-    roles.add(userRole);
-    merchant.setRoles(roles);
-
-    if (UserServiceImpl.isEmailChange(request.getEmail(), merchant)) {
-      merchant.setEmail(request.getEmail());
-    }
-
-    merchant.setPhone(request.getPhone());
-    merchant.setAddress(request.getAddress());
-    merchant.setStatus(EnumUserStatus.PENDING.name());
-    merchant.setWebsite(request.getWebsite());
-    merchant.setCompanyName(request.getCompanyName());
-    merchant.setCompanyCode(request.getCompanyCode());
-    merchant.setCompanyDescription(request.getCompanyDescription());
-    merchant.setCompanyAddress(request.getCompanyAddress());
-    merchant.setContactPerson(request.getContactPerson());
-    merchant.setTin(request.getTin());
-    merchant.setFax(request.getFax());
-
-    merchantRepository.save(merchant);
-
-    return merchant;
-  }
-
-  @Override
   public Merchant editMerchant(Long id, Map<String, Object> updates) {
     Merchant merchant = merchantRepository.findById(id)
         .orElseThrow(() -> new NotFoundException(ErrorConstant.MERCHANT_NOT_FOUND));
 
-    /*
-     * String password = String.valueOf( updates.get("password")); if (password !=
-     * null) { String encoder = passwordEncoder.encode(password);
-     * merchant.setPassword(encoder); }
-     */
-
- 
     String email = String.valueOf(updates.get("email"));
     if (updates.get("email") != null && !Tool.isEqual(merchant.getEmail(), email)) {
       if (userRepository.existsByEmail(email)) {
@@ -211,8 +165,8 @@ public class MerchantServiceImpl implements MerchantService {
       merchant.setFax(fax);
     }
 
-    merchantRepository.save(merchant);
-    return merchant;
+    Merchant _merchant = merchantRepository.save(merchant);
+    return _merchant;
   }
 
   @Override

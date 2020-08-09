@@ -20,8 +20,6 @@ public interface DriverService {
 
   Page<Driver> getDriversByForwarder(String username, PaginationRequest request);
 
-  Driver updateDriver(String username, DriverRequest request);
-
   Driver editDriver(Long id, String username, Map<String, Object> updates);
 
   void removeDriver(Long id, String username);

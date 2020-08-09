@@ -14,12 +14,12 @@ import com.crm.enums.EnumDriverNotification;
 import com.crm.enums.EnumNotificationType;
 import com.crm.exception.NotFoundException;
 import com.crm.models.DriverNotification;
-import com.crm.models.Outbound;
+import com.crm.models.ShippingInfo;
 import com.crm.models.User;
 import com.crm.payload.request.DriverNotificationRequest;
 import com.crm.payload.request.PaginationRequest;
 import com.crm.repository.DriverNotificationRepository;
-import com.crm.repository.OutboundRepository;
+import com.crm.repository.ShippingInfoRepository;
 import com.crm.repository.UserRepository;
 import com.crm.services.DriverNotificationService;
 
@@ -30,7 +30,7 @@ public class DriverNotificationServiceImpl implements DriverNotificationService 
   private UserRepository userRepositoty;
 
   @Autowired
-  private OutboundRepository outboundRepository;
+  private ShippingInfoRepository shippingInfoRepository;
 
   @Autowired
   private DriverNotificationRepository driverNotificationRepository;
@@ -47,7 +47,7 @@ public class DriverNotificationServiceImpl implements DriverNotificationService 
     driverNotification.setIsHide(false);
     driverNotification.setTitle(request.getTitle());
 
-    Outbound relatedResource = outboundRepository.findById(request.getRelatedResource())
+    ShippingInfo relatedResource = shippingInfoRepository.findById(request.getRelatedResource())
         .orElseThrow(() -> new NotFoundException(ErrorConstant.NOTIFICATION_RELATED_RESOURCE_NOT_FOUND));
     driverNotification.setRelatedResource(relatedResource);
 
@@ -59,8 +59,8 @@ public class DriverNotificationServiceImpl implements DriverNotificationService 
 
     driverNotification.setSendDate(LocalDateTime.now());
 
-    driverNotificationRepository.save(driverNotification);
-    return driverNotification;
+    DriverNotification _driverNotification = driverNotificationRepository.save(driverNotification);
+    return _driverNotification;
   }
 
   @Override
@@ -120,8 +120,8 @@ public class DriverNotificationServiceImpl implements DriverNotificationService 
       driverNotification.setIsHide(isHide);
     }
 
-    driverNotificationRepository.save(driverNotification);
-    return driverNotification;
+    DriverNotification _driverNotification = driverNotificationRepository.save(driverNotification);
+    return _driverNotification;
   }
 
   @Override

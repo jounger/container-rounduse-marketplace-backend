@@ -14,7 +14,7 @@ public interface BillOfLadingService {
 
   BillOfLading getBillOfLadingById(Long id);
 
-  BillOfLading getBillOfLadingByBillOfLadingNumber(String billOfLadingNumber);
+  BillOfLading getBillOfLadingByNumber(String number);
 
   Page<BillOfLading> searchBillOfLadings(PaginationRequest request, String search);
 

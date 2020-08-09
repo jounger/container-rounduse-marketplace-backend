@@ -48,8 +48,8 @@ public class Combined {
   @JoinColumn(name = "bid_id")
   private Bid bid;
 
-  @Column(name = "status")
-  private String status;
+  @Column(name = "is_canceled")
+  private Boolean isCanceled;
 
   @Column(name = "created_at", nullable = false, updatable = false)
   @Temporal(TemporalType.TIMESTAMP)
@@ -66,5 +66,8 @@ public class Combined {
 
   @OneToOne(mappedBy = "combined", cascade = CascadeType.ALL)
   private Contract contract;
+  
+  @OneToMany(mappedBy = "combined")
+  private Collection<ShippingInfo> shippingInfos = new ArrayList<>();
 
 }

@@ -14,6 +14,7 @@ public class ShippingLineNotificationMapper {
     shippingLineNotificationDto.setId(shippingLineNotification.getId());
     shippingLineNotificationDto.setRecipient(shippingLineNotification.getRecipient().getUsername());
     shippingLineNotificationDto.setIsRead(shippingLineNotification.getIsRead());
+    shippingLineNotificationDto.setIsHide(shippingLineNotificationDto.getIsHide());
 
     CombinedDto relatedResource = CombinedMapper.toCombinedDto(shippingLineNotification.getRelatedResource());
     shippingLineNotificationDto.setRelatedResource(relatedResource);

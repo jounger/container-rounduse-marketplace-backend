@@ -52,8 +52,8 @@ public class Booking {
   @JoinColumn(name = "port_id")
   private Port portOfLoading;
 
-  @Column(name = "booking_number")
-  private String bookingNumber;
+  @Column(name = "number")
+  private String number;
 
   @Column(name = "unit")
   private Integer unit;

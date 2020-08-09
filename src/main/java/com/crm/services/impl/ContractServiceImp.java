@@ -62,8 +62,8 @@ public class ContractServiceImp implements ContractService {
       throw new NotFoundException(ErrorConstant.USER_ACCESS_DENIED);
     }
 
-    contractRepository.save(contract);
-    return contract;
+    Contract _contract = contractRepository.save(contract);
+    return _contract;
   }
 
   @Override
@@ -126,8 +126,8 @@ public class ContractServiceImp implements ContractService {
       throw new NotFoundException(ErrorConstant.USER_ACCESS_DENIED);
     }
 
-    contractRepository.save(contract);
-    return contract;
+    Contract _contract = contractRepository.save(contract);
+    return _contract;
   }
 
   @Override

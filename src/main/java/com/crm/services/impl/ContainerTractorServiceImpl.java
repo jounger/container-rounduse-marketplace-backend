@@ -79,129 +79,115 @@ public class ContainerTractorServiceImpl implements ContainerTractorService {
 
     containerTractor.setForwarder(forwarder);
 
-    containerTractorRepository.save(containerTractor);
-    return containerTractor;
+    ContainerTractor _containerTractor = containerTractorRepository.save(containerTractor);
+    return _containerTractor;
   }
 
   @Override
   public ContainerTractor updateContainerTractor(String username, ContainerTractorRequest request) {
 
-    if (forwarderRepository.existsByUsername(username)) {
+    ContainerTractor containerTractor = containerTractorRepository.findById(request.getId())
+        .orElseThrow(() -> new NotFoundException(ErrorConstant.TRACTOR_NOT_FOUND));
 
-      ContainerTractor containerTractor = containerTractorRepository.findById(request.getId())
-          .orElseThrow(() -> new NotFoundException(ErrorConstant.TRACTOR_NOT_FOUND));
-
-      if (!containerTractor.getForwarder().getId().equals(username)) {
-        throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
-      }
-
-      Collection<Container> containers = containerRepository.findByTractor(request.getId(),
-          EnumSupplyStatus.COMBINED.name(), EnumSupplyStatus.BIDDING.name());
-      if (containers != null) {
-        containers.forEach(item -> {
-          if (item.getStatus().equalsIgnoreCase(EnumSupplyStatus.COMBINED.name())
-              || item.getStatus().equalsIgnoreCase(EnumSupplyStatus.BIDDING.name())) {
-            throw new InternalException(ErrorConstant.TRACTOR_BUSY);
-          }
-        });
-      }
-
-      if (vehicleRepository.existsByLicensePlate(request.getLicensePlate())
-          && !request.getLicensePlate().equals(containerTractor.getLicensePlate())) {
-        throw new DuplicateRecordException(ErrorConstant.VEHICLE_LICENSE_PLATE_ALREADY_EXISTS);
-      } else {
-        containerTractor.setLicensePlate(request.getLicensePlate());
-      }
-
-      containerTractor.setNumberOfAxles(request.getNumberOfAxles());
-
-      containerTractorRepository.save(containerTractor);
-      return containerTractor;
-    } else {
-      throw new NotFoundException(ErrorConstant.FORWARDER_NOT_FOUND);
+    if (!containerTractor.getForwarder().getUsername().equals(username)) {
+      throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
     }
+
+    Collection<Container> containers = containerRepository.findByTractor(request.getId(),
+        EnumSupplyStatus.COMBINED.name(), EnumSupplyStatus.BIDDING.name());
+    if (containers != null) {
+      containers.forEach(item -> {
+        if (item.getStatus().equalsIgnoreCase(EnumSupplyStatus.COMBINED.name())
+            || item.getStatus().equalsIgnoreCase(EnumSupplyStatus.BIDDING.name())) {
+          throw new InternalException(ErrorConstant.TRACTOR_BUSY);
+        }
+      });
+    }
+
+    if (vehicleRepository.existsByLicensePlate(request.getLicensePlate())
+        && !request.getLicensePlate().equals(containerTractor.getLicensePlate())) {
+      throw new DuplicateRecordException(ErrorConstant.VEHICLE_LICENSE_PLATE_ALREADY_EXISTS);
+    } else {
+      containerTractor.setLicensePlate(request.getLicensePlate());
+    }
+
+    containerTractor.setNumberOfAxles(request.getNumberOfAxles());
+
+    ContainerTractor _containerTractor = containerTractorRepository.save(containerTractor);
+    return _containerTractor;
+
   }
 
   @Override
   public ContainerTractor editContainerTractor(Map<String, Object> updates, Long id, String username) {
-    if (forwarderRepository.existsByUsername(username)) {
 
-      ContainerTractor containerTractor = containerTractorRepository.findById(id)
-          .orElseThrow(() -> new NotFoundException(ErrorConstant.TRACTOR_NOT_FOUND));
+    ContainerTractor containerTractor = containerTractorRepository.findById(id)
+        .orElseThrow(() -> new NotFoundException(ErrorConstant.TRACTOR_NOT_FOUND));
 
-      if (!containerTractor.getForwarder().getId().equals(username)) {
-        throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
-      }
-
-      Collection<Container> containers = containerRepository.findByTractor(id, EnumSupplyStatus.COMBINED.name(),
-          EnumSupplyStatus.BIDDING.name());
-      if (containers != null) {
-        containers.forEach(item -> {
-          if (item.getStatus().equalsIgnoreCase(EnumSupplyStatus.COMBINED.name())
-              || item.getStatus().equalsIgnoreCase(EnumSupplyStatus.BIDDING.name())) {
-            throw new InternalException(ErrorConstant.CONTAINER_BUSY);
-          }
-        });
-      }
-
-      String licensePlate = String.valueOf(updates.get("licensePlate"));
-      if (updates.get("licensePlate") != null && !Tool.isEqual(containerTractor.getLicensePlate(), licensePlate)) {
-        if (vehicleRepository.existsByLicensePlate(licensePlate)) {
-          throw new DuplicateRecordException(ErrorConstant.VEHICLE_LICENSE_PLATE_ALREADY_EXISTS);
-        }
-        containerTractor.setLicensePlate(licensePlate);
-      }
-
-      String numberOfAxles = String.valueOf(updates.get("numberOfAxles"));
-      if (updates.get("numberOfAxles") != null && !Tool.isEqual(containerTractor.getNumberOfAxles(), numberOfAxles)) {
-        containerTractor.setNumberOfAxles(Integer.valueOf(numberOfAxles));
-      }
-
-      containerTractorRepository.save(containerTractor);
-      return containerTractor;
-    } else {
-      throw new NotFoundException(ErrorConstant.FORWARDER_NOT_FOUND);
+    if (!containerTractor.getForwarder().getUsername().equals(username)) {
+      throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
     }
+
+    Collection<Container> containers = containerRepository.findByTractor(id, EnumSupplyStatus.COMBINED.name(),
+        EnumSupplyStatus.BIDDING.name());
+    if (containers != null) {
+      containers.forEach(item -> {
+        if (item.getStatus().equalsIgnoreCase(EnumSupplyStatus.COMBINED.name())
+            || item.getStatus().equalsIgnoreCase(EnumSupplyStatus.BIDDING.name())) {
+          throw new InternalException(ErrorConstant.CONTAINER_BUSY);
+        }
+      });
+    }
+
+    String licensePlate = String.valueOf(updates.get("licensePlate"));
+    if (updates.get("licensePlate") != null && !Tool.isEqual(containerTractor.getLicensePlate(), licensePlate)) {
+      if (vehicleRepository.existsByLicensePlate(licensePlate)) {
+        throw new DuplicateRecordException(ErrorConstant.VEHICLE_LICENSE_PLATE_ALREADY_EXISTS);
+      }
+      containerTractor.setLicensePlate(licensePlate);
+    }
+
+    String numberOfAxles = String.valueOf(updates.get("numberOfAxles"));
+    if (updates.get("numberOfAxles") != null && !Tool.isEqual(containerTractor.getNumberOfAxles(), numberOfAxles)) {
+      containerTractor.setNumberOfAxles(Integer.valueOf(numberOfAxles));
+    }
+
+    ContainerTractor _containerTractor = containerTractorRepository.save(containerTractor);
+    return _containerTractor;
   }
 
   @Override
   public void removeContainerTractor(Long id, String username) {
 
-    if (forwarderRepository.existsByUsername(username)) {
-      ContainerTractor containerTractor = containerTractorRepository.findById(id)
-          .orElseThrow(() -> new NotFoundException(ErrorConstant.TRACTOR_NOT_FOUND));
+    ContainerTractor containerTractor = containerTractorRepository.findById(id)
+        .orElseThrow(() -> new NotFoundException(ErrorConstant.TRACTOR_NOT_FOUND));
 
-      if (!containerTractor.getForwarder().getId().equals(username)) {
-        throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
-      }
-
-      Collection<Container> containers = containerRepository.findByTractor(id, EnumSupplyStatus.COMBINED.name(),
-          EnumSupplyStatus.BIDDING.name());
-      if (containers != null) {
-        containers.forEach(item -> {
-          if (item.getStatus().equalsIgnoreCase(EnumSupplyStatus.COMBINED.name())
-              || item.getStatus().equalsIgnoreCase(EnumSupplyStatus.BIDDING.name())) {
-            throw new InternalException(ErrorConstant.CONTAINER_BUSY);
-          }
-        });
-      }
-      containerTractorRepository.delete(containerTractor);
-    } else {
-      throw new NotFoundException(ErrorConstant.FORWARDER_NOT_FOUND);
+    if (!containerTractor.getForwarder().getUsername().equals(username)) {
+      throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
     }
+
+    Collection<Container> containers = containerRepository.findByTractor(id, EnumSupplyStatus.COMBINED.name(),
+        EnumSupplyStatus.BIDDING.name());
+    if (containers != null) {
+      containers.forEach(item -> {
+        if (item.getStatus().equalsIgnoreCase(EnumSupplyStatus.COMBINED.name())
+            || item.getStatus().equalsIgnoreCase(EnumSupplyStatus.BIDDING.name())) {
+          throw new InternalException(ErrorConstant.CONTAINER_BUSY);
+        }
+      });
+    }
+    containerTractorRepository.delete(containerTractor);
 
   }
 
   @Override
   public Page<ContainerTractor> getContainerTractorsByForwarder(String username, PaginationRequest request) {
-    if (forwarderRepository.existsByUsername(username)) {
-      PageRequest pageRequest = PageRequest.of(request.getPage(), request.getLimit(),
-          Sort.by(Sort.Direction.DESC, "createdAt"));
-      Page<ContainerTractor> pages = containerTractorRepository.findByForwarder(username, pageRequest);
-      return pages;
-    } else {
-      throw new NotFoundException(ErrorConstant.FORWARDER_NOT_FOUND);
-    }
+
+    PageRequest pageRequest = PageRequest.of(request.getPage(), request.getLimit(),
+        Sort.by(Sort.Direction.DESC, "createdAt"));
+    Page<ContainerTractor> pages = containerTractorRepository.findByForwarder(username, pageRequest);
+    return pages;
+
   }
 
   @Override

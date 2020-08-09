@@ -33,8 +33,8 @@ public class PortServiceImpl implements PortService {
     port.setFullname(request.getFullname());
     port.setNameCode(request.getNameCode());
     port.setAddress(request.getAddress());
-    portRepository.save(port);
-    return port;
+    Port _port = portRepository.save(port);
+    return _port;
   }
 
   @Override
@@ -53,8 +53,8 @@ public class PortServiceImpl implements PortService {
     port.setFullname(request.getFullname());
     port.setAddress(request.getAddress());
 
-    portRepository.save(port);
-    return port;
+    Port _port = portRepository.save(port);
+    return _port;
   }
 
   @Override
@@ -102,8 +102,8 @@ public class PortServiceImpl implements PortService {
       port.setNameCode(nameCode);
     }
 
-    portRepository.save(port);
-    return port;
+    Port _port = portRepository.save(port);
+    return _port;
   }
 
   @Override

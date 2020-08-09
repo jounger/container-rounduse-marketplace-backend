@@ -73,8 +73,8 @@ public class NotificationServiceImpl implements NotificationService {
       notification.setIsHide(isHide);
     }
 
-    notificationRepository.save(notification);
-    return notification;
+    Notification _notification = notificationRepository.save(notification);
+    return _notification;
   }
 
   @Override

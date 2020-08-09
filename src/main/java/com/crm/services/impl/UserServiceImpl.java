@@ -127,13 +127,6 @@ public class UserServiceImpl implements UserService {
     }
   }
 
-  public static boolean isEmailChange(String email, User user) {
-    if (email.equalsIgnoreCase(user.getEmail())) {
-      return false;
-    }
-    return true;
-  }
-
   @Override
   public List<User> getUsersByRole(String roleName) {
     List<User> users = userRepository.findByRole(roleName);

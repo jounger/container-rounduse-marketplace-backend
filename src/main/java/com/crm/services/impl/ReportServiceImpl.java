@@ -74,8 +74,8 @@ public class ReportServiceImpl implements ReportService {
     report.setStatus(EnumReportStatus.PENDING.name());
     report.setSendDate(LocalDateTime.now());
 
-    reportRepository.save(report);
-    return report;
+    Report _report = reportRepository.save(report);
+    return _report;
   }
 
   @Override
@@ -180,8 +180,8 @@ public class ReportServiceImpl implements ReportService {
       }
     }
 
-    reportRepository.save(report);
-    return report;
+    Report _report = reportRepository.save(report);
+    return _report;
   }
 
   @Override

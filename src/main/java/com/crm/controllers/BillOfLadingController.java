@@ -88,10 +88,10 @@ public class BillOfLadingController {
     return ResponseEntity.ok(billOfLadingDto);
   }
 
-  @RequestMapping(method = RequestMethod.GET, params = { "billOfLadingNumber" })
+  @RequestMapping(method = RequestMethod.GET, params = { "number" })
   @PreAuthorize("hasRole('FORWARDER') or hasRole('MERCHANT')")
-  public ResponseEntity<?> getBillOfLadingByBillOfLadingNumber(@RequestParam String billOfLadingNumber) {
-    BillOfLading billOfLading = billOfLadingService.getBillOfLadingByBillOfLadingNumber(billOfLadingNumber);
+  public ResponseEntity<?> getBillOfLadingByNumber(@RequestParam String number) {
+    BillOfLading billOfLading = billOfLadingService.getBillOfLadingByNumber(number);
     BillOfLadingDto billOfLadingDto = new BillOfLadingDto();
     billOfLadingDto = BillOfLadingMapper.toBillOfLadingDto(billOfLading);
     return ResponseEntity.ok(billOfLadingDto);

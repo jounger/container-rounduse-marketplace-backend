@@ -17,9 +17,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -30,6 +30,7 @@ import com.crm.models.dto.BidDto;
 import com.crm.models.mapper.BidMapper;
 import com.crm.payload.request.BidRequest;
 import com.crm.payload.request.PaginationRequest;
+import com.crm.payload.request.ReplaceContainerRequest;
 import com.crm.payload.response.MessageResponse;
 import com.crm.payload.response.PaginationResponse;
 import com.crm.services.BidService;
@@ -150,17 +151,6 @@ public class BidController {
   }
 
   @Transactional
-  @PreAuthorize("hasRole('FORWARDER')")
-  @PutMapping("")
-  public ResponseEntity<?> updateBid(@Valid @RequestBody BidRequest request) {
-    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    String username = userDetails.getUsername();
-    Bid bid = bidService.updateBid(username, request);
-    BidDto bidDto = BidMapper.toBidDto(bid);
-    return ResponseEntity.ok(bidDto);
-  }
-
-  @Transactional
   @PreAuthorize("hasRole('MERCHANT') or hasRole('FORWARDER')")
   @RequestMapping(value = "/{id}", method = RequestMethod.PATCH, consumes = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<?> editBid(@PathVariable("id") Long id, @RequestBody Map<String, Object> updates) {
@@ -174,6 +164,42 @@ public class BidController {
     // CREATE NOTIFICATION
     notificationBroadcast.broadcastEditBidToMerchantOrForwarder(status, bidEdit);
     // END NOTIFICATION
+
+    return ResponseEntity.ok(BidDto);
+  }
+
+  @Transactional
+  @PreAuthorize("hasRole('FORWARDER')")
+  @PostMapping(value = "/{id}/container/{contId}")
+  public ResponseEntity<?> addContainer(@PathVariable("id") Long id, @PathVariable("contId") Long containerId) {
+    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    String username = userDetails.getUsername();
+    Bid bid = bidService.addContainer(id, username, containerId);
+    BidDto BidDto = BidMapper.toBidDto(bid);
+
+    return ResponseEntity.ok(BidDto);
+  }
+
+  @Transactional
+  @PreAuthorize("hasRole('FORWARDER')")
+  @DeleteMapping(value = "/{id}/container/{contId}")
+  public ResponseEntity<?> removeContainer(@PathVariable("id") Long id, @PathVariable("contId") Long containerId) {
+    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    String username = userDetails.getUsername();
+    Bid bid = bidService.removeContainer(id, username, containerId);
+    BidDto BidDto = BidMapper.toBidDto(bid);
+
+    return ResponseEntity.ok(BidDto);
+  }
+
+  @Transactional
+  @PreAuthorize("hasRole('FORWARDER')")
+  @PatchMapping(value = "/{id}/container", consumes = MediaType.APPLICATION_JSON_VALUE)
+  public ResponseEntity<?> replaceContainer(@PathVariable("id") Long id, @RequestBody ReplaceContainerRequest request) {
+    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    String username = userDetails.getUsername();
+    Bid bid = bidService.replaceContainer(id, username, request);
+    BidDto BidDto = BidMapper.toBidDto(bid);
 
     return ResponseEntity.ok(BidDto);
   }

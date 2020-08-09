@@ -15,6 +15,8 @@ public class FeedbackMapper {
 
     User sender = feedback.getSender();
     feedbackDto.setSender(sender.getUsername());
+    User recipient = feedback.getRecipient();
+    feedbackDto.setRecipient(recipient.getUsername());
 
     feedbackDto.setMessage(feedback.getMessage());
     feedbackDto.setSatisfactionPoints(feedback.getSatisfactionPoints());

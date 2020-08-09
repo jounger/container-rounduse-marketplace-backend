@@ -13,6 +13,7 @@ public class ReportNotificationMapper {
     reportNotificationDto.setId(reportNotification.getId());
     reportNotificationDto.setRecipient(reportNotification.getRecipient().getUsername());
     reportNotificationDto.setIsRead(reportNotification.getIsRead());
+    reportNotificationDto.setIsHide(reportNotificationDto.getIsHide());
 
     ReportDto relatedResource = ReportMapper.toReportDto(reportNotification.getRelatedResource());
     reportNotificationDto.setRelatedResource(relatedResource);

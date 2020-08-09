@@ -16,7 +16,6 @@ import com.crm.common.Constant;
 import com.crm.common.ErrorConstant;
 import com.crm.common.Tool;
 import com.crm.enums.EnumSupplyStatus;
-import com.crm.exception.DuplicateRecordException;
 import com.crm.exception.ForbiddenException;
 import com.crm.exception.InternalException;
 import com.crm.exception.NotFoundException;
@@ -69,12 +68,6 @@ public class BookingServiceImpl implements BookingService {
 
     String number = request.getNumber();
     if (number != null && !number.isEmpty()) {
-      if (bookingRepository.existsByNumber(number)) {
-        if (number.equals(booking.getNumber())) {
-        } else {
-          throw new DuplicateRecordException(ErrorConstant.BOOKING_ALREADY_EXISTS);
-        }
-      }
       booking.setNumber(number);
     }
 
@@ -120,9 +113,6 @@ public class BookingServiceImpl implements BookingService {
 
     String numberRequest = String.valueOf(updates.get("number"));
     if (updates.get("number") != null && !Tool.isEqual(booking.getNumber(), numberRequest)) {
-      if (bookingRepository.existsByNumber(numberRequest)) {
-        throw new DuplicateRecordException(ErrorConstant.BOOKING_ALREADY_EXISTS);
-      }
       booking.setNumber(numberRequest);
     }
 

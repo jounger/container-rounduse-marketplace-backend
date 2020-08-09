@@ -17,6 +17,7 @@ import com.crm.common.Tool;
 import com.crm.enums.EnumBidStatus;
 import com.crm.enums.EnumShippingStatus;
 import com.crm.exception.DuplicateRecordException;
+import com.crm.exception.ForbiddenException;
 import com.crm.exception.InternalException;
 import com.crm.exception.NotFoundException;
 import com.crm.models.Bid;
@@ -98,7 +99,7 @@ public class CombinedServiceImpl implements CombinedService {
         throw new InternalException(ErrorConstant.CONTRACT_INVALID_FINES);
       }
     } else if (!username.equals(offeree.getUsername())) {
-      throw new NotFoundException(ErrorConstant.USER_ACCESS_DENIED);
+      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
     }
 
     combined.setContract(contract);

@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import com.crm.common.Constant;
 import com.crm.common.ErrorConstant;
 import com.crm.common.Tool;
+import com.crm.exception.ForbiddenException;
 import com.crm.exception.InternalException;
 import com.crm.exception.NotFoundException;
 import com.crm.models.Bid;
@@ -71,7 +72,7 @@ public class EvidenceServiceImpl implements EvidenceService {
       }
       evidence.setIsValid(false);
     } else {
-      throw new NotFoundException(ErrorConstant.USER_ACCESS_DENIED);
+      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
     }
 
     Evidence _evidence = evidenceRepository.save(evidence);
@@ -134,7 +135,7 @@ public class EvidenceServiceImpl implements EvidenceService {
     Supplier offeree = biddingDocument.getOfferee();
 
     if (!username.equals(bidder.getUsername()) && !username.equals(offeree.getUsername())) {
-      throw new NotFoundException(ErrorConstant.USER_ACCESS_DENIED);
+      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
     }
     String evidenceString = String.valueOf(updates.get("evidence"));
     if (updates.get("evidence") != null && !Tool.isBlank(evidenceString)) {
@@ -165,7 +166,7 @@ public class EvidenceServiceImpl implements EvidenceService {
     if (username.equals(bidder.getUsername()) || username.equals(offeree.getUsername())) {
       evidenceRepository.deleteById(id);
     } else {
-      throw new NotFoundException(ErrorConstant.USER_ACCESS_DENIED);
+      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
     }
 
   }

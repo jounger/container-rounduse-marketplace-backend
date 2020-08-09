@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 
 import com.crm.common.ErrorConstant;
 import com.crm.enums.EnumShippingStatus;
-import com.crm.exception.InternalException;
+import com.crm.exception.ForbiddenException;
 import com.crm.exception.NotFoundException;
 import com.crm.models.Bid;
 import com.crm.models.Combined;
@@ -74,7 +74,7 @@ public class ShippingInfoServiceImpl implements ShippingInfoService {
     Merchant merchant = outbound.getMerchant();
     if (!driver.getUsername().equals(username) || !merchant.getUsername().equals(username)
         || !forwarder.getUsername().equals(username)) {
-      throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
+      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
     }
     return shippingInfo;
   }
@@ -83,7 +83,7 @@ public class ShippingInfoServiceImpl implements ShippingInfoService {
   public Page<ShippingInfo> getShippingInfosByBid(Long bidId, String username, PaginationRequest request) {
     Bid bid = bidRepository.findById(bidId).orElseThrow(() -> new NotFoundException(ErrorConstant.BID_NOT_FOUND));
     if (bid.getBidder().getUsername().equals(username)) {
-      throw new NotFoundException(ErrorConstant.USER_ACCESS_DENIED);
+      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
     }
     PageRequest page = PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt"));
     Page<ShippingInfo> pages = shippingInfoRepository.findByDriver(username, page);
@@ -94,8 +94,8 @@ public class ShippingInfoServiceImpl implements ShippingInfoService {
   public Page<ShippingInfo> getShippingInfosByOutbound(Long outboundId, String username, PaginationRequest request) {
     Outbound outbound = outboundRepository.findById(outboundId)
         .orElseThrow(() -> new NotFoundException(ErrorConstant.OUTBOUND_NOT_FOUND));
-    if(!outbound.getMerchant().getUsername().equals(username)) {
-      throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
+    if (!outbound.getMerchant().getUsername().equals(username)) {
+      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
     }
     PageRequest page = PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt"));
     Page<ShippingInfo> pages = shippingInfoRepository.findByOutbound(outboundId, page);
@@ -115,7 +115,7 @@ public class ShippingInfoServiceImpl implements ShippingInfoService {
         .orElseThrow(() -> new NotFoundException(ErrorConstant.SHIPPING_INFO_NOT_FOUND));
     Container container = shippingInfo.getContainer();
     if (!container.getDriver().getUsername().equals(username)) {
-      throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
+      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
     }
     EnumShippingStatus eStatus = EnumShippingStatus.findByName(status);
     if (eStatus == null) {
@@ -129,10 +129,23 @@ public class ShippingInfoServiceImpl implements ShippingInfoService {
 
   @Override
   public void removeShippingInfo(Long id, String username) {
-    if(!shippingInfoRepository.isForwarder(id, username)) {
-      throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
+    if (!shippingInfoRepository.isForwarder(id, username)) {
+      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
     }
     shippingInfoRepository.deleteById(id);
+  }
+
+  @Override
+  public Page<ShippingInfo> getShippingInfosByCombined(Long combinedId, String username, PaginationRequest request) {
+    Combined combined = combinedRepository.findById(combinedId)
+        .orElseThrow(() -> new NotFoundException(ErrorConstant.COMBINED_NOT_FOUND));
+    if (!combined.getBid().getBidder().getUsername().equals(username)
+        || !combined.getBid().getBiddingDocument().getOfferee().getUsername().equals(username)) {
+      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
+    }
+    PageRequest page = PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt"));
+    Page<ShippingInfo> pages = shippingInfoRepository.findByCombined(combinedId, page);
+    return pages;
   }
 
 }

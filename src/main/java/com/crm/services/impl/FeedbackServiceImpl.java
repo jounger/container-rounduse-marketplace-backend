@@ -17,6 +17,7 @@ import com.crm.common.Constant;
 import com.crm.common.ErrorConstant;
 import com.crm.common.Tool;
 import com.crm.enums.EnumReportStatus;
+import com.crm.exception.ForbiddenException;
 import com.crm.exception.InternalException;
 import com.crm.exception.NotFoundException;
 import com.crm.models.Feedback;
@@ -64,16 +65,16 @@ public class FeedbackServiceImpl implements FeedbackService {
     if (role.equals("ROLE_MODERATOR") || username.equals(report.getSender().getUsername())) {
       feedback.setSender(sender);
     } else {
-      throw new NotFoundException("Access denied.");
+      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
     }
 
     User recipient = userRepository.findByUsername(request.getRecipient())
         .orElseThrow(() -> new NotFoundException(ErrorConstant.RECIPIENT_NOT_FOUND));
-    String role2 = sender.getRoles().iterator().next().getName();
+    String role2 = recipient.getRoles().iterator().next().getName();
     if (role2.equals("ROLE_MODERATOR") || request.getRecipient().equals(report.getSender().getUsername())) {
       feedback.setRecipient(recipient);
     } else {
-      throw new NotFoundException("Access denied.");
+      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
     }
 
     String message = request.getMessage();
@@ -150,7 +151,7 @@ public class FeedbackServiceImpl implements FeedbackService {
         .orElseThrow(() -> new NotFoundException(ErrorConstant.FEEDBACK_NOT_FOUND));
     if (!feedback.getSender().getUsername().equals(username)
         || !feedback.getReport().getSender().getUsername().equals(username)) {
-      throw new NotFoundException(ErrorConstant.USER_ACCESS_DENIED);
+      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
     }
 
     String message = String.valueOf(updates.get("message"));
@@ -175,7 +176,7 @@ public class FeedbackServiceImpl implements FeedbackService {
     if (feedback.getSender().getUsername().equals(username)) {
       feedbackRepository.deleteById(id);
     } else {
-      throw new NotFoundException(ErrorConstant.USER_ACCESS_DENIED);
+      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
     }
   }
 

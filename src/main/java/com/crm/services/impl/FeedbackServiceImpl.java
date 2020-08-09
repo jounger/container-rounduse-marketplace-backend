@@ -64,16 +64,16 @@ public class FeedbackServiceImpl implements FeedbackService {
     if (role.equals("ROLE_MODERATOR") || username.equals(report.getSender().getUsername())) {
       feedback.setSender(sender);
     } else {
-      throw new NotFoundException("Access denied.");
+      throw new NotFoundException(ErrorConstant.USER_ACCESS_DENIED);
     }
 
     User recipient = userRepository.findByUsername(request.getRecipient())
         .orElseThrow(() -> new NotFoundException(ErrorConstant.RECIPIENT_NOT_FOUND));
-    String role2 = sender.getRoles().iterator().next().getName();
+    String role2 = recipient.getRoles().iterator().next().getName();
     if (role2.equals("ROLE_MODERATOR") || request.getRecipient().equals(report.getSender().getUsername())) {
       feedback.setRecipient(recipient);
     } else {
-      throw new NotFoundException("Access denied.");
+      throw new NotFoundException(ErrorConstant.USER_ACCESS_DENIED);
     }
 
     String message = request.getMessage();

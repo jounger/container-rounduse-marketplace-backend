@@ -17,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.crm.exception.DuplicateRecordException;
+import com.crm.exception.InternalException;
 import com.crm.exception.NotFoundException;
 import com.crm.models.ContainerType;
 import com.crm.models.Forwarder;
@@ -137,12 +138,62 @@ public class InboundServiceImplTest {
     when(supplyRepository.existsByCode(Mockito.anyString())).thenReturn(false);
     when(shippingLineRepository.findByCompanyCode(Mockito.anyString())).thenReturn(Optional.of(shippingLine));
     when(containerTypeRepository.findByName(Mockito.anyString())).thenReturn(Optional.of(containerType));
-    when(billOfLadingRepository.existsByNumber(Mockito.anyString())).thenReturn(false);
     when(portRepository.findByNameCode(Mockito.anyString())).thenReturn(Optional.of(port));
     when(inboundRepository.save(Mockito.any(Inbound.class))).thenReturn(inbound);
     // then
     Inbound actualResult = inboundServiceImpl.createInbound(forwarder.getUsername(), request);
     assertThat(actualResult).isNotNull();
+  }
+
+  @Test
+  @DisplayName("Create inbound when pickupTime after freeTime")
+  public void whenCreateInbound_Return500_time() {
+    // given
+
+    ShippingLine shippingLine = new ShippingLine();
+    shippingLine.setId(1L);
+    shippingLine.setCompanyCode("APL");
+
+    Forwarder forwarder = new Forwarder();
+    forwarder.setId(1L);
+    forwarder.setUsername("forwarder");
+
+    ContainerType containerType = new ContainerType();
+    containerType.setId(1L);
+    containerType.setName("10CD");
+
+    Port port = new Port();
+    port.setId(1L);
+    port.setNameCode("HHP");
+
+    BillOfLadingRequest billOfLadingRequest = new BillOfLadingRequest();
+    billOfLadingRequest.setPortOfDelivery(port.getNameCode());
+    billOfLadingRequest.setNumber("SE0101");
+    billOfLadingRequest.setFreeTime("2020-07-25T15:41");
+    billOfLadingRequest.setUnit(3);
+
+    InboundRequest request = new InboundRequest();
+    request.setCode("0001");
+    request.setShippingLine(shippingLine.getCompanyCode());
+    request.setContainerType(containerType.getName());
+    request.setPickupTime("2020-07-26T10:05");
+    request.setEmptyTime("2020-07-27T15:41");
+    request.setReturnStation("Thành phố Nha Trang Khánh Hòa Việt Nam");
+    request.setBillOfLading(billOfLadingRequest);
+
+    Inbound inbound = new Inbound();
+    inbound.setId(1L);
+
+    // when
+    when(forwarderRepository.findByUsername(Mockito.anyString())).thenReturn(Optional.of(forwarder));
+    when(supplyRepository.existsByCode(Mockito.anyString())).thenReturn(false);
+    when(shippingLineRepository.findByCompanyCode(Mockito.anyString())).thenReturn(Optional.of(shippingLine));
+    when(containerTypeRepository.findByName(Mockito.anyString())).thenReturn(Optional.of(containerType));
+    when(portRepository.findByNameCode(Mockito.anyString())).thenReturn(Optional.of(port));
+    // then
+    Assertions.assertThrows(InternalException.class, () -> {
+      inboundServiceImpl.createInbound(forwarder.getUsername(), request);
+    });
   }
 
   @Test
@@ -266,7 +317,6 @@ public class InboundServiceImplTest {
     when(supplyRepository.existsByCode(Mockito.anyString())).thenReturn(false);
     when(shippingLineRepository.findByCompanyCode(Mockito.anyString())).thenReturn(Optional.of(shippingLine));
     when(containerTypeRepository.findByName(Mockito.anyString())).thenReturn(Optional.of(containerType));
-    when(billOfLadingRepository.existsByNumber(Mockito.anyString())).thenReturn(false);
     when(portRepository.findByNameCode(Mockito.anyString())).thenReturn(Optional.empty());
 
     // then
@@ -324,8 +374,8 @@ public class InboundServiceImplTest {
   }
 
   @Test
-  @DisplayName("Create inbound when BillOfLading number exists")
-  public void whenCreateInbound_thenReturn500_number() {
+  @DisplayName("Create inbound when BillOfLading number not found")
+  public void whenCreateInbound_thenReturn404_number() {
     // given
 
     ShippingLine shippingLine = new ShippingLine();
@@ -346,7 +396,6 @@ public class InboundServiceImplTest {
 
     BillOfLadingRequest billOfLadingRequest = new BillOfLadingRequest();
     billOfLadingRequest.setPortOfDelivery(port.getNameCode());
-    billOfLadingRequest.setNumber("SE0101");
     billOfLadingRequest.setFreeTime("2020-07-26T15:41");
     billOfLadingRequest.setUnit(3);
 
@@ -367,9 +416,54 @@ public class InboundServiceImplTest {
     when(supplyRepository.existsByCode(Mockito.anyString())).thenReturn(false);
     when(shippingLineRepository.findByCompanyCode(Mockito.anyString())).thenReturn(Optional.of(shippingLine));
     when(containerTypeRepository.findByName(Mockito.anyString())).thenReturn(Optional.of(containerType));
-    when(billOfLadingRepository.existsByNumber(Mockito.anyString())).thenReturn(true);
     // then
-    Assertions.assertThrows(DuplicateRecordException.class, () -> {
+    Assertions.assertThrows(NotFoundException.class, () -> {
+      inboundServiceImpl.createInbound(forwarder.getUsername(), request);
+    });
+  }
+
+  @Test
+  @DisplayName("Create inbound when inbound code not found")
+  public void whenCreateInbound_thenReturn404_code() {
+    // given
+
+    ShippingLine shippingLine = new ShippingLine();
+    shippingLine.setId(1L);
+    shippingLine.setCompanyCode("APL");
+
+    Forwarder forwarder = new Forwarder();
+    forwarder.setId(1L);
+    forwarder.setUsername("forwarder");
+
+    ContainerType containerType = new ContainerType();
+    containerType.setId(1L);
+    containerType.setName("10CD");
+
+    Port port = new Port();
+    port.setId(1L);
+    port.setNameCode("HHP");
+
+    BillOfLadingRequest billOfLadingRequest = new BillOfLadingRequest();
+    billOfLadingRequest.setNumber("SE0101");
+    billOfLadingRequest.setPortOfDelivery(port.getNameCode());
+    billOfLadingRequest.setFreeTime("2020-07-26T15:41");
+    billOfLadingRequest.setUnit(3);
+
+    InboundRequest request = new InboundRequest();
+    request.setShippingLine(shippingLine.getCompanyCode());
+    request.setContainerType(containerType.getName());
+    request.setPickupTime("2020-07-25T10:05");
+    request.setEmptyTime("2020-07-27T15:41");
+    request.setReturnStation("Thành phố Nha Trang Khánh Hòa Việt Nam");
+    request.setBillOfLading(billOfLadingRequest);
+
+    Inbound inbound = new Inbound();
+    inbound.setId(1L);
+
+    // when
+    when(forwarderRepository.findByUsername(Mockito.anyString())).thenReturn(Optional.of(forwarder));
+    // then
+    Assertions.assertThrows(NotFoundException.class, () -> {
       inboundServiceImpl.createInbound(forwarder.getUsername(), request);
     });
   }

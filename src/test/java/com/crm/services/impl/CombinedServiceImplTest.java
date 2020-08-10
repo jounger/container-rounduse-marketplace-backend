@@ -98,6 +98,8 @@ public class CombinedServiceImplTest {
     biddingDocument.setId(1L);
     biddingDocument.setOutbound(outbound);
     biddingDocument.setOfferee(merchant);
+    biddingDocument.setIsMultipleAward(false);
+    ;
 
     Bid bid = new Bid();
     bid.setId(1L);
@@ -110,8 +112,8 @@ public class CombinedServiceImplTest {
     ShippingInfo shippingInfo = new ShippingInfo();
     shippingInfo.setId(1L);
 
-    List<String> containersId = new ArrayList<>();
-    containersId.add("1");
+    List<Long> containersId = new ArrayList<>();
+    containersId.add(1L);
 
     ContractRequest contract = new ContractRequest();
     contract.setRequired(true);
@@ -187,8 +189,8 @@ public class CombinedServiceImplTest {
     Container container = new Container();
     container.setId(1L);
 
-    List<String> containersId = new ArrayList<>();
-    containersId.add("1");
+    List<Long> containersId = new ArrayList<>();
+    containersId.add(1L);
 
     ContractRequest contract = new ContractRequest();
     contract.setRequired(true);

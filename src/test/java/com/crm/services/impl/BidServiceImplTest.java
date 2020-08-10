@@ -262,9 +262,18 @@ public class BidServiceImplTest {
     bidder.setId(1L);
     bidder.setUsername("forwarder");
 
+    Merchant offeree = new Merchant();
+    offeree.setId(1L);
+    offeree.setUsername("merchant");
+
+    BiddingDocument biddingDocument = new BiddingDocument();
+    biddingDocument.setId(1L);
+    biddingDocument.setOfferee(offeree);
+
     Bid bid = new Bid();
     bid.setId(1L);
     bid.setBidder(bidder);
+    bid.setBiddingDocument(biddingDocument);
 
     // when
     when(bidRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(bid));
@@ -272,6 +281,7 @@ public class BidServiceImplTest {
     // then
     Bid actualResult = bidServiceImpl.getBid(bid.getId(), bidder.getUsername());
     assertThat(actualResult).isNotNull();
+    assertThat(actualResult.getBiddingDocument()).isNotNull();
     assertThat(actualResult.getId()).isEqualTo(1L);
     assertThat(actualResult.getBidder().getId()).isEqualTo(bidder.getId());
   }

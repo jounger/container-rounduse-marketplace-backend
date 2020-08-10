@@ -18,7 +18,6 @@ import com.crm.common.Constant;
 import com.crm.common.ErrorConstant;
 import com.crm.common.Tool;
 import com.crm.enums.EnumSupplyStatus;
-import com.crm.exception.DuplicateRecordException;
 import com.crm.exception.ForbiddenException;
 import com.crm.exception.InternalException;
 import com.crm.exception.NotFoundException;
@@ -76,12 +75,6 @@ public class BillOfLadingServiceImpl implements BillOfLadingService {
 
     String number = request.getNumber();
     if (number != null && !number.isEmpty()) {
-      if (billOfLadingRepository.existsByNumber(number)) {
-        if (number.equals(billOfLading.getNumber())) {
-        } else {
-          throw new DuplicateRecordException(ErrorConstant.BILLOFLADING_ALREADY_EXISTS);
-        }
-      }
       billOfLading.setNumber(number);
     }
 
@@ -161,9 +154,6 @@ public class BillOfLadingServiceImpl implements BillOfLadingService {
 
     String number = String.valueOf(updates.get("number"));
     if (updates.get("number") != null && !Tool.isEqual(billOfLading.getNumber(), number)) {
-      if (billOfLadingRepository.existsByNumber(number)) {
-        throw new DuplicateRecordException(ErrorConstant.BILLOFLADING_ALREADY_EXISTS);
-      }
       billOfLading.setNumber(number);
     }
 

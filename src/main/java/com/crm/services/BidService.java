@@ -1,5 +1,6 @@
 package com.crm.services;
 
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.data.domain.Page;
@@ -7,6 +8,7 @@ import org.springframework.data.domain.Page;
 import com.crm.models.Bid;
 import com.crm.payload.request.BidRequest;
 import com.crm.payload.request.PaginationRequest;
+import com.crm.payload.request.ReplaceContainerRequest;
 
 public interface BidService {
 
@@ -22,7 +24,7 @@ public interface BidService {
 
   Page<Bid> getBidsByForwarder(String username, PaginationRequest request);
 
-  Bid replaceContainer(Long id, String username, Map<String, String> updates);
+  Bid replaceContainer(Long id, String username, ReplaceContainerRequest request);
 
   Bid addContainer(Long id, String username, Long containerId);
 
@@ -30,6 +32,8 @@ public interface BidService {
 
   // update part biddingDocument
   Bid editBid(Long id, String username, Map<String, Object> updates);
+  
+  Bid editBidWhenCombined(Long id, String username, List<Long> containersId);
 
   void removeBid(Long id, String username);
 

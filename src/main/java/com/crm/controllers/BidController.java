@@ -30,6 +30,7 @@ import com.crm.models.dto.BidDto;
 import com.crm.models.mapper.BidMapper;
 import com.crm.payload.request.BidRequest;
 import com.crm.payload.request.PaginationRequest;
+import com.crm.payload.request.ReplaceContainerRequest;
 import com.crm.payload.response.MessageResponse;
 import com.crm.payload.response.PaginationResponse;
 import com.crm.services.BidService;
@@ -169,8 +170,8 @@ public class BidController {
 
   @Transactional
   @PreAuthorize("hasRole('FORWARDER')")
-  @PostMapping(value = "/{id}/container/{conId}")
-  public ResponseEntity<?> addContainer(@PathVariable("id") Long id, @PathVariable("conId") Long containerId) {
+  @PostMapping(value = "/{id}/container/{contId}")
+  public ResponseEntity<?> addContainer(@PathVariable("id") Long id, @PathVariable("contId") Long containerId) {
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
     Bid bid = bidService.addContainer(id, username, containerId);
@@ -181,8 +182,8 @@ public class BidController {
 
   @Transactional
   @PreAuthorize("hasRole('FORWARDER')")
-  @DeleteMapping(value = "/{id}/container/{conId}")
-  public ResponseEntity<?> removeContainer(@PathVariable("id") Long id, @PathVariable("conId") Long containerId) {
+  @DeleteMapping(value = "/{id}/container/{contId}")
+  public ResponseEntity<?> removeContainer(@PathVariable("id") Long id, @PathVariable("contId") Long containerId) {
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
     Bid bid = bidService.removeContainer(id, username, containerId);
@@ -194,10 +195,10 @@ public class BidController {
   @Transactional
   @PreAuthorize("hasRole('FORWARDER')")
   @PatchMapping(value = "/{id}/container", consumes = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<?> replaceContainer(@PathVariable("id") Long id, @RequestBody Map<String, String> updates) {
+  public ResponseEntity<?> replaceContainer(@PathVariable("id") Long id, @RequestBody ReplaceContainerRequest request) {
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
-    Bid bid = bidService.replaceContainer(id, username, updates);
+    Bid bid = bidService.replaceContainer(id, username, request);
     BidDto BidDto = BidMapper.toBidDto(bid);
 
     return ResponseEntity.ok(BidDto);

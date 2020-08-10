@@ -10,7 +10,7 @@ import com.crm.payload.request.PaginationRequest;
 
 public interface BookingService {
 
-  Page<Booking> getBookingsByOutbound(Long id, PaginationRequest request);
+  Booking getBookingByOutbound(Long id);
 
   Booking getBookingById(Long id);
 

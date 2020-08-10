@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import com.crm.common.Constant;
 import com.crm.common.ErrorConstant;
 import com.crm.common.Tool;
+import com.crm.exception.ForbiddenException;
 import com.crm.exception.NotFoundException;
 import com.crm.models.Bid;
 import com.crm.models.BiddingDocument;
@@ -55,11 +56,11 @@ public class RatingServiceImpl implements RatingService {
         .orElseThrow(() -> new NotFoundException(ErrorConstant.SENDER_NOT_FOUND));
     rating.setContract(contract);
     if (!contractRepository.existsByUserAndContract(request.getContract(), username)) {
-      throw new NotFoundException(ErrorConstant.USER_ACCESS_DENIED);
+      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
     }
 
     if (ratingRepository.existsByUserAndContract(request.getContract(), username)) {
-      throw new NotFoundException(ErrorConstant.USER_ACCESS_DENIED);
+      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
     }
     rating.setRatingValue(request.getRatingValue());
     Rating _rating = ratingRepository.save(rating);
@@ -78,7 +79,7 @@ public class RatingServiceImpl implements RatingService {
     Rating rating = ratingRepository.findById(id)
         .orElseThrow(() -> new NotFoundException(ErrorConstant.RATING_NOT_FOUND));
     if (!rating.getSender().getUsername().equals(username) || !rating.getReceiver().getUsername().equals(username)) {
-      throw new NotFoundException(ErrorConstant.USER_ACCESS_DENIED);
+      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
     }
     return rating;
   }
@@ -102,7 +103,7 @@ public class RatingServiceImpl implements RatingService {
       LocalDateTime rewind = LocalDateTime.now().minusMonths(Constant.REWIND_MONTH);
       ratings = ratingRepository.findByContract(id, username, Timestamp.valueOf(rewind), page);
     } else {
-      throw new NotFoundException(ErrorConstant.USER_ACCESS_DENIED);
+      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
     }
     return ratings;
   }
@@ -172,7 +173,7 @@ public class RatingServiceImpl implements RatingService {
         .orElseThrow(() -> new NotFoundException(ErrorConstant.RATING_NOT_FOUND));
 
     if (!rating.getSender().getUsername().equals(username)) {
-      throw new NotFoundException(ErrorConstant.USER_ACCESS_DENIED);
+      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
     }
 
     String ratingValue = String.valueOf(updates.get("ratingValue"));
@@ -198,7 +199,7 @@ public class RatingServiceImpl implements RatingService {
     if (rating.getSender().getUsername().equals(username)) {
       ratingRepository.deleteById(id);
     } else {
-      throw new NotFoundException(ErrorConstant.USER_ACCESS_DENIED);
+      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
     }
     Supplier receiver = rating.getReceiver();
     LocalDateTime rewind = LocalDateTime.now().minusMonths(Constant.REWIND_MONTH);

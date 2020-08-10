@@ -16,7 +16,7 @@ import com.crm.common.ErrorConstant;
 import com.crm.common.Tool;
 import com.crm.enums.EnumUserStatus;
 import com.crm.exception.DuplicateRecordException;
-import com.crm.exception.InternalException;
+import com.crm.exception.ForbiddenException;
 import com.crm.exception.NotFoundException;
 import com.crm.models.Driver;
 import com.crm.models.Forwarder;
@@ -117,7 +117,7 @@ public class DriverServiceImpl implements DriverService {
           .orElseThrow(() -> new NotFoundException(ErrorConstant.DRIVER_NOT_FOUND));
 
       if (!driver.getForwarder().getUsername().equals(username)) {
-        throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
+        throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
       }
 
       String email = String.valueOf(updates.get("email"));
@@ -175,7 +175,7 @@ public class DriverServiceImpl implements DriverService {
           .orElseThrow(() -> new NotFoundException(ErrorConstant.DRIVER_NOT_FOUND));
 
       if (!driver.getForwarder().getUsername().equals(username)) {
-        throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
+        throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
       }
     } else {
       throw new NotFoundException(ErrorConstant.FORWARDER_NOT_FOUND);

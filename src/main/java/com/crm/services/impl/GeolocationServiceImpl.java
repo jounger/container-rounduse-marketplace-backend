@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.crm.common.ErrorConstant;
 import com.crm.common.Tool;
-import com.crm.exception.InternalException;
+import com.crm.exception.ForbiddenException;
 import com.crm.exception.NotFoundException;
 import com.crm.models.Geolocation;
 import com.crm.payload.request.GeolocationRequest;
@@ -30,7 +30,7 @@ public class GeolocationServiceImpl implements GeolocationService {
       Geolocation geolocation = geolocationRepository.findById(request.getId())
           .orElseThrow(() -> new NotFoundException(ErrorConstant.GEOLOCATION_NOT_FOUND));
       if (!geolocation.getDriver().getUsername().equals(username)) {
-        throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
+        throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
       }
       geolocation.setLatitude(request.getLatitude());
       geolocation.setLongitude(request.getLongitude());
@@ -48,7 +48,7 @@ public class GeolocationServiceImpl implements GeolocationService {
       Geolocation geolocation = geolocationRepository.findById(id)
           .orElseThrow(() -> new NotFoundException(ErrorConstant.GEOLOCATION_NOT_FOUND));
       if (!geolocation.getDriver().getUsername().equals(username)) {
-        throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
+        throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
       }
 
       String latitude = String.valueOf(updates.get("latitude"));

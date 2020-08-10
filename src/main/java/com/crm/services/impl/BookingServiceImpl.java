@@ -16,7 +16,7 @@ import com.crm.common.Constant;
 import com.crm.common.ErrorConstant;
 import com.crm.common.Tool;
 import com.crm.enums.EnumSupplyStatus;
-import com.crm.exception.DuplicateRecordException;
+import com.crm.exception.ForbiddenException;
 import com.crm.exception.InternalException;
 import com.crm.exception.NotFoundException;
 import com.crm.models.Booking;
@@ -25,6 +25,7 @@ import com.crm.payload.request.BookingRequest;
 import com.crm.payload.request.PaginationRequest;
 import com.crm.repository.BookingRepository;
 import com.crm.repository.MerchantRepository;
+import com.crm.repository.OutboundRepository;
 import com.crm.repository.PortRepository;
 import com.crm.services.BookingService;
 import com.crm.specification.builder.BookingSpecificationsBuilder;
@@ -41,13 +42,17 @@ public class BookingServiceImpl implements BookingService {
   @Autowired
   private PortRepository portRepository;
 
-  @Override
-  public Page<Booking> getBookingsByOutbound(Long id, PaginationRequest request) {
+  @Autowired
+  private OutboundRepository outboundRepository;
 
-    PageRequest pageRequest = PageRequest.of(request.getPage(), request.getLimit(),
-        Sort.by(Sort.Direction.DESC, "createdAt"));
-    Page<Booking> pages = bookingRepository.findByOutbound(id, pageRequest);
-    return pages;
+  @Override
+  public Booking getBookingByOutbound(Long id) {
+    if (!outboundRepository.existsById(id)) {
+      throw new NotFoundException(ErrorConstant.OUTBOUND_NOT_FOUND);
+    }
+    Booking booking = bookingRepository.findByOutbound(id)
+        .orElseThrow(() -> new NotFoundException(ErrorConstant.BOOKING_NOT_FOUND));
+    return booking;
 
   }
 
@@ -58,7 +63,7 @@ public class BookingServiceImpl implements BookingService {
         .orElseThrow(() -> new NotFoundException(ErrorConstant.BOOKING_NOT_FOUND));
 
     if (!booking.getOutbound().getMerchant().getUsername().equals(username)) {
-      throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
+      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
     }
 
     if (booking.getOutbound().getStatus().equals(EnumSupplyStatus.COMBINED.name())
@@ -68,12 +73,6 @@ public class BookingServiceImpl implements BookingService {
 
     String number = request.getNumber();
     if (number != null && !number.isEmpty()) {
-      if (bookingRepository.existsByNumber(number)) {
-        if (number.equals(booking.getNumber())) {
-        } else {
-          throw new DuplicateRecordException(ErrorConstant.BOOKING_ALREADY_EXISTS);
-        }
-      }
       booking.setNumber(number);
     }
 
@@ -101,7 +100,7 @@ public class BookingServiceImpl implements BookingService {
         .orElseThrow(() -> new NotFoundException(ErrorConstant.BOOKING_NOT_FOUND));
 
     if (!booking.getOutbound().getMerchant().getUsername().equals(username)) {
-      throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
+      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
     }
 
     if (booking.getOutbound().getStatus().equals(EnumSupplyStatus.COMBINED.name())
@@ -119,9 +118,6 @@ public class BookingServiceImpl implements BookingService {
 
     String numberRequest = String.valueOf(updates.get("number"));
     if (updates.get("number") != null && !Tool.isEqual(booking.getNumber(), numberRequest)) {
-      if (bookingRepository.existsByNumber(numberRequest)) {
-        throw new DuplicateRecordException(ErrorConstant.BOOKING_ALREADY_EXISTS);
-      }
       booking.setNumber(numberRequest);
     }
 

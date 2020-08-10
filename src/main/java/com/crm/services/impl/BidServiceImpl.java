@@ -20,6 +20,7 @@ import com.crm.enums.EnumBidStatus;
 import com.crm.enums.EnumBiddingStatus;
 import com.crm.enums.EnumSupplyStatus;
 import com.crm.exception.DuplicateRecordException;
+import com.crm.exception.ForbiddenException;
 import com.crm.exception.InternalException;
 import com.crm.exception.NotFoundException;
 import com.crm.models.Bid;
@@ -32,6 +33,7 @@ import com.crm.models.Role;
 import com.crm.models.User;
 import com.crm.payload.request.BidRequest;
 import com.crm.payload.request.PaginationRequest;
+import com.crm.payload.request.ReplaceContainerRequest;
 import com.crm.repository.BidRepository;
 import com.crm.repository.BiddingDocumentRepository;
 import com.crm.repository.ContainerRepository;
@@ -144,8 +146,9 @@ public class BidServiceImpl implements BidService {
   @Override
   public Bid getBid(Long id, String username) {
     Bid bid = bidRepository.findById(id).orElseThrow(() -> new NotFoundException(ErrorConstant.BID_NOT_FOUND));
-    if (bid.getBidder().getUsername() != username) {
-      throw new NotFoundException(ErrorConstant.USER_ACCESS_DENIED);
+    if (!bid.getBidder().getUsername().equals(username)
+        || !bid.getBiddingDocument().getOfferee().getUsername().equals(username)) {
+      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
     }
     return bid;
   }
@@ -191,7 +194,6 @@ public class BidServiceImpl implements BidService {
     return bids;
   }
 
-  @SuppressWarnings("unchecked")
   @Override
   public Bid editBid(Long id, String username, Map<String, Object> updates) {
     Bid bid = bidRepository.findById(id).orElseThrow(() -> new NotFoundException(ErrorConstant.BID_NOT_FOUND));
@@ -214,8 +216,6 @@ public class BidServiceImpl implements BidService {
     List<Container> containers = new ArrayList<>(bid.getContainers());
 
     BiddingDocument biddingDocument = bid.getBiddingDocument();
-    Outbound outbound = biddingDocument.getOutbound();
-    Booking booking = outbound.getBooking();
 
     String biddingStatus = biddingDocument.getStatus();
     if (biddingStatus.equalsIgnoreCase(EnumBiddingStatus.CANCELED.name())
@@ -242,52 +242,7 @@ public class BidServiceImpl implements BidService {
         });
       }
 
-      if (bid.getStatus().equalsIgnoreCase(EnumBidStatus.ACCEPTED.name())) {
-        bid.setDateOfDecision(LocalDateTime.now());
-        if (biddingDocument.getIsMultipleAward()) {
-          List<String> containersId = (List<String>) updates.get("combinedContainers");
-          Long combinedContainers = containerRepository
-              .countCombinedContainersByBiddingDocument(biddingDocument.getId());
-          if (booking.getUnit() < combinedContainers + containersId.size()) {
-            throw new InternalException(ErrorConstant.CONTAINER_MORE_OR_LESS_THAN_NEEDED);
-          }
-          if (booking.getUnit() == combinedContainers + containersId.size()) {
-            biddingDocument.setStatus(EnumBiddingStatus.COMBINED.name());
-            biddingDocumentRepository.save(biddingDocument);
-          }
-          containersId.forEach(conId -> {
-            Long containerId = Long.valueOf(conId);
-            bid.getContainers().forEach(container -> {
-              if (container.getId() == containerId) {
-                container.setStatus(EnumSupplyStatus.COMBINED.name());
-                containerRepository.save(container);
-              }
-            });
-          });
-
-        } else {
-          Long combinedContainers = containerRepository
-              .countCombinedContainersByBiddingDocument(biddingDocument.getId());
-          if (booking.getUnit() < combinedContainers + bid.getContainers().size()) {
-            throw new InternalException(ErrorConstant.CONTAINER_MORE_OR_LESS_THAN_NEEDED);
-          }
-          if (booking.getUnit() == combinedContainers + bid.getContainers().size()) {
-            biddingDocument.setStatus(EnumBiddingStatus.COMBINED.name());
-            biddingDocumentRepository.save(biddingDocument);
-          }
-          containers.forEach(container -> {
-            container.setStatus(EnumSupplyStatus.COMBINED.name());
-            containerRepository.save(container);
-          });
-          if (bidRepository.isAllAcceptedByBiddingDocument(biddingDocument.getId())) {
-            outbound.setStatus(EnumSupplyStatus.COMBINED.name());
-            outboundRepository.save(outbound);
-          }
-        }
-      }
-
       if (bid.getStatus().equalsIgnoreCase(EnumBidStatus.CANCELED.name())
-          || bid.getStatus().equalsIgnoreCase(EnumBidStatus.REJECTED.name())
           || bid.getStatus().equalsIgnoreCase(EnumBidStatus.EXPIRED.name())) {
         containers.forEach(container -> {
           container.setStatus(EnumSupplyStatus.CREATED.name());
@@ -295,6 +250,50 @@ public class BidServiceImpl implements BidService {
         });
       }
     }
+
+    Bid _bid = bidRepository.save(bid);
+
+    return _bid;
+  }
+
+  @Override
+  public Bid editBidWhenCombined(Long id, String username, List<Long> containersId) {
+    Bid bid = bidRepository.findById(id).orElseThrow(() -> new NotFoundException(ErrorConstant.BID_NOT_FOUND));
+    User user = userRepository.findByUsername(username)
+        .orElseThrow(() -> new NotFoundException(ErrorConstant.USER_NOT_FOUND));
+    Role role = user.getRoles().iterator().next();
+    if (!role.getName().equalsIgnoreCase("ROLE_MERCHANT")) {
+      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
+    }
+
+    bid.setDateOfDecision(LocalDateTime.now());
+    bid.setStatus(EnumBidStatus.ACCEPTED.name());
+
+    BiddingDocument biddingDocument = bid.getBiddingDocument();
+    Outbound outbound = biddingDocument.getOutbound();
+    Booking booking = outbound.getBooking();
+    Long combinedContainers = containerRepository.countCombinedContainersByBiddingDocument(biddingDocument.getId());
+
+    if (containersId.size() < 1) {
+      throw new NotFoundException(ErrorConstant.CONTAINER_NOT_FOUND);
+    }
+    if (booking.getUnit() < combinedContainers + containersId.size()) {
+      throw new InternalException(ErrorConstant.CONTAINER_MORE_OR_LESS_THAN_NEEDED);
+    }
+    if (booking.getUnit() == combinedContainers + containersId.size()) {
+      biddingDocument.setStatus(EnumBiddingStatus.COMBINED.name());
+      biddingDocumentRepository.save(biddingDocument);
+      outbound.setStatus(EnumSupplyStatus.COMBINED.name());
+      outboundRepository.save(outbound);
+    }
+    containersId.forEach(containerId -> {
+      if (containerRepository.isContainedByBid(containerId, id)) {
+        Container container = containerRepository.findById(containerId)
+            .orElseThrow(() -> new NotFoundException(ErrorConstant.CONTAINER_NOT_FOUND));
+        container.setStatus(EnumSupplyStatus.COMBINED.name());
+        containerRepository.save(container);
+      }
+    });
 
     Bid _bid = bidRepository.save(bid);
 
@@ -321,27 +320,16 @@ public class BidServiceImpl implements BidService {
   }
 
   @Override
-  public Bid replaceContainer(Long id, String username, Map<String, String> updates) {
+  public Bid replaceContainer(Long id, String username, ReplaceContainerRequest request) {
     Bid bid = bidRepository.findById(id).orElseThrow(() -> new NotFoundException(ErrorConstant.BID_NOT_FOUND));
     if (!bid.getBidder().getUsername().equals(username)) {
-      throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
-    }
-    String oldContainerId = updates.get("oldContainerId");
-    String newContainerId = updates.get("newContainerId");
-    if(oldContainerId == null || newContainerId == null) {
-      throw new NotFoundException(ErrorConstant.CONTAINER_NOT_FOUND);
+      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
     }
     BiddingDocument biddingDocument = bid.getBiddingDocument();
     Outbound outbound = biddingDocument.getOutbound();
     Booking booking = outbound.getBooking();
-    Long oldContId = null;
-    Long newContId = null;
-    try {
-      oldContId = Long.valueOf(oldContainerId);
-      newContId = Long.valueOf(newContainerId);
-    } catch (NumberFormatException e) {
-      throw new NumberFormatException(ErrorConstant.CONTAINER_NOT_FOUND);
-    }
+    Long oldContId = request.getOldContainerId();
+    Long newContId = request.getNewContainerId();
     Container oldContainer = containerRepository.findById(oldContId)
         .orElseThrow(() -> new NotFoundException(ErrorConstant.CONTAINER_NOT_FOUND));
     Container newContainer = containerRepository.findById(newContId)
@@ -351,7 +339,7 @@ public class BidServiceImpl implements BidService {
     oldContainer.setStatus(EnumSupplyStatus.CREATED.name());
     containerRepository.save(oldContainer);
 
-    if (containerRepository.existsByOutbound(Long.valueOf(newContainerId), outbound.getShippingLine().getCompanyCode(),
+    if (containerRepository.existsByOutbound(newContId, outbound.getShippingLine().getCompanyCode(),
         outbound.getContainerType().getName(), Arrays.asList(EnumSupplyStatus.CREATED.name()),
         outbound.getPackingTime(), booking.getCutOffTime(), booking.getPortOfLoading().getNameCode())) {
       bid.getContainers().add(newContainer);
@@ -370,7 +358,7 @@ public class BidServiceImpl implements BidService {
   public Bid addContainer(Long id, String username, Long containerId) {
     Bid bid = bidRepository.findById(id).orElseThrow(() -> new NotFoundException(ErrorConstant.BID_NOT_FOUND));
     if (!bid.getBidder().getUsername().equals(username)) {
-      throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
+      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
     }
 
     if (!bid.getStatus().equalsIgnoreCase(EnumBidStatus.PENDING.name())) {
@@ -407,7 +395,7 @@ public class BidServiceImpl implements BidService {
   public Bid removeContainer(Long id, String username, Long containerId) {
     Bid bid = bidRepository.findById(id).orElseThrow(() -> new NotFoundException(ErrorConstant.BID_NOT_FOUND));
     if (!bid.getBidder().getUsername().equals(username)) {
-      throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
+      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
     }
 
     if (!bid.getStatus().equalsIgnoreCase(EnumBidStatus.PENDING.name())) {

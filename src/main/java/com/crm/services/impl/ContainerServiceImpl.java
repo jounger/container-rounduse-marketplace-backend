@@ -16,6 +16,7 @@ import com.crm.common.ErrorConstant;
 import com.crm.common.Tool;
 import com.crm.enums.EnumSupplyStatus;
 import com.crm.exception.DuplicateRecordException;
+import com.crm.exception.ForbiddenException;
 import com.crm.exception.InternalException;
 import com.crm.exception.NotFoundException;
 import com.crm.models.Bid;
@@ -101,7 +102,7 @@ public class ContainerServiceImpl implements ContainerService {
     }
 
     containers.forEach(item -> {
-      if (item.getContainerNumber().equals(request.getContainerNumber())
+      if (item.getNumber().equals(request.getNumber())
           || item.getDriver().getUsername().equals(request.getDriver())
           || item.getTrailer().getLicensePlate().equals(request.getTrailer())
           || item.getTractor().getLicensePlate().equals(request.getTractor())) {
@@ -109,8 +110,8 @@ public class ContainerServiceImpl implements ContainerService {
       }
     });
 
-    String containerNumber = request.getContainerNumber();
-    boolean listContainer = containerRepository.findByContainerNumber(containerNumber,
+    String containerNumber = request.getNumber();
+    boolean listContainer = containerRepository.findByNumber(containerNumber,
         billOfLading.getInbound().getPickupTime(), billOfLading.getFreeTime(), username);
     if (!listContainer) {
       throw new InternalException(ErrorConstant.CONTAINER_BUSY);
@@ -120,7 +121,7 @@ public class ContainerServiceImpl implements ContainerService {
     Driver driver = driverRepository.findByUsername(driverUserName)
         .orElseThrow(() -> new NotFoundException(ErrorConstant.DRIVER_BUSY));
     if (!driver.getForwarder().getUsername().equals(billOfLading.getInbound().getForwarder().getUsername())) {
-      throw new NotFoundException(ErrorConstant.USER_ACCESS_DENIED);
+      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
     }
 
     String trailer = request.getTrailer();
@@ -128,14 +129,14 @@ public class ContainerServiceImpl implements ContainerService {
         .orElseThrow(() -> new NotFoundException(ErrorConstant.TRAILER_NOT_FOUND));
     if (!containerSemiTrailer.getForwarder().getUsername()
         .equals(billOfLading.getInbound().getForwarder().getUsername())) {
-      throw new NotFoundException(ErrorConstant.USER_ACCESS_DENIED);
+      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
     }
 
     String tractor = request.getTractor();
     ContainerTractor containerTractor = containerTractorRepository.findByLicensePlate(tractor)
         .orElseThrow(() -> new NotFoundException(ErrorConstant.TRACTOR_NOT_FOUND));
     if (!containerTractor.getForwarder().getUsername().equals(billOfLading.getInbound().getForwarder().getUsername())) {
-      throw new NotFoundException(ErrorConstant.USER_ACCESS_DENIED);
+      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
     }
 
     boolean listContainerByDriver = containerRepository.findByDriver(driver.getId(), username,
@@ -162,7 +163,7 @@ public class ContainerServiceImpl implements ContainerService {
     container.setBillOfLading(billOfLading);
     container.setStatus(EnumSupplyStatus.CREATED.name());
 
-    container.setContainerNumber(request.getContainerNumber());
+    container.setNumber(request.getNumber());
 
     Container _container = containerRepository.save(container);
     return _container;
@@ -175,7 +176,7 @@ public class ContainerServiceImpl implements ContainerService {
         .orElseThrow(() -> new NotFoundException(ErrorConstant.CONTAINER_NOT_FOUND));
 
     if (!container.getBillOfLading().getInbound().getForwarder().getUsername().equals(username)) {
-      throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
+      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
     }
 
     if (container.getStatus().equalsIgnoreCase(EnumSupplyStatus.COMBINED.name())
@@ -187,7 +188,7 @@ public class ContainerServiceImpl implements ContainerService {
 
     Set<Container> containers = new HashSet<>(billOfLading.getContainers());
     containers.forEach(item -> {
-      if (item.getContainerNumber().equals(request.getContainerNumber())
+      if (item.getNumber().equals(request.getNumber())
           || item.getDriver().getUsername().equals(request.getDriver())
           || item.getTrailer().getLicensePlate().equals(request.getTrailer())
           || item.getTractor().getLicensePlate().equals(request.getTractor())) {
@@ -199,8 +200,8 @@ public class ContainerServiceImpl implements ContainerService {
       }
     });
 
-    String containerNumber = request.getContainerNumber();
-    boolean listContainer = containerRepository.findByContainerNumber(billOfLading.getId(), username, containerNumber,
+    String containerNumber = request.getNumber();
+    boolean listContainer = containerRepository.findByNumber(billOfLading.getId(), username, containerNumber,
         billOfLading.getInbound().getPickupTime(), billOfLading.getFreeTime());
     if (!listContainer) {
       throw new InternalException(ErrorConstant.CONTAINER_BUSY);
@@ -210,7 +211,7 @@ public class ContainerServiceImpl implements ContainerService {
     Driver driver = driverRepository.findByUsername(driverUserName)
         .orElseThrow(() -> new NotFoundException(ErrorConstant.DRIVER_NOT_FOUND));
     if (!driver.getForwarder().getUsername().equals(billOfLading.getInbound().getForwarder().getUsername())) {
-      throw new NotFoundException(ErrorConstant.USER_ACCESS_DENIED);
+      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
     }
 
     String trailer = request.getTrailer();
@@ -218,14 +219,14 @@ public class ContainerServiceImpl implements ContainerService {
         .orElseThrow(() -> new NotFoundException(ErrorConstant.TRAILER_NOT_FOUND));
     if (!containerSemiTrailer.getForwarder().getUsername()
         .equals(billOfLading.getInbound().getForwarder().getUsername())) {
-      throw new NotFoundException(ErrorConstant.USER_ACCESS_DENIED);
+      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
     }
 
     String tractor = request.getTractor();
     ContainerTractor containerTractor = containerTractorRepository.findByLicensePlate(tractor)
         .orElseThrow(() -> new NotFoundException(ErrorConstant.TRACTOR_NOT_FOUND));
     if (!containerTractor.getForwarder().getUsername().equals(billOfLading.getInbound().getForwarder().getUsername())) {
-      throw new NotFoundException(ErrorConstant.USER_ACCESS_DENIED);
+      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
     }
 
     boolean listContainerByDriver = containerRepository.findByDriver(driver.getId(), username,
@@ -255,7 +256,7 @@ public class ContainerServiceImpl implements ContainerService {
     container.setTrailer(containerSemiTrailer);
     container.setBillOfLading(billOfLading);
 
-    container.setContainerNumber(request.getContainerNumber());
+    container.setNumber(request.getNumber());
 
     containerRepository.save(container);
 
@@ -269,7 +270,7 @@ public class ContainerServiceImpl implements ContainerService {
         .orElseThrow(() -> new NotFoundException(ErrorConstant.CONTAINER_NOT_FOUND));
 
     if (!container.getBillOfLading().getInbound().getForwarder().getUsername().equals(username)) {
-      throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
+      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
     }
 
     if (container.getStatus().equalsIgnoreCase(EnumSupplyStatus.COMBINED.name())
@@ -294,7 +295,7 @@ public class ContainerServiceImpl implements ContainerService {
         .orElseThrow(() -> new NotFoundException(ErrorConstant.CONTAINER_NOT_FOUND));
 
     if (!container.getBillOfLading().getInbound().getForwarder().getUsername().equals(username)) {
-      throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
+      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
     }
 
     if (container.getStatus().equalsIgnoreCase(EnumSupplyStatus.COMBINED.name())
@@ -302,11 +303,11 @@ public class ContainerServiceImpl implements ContainerService {
       throw new InternalException(ErrorConstant.CONTAINER_BUSY);
     }
 
-    BillOfLading billOfLading = (BillOfLading) container.getBillOfLading();
+    BillOfLading billOfLading = container.getBillOfLading();
 
     String containerNumber = String.valueOf(updates.get("containerNumber"));
-    if (updates.get("containerNumber") != null && !Tool.isEqual(container.getContainerNumber(), containerNumber)) {
-      container.setContainerNumber(containerNumber);
+    if (updates.get("containerNumber") != null && !Tool.isEqual(container.getNumber(), containerNumber)) {
+      container.setNumber(containerNumber);
     }
 
     String driverRequest = String.valueOf(updates.get("driver"));
@@ -314,7 +315,7 @@ public class ContainerServiceImpl implements ContainerService {
       Driver driver = driverRepository.findByUsername(driverRequest)
           .orElseThrow(() -> new NotFoundException(ErrorConstant.DRIVER_NOT_FOUND));
       if (!driver.getForwarder().getUsername().equals(billOfLading.getInbound().getForwarder().getUsername())) {
-        throw new NotFoundException(ErrorConstant.USER_ACCESS_DENIED);
+        throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
       }
 
       boolean listContainerByDriver = containerRepository.findByDriver(driver.getId(), username,
@@ -332,7 +333,7 @@ public class ContainerServiceImpl implements ContainerService {
           .orElseThrow(() -> new NotFoundException(ErrorConstant.TRAILER_NOT_FOUND));
       if (!containerSemiTrailer.getForwarder().getUsername()
           .equals(billOfLading.getInbound().getForwarder().getUsername())) {
-        throw new NotFoundException(ErrorConstant.USER_ACCESS_DENIED);
+        throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
       }
 
       boolean listContainerByTrailer = containerRepository.findByTrailer(containerSemiTrailer.getId(), username,
@@ -350,7 +351,7 @@ public class ContainerServiceImpl implements ContainerService {
           .orElseThrow(() -> new NotFoundException(ErrorConstant.TRACTOR_NOT_FOUND));
       if (!containerTractor.getForwarder().getUsername()
           .equals(billOfLading.getInbound().getForwarder().getUsername())) {
-        throw new NotFoundException(ErrorConstant.USER_ACCESS_DENIED);
+        throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
       }
 
       boolean listContainerByTracTor = containerRepository.findByTractor(containerTractor.getId(), username,
@@ -368,7 +369,7 @@ public class ContainerServiceImpl implements ContainerService {
 
     Set<Container> containers = new HashSet<>(billOfLading.getContainers());
     containers.forEach(item -> {
-      if (item.getContainerNumber().equals(container.getContainerNumber())
+      if (item.getNumber().equals(container.getNumber())
           || item.getDriver().getUsername().equals(container.getDriver().getUsername())
           || item.getTrailer().getLicensePlate().equals(container.getTrailer().getLicensePlate())
           || item.getTractor().getLicensePlate().equals(container.getTractor().getLicensePlate())) {
@@ -380,8 +381,8 @@ public class ContainerServiceImpl implements ContainerService {
       }
     });
 
-    boolean listContainer = containerRepository.findByContainerNumber(billOfLading.getId(), username,
-        container.getContainerNumber(), billOfLading.getInbound().getPickupTime(), billOfLading.getFreeTime());
+    boolean listContainer = containerRepository.findByNumber(billOfLading.getId(), username,
+        container.getNumber(), billOfLading.getInbound().getPickupTime(), billOfLading.getFreeTime());
     if (!listContainer) {
       throw new InternalException(ErrorConstant.CONTAINER_BUSY);
     }

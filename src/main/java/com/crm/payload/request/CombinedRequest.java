@@ -12,11 +12,9 @@ public class CombinedRequest {
 
   private Long id;
 
-  private Long bid;
-
   private Boolean isCanceled;
 
-  private List<String> containers = new ArrayList<>();
+  private List<Long> containers = new ArrayList<>();
 
   private ContractRequest contract;
 }

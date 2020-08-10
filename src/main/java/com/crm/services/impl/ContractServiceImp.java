@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import com.crm.common.Constant;
 import com.crm.common.ErrorConstant;
 import com.crm.common.Tool;
+import com.crm.exception.ForbiddenException;
 import com.crm.exception.InternalException;
 import com.crm.exception.NotFoundException;
 import com.crm.models.Bid;
@@ -59,7 +60,7 @@ public class ContractServiceImp implements ContractService {
         throw new InternalException(ErrorConstant.CONTRACT_INVALID_FINES);
       }
     } else {
-      throw new NotFoundException(ErrorConstant.USER_ACCESS_DENIED);
+      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
     }
 
     Contract _contract = contractRepository.save(contract);
@@ -67,7 +68,7 @@ public class ContractServiceImp implements ContractService {
   }
 
   @Override
-  public Contract getContractsByCombined(Long id, String username) {
+  public Contract getContractByCombined(Long id, String username) {
     Combined combined = combinedRepository.findById(id)
         .orElseThrow(() -> new NotFoundException(ErrorConstant.COMBINED_NOT_FOUND));
     Bid bid = combined.getBid();
@@ -123,7 +124,7 @@ public class ContractServiceImp implements ContractService {
         contract.setRequired(Boolean.valueOf(requiredString));
       }
     } else {
-      throw new NotFoundException(ErrorConstant.USER_ACCESS_DENIED);
+      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
     }
 
     Contract _contract = contractRepository.save(contract);
@@ -143,7 +144,7 @@ public class ContractServiceImp implements ContractService {
     if (username.equals(bidder.getUsername()) || username.equals(offeree.getUsername())) {
       contractRepository.deleteById(id);
     } else {
-      throw new NotFoundException(ErrorConstant.USER_ACCESS_DENIED);
+      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
     }
 
   }

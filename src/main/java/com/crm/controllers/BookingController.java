@@ -42,21 +42,11 @@ public class BookingController {
 
   @GetMapping("/outbound/{id}")
   @PreAuthorize("hasRole('FORWARDER') or hasRole('MERCHANT')")
-  public ResponseEntity<?> getBookingsByOutbound(@PathVariable Long id, @Valid PaginationRequest request) {
+  public ResponseEntity<?> getBookingByOutbound(@PathVariable Long id, @Valid PaginationRequest request) {
 
-    Page<Booking> pages = bookingService.getBookingsByOutbound(id, request);
-    PaginationResponse<BookingDto> response = new PaginationResponse<>();
-    response.setPageNumber(request.getPage());
-    response.setPageSize(request.getLimit());
-    response.setTotalElements(pages.getTotalElements());
-    response.setTotalPages(pages.getTotalPages());
-
-    List<Booking> bookings = pages.getContent();
-    List<BookingDto> bookingsDto = new ArrayList<>();
-    bookings.forEach(booking -> bookingsDto.add(BookingMapper.toBookingDto(booking)));
-    response.setContents(bookingsDto);
-
-    return ResponseEntity.ok(response);
+    Booking booking = bookingService.getBookingByOutbound(id);
+    BookingDto bookingDto = BookingMapper.toBookingDto(booking);
+    return ResponseEntity.ok(bookingDto);
   }
 
   @GetMapping("/filter")

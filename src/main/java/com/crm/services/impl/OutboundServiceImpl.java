@@ -18,6 +18,7 @@ import com.crm.common.Tool;
 import com.crm.enums.EnumSupplyStatus;
 import com.crm.enums.EnumUnit;
 import com.crm.exception.DuplicateRecordException;
+import com.crm.exception.ForbiddenException;
 import com.crm.exception.InternalException;
 import com.crm.exception.NotFoundException;
 import com.crm.models.Booking;
@@ -29,7 +30,6 @@ import com.crm.models.ShippingLine;
 import com.crm.payload.request.BookingRequest;
 import com.crm.payload.request.OutboundRequest;
 import com.crm.payload.request.PaginationRequest;
-import com.crm.repository.BookingRepository;
 import com.crm.repository.ContainerTypeRepository;
 import com.crm.repository.MerchantRepository;
 import com.crm.repository.OutboundRepository;
@@ -53,9 +53,6 @@ public class OutboundServiceImpl implements OutboundService {
 
   @Autowired
   private ContainerTypeRepository containerTypeRepository;
-
-  @Autowired
-  private BookingRepository bookingRepository;
 
   @Autowired
   private PortRepository portRepository;
@@ -148,9 +145,6 @@ public class OutboundServiceImpl implements OutboundService {
     BookingRequest bookingRequest = (BookingRequest) request.getBooking();
     String number = bookingRequest.getNumber();
     if (number != null && !number.isEmpty()) {
-      if (bookingRepository.existsByNumber(number)) {
-        throw new DuplicateRecordException(ErrorConstant.BOOKING_ALREADY_EXISTS);
-      }
       booking.setNumber(number);
     } else {
       throw new NotFoundException(ErrorConstant.BOOKING_NOT_FOUND);
@@ -183,7 +177,7 @@ public class OutboundServiceImpl implements OutboundService {
         .orElseThrow(() -> new NotFoundException(ErrorConstant.OUTBOUND_NOT_FOUND));
 
     if (!outbound.getMerchant().getUsername().equals(username)) {
-      throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
+      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
     }
 
     if (outbound.getStatus().equals(EnumSupplyStatus.COMBINED.name())
@@ -254,7 +248,7 @@ public class OutboundServiceImpl implements OutboundService {
         .orElseThrow(() -> new NotFoundException(ErrorConstant.OUTBOUND_NOT_FOUND));
 
     if (!outbound.getMerchant().getUsername().equals(username)) {
-      throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
+      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
     }
 
     if (outbound.getStatus().equals(EnumSupplyStatus.COMBINED.name())
@@ -335,7 +329,7 @@ public class OutboundServiceImpl implements OutboundService {
         .orElseThrow(() -> new NotFoundException(ErrorConstant.OUTBOUND_NOT_FOUND));
 
     if (!outbound.getMerchant().getUsername().equals(username)) {
-      throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
+      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
     }
 
     if (outbound.getStatus().equals(EnumSupplyStatus.COMBINED.name())

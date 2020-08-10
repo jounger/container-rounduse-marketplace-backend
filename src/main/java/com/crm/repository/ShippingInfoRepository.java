@@ -18,6 +18,9 @@ public interface ShippingInfoRepository extends JpaRepository<ShippingInfo, Long
   @Query(value = "FROM ShippingInfo si WHERE si.outbound.id = :id")
   Page<ShippingInfo> findByOutbound(@Param("id") Long outboundId, Pageable pageable);
 
+  @Query(value = "FROM ShippingInfo si WHERE si.combined.id = :id")
+  Page<ShippingInfo> findByCombined(@Param("id") Long combinedId, Pageable pageable);
+
   @Query(value = "SELECT CASE WHEN COUNT(si) = 0 THEN TRUE ELSE FALSE END"
       + " FROM ShippingInfo si LEFT JOIN si.container c LEFT JOIN c.driver d"
       + " LEFT JOIN d.forwarder f WHERE si.id = :id AND f.username = :username")

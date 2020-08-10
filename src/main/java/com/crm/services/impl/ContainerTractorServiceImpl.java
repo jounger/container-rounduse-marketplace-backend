@@ -17,6 +17,7 @@ import com.crm.common.ErrorConstant;
 import com.crm.common.Tool;
 import com.crm.enums.EnumSupplyStatus;
 import com.crm.exception.DuplicateRecordException;
+import com.crm.exception.ForbiddenException;
 import com.crm.exception.InternalException;
 import com.crm.exception.NotFoundException;
 import com.crm.models.Container;
@@ -90,7 +91,7 @@ public class ContainerTractorServiceImpl implements ContainerTractorService {
         .orElseThrow(() -> new NotFoundException(ErrorConstant.TRACTOR_NOT_FOUND));
 
     if (!containerTractor.getForwarder().getUsername().equals(username)) {
-      throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
+      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
     }
 
     Collection<Container> containers = containerRepository.findByTractor(request.getId(),
@@ -125,7 +126,7 @@ public class ContainerTractorServiceImpl implements ContainerTractorService {
         .orElseThrow(() -> new NotFoundException(ErrorConstant.TRACTOR_NOT_FOUND));
 
     if (!containerTractor.getForwarder().getUsername().equals(username)) {
-      throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
+      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
     }
 
     Collection<Container> containers = containerRepository.findByTractor(id, EnumSupplyStatus.COMBINED.name(),
@@ -163,7 +164,7 @@ public class ContainerTractorServiceImpl implements ContainerTractorService {
         .orElseThrow(() -> new NotFoundException(ErrorConstant.TRACTOR_NOT_FOUND));
 
     if (!containerTractor.getForwarder().getUsername().equals(username)) {
-      throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
+      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
     }
 
     Collection<Container> containers = containerRepository.findByTractor(id, EnumSupplyStatus.COMBINED.name(),

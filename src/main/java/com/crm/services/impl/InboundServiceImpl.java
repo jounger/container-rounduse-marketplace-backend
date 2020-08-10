@@ -22,6 +22,7 @@ import com.crm.common.ErrorConstant;
 import com.crm.common.Tool;
 import com.crm.enums.EnumSupplyStatus;
 import com.crm.exception.DuplicateRecordException;
+import com.crm.exception.ForbiddenException;
 import com.crm.exception.InternalException;
 import com.crm.exception.NotFoundException;
 import com.crm.models.BillOfLading;
@@ -38,7 +39,6 @@ import com.crm.models.ShippingLine;
 import com.crm.payload.request.BillOfLadingRequest;
 import com.crm.payload.request.InboundRequest;
 import com.crm.payload.request.PaginationRequest;
-import com.crm.repository.BillOfLadingRepository;
 import com.crm.repository.ContainerRepository;
 import com.crm.repository.ContainerSemiTrailerRepository;
 import com.crm.repository.ContainerTractorRepository;
@@ -70,9 +70,6 @@ public class InboundServiceImpl implements InboundService {
 
   @Autowired
   private ContainerRepository containerRepository;
-
-  @Autowired
-  private BillOfLadingRepository billOfLadingRepository;
 
   @Autowired
   private PortRepository portRepository;
@@ -162,9 +159,6 @@ public class InboundServiceImpl implements InboundService {
     BillOfLadingRequest billOfLadingRequest = request.getBillOfLading();
     String number = billOfLadingRequest.getNumber();
     if (number != null && !number.isEmpty()) {
-      if (billOfLadingRepository.existsByNumber(number)) {
-        throw new DuplicateRecordException(ErrorConstant.BILLOFLADING_ALREADY_EXISTS);
-      }
       billOfLading.setNumber(number);
     } else {
       throw new NotFoundException(ErrorConstant.BILLOFLADING_NOT_FOUND);
@@ -196,7 +190,7 @@ public class InboundServiceImpl implements InboundService {
         .orElseThrow(() -> new NotFoundException(ErrorConstant.INBOUND_NOT_FOUND));
 
     if (!inbound.getForwarder().getUsername().equals(username)) {
-      throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
+      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
     }
 
     ShippingLine shippingLine = shippingLineRepository.findByCompanyCode(request.getShippingLine())
@@ -215,7 +209,7 @@ public class InboundServiceImpl implements InboundService {
     setContainers.forEach(item -> {
       if (item.getStatus().equalsIgnoreCase(EnumSupplyStatus.COMBINED.name())
           || item.getStatus().equalsIgnoreCase(EnumSupplyStatus.BIDDING.name())) {
-        throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
+        throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
       }
     });
 
@@ -238,8 +232,8 @@ public class InboundServiceImpl implements InboundService {
         Container container = containerRepository.findById(containers.get(i).getId())
             .orElseThrow(() -> new NotFoundException(ErrorConstant.CONTAINER_NOT_FOUND));
 
-        boolean listContainer = containerRepository.findByContainerNumber(billOfLading.getId(), username,
-            container.getContainerNumber(), inbound.getPickupTime(), freeTime);
+        boolean listContainer = containerRepository.findByNumber(billOfLading.getId(), username,
+            container.getNumber(), inbound.getPickupTime(), freeTime);
         if (!listContainer) {
           throw new InternalException(ErrorConstant.CONTAINER_BUSY);
         }
@@ -287,7 +281,7 @@ public class InboundServiceImpl implements InboundService {
         .orElseThrow(() -> new NotFoundException(ErrorConstant.INBOUND_NOT_FOUND));
 
     if (!inbound.getForwarder().getUsername().equals(username)) {
-      throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
+      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
     }
 
     BillOfLading billOfLading = inbound.getBillOfLading();
@@ -331,8 +325,8 @@ public class InboundServiceImpl implements InboundService {
       Set<Container> containers = new HashSet<>(billOfLading.getContainers());
       containers.forEach(item -> {
 
-        String containerNumber = item.getContainerNumber();
-        boolean listContainer = containerRepository.findByContainerNumber(billOfLading.getId(), username,
+        String containerNumber = item.getNumber();
+        boolean listContainer = containerRepository.findByNumber(billOfLading.getId(), username,
             containerNumber, pickupTime, billOfLading.getFreeTime());
         if (!listContainer) {
           throw new InternalException(ErrorConstant.CONTAINER_BUSY);
@@ -387,7 +381,7 @@ public class InboundServiceImpl implements InboundService {
         .orElseThrow(() -> new NotFoundException(ErrorConstant.INBOUND_NOT_FOUND));
 
     if (!inbound.getForwarder().getUsername().equals(username)) {
-      throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
+      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
     }
 
     BillOfLading billOfLading = inbound.getBillOfLading();

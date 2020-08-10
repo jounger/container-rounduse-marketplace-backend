@@ -10,7 +10,7 @@ import com.crm.payload.request.PaginationRequest;
 
 public interface BillOfLadingService {
 
-  Page<BillOfLading> getBillOfLadingsByInbound(Long id, PaginationRequest request);
+  BillOfLading getBillOfLadingByInbound(Long id);
 
   BillOfLading getBillOfLadingById(Long id);
 

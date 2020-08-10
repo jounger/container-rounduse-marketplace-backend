@@ -12,10 +12,10 @@ public class ShippingInfoMapper {
     shippingInfo.setId(shippingInfo.getId());
 
     Outbound outbound = shippingInfo.getOutbound();
-    shippingInfoDto.setSupplyCode(outbound.getCode());
+    shippingInfoDto.setOutbound(OutboundMapper.toOutboundDto(outbound));
 
     Container container = shippingInfo.getContainer();
-    shippingInfoDto.setContainerNumber(container.getContainerNumber());
+    shippingInfoDto.setContainer(ContainerMapper.toContainerDto(container));
 
     shippingInfoDto.setStatus(shippingInfo.getStatus());
 

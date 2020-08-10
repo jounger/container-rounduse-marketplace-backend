@@ -25,9 +25,9 @@ public interface InboundRepository extends JpaRepository<Inbound, Long>, JpaSpec
 
   @Query(value = "SELECT i FROM Inbound i LEFT JOIN i.billOfLading.containers c " + "WHERE i.forwarder.id = :id "
       + "AND (i.billOfLading.freeTime < :freeTime OR i.pickupTime > :pickupTime) "
-      + "AND c.containerNumber = :containerNumber " + "AND c.id != :containerId")
+      + "AND c.number = :number " + "AND c.id != :containerId")
   List<Inbound> findByFowarder(@Param("id") Long id, @Param("pickupTime") LocalDateTime pickupTime,
-      @Param("freeTime") LocalDateTime freeTime, @Param("containerNumber") String containerNumber,
+      @Param("freeTime") LocalDateTime freeTime, @Param("number") String number,
       @Param("containerId") Long containerId);
 
   /*

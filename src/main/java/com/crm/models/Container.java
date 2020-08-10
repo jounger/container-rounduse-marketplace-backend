@@ -54,8 +54,8 @@ public class Container {
   @JoinColumn(name = "bill_of_lading_id")
   private BillOfLading billOfLading;
 
-  @Column(name = "container_number")
-  private String containerNumber;
+  @Column(name = "number")
+  private String number;
 
   @ManyToOne
   @JoinColumn(name = "container_semi_trailer_id")
@@ -91,7 +91,7 @@ public class Container {
   public int hashCode() {
     final int prime = 31;
     int result = 1;
-    result = prime * result + ((containerNumber == null) ? 0 : containerNumber.hashCode());
+    result = prime * result + ((number == null) ? 0 : number.hashCode());
     result = prime * result + ((id == null) ? 0 : id.hashCode());
     return result;
   }
@@ -105,10 +105,10 @@ public class Container {
     if (getClass() != obj.getClass())
       return false;
     Container other = (Container) obj;
-    if (containerNumber == null) {
-      if (other.containerNumber != null)
+    if (number == null) {
+      if (other.number != null)
         return false;
-    } else if (!containerNumber.equals(other.containerNumber))
+    } else if (!number.equals(other.number))
       return false;
     if (id == null) {
       if (other.id != null)

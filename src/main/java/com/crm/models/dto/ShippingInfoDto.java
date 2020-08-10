@@ -10,9 +10,9 @@ public class ShippingInfoDto {
   
   private Long id;
   
-  private String supplyCode;
+  private OutboundDto outbound;
   
-  private String containerNumber;
+  private ContainerDto container;
   
   private String status;
 }

@@ -49,12 +49,11 @@ public class BillOfLadingServiceImpl implements BillOfLadingService {
   private ContainerRepository containerRepository;
 
   @Override
-  public Page<BillOfLading> getBillOfLadingsByInbound(Long id, PaginationRequest request) {
+  public BillOfLading getBillOfLadingByInbound(Long id) {
     if (inboundRepository.existsById(id)) {
-      PageRequest pageRequest = PageRequest.of(request.getPage(), request.getLimit(),
-          Sort.by(Sort.Direction.DESC, "createdAt"));
-      Page<BillOfLading> pages = billOfLadingRepository.findByInbound(id, pageRequest);
-      return pages;
+      BillOfLading billOfLading = billOfLadingRepository.findByInbound(id)
+          .orElseThrow(() -> new NotFoundException(ErrorConstant.BILLOFLADING_NOT_FOUND));
+      return billOfLading;
     } else {
       throw new NotFoundException(ErrorConstant.INBOUND_NOT_FOUND);
     }
@@ -94,8 +93,8 @@ public class BillOfLadingServiceImpl implements BillOfLadingService {
           throw new InternalException(ErrorConstant.CONTAINER_BUSY);
         }
 
-        String containerNumber = item.getContainerNumber();
-        boolean isContainer = containerRepository.findByContainerNumber(billOfLading.getId(), username, containerNumber,
+        String containerNumber = item.getNumber();
+        boolean isContainer = containerRepository.findByNumber(billOfLading.getId(), username, containerNumber,
             billOfLading.getInbound().getPickupTime(), freeTime);
         if (!isContainer) {
           throw new InternalException(ErrorConstant.CONTAINER_BUSY);
@@ -180,8 +179,8 @@ public class BillOfLadingServiceImpl implements BillOfLadingService {
           throw new InternalException(ErrorConstant.CONTAINER_BUSY);
         }
 
-        String containerNumber = item.getContainerNumber();
-        boolean isContainer = containerRepository.findByContainerNumber(billOfLading.getId(), username, containerNumber,
+        String containerNumber = item.getNumber();
+        boolean isContainer = containerRepository.findByNumber(billOfLading.getId(), username, containerNumber,
             billOfLading.getInbound().getPickupTime(), freeTime);
         if (!isContainer) {
           throw new InternalException(ErrorConstant.CONTAINER_BUSY);

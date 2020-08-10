@@ -16,7 +16,7 @@ import com.crm.models.Container;
 @Repository
 public interface ContainerRepository extends JpaRepository<Container, Long> {
 
-  Boolean existsByContainerNumber(String containerNumber);
+  Boolean existsByNumber(String number);
 
   @Query(value = "SELECT b FROM Container b WHERE b.billOfLading.id = :id")
   Page<Container> findByBillOfLading(@Param("id") Long id, Pageable pageable);
@@ -80,27 +80,27 @@ public interface ContainerRepository extends JpaRepository<Container, Long> {
 
   @Query(value = "SELECT CASE WHEN COUNT(c) = 0 THEN TRUE ELSE FALSE END "
       + "FROM Container c WHERE c.billOfLading.inbound.forwarder.username = :username "
-      + "AND c.containerNumber = :containerNumber "
+      + "AND c.number = :number "
       + "AND ((c.billOfLading.freeTime > :freeTime AND c.billOfLading.inbound.pickupTime < :freeTime) "
       + "OR (c.billOfLading.freeTime > :pickupTime AND c.billOfLading.inbound.pickupTime < :pickupTime) "
       + "OR (c.billOfLading.freeTime < :freeTime AND c.billOfLading.inbound.pickupTime > :pickupTime) "
       + "OR (c.billOfLading.freeTime = :freeTime) " + "OR (c.billOfLading.inbound.pickupTime = :pickupTime) "
       + "OR (c.billOfLading.inbound.pickupTime = :freeTime) " + "OR (c.billOfLading.freeTime = :pickupTime))")
-  boolean findByContainerNumber(@Param("containerNumber") String containerNumber,
+  boolean findByNumber(@Param("number") String number,
       @Param("pickupTime") LocalDateTime pickupTime, @Param("freeTime") LocalDateTime freeTime,
       @Param("username") String username);
 
   @Query(value = "SELECT CASE WHEN COUNT(c) = 0 THEN TRUE ELSE FALSE END "
       + "FROM Container c WHERE c.billOfLading.inbound.forwarder.username = :username "
-      + "AND c.containerNumber = :containerNumber "
+      + "AND c.number = :number "
       + "AND ((c.billOfLading.freeTime > :freeTime AND c.billOfLading.inbound.pickupTime < :freeTime) "
       + "OR (c.billOfLading.freeTime > :pickupTime AND c.billOfLading.inbound.pickupTime < :pickupTime) "
       + "OR (c.billOfLading.freeTime < :freeTime AND c.billOfLading.inbound.pickupTime > :pickupTime) "
       + "OR (c.billOfLading.freeTime = :freeTime) " + "OR (c.billOfLading.inbound.pickupTime = :pickupTime) "
       + "OR (c.billOfLading.inbound.pickupTime = :freeTime) " + "OR (c.billOfLading.freeTime = :pickupTime)) "
       + "AND c.billOfLading.id != :id")
-  boolean findByContainerNumber(@Param("id") Long id, @Param("username") String username,
-      @Param("containerNumber") String containerNumber, @Param("pickupTime") LocalDateTime pickupTime,
+  boolean findByNumber(@Param("id") Long id, @Param("username") String username,
+      @Param("number") String number, @Param("pickupTime") LocalDateTime pickupTime,
       @Param("freeTime") LocalDateTime freeTime);
 
   /* Check time busy Driver */

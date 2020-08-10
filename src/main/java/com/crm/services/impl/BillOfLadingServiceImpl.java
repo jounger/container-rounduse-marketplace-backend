@@ -93,8 +93,8 @@ public class BillOfLadingServiceImpl implements BillOfLadingService {
           throw new InternalException(ErrorConstant.CONTAINER_BUSY);
         }
 
-        String containerNumber = item.getContainerNumber();
-        boolean isContainer = containerRepository.findByContainerNumber(billOfLading.getId(), username, containerNumber,
+        String containerNumber = item.getNumber();
+        boolean isContainer = containerRepository.findByNumber(billOfLading.getId(), username, containerNumber,
             billOfLading.getInbound().getPickupTime(), freeTime);
         if (!isContainer) {
           throw new InternalException(ErrorConstant.CONTAINER_BUSY);
@@ -179,8 +179,8 @@ public class BillOfLadingServiceImpl implements BillOfLadingService {
           throw new InternalException(ErrorConstant.CONTAINER_BUSY);
         }
 
-        String containerNumber = item.getContainerNumber();
-        boolean isContainer = containerRepository.findByContainerNumber(billOfLading.getId(), username, containerNumber,
+        String containerNumber = item.getNumber();
+        boolean isContainer = containerRepository.findByNumber(billOfLading.getId(), username, containerNumber,
             billOfLading.getInbound().getPickupTime(), freeTime);
         if (!isContainer) {
           throw new InternalException(ErrorConstant.CONTAINER_BUSY);

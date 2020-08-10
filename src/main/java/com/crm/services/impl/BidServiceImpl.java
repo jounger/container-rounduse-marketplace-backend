@@ -288,7 +288,7 @@ public class BidServiceImpl implements BidService {
     }
     containersId.forEach(containerId -> {
       if (containerRepository.isContainedByBid(containerId, id)) {
-        Container container = containerRepository.findById(id)
+        Container container = containerRepository.findById(containerId)
             .orElseThrow(() -> new NotFoundException(ErrorConstant.CONTAINER_NOT_FOUND));
         container.setStatus(EnumSupplyStatus.COMBINED.name());
         containerRepository.save(container);

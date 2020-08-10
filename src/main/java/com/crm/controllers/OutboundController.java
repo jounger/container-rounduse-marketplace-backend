@@ -95,8 +95,7 @@ public class OutboundController {
   @PreAuthorize("hasRole('MERCHANT')")
   public ResponseEntity<?> getOutboundsByMerchant(@Valid PaginationRequest request) {
 
-    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
-        .getPrincipal();
+    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
 
     Page<Outbound> pages = outBoundService.getOutboundsByMerchant(username, request);
@@ -118,8 +117,7 @@ public class OutboundController {
   @PostMapping("")
   @PreAuthorize("hasRole('MERCHANT')")
   public ResponseEntity<?> createOutbound(@Valid @RequestBody OutboundRequest request) {
-    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
-        .getPrincipal();
+    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
     Outbound outbound = outBoundService.createOutbound(username, request);
     OutboundDto outboundDto = new OutboundDto();
@@ -132,8 +130,7 @@ public class OutboundController {
   @PreAuthorize("hasRole('MERCHANT')")
   public ResponseEntity<?> updateOutboundDto(@Valid @RequestBody OutboundRequest request) {
 
-    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
-        .getPrincipal();
+    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
 
     Outbound outbound = outBoundService.updateOutbound(username, request);
@@ -147,8 +144,7 @@ public class OutboundController {
   @PreAuthorize("hasRole('MERCHANT')")
   public ResponseEntity<?> editOutbound(@RequestBody Map<String, Object> updates, @PathVariable("id") Long id) {
 
-    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
-        .getPrincipal();
+    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
 
     Outbound outbound = outBoundService.editOutbound(updates, id, username);
@@ -162,8 +158,7 @@ public class OutboundController {
   @PreAuthorize("hasRole('MERCHANT')")
   public ResponseEntity<?> removeOutbound(@PathVariable Long id) {
 
-    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
-        .getPrincipal();
+    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
 
     outBoundService.removeOutbound(id, username);

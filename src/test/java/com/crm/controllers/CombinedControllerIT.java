@@ -1,7 +1,6 @@
 package com.crm.controllers;
 
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -34,43 +33,58 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.util.LinkedMultiValueMap;
 
-import com.crm.common.Tool;
+import com.crm.enums.EnumBidStatus;
 import com.crm.enums.EnumBiddingStatus;
+import com.crm.models.Bid;
 import com.crm.models.BiddingDocument;
+import com.crm.models.BillOfLading;
 import com.crm.models.Booking;
+import com.crm.models.Combined;
+import com.crm.models.Container;
+import com.crm.models.ContainerSemiTrailer;
+import com.crm.models.ContainerTractor;
 import com.crm.models.ContainerType;
+import com.crm.models.Contract;
+import com.crm.models.Driver;
+import com.crm.models.Forwarder;
+import com.crm.models.Inbound;
 import com.crm.models.Merchant;
 import com.crm.models.Outbound;
 import com.crm.models.Port;
 import com.crm.models.ShippingLine;
-import com.crm.payload.request.BiddingDocumentRequest;
+import com.crm.payload.request.CombinedRequest;
 import com.crm.payload.request.PaginationRequest;
-import com.crm.services.BiddingDocumentService;
+import com.crm.services.CombinedService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @SpringBootTest
 @AutoConfigureMockMvc
 @ContextConfiguration
-class BiddingDocumentControllerIT {
+class CombinedControllerIT {
 
-  private static final Logger logger = LoggerFactory.getLogger(BiddingDocumentControllerIT.class);
+  private static final Logger logger = LoggerFactory.getLogger(CombinedControllerIT.class);
 
   @Autowired
   protected MockMvc mockMvc;
 
   @MockBean
-  private BiddingDocumentService biddingDocumentService;
+  private CombinedService combinedService;
 
   @Autowired
   private ObjectMapper objectMapper;
 
   PaginationRequest paginationRequest;
 
-  Page<BiddingDocument> pages;
+  Page<Combined> pages;
+
+  Combined combined;
 
   BiddingDocument biddingDocument;
 
-  List<BiddingDocument> listBidDoc;
+  Bid bid;
+
+  List<Bid> listBids;
 
   LinkedMultiValueMap<String, String> requestParams;
 
@@ -102,8 +116,18 @@ class BiddingDocumentControllerIT {
     biddingDocument.setStatus(EnumBiddingStatus.BIDDING.name());
 
     merchant = new Merchant();
+    merchant.setId(1L);
     merchant.setUsername("merchant");
     biddingDocument.setOfferee(merchant);
+
+    Forwarder forwarder = new Forwarder();
+    forwarder.setId(2L);
+    forwarder.setUsername("forwarder");
+
+    Driver driver = new Driver();
+    driver.setId(3L);
+    driver.setUsername("driver");
+    driver.setForwarder(forwarder);
 
     shippingLine = new ShippingLine();
     shippingLine.setCompanyCode("SPL1");
@@ -135,30 +159,83 @@ class BiddingDocumentControllerIT {
 
     biddingDocument.setOutbound(outbound);
 
-    listBidDoc = new ArrayList<BiddingDocument>();
-    listBidDoc.add(biddingDocument);
-    pages = new PageImpl<BiddingDocument>(listBidDoc);
+    ContainerTractor tractor = new ContainerTractor();
+    tractor.setId(1L);
+
+    ContainerSemiTrailer trailer = new ContainerSemiTrailer();
+    trailer.setId(2L);
+
+    List<Container> containers = new ArrayList<>();
+    Container container = new Container();
+    container.setId(1L);
+    container.setDriver(driver);
+    container.setContainerNumber("CN2d2d22");
+    container.setTractor(tractor);
+    container.setTrailer(trailer);
+
+    containers.add(container);
+
+    Inbound inbound = new Inbound();
+    inbound.setId(1L);
+    inbound.setForwarder(forwarder);
+    inbound.setEmptyTime(timeNow.plusDays(10));
+    inbound.setPickupTime(timeNow.plusDays(9));
+
+    BillOfLading billOfLading = new BillOfLading();
+    billOfLading.setFreeTime(timeNow.plusDays(12));
+    billOfLading.setId(1L);
+    billOfLading.setPortOfDelivery(port);
+    billOfLading.getContainers().add(container);
+    billOfLading.setInbound(inbound);
+
+    bid = new Bid();
+    bid.setId(1L);
+    bid.setBidder(forwarder);
+    bid.setBiddingDocument(biddingDocument);
+    bid.setBidDate(timeNow);
+    bid.setBidPrice(2300D);
+    bid.setBidValidityPeriod(timeNow.plusHours(1));
+    bid.setStatus(EnumBidStatus.PENDING.name());
+    bid.setContainers(containers);
+
+    listBids = new ArrayList<Bid>();
+    listBids.add(bid);
 
     requestParams = new LinkedMultiValueMap<>();
     requestParams.add("page", "0");
     requestParams.add("limit", "10");
+    
+    Contract contract = new Contract();
+    contract.setId(1L);
+    contract.setFinesAgainstContractViolations(8D);
+    contract.setRequired(false);
+
+    combined = new Combined();
+    combined.setId(1L);
+    combined.setBid(bid);
+    combined.setIsCanceled(false);
+    combined.setContract(contract);
+
+    List<Combined> combineds = new ArrayList<Combined>();
+    combineds.add(combined);
+    pages = new PageImpl<Combined>(combineds);
   }
 
   @Test
   @WithMockUser(username = "merchant", roles = { "MERCHANT" })
-  void createBiddingDocument_thenStatusOk_andReturnBiddingDocument() throws Exception {
+  void createBid_thenStatusOk_andReturnCombined() throws JsonProcessingException, Exception {
     // given
-    BiddingDocumentRequest request = new BiddingDocumentRequest();
-    request.setBidOpening(LocalDateTime.now().toString());
-    when(biddingDocumentService.createBiddingDocument(Mockito.anyString(), Mockito.any(BiddingDocumentRequest.class)))
-        .thenReturn(biddingDocument);
+    CombinedRequest request = new CombinedRequest();
+    request.setIsCanceled(false);
+    when(combinedService.createCombined(Mockito.anyLong(), Mockito.anyString(), Mockito.any(CombinedRequest.class)))
+        .thenReturn(combined);
 
     // when and then
     MvcResult result = mockMvc
-        .perform(post("/api/bidding-document").contentType(MediaType.APPLICATION_JSON_VALUE)
+        .perform(post("/api/combined/bid/1").contentType(MediaType.APPLICATION_JSON_VALUE)
             .content(objectMapper.writeValueAsString(request)))
         .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.id").value(1))
-        .andExpect(jsonPath("$.bidOpening").value(Tool.convertLocalDateTimeToString(timeNow))).andReturn();
+        .andExpect(jsonPath("$.isCanceled").value(false)).andReturn();
 
     // print response
     MockHttpServletResponse response = result.getResponse();
@@ -167,14 +244,14 @@ class BiddingDocumentControllerIT {
 
   @Test
   @WithMockUser(username = "merchant", roles = { "MERCHANT" })
-  void getBiddingDocument_thenStatusOk_andReturnBiddingDocument() throws Exception {
+  void getCombined_thenStatusOk_andReturnCombined() throws JsonProcessingException, Exception {
     // given
-    when(biddingDocumentService.getBiddingDocument(Mockito.anyLong())).thenReturn(biddingDocument);
+    when(combinedService.getCombined(Mockito.anyLong())).thenReturn(combined);
 
     // when and then
-    MvcResult result = mockMvc.perform(get("/api/bidding-document/1").contentType(MediaType.APPLICATION_JSON_VALUE))
+    MvcResult result = mockMvc.perform(get("/api/combined/1").contentType(MediaType.APPLICATION_JSON_VALUE))
         .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.id").value(1))
-        .andExpect(jsonPath("$.bidOpening").value(Tool.convertLocalDateTimeToString(timeNow))).andReturn();
+        .andExpect(jsonPath("$.isCanceled").value(false)).andReturn();
 
     // print response
     MockHttpServletResponse response = result.getResponse();
@@ -182,20 +259,17 @@ class BiddingDocumentControllerIT {
   }
 
   @Test
-  @WithMockUser(username = "merchant", roles = { "MERCHANT" })
-  void getBiddingDocuments_thenStatusOk_andReturnBiddingDocuments() throws Exception {
+  @WithMockUser(username = "forwarder", roles = { "FORWARDER" })
+  void getCombinedsByUser_thenStatusOk_andReturnCombineds() throws JsonProcessingException, Exception {
     // given
-    LinkedMultiValueMap<String, String> requestParams = new LinkedMultiValueMap<>();
-    requestParams.add("page", "0");
-    requestParams.add("limit", "10");
-    when(biddingDocumentService.getBiddingDocuments(Mockito.anyString(), Mockito.any(PaginationRequest.class)))
+    when(combinedService.getCombinedsByUser(Mockito.anyString(), Mockito.any(PaginationRequest.class)))
         .thenReturn(pages);
 
     // when and then
-    MvcResult result = mockMvc
-        .perform(get("/api/bidding-document").contentType(MediaType.APPLICATION_JSON_VALUE).params(requestParams))
+    MvcResult result = mockMvc.perform(get("/api/combined/user").contentType(MediaType.APPLICATION_JSON_VALUE)
+        .params(requestParams))
         .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.data[0].id").value(1))
-        .andExpect(jsonPath("$.data[0].merchant").value("merchant")).andReturn();
+        .andExpect(jsonPath("$.data[0].isCanceled").value(false)).andReturn();
 
     // print response
     MockHttpServletResponse response = result.getResponse();
@@ -204,40 +278,17 @@ class BiddingDocumentControllerIT {
 
   @Test
   @WithMockUser(username = "merchant", roles = { "MERCHANT" })
-  void getBiddingDocumentByBid_thenStatusOk_andReturnBiddingDocument() throws Exception {
+  void getCombinedsByBiddingDocument_thenStatusOk_andReturnBids() throws JsonProcessingException, Exception {
     // given
-    when(biddingDocumentService.getBiddingDocumentByBid(Mockito.anyLong(), Mockito.anyString()))
-        .thenReturn(biddingDocument);
-
-    // when and then
-    MvcResult result = mockMvc
-        .perform(get("/api/bidding-document/bid/1").contentType(MediaType.APPLICATION_JSON_VALUE).params(requestParams))
-        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.id").value(1))
-        .andExpect(jsonPath("$.merchant").value("merchant")).andReturn();
-
-    // print response
-    MockHttpServletResponse response = result.getResponse();
-    logger.info("Reponse: {}", response.getContentAsString());
-  }
-
-  @Test
-  @WithMockUser(username = "merchant", roles = { "MERCHANT" })
-  void getBiddingDocumentsByExistCombined_thenStatusOk_andReturnNull() throws Exception {
-    // given
-    // pages = Mockito.mock(Page.class);
-    List<BiddingDocument> listBidDoc1 = new ArrayList<BiddingDocument>();
-    Page<BiddingDocument> pages1 = new PageImpl<BiddingDocument>(listBidDoc1);
-    LinkedMultiValueMap<String, String> requestParams = new LinkedMultiValueMap<>();
-    requestParams.add("page", "0");
-    requestParams.add("limit", "10");
-    when(biddingDocumentService.getBiddingDocumentsByExistCombined(Mockito.anyString(),
-        Mockito.any(PaginationRequest.class))).thenReturn(pages1);
+    when(combinedService.getCombinedsByBiddingDocument(Mockito.anyLong(), Mockito.anyString(),
+        Mockito.any(PaginationRequest.class))).thenReturn(pages);
 
     // when and then
     MvcResult result = mockMvc
         .perform(
-            get("/api/bidding-document/combined").contentType(MediaType.APPLICATION_JSON_VALUE).params(requestParams))
-        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.totalElements").value(0)).andReturn();
+            get("/api/combined/bidding-document/1").contentType(MediaType.APPLICATION_JSON_VALUE).params(requestParams))
+        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.data[0].id").value(1))
+        .andExpect(jsonPath("$.data[0].isCanceled").value(false)).andReturn();
 
     // print response
     MockHttpServletResponse response = result.getResponse();
@@ -245,34 +296,20 @@ class BiddingDocumentControllerIT {
   }
 
   @Test
-  @WithMockUser(username = "merchant", roles = { "MERCHANT" })
-  void updateBiddingDocument_thenStatusOk_andReturnBiddingDocument() throws Exception {
+  @WithMockUser(username = "forwarder", roles = { "FORWARDER" })
+  void editCombined_thenStatusOk_andReturnBid() throws Exception {
     // given
-    biddingDocument.setBidFloorPrice(1800D);
-    when(biddingDocumentService.editBiddingDocument(Mockito.anyLong(), Mockito.anyMap())).thenReturn(biddingDocument);
+    combined.setIsCanceled(true);
     Map<String, Object> updates = new HashMap<String, Object>();
-    updates.put("bidFloorPrice", "1800");
+    updates.put("isCanceled", "true");
+    when(combinedService.editCombined(Mockito.anyLong(), Mockito.anyString(), Mockito.anyString())).thenReturn(combined);
 
     // when and then
     MvcResult result = mockMvc
-        .perform(patch("/api/bidding-document/1").contentType(MediaType.APPLICATION_JSON_VALUE)
+        .perform(patch("/api/combined/1").contentType(MediaType.APPLICATION_JSON_VALUE)
             .content(objectMapper.writeValueAsString(updates)))
         .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.id").value(1))
-        .andExpect(jsonPath("$.bidFloorPrice").value(1800D)).andReturn();
-
-    // print response
-    MockHttpServletResponse response = result.getResponse();
-    logger.info("Reponse: {}", response.getContentAsString());
-  }
-
-  @Test
-  @WithMockUser(username = "merchant", roles = { "MERCHANT" })
-  void deleteBiddingDocument_thenStatusOk_AndReturnMessage() throws Exception {
-
-    // when and then
-    MvcResult result = mockMvc.perform(delete("/api/bidding-document/1").contentType(MediaType.APPLICATION_JSON_VALUE))
-        .andDo(print()).andExpect(status().isOk())
-        .andExpect(jsonPath("$.message").value("Bidding document deleted successfully")).andReturn();
+        .andExpect(jsonPath("$.isCanceled").value(true)).andReturn();
 
     // print response
     MockHttpServletResponse response = result.getResponse();

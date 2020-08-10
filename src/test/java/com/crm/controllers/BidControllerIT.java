@@ -137,7 +137,7 @@ class BidControllerIT {
     containerType.setName("CT12");
 
     booking = new Booking();
-    booking.setBookingNumber("BK123w22");
+    booking.setNumber("BK123w22");
     booking.setUnit(3);
     booking.setCutOffTime(timeNow.plusDays(30));
     booking.setIsFcl(false);
@@ -256,24 +256,25 @@ class BidControllerIT {
     MockHttpServletResponse response = result.getResponse();
     logger.info("Reponse: {}", response.getContentAsString());
   }
-  
+
   @Test
   @WithMockUser(username = "merchant", roles = { "MERCHANT" })
   void getBidsByBiddingDocument_thenStatusOk_andReturnBids() throws JsonProcessingException, Exception {
     // given
-    when(bidService.getBidsByBiddingDocument(Mockito.anyLong(), Mockito.any(PaginationRequest.class))).thenReturn(pages);
+    when(bidService.getBidsByBiddingDocument(Mockito.anyLong(), Mockito.any(PaginationRequest.class)))
+        .thenReturn(pages);
 
     // when and then
-    MvcResult result = mockMvc.perform(get("/api/bid/merchant/1").contentType(MediaType.APPLICATION_JSON_VALUE)
-        .params(requestParams)).andDo(print()).andExpect(status().isOk())
-        .andExpect(jsonPath("$.data[0].id").value(1))
+    MvcResult result = mockMvc
+        .perform(get("/api/bid/merchant/1").contentType(MediaType.APPLICATION_JSON_VALUE).params(requestParams))
+        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.data[0].id").value(1))
         .andExpect(jsonPath("$.data[0].bidDate").value(Tool.convertLocalDateTimeToString(timeNow))).andReturn();
 
     // print response
     MockHttpServletResponse response = result.getResponse();
     logger.info("Reponse: {}", response.getContentAsString());
   }
-  
+
   @Test
   @WithMockUser(username = "forwarder", roles = { "FORWARDER" })
   void getBidsByForwarder_thenStatusOk_andReturnBids() throws JsonProcessingException, Exception {
@@ -281,16 +282,16 @@ class BidControllerIT {
     when(bidService.getBidsByForwarder(Mockito.anyString(), Mockito.any(PaginationRequest.class))).thenReturn(pages);
 
     // when and then
-    MvcResult result = mockMvc.perform(get("/api/bid/forwarder").contentType(MediaType.APPLICATION_JSON_VALUE)
-        .params(requestParams)).andDo(print()).andExpect(status().isOk())
-        .andExpect(jsonPath("$.data[0].id").value(1))
+    MvcResult result = mockMvc
+        .perform(get("/api/bid/forwarder").contentType(MediaType.APPLICATION_JSON_VALUE).params(requestParams))
+        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.data[0].id").value(1))
         .andExpect(jsonPath("$.data[0].bidDate").value(Tool.convertLocalDateTimeToString(timeNow))).andReturn();
 
     // print response
     MockHttpServletResponse response = result.getResponse();
     logger.info("Reponse: {}", response.getContentAsString());
   }
-  
+
   @Test
   @WithMockUser(username = "forwarder", roles = { "FORWARDER" })
   void editBid_thenStatusOk_andReturnBid() throws Exception {
@@ -304,7 +305,7 @@ class BidControllerIT {
     // when and then
     MvcResult result = mockMvc
         .perform(patch("/api/bid/1").contentType(MediaType.APPLICATION_JSON_VALUE)
-        .content(objectMapper.writeValueAsString(updates)))
+            .content(objectMapper.writeValueAsString(updates)))
         .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.id").value(1))
         .andExpect(jsonPath("$.bidPrice").value(2800D)).andReturn();
 
@@ -312,18 +313,18 @@ class BidControllerIT {
     MockHttpServletResponse response = result.getResponse();
     logger.info("Reponse: {}", response.getContentAsString());
   }
-  
+
   @Test
   @WithMockUser(username = "forwarder", roles = { "FORWARDER" })
   void deleteBid_thenStatusOk_andReturnMessage() throws Exception {
     // given
-    //when(bidService.removeBid(Mockito.anyLong(), Mockito.anyString())).thenReturn(bid);
+    // when(bidService.removeBid(Mockito.anyLong(),
+    // Mockito.anyString())).thenReturn(bid);
 
     // when and then
-    MvcResult result = mockMvc
-        .perform(delete("/api/bid/1").contentType(MediaType.APPLICATION_JSON_VALUE))
-        .andDo(print()).andExpect(status().isOk())
-        .andExpect(jsonPath("$.message").value("Bid deleted successfully.")).andReturn();
+    MvcResult result = mockMvc.perform(delete("/api/bid/1").contentType(MediaType.APPLICATION_JSON_VALUE))
+        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.message").value("Bid deleted successfully."))
+        .andReturn();
 
     // print response
     MockHttpServletResponse response = result.getResponse();

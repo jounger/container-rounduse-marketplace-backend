@@ -3,8 +3,6 @@ package com.crm.repository;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -20,7 +18,7 @@ public interface BillOfLadingRepository
   Boolean existsByNumber(String number);
 
   @Query(value = "SELECT b FROM BillOfLading b WHERE b.inbound.id = :id")
-  Page<BillOfLading> findByInbound(@Param("id") Long id, Pageable pageable);
+  Optional<BillOfLading> findByInbound(@Param("id") Long id);
 
   Optional<BillOfLading> findByNumber(String number);
 

@@ -26,6 +26,7 @@ import com.crm.payload.request.BookingRequest;
 import com.crm.payload.request.PaginationRequest;
 import com.crm.repository.BookingRepository;
 import com.crm.repository.MerchantRepository;
+import com.crm.repository.OutboundRepository;
 import com.crm.repository.PortRepository;
 import com.crm.services.BookingService;
 import com.crm.specification.builder.BookingSpecificationsBuilder;
@@ -42,13 +43,17 @@ public class BookingServiceImpl implements BookingService {
   @Autowired
   private PortRepository portRepository;
 
-  @Override
-  public Page<Booking> getBookingsByOutbound(Long id, PaginationRequest request) {
+  @Autowired
+  private OutboundRepository outboundRepository;
 
-    PageRequest pageRequest = PageRequest.of(request.getPage(), request.getLimit(),
-        Sort.by(Sort.Direction.DESC, "createdAt"));
-    Page<Booking> pages = bookingRepository.findByOutbound(id, pageRequest);
-    return pages;
+  @Override
+  public Booking getBookingByOutbound(Long id) {
+    if (!outboundRepository.existsById(id)) {
+      throw new NotFoundException(ErrorConstant.OUTBOUND_NOT_FOUND);
+    }
+    Booking booking = bookingRepository.findByOutbound(id)
+        .orElseThrow(() -> new NotFoundException(ErrorConstant.BOOKING_NOT_FOUND));
+    return booking;
 
   }
 

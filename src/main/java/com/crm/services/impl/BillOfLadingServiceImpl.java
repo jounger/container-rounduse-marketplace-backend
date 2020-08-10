@@ -50,12 +50,11 @@ public class BillOfLadingServiceImpl implements BillOfLadingService {
   private ContainerRepository containerRepository;
 
   @Override
-  public Page<BillOfLading> getBillOfLadingsByInbound(Long id, PaginationRequest request) {
+  public BillOfLading getBillOfLadingByInbound(Long id) {
     if (inboundRepository.existsById(id)) {
-      PageRequest pageRequest = PageRequest.of(request.getPage(), request.getLimit(),
-          Sort.by(Sort.Direction.DESC, "createdAt"));
-      Page<BillOfLading> pages = billOfLadingRepository.findByInbound(id, pageRequest);
-      return pages;
+      BillOfLading billOfLading = billOfLadingRepository.findByInbound(id)
+          .orElseThrow(() -> new NotFoundException(ErrorConstant.BILLOFLADING_NOT_FOUND));
+      return billOfLading;
     } else {
       throw new NotFoundException(ErrorConstant.INBOUND_NOT_FOUND);
     }
@@ -161,8 +160,7 @@ public class BillOfLadingServiceImpl implements BillOfLadingService {
     }
 
     String number = String.valueOf(updates.get("number"));
-    if (updates.get("number") != null
-        && !Tool.isEqual(billOfLading.getNumber(), number)) {
+    if (updates.get("number") != null && !Tool.isEqual(billOfLading.getNumber(), number)) {
       if (billOfLadingRepository.existsByNumber(number)) {
         throw new DuplicateRecordException(ErrorConstant.BILLOFLADING_ALREADY_EXISTS);
       }

@@ -42,21 +42,12 @@ public class BillOfLadingController {
 
   @GetMapping("/inbound/{id}")
   @PreAuthorize("hasRole('FORWARDER') or hasRole('MERCHANT')")
-  public ResponseEntity<?> getBillOfLadingsByInbound(@PathVariable Long id, @Valid PaginationRequest request) {
+  public ResponseEntity<?> getBillOfLadingByInbound(@PathVariable Long id, @Valid PaginationRequest request) {
 
-    Page<BillOfLading> pages = billOfLadingService.getBillOfLadingsByInbound(id, request);
-    PaginationResponse<BillOfLadingDto> response = new PaginationResponse<>();
-    response.setPageNumber(request.getPage());
-    response.setPageSize(request.getLimit());
-    response.setTotalElements(pages.getTotalElements());
-    response.setTotalPages(pages.getTotalPages());
-
-    List<BillOfLading> billOfLadings = pages.getContent();
-    List<BillOfLadingDto> BillOfLadingsDto = new ArrayList<>();
-    billOfLadings.forEach(billOfLading -> BillOfLadingsDto.add(BillOfLadingMapper.toBillOfLadingDto(billOfLading)));
-    response.setContents(BillOfLadingsDto);
-
-    return ResponseEntity.ok(response);
+    BillOfLading billOfLading = billOfLadingService.getBillOfLadingByInbound(id);
+    BillOfLadingDto billOfLadingDto = new BillOfLadingDto();
+    billOfLadingDto = BillOfLadingMapper.toBillOfLadingDto(billOfLading);
+    return ResponseEntity.ok(billOfLadingDto);
   }
 
   @GetMapping("/filter")

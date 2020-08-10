@@ -17,6 +17,7 @@ import com.crm.common.Constant;
 import com.crm.common.ErrorConstant;
 import com.crm.common.Tool;
 import com.crm.enums.EnumPaymentType;
+import com.crm.exception.ForbiddenException;
 import com.crm.exception.InternalException;
 import com.crm.exception.NotFoundException;
 import com.crm.models.Contract;
@@ -164,7 +165,7 @@ public class PaymentServiceImpl implements PaymentService {
     if (payment.getSender().equals(sender)) {
       paymentRepository.deleteById(id);
     } else {
-      throw new NotFoundException(ErrorConstant.USER_ACCESS_DENIED);
+      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
     }
   }
 

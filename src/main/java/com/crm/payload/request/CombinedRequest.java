@@ -12,8 +12,6 @@ public class CombinedRequest {
 
   private Long id;
 
-  private Long bid;
-
   private Boolean isCanceled;
 
   private List<Long> containers = new ArrayList<>();

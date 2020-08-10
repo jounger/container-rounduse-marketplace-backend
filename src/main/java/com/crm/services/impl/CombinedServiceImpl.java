@@ -17,6 +17,7 @@ import com.crm.common.Tool;
 import com.crm.enums.EnumBidStatus;
 import com.crm.enums.EnumShippingStatus;
 import com.crm.exception.DuplicateRecordException;
+import com.crm.exception.ForbiddenException;
 import com.crm.exception.InternalException;
 import com.crm.exception.NotFoundException;
 import com.crm.models.Bid;
@@ -73,17 +74,23 @@ public class CombinedServiceImpl implements CombinedService {
     if (bid.getCombined() != null) {
       throw new DuplicateRecordException(ErrorConstant.BID_INVALID_CREATE);
     }
-    List<Long> containersId = request.getContainers();
+    BiddingDocument biddingDocument = bid.getBiddingDocument();
+    List<Long> containers = request.getContainers();
+    if (!biddingDocument.getIsMultipleAward()) {
+      bid.getContainers().forEach(container -> {
+        containers.add(container.getId());
+      });
+    }
+
     if (request.getContainers() == null || request.getContainers().size() == 0) {
       throw new NotFoundException(ErrorConstant.CONTAINER_NOT_FOUND);
     }
 
-    bid = bidService.editBidWhenCombined(bidId, username, containersId);
+    bid = bidService.editBidWhenCombined(bidId, username, containers);
     combined.setBid(bid);
 
     combined.setIsCanceled(false);
     bid = combined.getBid();
-    BiddingDocument biddingDocument = bid.getBiddingDocument();
     Supplier offeree = biddingDocument.getOfferee();
     ContractRequest contracRequest = request.getContract();
     Contract contract = new Contract();
@@ -98,7 +105,7 @@ public class CombinedServiceImpl implements CombinedService {
         throw new InternalException(ErrorConstant.CONTRACT_INVALID_FINES);
       }
     } else if (!username.equals(offeree.getUsername())) {
-      throw new NotFoundException(ErrorConstant.USER_ACCESS_DENIED);
+      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
     }
 
     combined.setContract(contract);
@@ -107,7 +114,7 @@ public class CombinedServiceImpl implements CombinedService {
     Combined _combined = combinedRepository.save(combined);
 
     Outbound outbound = biddingDocument.getOutbound();
-    createShippingInfosForCombined(_combined, outbound, containersId);
+    createShippingInfosForCombined(_combined, outbound, containers);
 
     return _combined;
   }

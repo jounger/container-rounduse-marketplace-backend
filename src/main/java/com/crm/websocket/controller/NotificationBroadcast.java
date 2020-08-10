@@ -251,7 +251,7 @@ public class NotificationBroadcast {
             driverNotifyRequest.setRecipient(driverUserName);
             driverNotifyRequest.setRelatedResource(shippingInfo.getId());
             driverNotifyRequest.setMessage(String.format("%s and %s want you driver container %s",
-                offeree.getUsername(), bidNew.getBidder().getUsername(), shippingInfo.getContainer().getContainerNumber()));
+                offeree.getUsername(), bidNew.getBidder().getUsername(), shippingInfo.getContainer().getNumber()));
             driverNotifyRequest.setType(EnumNotificationType.DRIVER.name());
             driverNotifyRequest.setAction(EnumDriverNotification.TASK.name());
             driverNotification = driverNotificationService.createDriverNotification(driverNotifyRequest);

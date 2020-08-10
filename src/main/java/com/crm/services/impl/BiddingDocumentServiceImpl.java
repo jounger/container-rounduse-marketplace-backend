@@ -16,6 +16,7 @@ import com.crm.enums.EnumBidStatus;
 import com.crm.enums.EnumBiddingStatus;
 import com.crm.enums.EnumCurrency;
 import com.crm.enums.EnumSupplyStatus;
+import com.crm.exception.ForbiddenException;
 import com.crm.exception.InternalException;
 import com.crm.exception.NotFoundException;
 import com.crm.models.BiddingDocument;
@@ -270,7 +271,7 @@ public class BiddingDocumentServiceImpl implements BiddingDocumentService {
     BiddingDocument biddingDocument = biddingDocumentRepository.findById(id)
         .orElseThrow(() -> new NotFoundException(ErrorConstant.BIDDINGDOCUMENT_NOT_FOUND));
     if (!biddingDocument.getOfferee().equals(merchant)) {
-      throw new NotFoundException(ErrorConstant.BIDDINGDOCUMENT_NOT_OWNER);
+      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
     }
     if (!biddingDocument.getStatus().equalsIgnoreCase(EnumBiddingStatus.CANCELED.name())) {
       throw new InternalException(ErrorConstant.BIDDINGDOCUMENT_IS_IN_TRANSACTION);

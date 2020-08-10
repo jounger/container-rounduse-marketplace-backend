@@ -15,7 +15,7 @@ public class ContainerDto {
 
   private ContainerTractorDto tractor;
 
-  private String containerNumber;
+  private String number;
 
   private String status;
 }

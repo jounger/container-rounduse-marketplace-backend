@@ -11,7 +11,7 @@ public class ContainerRequest {
 
   private Long id;
 
-  private String containerNumber;
+  private String number;
 
   // driver as Driver.userName
   private String driver;

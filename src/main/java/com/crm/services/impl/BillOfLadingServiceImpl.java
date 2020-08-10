@@ -18,7 +18,7 @@ import com.crm.common.Constant;
 import com.crm.common.ErrorConstant;
 import com.crm.common.Tool;
 import com.crm.enums.EnumSupplyStatus;
-import com.crm.exception.DuplicateRecordException;
+import com.crm.exception.ForbiddenException;
 import com.crm.exception.InternalException;
 import com.crm.exception.NotFoundException;
 import com.crm.models.BillOfLading;
@@ -49,12 +49,11 @@ public class BillOfLadingServiceImpl implements BillOfLadingService {
   private ContainerRepository containerRepository;
 
   @Override
-  public Page<BillOfLading> getBillOfLadingsByInbound(Long id, PaginationRequest request) {
+  public BillOfLading getBillOfLadingByInbound(Long id) {
     if (inboundRepository.existsById(id)) {
-      PageRequest pageRequest = PageRequest.of(request.getPage(), request.getLimit(),
-          Sort.by(Sort.Direction.DESC, "createdAt"));
-      Page<BillOfLading> pages = billOfLadingRepository.findByInbound(id, pageRequest);
-      return pages;
+      BillOfLading billOfLading = billOfLadingRepository.findByInbound(id)
+          .orElseThrow(() -> new NotFoundException(ErrorConstant.BILLOFLADING_NOT_FOUND));
+      return billOfLading;
     } else {
       throw new NotFoundException(ErrorConstant.INBOUND_NOT_FOUND);
     }
@@ -67,7 +66,7 @@ public class BillOfLadingServiceImpl implements BillOfLadingService {
         .orElseThrow(() -> new NotFoundException(ErrorConstant.BILLOFLADING_NOT_FOUND));
 
     if (!billOfLading.getInbound().getForwarder().getUsername().equals(username)) {
-      throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
+      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
     }
 
     Port port = portRepository.findByNameCode(request.getPortOfDelivery())
@@ -76,12 +75,6 @@ public class BillOfLadingServiceImpl implements BillOfLadingService {
 
     String number = request.getNumber();
     if (number != null && !number.isEmpty()) {
-      if (billOfLadingRepository.existsByNumber(number)) {
-        if (number.equals(billOfLading.getNumber())) {
-        } else {
-          throw new DuplicateRecordException(ErrorConstant.BILLOFLADING_ALREADY_EXISTS);
-        }
-      }
       billOfLading.setNumber(number);
     }
 
@@ -100,8 +93,8 @@ public class BillOfLadingServiceImpl implements BillOfLadingService {
           throw new InternalException(ErrorConstant.CONTAINER_BUSY);
         }
 
-        String containerNumber = item.getContainerNumber();
-        boolean isContainer = containerRepository.findByContainerNumber(billOfLading.getId(), username, containerNumber,
+        String containerNumber = item.getNumber();
+        boolean isContainer = containerRepository.findByNumber(billOfLading.getId(), username, containerNumber,
             billOfLading.getInbound().getPickupTime(), freeTime);
         if (!isContainer) {
           throw new InternalException(ErrorConstant.CONTAINER_BUSY);
@@ -148,7 +141,7 @@ public class BillOfLadingServiceImpl implements BillOfLadingService {
         .orElseThrow(() -> new NotFoundException(ErrorConstant.BILLOFLADING_NOT_FOUND));
 
     if (!billOfLading.getInbound().getForwarder().getUsername().equals(username)) {
-      throw new InternalException(ErrorConstant.USER_ACCESS_DENIED);
+      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
     }
 
     String portOfDelivery = String.valueOf(updates.get("portOfDelivery"));
@@ -160,11 +153,7 @@ public class BillOfLadingServiceImpl implements BillOfLadingService {
     }
 
     String number = String.valueOf(updates.get("number"));
-    if (updates.get("number") != null
-        && !Tool.isEqual(billOfLading.getNumber(), number)) {
-      if (billOfLadingRepository.existsByNumber(number)) {
-        throw new DuplicateRecordException(ErrorConstant.BILLOFLADING_ALREADY_EXISTS);
-      }
+    if (updates.get("number") != null && !Tool.isEqual(billOfLading.getNumber(), number)) {
       billOfLading.setNumber(number);
     }
 
@@ -190,8 +179,8 @@ public class BillOfLadingServiceImpl implements BillOfLadingService {
           throw new InternalException(ErrorConstant.CONTAINER_BUSY);
         }
 
-        String containerNumber = item.getContainerNumber();
-        boolean isContainer = containerRepository.findByContainerNumber(billOfLading.getId(), username, containerNumber,
+        String containerNumber = item.getNumber();
+        boolean isContainer = containerRepository.findByNumber(billOfLading.getId(), username, containerNumber,
             billOfLading.getInbound().getPickupTime(), freeTime);
         if (!isContainer) {
           throw new InternalException(ErrorConstant.CONTAINER_BUSY);

@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -126,20 +125,6 @@ public class OutboundController {
   }
 
   @Transactional
-  @PutMapping("")
-  @PreAuthorize("hasRole('MERCHANT')")
-  public ResponseEntity<?> updateOutboundDto(@Valid @RequestBody OutboundRequest request) {
-
-    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    String username = userDetails.getUsername();
-
-    Outbound outbound = outBoundService.updateOutbound(username, request);
-    OutboundDto outboundDto = new OutboundDto();
-    outboundDto = OutboundMapper.toOutboundDto(outbound);
-    return ResponseEntity.ok(outboundDto);
-  }
-
-  @Transactional
   @RequestMapping(value = "/{id}", method = RequestMethod.PATCH, consumes = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("hasRole('MERCHANT')")
   public ResponseEntity<?> editOutbound(@RequestBody Map<String, Object> updates, @PathVariable("id") Long id) {
@@ -162,6 +147,6 @@ public class OutboundController {
     String username = userDetails.getUsername();
 
     outBoundService.removeOutbound(id, username);
-    return ResponseEntity.ok(new MessageResponse("Outbound has remove successfully"));
+    return ResponseEntity.ok(new MessageResponse("Outbound has removed successfully"));
   }
 }

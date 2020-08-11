@@ -78,7 +78,7 @@ public class RatingServiceImpl implements RatingService {
   public Rating getRating(Long id, String username) {
     Rating rating = ratingRepository.findById(id)
         .orElseThrow(() -> new NotFoundException(ErrorConstant.RATING_NOT_FOUND));
-    if (!rating.getSender().getUsername().equals(username) || !rating.getReceiver().getUsername().equals(username)) {
+    if (!(rating.getSender().getUsername().equals(username) || rating.getReceiver().getUsername().equals(username))) {
       throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
     }
     return rating;

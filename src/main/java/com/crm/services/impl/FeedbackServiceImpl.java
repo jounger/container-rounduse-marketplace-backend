@@ -149,8 +149,8 @@ public class FeedbackServiceImpl implements FeedbackService {
   public Feedback editFeedback(Long id, String username, Map<String, Object> updates) {
     Feedback feedback = feedbackRepository.findById(id)
         .orElseThrow(() -> new NotFoundException(ErrorConstant.FEEDBACK_NOT_FOUND));
-    if (!feedback.getSender().getUsername().equals(username)
-        || !feedback.getReport().getSender().getUsername().equals(username)) {
+    if (!(feedback.getSender().getUsername().equals(username)
+        || feedback.getReport().getSender().getUsername().equals(username))) {
       throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
     }
 

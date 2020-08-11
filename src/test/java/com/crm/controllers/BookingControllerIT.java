@@ -144,19 +144,16 @@ class BookingControllerIT {
 
   @Test
   @WithMockUser(username = "merchant", roles = { "MERCHANT" })
-  void getBookingsByInbound_thenStatusOk_andReturnBookings() throws Exception {
+  void getBookingByInbound_thenStatusOk_andReturnBookings() throws Exception {
     // given
-    List<Booking> bookings = new ArrayList<Booking>();
-    bookings.add(booking);
-    pages = new PageImpl<Booking>(bookings);
-    when(bookingService.getBookingsByOutbound(Mockito.anyLong(), Mockito.any(PaginationRequest.class)))
-        .thenReturn(pages);
+    when(bookingService.getBookingByOutbound(Mockito.anyLong()))
+        .thenReturn(booking);
 
     // when and then
     MvcResult result = mockMvc
         .perform(get("/api/booking/outbound/1").contentType(MediaType.APPLICATION_JSON_VALUE).params(requestParams))
-        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.data[0].id").value(1))
-        .andExpect(jsonPath("$.data[0].number").value("BK123w22")).andReturn();
+        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.id").value(1))
+        .andExpect(jsonPath("$.number").value("BK123w22")).andReturn();
 
     // print response
     MockHttpServletResponse response = result.getResponse();

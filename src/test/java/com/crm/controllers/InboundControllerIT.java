@@ -115,7 +115,7 @@ class InboundControllerIT {
     Container container = new Container();
     container.setId(1L);
     container.setDriver(driver);
-    container.setContainerNumber("CN2d2d22");
+    container.setNumber("CN2d2d22");
     container.setTractor(tractor);
     container.setTrailer(trailer);
 

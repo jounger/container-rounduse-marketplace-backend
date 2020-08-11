@@ -1,6 +1,7 @@
 package com.crm.controllers;
 
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -34,67 +35,56 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.util.LinkedMultiValueMap;
 
 import com.crm.enums.EnumBidStatus;
-import com.crm.enums.EnumBiddingStatus;
 import com.crm.models.Bid;
-import com.crm.models.BiddingDocument;
 import com.crm.models.BillOfLading;
-import com.crm.models.Booking;
-import com.crm.models.Combined;
 import com.crm.models.Container;
 import com.crm.models.ContainerSemiTrailer;
 import com.crm.models.ContainerTractor;
 import com.crm.models.ContainerType;
-import com.crm.models.Contract;
 import com.crm.models.Driver;
 import com.crm.models.Forwarder;
 import com.crm.models.Inbound;
-import com.crm.models.Merchant;
-import com.crm.models.Outbound;
 import com.crm.models.Port;
 import com.crm.models.ShippingLine;
-import com.crm.payload.request.CombinedRequest;
+import com.crm.payload.request.ContainerRequest;
 import com.crm.payload.request.PaginationRequest;
-import com.crm.services.CombinedService;
+import com.crm.services.ContainerService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @SpringBootTest
 @AutoConfigureMockMvc
 @ContextConfiguration
-class CombinedControllerIT {
+class ContainerControllerIT {
 
-  private static final Logger logger = LoggerFactory.getLogger(CombinedControllerIT.class);
+  private static final Logger logger = LoggerFactory.getLogger(ContainerControllerIT.class);
 
   @Autowired
   protected MockMvc mockMvc;
 
   @MockBean
-  private CombinedService combinedService;
+  private ContainerService containerService;
 
   @Autowired
   private ObjectMapper objectMapper;
 
   PaginationRequest paginationRequest;
 
-  Page<Combined> pages;
+  Page<Container> pages;
 
-  Combined combined;
+  Inbound inbound;
 
-  BiddingDocument biddingDocument;
+  BillOfLading billOfLading;
 
+  Container container;
+
+  List<Container> containers;
+  
   Bid bid;
-
-  List<Bid> listBids;
 
   LinkedMultiValueMap<String, String> requestParams;
 
   LocalDateTime timeNow = LocalDateTime.now();
-
-  Merchant merchant;
-
-  Outbound outbound;
-
-  Booking booking;
 
   Port port;
 
@@ -104,21 +94,6 @@ class CombinedControllerIT {
 
   @BeforeEach
   public void setUp() {
-    biddingDocument = new BiddingDocument();
-    biddingDocument.setId(1L);
-    biddingDocument.setBidOpening(timeNow);
-    biddingDocument.setBidClosing(timeNow.plusHours(8));
-    biddingDocument.setIsMultipleAward(false);
-    biddingDocument.setBidFloorPrice(2000D);
-    biddingDocument.setPriceLeadership(2000D);
-    biddingDocument.setBidPackagePrice(3000D);
-    biddingDocument.setCurrencyOfPayment("VND");
-    biddingDocument.setStatus(EnumBiddingStatus.BIDDING.name());
-
-    merchant = new Merchant();
-    merchant.setId(1L);
-    merchant.setUsername("merchant");
-    biddingDocument.setOfferee(merchant);
 
     Forwarder forwarder = new Forwarder();
     forwarder.setId(2L);
@@ -138,120 +113,72 @@ class CombinedControllerIT {
     containerType = new ContainerType();
     containerType.setName("CT12");
 
-    booking = new Booking();
-    booking.setNumber("BK123w22");
-    booking.setUnit(3);
-    booking.setCutOffTime(timeNow.plusDays(30));
-    booking.setIsFcl(false);
-    booking.setPortOfLoading(port);
-
-    outbound = new Outbound();
-    outbound.setId(1L);
-    outbound.setBooking(booking);
-    outbound.setContainerType(containerType);
-    outbound.setDeliveryTime(timeNow.plusDays(10));
-    outbound.setGoodsDescription("Abc");
-    outbound.setGrossWeight(1233D);
-    outbound.setPackingStation("Ha Noi");
-    outbound.setPackingTime(timeNow.plusDays(9));
-    outbound.setUnitOfMeasurement("3");
-    outbound.setShippingLine(shippingLine);
-
-    biddingDocument.setOutbound(outbound);
-
     ContainerTractor tractor = new ContainerTractor();
     tractor.setId(1L);
 
     ContainerSemiTrailer trailer = new ContainerSemiTrailer();
     trailer.setId(2L);
 
-    List<Container> containers = new ArrayList<>();
-    Container container = new Container();
+    container = new Container();
     container.setId(1L);
     container.setDriver(driver);
     container.setNumber("CN2d2d22");
     container.setTractor(tractor);
     container.setTrailer(trailer);
 
-    containers.add(container);
-
-    Inbound inbound = new Inbound();
-    inbound.setId(1L);
-    inbound.setForwarder(forwarder);
-    inbound.setEmptyTime(timeNow.plusDays(10));
-    inbound.setPickupTime(timeNow.plusDays(9));
-
-    BillOfLading billOfLading = new BillOfLading();
-    billOfLading.setFreeTime(timeNow.plusDays(12));
+    billOfLading = new BillOfLading();
+    billOfLading.setFreeTime(timeNow.plusDays(10));
     billOfLading.setId(1L);
+    billOfLading.setNumber("2esa2ss");
     billOfLading.setPortOfDelivery(port);
-    billOfLading.getContainers().add(container);
+    billOfLading.setUnit(3);
+    billOfLading.setContainers(containers);
     billOfLading.setInbound(inbound);
 
+    inbound = new Inbound();
+    inbound.setId(1L);
+    inbound.setCode("C2sd2radasd");
+    inbound.setForwarder(forwarder);
+    inbound.setBillOfLading(billOfLading);
+    inbound.setContainerType(containerType);
+    inbound.setPickupTime(timeNow.plusDays(1));
+    inbound.setReturnStation("123456");
+    inbound.setEmptyTime(timeNow.plusDays(3));
+    inbound.setShippingLine(shippingLine);
+    
     bid = new Bid();
     bid.setId(1L);
     bid.setBidder(forwarder);
-    bid.setBiddingDocument(biddingDocument);
     bid.setBidDate(timeNow);
     bid.setBidPrice(2300D);
     bid.setBidValidityPeriod(timeNow.plusHours(1));
     bid.setStatus(EnumBidStatus.PENDING.name());
     bid.setContainers(containers);
 
-    listBids = new ArrayList<Bid>();
-    listBids.add(bid);
+    containers = new ArrayList<Container>();
+    containers.add(container);
+    pages = new PageImpl<Container>(containers);
 
     requestParams = new LinkedMultiValueMap<>();
     requestParams.add("page", "0");
     requestParams.add("limit", "10");
-    
-    Contract contract = new Contract();
-    contract.setId(1L);
-    contract.setFinesAgainstContractViolations(8D);
-    contract.setRequired(false);
-
-    combined = new Combined();
-    combined.setId(1L);
-    combined.setBid(bid);
-    combined.setIsCanceled(false);
-    combined.setContract(contract);
-
-    List<Combined> combineds = new ArrayList<Combined>();
-    combineds.add(combined);
-    pages = new PageImpl<Combined>(combineds);
   }
 
   @Test
-  @WithMockUser(username = "merchant", roles = { "MERCHANT" })
-  void createBid_thenStatusOk_andReturnCombined() throws JsonProcessingException, Exception {
+  @WithMockUser(username = "forwarder", roles = { "FORWARDER" })
+  void createContainer_thenStatusOk_andReturnContainer() throws JsonProcessingException, Exception {
     // given
-    CombinedRequest request = new CombinedRequest();
-    request.setIsCanceled(false);
-    when(combinedService.createCombined(Mockito.anyLong(), Mockito.anyString(), Mockito.any(CombinedRequest.class)))
-        .thenReturn(combined);
+    ContainerRequest request = new ContainerRequest();
+    request.setNumber("number");
+    when(containerService.createContainer(Mockito.anyLong(), Mockito.anyString(), Mockito.any(ContainerRequest.class)))
+        .thenReturn(container);
 
     // when and then
     MvcResult result = mockMvc
-        .perform(post("/api/combined/bid/1").contentType(MediaType.APPLICATION_JSON_VALUE)
+        .perform(post("/api/container/bill-of-lading/1").contentType(MediaType.APPLICATION_JSON_VALUE)
             .content(objectMapper.writeValueAsString(request)))
         .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.id").value(1))
-        .andExpect(jsonPath("$.isCanceled").value(false)).andReturn();
-
-    // print response
-    MockHttpServletResponse response = result.getResponse();
-    logger.info("Reponse: {}", response.getContentAsString());
-  }
-
-  @Test
-  @WithMockUser(username = "merchant", roles = { "MERCHANT" })
-  void getCombined_thenStatusOk_andReturnCombined() throws JsonProcessingException, Exception {
-    // given
-    when(combinedService.getCombined(Mockito.anyLong())).thenReturn(combined);
-
-    // when and then
-    MvcResult result = mockMvc.perform(get("/api/combined/1").contentType(MediaType.APPLICATION_JSON_VALUE))
-        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.id").value(1))
-        .andExpect(jsonPath("$.isCanceled").value(false)).andReturn();
+        .andExpect(jsonPath("$.number").value("CN2d2d22")).andReturn();
 
     // print response
     MockHttpServletResponse response = result.getResponse();
@@ -260,16 +187,31 @@ class CombinedControllerIT {
 
   @Test
   @WithMockUser(username = "forwarder", roles = { "FORWARDER" })
-  void getCombinedsByUser_thenStatusOk_andReturnCombineds() throws JsonProcessingException, Exception {
+  void getContainer_thenStatusOk_andReturnContainer() throws JsonProcessingException, Exception {
     // given
-    when(combinedService.getCombinedsByUser(Mockito.anyString(), Mockito.any(PaginationRequest.class)))
-        .thenReturn(pages);
+    when(containerService.getContainerById(Mockito.anyLong())).thenReturn(container);
 
     // when and then
-    MvcResult result = mockMvc.perform(get("/api/combined/user").contentType(MediaType.APPLICATION_JSON_VALUE)
-        .params(requestParams))
+    MvcResult result = mockMvc.perform(get("/api/container/1").contentType(MediaType.APPLICATION_JSON_VALUE))
+        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.id").value(1))
+        .andExpect(jsonPath("$.number").value("CN2d2d22")).andReturn();
+
+    // print response
+    MockHttpServletResponse response = result.getResponse();
+    logger.info("Reponse: {}", response.getContentAsString());
+  }
+
+  @Test
+  @WithMockUser(username = "forwarder", roles = { "FORWARDER" })
+  void getContainers_thenStatusOk_andReturnContainer()
+      throws JsonProcessingException, Exception {
+    // given
+    when(containerService.getContainers(Mockito.any(PaginationRequest.class))).thenReturn(pages);
+
+    // when and then
+    MvcResult result = mockMvc.perform(get("/api/container").contentType(MediaType.APPLICATION_JSON_VALUE).params(requestParams))
         .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.data[0].id").value(1))
-        .andExpect(jsonPath("$.data[0].isCanceled").value(false)).andReturn();
+        .andExpect(jsonPath("$.data[0].number").value("CN2d2d22")).andReturn();
 
     // print response
     MockHttpServletResponse response = result.getResponse();
@@ -278,17 +220,18 @@ class CombinedControllerIT {
 
   @Test
   @WithMockUser(username = "merchant", roles = { "MERCHANT" })
-  void getCombinedsByBiddingDocument_thenStatusOk_andReturnBids() throws JsonProcessingException, Exception {
+  void getContainersByBillOfLading_thenStatusOk_andReturnContainers()
+      throws JsonProcessingException, Exception {
     // given
-    when(combinedService.getCombinedsByBiddingDocument(Mockito.anyLong(), Mockito.anyString(),
-        Mockito.any(PaginationRequest.class))).thenReturn(pages);
+    when(containerService.getContainersByBillOfLading(Mockito.anyLong(), Mockito.any(PaginationRequest.class)))
+        .thenReturn(pages);
 
     // when and then
     MvcResult result = mockMvc
         .perform(
-            get("/api/combined/bidding-document/1").contentType(MediaType.APPLICATION_JSON_VALUE).params(requestParams))
+            get("/api/container/bill-of-lading/1").contentType(MediaType.APPLICATION_JSON_VALUE).params(requestParams))
         .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.data[0].id").value(1))
-        .andExpect(jsonPath("$.data[0].isCanceled").value(false)).andReturn();
+        .andExpect(jsonPath("$.data[0].number").value("CN2d2d22")).andReturn();
 
     // print response
     MockHttpServletResponse response = result.getResponse();
@@ -297,19 +240,71 @@ class CombinedControllerIT {
 
   @Test
   @WithMockUser(username = "forwarder", roles = { "FORWARDER" })
-  void editCombined_thenStatusOk_andReturnBid() throws Exception {
+  void getContainersByInbound_thenStatusOk_andReturnContainers() throws JsonProcessingException, Exception {
     // given
-    combined.setIsCanceled(true);
-    Map<String, Object> updates = new HashMap<String, Object>();
-    updates.put("isCanceled", "true");
-    when(combinedService.editCombined(Mockito.anyLong(), Mockito.anyString(), Mockito.anyString())).thenReturn(combined);
+    when(containerService.getContainersByInbound(Mockito.anyLong(), Mockito.any(PaginationRequest.class)))
+        .thenReturn(pages);
 
     // when and then
     MvcResult result = mockMvc
-        .perform(patch("/api/combined/1").contentType(MediaType.APPLICATION_JSON_VALUE)
+        .perform(get("/api/container/inbound/1").contentType(MediaType.APPLICATION_JSON_VALUE).params(requestParams))
+        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.data[0].id").value(1))
+        .andExpect(jsonPath("$.data[0].number").value("CN2d2d22")).andReturn();
+
+    // print response
+    MockHttpServletResponse response = result.getResponse();
+    logger.info("Reponse: {}", response.getContentAsString());
+  }
+
+  @Test
+  @WithMockUser(username = "forwarder", roles = { "FORWARDER" })
+  void getContainersByBid_thenStatusOk_andReturnContainers() throws JsonProcessingException, Exception {
+    // given
+    when(containerService.getContainersByBid(Mockito.anyLong(), Mockito.any(PaginationRequest.class)))
+        .thenReturn(pages);
+
+    // when and then
+    MvcResult result = mockMvc
+        .perform(get("/api/container/bid/1").contentType(MediaType.APPLICATION_JSON_VALUE).params(requestParams))
+        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.data[0].id").value(1))
+        .andExpect(jsonPath("$.data[0].number").value("CN2d2d22")).andReturn();
+
+    // print response
+    MockHttpServletResponse response = result.getResponse();
+    logger.info("Reponse: {}", response.getContentAsString());
+  }
+
+  @Test
+  @WithMockUser(username = "forwarder", roles = { "FORWARDER" })
+  void editContainer_thenStatusOk_andReturnContainer() throws Exception {
+    // given
+    container.setNumber("2s3d2w");
+    Map<String, Object> updates = new HashMap<String, Object>();
+    updates.put("number", "2s3d2w");
+    when(containerService.editContainer(Mockito.anyMap(), Mockito.anyLong(), Mockito.anyString()))
+        .thenReturn(container);
+
+    // when and then
+    MvcResult result = mockMvc
+        .perform(patch("/api/container/1").contentType(MediaType.APPLICATION_JSON_VALUE)
             .content(objectMapper.writeValueAsString(updates)))
         .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.id").value(1))
-        .andExpect(jsonPath("$.isCanceled").value(true)).andReturn();
+        .andExpect(jsonPath("$.number").value("2s3d2w")).andReturn();
+
+    // print response
+    MockHttpServletResponse response = result.getResponse();
+    logger.info("Reponse: {}", response.getContentAsString());
+  }
+
+  @Test
+  @WithMockUser(username = "forwarder", roles = { "FORWARDER" })
+  void deleteContainer_thenStatusOk_andReturnMessage() throws Exception {
+    // given
+
+    // when and then
+    MvcResult result = mockMvc.perform(delete("/api/container/1").contentType(MediaType.APPLICATION_JSON_VALUE))
+        .andDo(print()).andExpect(status().isOk())
+        .andExpect(jsonPath("$.message").value("Container has remove successfully")).andReturn();
 
     // print response
     MockHttpServletResponse response = result.getResponse();

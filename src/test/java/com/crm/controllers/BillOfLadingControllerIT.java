@@ -112,7 +112,7 @@ class BillOfLadingControllerIT {
     Container container = new Container();
     container.setId(1L);
     container.setDriver(driver);
-    container.setContainerNumber("CN2d2d22");
+    container.setNumber("CN2d2d22");
     container.setTractor(tractor);
     container.setTrailer(trailer);
 
@@ -170,17 +170,14 @@ class BillOfLadingControllerIT {
   @WithMockUser(username = "merchant", roles = { "MERCHANT" })
   void getBillOfLadingsByInbound_thenStatusOk_andReturnBillOfLadings() throws Exception {
     // given
-    List<BillOfLading> billOfLadings = new ArrayList<BillOfLading>();
-    billOfLadings.add(billOfLading);
-    pages = new PageImpl<BillOfLading>(billOfLadings);
-    when(billOfLadingService.getBillOfLadingsByInbound(Mockito.anyLong(), Mockito.any(PaginationRequest.class)))
-        .thenReturn(pages);
+    when(billOfLadingService.getBillOfLadingByInbound(Mockito.anyLong())).thenReturn(billOfLading);
 
     // when and then
     MvcResult result = mockMvc
-        .perform(get("/api/bill-of-lading/inbound/1").contentType(MediaType.APPLICATION_JSON_VALUE).params(requestParams))
-        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.data[0].id").value(1))
-        .andExpect(jsonPath("$.data[0].number").value("2esa2ss")).andReturn();
+        .perform(
+            get("/api/bill-of-lading/inbound/1").contentType(MediaType.APPLICATION_JSON_VALUE).params(requestParams))
+        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.id").value(1))
+        .andExpect(jsonPath("$.number").value("2esa2ss")).andReturn();
 
     // print response
     MockHttpServletResponse response = result.getResponse();
@@ -193,8 +190,7 @@ class BillOfLadingControllerIT {
     // given
     requestParams = new LinkedMultiValueMap<String, String>();
     requestParams.add("number", "2esa2ss");
-    when(billOfLadingService.getBillOfLadingByNumber(Mockito.anyString()))
-        .thenReturn(billOfLading);
+    when(billOfLadingService.getBillOfLadingByNumber(Mockito.anyString())).thenReturn(billOfLading);
 
     // when and then
     MvcResult result = mockMvc

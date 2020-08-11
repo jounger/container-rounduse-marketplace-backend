@@ -4,7 +4,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Assertions;
@@ -23,6 +25,8 @@ import org.springframework.data.domain.PageRequest;
 
 import com.crm.common.Tool;
 import com.crm.exception.DuplicateRecordException;
+import com.crm.exception.ForbiddenException;
+import com.crm.exception.InternalException;
 import com.crm.exception.NotFoundException;
 import com.crm.models.Booking;
 import com.crm.models.ContainerType;
@@ -492,4 +496,826 @@ public class OutboundServiceImplTest {
     });
   }
 
+  @Test
+  @DisplayName("Create outbound when ShippingLine notFound")
+  public void whenCreateOutbound_thenReturnNotFoundException_ShippingLine() {
+    // given
+
+    Merchant merchant = new Merchant();
+    merchant.setId(1L);
+    merchant.setUsername("merchant");
+
+    ContainerType containerType = new ContainerType();
+    containerType.setId(1L);
+    containerType.setName("10CD");
+
+    Port port = new Port();
+    port.setId(1L);
+    port.setNameCode("HHP");
+
+    ShippingLine shippingLine = new ShippingLine();
+    shippingLine.setId(1L);
+    shippingLine.setCompanyCode("APL");
+
+    BookingRequest bookingRequest = new BookingRequest();
+    bookingRequest.setUnit(3);
+    bookingRequest.setNumber("001");
+    bookingRequest.setCutOffTime("2020-07-30T19:20");
+    bookingRequest.setPortOfLoading(port.getNameCode());
+
+    OutboundRequest outboundRequest = new OutboundRequest();
+    outboundRequest.setCode("0002");
+    outboundRequest.setShippingLine(shippingLine.getCompanyCode());
+    outboundRequest.setContainerType(containerType.getName());
+    outboundRequest.setGoodsDescription("Good Job");
+    outboundRequest.setPackingTime("2020-07-26T15:41");
+    outboundRequest.setDeliveryTime("2020-07-29T20:45");
+    outboundRequest.setPackingStation("Thành phố Nha Trang Khánh Hòa Việt Nam");
+    outboundRequest.setGrossWeight(10.5);
+    outboundRequest.setUnitOfMeasurement("KG");
+    outboundRequest.setStatus("CREATED");
+    outboundRequest.setBooking(bookingRequest);
+
+    Outbound outbound = new Outbound();
+    outbound.setId(1L);
+
+    // when
+    when(merchantRepository.findByUsername(Mockito.anyString())).thenReturn(Optional.of(merchant));
+    when(supplyRepository.existsByCode(Mockito.anyString())).thenReturn(false);
+    when(shippingLineRepository.findByCompanyCode(Mockito.anyString())).thenReturn(Optional.empty());
+    when(containerTypeRepository.findByName(Mockito.anyString())).thenReturn(Optional.of(containerType));
+    when(portRepository.findByNameCode(Mockito.anyString())).thenReturn(Optional.of(port));
+    when(outboundRepository.save(Mockito.any(Outbound.class))).thenReturn(outbound);
+    // then
+    Assertions.assertThrows(NotFoundException.class, () -> {
+      outboundServiceImpl.createOutbound(merchant.getUsername(), outboundRequest);
+    });
+  }
+
+  @Test
+  @DisplayName("Create outbound when ContainerType notFound")
+  public void whenCreateOutbound_thenReturnNotFoundException_ContainerType() {
+    // given
+
+    Merchant merchant = new Merchant();
+    merchant.setId(1L);
+    merchant.setUsername("merchant");
+
+    ContainerType containerType = new ContainerType();
+    containerType.setId(1L);
+    containerType.setName("10CD");
+
+    Port port = new Port();
+    port.setId(1L);
+    port.setNameCode("HHP");
+
+    ShippingLine shippingLine = new ShippingLine();
+    shippingLine.setId(1L);
+    shippingLine.setCompanyCode("APL");
+
+    BookingRequest bookingRequest = new BookingRequest();
+    bookingRequest.setUnit(3);
+    bookingRequest.setNumber("001");
+    bookingRequest.setCutOffTime("2020-07-30T19:20");
+    bookingRequest.setPortOfLoading(port.getNameCode());
+
+    OutboundRequest outboundRequest = new OutboundRequest();
+    outboundRequest.setCode("0002");
+    outboundRequest.setShippingLine(shippingLine.getCompanyCode());
+    outboundRequest.setContainerType(containerType.getName());
+    outboundRequest.setGoodsDescription("Good Job");
+    outboundRequest.setPackingTime("2020-07-26T15:41");
+    outboundRequest.setDeliveryTime("2020-07-29T20:45");
+    outboundRequest.setPackingStation("Thành phố Nha Trang Khánh Hòa Việt Nam");
+    outboundRequest.setGrossWeight(10.5);
+    outboundRequest.setUnitOfMeasurement("KG");
+    outboundRequest.setStatus("CREATED");
+    outboundRequest.setBooking(bookingRequest);
+
+    Outbound outbound = new Outbound();
+    outbound.setId(1L);
+
+    // when
+    when(merchantRepository.findByUsername(Mockito.anyString())).thenReturn(Optional.of(merchant));
+    when(supplyRepository.existsByCode(Mockito.anyString())).thenReturn(false);
+    when(shippingLineRepository.findByCompanyCode(Mockito.anyString())).thenReturn(Optional.of(shippingLine));
+    when(containerTypeRepository.findByName(Mockito.anyString())).thenReturn(Optional.empty());
+    when(portRepository.findByNameCode(Mockito.anyString())).thenReturn(Optional.of(port));
+    when(outboundRepository.save(Mockito.any(Outbound.class))).thenReturn(outbound);
+    // then
+    Assertions.assertThrows(NotFoundException.class, () -> {
+      outboundServiceImpl.createOutbound(merchant.getUsername(), outboundRequest);
+    });
+  }
+
+  @Test
+  @DisplayName("Create outbound when ContainerType notFound")
+  public void whenCreateOutbound_thenReturnNotFoundException_Port() {
+    // given
+
+    Merchant merchant = new Merchant();
+    merchant.setId(1L);
+    merchant.setUsername("merchant");
+
+    ContainerType containerType = new ContainerType();
+    containerType.setId(1L);
+    containerType.setName("10CD");
+
+    Port port = new Port();
+    port.setId(1L);
+    port.setNameCode("HHP");
+
+    ShippingLine shippingLine = new ShippingLine();
+    shippingLine.setId(1L);
+    shippingLine.setCompanyCode("APL");
+
+    BookingRequest bookingRequest = new BookingRequest();
+    bookingRequest.setUnit(3);
+    bookingRequest.setNumber("001");
+    bookingRequest.setCutOffTime("2020-07-30T19:20");
+    bookingRequest.setPortOfLoading(port.getNameCode());
+
+    OutboundRequest outboundRequest = new OutboundRequest();
+    outboundRequest.setCode("0002");
+    outboundRequest.setShippingLine(shippingLine.getCompanyCode());
+    outboundRequest.setContainerType(containerType.getName());
+    outboundRequest.setGoodsDescription("Good Job");
+    outboundRequest.setPackingTime("2020-07-26T15:41");
+    outboundRequest.setDeliveryTime("2020-07-29T20:45");
+    outboundRequest.setPackingStation("Thành phố Nha Trang Khánh Hòa Việt Nam");
+    outboundRequest.setGrossWeight(10.5);
+    outboundRequest.setUnitOfMeasurement("KG");
+    outboundRequest.setStatus("CREATED");
+    outboundRequest.setBooking(bookingRequest);
+
+    Outbound outbound = new Outbound();
+    outbound.setId(1L);
+
+    // when
+    when(merchantRepository.findByUsername(Mockito.anyString())).thenReturn(Optional.of(merchant));
+    when(supplyRepository.existsByCode(Mockito.anyString())).thenReturn(false);
+    when(shippingLineRepository.findByCompanyCode(Mockito.anyString())).thenReturn(Optional.of(shippingLine));
+    when(containerTypeRepository.findByName(Mockito.anyString())).thenReturn(Optional.of(containerType));
+    when(portRepository.findByNameCode(Mockito.anyString())).thenReturn(Optional.empty());
+    when(outboundRepository.save(Mockito.any(Outbound.class))).thenReturn(outbound);
+    // then
+    Assertions.assertThrows(NotFoundException.class, () -> {
+      outboundServiceImpl.createOutbound(merchant.getUsername(), outboundRequest);
+    });
+  }
+
+  @Test
+  @DisplayName("Create outbound when Booking notFound")
+  public void whenCreateOutbound_thenReturnNotFoundException_Booking() {
+    // given
+
+    Merchant merchant = new Merchant();
+    merchant.setId(1L);
+    merchant.setUsername("merchant");
+
+    ContainerType containerType = new ContainerType();
+    containerType.setId(1L);
+    containerType.setName("10CD");
+
+    Port port = new Port();
+    port.setId(1L);
+    port.setNameCode("HHP");
+
+    ShippingLine shippingLine = new ShippingLine();
+    shippingLine.setId(1L);
+    shippingLine.setCompanyCode("APL");
+
+    BookingRequest bookingRequest = new BookingRequest();
+    bookingRequest.setUnit(3);
+    bookingRequest.setCutOffTime("2020-07-30T19:20");
+    bookingRequest.setPortOfLoading(port.getNameCode());
+
+    OutboundRequest outboundRequest = new OutboundRequest();
+    outboundRequest.setCode("0002");
+    outboundRequest.setShippingLine(shippingLine.getCompanyCode());
+    outboundRequest.setContainerType(containerType.getName());
+    outboundRequest.setGoodsDescription("Good Job");
+    outboundRequest.setPackingTime("2020-07-26T15:41");
+    outboundRequest.setDeliveryTime("2020-07-29T20:45");
+    outboundRequest.setPackingStation("Thành phố Nha Trang Khánh Hòa Việt Nam");
+    outboundRequest.setGrossWeight(10.5);
+    outboundRequest.setUnitOfMeasurement("KG");
+    outboundRequest.setStatus("CREATED");
+    outboundRequest.setBooking(bookingRequest);
+
+    Outbound outbound = new Outbound();
+    outbound.setId(1L);
+
+    // when
+    when(merchantRepository.findByUsername(Mockito.anyString())).thenReturn(Optional.of(merchant));
+    when(supplyRepository.existsByCode(Mockito.anyString())).thenReturn(false);
+    when(shippingLineRepository.findByCompanyCode(Mockito.anyString())).thenReturn(Optional.of(shippingLine));
+    when(containerTypeRepository.findByName(Mockito.anyString())).thenReturn(Optional.of(containerType));
+    when(portRepository.findByNameCode(Mockito.anyString())).thenReturn(Optional.of(port));
+    when(outboundRepository.save(Mockito.any(Outbound.class))).thenReturn(outbound);
+    // then
+    Assertions.assertThrows(NotFoundException.class, () -> {
+      outboundServiceImpl.createOutbound(merchant.getUsername(), outboundRequest);
+    });
+  }
+
+  @Test
+  @DisplayName("Create outbound when packingTime after deliveryTime")
+  public void whenCreateOutbound_thenPackingTimeAfterDeliveryTime() {
+    // given
+
+    Merchant merchant = new Merchant();
+    merchant.setId(1L);
+    merchant.setUsername("merchant");
+
+    ContainerType containerType = new ContainerType();
+    containerType.setId(1L);
+    containerType.setName("10CD");
+
+    Port port = new Port();
+    port.setId(1L);
+    port.setNameCode("HHP");
+
+    ShippingLine shippingLine = new ShippingLine();
+    shippingLine.setId(1L);
+    shippingLine.setCompanyCode("APL");
+
+    BookingRequest bookingRequest = new BookingRequest();
+    bookingRequest.setUnit(3);
+    bookingRequest.setNumber("001");
+    bookingRequest.setCutOffTime("2020-07-30T19:20");
+    bookingRequest.setPortOfLoading(port.getNameCode());
+
+    OutboundRequest outboundRequest = new OutboundRequest();
+    outboundRequest.setCode("0002");
+    outboundRequest.setShippingLine(shippingLine.getCompanyCode());
+    outboundRequest.setContainerType(containerType.getName());
+    outboundRequest.setGoodsDescription("Good Job");
+    outboundRequest.setPackingTime("2020-07-30T15:41");
+    outboundRequest.setDeliveryTime("2020-07-29T20:45");
+    outboundRequest.setPackingStation("Thành phố Nha Trang Khánh Hòa Việt Nam");
+    outboundRequest.setGrossWeight(10.5);
+    outboundRequest.setUnitOfMeasurement("KG");
+    outboundRequest.setStatus("CREATED");
+    outboundRequest.setBooking(bookingRequest);
+
+    Outbound outbound = new Outbound();
+    outbound.setId(1L);
+
+    // when
+    when(merchantRepository.findByUsername(Mockito.anyString())).thenReturn(Optional.of(merchant));
+    when(supplyRepository.existsByCode(Mockito.anyString())).thenReturn(false);
+    when(shippingLineRepository.findByCompanyCode(Mockito.anyString())).thenReturn(Optional.of(shippingLine));
+    when(containerTypeRepository.findByName(Mockito.anyString())).thenReturn(Optional.of(containerType));
+    when(portRepository.findByNameCode(Mockito.anyString())).thenReturn(Optional.of(port));
+    when(outboundRepository.save(Mockito.any(Outbound.class))).thenReturn(outbound);
+    // then
+    Assertions.assertThrows(InternalException.class, () -> {
+      outboundServiceImpl.createOutbound(merchant.getUsername(), outboundRequest);
+    });
+  }
+
+  @Test
+  @DisplayName("Edit Outbound success")
+  public void whenEditOutbound_thenReturnOutbound() {
+    // given
+
+    Map<String, Object> updates = new HashMap<>();
+    updates.put("shippingLine", "AL01");
+    updates.put("containerType", "8CD");
+    updates.put("packingTime", "2020-07-25T15:41");
+    updates.put("deliveryTime", "2020-07-28T15:41");
+
+    Merchant merchant = new Merchant();
+    merchant.setId(1L);
+    merchant.setUsername("merchant");
+
+    ContainerType containerType = new ContainerType();
+    containerType.setId(1L);
+    containerType.setName("10CD");
+
+    ShippingLine shippingLine = new ShippingLine();
+    shippingLine.setId(1L);
+    shippingLine.setCompanyCode("APL");
+
+    Booking booking = new Booking();
+    booking.setId(1L);
+    booking.setUnit(3);
+
+    Outbound outbound = new Outbound();
+    outbound.setId(1L);
+    outbound.setCode("0002");
+    outbound.setShippingLine(shippingLine);
+    outbound.setContainerType(containerType);
+    outbound.setMerchant(merchant);
+    outbound.setGoodsDescription("Good Job");
+    outbound.setPackingTime(Tool.convertToLocalDateTime("2020-07-26T15:41"));
+    outbound.setDeliveryTime(Tool.convertToLocalDateTime("2020-07-29T20:45"));
+    outbound.setPackingStation("Thành phố Nha Trang Khánh Hòa Việt Nam");
+    outbound.setGrossWeight(10.5);
+    outbound.setUnitOfMeasurement("KG");
+    outbound.setStatus("CREATED");
+    outbound.setBooking(booking);
+
+    // when
+    when(outboundRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(outbound));
+    when(shippingLineRepository.findByCompanyCode(Mockito.anyString())).thenReturn(Optional.of(shippingLine));
+    when(containerTypeRepository.findByName(Mockito.anyString())).thenReturn(Optional.of(containerType));
+    when(outboundRepository.save(Mockito.any(Outbound.class))).thenReturn(outbound);
+    // then
+    Outbound actualResult = outboundServiceImpl.editOutbound(updates, outbound.getId(), merchant.getUsername());
+    assertThat(actualResult).isNotNull();
+  }
+
+  @Test
+  @DisplayName("Edit Outbound NotFound")
+  public void whenEditOutbound_thenReturnNotFoundException_Outbound() {
+    // given
+
+    Map<String, Object> updates = new HashMap<>();
+    updates.put("shippingLine", "AL01");
+    updates.put("containerType", "8CD");
+    updates.put("packingTime", "2020-07-25T15:41");
+    updates.put("deliveryTime", "2020-07-28T15:41");
+
+    Merchant merchant = new Merchant();
+    merchant.setId(1L);
+    merchant.setUsername("merchant");
+
+    ContainerType containerType = new ContainerType();
+    containerType.setId(1L);
+    containerType.setName("10CD");
+
+    ShippingLine shippingLine = new ShippingLine();
+    shippingLine.setId(1L);
+    shippingLine.setCompanyCode("APL");
+
+    Booking booking = new Booking();
+    booking.setId(1L);
+    booking.setUnit(3);
+
+    Outbound outbound = new Outbound();
+    outbound.setId(1L);
+    outbound.setCode("0002");
+    outbound.setShippingLine(shippingLine);
+    outbound.setContainerType(containerType);
+    outbound.setMerchant(merchant);
+    outbound.setGoodsDescription("Good Job");
+    outbound.setPackingTime(Tool.convertToLocalDateTime("2020-07-26T15:41"));
+    outbound.setDeliveryTime(Tool.convertToLocalDateTime("2020-07-29T20:45"));
+    outbound.setPackingStation("Thành phố Nha Trang Khánh Hòa Việt Nam");
+    outbound.setGrossWeight(10.5);
+    outbound.setUnitOfMeasurement("KG");
+    outbound.setStatus("CREATED");
+    outbound.setBooking(booking);
+
+    // when
+    when(outboundRepository.findById(Mockito.anyLong())).thenReturn(Optional.empty());
+    when(shippingLineRepository.findByCompanyCode(Mockito.anyString())).thenReturn(Optional.of(shippingLine));
+    when(containerTypeRepository.findByName(Mockito.anyString())).thenReturn(Optional.of(containerType));
+    when(outboundRepository.save(Mockito.any(Outbound.class))).thenReturn(outbound);
+    // then
+    Assertions.assertThrows(NotFoundException.class, () -> {
+      outboundServiceImpl.editOutbound(updates, outbound.getId(), merchant.getUsername());
+    });
+  }
+
+  @Test
+  @DisplayName("Edit Outbound ShippingLine NotFound")
+  public void whenEditOutbound_thenReturnNotFoundException_ShippingLine() {
+    // given
+
+    Map<String, Object> updates = new HashMap<>();
+    updates.put("shippingLine", "AL01");
+    updates.put("containerType", "8CD");
+    updates.put("packingTime", "2020-07-25T15:41");
+    updates.put("deliveryTime", "2020-07-28T15:41");
+
+    Merchant merchant = new Merchant();
+    merchant.setId(1L);
+    merchant.setUsername("merchant");
+
+    ContainerType containerType = new ContainerType();
+    containerType.setId(1L);
+    containerType.setName("10CD");
+
+    ShippingLine shippingLine = new ShippingLine();
+    shippingLine.setId(1L);
+    shippingLine.setCompanyCode("APL");
+
+    Booking booking = new Booking();
+    booking.setId(1L);
+    booking.setUnit(3);
+
+    Outbound outbound = new Outbound();
+    outbound.setId(1L);
+    outbound.setCode("0002");
+    outbound.setShippingLine(shippingLine);
+    outbound.setContainerType(containerType);
+    outbound.setMerchant(merchant);
+    outbound.setGoodsDescription("Good Job");
+    outbound.setPackingTime(Tool.convertToLocalDateTime("2020-07-26T15:41"));
+    outbound.setDeliveryTime(Tool.convertToLocalDateTime("2020-07-29T20:45"));
+    outbound.setPackingStation("Thành phố Nha Trang Khánh Hòa Việt Nam");
+    outbound.setGrossWeight(10.5);
+    outbound.setUnitOfMeasurement("KG");
+    outbound.setStatus("CREATED");
+    outbound.setBooking(booking);
+
+    // when
+    when(outboundRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(outbound));
+    when(shippingLineRepository.findByCompanyCode(Mockito.anyString())).thenReturn(Optional.empty());
+    when(containerTypeRepository.findByName(Mockito.anyString())).thenReturn(Optional.of(containerType));
+    when(outboundRepository.save(Mockito.any(Outbound.class))).thenReturn(outbound);
+    // then
+    Assertions.assertThrows(NotFoundException.class, () -> {
+      outboundServiceImpl.editOutbound(updates, outbound.getId(), merchant.getUsername());
+    });
+  }
+
+  @Test
+  @DisplayName("Edit Outbound ContainerType NotFound")
+  public void whenEditOutbound_thenReturnNotFoundException_ContainerType() {
+    // given
+
+    Map<String, Object> updates = new HashMap<>();
+    updates.put("shippingLine", "AL01");
+    updates.put("containerType", "8CD");
+    updates.put("packingTime", "2020-07-25T15:41");
+    updates.put("deliveryTime", "2020-07-28T15:41");
+
+    Merchant merchant = new Merchant();
+    merchant.setId(1L);
+    merchant.setUsername("merchant");
+
+    ContainerType containerType = new ContainerType();
+    containerType.setId(1L);
+    containerType.setName("10CD");
+
+    ShippingLine shippingLine = new ShippingLine();
+    shippingLine.setId(1L);
+    shippingLine.setCompanyCode("APL");
+
+    Booking booking = new Booking();
+    booking.setId(1L);
+    booking.setUnit(3);
+
+    Outbound outbound = new Outbound();
+    outbound.setId(1L);
+    outbound.setCode("0002");
+    outbound.setShippingLine(shippingLine);
+    outbound.setContainerType(containerType);
+    outbound.setMerchant(merchant);
+    outbound.setGoodsDescription("Good Job");
+    outbound.setPackingTime(Tool.convertToLocalDateTime("2020-07-26T15:41"));
+    outbound.setDeliveryTime(Tool.convertToLocalDateTime("2020-07-29T20:45"));
+    outbound.setPackingStation("Thành phố Nha Trang Khánh Hòa Việt Nam");
+    outbound.setGrossWeight(10.5);
+    outbound.setUnitOfMeasurement("KG");
+    outbound.setStatus("CREATED");
+    outbound.setBooking(booking);
+
+    // when
+    when(outboundRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(outbound));
+    when(shippingLineRepository.findByCompanyCode(Mockito.anyString())).thenReturn(Optional.of(shippingLine));
+    when(containerTypeRepository.findByName(Mockito.anyString())).thenReturn(Optional.empty());
+    when(outboundRepository.save(Mockito.any(Outbound.class))).thenReturn(outbound);
+    // then
+    Assertions.assertThrows(NotFoundException.class, () -> {
+      outboundServiceImpl.editOutbound(updates, outbound.getId(), merchant.getUsername());
+    });
+  }
+
+  @Test
+  @DisplayName("Edit Outbound Access Denied")
+  public void whenEditOutbound_thenReturnAccessDeniedException() {
+    // given
+
+    Map<String, Object> updates = new HashMap<>();
+    updates.put("shippingLine", "AL01");
+    updates.put("containerType", "8CD");
+    updates.put("packingTime", "2020-07-25T15:41");
+    updates.put("deliveryTime", "2020-07-28T15:41");
+
+    Merchant merchant = new Merchant();
+    merchant.setId(1L);
+    merchant.setUsername("merchant");
+
+    ContainerType containerType = new ContainerType();
+    containerType.setId(1L);
+    containerType.setName("10CD");
+
+    ShippingLine shippingLine = new ShippingLine();
+    shippingLine.setId(1L);
+    shippingLine.setCompanyCode("APL");
+
+    Booking booking = new Booking();
+    booking.setId(1L);
+    booking.setUnit(3);
+
+    Outbound outbound = new Outbound();
+    outbound.setId(1L);
+    outbound.setCode("0002");
+    outbound.setShippingLine(shippingLine);
+    outbound.setContainerType(containerType);
+    outbound.setMerchant(merchant);
+    outbound.setGoodsDescription("Good Job");
+    outbound.setPackingTime(Tool.convertToLocalDateTime("2020-07-26T15:41"));
+    outbound.setDeliveryTime(Tool.convertToLocalDateTime("2020-07-29T20:45"));
+    outbound.setPackingStation("Thành phố Nha Trang Khánh Hòa Việt Nam");
+    outbound.setGrossWeight(10.5);
+    outbound.setUnitOfMeasurement("KG");
+    outbound.setStatus("CREATED");
+    outbound.setBooking(booking);
+
+    // when
+    when(outboundRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(outbound));
+    when(shippingLineRepository.findByCompanyCode(Mockito.anyString())).thenReturn(Optional.of(shippingLine));
+    when(containerTypeRepository.findByName(Mockito.anyString())).thenReturn(Optional.of(containerType));
+    when(outboundRepository.save(Mockito.any(Outbound.class))).thenReturn(outbound);
+    // then
+    Assertions.assertThrows(ForbiddenException.class, () -> {
+      outboundServiceImpl.editOutbound(updates, outbound.getId(), "XXXXX");
+    });
+  }
+
+  @Test
+  @DisplayName("Edit Outbound COMBINED or BIDDING")
+  public void whenEditOutbound_thenReturnOutboundIsInTransactionException() {
+    // given
+
+    Map<String, Object> updates = new HashMap<>();
+    updates.put("shippingLine", "AL01");
+    updates.put("containerType", "8CD");
+    updates.put("packingTime", "2020-07-25T15:41");
+    updates.put("deliveryTime", "2020-07-28T15:41");
+
+    Merchant merchant = new Merchant();
+    merchant.setId(1L);
+    merchant.setUsername("merchant");
+
+    ContainerType containerType = new ContainerType();
+    containerType.setId(1L);
+    containerType.setName("10CD");
+
+    ShippingLine shippingLine = new ShippingLine();
+    shippingLine.setId(1L);
+    shippingLine.setCompanyCode("APL");
+
+    Booking booking = new Booking();
+    booking.setId(1L);
+    booking.setUnit(3);
+
+    Outbound outbound = new Outbound();
+    outbound.setId(1L);
+    outbound.setCode("0002");
+    outbound.setShippingLine(shippingLine);
+    outbound.setContainerType(containerType);
+    outbound.setMerchant(merchant);
+    outbound.setGoodsDescription("Good Job");
+    outbound.setPackingTime(Tool.convertToLocalDateTime("2020-07-26T15:41"));
+    outbound.setDeliveryTime(Tool.convertToLocalDateTime("2020-07-29T20:45"));
+    outbound.setPackingStation("Thành phố Nha Trang Khánh Hòa Việt Nam");
+    outbound.setGrossWeight(10.5);
+    outbound.setUnitOfMeasurement("KG");
+    outbound.setStatus("COMBINED");
+    outbound.setBooking(booking);
+
+    // when
+    when(outboundRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(outbound));
+    when(shippingLineRepository.findByCompanyCode(Mockito.anyString())).thenReturn(Optional.of(shippingLine));
+    when(containerTypeRepository.findByName(Mockito.anyString())).thenReturn(Optional.of(containerType));
+    when(outboundRepository.save(Mockito.any(Outbound.class))).thenReturn(outbound);
+    // then
+    Assertions.assertThrows(InternalException.class, () -> {
+      outboundServiceImpl.editOutbound(updates, outbound.getId(), merchant.getUsername());
+    });
+  }
+
+  @Test
+  @DisplayName("Edit Outbound when packingTime after deliveryTime")
+  public void whenEditOutbound_thenReturnOutboundInvalidDeliveryException() {
+    // given
+
+    Map<String, Object> updates = new HashMap<>();
+    updates.put("shippingLine", "AL01");
+    updates.put("containerType", "8CD");
+    updates.put("packingTime", "2020-07-28T15:41");
+    updates.put("deliveryTime", "2020-07-25T15:41");
+
+    Merchant merchant = new Merchant();
+    merchant.setId(1L);
+    merchant.setUsername("merchant");
+
+    ContainerType containerType = new ContainerType();
+    containerType.setId(1L);
+    containerType.setName("10CD");
+
+    ShippingLine shippingLine = new ShippingLine();
+    shippingLine.setId(1L);
+    shippingLine.setCompanyCode("APL");
+
+    Booking booking = new Booking();
+    booking.setId(1L);
+    booking.setUnit(3);
+
+    Outbound outbound = new Outbound();
+    outbound.setId(1L);
+    outbound.setCode("0002");
+    outbound.setShippingLine(shippingLine);
+    outbound.setContainerType(containerType);
+    outbound.setMerchant(merchant);
+    outbound.setGoodsDescription("Good Job");
+    outbound.setPackingTime(Tool.convertToLocalDateTime("2020-07-26T15:41"));
+    outbound.setDeliveryTime(Tool.convertToLocalDateTime("2020-07-29T20:45"));
+    outbound.setPackingStation("Thành phố Nha Trang Khánh Hòa Việt Nam");
+    outbound.setGrossWeight(10.5);
+    outbound.setUnitOfMeasurement("KG");
+    outbound.setStatus("CREATED");
+    outbound.setBooking(booking);
+
+    // when
+    when(outboundRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(outbound));
+    when(shippingLineRepository.findByCompanyCode(Mockito.anyString())).thenReturn(Optional.of(shippingLine));
+    when(containerTypeRepository.findByName(Mockito.anyString())).thenReturn(Optional.of(containerType));
+    when(outboundRepository.save(Mockito.any(Outbound.class))).thenReturn(outbound);
+    // then
+    Assertions.assertThrows(InternalException.class, () -> {
+      outboundServiceImpl.editOutbound(updates, outbound.getId(), merchant.getUsername());
+    });
+  }
+
+  @Test
+  @DisplayName("Remove Outbound Success")
+  public void whenRemoveOutboundSuccess() {
+    // given
+
+    Merchant merchant = new Merchant();
+    merchant.setId(1L);
+    merchant.setUsername("merchant");
+
+    ContainerType containerType = new ContainerType();
+    containerType.setId(1L);
+    containerType.setName("10CD");
+
+    ShippingLine shippingLine = new ShippingLine();
+    shippingLine.setId(1L);
+    shippingLine.setCompanyCode("APL");
+
+    Booking booking = new Booking();
+    booking.setId(1L);
+    booking.setUnit(3);
+
+    Outbound outbound = new Outbound();
+    outbound.setId(1L);
+    outbound.setCode("0002");
+    outbound.setShippingLine(shippingLine);
+    outbound.setContainerType(containerType);
+    outbound.setMerchant(merchant);
+    outbound.setGoodsDescription("Good Job");
+    outbound.setPackingTime(Tool.convertToLocalDateTime("2020-07-26T15:41"));
+    outbound.setDeliveryTime(Tool.convertToLocalDateTime("2020-07-29T20:45"));
+    outbound.setPackingStation("Thành phố Nha Trang Khánh Hòa Việt Nam");
+    outbound.setGrossWeight(10.5);
+    outbound.setUnitOfMeasurement("KG");
+    outbound.setStatus("CREATED");
+    outbound.setBooking(booking);
+
+    // when
+    when(outboundRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(outbound));
+    // then
+    outboundServiceImpl.removeOutbound(outbound.getId(), merchant.getUsername());
+  }
+
+  @Test
+  @DisplayName("Remove Outbound NotFound")
+  public void whenRemoveOutboundNotFound() {
+    // given
+
+    Merchant merchant = new Merchant();
+    merchant.setId(1L);
+    merchant.setUsername("merchant");
+
+    ContainerType containerType = new ContainerType();
+    containerType.setId(1L);
+    containerType.setName("10CD");
+
+    ShippingLine shippingLine = new ShippingLine();
+    shippingLine.setId(1L);
+    shippingLine.setCompanyCode("APL");
+
+    Booking booking = new Booking();
+    booking.setId(1L);
+    booking.setUnit(3);
+
+    Outbound outbound = new Outbound();
+    outbound.setId(1L);
+    outbound.setCode("0002");
+    outbound.setShippingLine(shippingLine);
+    outbound.setContainerType(containerType);
+    outbound.setMerchant(merchant);
+    outbound.setGoodsDescription("Good Job");
+    outbound.setPackingTime(Tool.convertToLocalDateTime("2020-07-26T15:41"));
+    outbound.setDeliveryTime(Tool.convertToLocalDateTime("2020-07-29T20:45"));
+    outbound.setPackingStation("Thành phố Nha Trang Khánh Hòa Việt Nam");
+    outbound.setGrossWeight(10.5);
+    outbound.setUnitOfMeasurement("KG");
+    outbound.setStatus("CREATED");
+    outbound.setBooking(booking);
+
+    // when
+    when(outboundRepository.findById(Mockito.anyLong())).thenReturn(Optional.empty());
+    // then
+    Assertions.assertThrows(NotFoundException.class, () -> {
+      outboundServiceImpl.removeOutbound(outbound.getId(), merchant.getUsername());
+    });
+  }
+
+  @Test
+  @DisplayName("Remove Outbound AccessDenied")
+  public void whenRemoveOutbound_whenAccessDenied() {
+    // given
+
+    Merchant merchant = new Merchant();
+    merchant.setId(1L);
+    merchant.setUsername("merchant");
+
+    ContainerType containerType = new ContainerType();
+    containerType.setId(1L);
+    containerType.setName("10CD");
+
+    ShippingLine shippingLine = new ShippingLine();
+    shippingLine.setId(1L);
+    shippingLine.setCompanyCode("APL");
+
+    Booking booking = new Booking();
+    booking.setId(1L);
+    booking.setUnit(3);
+
+    Outbound outbound = new Outbound();
+    outbound.setId(1L);
+    outbound.setCode("0002");
+    outbound.setShippingLine(shippingLine);
+    outbound.setContainerType(containerType);
+    outbound.setMerchant(merchant);
+    outbound.setGoodsDescription("Good Job");
+    outbound.setPackingTime(Tool.convertToLocalDateTime("2020-07-26T15:41"));
+    outbound.setDeliveryTime(Tool.convertToLocalDateTime("2020-07-29T20:45"));
+    outbound.setPackingStation("Thành phố Nha Trang Khánh Hòa Việt Nam");
+    outbound.setGrossWeight(10.5);
+    outbound.setUnitOfMeasurement("KG");
+    outbound.setStatus("CREATED");
+    outbound.setBooking(booking);
+
+    // when
+    when(outboundRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(outbound));
+    // then
+    Assertions.assertThrows(ForbiddenException.class, () -> {
+      outboundServiceImpl.removeOutbound(outbound.getId(), "XXXXX");
+    });
+  }
+
+  @Test
+  @DisplayName("Remove Outbound Combined or Bidding")
+  public void whenRemoveOutbound_whenOutboundIsInTransaction() {
+    // given
+
+    Merchant merchant = new Merchant();
+    merchant.setId(1L);
+    merchant.setUsername("merchant");
+
+    ContainerType containerType = new ContainerType();
+    containerType.setId(1L);
+    containerType.setName("10CD");
+
+    ShippingLine shippingLine = new ShippingLine();
+    shippingLine.setId(1L);
+    shippingLine.setCompanyCode("APL");
+
+    Booking booking = new Booking();
+    booking.setId(1L);
+    booking.setUnit(3);
+
+    Outbound outbound = new Outbound();
+    outbound.setId(1L);
+    outbound.setCode("0002");
+    outbound.setShippingLine(shippingLine);
+    outbound.setContainerType(containerType);
+    outbound.setMerchant(merchant);
+    outbound.setGoodsDescription("Good Job");
+    outbound.setPackingTime(Tool.convertToLocalDateTime("2020-07-26T15:41"));
+    outbound.setDeliveryTime(Tool.convertToLocalDateTime("2020-07-29T20:45"));
+    outbound.setPackingStation("Thành phố Nha Trang Khánh Hòa Việt Nam");
+    outbound.setGrossWeight(10.5);
+    outbound.setUnitOfMeasurement("KG");
+    outbound.setStatus("COMBINED");
+    outbound.setBooking(booking);
+
+    // when
+    when(outboundRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(outbound));
+    // then
+    Assertions.assertThrows(InternalException.class, () -> {
+      outboundServiceImpl.removeOutbound(outbound.getId(), merchant.getUsername());
+    });
+  }
 }

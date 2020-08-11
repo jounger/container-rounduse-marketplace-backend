@@ -28,6 +28,7 @@ import com.crm.payload.request.BiddingDocumentRequest;
 import com.crm.payload.request.PaginationRequest;
 import com.crm.repository.BidRepository;
 import com.crm.repository.BiddingDocumentRepository;
+import com.crm.repository.CombinedRepository;
 import com.crm.repository.ContainerRepository;
 import com.crm.repository.DiscountRepository;
 import com.crm.repository.MerchantRepository;
@@ -58,6 +59,9 @@ public class BiddingDocumentServiceImpl implements BiddingDocumentService {
 
   @Autowired
   private BidRepository bidRepository;
+
+  @Autowired
+  private CombinedRepository combinedRepository;
 
   @Override
   public BiddingDocument createBiddingDocument(String username, BiddingDocumentRequest request) {
@@ -129,6 +133,16 @@ public class BiddingDocumentServiceImpl implements BiddingDocumentService {
       throw new NotFoundException(ErrorConstant.BID_NOT_FOUND);
     }
     BiddingDocument biddingDocument = biddingDocumentRepository.findByBid(id, username)
+        .orElseThrow(() -> new NotFoundException(ErrorConstant.BIDDINGDOCUMENT_NOT_FOUND));
+    return biddingDocument;
+  }
+
+  @Override
+  public BiddingDocument getBiddingDocumentByCombined(Long id, String username) {
+    if (!combinedRepository.existsById(id)) {
+      throw new NotFoundException(ErrorConstant.COMBINED_NOT_FOUND);
+    }
+    BiddingDocument biddingDocument = biddingDocumentRepository.findByCombined(id, username)
         .orElseThrow(() -> new NotFoundException(ErrorConstant.BIDDINGDOCUMENT_NOT_FOUND));
     return biddingDocument;
   }
@@ -241,8 +255,9 @@ public class BiddingDocumentServiceImpl implements BiddingDocumentService {
 
     String status = String.valueOf(updates.get("status"));
     EnumBiddingStatus eStatus = null;
-    if (updates.get("status") != null && !Tool.isBlank(status) && (eStatus = EnumBiddingStatus.findByName(status)) != null){
-        biddingDocument.setStatus(eStatus.name());
+    if (updates.get("status") != null && !Tool.isBlank(status)
+        && (eStatus = EnumBiddingStatus.findByName(status)) != null) {
+      biddingDocument.setStatus(eStatus.name());
       if (eStatus.name().equalsIgnoreCase(EnumBiddingStatus.CANCELED.name())) {
         outbound = biddingDocument.getOutbound();
         outbound.setStatus(EnumSupplyStatus.CREATED.name());

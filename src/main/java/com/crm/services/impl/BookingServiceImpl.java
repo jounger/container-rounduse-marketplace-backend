@@ -21,7 +21,6 @@ import com.crm.exception.InternalException;
 import com.crm.exception.NotFoundException;
 import com.crm.models.Booking;
 import com.crm.models.Port;
-import com.crm.payload.request.BookingRequest;
 import com.crm.payload.request.PaginationRequest;
 import com.crm.repository.BookingRepository;
 import com.crm.repository.MerchantRepository;
@@ -54,43 +53,6 @@ public class BookingServiceImpl implements BookingService {
         .orElseThrow(() -> new NotFoundException(ErrorConstant.BOOKING_NOT_FOUND));
     return booking;
 
-  }
-
-  @Override
-  public Booking updateBooking(String username, BookingRequest request) {
-
-    Booking booking = bookingRepository.findById(request.getId())
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.BOOKING_NOT_FOUND));
-
-    if (!booking.getOutbound().getMerchant().getUsername().equals(username)) {
-      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
-    }
-
-    if (booking.getOutbound().getStatus().equals(EnumSupplyStatus.COMBINED.name())
-        || booking.getOutbound().getStatus().equals(EnumSupplyStatus.BIDDING.name())) {
-      throw new InternalException(ErrorConstant.OUTBOUND_IS_IN_TRANSACTION);
-    }
-
-    String number = request.getNumber();
-    if (number != null && !number.isEmpty()) {
-      booking.setNumber(number);
-    }
-
-    Port portOfLoading = portRepository.findByNameCode(request.getPortOfLoading())
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.PORT_NOT_FOUND));
-    booking.setPortOfLoading(portOfLoading);
-
-    booking.setUnit(request.getUnit());
-
-    if (request.getCutOffTime() != null && !request.getCutOffTime().isEmpty()) {
-      LocalDateTime cutOffTime = Tool.convertToLocalDateTime(request.getCutOffTime());
-      booking.setCutOffTime(cutOffTime);
-    }
-
-    booking.setIsFcl(request.getIsFcl());
-
-    Booking _booking = bookingRepository.save(booking);
-    return _booking;
   }
 
   @Override

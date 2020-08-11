@@ -72,8 +72,8 @@ public class ShippingInfoServiceImpl implements ShippingInfoService {
     Forwarder forwarder = driver.getForwarder();
     Outbound outbound = shippingInfo.getOutbound();
     Merchant merchant = outbound.getMerchant();
-    if (!driver.getUsername().equals(username) || !merchant.getUsername().equals(username)
-        || !forwarder.getUsername().equals(username)) {
+    if (!(driver.getUsername().equals(username) || !merchant.getUsername().equals(username)
+        || forwarder.getUsername().equals(username))) {
       throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
     }
     return shippingInfo;
@@ -139,8 +139,8 @@ public class ShippingInfoServiceImpl implements ShippingInfoService {
   public Page<ShippingInfo> getShippingInfosByCombined(Long combinedId, String username, PaginationRequest request) {
     Combined combined = combinedRepository.findById(combinedId)
         .orElseThrow(() -> new NotFoundException(ErrorConstant.COMBINED_NOT_FOUND));
-    if (!combined.getBid().getBidder().getUsername().equals(username)
-        || !combined.getBid().getBiddingDocument().getOfferee().getUsername().equals(username)) {
+    if (!(combined.getBid().getBidder().getUsername().equals(username)
+        || combined.getBid().getBiddingDocument().getOfferee().getUsername().equals(username))) {
       throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
     }
     PageRequest page = PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt"));

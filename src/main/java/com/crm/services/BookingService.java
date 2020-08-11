@@ -5,7 +5,6 @@ import java.util.Map;
 import org.springframework.data.domain.Page;
 
 import com.crm.models.Booking;
-import com.crm.payload.request.BookingRequest;
 import com.crm.payload.request.PaginationRequest;
 
 public interface BookingService {
@@ -17,8 +16,6 @@ public interface BookingService {
   Booking getBookingsByNumber(String number);
 
   Page<Booking> searchBookings(PaginationRequest request, String search);
-
-  Booking updateBooking(String username, BookingRequest request);
 
   Booking editBooking(Map<String, Object> updates, Long id, String username);
 }

@@ -114,7 +114,7 @@ public class ShippingInfoController {
   }
 
   @PreAuthorize("hasRole('MERCHANT')")
-  @GetMapping("/contract/{id}")
+  @GetMapping("/outbound/{id}")
   public ResponseEntity<?> getShippingInfosByOutbound(@PathVariable("id") Long id, @Valid PaginationRequest request) {
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();

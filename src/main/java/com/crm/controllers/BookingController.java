@@ -17,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -27,7 +26,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.crm.models.Booking;
 import com.crm.models.dto.BookingDto;
 import com.crm.models.mapper.BookingMapper;
-import com.crm.payload.request.BookingRequest;
 import com.crm.payload.request.PaginationRequest;
 import com.crm.payload.response.PaginationResponse;
 import com.crm.services.BookingService;
@@ -86,19 +84,6 @@ public class BookingController {
   }
 
   @Transactional
-  @PutMapping("")
-  @PreAuthorize("hasRole('MERCHANT')")
-  public ResponseEntity<?> updateBooking(@Valid @RequestBody BookingRequest request) {
-
-    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
-        .getPrincipal();
-    String username = userDetails.getUsername();
-
-    Booking booking = bookingService.updateBooking(username, request);
-    BookingDto bookingDto = BookingMapper.toBookingDto(booking);
-    return ResponseEntity.ok(bookingDto);
-  }
-
   @RequestMapping(value = "/{id}", method = RequestMethod.PATCH, consumes = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("hasRole('MERCHANT')")
   public ResponseEntity<?> editBooking(@RequestBody Map<String, Object> updates, @PathVariable("id") Long id) {

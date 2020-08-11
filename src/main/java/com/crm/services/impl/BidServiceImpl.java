@@ -146,8 +146,8 @@ public class BidServiceImpl implements BidService {
   @Override
   public Bid getBid(Long id, String username) {
     Bid bid = bidRepository.findById(id).orElseThrow(() -> new NotFoundException(ErrorConstant.BID_NOT_FOUND));
-    if (!bid.getBidder().getUsername().equals(username)
-        || !bid.getBiddingDocument().getOfferee().getUsername().equals(username)) {
+    if (!(bid.getBidder().getUsername().equals(username)
+        || bid.getBiddingDocument().getOfferee().getUsername().equals(username))) {
       throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
     }
     return bid;

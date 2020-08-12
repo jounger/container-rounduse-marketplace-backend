@@ -61,4 +61,28 @@ public class ExceptionController {
     return error;
   }
 
+  @ExceptionHandler(FileStorageException.class)
+  @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+  public ErrorResponse handlerException(FileStorageException ex, WebRequest req) {
+
+    logger.error("File Storage Error: {}", ex.getMessage());
+
+    ErrorResponse error = new ErrorResponse();
+    error.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
+    error.setMessage(ex.getMessage());
+    return error;
+  }
+
+  @ExceptionHandler(MyFileNotFoundException.class)
+  @ResponseStatus(HttpStatus.NOT_FOUND)
+  public ErrorResponse handlerException(MyFileNotFoundException ex, WebRequest req) {
+
+    logger.error("MyFile Not Found Error: {}", ex.getMessage());
+
+    ErrorResponse error = new ErrorResponse();
+    error.setStatus(HttpStatus.FORBIDDEN);
+    error.setMessage(ex.getMessage());
+    return error;
+  }
+
 }

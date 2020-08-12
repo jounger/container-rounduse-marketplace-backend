@@ -74,7 +74,7 @@ public class Discount {
   private Date updatedAt;
 
   @OneToMany(mappedBy = "discount")
-  private Collection<BiddingDocument> biddingDocuments = new ArrayList<>();
+  private Collection<Contract> contracts = new ArrayList<>();
 
   // DO NOT DELETE CODE BELLOW
 

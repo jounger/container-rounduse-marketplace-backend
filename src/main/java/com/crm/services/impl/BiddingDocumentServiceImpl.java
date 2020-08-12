@@ -20,7 +20,6 @@ import com.crm.exception.ForbiddenException;
 import com.crm.exception.InternalException;
 import com.crm.exception.NotFoundException;
 import com.crm.models.BiddingDocument;
-import com.crm.models.Discount;
 import com.crm.models.Merchant;
 import com.crm.models.Outbound;
 import com.crm.models.User;
@@ -30,7 +29,6 @@ import com.crm.repository.BidRepository;
 import com.crm.repository.BiddingDocumentRepository;
 import com.crm.repository.CombinedRepository;
 import com.crm.repository.ContainerRepository;
-import com.crm.repository.DiscountRepository;
 import com.crm.repository.MerchantRepository;
 import com.crm.repository.OutboundRepository;
 import com.crm.repository.UserRepository;
@@ -50,9 +48,6 @@ public class BiddingDocumentServiceImpl implements BiddingDocumentService {
 
   @Autowired
   private OutboundRepository outboundRepository;
-
-  @Autowired
-  private DiscountRepository discountRepository;
 
   @Autowired
   private ContainerRepository containerRepository;
@@ -105,13 +100,6 @@ public class BiddingDocumentServiceImpl implements BiddingDocumentService {
     biddingDocument.setBidPackagePrice(request.getBidPackagePrice());
     biddingDocument.setBidFloorPrice(request.getBidFloorPrice());
     biddingDocument.setPriceLeadership(request.getBidPackagePrice());
-
-    String discountCodeString = request.getBidDiscountCode();
-    if (discountCodeString != null && !discountCodeString.isEmpty()) {
-      Discount bidDiscountCode = discountRepository.findByCode(discountCodeString)
-          .orElseThrow(() -> new NotFoundException(ErrorMessage.DISCOUNT_NOT_FOUND));
-      biddingDocument.setDiscount(bidDiscountCode);
-    }
 
     biddingDocument.setStatus(EnumBiddingStatus.BIDDING.name());
 

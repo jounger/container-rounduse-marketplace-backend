@@ -54,10 +54,6 @@ public class BiddingDocument {
   @JoinColumn(name = "outbound_id")
   private Outbound outbound;
 
-  @ManyToOne
-  @JoinColumn(name = "discount_id")
-  private Discount discount;
-
   @Column(name = "is_multiple_award")
   private Boolean isMultipleAward;
 

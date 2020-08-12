@@ -9,6 +9,7 @@ import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -25,12 +26,13 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.crm.common.SuccessMessage;
 import com.crm.models.Contract;
 import com.crm.models.dto.ContractDto;
 import com.crm.models.mapper.ContractMapper;
 import com.crm.payload.request.ContractRequest;
 import com.crm.payload.request.PaginationRequest;
-import com.crm.payload.response.MessageResponse;
+import com.crm.payload.response.DefaultResponse;
 import com.crm.payload.response.PaginationResponse;
 import com.crm.services.ContractService;
 
@@ -50,12 +52,19 @@ public class ContractController {
     String username = userDetails.getUsername();
     Contract contract = contractService.createContract(id, username, request);
     ContractDto contractDto = ContractMapper.toContractDto(contract);
-    return ResponseEntity.ok(contractDto);
+
+    // Set default response body
+    DefaultResponse<ContractDto> defaultResponse = new DefaultResponse<>();
+    defaultResponse.setMessage(SuccessMessage.CREATE_CONTRACT_SUCCESSFULLY);
+    defaultResponse.setData(contractDto);
+
+    return ResponseEntity.status(HttpStatus.CREATED).body(defaultResponse);
   }
-  
+
   @GetMapping("/combined/{id}")
   @PreAuthorize("hasRole('MERCHANT') or hasRole('FORWARDER')")
-  public ResponseEntity<?> getContractByCombined(@PathVariable("id") Long id, @Valid @RequestBody ContractRequest request) {
+  public ResponseEntity<?> getContractByCombined(@PathVariable("id") Long id,
+      @Valid @RequestBody ContractRequest request) {
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
     Contract contract = contractService.getContractByCombined(id, username);
@@ -112,7 +121,13 @@ public class ContractController {
     String username = userDetails.getUsername();
     Contract contract = contractService.editContract(id, username, updates);
     ContractDto contractDto = ContractMapper.toContractDto(contract);
-    return ResponseEntity.ok(contractDto);
+
+    // Set default response body
+    DefaultResponse<ContractDto> defaultResponse = new DefaultResponse<>();
+    defaultResponse.setMessage(SuccessMessage.EDIT_CONTRACT_SUCCESSFULLY);
+    defaultResponse.setData(contractDto);
+
+    return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 
   @Transactional
@@ -122,6 +137,11 @@ public class ContractController {
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
     contractService.removeContract(id, username);
-    return ResponseEntity.ok(new MessageResponse("Contract deleted successfully."));
+
+    // Set default response body
+    DefaultResponse<ContractDto> defaultResponse = new DefaultResponse<>();
+    defaultResponse.setMessage(SuccessMessage.DELETE_CONTRACT_SUCCESSFULLY);
+
+    return ResponseEntity.status(HttpStatus.NO_CONTENT).body(defaultResponse);
   }
 }

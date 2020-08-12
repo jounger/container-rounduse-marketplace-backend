@@ -17,7 +17,7 @@ public class BiddingDocumentMapper {
     biddingDocumentDto.setId(biddingDocument.getId());
     
     String merchantUsername = biddingDocument.getOfferee().getUsername();
-    biddingDocumentDto.setMerchant(merchantUsername);
+    biddingDocumentDto.setOfferee(merchantUsername);
 
     OutboundDto outboundDto = OutboundMapper.toOutboundDto(biddingDocument.getOutbound());
     biddingDocumentDto.setOutbound(outboundDto);

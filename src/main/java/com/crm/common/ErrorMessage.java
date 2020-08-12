@@ -1,6 +1,6 @@
 package com.crm.common;
 
-public class ErrorConstant {
+public class ErrorMessage {
   // Bidding
   public static final String BIDDINGDOCUMENT_NOT_FOUND = "Không tìm thấy hồ sơ mời thầu";
   public static final String BIDDINGDOCUMENT_INVALID_CLOSING_TIME = "Thời gian đóng thầu phải sau thời gian hiện tại và trước thời gian đóng hàng";
@@ -116,6 +116,7 @@ public class ErrorConstant {
   public static final String USER_PHONE_ALREADY_EXISTS = "Số điện thoại đã tồn tại";
   public static final String COMPANY_CODE_ALREADY_EXISTS = "Mã công ty đã tồn tại";
   public static final String USERNAME_ALREADY_EXISTS = "Tên đăng nhập đã tồn tại";
+  public static final String PASSWORD_NOT_CORRECT = "Mật khẩu không đúng";
   public static final String USER_ALREADY_EXISTS = "Tên đăng nhập, số điện thoại, email hoặc mã công ty đã tồn tại";
 
   // Operator

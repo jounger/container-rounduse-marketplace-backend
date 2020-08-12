@@ -9,7 +9,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import com.crm.common.ErrorConstant;
+import com.crm.common.ErrorMessage;
 import com.crm.enums.EnumDriverNotification;
 import com.crm.enums.EnumNotificationType;
 import com.crm.exception.NotFoundException;
@@ -40,7 +40,7 @@ public class DriverNotificationServiceImpl implements DriverNotificationService 
     DriverNotification driverNotification = new DriverNotification();
 
     User recipient = userRepositoty.findByUsername(request.getRecipient())
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.RECIPIENT_NOT_FOUND));
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.RECIPIENT_NOT_FOUND));
     driverNotification.setRecipient(recipient);
 
     driverNotification.setIsRead(false);
@@ -48,7 +48,7 @@ public class DriverNotificationServiceImpl implements DriverNotificationService 
     driverNotification.setTitle(request.getTitle());
 
     ShippingInfo relatedResource = shippingInfoRepository.findById(request.getRelatedResource())
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.NOTIFICATION_RELATED_RESOURCE_NOT_FOUND));
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.NOTIFICATION_RELATED_RESOURCE_NOT_FOUND));
     driverNotification.setRelatedResource(relatedResource);
 
     driverNotification.setMessage(request.getMessage());
@@ -66,7 +66,7 @@ public class DriverNotificationServiceImpl implements DriverNotificationService 
   @Override
   public DriverNotification getDriverNotification(Long id) {
     DriverNotification driverNotification = driverNotificationRepository.findById(id)
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.NOTIFICATION_NOT_FOUND));
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.NOTIFICATION_NOT_FOUND));
     return driverNotification;
   }
 
@@ -108,7 +108,7 @@ public class DriverNotificationServiceImpl implements DriverNotificationService 
   @Override
   public DriverNotification editDriverNotification(Long id, Map<String, Object> updates) {
     DriverNotification driverNotification = driverNotificationRepository.findById(id)
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.NOTIFICATION_NOT_FOUND));
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.NOTIFICATION_NOT_FOUND));
 
     Boolean isRead = (Boolean) updates.get("isRead");
     if (updates.get("isRead") != null && isRead != null) {
@@ -129,7 +129,7 @@ public class DriverNotificationServiceImpl implements DriverNotificationService 
     if (driverNotificationRepository.existsById(id)) {
       driverNotificationRepository.deleteById(id);
     } else {
-      throw new NotFoundException(ErrorConstant.NOTIFICATION_NOT_FOUND);
+      throw new NotFoundException(ErrorMessage.NOTIFICATION_NOT_FOUND);
     }
   }
 

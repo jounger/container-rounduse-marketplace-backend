@@ -9,7 +9,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import com.crm.common.ErrorConstant;
+import com.crm.common.ErrorMessage;
 import com.crm.common.Tool;
 import com.crm.enums.EnumCurrency;
 import com.crm.exception.DuplicateRecordException;
@@ -37,21 +37,21 @@ public class DiscountServiceImpl implements DiscountService {
   @Override
   public Discount getDiscountById(Long id) {
     Discount discount = discountRepository.findById(id)
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.DISCOUNT_NOT_FOUND));
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.DISCOUNT_NOT_FOUND));
     return discount;
   }
 
   @Override
   public Discount getDiscountByCode(String code) {
     Discount discount = discountRepository.findByCode(code)
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.DISCOUNT_NOT_FOUND));
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.DISCOUNT_NOT_FOUND));
     return discount;
   }
 
   @Override
   public Discount createDiscount(DiscountRequest request) {
     if (discountRepository.existsByCode(request.getCode())) {
-      throw new DuplicateRecordException(ErrorConstant.DISCOUNT_ALREADY_EXISTS);
+      throw new DuplicateRecordException(ErrorMessage.DISCOUNT_ALREADY_EXISTS);
     }
     Discount discount = new Discount();
     discount.setCode(request.getCode());
@@ -59,7 +59,7 @@ public class DiscountServiceImpl implements DiscountService {
     if (request.getCurrency() != null && !request.getCurrency().isEmpty()) {
       discount.setCurrency(EnumCurrency.findByName(request.getCurrency()).name());
     } else {
-      throw new NotFoundException(ErrorConstant.CURRENCY_NOT_FOUND);
+      throw new NotFoundException(ErrorMessage.CURRENCY_NOT_FOUND);
     }
     discount.setPercent(request.getPercent());
     discount.setMaximumDiscount(request.getMaximumDiscount());
@@ -74,12 +74,12 @@ public class DiscountServiceImpl implements DiscountService {
   @Override
   public Discount updateDiscount(DiscountRequest request) {
     Discount discount = discountRepository.findById(request.getId())
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.DISCOUNT_NOT_FOUND));
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.DISCOUNT_NOT_FOUND));
 
     if (discountRepository.existsByCode(request.getCode())) {
       if (request.getCode().equals(discount.getCode())) {
       } else {
-        throw new DuplicateRecordException(ErrorConstant.DISCOUNT_ALREADY_EXISTS);
+        throw new DuplicateRecordException(ErrorMessage.DISCOUNT_ALREADY_EXISTS);
       }
     }
     discount.setCode(request.getCode());
@@ -88,7 +88,7 @@ public class DiscountServiceImpl implements DiscountService {
     if (request.getCurrency() != null && !request.getCurrency().isEmpty()) {
       discount.setCurrency(EnumCurrency.findByName(request.getCurrency()).name());
     } else {
-      throw new NotFoundException(ErrorConstant.CURRENCY_NOT_FOUND);
+      throw new NotFoundException(ErrorMessage.CURRENCY_NOT_FOUND);
     }
     discount.setPercent(request.getPercent());
     discount.setMaximumDiscount(request.getMaximumDiscount());
@@ -103,12 +103,12 @@ public class DiscountServiceImpl implements DiscountService {
   @Override
   public Discount editDiscount(Map<String, Object> updates, Long id) {
     Discount discount = discountRepository.findById(id)
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.DISCOUNT_NOT_FOUND));
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.DISCOUNT_NOT_FOUND));
 
     String code = String.valueOf(updates.get("code"));
     if (updates.get("code") != null && !Tool.isEqual(discount.getCode(), code)) {
       if (discountRepository.existsByCode(code)) {
-        throw new DuplicateRecordException(ErrorConstant.DISCOUNT_ALREADY_EXISTS);
+        throw new DuplicateRecordException(ErrorMessage.DISCOUNT_ALREADY_EXISTS);
       }
       discount.setCode(code);
     }
@@ -124,7 +124,7 @@ public class DiscountServiceImpl implements DiscountService {
       if (currencyName != null && !currencyName.isEmpty()) {
         discount.setCurrency(currencyName);
       } else {
-        throw new NotFoundException(ErrorConstant.CURRENCY_NOT_FOUND);
+        throw new NotFoundException(ErrorMessage.CURRENCY_NOT_FOUND);
       }
     }
 
@@ -152,7 +152,7 @@ public class DiscountServiceImpl implements DiscountService {
     if (discountRepository.existsById(id)) {
       discountRepository.deleteById(id);
     } else {
-      new NotFoundException(ErrorConstant.DISCOUNT_NOT_FOUND);
+      new NotFoundException(ErrorMessage.DISCOUNT_NOT_FOUND);
     }
   }
 

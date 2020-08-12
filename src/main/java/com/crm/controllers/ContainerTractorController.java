@@ -8,6 +8,7 @@ import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -19,19 +20,19 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.crm.common.SuccessMessage;
 import com.crm.models.ContainerTractor;
 import com.crm.models.dto.ContainerTractorDto;
 import com.crm.models.mapper.ContainerTractorMapper;
 import com.crm.payload.request.ContainerTractorRequest;
 import com.crm.payload.request.PaginationRequest;
-import com.crm.payload.response.MessageResponse;
+import com.crm.payload.response.DefaultResponse;
 import com.crm.payload.response.PaginationResponse;
 import com.crm.services.ContainerTractorService;
 
@@ -87,8 +88,7 @@ public class ContainerTractorController {
   @GetMapping("/forwarder")
   @PreAuthorize("hasRole('FORWARDER') or hasRole('MERCHANT')")
   public ResponseEntity<?> getContainerTractorsByForwarder(@Valid PaginationRequest request) {
-    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
-        .getPrincipal();
+    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
 
     Page<ContainerTractor> pages = containerTractorService.getContainerTractorsByForwarder(username, request);
@@ -130,42 +130,38 @@ public class ContainerTractorController {
   @PostMapping("")
   @PreAuthorize("hasRole('FORWARDER')")
   public ResponseEntity<?> createContainerTractor(@Valid @RequestBody ContainerTractorRequest request) {
-    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
-        .getPrincipal();
+    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
 
     ContainerTractor containerTractor = containerTractorService.createContainerTractor(username, request);
     ContainerTractorDto containerTractorDto = new ContainerTractorDto();
     containerTractorDto = ContainerTractorMapper.toContainerTractorDto(containerTractor);
-    return ResponseEntity.ok(containerTractorDto);
-  }
 
-  @Transactional
-  @PutMapping("")
-  @PreAuthorize("hasRole('FORWARDER')")
-  public ResponseEntity<?> updateContainerTractor(@Valid @RequestBody ContainerTractorRequest request) {
-    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
-        .getPrincipal();
-    String username = userDetails.getUsername();
+    // Set default response body
+    DefaultResponse<ContainerTractorDto> defaultResponse = new DefaultResponse<>();
+    defaultResponse.setMessage(SuccessMessage.CREATE_CONTAINER_TRACTOR_SUCCESSFULLY);
+    defaultResponse.setData(containerTractorDto);
 
-    ContainerTractor containerTractor = containerTractorService.updateContainerTractor(username, request);
-    ContainerTractorDto containerTractorDto = new ContainerTractorDto();
-    containerTractorDto = ContainerTractorMapper.toContainerTractorDto(containerTractor);
-    return ResponseEntity.ok(containerTractorDto);
+    return ResponseEntity.status(HttpStatus.CREATED).body(defaultResponse);
   }
 
   @PreAuthorize("hasRole('FORWARDER')")
   @RequestMapping(value = "/{id}", method = RequestMethod.PATCH, consumes = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<?> editContainerTractor(@RequestBody Map<String, Object> updates, @PathVariable("id") Long id) {
 
-    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
-        .getPrincipal();
+    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
 
     ContainerTractor containerTractor = containerTractorService.editContainerTractor(updates, id, username);
     ContainerTractorDto containerTractorDto = new ContainerTractorDto();
     containerTractorDto = ContainerTractorMapper.toContainerTractorDto(containerTractor);
-    return ResponseEntity.ok(containerTractorDto);
+
+    // Set default response body
+    DefaultResponse<ContainerTractorDto> defaultResponse = new DefaultResponse<>();
+    defaultResponse.setMessage(SuccessMessage.EDIT_CONTAINER_TRACTOR_SUCCESSFULLY);
+    defaultResponse.setData(containerTractorDto);
+
+    return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 
   @Transactional
@@ -173,11 +169,15 @@ public class ContainerTractorController {
   @PreAuthorize("hasRole('FORWARDER')")
   public ResponseEntity<?> removeContainerTractor(@PathVariable Long id) {
 
-    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
-        .getPrincipal();
+    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
 
     containerTractorService.removeContainerTractor(id, username);
-    return ResponseEntity.ok(new MessageResponse("ContainerTractor has remove successfully"));
+
+    // Set default response body
+    DefaultResponse<ContainerTractorDto> defaultResponse = new DefaultResponse<>();
+    defaultResponse.setMessage(SuccessMessage.DELETE_CONTAINER_TRACTOR_SUCCESSFULLY);
+
+    return ResponseEntity.status(HttpStatus.NO_CONTENT).body(defaultResponse);
   }
 }

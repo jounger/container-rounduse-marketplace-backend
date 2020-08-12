@@ -1,7 +1,10 @@
 package com.crm.services;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 
+import com.crm.models.Combined;
 import com.crm.models.ShippingInfo;
 import com.crm.payload.request.PaginationRequest;
 import com.crm.payload.request.ShippingInfoRequest;
@@ -9,6 +12,8 @@ import com.crm.payload.request.ShippingInfoRequest;
 public interface ShippingInfoService {
 
   ShippingInfo createShippingInfo(ShippingInfoRequest request);
+
+  void createShippingInfosForCombined(Combined combined, List<Long> containers);
 
   ShippingInfo getShippingInfo(Long id, String username);
 

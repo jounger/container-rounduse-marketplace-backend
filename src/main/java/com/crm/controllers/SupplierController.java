@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -23,11 +24,13 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.crm.common.SuccessMessage;
 import com.crm.models.Supplier;
 import com.crm.models.dto.SupplierDto;
 import com.crm.models.mapper.SupplierMapper;
 import com.crm.payload.request.PaginationRequest;
 import com.crm.payload.request.SupplierRequest;
+import com.crm.payload.response.DefaultResponse;
 import com.crm.payload.response.PaginationResponse;
 import com.crm.services.SupplierService;
 
@@ -109,7 +112,7 @@ public class SupplierController {
     return ResponseEntity.ok(supplierDto);
   }
 
-  @PreAuthorize("hasRole('MODERATOR') or hasRole('FORWARDER') or hasRole('MERCHANT')")
+  @PreAuthorize("hasRole('MODERATOR') or hasRole('FORWARDER') or hasRole('MERCHANT') or hasRole('SHIPPINGLINE')")
   @GetMapping("/{username}")
   public ResponseEntity<?> getSupplier(@PathVariable("username") String username) {
     Supplier supplier = supplierService.getSupplier(username);
@@ -151,6 +154,12 @@ public class SupplierController {
   public ResponseEntity<?> editSupplier(@PathVariable("id") Long id, @RequestBody Map<String, Object> updates) {
     Supplier supplier = supplierService.editSupplier(updates, id);
     SupplierDto supplierDto = SupplierMapper.toSupplierDto(supplier);
-    return ResponseEntity.ok(supplierDto);
+
+    // Set default response body
+    DefaultResponse<SupplierDto> defaultResponse = new DefaultResponse<>();
+    defaultResponse.setMessage(SuccessMessage.EDIT_SUPPLIER_SUCCESSFULLY);
+    defaultResponse.setData(supplierDto);
+
+    return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 }

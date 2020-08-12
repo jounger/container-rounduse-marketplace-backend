@@ -5,7 +5,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.crm.common.ErrorConstant;
+import com.crm.common.ErrorMessage;
 import com.crm.common.Tool;
 import com.crm.exception.ForbiddenException;
 import com.crm.exception.NotFoundException;
@@ -28,9 +28,9 @@ public class GeolocationServiceImpl implements GeolocationService {
   public Geolocation updateGeolocation(String username, GeolocationRequest request) {
     if (driverRepository.existsByUsername(username)) {
       Geolocation geolocation = geolocationRepository.findById(request.getId())
-          .orElseThrow(() -> new NotFoundException(ErrorConstant.GEOLOCATION_NOT_FOUND));
+          .orElseThrow(() -> new NotFoundException(ErrorMessage.GEOLOCATION_NOT_FOUND));
       if (!geolocation.getDriver().getUsername().equals(username)) {
-        throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
+        throw new ForbiddenException(ErrorMessage.USER_ACCESS_DENIED);
       }
       geolocation.setLatitude(request.getLatitude());
       geolocation.setLongitude(request.getLongitude());
@@ -38,7 +38,7 @@ public class GeolocationServiceImpl implements GeolocationService {
       Geolocation _geolocation = geolocationRepository.save(geolocation);
       return _geolocation;
     } else {
-      throw new NotFoundException(ErrorConstant.FORWARDER_NOT_FOUND);
+      throw new NotFoundException(ErrorMessage.FORWARDER_NOT_FOUND);
     }
   }
 
@@ -46,9 +46,9 @@ public class GeolocationServiceImpl implements GeolocationService {
   public Geolocation editGeolocation(Long id, String username, Map<String, Object> updates) {
     if (driverRepository.existsByUsername(username)) {
       Geolocation geolocation = geolocationRepository.findById(id)
-          .orElseThrow(() -> new NotFoundException(ErrorConstant.GEOLOCATION_NOT_FOUND));
+          .orElseThrow(() -> new NotFoundException(ErrorMessage.GEOLOCATION_NOT_FOUND));
       if (!geolocation.getDriver().getUsername().equals(username)) {
-        throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
+        throw new ForbiddenException(ErrorMessage.USER_ACCESS_DENIED);
       }
 
       String latitude = String.valueOf(updates.get("latitude"));
@@ -65,7 +65,7 @@ public class GeolocationServiceImpl implements GeolocationService {
       return _geolocation;
 
     } else {
-      throw new NotFoundException(ErrorConstant.FORWARDER_NOT_FOUND);
+      throw new NotFoundException(ErrorMessage.FORWARDER_NOT_FOUND);
     }
   }
 

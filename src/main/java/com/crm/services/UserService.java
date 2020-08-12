@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 
 import com.crm.models.FileUpload;
 import com.crm.models.User;
+import com.crm.payload.request.ChangePasswordRequest;
 import com.crm.payload.request.PaginationRequest;
 import com.crm.payload.request.SignUpRequest;
 
@@ -23,4 +24,6 @@ public interface UserService {
   User editProfileImage(String username, FileUpload profileImage);
 
   User editUser(Long id, Map<String, Object> updates);
+  User changePassword(String username, ChangePasswordRequest request);
+
 }

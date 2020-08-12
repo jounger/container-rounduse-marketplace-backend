@@ -16,13 +16,14 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.crm.common.Constant;
-import com.crm.common.ErrorConstant;
+import com.crm.common.ErrorMessage;
 import com.crm.enums.EnumUserStatus;
 import com.crm.exception.DuplicateRecordException;
 import com.crm.exception.NotFoundException;
 import com.crm.models.FileUpload;
 import com.crm.models.Role;
 import com.crm.models.User;
+import com.crm.payload.request.ChangePasswordRequest;
 import com.crm.payload.request.PaginationRequest;
 import com.crm.payload.request.SignUpRequest;
 import com.crm.repository.RoleRepository;
@@ -46,7 +47,7 @@ public class UserServiceImpl implements UserService {
   public User createUser(SignUpRequest request) {
     if (userRepository.existsByUsername(request.getUsername()) || userRepository.existsByEmail(request.getEmail())
         || userRepository.existsByPhone(request.getPhone())) {
-      throw new DuplicateRecordException(ErrorConstant.USER_ALREADY_EXISTS);
+      throw new DuplicateRecordException(ErrorMessage.USER_ALREADY_EXISTS);
     }
     User user = new User();
     user.setUsername(request.getUsername());
@@ -58,13 +59,13 @@ public class UserServiceImpl implements UserService {
 
     if (rolesString == null) {
       Role userRole = roleRepository.findByName("ROLE_OTHER")
-          .orElseThrow(() -> new NotFoundException(ErrorConstant.ROLE_NOT_FOUND));
+          .orElseThrow(() -> new NotFoundException(ErrorMessage.ROLE_NOT_FOUND));
       roles.add(userRole);
     } else {
       rolesString.forEach(role -> {
         for (int i = 0; i < rolesString.size(); i++) {
           Role userRole = roleRepository.findByName(role)
-              .orElseThrow(() -> new NotFoundException(ErrorConstant.ROLE_NOT_FOUND));
+              .orElseThrow(() -> new NotFoundException(ErrorMessage.ROLE_NOT_FOUND));
           roles.add(userRole);
         }
       });
@@ -72,7 +73,7 @@ public class UserServiceImpl implements UserService {
     user.setRoles(roles);
     String address = request.getAddress();
     if (address == null) {
-      throw new NotFoundException(ErrorConstant.USER_ADDRESS_NOT_FOUND);
+      throw new NotFoundException(ErrorMessage.USER_ADDRESS_NOT_FOUND);
     } else {
       user.setAddress(address);
     }
@@ -148,5 +149,17 @@ public class UserServiceImpl implements UserService {
       throw new NotFoundException("Error: User is not found");
     }
     return users;
+  }
+
+  @Override
+  public User changePassword(String username, ChangePasswordRequest request) {
+    User user = userRepository.findByUsername(username)
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.USER_NOT_FOUND));
+    if(!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
+      throw new NotFoundException(ErrorMessage.PASSWORD_NOT_CORRECT);
+    }
+    user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+    User _user = userRepository.save(user);
+    return _user;
   }
 }

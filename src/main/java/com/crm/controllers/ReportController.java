@@ -9,6 +9,7 @@ import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -25,12 +26,13 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.crm.common.SuccessMessage;
 import com.crm.models.Report;
 import com.crm.models.dto.ReportDto;
 import com.crm.models.mapper.ReportMapper;
 import com.crm.payload.request.PaginationRequest;
 import com.crm.payload.request.ReportRequest;
-import com.crm.payload.response.MessageResponse;
+import com.crm.payload.response.DefaultResponse;
 import com.crm.payload.response.PaginationResponse;
 import com.crm.services.ReportService;
 import com.crm.websocket.controller.NotificationBroadcast;
@@ -59,7 +61,12 @@ public class ReportController {
     notificationBroadcast.broadcastCreateReportToModerator(report);
     // END NOTIFICATION
 
-    return ResponseEntity.ok(reportDto);
+    // Set default response body
+    DefaultResponse<ReportDto> defaultResponse = new DefaultResponse<>();
+    defaultResponse.setMessage(SuccessMessage.CREATE_REPORT_SUCCESSFULLY);
+    defaultResponse.setData(reportDto);
+
+    return ResponseEntity.status(HttpStatus.CREATED).body(defaultResponse);
   }
 
   @PreAuthorize("hasRole('MODERATOR') or hasRole('FORWARDER')")
@@ -148,7 +155,12 @@ public class ReportController {
     notificationBroadcast.broadcastUpdateReportToModerator(status, editReport);
     // END NOTIFICATION
 
-    return ResponseEntity.ok(reportDto);
+    // Set default response body
+    DefaultResponse<ReportDto> defaultResponse = new DefaultResponse<>();
+    defaultResponse.setMessage(SuccessMessage.EDIT_REPORT_SUCCESSFULLY);
+    defaultResponse.setData(reportDto);
+
+    return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 
   @Transactional
@@ -158,6 +170,11 @@ public class ReportController {
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
     reportService.removeReport(id, username);
-    return ResponseEntity.ok(new MessageResponse("Report deleted successfully."));
+
+    // Set default response body
+    DefaultResponse<ReportDto> defaultResponse = new DefaultResponse<>();
+    defaultResponse.setMessage(SuccessMessage.DELETE_REPORT_SUCCESSFULLY);
+
+    return ResponseEntity.status(HttpStatus.NO_CONTENT).body(defaultResponse);
   }
 }

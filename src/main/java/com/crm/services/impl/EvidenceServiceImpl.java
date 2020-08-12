@@ -22,6 +22,7 @@ import com.crm.models.BiddingDocument;
 import com.crm.models.Combined;
 import com.crm.models.Contract;
 import com.crm.models.Evidence;
+import com.crm.models.FileUpload;
 import com.crm.models.Supplier;
 import com.crm.models.User;
 import com.crm.payload.request.EvidenceRequest;
@@ -31,6 +32,7 @@ import com.crm.repository.EvidenceRepository;
 import com.crm.repository.SupplierRepository;
 import com.crm.repository.UserRepository;
 import com.crm.services.EvidenceService;
+import com.crm.services.FileUploadService;
 import com.crm.specification.builder.EvidenceSpecificationsBuilder;
 
 @Service
@@ -48,6 +50,9 @@ public class EvidenceServiceImpl implements EvidenceService {
   @Autowired
   private UserRepository userRepository;
 
+  @Autowired
+  private FileUploadService fileUploadService;
+
   @Override
   public Evidence createEvidence(Long id, String username, EvidenceRequest request) {
     Evidence evidence = new Evidence();
@@ -62,11 +67,14 @@ public class EvidenceServiceImpl implements EvidenceService {
     BiddingDocument biddingDocument = bid.getBiddingDocument();
     Supplier offeree = biddingDocument.getOfferee();
     if (username.equals(bidder.getUsername()) || username.equals(offeree.getUsername())) {
-      Supplier supplier = supplierRepository.findByUsername(username).orElseThrow(() -> new NotFoundException(ErrorConstant.SENDER_NOT_FOUND));
+      Supplier supplier = supplierRepository.findByUsername(username)
+          .orElseThrow(() -> new NotFoundException(ErrorConstant.SENDER_NOT_FOUND));
       evidence.setSender(supplier);
-      String evidenceString = request.getEvidence();
-      if (!Tool.isBlank(evidenceString)) {
-        evidence.setEvidence(evidenceString);
+
+      // UPLOAD FILE
+      if (!Tool.isBlank(request.getDocument().getName())) {
+        FileUpload fileUpload = fileUploadService.createFileUpload(request.getDocument());
+        evidence.setDocument(fileUpload);
       } else {
         throw new InternalException(ErrorConstant.EVIDENCE_INVALID);
       }
@@ -93,7 +101,8 @@ public class EvidenceServiceImpl implements EvidenceService {
     }
     Page<Evidence> evidences = null;
     PageRequest page = PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt"));
-    User user = userRepository.findByUsername(username).orElseThrow(() -> new NotFoundException(ErrorConstant.USER_NOT_FOUND));
+    User user = userRepository.findByUsername(username)
+        .orElseThrow(() -> new NotFoundException(ErrorConstant.USER_NOT_FOUND));
     String role = user.getRoles().iterator().next().getName();
 
     if (role.equalsIgnoreCase("ROLE_MODERATOR")) {
@@ -137,11 +146,7 @@ public class EvidenceServiceImpl implements EvidenceService {
     if (!username.equals(bidder.getUsername()) && !username.equals(offeree.getUsername())) {
       throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
     }
-    String evidenceString = String.valueOf(updates.get("evidence"));
-    if (updates.get("evidence") != null && !Tool.isBlank(evidenceString)) {
-      evidence.setEvidence(evidenceString);
-    }
-    
+
     String isValid = String.valueOf(updates.get("isValid"));
     if (updates.get("isValid") != null && !Tool.isEqual(evidence.getIsValid(), isValid)) {
       evidence.setIsValid(Boolean.valueOf(isValid));

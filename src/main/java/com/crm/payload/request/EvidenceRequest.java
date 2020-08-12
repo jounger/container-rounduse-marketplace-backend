@@ -11,7 +11,7 @@ public class EvidenceRequest {
   
   private String sender;
   
-  private String evidence;
+  private FileUploadRequest document;
   
   private Boolean isValid;
 }

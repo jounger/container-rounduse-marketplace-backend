@@ -7,7 +7,9 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
+import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 import javax.validation.constraints.NotBlank;
@@ -77,10 +79,14 @@ public class Supplier extends User {
 
   @OneToMany(mappedBy = "sender")
   private Collection<Report> reports = new ArrayList<>();
-  
+
   @OneToMany(mappedBy = "recipient")
   private Collection<Payment> receivedPayments = new ArrayList<>();
-  
+
   @OneToMany(mappedBy = "sender")
   private Collection<Payment> sentPayments = new ArrayList<>();
+
+  @OneToOne
+  @JoinColumn(name = "brc_scan_id")
+  private FileUpload fileUpload;
 }

@@ -18,6 +18,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -81,13 +82,17 @@ public class User {
   @Size(min = 5, max = 200)
   private String address;
 
+  @OneToOne
+  @JoinColumn(name = "profile_image_id")
+  private FileUpload profileImage;
+
   // EnumUserStatus
   @Column(name = "status")
   @NotBlank
   @Size(min = 2, max = 20)
   private String status;
-  
-  @ManyToMany(cascade = {CascadeType.MERGE, CascadeType.PERSIST},fetch = FetchType.EAGER)
+
+  @ManyToMany(cascade = { CascadeType.MERGE, CascadeType.PERSIST }, fetch = FetchType.EAGER)
   @JoinTable(name = "user_role", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
   private Collection<Role> roles = new ArrayList<>();
 

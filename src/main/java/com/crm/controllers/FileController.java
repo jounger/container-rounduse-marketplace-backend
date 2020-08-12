@@ -44,8 +44,8 @@ public class FileController {
   public ResponseEntity<?> uploadFile(@RequestParam("file") MultipartFile file) {
     String fileName = fileStorageService.storeFile(file);
 
-    String fileDownloadUri = ServletUriComponentsBuilder.fromCurrentContextPath().path("/api/file/download/").path(fileName)
-        .toUriString();
+    String fileDownloadUri = ServletUriComponentsBuilder.fromCurrentContextPath().path("/api/file/download/")
+        .path(fileName).toUriString();
 
     UploadFileResponse uploadFileResponse = new UploadFileResponse();
     uploadFileResponse.setFileName(fileName);

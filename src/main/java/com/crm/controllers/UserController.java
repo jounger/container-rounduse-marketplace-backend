@@ -11,23 +11,30 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.crm.models.User;
 import com.crm.models.dto.UserDto;
 import com.crm.models.mapper.UserMapper;
+import com.crm.payload.request.FileUploadRequest;
 import com.crm.payload.request.PaginationRequest;
 import com.crm.payload.response.PaginationResponse;
+import com.crm.payload.response.UploadFileResponse;
+import com.crm.services.FileStorageService;
+import com.crm.services.FileUploadService;
 import com.crm.services.UserService;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
@@ -39,6 +46,12 @@ public class UserController {
 
   @Autowired
   private UserService userService;
+
+  @Autowired
+  private FileStorageService fileStorageService;
+
+  @Autowired
+  private FileUploadService fileUploadService;
 
   /*
    * REF:
@@ -90,8 +103,29 @@ public class UserController {
   @PreAuthorize("hasRole('MODERATOR')")
   @RequestMapping(value = "/{id}", method = RequestMethod.PATCH, consumes = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<?> changeStatus(@PathVariable("id") Long id, @RequestBody Map<String, Object> updates) {
-    User user = userService.changeStatus(id, updates);
+    User user = userService.editUser(id, updates);
     UserDto userDto = UserMapper.toUserDto(user);
     return ResponseEntity.ok(userDto);
+  }
+
+  @Transactional
+  @PreAuthorize("hasRole('MODERATOR') or hasRole('MERCHANT') or hasRole('FORWARDER')")
+  @PostMapping("/upload")
+  public ResponseEntity<?> uploadProfileImage(@RequestBody FileUploadRequest request) {
+    String fileName = fileStorageService.storeFile(request.getFile());
+    String fileDownloadUri = ServletUriComponentsBuilder.fromCurrentContextPath().path("/api/file/download/")
+        .path(fileName).toUriString();
+
+    if (fileName != null) {
+      fileUploadService.createFileUpload(request);
+    }
+
+    UploadFileResponse uploadFileResponse = new UploadFileResponse();
+    uploadFileResponse.setFileName(fileName);
+    uploadFileResponse.setFileDownloadUri(fileDownloadUri);
+    uploadFileResponse.setFileType(request.getFile().getContentType());
+    uploadFileResponse.setSize(request.getFile().getSize());
+
+    return ResponseEntity.status(HttpStatus.CREATED).body(uploadFileResponse);
   }
 }

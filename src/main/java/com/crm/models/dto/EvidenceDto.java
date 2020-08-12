@@ -15,7 +15,7 @@ public class EvidenceDto {
 
   private String sender;
 
-  private String evidence;
+  private String document;
 
   private Boolean isValid;
 

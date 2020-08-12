@@ -9,14 +9,14 @@ public class EvidenceMapper {
   public static EvidenceDto toEvidenceDto(Evidence evidence) {
     EvidenceDto evidenceDto = new EvidenceDto();
     evidenceDto.setId(evidence.getId());
-    
+
     Supplier sender = evidence.getSender();
     evidenceDto.setSender(sender.getUsername());
-    
-    if(evidence.getEvidence() != null) {
-      evidenceDto.setEvidence(evidence.getEvidence());
+
+    if (evidence.getDocument() != null) {
+      evidenceDto.setDocument(evidence.getDocument().getPath() + evidence.getDocument().getOriginName());
     }
-    
+
     if (evidence.getIsValid() != null) {
       evidenceDto.setIsValid(evidence.getIsValid());
     }

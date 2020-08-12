@@ -6,6 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.sql.Timestamp;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
@@ -28,8 +29,9 @@ public class FileStorageServiceImpl implements FileStorageService {
 
   @Override
   public String storeFile(MultipartFile file) {
+    Timestamp timestamp = new Timestamp(System.currentTimeMillis());
     // Normalize file name
-    String fileName = StringUtils.cleanPath(file.getOriginalFilename());
+    String fileName = StringUtils.cleanPath(String.valueOf(timestamp.getTime()) + "-" + file.getOriginalFilename());
     this.fileStorageLocation = Paths.get(UPLOAD_DIR).toAbsolutePath().normalize();
 
     try {

@@ -20,6 +20,7 @@ import com.crm.common.ErrorConstant;
 import com.crm.enums.EnumUserStatus;
 import com.crm.exception.DuplicateRecordException;
 import com.crm.exception.NotFoundException;
+import com.crm.models.FileUpload;
 import com.crm.models.Role;
 import com.crm.models.User;
 import com.crm.payload.request.PaginationRequest;
@@ -42,7 +43,7 @@ public class UserServiceImpl implements UserService {
   private PasswordEncoder passwordEncoder;
 
   @Override
-  public void createUser(SignUpRequest request) {
+  public User createUser(SignUpRequest request) {
     if (userRepository.existsByUsername(request.getUsername()) || userRepository.existsByEmail(request.getEmail())
         || userRepository.existsByPhone(request.getPhone())) {
       throw new DuplicateRecordException(ErrorConstant.USER_ALREADY_EXISTS);
@@ -77,7 +78,9 @@ public class UserServiceImpl implements UserService {
     }
     String encoder = passwordEncoder.encode(request.getPassword());
     user.setPassword(encoder);
-    userRepository.save(user);
+
+    User _user = userRepository.save(user);
+    return _user;
   }
 
   @Override
@@ -113,23 +116,35 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
-  public User changeStatus(Long id, Map<String, Object> updates) {
+  public User editProfileImage(String username, FileUpload profileImage) {
+    User user = userRepository.findByUsername(username)
+        .orElseThrow(() -> new NotFoundException(ErrorConstant.USER_NOT_FOUND));
+
+    if (profileImage != null) {
+      user.setProfileImage(profileImage);
+    }
+
+    return user;
+  }
+
+  @Override
+  public User editUser(Long id, Map<String, Object> updates) {
+    User user = userRepository.findById(id).orElseThrow(() -> new NotFoundException(ErrorConstant.USER_NOT_FOUND));
+
     String status = String.valueOf(updates.get("status"));
     EnumUserStatus eStatus = EnumUserStatus.findByName(status);
     if (status != null && eStatus != null) {
-      User user = userRepository.findById(id).orElseThrow(() -> new NotFoundException(ErrorConstant.USER_NOT_FOUND));
       user.setStatus(eStatus.name());
-      userRepository.save(user);
-      return user;
-    } else {
-      throw new NotFoundException("Status is not found.");
     }
+
+    userRepository.save(user);
+    return user;
   }
 
   @Override
   public List<User> getUsersByRole(String roleName) {
     List<User> users = userRepository.findByRole(roleName);
-    if (users == null) {
+    if (users.size() == 0) {
       throw new NotFoundException("Error: User is not found");
     }
     return users;

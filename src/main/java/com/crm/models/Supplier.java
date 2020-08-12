@@ -59,6 +59,10 @@ public class Supplier extends User {
   @Size(min = 5, max = 200)
   private String companyAddress;
 
+//  @OneToOne
+//  @JoinColumn(name = "brc_scan_id")
+//  private FileUpload brcScan;
+
   @Column(name = "tin", length = 20)
   private String tin;
 
@@ -86,7 +90,4 @@ public class Supplier extends User {
   @OneToMany(mappedBy = "sender")
   private Collection<Payment> sentPayments = new ArrayList<>();
 
-  @OneToOne
-  @JoinColumn(name = "brc_scan_id")
-  private FileUpload fileUpload;
 }

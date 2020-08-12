@@ -119,18 +119,20 @@ public class UserServiceImpl implements UserService {
   @Override
   public User editProfileImage(String username, FileUpload profileImage) {
     User user = userRepository.findByUsername(username)
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.USER_NOT_FOUND));
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.USER_NOT_FOUND));
 
     if (profileImage != null) {
-      user.setProfileImage(profileImage);
+//      user.setProfileImage(profileImage);
     }
+    
+    User _user = userRepository.save(user);
 
-    return user;
+    return _user;
   }
 
   @Override
   public User editUser(Long id, Map<String, Object> updates) {
-    User user = userRepository.findById(id).orElseThrow(() -> new NotFoundException(ErrorConstant.USER_NOT_FOUND));
+    User user = userRepository.findById(id).orElseThrow(() -> new NotFoundException(ErrorMessage.USER_NOT_FOUND));
 
     String status = String.valueOf(updates.get("status"));
     EnumUserStatus eStatus = EnumUserStatus.findByName(status);
@@ -138,8 +140,8 @@ public class UserServiceImpl implements UserService {
       user.setStatus(eStatus.name());
     }
 
-    userRepository.save(user);
-    return user;
+    User _user = userRepository.save(user);
+    return _user;
   }
 
   @Override
@@ -155,7 +157,7 @@ public class UserServiceImpl implements UserService {
   public User changePassword(String username, ChangePasswordRequest request) {
     User user = userRepository.findByUsername(username)
         .orElseThrow(() -> new NotFoundException(ErrorMessage.USER_NOT_FOUND));
-    if(!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
+    if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
       throw new NotFoundException(ErrorMessage.PASSWORD_NOT_CORRECT);
     }
     user.setPassword(passwordEncoder.encode(request.getNewPassword()));

@@ -24,6 +24,7 @@ public interface UserService {
   User editProfileImage(String username, FileUpload profileImage);
 
   User editUser(Long id, Map<String, Object> updates);
+
   User changePassword(String username, ChangePasswordRequest request);
 
 }

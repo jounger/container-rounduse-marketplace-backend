@@ -8,6 +8,7 @@ import javax.persistence.EntityListeners;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
@@ -60,13 +61,13 @@ public class FileUpload {
   @LastModifiedDate
   private Date updatedAt;
 
-  @OneToOne(mappedBy = "brcScan")
-  private Supplier supplier;
-
   @OneToOne(mappedBy = "document")
   private Evidence evidence;
 
-  @OneToOne(mappedBy = "profileImage")
-  private User user;
+//  @OneToOne(mappedBy = "brcScan")
+//  private Supplier supplier;
+
+//  @OneToOne(mappedBy = "profileImage")
+//  private User user;
 
 }

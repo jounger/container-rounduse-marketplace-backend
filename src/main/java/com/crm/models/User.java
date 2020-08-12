@@ -17,6 +17,7 @@ import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
@@ -82,9 +83,9 @@ public class User {
   @Size(min = 5, max = 200)
   private String address;
 
-  @OneToOne
-  @JoinColumn(name = "profile_image_id")
-  private FileUpload profileImage;
+//  @OneToOne
+//  @JoinColumn(name = "file_upload_id")
+//  private FileUpload profileImage;
 
   // EnumUserStatus
   @Column(name = "status")

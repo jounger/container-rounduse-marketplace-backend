@@ -68,7 +68,7 @@ public class EvidenceServiceImpl implements EvidenceService {
     Supplier offeree = biddingDocument.getOfferee();
     if (username.equals(bidder.getUsername()) || username.equals(offeree.getUsername())) {
       Supplier supplier = supplierRepository.findByUsername(username)
-          .orElseThrow(() -> new NotFoundException(ErrorConstant.SENDER_NOT_FOUND));
+          .orElseThrow(() -> new NotFoundException(ErrorMessage.SENDER_NOT_FOUND));
       evidence.setSender(supplier);
 
       // UPLOAD FILE
@@ -102,7 +102,7 @@ public class EvidenceServiceImpl implements EvidenceService {
     Page<Evidence> evidences = null;
     PageRequest page = PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt"));
     User user = userRepository.findByUsername(username)
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.USER_NOT_FOUND));
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.USER_NOT_FOUND));
     String role = user.getRoles().iterator().next().getName();
 
     if (role.equalsIgnoreCase("ROLE_MODERATOR")) {

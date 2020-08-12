@@ -14,7 +14,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import com.crm.common.Constant;
-import com.crm.common.ErrorConstant;
+import com.crm.common.ErrorMessage;
 import com.crm.common.Tool;
 import com.crm.enums.EnumPaymentType;
 import com.crm.exception.ForbiddenException;
@@ -53,22 +53,22 @@ public class PaymentServiceImpl implements PaymentService {
     Payment payment = new Payment();
 
     Supplier sender = supplierRepository.findByUsername(username)
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.SENDER_NOT_FOUND));
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.SENDER_NOT_FOUND));
     payment.setSender(sender);
 
     Supplier recipient = supplierRepository.findByUsername(request.getRecipient())
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.RECIPIENT_NOT_FOUND));
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.RECIPIENT_NOT_FOUND));
     payment.setRecipient(recipient);
 
     Contract contract = contractRepository.findById(id)
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.CONTRACT_NOT_FOUND));
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.CONTRACT_NOT_FOUND));
     payment.setContract(contract);
 
     payment.setDetail(request.getDetail());
     if (request.getAmount() > 0) {
       payment.setAmount(request.getAmount());
     } else {
-      throw new InternalException(ErrorConstant.PAYMENT_INVALID_AMOUNT);
+      throw new InternalException(ErrorMessage.PAYMENT_INVALID_AMOUNT);
     }
 
     payment.setIsPaid(false);
@@ -77,7 +77,7 @@ public class PaymentServiceImpl implements PaymentService {
     if (type != null) {
       payment.setType(type.name());
     } else {
-      throw new NotFoundException(ErrorConstant.PAYMENT_TYPE_NOT_FOUND);
+      throw new NotFoundException(ErrorMessage.PAYMENT_TYPE_NOT_FOUND);
     }
 
     payment.setPaymentDate(LocalDateTime.now());
@@ -97,11 +97,11 @@ public class PaymentServiceImpl implements PaymentService {
   @Override
   public Page<Payment> getPaymentsByContract(Long id, String username, PaginationRequest request) {
     if (!contractRepository.existsById(id)) {
-      throw new NotFoundException(ErrorConstant.CONTRACT_NOT_FOUND);
+      throw new NotFoundException(ErrorMessage.CONTRACT_NOT_FOUND);
     }
     Page<Payment> payments = null;
     PageRequest page = PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt"));
-    User user = userRepository.findByUsername(username).orElseThrow(() -> new NotFoundException(ErrorConstant.USER_NOT_FOUND));
+    User user = userRepository.findByUsername(username).orElseThrow(() -> new NotFoundException(ErrorMessage.USER_NOT_FOUND));
     String role = user.getRoles().iterator().next().getName();
 
     if (role.equalsIgnoreCase("ROLE_MODERATOR")) {
@@ -132,7 +132,7 @@ public class PaymentServiceImpl implements PaymentService {
 
   @Override
   public Payment editPayment(Long id, String username, Map<String, Object> updates) {
-    Payment payment = paymentRepository.findById(id).orElseThrow(() -> new NotFoundException(ErrorConstant.PAYMENT_NOT_FOUND));
+    Payment payment = paymentRepository.findById(id).orElseThrow(() -> new NotFoundException(ErrorMessage.PAYMENT_NOT_FOUND));
 
     if (payment.getSender().getUsername().equals(username)) {
       String detail = String.valueOf(updates.get("detail"));
@@ -159,13 +159,13 @@ public class PaymentServiceImpl implements PaymentService {
 
   @Override
   public void removePayment(Long id, String paymentname) {
-    Payment payment = paymentRepository.findById(id).orElseThrow(() -> new NotFoundException(ErrorConstant.PAYMENT_NOT_FOUND));
+    Payment payment = paymentRepository.findById(id).orElseThrow(() -> new NotFoundException(ErrorMessage.PAYMENT_NOT_FOUND));
     Supplier sender = supplierRepository.findByUsername(paymentname)
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.USER_NOT_FOUND));
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.USER_NOT_FOUND));
     if (payment.getSender().equals(sender)) {
       paymentRepository.deleteById(id);
     } else {
-      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
+      throw new ForbiddenException(ErrorMessage.USER_ACCESS_DENIED);
     }
   }
 

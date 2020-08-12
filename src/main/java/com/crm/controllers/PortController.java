@@ -8,6 +8,7 @@ import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -17,19 +18,19 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.crm.common.SuccessMessage;
 import com.crm.models.Port;
 import com.crm.models.dto.PortDto;
 import com.crm.models.mapper.PortMapper;
 import com.crm.payload.request.PaginationRequest;
 import com.crm.payload.request.PortRequest;
-import com.crm.payload.response.MessageResponse;
+import com.crm.payload.response.DefaultResponse;
 import com.crm.payload.response.PaginationResponse;
 import com.crm.services.PortService;
 
@@ -81,25 +82,27 @@ public class PortController {
   public ResponseEntity<?> createPort(@Valid @RequestBody PortRequest request) {
     Port port = portService.createPort(request);
     PortDto portDto = PortMapper.toPortDto(port);
-    return ResponseEntity.ok(portDto);
-  }
 
-  @Transactional
-  @PutMapping("")
-  @PreAuthorize("hasRole('MODERATOR')")
-  public ResponseEntity<?> updatePort(@Valid @RequestBody PortRequest request) {
-    Port port = portService.updatePort(request);
-    PortDto portDto = PortMapper.toPortDto(port);
-    return ResponseEntity.ok(portDto);
+    // Set default response body
+    DefaultResponse<PortDto> defaultResponse = new DefaultResponse<>();
+    defaultResponse.setMessage(SuccessMessage.CREATE_PORT_SUCCESSFULLY);
+    defaultResponse.setData(portDto);
+
+    return ResponseEntity.status(HttpStatus.CREATED).body(defaultResponse);
   }
 
   @PreAuthorize("hasRole('MODERATOR')")
   @RequestMapping(value = "/{id}", method = RequestMethod.PATCH, consumes = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<?> editPort(@RequestBody Map<String, Object> updates, @PathVariable("id") Long id) {
     Port port = portService.editPort(updates, id);
-    PortDto portDto = new PortDto();
-    portDto = PortMapper.toPortDto(port);
-    return ResponseEntity.ok(portDto);
+    PortDto portDto = PortMapper.toPortDto(port);
+
+    // Set default response body
+    DefaultResponse<PortDto> defaultResponse = new DefaultResponse<>();
+    defaultResponse.setMessage(SuccessMessage.EDIT_PORT_SUCCESSFULLY);
+    defaultResponse.setData(portDto);
+
+    return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 
   @Transactional
@@ -107,6 +110,11 @@ public class PortController {
   @PreAuthorize("hasRole('MODERATOR')")
   public ResponseEntity<?> removePort(@PathVariable Long id) {
     portService.removePort(id);
-    return ResponseEntity.ok(new MessageResponse("Port has remove successfully"));
+
+    // Set default response body
+    DefaultResponse<PortDto> defaultResponse = new DefaultResponse<>();
+    defaultResponse.setMessage(SuccessMessage.DELETE_PORT_SUCCESSFULLY);
+
+    return ResponseEntity.status(HttpStatus.NO_CONTENT).body(defaultResponse);
   }
 }

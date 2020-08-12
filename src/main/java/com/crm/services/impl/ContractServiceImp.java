@@ -12,7 +12,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import com.crm.common.Constant;
-import com.crm.common.ErrorConstant;
+import com.crm.common.ErrorMessage;
 import com.crm.common.Tool;
 import com.crm.exception.ForbiddenException;
 import com.crm.exception.InternalException;
@@ -43,7 +43,7 @@ public class ContractServiceImp implements ContractService {
     Contract contract = new Contract();
 
     Combined combined = combinedRepository.findById(id)
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.COMBINED_NOT_FOUND));
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.COMBINED_NOT_FOUND));
     contract.setCombined(combined);
 
     Bid bid = combined.getBid();
@@ -57,10 +57,10 @@ public class ContractServiceImp implements ContractService {
       if (fines > 0) {
         contract.setFinesAgainstContractViolations(fines);
       } else {
-        throw new InternalException(ErrorConstant.CONTRACT_INVALID_FINES);
+        throw new InternalException(ErrorMessage.CONTRACT_INVALID_FINES);
       }
     } else {
-      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
+      throw new ForbiddenException(ErrorMessage.USER_ACCESS_DENIED);
     }
 
     Contract _contract = contractRepository.save(contract);
@@ -70,14 +70,14 @@ public class ContractServiceImp implements ContractService {
   @Override
   public Contract getContractByCombined(Long id, String username) {
     Combined combined = combinedRepository.findById(id)
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.COMBINED_NOT_FOUND));
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.COMBINED_NOT_FOUND));
     Bid bid = combined.getBid();
     BiddingDocument biddingDocument = bid.getBiddingDocument();
     Supplier offeree = biddingDocument.getOfferee();
     Contract contract = null;
     if (username.equals(offeree.getUsername()) || username.equals(bid.getBidder().getUsername())) {
       contract = contractRepository.findByCombined(id, username)
-          .orElseThrow(() -> new NotFoundException(ErrorConstant.CONTRACT_NOT_FOUND));
+          .orElseThrow(() -> new NotFoundException(ErrorMessage.CONTRACT_NOT_FOUND));
     }
     return contract;
   }
@@ -111,7 +111,7 @@ public class ContractServiceImp implements ContractService {
   @Override
   public Contract editContract(Long id, String username, Map<String, Object> updates) {
     Contract contract = contractRepository.findById(id)
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.CONTRACT_NOT_FOUND));
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.CONTRACT_NOT_FOUND));
     Combined combined = contract.getCombined();
 
     Bid bid = combined.getBid();
@@ -124,7 +124,7 @@ public class ContractServiceImp implements ContractService {
         contract.setRequired(Boolean.valueOf(requiredString));
       }
     } else {
-      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
+      throw new ForbiddenException(ErrorMessage.USER_ACCESS_DENIED);
     }
 
     Contract _contract = contractRepository.save(contract);
@@ -134,7 +134,7 @@ public class ContractServiceImp implements ContractService {
   @Override
   public void removeContract(Long id, String username) {
     Contract contract = contractRepository.findById(id)
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.CONTRACT_NOT_FOUND));
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.CONTRACT_NOT_FOUND));
     Combined combined = contract.getCombined();
 
     Bid bid = combined.getBid();
@@ -144,7 +144,7 @@ public class ContractServiceImp implements ContractService {
     if (username.equals(bidder.getUsername()) || username.equals(offeree.getUsername())) {
       contractRepository.deleteById(id);
     } else {
-      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
+      throw new ForbiddenException(ErrorMessage.USER_ACCESS_DENIED);
     }
 
   }

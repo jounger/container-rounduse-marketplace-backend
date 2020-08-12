@@ -12,7 +12,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import com.crm.common.Constant;
-import com.crm.common.ErrorConstant;
+import com.crm.common.ErrorMessage;
 import com.crm.common.Tool;
 import com.crm.enums.EnumUnit;
 import com.crm.exception.DuplicateRecordException;
@@ -41,21 +41,21 @@ public class ContainerTypeServiceImpl implements ContainerTypeService {
   @Override
   public ContainerType getContainerTypeById(Long id) {
     ContainerType containerType = containerTypeRepository.findById(id)
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.CONTAINER_TYPE_NOT_FOUND));
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.CONTAINER_TYPE_NOT_FOUND));
     return containerType;
   }
 
   @Override
   public ContainerType getContainerTypeByName(String name) {
     ContainerType containerType = containerTypeRepository.findByName(name)
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.CONTAINER_TYPE_NOT_FOUND));
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.CONTAINER_TYPE_NOT_FOUND));
     return containerType;
   }
 
   @Override
   public ContainerType createContainerType(ContainerTypeRequest request) {
     if (containerTypeRepository.existsByName(request.getName())) {
-      throw new DuplicateRecordException(ErrorConstant.CONTAINER_TYPE_ALREADY_EXISTS);
+      throw new DuplicateRecordException(ErrorMessage.CONTAINER_TYPE_ALREADY_EXISTS);
     }
     ContainerType containerType = new ContainerType();
     containerType.setName(request.getName());
@@ -75,7 +75,7 @@ public class ContainerTypeServiceImpl implements ContainerTypeService {
     try {
       containerType.setUnitOfMeasurement(EnumUnit.findByName(request.getUnitOfMeasurement()).name());
     } catch (Exception e) {
-      throw new NotFoundException(ErrorConstant.UNIT_OF_MEASUREMENT_NOT_FOUND);
+      throw new NotFoundException(ErrorMessage.UNIT_OF_MEASUREMENT_NOT_FOUND);
     }
     ContainerType _containerType = containerTypeRepository.save(containerType);
     return _containerType;
@@ -85,12 +85,12 @@ public class ContainerTypeServiceImpl implements ContainerTypeService {
   public ContainerType updateContainerType(ContainerTypeRequest request) {
 
     ContainerType containerType = containerTypeRepository.findById(request.getId())
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.CONTAINER_TYPE_NOT_FOUND));
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.CONTAINER_TYPE_NOT_FOUND));
 
     if (containerTypeRepository.existsByName(request.getName())) {
       if (request.getName().equals(containerType.getName())) {
       } else {
-        throw new DuplicateRecordException(ErrorConstant.CONTAINER_TYPE_ALREADY_EXISTS);
+        throw new DuplicateRecordException(ErrorMessage.CONTAINER_TYPE_ALREADY_EXISTS);
       }
     }
     containerType.setName(request.getName());
@@ -107,7 +107,7 @@ public class ContainerTypeServiceImpl implements ContainerTypeService {
     try {
       containerType.setUnitOfMeasurement(EnumUnit.findByName(request.getUnitOfMeasurement()).name());
     } catch (Exception e) {
-      throw new NotFoundException(ErrorConstant.UNIT_OF_MEASUREMENT_NOT_FOUND);
+      throw new NotFoundException(ErrorMessage.UNIT_OF_MEASUREMENT_NOT_FOUND);
     }
     ContainerType _containerType = containerTypeRepository.save(containerType);
     return _containerType;
@@ -118,7 +118,7 @@ public class ContainerTypeServiceImpl implements ContainerTypeService {
     if (containerTypeRepository.existsById(id)) {
       containerTypeRepository.deleteById(id);
     } else {
-      new NotFoundException(ErrorConstant.CONTAINER_TYPE_NOT_FOUND);
+      new NotFoundException(ErrorMessage.CONTAINER_TYPE_NOT_FOUND);
     }
   }
 
@@ -126,12 +126,12 @@ public class ContainerTypeServiceImpl implements ContainerTypeService {
   public ContainerType editContainerType(Map<String, Object> updates, Long id) {
 
     ContainerType containerType = containerTypeRepository.findById(id)
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.CONTAINER_TYPE_NOT_FOUND));
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.CONTAINER_TYPE_NOT_FOUND));
 
     String name = String.valueOf(updates.get("name"));
     if (updates.get("name") != null && !Tool.isEqual(containerType.getName(), name)) {
       if (containerTypeRepository.existsByName(name)) {
-        throw new DuplicateRecordException(ErrorConstant.CONTAINER_TYPE_ALREADY_EXISTS);
+        throw new DuplicateRecordException(ErrorMessage.CONTAINER_TYPE_ALREADY_EXISTS);
       }
       containerType.setName(name);
     }
@@ -189,7 +189,7 @@ public class ContainerTypeServiceImpl implements ContainerTypeService {
       try {
         containerType.setUnitOfMeasurement(EnumUnit.findByName(unitOfMeasurement).name());
       } catch (Exception e) {
-        throw new NotFoundException(ErrorConstant.UNIT_OF_MEASUREMENT_NOT_FOUND);
+        throw new NotFoundException(ErrorMessage.UNIT_OF_MEASUREMENT_NOT_FOUND);
       }
     }
 

@@ -18,17 +18,16 @@ import org.springframework.web.multipart.MultipartFile;
 import com.crm.exception.InternalException;
 import com.crm.exception.NotFoundException;
 import com.crm.payload.request.UploadFile;
-import com.crm.payload.response.MessageResponse;
 
 @RestController
 public class FileController {
 
   private static String UPLOAD_DIR = System.getProperty("user.home") + "/upload";
-  
+
   @GetMapping("/file/{filename}")
   public ResponseEntity<?> downloadFile(@PathVariable String filename) {
     File file = new File(UPLOAD_DIR + "/" + filename);
-    if(!file.exists()) {
+    if (!file.exists()) {
       throw new NotFoundException("File is not found");
     }
     UrlResource resource;
@@ -38,21 +37,20 @@ public class FileController {
       throw new NotFoundException("File is not found");
     }
     return ResponseEntity.ok()
-        .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getName() + "\"")
-        .body(resource);
+        .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getName() + "\"").body(resource);
   }
-  
+
   @PostMapping("/upload")
   public ResponseEntity<?> uploadFile(@ModelAttribute("uploadForm") UploadFile form) {
-    
+
     // create folder to save file if not exist
     File uploadDir = new File(UPLOAD_DIR);
-    if(!uploadDir.exists()) {
+    if (!uploadDir.exists()) {
       uploadDir.mkdirs();
     }
     MultipartFile fileData = form.getFileData();
     String name = fileData.getOriginalFilename();
-    if(name != null && name.length() > 0) {
+    if (name != null && name.length() > 0) {
       try {
         // create file
         File serverFile = new File(UPLOAD_DIR + "/" + name);
@@ -64,7 +62,8 @@ public class FileController {
         throw new InternalException("Error when uploading");
       }
     }
-    return ResponseEntity.badRequest().body(new MessageResponse("Bad request"));
+
+    return ResponseEntity.badRequest().body("Bad request");
   }
-  
+
 }

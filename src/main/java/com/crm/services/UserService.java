@@ -6,6 +6,7 @@ import java.util.Map;
 import org.springframework.data.domain.Page;
 
 import com.crm.models.User;
+import com.crm.payload.request.ChangePasswordRequest;
 import com.crm.payload.request.PaginationRequest;
 import com.crm.payload.request.SignUpRequest;
 
@@ -20,5 +21,7 @@ public interface UserService {
   User changeStatus(Long id, Map<String, Object> updates);
 
   List<User> getUsersByRole(String roleName);
+
+  User changePassword(String username, ChangePasswordRequest request);
 
 }

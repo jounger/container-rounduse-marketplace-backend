@@ -9,7 +9,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import com.crm.common.ErrorConstant;
+import com.crm.common.ErrorMessage;
 import com.crm.enums.EnumBiddingNotification;
 import com.crm.enums.EnumNotificationType;
 import com.crm.exception.NotFoundException;
@@ -40,7 +40,7 @@ public class BiddingNotificationServiceImpl implements BiddingNotificationServic
     BiddingNotification biddingNotification = new BiddingNotification();
 
     User recipient = userRepositoty.findByUsername(request.getRecipient())
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.RECIPIENT_NOT_FOUND));
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.RECIPIENT_NOT_FOUND));
     biddingNotification.setRecipient(recipient);
 
     biddingNotification.setIsRead(false);
@@ -48,7 +48,7 @@ public class BiddingNotificationServiceImpl implements BiddingNotificationServic
     biddingNotification.setTitle(request.getTitle());
 
     BiddingDocument relatedResource = biddingDocumentRepository.findById(request.getRelatedResource())
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.NOTIFICATION_RELATED_RESOURCE_NOT_FOUND));
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.NOTIFICATION_RELATED_RESOURCE_NOT_FOUND));
     biddingNotification.setRelatedResource(relatedResource);
 
     biddingNotification.setMessage(request.getMessage());
@@ -66,7 +66,7 @@ public class BiddingNotificationServiceImpl implements BiddingNotificationServic
   @Override
   public BiddingNotification getBiddingNotification(Long id) {
     BiddingNotification biddingNotification = biddingNotificationRepository.findById(id)
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.NOTIFICATION_NOT_FOUND));
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.NOTIFICATION_NOT_FOUND));
     return biddingNotification;
   }
 
@@ -108,7 +108,7 @@ public class BiddingNotificationServiceImpl implements BiddingNotificationServic
   @Override
   public BiddingNotification editBiddingNotification(Long id, Map<String, Object> updates) {
     BiddingNotification biddingNotification = biddingNotificationRepository.findById(id)
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.BIDDINGDOCUMENT_NOT_FOUND));
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.BIDDINGDOCUMENT_NOT_FOUND));
 
     Boolean isRead = (Boolean) updates.get("isRead");
     if (updates.get("isRead") != null && isRead != null) {
@@ -129,7 +129,7 @@ public class BiddingNotificationServiceImpl implements BiddingNotificationServic
     if (biddingNotificationRepository.existsById(id)) {
       biddingNotificationRepository.deleteById(id);
     } else {
-      throw new NotFoundException(ErrorConstant.NOTIFICATION_NOT_FOUND);
+      throw new NotFoundException(ErrorMessage.NOTIFICATION_NOT_FOUND);
     }
   }
 }

@@ -13,7 +13,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import com.crm.common.Constant;
-import com.crm.common.ErrorConstant;
+import com.crm.common.ErrorMessage;
 import com.crm.common.Tool;
 import com.crm.enums.EnumSupplyStatus;
 import com.crm.enums.EnumTrailerType;
@@ -52,7 +52,7 @@ public class ContainerSemiTrailerServiceImpl implements ContainerSemiTrailerServ
   @Override
   public ContainerSemiTrailer getContainerSemiTrailerById(Long id) {
     ContainerSemiTrailer containerSemiTrailer = containerSemiTrailerRepository.findById(id)
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.TRAILER_NOT_FOUND));
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.TRAILER_NOT_FOUND));
     return containerSemiTrailer;
   }
 
@@ -70,10 +70,10 @@ public class ContainerSemiTrailerServiceImpl implements ContainerSemiTrailerServ
     ContainerSemiTrailer containerSemiTrailer = new ContainerSemiTrailer();
 
     Forwarder forwarder = forwarderRepository.findByUsername(username)
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.FORWARDER_NOT_FOUND));
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.FORWARDER_NOT_FOUND));
 
     if (vehicleRepository.existsByLicensePlate(request.getLicensePlate())) {
-      throw new DuplicateRecordException(ErrorConstant.VEHICLE_LICENSE_PLATE_ALREADY_EXISTS);
+      throw new DuplicateRecordException(ErrorMessage.VEHICLE_LICENSE_PLATE_ALREADY_EXISTS);
     } else {
       containerSemiTrailer.setLicensePlate(request.getLicensePlate());
     }
@@ -83,13 +83,13 @@ public class ContainerSemiTrailerServiceImpl implements ContainerSemiTrailerServ
     try {
       containerSemiTrailer.setType(EnumTrailerType.findByName(request.getType()).name());
     } catch (Exception e) {
-      throw new NotFoundException(ErrorConstant.TRAILER_TYPE_NOT_FOUND);
+      throw new NotFoundException(ErrorMessage.TRAILER_TYPE_NOT_FOUND);
     }
 
     try {
       containerSemiTrailer.setUnitOfMeasurement(EnumUnit.findByName(request.getUnitOfMeasurement()).name());
     } catch (Exception e) {
-      throw new NotFoundException(ErrorConstant.UNIT_OF_MEASUREMENT_NOT_FOUND);
+      throw new NotFoundException(ErrorMessage.UNIT_OF_MEASUREMENT_NOT_FOUND);
     }
 
     containerSemiTrailer.setNumberOfAxles(request.getNumberOfAxles());
@@ -102,10 +102,10 @@ public class ContainerSemiTrailerServiceImpl implements ContainerSemiTrailerServ
   public ContainerSemiTrailer updateContainerSemiTrailer(String username, ContainerSemiTrailerRequest request) {
 
     ContainerSemiTrailer containerSemiTrailer = containerSemiTrailerRepository.findById(request.getId())
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.TRAILER_NOT_FOUND));
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.TRAILER_NOT_FOUND));
 
     if (!containerSemiTrailer.getForwarder().getUsername().equals(username)) {
-      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
+      throw new ForbiddenException(ErrorMessage.USER_ACCESS_DENIED);
     }
 
     Collection<Container> containers = containerRepository.findByTrailer(request.getId(),
@@ -114,14 +114,14 @@ public class ContainerSemiTrailerServiceImpl implements ContainerSemiTrailerServ
       containers.forEach(item -> {
         if (item.getStatus().equalsIgnoreCase(EnumSupplyStatus.COMBINED.name())
             || item.getStatus().equalsIgnoreCase(EnumSupplyStatus.BIDDING.name())) {
-          throw new InternalException(ErrorConstant.CONTAINER_BUSY);
+          throw new InternalException(ErrorMessage.CONTAINER_BUSY);
         }
       });
     }
 
     if (vehicleRepository.existsByLicensePlate(request.getLicensePlate())
         && !request.getLicensePlate().equals(containerSemiTrailer.getLicensePlate())) {
-      throw new DuplicateRecordException(ErrorConstant.VEHICLE_LICENSE_PLATE_ALREADY_EXISTS);
+      throw new DuplicateRecordException(ErrorMessage.VEHICLE_LICENSE_PLATE_ALREADY_EXISTS);
     } else {
       containerSemiTrailer.setLicensePlate(request.getLicensePlate());
     }
@@ -129,13 +129,13 @@ public class ContainerSemiTrailerServiceImpl implements ContainerSemiTrailerServ
     try {
       containerSemiTrailer.setType(EnumTrailerType.findByName(request.getType()).name());
     } catch (Exception e) {
-      throw new NotFoundException(ErrorConstant.TRAILER_TYPE_NOT_FOUND);
+      throw new NotFoundException(ErrorMessage.TRAILER_TYPE_NOT_FOUND);
     }
 
     try {
       containerSemiTrailer.setUnitOfMeasurement(EnumUnit.findByName(request.getUnitOfMeasurement()).name());
     } catch (Exception e) {
-      throw new NotFoundException(ErrorConstant.UNIT_OF_MEASUREMENT_NOT_FOUND);
+      throw new NotFoundException(ErrorMessage.UNIT_OF_MEASUREMENT_NOT_FOUND);
     }
 
     containerSemiTrailer.setNumberOfAxles(request.getNumberOfAxles());
@@ -148,10 +148,10 @@ public class ContainerSemiTrailerServiceImpl implements ContainerSemiTrailerServ
   public ContainerSemiTrailer editContainerSemiTrailer(Map<String, Object> updates, Long id, String username) {
 
     ContainerSemiTrailer containerSemiTrailer = containerSemiTrailerRepository.findById(id)
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.TRAILER_NOT_FOUND));
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.TRAILER_NOT_FOUND));
 
     if (!containerSemiTrailer.getForwarder().getUsername().equals(username)) {
-      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
+      throw new ForbiddenException(ErrorMessage.USER_ACCESS_DENIED);
     }
 
     Collection<Container> containers = containerRepository.findByTrailer(id, EnumSupplyStatus.COMBINED.name(),
@@ -160,7 +160,7 @@ public class ContainerSemiTrailerServiceImpl implements ContainerSemiTrailerServ
       containers.forEach(item -> {
         if (item.getStatus().equalsIgnoreCase(EnumSupplyStatus.COMBINED.name())
             || item.getStatus().equalsIgnoreCase(EnumSupplyStatus.BIDDING.name())) {
-          throw new InternalException(ErrorConstant.CONTAINER_BUSY);
+          throw new InternalException(ErrorMessage.CONTAINER_BUSY);
         }
       });
     }
@@ -168,7 +168,7 @@ public class ContainerSemiTrailerServiceImpl implements ContainerSemiTrailerServ
     String licensePlate = String.valueOf(updates.get("licensePlate"));
     if (updates.get("licensePlate") != null && !Tool.isEqual(containerSemiTrailer.getLicensePlate(), licensePlate)) {
       if (vehicleRepository.existsByLicensePlate(licensePlate)) {
-        throw new DuplicateRecordException(ErrorConstant.VEHICLE_LICENSE_PLATE_ALREADY_EXISTS);
+        throw new DuplicateRecordException(ErrorMessage.VEHICLE_LICENSE_PLATE_ALREADY_EXISTS);
       }
       containerSemiTrailer.setLicensePlate(licensePlate);
     }
@@ -183,7 +183,7 @@ public class ContainerSemiTrailerServiceImpl implements ContainerSemiTrailerServ
       try {
         containerSemiTrailer.setType(EnumTrailerType.findByName(type).name());
       } catch (Exception e) {
-        throw new NotFoundException(ErrorConstant.TRAILER_TYPE_NOT_FOUND);
+        throw new NotFoundException(ErrorMessage.TRAILER_TYPE_NOT_FOUND);
       }
     }
 
@@ -193,7 +193,7 @@ public class ContainerSemiTrailerServiceImpl implements ContainerSemiTrailerServ
       try {
         containerSemiTrailer.setUnitOfMeasurement(EnumUnit.findByName(unitOfMeasurement).name());
       } catch (Exception e) {
-        throw new NotFoundException(ErrorConstant.UNIT_OF_MEASUREMENT_NOT_FOUND);
+        throw new NotFoundException(ErrorMessage.UNIT_OF_MEASUREMENT_NOT_FOUND);
       }
     }
     ContainerSemiTrailer _containerSemiTrailer = containerSemiTrailerRepository.save(containerSemiTrailer);
@@ -204,10 +204,10 @@ public class ContainerSemiTrailerServiceImpl implements ContainerSemiTrailerServ
   public void removeContainerSemiTrailer(Long id, String username) {
 
     ContainerSemiTrailer containerSemiTrailer = containerSemiTrailerRepository.findById(id)
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.TRAILER_NOT_FOUND));
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.TRAILER_NOT_FOUND));
 
     if (!containerSemiTrailer.getForwarder().getUsername().equals(username)) {
-      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
+      throw new ForbiddenException(ErrorMessage.USER_ACCESS_DENIED);
     }
 
     Collection<Container> containers = containerRepository.findByTrailer(id, EnumSupplyStatus.COMBINED.name(),
@@ -216,7 +216,7 @@ public class ContainerSemiTrailerServiceImpl implements ContainerSemiTrailerServ
       containers.forEach(item -> {
         if (item.getStatus().equalsIgnoreCase(EnumSupplyStatus.COMBINED.name())
             || item.getStatus().equalsIgnoreCase(EnumSupplyStatus.BIDDING.name())) {
-          throw new InternalException(ErrorConstant.CONTAINER_BUSY);
+          throw new InternalException(ErrorMessage.CONTAINER_BUSY);
         }
       });
     }
@@ -255,7 +255,7 @@ public class ContainerSemiTrailerServiceImpl implements ContainerSemiTrailerServ
   @Override
   public ContainerSemiTrailer getContainerSemiTrailerByLicensePlate(String licensePlate) {
     ContainerSemiTrailer containerSemiTrailer = containerSemiTrailerRepository.findByLicensePlate(licensePlate)
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.TRAILER_NOT_FOUND));
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.TRAILER_NOT_FOUND));
     return containerSemiTrailer;
   }
 

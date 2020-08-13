@@ -9,6 +9,7 @@ import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -22,12 +23,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.crm.common.SuccessMessage;
 import com.crm.models.Merchant;
 import com.crm.models.dto.MerchantDto;
 import com.crm.models.mapper.MerchantMapper;
 import com.crm.payload.request.MerchantRequest;
 import com.crm.payload.request.PaginationRequest;
-import com.crm.payload.response.MessageResponse;
+import com.crm.payload.response.DefaultResponse;
 import com.crm.payload.response.PaginationResponse;
 import com.crm.services.MerchantService;
 
@@ -42,8 +44,15 @@ public class MerchantController {
   @Transactional
   @PostMapping("")
   public ResponseEntity<?> createMerchant(@Valid @RequestBody MerchantRequest request) {
-    merchantService.createMerchant(request);
-    return ResponseEntity.ok("Shipping Line created successfully");
+    Merchant merchant = merchantService.createMerchant(request);
+    MerchantDto merchantDto = MerchantMapper.toMerchantDto(merchant);
+
+    // Set default response body
+    DefaultResponse<MerchantDto> defaultResponse = new DefaultResponse<>();
+    defaultResponse.setMessage(SuccessMessage.CREATE_MERCHANT_SUCCESSFULLY);
+    defaultResponse.setData(merchantDto);
+
+    return ResponseEntity.status(HttpStatus.CREATED).body(defaultResponse);
   }
 
   @PreAuthorize("hasRole('OPERATOR')")
@@ -80,7 +89,13 @@ public class MerchantController {
   public ResponseEntity<?> editMerchant(@PathVariable("id") Long id, @RequestBody Map<String, Object> updates) {
     Merchant merchant = merchantService.editMerchant(id, updates);
     MerchantDto merchantDto = MerchantMapper.toMerchantDto(merchant);
-    return ResponseEntity.ok(merchantDto);
+
+    // Set default response body
+    DefaultResponse<MerchantDto> defaultResponse = new DefaultResponse<>();
+    defaultResponse.setMessage(SuccessMessage.EDIT_MERCHANT_SUCCESSFULLY);
+    defaultResponse.setData(merchantDto);
+
+    return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 
   @Transactional
@@ -88,6 +103,11 @@ public class MerchantController {
   @DeleteMapping("/{id}")
   public ResponseEntity<?> deleteMerchant(@PathVariable Long id) {
     merchantService.removeMerchant(id);
-    return ResponseEntity.ok(new MessageResponse("Bidding document deleted successfully."));
+
+    // Set default response body
+    DefaultResponse<MerchantDto> defaultResponse = new DefaultResponse<>();
+    defaultResponse.setMessage(SuccessMessage.DELETE_MERCHANT_SUCCESSFULLY);
+
+    return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 }

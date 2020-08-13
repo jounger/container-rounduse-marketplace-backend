@@ -8,6 +8,7 @@ import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -25,12 +26,13 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.crm.common.SuccessMessage;
 import com.crm.models.Outbound;
 import com.crm.models.dto.OutboundDto;
 import com.crm.models.mapper.OutboundMapper;
 import com.crm.payload.request.OutboundRequest;
 import com.crm.payload.request.PaginationRequest;
-import com.crm.payload.response.MessageResponse;
+import com.crm.payload.response.DefaultResponse;
 import com.crm.payload.response.PaginationResponse;
 import com.crm.services.OutboundService;
 
@@ -121,7 +123,13 @@ public class OutboundController {
     Outbound outbound = outBoundService.createOutbound(username, request);
     OutboundDto outboundDto = new OutboundDto();
     outboundDto = OutboundMapper.toOutboundDto(outbound);
-    return ResponseEntity.ok(outboundDto);
+
+    // Set default response body
+    DefaultResponse<OutboundDto> defaultResponse = new DefaultResponse<>();
+    defaultResponse.setMessage(SuccessMessage.CREATE_OUTBOUND_SUCCESSFULLY);
+    defaultResponse.setData(outboundDto);
+
+    return ResponseEntity.status(HttpStatus.CREATED).body(defaultResponse);
   }
 
   @Transactional
@@ -135,7 +143,13 @@ public class OutboundController {
     Outbound outbound = outBoundService.editOutbound(updates, id, username);
     OutboundDto outboundDto = new OutboundDto();
     outboundDto = OutboundMapper.toOutboundDto(outbound);
-    return ResponseEntity.ok(outboundDto);
+
+    // Set default response body
+    DefaultResponse<OutboundDto> defaultResponse = new DefaultResponse<>();
+    defaultResponse.setMessage(SuccessMessage.EDIT_OUTBOUND_SUCCESSFULLY);
+    defaultResponse.setData(outboundDto);
+
+    return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 
   @Transactional
@@ -147,6 +161,11 @@ public class OutboundController {
     String username = userDetails.getUsername();
 
     outBoundService.removeOutbound(id, username);
-    return ResponseEntity.ok(new MessageResponse("Outbound has removed successfully"));
+
+    // Set default response body
+    DefaultResponse<OutboundDto> defaultResponse = new DefaultResponse<>();
+    defaultResponse.setMessage(SuccessMessage.DELETE_OUTBOUND_SUCCESSFULLY);
+
+    return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 }

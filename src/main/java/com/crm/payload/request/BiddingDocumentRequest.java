@@ -30,8 +30,6 @@ public class BiddingDocumentRequest {
   private Double bidPackagePrice;
 
   private Double bidFloorPrice;
-  
-  private String bidDiscountCode;
 
   private Double priceLeadership;
 

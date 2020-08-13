@@ -1,4 +1,4 @@
-package com.crm.controllers;
+ package com.crm.controllers;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,6 +8,7 @@ import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -21,11 +22,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.crm.common.SuccessMessage;
 import com.crm.models.ShippingInfo;
 import com.crm.models.dto.ShippingInfoDto;
 import com.crm.models.mapper.ShippingInfoMapper;
 import com.crm.payload.request.PaginationRequest;
-import com.crm.payload.response.MessageResponse;
+import com.crm.payload.response.DefaultResponse;
 import com.crm.payload.response.PaginationResponse;
 import com.crm.services.ShippingInfoService;
 
@@ -69,7 +71,7 @@ public class ShippingInfoController {
     return ResponseEntity.ok(response);
   }
 
-  @PreAuthorize("hasRole('FORWARDER') or hasRole('MERCHANT')")
+  @PreAuthorize("hasRole('FORWARDER') or hasRole('MERCHANT') or hasRole('SHIPPINGLINE')")
   @GetMapping("/combined/{id}")
   public ResponseEntity<?> getShippingInfosByCombined(@PathVariable("id") Long id, @Valid PaginationRequest request) {
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -143,7 +145,13 @@ public class ShippingInfoController {
     String username = userDetails.getUsername();
     ShippingInfo shippingInfo = shippingInfoService.editShippingInfo(id, username, status);
     ShippingInfoDto shippingInfoDto = ShippingInfoMapper.toShippingInfoDto(shippingInfo);
-    return ResponseEntity.ok(shippingInfoDto);
+
+    // Set default response body
+    DefaultResponse<ShippingInfoDto> defaultResponse = new DefaultResponse<>();
+    defaultResponse.setMessage(SuccessMessage.EDIT_SHIPPING_INFO_SUCCESSFULLY);
+    defaultResponse.setData(shippingInfoDto);
+
+    return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 
   @Transactional
@@ -153,7 +161,12 @@ public class ShippingInfoController {
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
     shippingInfoService.removeShippingInfo(id, username);
-    return ResponseEntity.ok(new MessageResponse("ShippingInfo deleted successfully."));
+
+    // Set default response body
+    DefaultResponse<ShippingInfoDto> defaultResponse = new DefaultResponse<>();
+    defaultResponse.setMessage(SuccessMessage.DELETE_SHIPPING_INFO_SUCCESSFULLY);
+
+    return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 
 }

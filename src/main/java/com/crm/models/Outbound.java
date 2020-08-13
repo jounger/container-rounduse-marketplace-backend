@@ -1,12 +1,15 @@
 package com.crm.models;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collection;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
@@ -56,4 +59,7 @@ public class Outbound extends Supply {
 
   @OneToOne(mappedBy = "outbound", cascade = CascadeType.ALL)
   private Booking booking;
+
+  @OneToMany(mappedBy = "outbound")
+  private Collection<BiddingDocument> biddingDocuments = new ArrayList<>();
 }

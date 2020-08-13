@@ -9,6 +9,7 @@ import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -19,18 +20,18 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.crm.common.SuccessMessage;
 import com.crm.models.BiddingDocument;
 import com.crm.models.dto.BiddingDocumentDto;
 import com.crm.models.mapper.BiddingDocumentMapper;
 import com.crm.payload.request.BiddingDocumentRequest;
 import com.crm.payload.request.PaginationRequest;
-import com.crm.payload.response.MessageResponse;
+import com.crm.payload.response.DefaultResponse;
 import com.crm.payload.response.PaginationResponse;
 import com.crm.services.BiddingDocumentService;
 import com.crm.websocket.controller.NotificationBroadcast;
@@ -61,7 +62,12 @@ public class BiddingDocumentController {
     notificationBroadcast.broadcastCreateBiddingDocumentToForwarder(biddingDocument);
     // END NOTIFICATION
 
-    return ResponseEntity.ok(biddingDocumentDto);
+    // Set default response body
+    DefaultResponse<BiddingDocumentDto> defaultResponse = new DefaultResponse<>();
+    defaultResponse.setMessage(SuccessMessage.CREATE_BIDDING_DUCUMENT_SUCCESSFULLY);
+    defaultResponse.setData(biddingDocumentDto);
+
+    return ResponseEntity.status(HttpStatus.CREATED).body(defaultResponse);
   }
 
   @PreAuthorize("hasRole('MERCHANT') or hasRole('FORWARDER')")
@@ -140,20 +146,17 @@ public class BiddingDocumentController {
 
   @Transactional
   @PreAuthorize("hasRole('MERCHANT')")
-  @PutMapping("")
-  public ResponseEntity<?> updateBiddingDocument(@Valid @RequestBody BiddingDocumentRequest request) {
-    BiddingDocument biddingDocument = biddingDocumentService.updateBiddingDocument(request);
-    BiddingDocumentDto biddingDocumentDto = BiddingDocumentMapper.toBiddingDocumentDto(biddingDocument);
-    return ResponseEntity.ok(biddingDocumentDto);
-  }
-
-  @Transactional
-  @PreAuthorize("hasRole('MERCHANT')")
   @RequestMapping(value = "/{id}", method = RequestMethod.PATCH, consumes = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<?> editBiddingDocument(@PathVariable("id") Long id, @RequestBody Map<String, Object> updates) {
     BiddingDocument biddingDocument = biddingDocumentService.editBiddingDocument(id, updates);
     BiddingDocumentDto biddingDocumentDto = BiddingDocumentMapper.toBiddingDocumentDto(biddingDocument);
-    return ResponseEntity.ok(biddingDocumentDto);
+
+    // Set default response body
+    DefaultResponse<BiddingDocumentDto> defaultResponse = new DefaultResponse<>();
+    defaultResponse.setMessage(SuccessMessage.EDIT_BIDDING_DUCUMENT_SUCCESSFULLY);
+    defaultResponse.setData(biddingDocumentDto);
+
+    return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 
   @Transactional
@@ -163,6 +166,11 @@ public class BiddingDocumentController {
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
     biddingDocumentService.removeBiddingDocument(id, username);
-    return ResponseEntity.ok(new MessageResponse("Bidding document deleted successfully"));
+
+    // Set default response body
+    DefaultResponse<BiddingDocumentDto> defaultResponse = new DefaultResponse<>();
+    defaultResponse.setMessage(SuccessMessage.DELETE_BIDDING_DUCUMENT_SUCCESSFULLY);
+
+    return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 }

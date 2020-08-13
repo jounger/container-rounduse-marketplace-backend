@@ -9,6 +9,7 @@ import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -25,12 +26,13 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.crm.common.SuccessMessage;
 import com.crm.models.Feedback;
 import com.crm.models.dto.FeedbackDto;
 import com.crm.models.mapper.FeedbackMapper;
 import com.crm.payload.request.FeedbackRequest;
 import com.crm.payload.request.PaginationRequest;
-import com.crm.payload.response.MessageResponse;
+import com.crm.payload.response.DefaultResponse;
 import com.crm.payload.response.PaginationResponse;
 import com.crm.services.FeedbackService;
 import com.crm.websocket.controller.NotificationBroadcast;
@@ -54,13 +56,18 @@ public class FeedbackController {
         .getPrincipal();
     String username = userDetails.getUsername();
     Feedback payment = paymentService.createFeedback(id, username, request);
-    FeedbackDto paymentDto = FeedbackMapper.toFeedbackDto(payment);
+    FeedbackDto feedbackDto = FeedbackMapper.toFeedbackDto(payment);
 
     // CREATE NOTIFICATION
     notificationBroadcast.broadcastCreateFeedbackToUser(payment);
     // END NOTIFICATION
 
-    return ResponseEntity.ok(paymentDto);
+    // Set default response body
+    DefaultResponse<FeedbackDto> defaultResponse = new DefaultResponse<>();
+    defaultResponse.setMessage(SuccessMessage.CREATE_FEEDBACK_SUCCESSFULLY);
+    defaultResponse.setData(feedbackDto);
+
+    return ResponseEntity.status(HttpStatus.CREATED).body(defaultResponse);
   }
 
   @Transactional
@@ -153,8 +160,14 @@ public class FeedbackController {
         .getPrincipal();
     String username = userDetails.getUsername();
     Feedback payment = paymentService.editFeedback(id, username, updates);
-    FeedbackDto paymentDto = FeedbackMapper.toFeedbackDto(payment);
-    return ResponseEntity.ok(paymentDto);
+    FeedbackDto feedbackDto = FeedbackMapper.toFeedbackDto(payment);
+
+    // Set default response body
+    DefaultResponse<FeedbackDto> defaultResponse = new DefaultResponse<>();
+    defaultResponse.setMessage(SuccessMessage.EDIT_FEEDBACK_SUCCESSFULLY);
+    defaultResponse.setData(feedbackDto);
+
+    return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 
   @Transactional
@@ -165,6 +178,11 @@ public class FeedbackController {
         .getPrincipal();
     String username = userDetails.getUsername();
     paymentService.removeFeedback(id, username);
-    return ResponseEntity.ok(new MessageResponse("Feedback deleted successfully."));
+
+    // Set default response body
+    DefaultResponse<FeedbackDto> defaultResponse = new DefaultResponse<>();
+    defaultResponse.setMessage(SuccessMessage.DELETE_FEEDBACK_SUCCESSFULLY);
+
+    return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 }

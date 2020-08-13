@@ -13,7 +13,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import com.crm.common.Constant;
-import com.crm.common.ErrorConstant;
+import com.crm.common.ErrorMessage;
 import com.crm.common.Tool;
 import com.crm.enums.EnumSupplyStatus;
 import com.crm.enums.EnumUnit;
@@ -63,7 +63,7 @@ public class OutboundServiceImpl implements OutboundService {
   @Override
   public Outbound getOutboundById(Long id) {
     Outbound outbound = outboundRepository.findById(id)
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.OUTBOUND_NOT_FOUND));
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.OUTBOUND_NOT_FOUND));
     return outbound;
   }
 
@@ -102,21 +102,21 @@ public class OutboundServiceImpl implements OutboundService {
     Outbound outbound = new Outbound();
 
     Merchant merchant = merchantRepository.findByUsername(username)
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.MERCHANT_NOT_FOUND));
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.MERCHANT_NOT_FOUND));
     outbound.setMerchant(merchant);
 
     String code = request.getCode();
     if (supplyRepository.existsByCode(code)) {
-      throw new DuplicateRecordException(ErrorConstant.SUPPLY_CODE_DUPLICATE);
+      throw new DuplicateRecordException(ErrorMessage.SUPPLY_CODE_DUPLICATE);
     }
     outbound.setCode(code);
 
     ShippingLine shippingLine = shippingLineRepository.findByCompanyCode(request.getShippingLine())
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.SHIPPINGLINE_NOT_FOUND));
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.SHIPPINGLINE_NOT_FOUND));
     outbound.setShippingLine(shippingLine);
 
     ContainerType containerType = containerTypeRepository.findByName(request.getContainerType())
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.CONTAINER_TYPE_NOT_FOUND));
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.CONTAINER_TYPE_NOT_FOUND));
     outbound.setContainerType(containerType);
 
     outbound.setStatus(EnumSupplyStatus.CREATED.name());
@@ -130,7 +130,7 @@ public class OutboundServiceImpl implements OutboundService {
     outbound.setDeliveryTime(deliveryTime);
 
     if (packingTime.isAfter(deliveryTime)) {
-      throw new InternalException(ErrorConstant.OUTBOUND_INVALID_DELIVERY_TIME);
+      throw new InternalException(ErrorMessage.OUTBOUND_INVALID_DELIVERY_TIME);
     }
 
     outbound.setPackingStation(request.getPackingStation());
@@ -147,11 +147,11 @@ public class OutboundServiceImpl implements OutboundService {
     if (number != null && !number.isEmpty()) {
       booking.setNumber(number);
     } else {
-      throw new NotFoundException(ErrorConstant.BOOKING_NOT_FOUND);
+      throw new NotFoundException(ErrorMessage.BOOKING_NOT_FOUND);
     }
 
     Port portOfLoading = portRepository.findByNameCode(bookingRequest.getPortOfLoading())
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.PORT_NOT_FOUND));
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.PORT_NOT_FOUND));
     booking.setPortOfLoading(portOfLoading);
 
     booking.setUnit(bookingRequest.getUnit());
@@ -174,22 +174,22 @@ public class OutboundServiceImpl implements OutboundService {
   public Outbound editOutbound(Map<String, Object> updates, Long id, String username) {
 
     Outbound outbound = outboundRepository.findById(id)
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.OUTBOUND_NOT_FOUND));
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.OUTBOUND_NOT_FOUND));
 
     if (!outbound.getMerchant().getUsername().equals(username)) {
-      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
+      throw new ForbiddenException(ErrorMessage.USER_ACCESS_DENIED);
     }
 
     if (outbound.getStatus().equals(EnumSupplyStatus.COMBINED.name())
         || outbound.getStatus().equals(EnumSupplyStatus.BIDDING.name())) {
-      throw new InternalException(ErrorConstant.OUTBOUND_IS_IN_TRANSACTION);
+      throw new InternalException(ErrorMessage.OUTBOUND_IS_IN_TRANSACTION);
     }
 
     String shippingLineRequest = String.valueOf(updates.get("shippingLine"));
     if (updates.get("shippingLine") != null
         && !Tool.isEqual(outbound.getShippingLine().getCompanyCode(), shippingLineRequest)) {
       ShippingLine shippingLine = shippingLineRepository.findByCompanyCode(shippingLineRequest)
-          .orElseThrow(() -> new NotFoundException(ErrorConstant.SHIPPINGLINE_NOT_FOUND));
+          .orElseThrow(() -> new NotFoundException(ErrorMessage.SHIPPINGLINE_NOT_FOUND));
       outbound.setShippingLine(shippingLine);
     }
 
@@ -197,7 +197,7 @@ public class OutboundServiceImpl implements OutboundService {
     if (updates.get("containerType") != null
         && !Tool.isEqual(outbound.getContainerType().getName(), containerTypeRequest)) {
       ContainerType containerType = containerTypeRepository.findByName(containerTypeRequest)
-          .orElseThrow(() -> new NotFoundException(ErrorConstant.CONTAINER_TYPE_NOT_FOUND));
+          .orElseThrow(() -> new NotFoundException(ErrorMessage.CONTAINER_TYPE_NOT_FOUND));
       outbound.setContainerType(containerType);
     }
 
@@ -243,7 +243,7 @@ public class OutboundServiceImpl implements OutboundService {
     }
 
     if (outbound.getPackingTime().isAfter(outbound.getDeliveryTime())) {
-      throw new InternalException(ErrorConstant.OUTBOUND_INVALID_DELIVERY_TIME);
+      throw new InternalException(ErrorMessage.OUTBOUND_INVALID_DELIVERY_TIME);
     }
 
     Outbound _outbound = outboundRepository.save(outbound);
@@ -255,15 +255,15 @@ public class OutboundServiceImpl implements OutboundService {
   public void removeOutbound(Long id, String username) {
 
     Outbound outbound = outboundRepository.findById(id)
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.OUTBOUND_NOT_FOUND));
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.OUTBOUND_NOT_FOUND));
 
     if (!outbound.getMerchant().getUsername().equals(username)) {
-      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
+      throw new ForbiddenException(ErrorMessage.USER_ACCESS_DENIED);
     }
 
     if (outbound.getStatus().equals(EnumSupplyStatus.COMBINED.name())
         || outbound.getStatus().equals(EnumSupplyStatus.BIDDING.name())) {
-      throw new InternalException(ErrorConstant.OUTBOUND_IS_IN_TRANSACTION);
+      throw new InternalException(ErrorMessage.OUTBOUND_IS_IN_TRANSACTION);
     }
     outboundRepository.delete(outbound);
 

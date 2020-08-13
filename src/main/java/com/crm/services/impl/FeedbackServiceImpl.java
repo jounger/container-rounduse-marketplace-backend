@@ -14,7 +14,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import com.crm.common.Constant;
-import com.crm.common.ErrorConstant;
+import com.crm.common.ErrorMessage;
 import com.crm.common.Tool;
 import com.crm.enums.EnumReportStatus;
 import com.crm.exception.ForbiddenException;
@@ -48,33 +48,33 @@ public class FeedbackServiceImpl implements FeedbackService {
     Feedback feedback = new Feedback();
 
     Report report = reportRepository.findById(id)
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.REPORT_NOT_FOUND));
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.REPORT_NOT_FOUND));
 
     if (report.getStatus().equals(EnumReportStatus.RESOLVED.name())
         || report.getStatus().equals(EnumReportStatus.REJECTED.name())
         || report.getStatus().equals(EnumReportStatus.CLOSED.name())) {
-      throw new InternalException(ErrorConstant.FEEDBACK_INVALID_TIME);
+      throw new InternalException(ErrorMessage.FEEDBACK_INVALID_TIME);
     }
 
     report.setStatus(EnumReportStatus.UPDATED.name());
     feedback.setReport(report);
 
     User sender = userRepository.findByUsername(username)
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.SENDER_NOT_FOUND));
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.SENDER_NOT_FOUND));
     String role = sender.getRoles().iterator().next().getName();
     if (role.equals("ROLE_MODERATOR") || username.equals(report.getSender().getUsername())) {
       feedback.setSender(sender);
     } else {
-      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
+      throw new ForbiddenException(ErrorMessage.USER_ACCESS_DENIED);
     }
 
     User recipient = userRepository.findByUsername(request.getRecipient())
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.RECIPIENT_NOT_FOUND));
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.RECIPIENT_NOT_FOUND));
     String role2 = recipient.getRoles().iterator().next().getName();
     if (role2.equals("ROLE_MODERATOR") || request.getRecipient().equals(report.getSender().getUsername())) {
       feedback.setRecipient(recipient);
     } else {
-      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
+      throw new ForbiddenException(ErrorMessage.USER_ACCESS_DENIED);
     }
 
     String message = request.getMessage();
@@ -82,7 +82,7 @@ public class FeedbackServiceImpl implements FeedbackService {
 
     Integer satisfactionPoints = request.getSatisfactionPoints();
     if (satisfactionPoints < 0 || satisfactionPoints > 5) {
-      throw new InternalException(ErrorConstant.FEEDBACK_INVALID_SATISFACTION_POINTS);
+      throw new InternalException(ErrorMessage.FEEDBACK_INVALID_SATISFACTION_POINTS);
     }
     feedback.setSatisfactionPoints(satisfactionPoints);
     feedback.setSendDate(LocalDateTime.now());
@@ -96,13 +96,13 @@ public class FeedbackServiceImpl implements FeedbackService {
     Page<Feedback> feedbacks = null;
 
     if (!reportRepository.existsById(reportId)) {
-      throw new NotFoundException(ErrorConstant.REPORT_NOT_FOUND);
+      throw new NotFoundException(ErrorMessage.REPORT_NOT_FOUND);
     }
 
     PageRequest pageRequest = PageRequest.of(request.getPage(), request.getLimit(),
         Sort.by(Direction.DESC, "createdAt"));
     User sender = userRepository.findByUsername(username)
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.SENDER_NOT_FOUND));
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.SENDER_NOT_FOUND));
     String role = sender.getRoles().iterator().next().getName();
     if (role.equals("ROLE_FORWARDER")) {
       feedbacks = feedbackRepository.findByReport(reportId, username, pageRequest);
@@ -118,7 +118,7 @@ public class FeedbackServiceImpl implements FeedbackService {
     PageRequest pageRequest = PageRequest.of(request.getPage(), request.getLimit(),
         Sort.by(Direction.DESC, "createdAt"));
     User sender = userRepository.findByUsername(username)
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.SENDER_NOT_FOUND));
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.SENDER_NOT_FOUND));
     String role = sender.getRoles().iterator().next().getName();
     if (role.equals("ROLE_MODERATOR") || role.equals("ROLE_FORWARDER")) {
       feedbacks = feedbackRepository.findBySender(sender, pageRequest);
@@ -148,10 +148,10 @@ public class FeedbackServiceImpl implements FeedbackService {
   @Override
   public Feedback editFeedback(Long id, String username, Map<String, Object> updates) {
     Feedback feedback = feedbackRepository.findById(id)
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.FEEDBACK_NOT_FOUND));
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.FEEDBACK_NOT_FOUND));
     if (!(feedback.getSender().getUsername().equals(username)
         || feedback.getReport().getSender().getUsername().equals(username))) {
-      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
+      throw new ForbiddenException(ErrorMessage.USER_ACCESS_DENIED);
     }
 
     String message = String.valueOf(updates.get("message"));
@@ -172,11 +172,11 @@ public class FeedbackServiceImpl implements FeedbackService {
   @Override
   public void removeFeedback(Long id, String username) {
     Feedback feedback = feedbackRepository.findById(id)
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.FEEDBACK_NOT_FOUND));
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.FEEDBACK_NOT_FOUND));
     if (feedback.getSender().getUsername().equals(username)) {
       feedbackRepository.deleteById(id);
     } else {
-      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
+      throw new ForbiddenException(ErrorMessage.USER_ACCESS_DENIED);
     }
   }
 

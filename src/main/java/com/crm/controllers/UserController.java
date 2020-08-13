@@ -1,9 +1,12 @@
 package com.crm.controllers;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import javax.mail.MessagingException;
+import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
 
@@ -11,22 +14,31 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.crm.common.SuccessMessage;
 import com.crm.models.User;
 import com.crm.models.dto.UserDto;
 import com.crm.models.mapper.UserMapper;
+import com.crm.payload.request.ChangePasswordRequest;
 import com.crm.payload.request.PaginationRequest;
+import com.crm.payload.request.ResetPasswordRequest;
+import com.crm.payload.response.DefaultResponse;
 import com.crm.payload.response.PaginationResponse;
 import com.crm.services.UserService;
 
@@ -92,6 +104,58 @@ public class UserController {
   public ResponseEntity<?> changeStatus(@PathVariable("id") Long id, @RequestBody Map<String, Object> updates) {
     User user = userService.changeStatus(id, updates);
     UserDto userDto = UserMapper.toUserDto(user);
-    return ResponseEntity.ok(userDto);
+
+    // Set default response body
+    DefaultResponse<UserDto> defaultResponse = new DefaultResponse<>();
+    defaultResponse.setMessage(SuccessMessage.EDIT_USER_SUCCESSFULLY);
+    defaultResponse.setData(userDto);
+
+    return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
+  }
+
+  @Transactional
+  @RequestMapping(value = "/change-password", method = RequestMethod.PATCH, consumes = MediaType.APPLICATION_JSON_VALUE)
+  public ResponseEntity<?> changePassword(@Valid @RequestBody ChangePasswordRequest request) {
+    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    String username = userDetails.getUsername();
+
+    User user = userService.changePassword(username, request);
+    UserDto userDto = UserMapper.toUserDto(user);
+
+    // Set default response body
+    DefaultResponse<UserDto> defaultResponse = new DefaultResponse<>();
+    defaultResponse.setMessage(SuccessMessage.CHANGE_PASSWORD_SUCCESSFULLY);
+    defaultResponse.setData(userDto);
+
+    return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
+  }
+
+  @PostMapping("/reset-password")
+  public ResponseEntity<?> getResetPasswordToken(@Valid @RequestBody ResetPasswordRequest request) throws MessagingException, IOException {
+    logger.info("Reset password with email: {}", request.getEmail());
+    userService.getResetPasswordToken(request.getEmail());
+    DefaultResponse<UserDto> response = new DefaultResponse<UserDto>();
+    response.setMessage(SuccessMessage.GENERATE_RESET_PASSWORD_TOKEN_SUCCESSFULLY);
+    return ResponseEntity.status(HttpStatus.OK).body(response);
+  }
+  
+  @GetMapping("/reset-password")
+  public ResponseEntity<?> isValidResetPasswordToken(@Valid @RequestBody ResetPasswordRequest request){
+    logger.info("Reset Password Token: {}", request.getToken());
+    Boolean isValidResetPasswordToken = userService.isValidResetPasswrodTolken(request.getToken());
+    DefaultResponse<Boolean> response = new DefaultResponse<Boolean>();
+    response.setData(isValidResetPasswordToken);
+    return ResponseEntity.status(HttpStatus.OK).body(response);
+  }
+  
+  @PatchMapping("/reset-password")
+  public ResponseEntity<?> resetPasswordByToken(HttpServletRequest httpRequest, @Valid @RequestBody ResetPasswordRequest request){
+    String token = httpRequest.getHeader("Authentication");
+    logger.info("Reset Password Token: {}", token);
+    logger.info("Reset Password Token: {}", request);
+    userService.resetPasswordByToken(token, request.getNewPassword());
+    DefaultResponse<Boolean> response = new DefaultResponse<Boolean>();
+    response.setMessage(SuccessMessage.CHANGE_PASSWORD_SUCCESSFULLY);
+    return ResponseEntity.status(HttpStatus.OK).body(response);
   }
 }

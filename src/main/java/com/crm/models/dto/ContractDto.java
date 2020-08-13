@@ -13,6 +13,10 @@ public class ContractDto {
 
   private Long Id;
 
+  private Double price;
+
+  private String discountCode;
+
   private Double finesAgainstContractViolation;
 
   private Boolean required;

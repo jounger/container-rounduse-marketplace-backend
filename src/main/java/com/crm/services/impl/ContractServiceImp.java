@@ -21,11 +21,13 @@ import com.crm.models.Bid;
 import com.crm.models.BiddingDocument;
 import com.crm.models.Combined;
 import com.crm.models.Contract;
+import com.crm.models.Discount;
 import com.crm.models.Supplier;
 import com.crm.payload.request.ContractRequest;
 import com.crm.payload.request.PaginationRequest;
 import com.crm.repository.CombinedRepository;
 import com.crm.repository.ContractRepository;
+import com.crm.repository.DiscountRepository;
 import com.crm.services.ContractService;
 import com.crm.specification.builder.ContractSpecificationsBuilder;
 
@@ -38,6 +40,9 @@ public class ContractServiceImp implements ContractService {
   @Autowired
   private CombinedRepository combinedRepository;
 
+  @Autowired
+  private DiscountRepository discountRepository;
+
   @Override
   public Contract createContract(Long id, String username, ContractRequest request) {
     Contract contract = new Contract();
@@ -46,12 +51,21 @@ public class ContractServiceImp implements ContractService {
         .orElseThrow(() -> new NotFoundException(ErrorMessage.COMBINED_NOT_FOUND));
     contract.setCombined(combined);
 
+    contract.setPrice(request.getPrice());
+
     Bid bid = combined.getBid();
     BiddingDocument biddingDocument = bid.getBiddingDocument();
     Supplier offeree = biddingDocument.getOfferee();
     Boolean required = request.getRequired();
     contract.setRequired(required);
     contract.setFinesAgainstContractViolations(0D);
+
+    String discountCodeString = request.getDiscountCode();
+    if (discountCodeString != null && !discountCodeString.isEmpty()) {
+      Discount discount = discountRepository.findByCode(discountCodeString)
+          .orElseThrow(() -> new NotFoundException(ErrorMessage.DISCOUNT_NOT_FOUND));
+      contract.setDiscount(discount);
+    }
     if (username.equals(offeree.getUsername()) && required == true) {
       Double fines = request.getFinesAgainstContractViolations();
       if (fines > 0) {

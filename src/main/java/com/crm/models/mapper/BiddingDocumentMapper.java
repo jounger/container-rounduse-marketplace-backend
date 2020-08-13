@@ -42,11 +42,6 @@ public class BiddingDocumentMapper {
     Double bidFloorPrice = biddingDocument.getBidFloorPrice();
     biddingDocumentDto.setBidFloorPrice(bidFloorPrice);
 
-    if (biddingDocument.getDiscount() != null) {
-      String bidDiscountCode = biddingDocument.getDiscount().getCode();
-      biddingDocumentDto.setBidDiscountCode(bidDiscountCode);
-    }
-
     Double priceLeadership = biddingDocument.getPriceLeadership();
     biddingDocumentDto.setPriceLeadership(priceLeadership);
     

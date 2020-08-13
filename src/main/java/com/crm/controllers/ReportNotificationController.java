@@ -114,7 +114,7 @@ public class ReportNotificationController {
     DefaultResponse<ReportNotificationDto> defaultResponse = new DefaultResponse<>();
     defaultResponse.setMessage(SuccessMessage.DELETE_NOTIFICATION_SUCCESSFULLY);
 
-    return ResponseEntity.status(HttpStatus.NO_CONTENT).body(defaultResponse);
+    return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 
 }

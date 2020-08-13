@@ -146,5 +146,7 @@ public class SuccessMessage {
   // UserController
   public static final String EDIT_USER_SUCCESSFULLY = "Cập nhật người dùng thành công";
   public static final String CHANGE_PASSWORD_SUCCESSFULLY = "Thay đổi mật khẩu thành công";
+  public static final String GENERATE_RESET_PASSWORD_TOKEN_SUCCESSFULLY = "Tạo đường dẫn cài lại mật khẩu thành công. Vui lòng kiểm tra email!";
+  public static final String RESET_PASSWORD_SUCCESSFULLY = "Đặt lại mật khẩu thành công";
 
 }

@@ -115,6 +115,6 @@ public class PortController {
     DefaultResponse<PortDto> defaultResponse = new DefaultResponse<>();
     defaultResponse.setMessage(SuccessMessage.DELETE_PORT_SUCCESSFULLY);
 
-    return ResponseEntity.status(HttpStatus.NO_CONTENT).body(defaultResponse);
+    return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 }

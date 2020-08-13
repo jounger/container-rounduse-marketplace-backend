@@ -52,6 +52,9 @@ public class ShippingInfoServiceImpl implements ShippingInfoService {
   @Autowired
   private UserRepository userRepository;
 
+  @Autowired
+  private UserRepository userRepository;
+
   @Override
   public ShippingInfo createShippingInfo(ShippingInfoRequest request) {
     ShippingInfo shippingInfo = new ShippingInfo();

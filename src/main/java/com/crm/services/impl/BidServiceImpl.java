@@ -154,15 +154,8 @@ public class BidServiceImpl implements BidService {
   }
 
   @Override
-  public Bid getBidByBiddingDocumentAndForwarder(Long biddingDocumentId, String username) {
-    Bid bid = bidRepository.findByBiddingDocumentAndForwarder(biddingDocumentId, username)
-        .orElseThrow(() -> new NotFoundException(ErrorMessage.BID_NOT_FOUND));
-    return bid;
-  }
-
-  @Override
-  public Page<Bid> getBidsByBiddingDocument(Long id, PaginationRequest request) {
-    Page<Bid> bids = bidRepository.findByBiddingDocument(id,
+  public Page<Bid> getBidsByBiddingDocument(Long id, String username, PaginationRequest request) {
+    Page<Bid> bids = bidRepository.findByBiddingDocument(id, username,
         PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Direction.DESC, "createdAt")));
     return bids;
   }

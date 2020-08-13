@@ -153,6 +153,6 @@ public class PaymentController {
     DefaultResponse<PaymentDto> defaultResponse = new DefaultResponse<>();
     defaultResponse.setMessage(SuccessMessage.DELETE_PAYMENT_SUCCESSFULLY);
 
-    return ResponseEntity.status(HttpStatus.NO_CONTENT).body(defaultResponse);
+    return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 }

@@ -142,6 +142,6 @@ public class ContractController {
     DefaultResponse<ContractDto> defaultResponse = new DefaultResponse<>();
     defaultResponse.setMessage(SuccessMessage.DELETE_CONTRACT_SUCCESSFULLY);
 
-    return ResponseEntity.status(HttpStatus.NO_CONTENT).body(defaultResponse);
+    return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 }

@@ -16,8 +16,6 @@ public class BiddingDocumentDto {
 
   private OutboundDto outbound;
 
-  private String bidDiscountCode;
-
   private Boolean isMultipleAward;
 
   private List<BidDto> bids;

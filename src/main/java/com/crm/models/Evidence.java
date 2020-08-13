@@ -10,10 +10,10 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.validation.constraints.Size;
 
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -51,9 +51,9 @@ public class Evidence {
   @JoinColumn(name = "supplier_id")
   private Supplier sender;
 
-  @OneToOne
-  @JoinColumn(name = "file_upload_id")
-  private FileUpload document;
+  @Size(min = 5, max = 200)
+  @Column(name = "document_path")
+  private String documentPath;
 
   @Column(name = "is_valid")
   private Boolean isValid;

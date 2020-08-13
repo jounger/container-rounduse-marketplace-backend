@@ -7,7 +7,7 @@ import com.crm.models.Merchant;
 import com.crm.models.dto.MerchantDto;
 
 public class MerchantMapper {
-  
+
   public static MerchantDto toMerchantDto(Merchant merchant) {
     MerchantDto merchantDto = new MerchantDto();
     merchantDto.setId(merchant.getId());
@@ -16,6 +16,7 @@ public class MerchantMapper {
     merchantDto.setEmail(merchant.getEmail());
     merchantDto.setPhone(merchant.getPhone());
     merchantDto.setStatus(merchant.getStatus());
+    merchantDto.setProfileImagePath(merchant.getProfileImagePath());
 
     Set<String> merchantRoles = new HashSet<>();
     merchant.getRoles().forEach(role -> merchantRoles.add(RoleMapper.toRoleDto(role).getName()));
@@ -30,6 +31,7 @@ public class MerchantMapper {
     merchantDto.setTin(merchant.getTin());
     merchantDto.setFax(merchant.getFax());
     merchantDto.setRatingValue(merchant.getRatingValue());
+
     return merchantDto;
   }
 }

@@ -15,6 +15,8 @@ public class OperatorMapper {
     operatorDto.setEmail(operator.getEmail());
     operatorDto.setPhone(operator.getPhone());
     operatorDto.setStatus(operator.getStatus());
+    operatorDto.setProfileImagePath(operator.getProfileImagePath());
+
     Set<String> roles = new HashSet<>();
     operator.getRoles().forEach(role -> roles.add(role.getName()));
     operatorDto.setRoles(roles);

@@ -17,9 +17,7 @@ import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -83,9 +81,9 @@ public class User {
   @Size(min = 5, max = 200)
   private String address;
 
-//  @OneToOne
-//  @JoinColumn(name = "file_upload_id")
-//  private FileUpload profileImage;
+  @Size(min = 5, max = 200)
+  @JoinColumn(name = "profile_image_path")
+  private String profileImagePath;
 
   // EnumUserStatus
   @Column(name = "status")
@@ -112,6 +110,9 @@ public class User {
 
   @OneToMany(mappedBy = "sender")
   private Collection<Feedback> feedbacks = new ArrayList<>();
+
+  @OneToMany(mappedBy = "owner")
+  private Collection<FileUpload> fileUploads = new ArrayList<>();
 
   // DO NOT DELETE CODE BELLOW
 

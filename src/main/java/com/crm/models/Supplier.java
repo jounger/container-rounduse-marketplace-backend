@@ -7,9 +7,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
-import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 import javax.validation.constraints.NotBlank;
@@ -59,9 +57,9 @@ public class Supplier extends User {
   @Size(min = 5, max = 200)
   private String companyAddress;
 
-//  @OneToOne
-//  @JoinColumn(name = "brc_scan_id")
-//  private FileUpload brcScan;
+  @Size(min = 5, max = 200)
+  @Column(name = "brc_scan_path")
+  private String brcScanPath;
 
   @Column(name = "tin", length = 20)
   private String tin;

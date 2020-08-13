@@ -20,6 +20,7 @@ import com.crm.models.Forwarder;
 import com.crm.models.Merchant;
 import com.crm.models.Outbound;
 import com.crm.models.ShippingInfo;
+import com.crm.models.User;
 import com.crm.payload.request.PaginationRequest;
 import com.crm.payload.request.ShippingInfoRequest;
 import com.crm.repository.BidRepository;
@@ -27,6 +28,7 @@ import com.crm.repository.CombinedRepository;
 import com.crm.repository.ContainerRepository;
 import com.crm.repository.OutboundRepository;
 import com.crm.repository.ShippingInfoRepository;
+import com.crm.repository.UserRepository;
 import com.crm.services.ShippingInfoService;
 
 @Service
@@ -46,6 +48,9 @@ public class ShippingInfoServiceImpl implements ShippingInfoService {
 
   @Autowired
   private BidRepository bidRepository;
+  
+  @Autowired
+  private UserRepository userRepository;
 
   @Override
   public ShippingInfo createShippingInfo(ShippingInfoRequest request) {
@@ -155,12 +160,29 @@ public class ShippingInfoServiceImpl implements ShippingInfoService {
     shippingInfoRepository.deleteById(id);
   }
 
+//  @Override
+//  public Page<ShippingInfo> getShippingInfosByCombined(Long combinedId, String username, PaginationRequest request) {
+//    Combined combined = combinedRepository.findById(combinedId)
+//        .orElseThrow(() -> new NotFoundException(ErrorMessage.COMBINED_NOT_FOUND));
+//    if (!(combined.getBid().getBidder().getUsername().equals(username)
+//        || combined.getBid().getBiddingDocument().getOfferee().getUsername().equals(username))) {
+//      throw new ForbiddenException(ErrorMessage.USER_ACCESS_DENIED);
+//    }
+//    PageRequest page = PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt"));
+//    Page<ShippingInfo> pages = shippingInfoRepository.findByCombined(combinedId, page);
+//    return pages;
+//  }
+  
   @Override
   public Page<ShippingInfo> getShippingInfosByCombined(Long combinedId, String username, PaginationRequest request) {
+    User user = userRepository.findByUsername(username)
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.USER_NOT_FOUND));
+    String role = user.getRoles().iterator().next().getName();
     Combined combined = combinedRepository.findById(combinedId)
         .orElseThrow(() -> new NotFoundException(ErrorMessage.COMBINED_NOT_FOUND));
     if (!(combined.getBid().getBidder().getUsername().equals(username)
-        || combined.getBid().getBiddingDocument().getOfferee().getUsername().equals(username))) {
+        || combined.getBid().getBiddingDocument().getOfferee().getUsername().equals(username)
+        || role.equalsIgnoreCase("ROLE_SHIPPINGLINE"))) {
       throw new ForbiddenException(ErrorMessage.USER_ACCESS_DENIED);
     }
     PageRequest page = PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt"));

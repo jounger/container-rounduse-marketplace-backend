@@ -9,7 +9,7 @@ public class ShippingInfoMapper {
 
   public static ShippingInfoDto toShippingInfoDto(ShippingInfo shippingInfo) {
     ShippingInfoDto shippingInfoDto = new ShippingInfoDto();
-    shippingInfo.setId(shippingInfo.getId());
+    shippingInfoDto.setId(shippingInfo.getId());
 
     Outbound outbound = shippingInfo.getOutbound();
     shippingInfoDto.setOutbound(OutboundMapper.toOutboundDto(outbound));

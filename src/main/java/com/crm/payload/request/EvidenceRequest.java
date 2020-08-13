@@ -8,10 +8,10 @@ import lombok.Setter;
 public class EvidenceRequest {
 
   private Long id;
-  
+
   private String sender;
-  
-  private String evidence;
-  
+
+  private String documentPath;
+
   private Boolean isValid;
 }

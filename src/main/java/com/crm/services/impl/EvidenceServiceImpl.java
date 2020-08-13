@@ -62,11 +62,12 @@ public class EvidenceServiceImpl implements EvidenceService {
     BiddingDocument biddingDocument = bid.getBiddingDocument();
     Supplier offeree = biddingDocument.getOfferee();
     if (username.equals(bidder.getUsername()) || username.equals(offeree.getUsername())) {
-      Supplier supplier = supplierRepository.findByUsername(username).orElseThrow(() -> new NotFoundException(ErrorMessage.SENDER_NOT_FOUND));
+      Supplier supplier = supplierRepository.findByUsername(username)
+          .orElseThrow(() -> new NotFoundException(ErrorMessage.SENDER_NOT_FOUND));
       evidence.setSender(supplier);
-      String evidenceString = request.getEvidence();
-      if (!Tool.isBlank(evidenceString)) {
-        evidence.setEvidence(evidenceString);
+
+      if (!Tool.isBlank(request.getDocumentPath())) {
+        evidence.setDocumentPath(request.getDocumentPath());
       } else {
         throw new InternalException(ErrorMessage.EVIDENCE_INVALID);
       }
@@ -93,7 +94,8 @@ public class EvidenceServiceImpl implements EvidenceService {
     }
     Page<Evidence> evidences = null;
     PageRequest page = PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt"));
-    User user = userRepository.findByUsername(username).orElseThrow(() -> new NotFoundException(ErrorMessage.USER_NOT_FOUND));
+    User user = userRepository.findByUsername(username)
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.USER_NOT_FOUND));
     String role = user.getRoles().iterator().next().getName();
 
     if (role.equalsIgnoreCase("ROLE_MODERATOR")) {
@@ -137,19 +139,19 @@ public class EvidenceServiceImpl implements EvidenceService {
     if (!username.equals(bidder.getUsername()) && !username.equals(offeree.getUsername())) {
       throw new ForbiddenException(ErrorMessage.USER_ACCESS_DENIED);
     }
-    String evidenceString = String.valueOf(updates.get("evidence"));
-    if (updates.get("evidence") != null && !Tool.isBlank(evidenceString)) {
-      evidence.setEvidence(evidenceString);
-    }
-    
-    String isValid = String.valueOf(updates.get("isValid"));
-    if (updates.get("isValid") != null && !Tool.isEqual(evidence.getIsValid(), isValid)) {
-      evidence.setIsValid(Boolean.valueOf(isValid));
+
+    if (username.equals(evidence.getSender().getUsername())) {
+      // YOU CANNOT SET EVIDEN TO VALID BY YOURSELF
+      throw new ForbiddenException(ErrorMessage.USER_ACCESS_DENIED);
+    } else {
+      String isValid = String.valueOf(updates.get("isValid"));
+      if (updates.get("isValid") != null && !Tool.isEqual(evidence.getIsValid(), isValid)) {
+        evidence.setIsValid(Boolean.valueOf(isValid));
+      }
     }
 
     Evidence _evidence = evidenceRepository.save(evidence);
     return _evidence;
-
   }
 
   @Override

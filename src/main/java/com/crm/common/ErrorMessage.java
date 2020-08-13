@@ -117,7 +117,9 @@ public class ErrorMessage {
   public static final String COMPANY_CODE_ALREADY_EXISTS = "Mã công ty đã tồn tại";
   public static final String USERNAME_ALREADY_EXISTS = "Tên đăng nhập đã tồn tại";
   public static final String PASSWORD_NOT_CORRECT = "Mật khẩu không đúng";
+  public static final String NEW_PASSWORD_NOT_VALID = "Mật khẩu mới không hợp lệ";
   public static final String USER_ALREADY_EXISTS = "Tên đăng nhập, số điện thoại, email hoặc mã công ty đã tồn tại";
+  public static final String INVALID_RESET_PASSWORD_TOKEN = "Không tim thấy tài khoản hoặc đường dẫn đã hết hạn";
 
   // Operator
   public static final String OPERATOR_NOT_FOUND = "Không tìm thấy quản trị viên";

@@ -1,4 +1,4 @@
-package com.crm.controllers;
+ package com.crm.controllers;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -166,7 +166,7 @@ public class ShippingInfoController {
     DefaultResponse<ShippingInfoDto> defaultResponse = new DefaultResponse<>();
     defaultResponse.setMessage(SuccessMessage.DELETE_SHIPPING_INFO_SUCCESSFULLY);
 
-    return ResponseEntity.status(HttpStatus.NO_CONTENT).body(defaultResponse);
+    return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 
 }

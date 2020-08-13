@@ -236,7 +236,7 @@ public class NotificationBroadcast {
         shippingLineNotificationRequest.setMessage(String.format("%s and %s want to borrow %s container from you",
             offeree.getUsername(), bidNew.getBidder().getUsername(), numberOfContainer));
         shippingLineNotificationRequest.setAction(EnumShippingLineNotification.REQUEST.name());
-        shippingLineNotificationRequest.setType(EnumNotificationType.SHPIPPINGLINE.name());
+        shippingLineNotificationRequest.setType(EnumNotificationType.SHPIPPING_LINE.name());
         shippingLineNotification = shippingLineNotificationService
             .createShippingLineNotification(shippingLineNotificationRequest);
 

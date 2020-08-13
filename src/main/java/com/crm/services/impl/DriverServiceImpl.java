@@ -173,7 +173,7 @@ public class DriverServiceImpl implements DriverService {
 
       Driver driver = driverRepository.findById(id)
           .orElseThrow(() -> new NotFoundException(ErrorMessage.DRIVER_NOT_FOUND));
-
+      driverRepository.delete(driver);
       if (!driver.getForwarder().getUsername().equals(username)) {
         throw new ForbiddenException(ErrorMessage.USER_ACCESS_DENIED);
       }

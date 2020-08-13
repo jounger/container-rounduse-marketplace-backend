@@ -82,16 +82,6 @@ public class BidController {
     return ResponseEntity.ok(bidDto);
   }
 
-  @PreAuthorize("hasRole('FORWARDER')")
-  @GetMapping("/bidding-document/{id}")
-  public ResponseEntity<?> getBidByBiddingDocumentAndForwarder(@PathVariable Long id) {
-    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    String username = userDetails.getUsername();
-    Bid bid = bidService.getBidByBiddingDocumentAndForwarder(id, username);
-    BidDto bidDto = BidMapper.toBidDto(bid);
-    return ResponseEntity.ok(bidDto);
-  }
-
   @PreAuthorize("hasRole('MERCHANT') or hasRole('FORWARDER')")
   @GetMapping("/combined/bidding-document/{id}")
   public ResponseEntity<?> getBidByBiddingDocumentAndExistCombined(@PathVariable Long id,
@@ -115,11 +105,12 @@ public class BidController {
     return ResponseEntity.ok(response);
   }
 
-  @PreAuthorize("hasRole('MERCHANT')")
-  @GetMapping("/merchant/{id}")
+  @PreAuthorize("hasRole('MERCHANT') or hasRole('FORWARDER')")
+  @GetMapping("/bidding-document/{id}")
   public ResponseEntity<?> getBidsByBiddingDocument(@PathVariable Long id, @Valid PaginationRequest request) {
-
-    Page<Bid> pages = bidService.getBidsByBiddingDocument(id, request);
+    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    String username = userDetails.getUsername();
+    Page<Bid> pages = bidService.getBidsByBiddingDocument(id, username, request);
 
     PaginationResponse<BidDto> response = new PaginationResponse<>();
     response.setPageNumber(request.getPage());

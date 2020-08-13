@@ -119,7 +119,7 @@ public class ContainerServiceImpl implements ContainerService {
 
     String driverUserName = request.getDriver();
     Driver driver = driverRepository.findByUsername(driverUserName)
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.DRIVER_BUSY));
+        .orElseThrow(() -> new NotFoundException(ErrorConstant.DRIVER_NOT_FOUND));
     if (!driver.getForwarder().getUsername().equals(billOfLading.getInbound().getForwarder().getUsername())) {
       throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
     }
@@ -142,7 +142,7 @@ public class ContainerServiceImpl implements ContainerService {
     boolean listContainerByDriver = containerRepository.findByDriver(driver.getId(), username,
         billOfLading.getInbound().getPickupTime(), billOfLading.getFreeTime());
     if (!listContainerByDriver) {
-      throw new InternalException(ErrorConstant.CONTAINER_BUSY);
+      throw new InternalException(ErrorConstant.DRIVER_BUSY);
     }
 
     boolean listContainerByTractor = containerRepository.findByTractor(containerTractor.getId(), username,

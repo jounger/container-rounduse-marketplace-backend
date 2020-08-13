@@ -73,7 +73,7 @@ public class EvidenceServiceImpl implements EvidenceService {
 
       // UPLOAD FILE
       if (!Tool.isBlank(request.getDocument().getName())) {
-        FileUpload fileUpload = fileUploadService.createFileUpload(request.getDocument());
+        FileUpload fileUpload = fileUploadService.createFileUpload(username, request.getDocument());
         String filePath = fileUpload.getPath() + "/" + fileUpload.getName();
         evidence.setDocumentPath(filePath);
       } else {

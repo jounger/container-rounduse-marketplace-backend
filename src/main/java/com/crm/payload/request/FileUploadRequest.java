@@ -10,6 +10,8 @@ import lombok.Setter;
 public class FileUploadRequest {
 
   private String name;
+  
+  private String type;
 
   private MultipartFile file;
 

@@ -48,9 +48,6 @@ public class ShippingInfoServiceImpl implements ShippingInfoService {
 
   @Autowired
   private BidRepository bidRepository;
-  
-  @Autowired
-  private UserRepository userRepository;
 
   @Autowired
   private UserRepository userRepository;
@@ -163,19 +160,6 @@ public class ShippingInfoServiceImpl implements ShippingInfoService {
     shippingInfoRepository.deleteById(id);
   }
 
-//  @Override
-//  public Page<ShippingInfo> getShippingInfosByCombined(Long combinedId, String username, PaginationRequest request) {
-//    Combined combined = combinedRepository.findById(combinedId)
-//        .orElseThrow(() -> new NotFoundException(ErrorMessage.COMBINED_NOT_FOUND));
-//    if (!(combined.getBid().getBidder().getUsername().equals(username)
-//        || combined.getBid().getBiddingDocument().getOfferee().getUsername().equals(username))) {
-//      throw new ForbiddenException(ErrorMessage.USER_ACCESS_DENIED);
-//    }
-//    PageRequest page = PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt"));
-//    Page<ShippingInfo> pages = shippingInfoRepository.findByCombined(combinedId, page);
-//    return pages;
-//  }
-  
   @Override
   public Page<ShippingInfo> getShippingInfosByCombined(Long combinedId, String username, PaginationRequest request) {
     User user = userRepository.findByUsername(username)

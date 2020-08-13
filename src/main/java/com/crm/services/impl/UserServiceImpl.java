@@ -137,20 +137,26 @@ public class UserServiceImpl implements UserService {
     if (profileImage != null) {
 //      user.setProfileImage(profileImage);
     }
-    
+
     User _user = userRepository.save(user);
 
     return _user;
   }
 
   @Override
-  public User editUser(Long id, Map<String, Object> updates) {
-    User user = userRepository.findById(id).orElseThrow(() -> new NotFoundException(ErrorMessage.USER_NOT_FOUND));
+  public User editUser(String username, Map<String, Object> updates) {
+    User user = userRepository.findByUsername(username)
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.USER_NOT_FOUND));
 
     String status = String.valueOf(updates.get("status"));
     EnumUserStatus eStatus = EnumUserStatus.findByName(status);
     if (status != null && eStatus != null) {
       user.setStatus(eStatus.name());
+    }
+
+    String profileImagePath = String.valueOf(updates.get("profileImagePath"));
+    if (updates.get("profileImagePath") != null) {
+      user.setProfileImagePath(profileImagePath);
     }
 
     User _user = userRepository.save(user);

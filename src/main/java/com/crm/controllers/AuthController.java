@@ -89,6 +89,7 @@ public class AuthController {
     userInfo.setEmail(userDetails.getEmail());
     userInfo.setStatus(userDetails.getStatus());
     userInfo.setAddress(userDetails.getAddress());
+    userInfo.setProfileImagePath(userDetails.getProfileImagePath());
 
     JwtResponse response = new JwtResponse();
     response.setIdToken(jwt);
@@ -152,6 +153,7 @@ public class AuthController {
   @GetMapping("/user")
   public ResponseEntity<?> fetchUser(HttpServletRequest request, HttpServletResponse response) {
     try {
+      String jwt = AuthTokenFilter.parseJwt(request);
       UsernamePasswordAuthenticationToken authentication = authUserByToken(request);
       if (authentication != null) {
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
@@ -167,8 +169,10 @@ public class AuthController {
         userInfo.setEmail(userDetails.getEmail());
         userInfo.setStatus(userDetails.getStatus());
         userInfo.setAddress(userDetails.getAddress());
+        userInfo.setProfileImagePath(userDetails.getProfileImagePath());
 
         JwtResponse responseJwt = new JwtResponse();
+        responseJwt.setIdToken(jwt);
         responseJwt.setUserInfo(userInfo);
 
         return ResponseEntity.ok().body(responseJwt);

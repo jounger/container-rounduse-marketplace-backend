@@ -2,6 +2,7 @@ package com.crm.controllers;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -30,20 +31,20 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.crm.common.SuccessMessage;
+import com.crm.enums.EnumFileType;
+import com.crm.models.FileUpload;
 import com.crm.models.User;
 import com.crm.models.dto.UserDto;
 import com.crm.models.mapper.UserMapper;
-import com.crm.payload.request.FileUploadRequest;
 import com.crm.payload.request.ChangePasswordRequest;
+import com.crm.payload.request.FileUploadRequest;
 import com.crm.payload.request.PaginationRequest;
 import com.crm.payload.request.ResetPasswordRequest;
 import com.crm.payload.response.DefaultResponse;
 import com.crm.payload.response.PaginationResponse;
-import com.crm.payload.response.UploadFileResponse;
-import com.crm.services.FileStorageService;
 import com.crm.services.FileUploadService;
 import com.crm.services.UserService;
 
@@ -56,9 +57,6 @@ public class UserController {
 
   @Autowired
   private UserService userService;
-
-  @Autowired
-  private FileStorageService fileStorageService;
 
   @Autowired
   private FileUploadService fileUploadService;
@@ -111,9 +109,10 @@ public class UserController {
 
   @Transactional
   @PreAuthorize("hasRole('MODERATOR')")
-  @RequestMapping(value = "/{id}", method = RequestMethod.PATCH, consumes = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<?> changeStatus(@PathVariable("id") Long id, @RequestBody Map<String, Object> updates) {
-    User user = userService.editUser(id, updates);
+  @RequestMapping(value = "/{username}", method = RequestMethod.PATCH, consumes = MediaType.APPLICATION_JSON_VALUE)
+  public ResponseEntity<?> editUser(@PathVariable("username") String username,
+      @RequestBody Map<String, Object> updates) {
+    User user = userService.editUser(username, updates);
     UserDto userDto = UserMapper.toUserDto(user);
 
     // Set default response body
@@ -142,24 +141,28 @@ public class UserController {
   }
 
   @Transactional
-  @PreAuthorize("hasRole('MODERATOR') or hasRole('MERCHANT') or hasRole('FORWARDER')")
-  @PostMapping("/upload")
-  public ResponseEntity<?> uploadProfileImage(@RequestBody FileUploadRequest request) {
-    String fileName = fileStorageService.storeFile(request.getFile());
-    String fileDownloadUri = ServletUriComponentsBuilder.fromCurrentContextPath().path("/api/file/download/")
-        .path(fileName).toUriString();
+  @PostMapping("/upload-profile")
+  public ResponseEntity<?> uploadProfileImage(@RequestParam("file") MultipartFile file) {
+    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    String username = userDetails.getUsername();
 
-    if (fileName != null) {
-      fileUploadService.createFileUpload(request);
-    }
+    FileUploadRequest request = new FileUploadRequest();
+    request.setFile(file);
+    request.setType(EnumFileType.IMAGE.name());
 
-    UploadFileResponse uploadFileResponse = new UploadFileResponse();
-    uploadFileResponse.setFileName(fileName);
-    uploadFileResponse.setFileDownloadUri(fileDownloadUri);
-    uploadFileResponse.setFileType(request.getFile().getContentType());
-    uploadFileResponse.setSize(request.getFile().getSize());
+    FileUpload fileUpload = fileUploadService.createFileUpload(username, request);
+    String filePath = fileUpload.getPath() + fileUpload.getName();
 
-    return ResponseEntity.status(HttpStatus.CREATED).body(uploadFileResponse);
+    Map<String, Object> updates = new HashMap<>();
+    updates.put("profileImagePath", filePath);
+    User user = userService.editUser(username, updates);
+    UserDto userDto = UserMapper.toUserDto(user);
+
+    DefaultResponse<UserDto> defaultResponse = new DefaultResponse<>();
+    defaultResponse.setMessage("Update profile successful");
+    defaultResponse.setData(userDto);
+
+    return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 
   @PostMapping("/reset-password")

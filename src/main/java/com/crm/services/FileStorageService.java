@@ -7,5 +7,7 @@ public interface FileStorageService {
 
   String storeFile(MultipartFile file);
 
+  String storeFile(String salt, MultipartFile file);
+
   Resource loadFileAsResource(String fileName);
 }

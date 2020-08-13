@@ -6,7 +6,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.sql.Timestamp;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
@@ -29,9 +28,30 @@ public class FileStorageServiceImpl implements FileStorageService {
 
   @Override
   public String storeFile(MultipartFile file) {
-    Timestamp timestamp = new Timestamp(System.currentTimeMillis());
     // Normalize file name
-    String fileName = StringUtils.cleanPath(String.valueOf(timestamp.getTime()) + "-" + file.getOriginalFilename());
+    String fileName = StringUtils.cleanPath(file.getOriginalFilename());
+    this.fileStorageLocation = Paths.get(UPLOAD_DIR).toAbsolutePath().normalize();
+
+    try {
+      // Check if the file's name contains invalid characters
+      if (fileName.contains("..")) {
+        throw new FileStorageException("Sorry! Filename contains invalid path sequence " + fileName);
+      }
+      Files.createDirectories(this.fileStorageLocation);
+      // Copy file to the target location (Replacing existing file with the same name)
+      Path targetLocation = this.fileStorageLocation.resolve(fileName);
+      Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
+
+      return fileName;
+    } catch (IOException ex) {
+      throw new FileStorageException("Could not store file " + fileName + ". Please try again!", ex);
+    }
+  }
+
+  @Override
+  public String storeFile(String salt, MultipartFile file) {
+    // Normalize file name
+    String fileName = StringUtils.cleanPath(salt + "-" + file.getOriginalFilename());
     this.fileStorageLocation = Paths.get(UPLOAD_DIR).toAbsolutePath().normalize();
 
     try {

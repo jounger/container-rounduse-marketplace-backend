@@ -5,7 +5,7 @@ import com.crm.payload.request.FileUploadRequest;
 
 public interface FileUploadService {
 
-  FileUpload createFileUpload(FileUploadRequest request);
+  FileUpload createFileUpload(String username, FileUploadRequest request);
 
 //  FileUpload getFileUpload(Long id);
 

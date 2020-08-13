@@ -45,31 +45,31 @@ import com.crm.models.Forwarder;
 import com.crm.models.Inbound;
 import com.crm.models.Port;
 import com.crm.models.ShippingLine;
-import com.crm.payload.request.ContainerTractorRequest;
+import com.crm.payload.request.ContainerSemiTrailerRequest;
 import com.crm.payload.request.PaginationRequest;
-import com.crm.services.ContainerTractorService;
+import com.crm.services.ContainerSemiTrailerService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @SpringBootTest
 @AutoConfigureMockMvc
 @ContextConfiguration
-class ContainerTractorControllerIT {
+class ContainerSemiTrailerControllerIT {
 
-  private static final Logger logger = LoggerFactory.getLogger(ContainerTractorControllerIT.class);
+  private static final Logger logger = LoggerFactory.getLogger(ContainerSemiTrailerControllerIT.class);
 
   @Autowired
   protected MockMvc mockMvc;
 
   @MockBean
-  private ContainerTractorService tractorService;
+  private ContainerSemiTrailerService containerSemiTrailerServiceService;
 
   @Autowired
   private ObjectMapper objectMapper;
 
   PaginationRequest paginationRequest;
 
-  Page<ContainerTractor> pages;
+  Page<ContainerSemiTrailer> pages;
 
   Inbound inbound;
 
@@ -78,8 +78,10 @@ class ContainerTractorControllerIT {
   Container container;
 
   ContainerTractor tractor;
+  
+  ContainerSemiTrailer trailer;
 
-  List<ContainerTractor> tractors;
+  List<ContainerSemiTrailer> trailers;
 
   Bid bid;
 
@@ -118,8 +120,9 @@ class ContainerTractorControllerIT {
     tractor.setId(1L);
     tractor.setLicensePlate("29A-3231");
 
-    ContainerSemiTrailer trailer = new ContainerSemiTrailer();
+    trailer = new ContainerSemiTrailer();
     trailer.setId(2L);
+    trailer.setLicensePlate("29A-2353");
 
     container = new Container();
     container.setId(1L);
@@ -139,9 +142,9 @@ class ContainerTractorControllerIT {
     inbound.setEmptyTime(timeNow.plusDays(3));
     inbound.setShippingLine(shippingLine);
 
-    tractors = new ArrayList<ContainerTractor>();
-    tractors.add(tractor);
-    pages = new PageImpl<ContainerTractor>(tractors);
+    trailers = new ArrayList<ContainerSemiTrailer>();
+    trailers.add(trailer);
+    pages = new PageImpl<ContainerSemiTrailer>(trailers);
 
     requestParams = new LinkedMultiValueMap<>();
     requestParams.add("page", "0");
@@ -152,17 +155,17 @@ class ContainerTractorControllerIT {
   @WithMockUser(username = "forwarder", roles = { "FORWARDER" })
   void createContainerTractor_thenStatusOk_andReturnContainerTractor() throws JsonProcessingException, Exception {
     // given
-    ContainerTractorRequest request = new ContainerTractorRequest();
-    request.setLicensePlate("29A-3231");
-    when(tractorService.createContainerTractor(Mockito.anyString(), Mockito.any(ContainerTractorRequest.class)))
-        .thenReturn(tractor);
+    ContainerSemiTrailerRequest request = new ContainerSemiTrailerRequest();
+    request.setLicensePlate("29A-2353");
+    when(containerSemiTrailerServiceService.createContainerSemiTrailer(Mockito.anyString(), Mockito.any(ContainerSemiTrailerRequest.class)))
+        .thenReturn(trailer);
 
     // when and then
     MvcResult result = mockMvc
-        .perform(post("/api/container-tractor").contentType(MediaType.APPLICATION_JSON_VALUE)
+        .perform(post("/api/container-semi-trailer").contentType(MediaType.APPLICATION_JSON_VALUE)
             .content(objectMapper.writeValueAsString(request)))
-        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.id").value(1))
-        .andExpect(jsonPath("$.licensePlate").value("29A-3231")).andReturn();
+        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.id").value(2))
+        .andExpect(jsonPath("$.licensePlate").value("29A-2353")).andReturn();
 
     // print response
     MockHttpServletResponse response = result.getResponse();
@@ -171,14 +174,14 @@ class ContainerTractorControllerIT {
 
   @Test
   @WithMockUser(username = "forwarder", roles = { "FORWARDER" })
-  void getContainerTractor_thenStatusOk_andReturnContainerTractor() throws JsonProcessingException, Exception {
+  void getContainerSemiTrailer_thenStatusOk_andReturnContainerTractor() throws JsonProcessingException, Exception {
     // given
-    when(tractorService.getContainerTractorById(Mockito.anyLong())).thenReturn(tractor);
+    when(containerSemiTrailerServiceService.getContainerSemiTrailerById(Mockito.anyLong())).thenReturn(trailer);
 
     // when and then
-    MvcResult result = mockMvc.perform(get("/api/container-tractor/1").contentType(MediaType.APPLICATION_JSON_VALUE))
-        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.id").value(1))
-        .andExpect(jsonPath("$.licensePlate").value("29A-3231")).andReturn();
+    MvcResult result = mockMvc.perform(get("/api/container-semi-trailer/1").contentType(MediaType.APPLICATION_JSON_VALUE))
+        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.id").value(2))
+        .andExpect(jsonPath("$.licensePlate").value("29A-2353")).andReturn();
 
     // print response
     MockHttpServletResponse response = result.getResponse();
@@ -187,18 +190,18 @@ class ContainerTractorControllerIT {
 
   @Test
   @WithMockUser(username = "forwarder", roles = { "FORWARDER" })
-  void getContainerTractorByLicensePlate_thenStatusOk_andReturnContainerTractor()
+  void getContainerSemiTrailerByLicensePlate_thenStatusOk_andReturnContainerTractor()
       throws JsonProcessingException, Exception {
     // given
     requestParams = new LinkedMultiValueMap<String, String>();
-    requestParams.add("licensePlate", "29A-3231");
-    when(tractorService.getContainerTractorByLicensePlate(Mockito.anyString())).thenReturn(tractor);
+    requestParams.add("licensePlate", "29A-2353");
+    when(containerSemiTrailerServiceService.getContainerSemiTrailerByLicensePlate(Mockito.anyString())).thenReturn(trailer);
 
     // when and then
     MvcResult result = mockMvc
-        .perform(get("/api/container-tractor").contentType(MediaType.APPLICATION_JSON_VALUE).params(requestParams))
-        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.id").value(1))
-        .andExpect(jsonPath("$.licensePlate").value("29A-3231")).andReturn();
+        .perform(get("/api/container-semi-trailer").contentType(MediaType.APPLICATION_JSON_VALUE).params(requestParams))
+        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.id").value(2))
+        .andExpect(jsonPath("$.licensePlate").value("29A-2353")).andReturn();
 
     // print response
     MockHttpServletResponse response = result.getResponse();
@@ -211,15 +214,15 @@ class ContainerTractorControllerIT {
     // given
     String search = "licensePlate:29A-3231";
     requestParams.add("search", search);
-    when(tractorService.searchContainerTractors(Mockito.any(PaginationRequest.class), Mockito.anyString()))
+    when(containerSemiTrailerServiceService.searchContainerSemiTrailers(Mockito.any(PaginationRequest.class), Mockito.anyString()))
         .thenReturn(pages);
 
     // when and then
     MvcResult result = mockMvc
-        .perform(get("/api/container-tractor/filter").contentType(MediaType.APPLICATION_JSON).params(requestParams)
+        .perform(get("/api/container-semi-trailer/filter").contentType(MediaType.APPLICATION_JSON).params(requestParams)
             .accept(MediaType.APPLICATION_JSON))
-        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.data[0].id").value(1))
-        .andExpect(jsonPath("$.data[0].licensePlate").value("29A-3231")).andReturn();
+        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.data[0].id").value(2))
+        .andExpect(jsonPath("$.data[0].licensePlate").value("29A-2353")).andReturn();
 
     // print response
     MockHttpServletResponse response = result.getResponse();
@@ -228,15 +231,15 @@ class ContainerTractorControllerIT {
 
   @Test
   @WithMockUser(username = "forwarder", roles = { "FORWARDER" })
-  void getContainerTractors_thenStatusOk_andReturnContainerTractor() throws JsonProcessingException, Exception {
+  void getContainerSemiTrailers_thenStatusOk_andReturnContainerTractor() throws JsonProcessingException, Exception {
     // given
-    when(tractorService.getContainerTractors(Mockito.any(PaginationRequest.class))).thenReturn(pages);
+    when(containerSemiTrailerServiceService.getContainerSemiTrailers(Mockito.any(PaginationRequest.class))).thenReturn(pages);
 
     // when and then
     MvcResult result = mockMvc
-        .perform(get("/api/container-tractor").contentType(MediaType.APPLICATION_JSON_VALUE).params(requestParams))
-        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.data[0].id").value(1))
-        .andExpect(jsonPath("$.data[0].licensePlate").value("29A-3231")).andReturn();
+        .perform(get("/api/container-semi-trailer").contentType(MediaType.APPLICATION_JSON_VALUE).params(requestParams))
+        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.data[0].id").value(2))
+        .andExpect(jsonPath("$.data[0].licensePlate").value("29A-2353")).andReturn();
 
     // print response
     MockHttpServletResponse response = result.getResponse();
@@ -244,19 +247,19 @@ class ContainerTractorControllerIT {
   }
 
   @Test
-  @WithMockUser(username = "merchant", roles = { "MERCHANT" })
-  void getContainerTractorsByForwarder_thenStatusOk_andReturnContainerTractors()
+  @WithMockUser(username = "forwarder", roles = { "FORWARDER" })
+  void getContainerSemiTrailersByForwarder_thenStatusOk_andReturnContainerTractors()
       throws JsonProcessingException, Exception {
     // given
-    when(tractorService.getContainerTractorsByForwarder(Mockito.anyString(), Mockito.any(PaginationRequest.class)))
+    when(containerSemiTrailerServiceService.getContainerSemiTrailersByForwarder(Mockito.anyString(), Mockito.any(PaginationRequest.class)))
         .thenReturn(pages);
 
     // when and then
     MvcResult result = mockMvc
         .perform(
-            get("/api/container-tractor/forwarder").contentType(MediaType.APPLICATION_JSON_VALUE).params(requestParams))
-        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.data[0].id").value(1))
-        .andExpect(jsonPath("$.data[0].licensePlate").value("29A-3231")).andReturn();
+            get("/api/container-semi-trailer/forwarder").contentType(MediaType.APPLICATION_JSON_VALUE).params(requestParams))
+        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.data[0].id").value(2))
+        .andExpect(jsonPath("$.data[0].licensePlate").value("29A-2353")).andReturn();
 
     // print response
     MockHttpServletResponse response = result.getResponse();
@@ -267,17 +270,17 @@ class ContainerTractorControllerIT {
   @WithMockUser(username = "forwarder", roles = { "FORWARDER" })
   void editContainerTractor_thenStatusOk_andReturnContainerTractor() throws Exception {
     // given
-    tractor.setLicensePlate("2s3d2w");
+    trailer.setLicensePlate("2s3d2w");
     Map<String, Object> updates = new HashMap<String, Object>();
     updates.put("licensePlate", "2s3d2w");
-    when(tractorService.editContainerTractor(Mockito.anyMap(), Mockito.anyLong(), Mockito.anyString()))
-        .thenReturn(tractor);
+    when(containerSemiTrailerServiceService.editContainerSemiTrailer(Mockito.anyMap(), Mockito.anyLong(), Mockito.anyString()))
+        .thenReturn(trailer);
 
     // when and then
     MvcResult result = mockMvc
-        .perform(patch("/api/container-tractor/1").contentType(MediaType.APPLICATION_JSON_VALUE)
+        .perform(patch("/api/container-semi-trailer/1").contentType(MediaType.APPLICATION_JSON_VALUE)
             .content(objectMapper.writeValueAsString(updates)))
-        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.id").value(1))
+        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.id").value(2))
         .andExpect(jsonPath("$.licensePlate").value("2s3d2w")).andReturn();
 
     // print response
@@ -291,9 +294,9 @@ class ContainerTractorControllerIT {
     // given
 
     // when and then
-    MvcResult result = mockMvc.perform(delete("/api/container-tractor/1").contentType(MediaType.APPLICATION_JSON_VALUE))
+    MvcResult result = mockMvc.perform(delete("/api/container-semi-trailer/1").contentType(MediaType.APPLICATION_JSON_VALUE))
         .andDo(print()).andExpect(status().isOk())
-        .andExpect(jsonPath("$.message").value("ContainerTractor has remove successfully")).andReturn();
+        .andExpect(jsonPath("$.message").value("ContainerSemiTrailer has remove successfully")).andReturn();
 
     // print response
     MockHttpServletResponse response = result.getResponse();

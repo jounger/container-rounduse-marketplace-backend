@@ -250,7 +250,7 @@ class OutboundControllerIT {
     // when and then
     MvcResult result = mockMvc.perform(delete("/api/outbound/1").contentType(MediaType.APPLICATION_JSON_VALUE))
         .andDo(print()).andExpect(status().isOk())
-        .andExpect(jsonPath("$.message").value("Outbound has remove successfully")).andReturn();
+        .andExpect(jsonPath("$.message").value("Outbound has removed successfully")).andReturn();
 
     // print response
     MockHttpServletResponse response = result.getResponse();

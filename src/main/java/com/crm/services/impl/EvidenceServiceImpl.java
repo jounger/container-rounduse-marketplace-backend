@@ -22,7 +22,6 @@ import com.crm.models.BiddingDocument;
 import com.crm.models.Combined;
 import com.crm.models.Contract;
 import com.crm.models.Evidence;
-import com.crm.models.FileUpload;
 import com.crm.models.Supplier;
 import com.crm.models.User;
 import com.crm.payload.request.EvidenceRequest;
@@ -32,7 +31,6 @@ import com.crm.repository.EvidenceRepository;
 import com.crm.repository.SupplierRepository;
 import com.crm.repository.UserRepository;
 import com.crm.services.EvidenceService;
-import com.crm.services.FileUploadService;
 import com.crm.specification.builder.EvidenceSpecificationsBuilder;
 
 @Service
@@ -49,9 +47,6 @@ public class EvidenceServiceImpl implements EvidenceService {
 
   @Autowired
   private UserRepository userRepository;
-
-  @Autowired
-  private FileUploadService fileUploadService;
 
   @Override
   public Evidence createEvidence(Long id, String username, EvidenceRequest request) {
@@ -71,11 +66,8 @@ public class EvidenceServiceImpl implements EvidenceService {
           .orElseThrow(() -> new NotFoundException(ErrorMessage.SENDER_NOT_FOUND));
       evidence.setSender(supplier);
 
-      // UPLOAD FILE
-      if (!Tool.isBlank(request.getDocument().getName())) {
-        FileUpload fileUpload = fileUploadService.createFileUpload(username, request.getDocument());
-        String filePath = fileUpload.getPath() + "/" + fileUpload.getName();
-        evidence.setDocumentPath(filePath);
+      if (!Tool.isBlank(request.getDocumentPath())) {
+        evidence.setDocumentPath(request.getDocumentPath());
       } else {
         throw new InternalException(ErrorMessage.EVIDENCE_INVALID);
       }
@@ -148,14 +140,18 @@ public class EvidenceServiceImpl implements EvidenceService {
       throw new ForbiddenException(ErrorMessage.USER_ACCESS_DENIED);
     }
 
-    String isValid = String.valueOf(updates.get("isValid"));
-    if (updates.get("isValid") != null && !Tool.isEqual(evidence.getIsValid(), isValid)) {
-      evidence.setIsValid(Boolean.valueOf(isValid));
+    if (username.equals(evidence.getSender().getUsername())) {
+      // YOU CANNOT SET EVIDEN TO VALID BY YOURSELF
+      throw new ForbiddenException(ErrorMessage.USER_ACCESS_DENIED);
+    } else {
+      String isValid = String.valueOf(updates.get("isValid"));
+      if (updates.get("isValid") != null && !Tool.isEqual(evidence.getIsValid(), isValid)) {
+        evidence.setIsValid(Boolean.valueOf(isValid));
+      }
     }
 
     Evidence _evidence = evidenceRepository.save(evidence);
     return _evidence;
-
   }
 
   @Override

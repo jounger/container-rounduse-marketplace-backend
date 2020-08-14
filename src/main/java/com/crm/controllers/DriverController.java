@@ -82,7 +82,7 @@ public class DriverController {
   @PreAuthorize("hasRole('FORWARDER') or hasRole('DRIVER')")
   @RequestMapping(method = RequestMethod.GET, params = { "username" })
   public ResponseEntity<?> getDriver(@RequestParam String username) {
-    Driver driver = driverService.getDriverByUserName(username);
+    Driver driver = driverService.getDriverByUsername(username);
     DriverDto driverDto = DriverMapper.toDriverDto(driver);
     return ResponseEntity.ok(driverDto);
   }

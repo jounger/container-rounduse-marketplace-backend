@@ -165,11 +165,17 @@ public class ForwarderServiceImpl implements ForwarderService {
 
     String tin = String.valueOf(updates.get("tin"));
     if (updates.get("tin") != null && !Tool.isEqual(forwarder.getTin(), tin)) {
+      if (supplierRepository.existsByTin(tin)) {
+        throw new DuplicateRecordException(ErrorMessage.TIN_DUPLICATE);
+      }
       forwarder.setTin(tin);
     }
 
     String fax = String.valueOf(updates.get("fax"));
     if (updates.get("fax") != null && !Tool.isEqual(forwarder.getFax(), fax)) {
+      if (supplierRepository.existsByFax(fax)) {
+        throw new DuplicateRecordException(ErrorMessage.FAX_DUPLICATE);
+      }
       forwarder.setFax(fax);
     }
 

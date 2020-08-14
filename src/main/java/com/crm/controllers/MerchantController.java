@@ -55,7 +55,7 @@ public class MerchantController {
     return ResponseEntity.status(HttpStatus.CREATED).body(defaultResponse);
   }
 
-  @PreAuthorize("hasRole('OPERATOR')")
+  @PreAuthorize("hasRole('MODERATOR')")
   @GetMapping("")
   public ResponseEntity<?> getMerchants(@PathVariable Long id, @Valid PaginationRequest request) {
 
@@ -75,7 +75,7 @@ public class MerchantController {
     return ResponseEntity.ok(response);
   }
 
-  @PreAuthorize("hasRole('OPERATOR') or hasRole('MERCHANT') or hasRole('FORWARDER')")
+  @PreAuthorize("hasRole('MODERATOR') or hasRole('MERCHANT') or hasRole('FORWARDER')")
   @GetMapping("/{id}")
   public ResponseEntity<?> getMerchant(@PathVariable Long id) {
     Merchant merchant = merchantService.getMerchant(id);
@@ -99,7 +99,7 @@ public class MerchantController {
   }
 
   @Transactional
-  @PreAuthorize("hasRole('OPERATOR')")
+  @PreAuthorize("hasRole('MODERATOR')")
   @DeleteMapping("/{id}")
   public ResponseEntity<?> deleteMerchant(@PathVariable Long id) {
     merchantService.removeMerchant(id);

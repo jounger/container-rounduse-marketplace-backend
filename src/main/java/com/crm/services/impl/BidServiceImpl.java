@@ -98,11 +98,10 @@ public class BidServiceImpl implements BidService {
     Outbound outbound = biddingDocument.getOutbound();
     Booking booking = outbound.getBooking();
     if (containersId.size() > booking.getUnit()) {
-      throw new InternalException(ErrorMessage.CONTAINER_MORE_OR_LESS_THAN_NEEDED);
+      throw new InternalException(ErrorMessage.CONTAINER_MORE_THAN_NEEDED);
     }
-    if ((booking.getUnit() > containersId.size() && !biddingDocument.getIsMultipleAward())
-        || (containersId.size() < booking.getUnit() && !biddingDocument.getIsMultipleAward())) {
-      throw new InternalException(ErrorMessage.CONTAINER_MORE_OR_LESS_THAN_NEEDED);
+    if ((booking.getUnit() > containersId.size() && !biddingDocument.getIsMultipleAward())) {
+      throw new InternalException(ErrorMessage.CONTAINER_LESS_THAN_NEEDED);
     }
     containersId.forEach(containerId -> {
       Container container = containerRepository.findById(containerId)
@@ -162,8 +161,13 @@ public class BidServiceImpl implements BidService {
       throw new NotFoundException(ErrorMessage.USER_NOT_FOUND);
     }
     PageRequest page = PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Direction.DESC, "createdAt"));
-    Page<Bid> bids = bidRepository.findByBiddingDocument(id, username, page);
-    return bids;
+    String status = request.getStatus();
+    if (status != null) {
+      return bidRepository.findByBiddingDocument(id, username, status, page);
+    } else {
+      return bidRepository.findByBiddingDocument(id, username, page);
+    }
+
   }
 
   @Override
@@ -277,7 +281,7 @@ public class BidServiceImpl implements BidService {
       throw new NotFoundException(ErrorMessage.CONTAINER_NOT_FOUND);
     }
     if (booking.getUnit() < combinedContainers + containersId.size()) {
-      throw new InternalException(ErrorMessage.CONTAINER_MORE_OR_LESS_THAN_NEEDED);
+      throw new InternalException(ErrorMessage.CONTAINER_MORE_THAN_NEEDED);
     }
     if (booking.getUnit() == combinedContainers + containersId.size()) {
       biddingDocument.setStatus(EnumBiddingStatus.COMBINED.name());
@@ -373,7 +377,7 @@ public class BidServiceImpl implements BidService {
     Container container = containerRepository.findById(containerId)
         .orElseThrow(() -> new NotFoundException(ErrorMessage.CONTAINER_NOT_FOUND));
     if (bid.getContainers().size() >= booking.getUnit()) {
-      throw new InternalException(ErrorMessage.CONTAINER_MORE_OR_LESS_THAN_NEEDED);
+      throw new InternalException(ErrorMessage.CONTAINER_MORE_THAN_NEEDED);
     }
     if (containerRepository.existsByOutbound(containerId, outbound.getShippingLine().getCompanyCode(),
         outbound.getContainerType().getName(), Arrays.asList(EnumSupplyStatus.CREATED.name()),

@@ -156,7 +156,11 @@ public class DriverServiceImpl implements DriverService {
 
       String driverLicense = String.valueOf(updates.get("driverLicense"));
       if (updates.get("driverLicense") != null && !Tool.isEqual(driver.getDriverLicense(), driverLicense)) {
-        driver.setDriverLicense(driverLicense);
+        if(!driverRepository.existsByDriverLicense(driverLicense)) {
+          driver.setDriverLicense(driverLicense);
+        }else {
+          throw new DuplicateRecordException(ErrorMessage.DRIVER_LICENSE_ALREADY_EXIST);
+        }
       }
 
       Driver _driver = driverRepository.save(driver);
@@ -183,7 +187,7 @@ public class DriverServiceImpl implements DriverService {
   }
 
   @Override
-  public Driver getDriverByUserName(String username) {
+  public Driver getDriverByUsername(String username) {
     Driver driver = driverRepository.findByUsername(username)
         .orElseThrow(() -> new NotFoundException(ErrorMessage.DRIVER_NOT_FOUND));
     return driver;

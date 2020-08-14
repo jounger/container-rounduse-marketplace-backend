@@ -1,5 +1,7 @@
 package com.crm.services.impl;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +22,7 @@ import com.crm.exception.NotFoundException;
 import com.crm.models.Bid;
 import com.crm.models.BiddingDocument;
 import com.crm.models.Combined;
+import com.crm.models.Container;
 import com.crm.models.Contract;
 import com.crm.models.Supplier;
 import com.crm.models.User;
@@ -56,11 +59,18 @@ public class CombinedServiceImpl implements CombinedService {
       throw new DuplicateRecordException(ErrorMessage.BID_INVALID_CREATE);
     }
     BiddingDocument biddingDocument = bid.getBiddingDocument();
-    List<Long> containersId = request.getContainers();
+    if(biddingDocument.getBidClosing().isBefore(LocalDateTime.now())) {
+      throw new NotFoundException(ErrorMessage.BIDDINGDOCUMENT_TIME_OUT);
+    }
+    List<Long> containersId = new ArrayList<>();
+    List<Container> containers = new ArrayList<Container>(bid.getContainers());
     if (!biddingDocument.getIsMultipleAward()) {
-      bid.getContainers().forEach(container -> {
+      for (int i = 0; i < containers.size(); i++) {
+        Container container = containers.get(i);
         containersId.add(container.getId());
-      });
+      }
+    }else {
+      containersId = request.getContainers();
     }
 
     if (request.getContainers() == null || request.getContainers().size() == 0) {

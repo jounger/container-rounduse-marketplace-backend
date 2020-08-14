@@ -98,7 +98,7 @@ public class ContainerServiceImpl implements ContainerService {
     Set<Container> containers = new HashSet<>(billOfLading.getContainers());
 
     if (containers.size() == billOfLading.getUnit()) {
-      throw new InternalException(ErrorMessage.CONTAINER_MORE_OR_LESS_THAN_NEEDED);
+      throw new InternalException(ErrorMessage.CONTAINER_MORE_THAN_NEEDED);
     }
 
     containers.forEach(item -> {

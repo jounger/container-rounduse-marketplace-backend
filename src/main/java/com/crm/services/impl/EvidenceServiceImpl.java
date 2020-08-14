@@ -12,7 +12,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import com.crm.common.Constant;
-import com.crm.common.ErrorConstant;
+import com.crm.common.ErrorMessage;
 import com.crm.common.Tool;
 import com.crm.exception.ForbiddenException;
 import com.crm.exception.InternalException;
@@ -53,7 +53,7 @@ public class EvidenceServiceImpl implements EvidenceService {
     Evidence evidence = new Evidence();
 
     Contract contract = contractRepository.findById(id)
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.COMBINED_NOT_FOUND));
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.COMBINED_NOT_FOUND));
     evidence.setContract(contract);
 
     Combined combined = contract.getCombined();
@@ -62,17 +62,18 @@ public class EvidenceServiceImpl implements EvidenceService {
     BiddingDocument biddingDocument = bid.getBiddingDocument();
     Supplier offeree = biddingDocument.getOfferee();
     if (username.equals(bidder.getUsername()) || username.equals(offeree.getUsername())) {
-      Supplier supplier = supplierRepository.findByUsername(username).orElseThrow(() -> new NotFoundException(ErrorConstant.SENDER_NOT_FOUND));
+      Supplier supplier = supplierRepository.findByUsername(username)
+          .orElseThrow(() -> new NotFoundException(ErrorMessage.SENDER_NOT_FOUND));
       evidence.setSender(supplier);
-      String evidenceString = request.getEvidence();
-      if (!Tool.isBlank(evidenceString)) {
-        evidence.setEvidence(evidenceString);
+
+      if (!Tool.isBlank(request.getDocumentPath())) {
+        evidence.setDocumentPath(request.getDocumentPath());
       } else {
-        throw new InternalException(ErrorConstant.EVIDENCE_INVALID);
+        throw new InternalException(ErrorMessage.EVIDENCE_INVALID);
       }
       evidence.setIsValid(false);
     } else {
-      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
+      throw new ForbiddenException(ErrorMessage.USER_ACCESS_DENIED);
     }
 
     Evidence _evidence = evidenceRepository.save(evidence);
@@ -89,11 +90,12 @@ public class EvidenceServiceImpl implements EvidenceService {
   @Override
   public Page<Evidence> getEvidencesByContract(Long id, String username, PaginationRequest request) {
     if (!contractRepository.existsById(id)) {
-      throw new NotFoundException(ErrorConstant.CONTRACT_NOT_FOUND);
+      throw new NotFoundException(ErrorMessage.CONTRACT_NOT_FOUND);
     }
     Page<Evidence> evidences = null;
     PageRequest page = PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt"));
-    User user = userRepository.findByUsername(username).orElseThrow(() -> new NotFoundException(ErrorConstant.USER_NOT_FOUND));
+    User user = userRepository.findByUsername(username)
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.USER_NOT_FOUND));
     String role = user.getRoles().iterator().next().getName();
 
     if (role.equalsIgnoreCase("ROLE_MODERATOR")) {
@@ -126,7 +128,7 @@ public class EvidenceServiceImpl implements EvidenceService {
   @Override
   public Evidence editEvidence(Long id, String username, Map<String, Object> updates) {
     Evidence evidence = evidenceRepository.findById(id)
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.EVIDENCE_NOT_FOUND));
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.EVIDENCE_NOT_FOUND));
     Contract contract = evidence.getContract();
     Combined combined = contract.getCombined();
     Bid bid = combined.getBid();
@@ -135,27 +137,27 @@ public class EvidenceServiceImpl implements EvidenceService {
     Supplier offeree = biddingDocument.getOfferee();
 
     if (!username.equals(bidder.getUsername()) && !username.equals(offeree.getUsername())) {
-      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
+      throw new ForbiddenException(ErrorMessage.USER_ACCESS_DENIED);
     }
-    String evidenceString = String.valueOf(updates.get("evidence"));
-    if (updates.get("evidence") != null && !Tool.isBlank(evidenceString)) {
-      evidence.setEvidence(evidenceString);
-    }
-    
-    String isValid = String.valueOf(updates.get("isValid"));
-    if (updates.get("isValid") != null && !Tool.isEqual(evidence.getIsValid(), isValid)) {
-      evidence.setIsValid(Boolean.valueOf(isValid));
+
+    if (username.equals(evidence.getSender().getUsername())) {
+      // YOU CANNOT SET EVIDEN TO VALID BY YOURSELF
+      throw new ForbiddenException(ErrorMessage.USER_ACCESS_DENIED);
+    } else {
+      String isValid = String.valueOf(updates.get("isValid"));
+      if (updates.get("isValid") != null && !Tool.isEqual(evidence.getIsValid(), isValid)) {
+        evidence.setIsValid(Boolean.valueOf(isValid));
+      }
     }
 
     Evidence _evidence = evidenceRepository.save(evidence);
     return _evidence;
-
   }
 
   @Override
   public void removeEvidence(Long id, String username) {
     Evidence evidence = evidenceRepository.findById(id)
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.EVIDENCE_NOT_FOUND));
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.EVIDENCE_NOT_FOUND));
     Contract contract = evidence.getContract();
     Combined combined = contract.getCombined();
 
@@ -166,7 +168,7 @@ public class EvidenceServiceImpl implements EvidenceService {
     if (username.equals(bidder.getUsername()) || username.equals(offeree.getUsername())) {
       evidenceRepository.deleteById(id);
     } else {
-      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
+      throw new ForbiddenException(ErrorMessage.USER_ACCESS_DENIED);
     }
 
   }

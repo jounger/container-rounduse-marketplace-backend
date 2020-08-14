@@ -9,6 +9,7 @@ import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -22,12 +23,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.crm.common.SuccessMessage;
 import com.crm.models.Forwarder;
 import com.crm.models.dto.ForwarderDto;
 import com.crm.models.mapper.ForwarderMapper;
 import com.crm.payload.request.ForwarderRequest;
 import com.crm.payload.request.PaginationRequest;
-import com.crm.payload.response.MessageResponse;
+import com.crm.payload.response.DefaultResponse;
 import com.crm.payload.response.PaginationResponse;
 import com.crm.services.ForwarderService;
 
@@ -41,8 +43,15 @@ public class ForwarderController {
   @Transactional
   @PostMapping("hasRole('MODERATOR')")
   public ResponseEntity<?> createForwarder(@Valid @RequestBody ForwarderRequest request) {
-    forwarderService.createForwarder(request);
-    return ResponseEntity.ok("Forwarder created successfully");
+    Forwarder forwarder = forwarderService.createForwarder(request);
+    ForwarderDto forwarderDto = ForwarderMapper.toForwarderDto(forwarder);
+
+    // Set default response body
+    DefaultResponse<ForwarderDto> defaultResponse = new DefaultResponse<>();
+    defaultResponse.setMessage(SuccessMessage.CREATE_FORWARDER_SUCCESSFULLY);
+    defaultResponse.setData(forwarderDto);
+
+    return ResponseEntity.status(HttpStatus.CREATED).body(defaultResponse);
   }
 
   @PreAuthorize("hasRole('MODERATOR')")
@@ -99,7 +108,13 @@ public class ForwarderController {
   public ResponseEntity<?> editForwarder(@PathVariable("id") Long id, @RequestBody Map<String, Object> updates) {
     Forwarder forwarder = forwarderService.editForwarder(id, updates);
     ForwarderDto forwarderDto = ForwarderMapper.toForwarderDto(forwarder);
-    return ResponseEntity.ok(forwarderDto);
+
+    // Set default response body
+    DefaultResponse<ForwarderDto> defaultResponse = new DefaultResponse<>();
+    defaultResponse.setMessage(SuccessMessage.EDIT_FORWARDER_SUCCESSFULLY);
+    defaultResponse.setData(forwarderDto);
+
+    return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 
   @Transactional
@@ -107,6 +122,11 @@ public class ForwarderController {
   @DeleteMapping("/{id}")
   public ResponseEntity<?> deleteForwarder(@PathVariable Long id) {
     forwarderService.removeForwarder(id);
-    return ResponseEntity.ok(new MessageResponse("Bidding document deleted successfully."));
+
+    // Set default response body
+    DefaultResponse<ForwarderDto> defaultResponse = new DefaultResponse<>();
+    defaultResponse.setMessage(SuccessMessage.DELETE_FORWARDER_SUCCESSFULLY);
+
+    return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 }

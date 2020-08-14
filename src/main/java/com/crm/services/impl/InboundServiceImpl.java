@@ -18,7 +18,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import com.crm.common.Constant;
-import com.crm.common.ErrorConstant;
+import com.crm.common.ErrorMessage;
 import com.crm.common.Tool;
 import com.crm.enums.EnumSupplyStatus;
 import com.crm.exception.DuplicateRecordException;
@@ -100,7 +100,7 @@ public class InboundServiceImpl implements InboundService {
   @Override
   public Inbound getInboundById(Long id) {
     Inbound inbound = inboundRepository.findById(id)
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.INBOUND_NOT_FOUND));
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.INBOUND_NOT_FOUND));
     return inbound;
   }
 
@@ -115,7 +115,7 @@ public class InboundServiceImpl implements InboundService {
   @Override
   public Page<Inbound> getInboundsByOutbound(Long id, PaginationRequest request) {
     Outbound outbound = outboundRepository.findById(id)
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.OUTBOUND_NOT_FOUND));
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.OUTBOUND_NOT_FOUND));
     PageRequest pageRequest = PageRequest.of(request.getPage(), request.getLimit(),
         Sort.by(Sort.Direction.DESC, "createdAt"));
     String shippingLine = outbound.getShippingLine().getCompanyCode();
@@ -130,21 +130,21 @@ public class InboundServiceImpl implements InboundService {
     Inbound inbound = new Inbound();
 
     Forwarder forwarder = forwarderRepository.findByUsername(username)
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.FORWARDER_NOT_FOUND));
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.FORWARDER_NOT_FOUND));
     inbound.setForwarder(forwarder);
 
     String code = request.getCode();
     if (supplyRepository.existsByCode(code)) {
-      throw new DuplicateRecordException(ErrorConstant.SUPPLY_CODE_DUPLICATE);
+      throw new DuplicateRecordException(ErrorMessage.SUPPLY_CODE_DUPLICATE);
     }
     inbound.setCode(code);
 
     ShippingLine shippingLine = shippingLineRepository.findByCompanyCode(request.getShippingLine())
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.SHIPPINGLINE_NOT_FOUND));
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.SHIPPINGLINE_NOT_FOUND));
     inbound.setShippingLine(shippingLine);
 
     ContainerType containerType = containerTypeRepository.findByName(request.getContainerType())
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.CONTAINER_TYPE_NOT_FOUND));
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.CONTAINER_TYPE_NOT_FOUND));
     inbound.setContainerType(containerType);
 
     inbound.setReturnStation(request.getReturnStation());
@@ -161,18 +161,18 @@ public class InboundServiceImpl implements InboundService {
     if (number != null && !number.isEmpty()) {
       billOfLading.setNumber(number);
     } else {
-      throw new NotFoundException(ErrorConstant.BILLOFLADING_NOT_FOUND);
+      throw new NotFoundException(ErrorMessage.BILLOFLADING_NOT_FOUND);
     }
 
     billOfLading.setUnit(billOfLadingRequest.getUnit());
 
     Port port = portRepository.findByNameCode(billOfLadingRequest.getPortOfDelivery())
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.PORT_NOT_FOUND));
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.PORT_NOT_FOUND));
     billOfLading.setPortOfDelivery(port);
 
     LocalDateTime freeTime = Tool.convertToLocalDateTime(request.getBillOfLading().getFreeTime());
     if (pickupTime.isAfter(freeTime)) {
-      throw new InternalException(ErrorConstant.INBOUND_INVALID_FREETIME);
+      throw new InternalException(ErrorMessage.INBOUND_INVALID_FREETIME);
     }
     billOfLading.setFreeTime(freeTime);
     billOfLading.setInbound(inbound);
@@ -187,18 +187,18 @@ public class InboundServiceImpl implements InboundService {
   public Inbound updateInbound(String username, InboundRequest request) {
 
     Inbound inbound = inboundRepository.findById(request.getId())
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.INBOUND_NOT_FOUND));
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.INBOUND_NOT_FOUND));
 
     if (!inbound.getForwarder().getUsername().equals(username)) {
-      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
+      throw new ForbiddenException(ErrorMessage.USER_ACCESS_DENIED);
     }
 
     ShippingLine shippingLine = shippingLineRepository.findByCompanyCode(request.getShippingLine())
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.SHIPPINGLINE_NOT_FOUND));
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.SHIPPINGLINE_NOT_FOUND));
     inbound.setShippingLine(shippingLine);
 
     ContainerType containerType = containerTypeRepository.findByName(request.getContainerType())
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.CONTAINER_TYPE_NOT_FOUND));
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.CONTAINER_TYPE_NOT_FOUND));
     inbound.setContainerType(containerType);
 
     inbound.setReturnStation(request.getReturnStation());
@@ -209,14 +209,14 @@ public class InboundServiceImpl implements InboundService {
     setContainers.forEach(item -> {
       if (item.getStatus().equalsIgnoreCase(EnumSupplyStatus.COMBINED.name())
           || item.getStatus().equalsIgnoreCase(EnumSupplyStatus.BIDDING.name())) {
-        throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
+        throw new ForbiddenException(ErrorMessage.USER_ACCESS_DENIED);
       }
     });
 
     LocalDateTime pickupTime = Tool.convertToLocalDateTime(request.getPickupTime());
     LocalDateTime freeTime = billOfLading.getFreeTime();
     if (pickupTime.isAfter(freeTime)) {
-      throw new InternalException(ErrorConstant.INBOUND_INVALID_FREETIME);
+      throw new InternalException(ErrorMessage.INBOUND_INVALID_FREETIME);
     }
 
     inbound.setPickupTime(pickupTime);
@@ -230,42 +230,42 @@ public class InboundServiceImpl implements InboundService {
     if (containers != null) {
       for (int i = 0; i < containers.size(); i++) {
         Container container = containerRepository.findById(containers.get(i).getId())
-            .orElseThrow(() -> new NotFoundException(ErrorConstant.CONTAINER_NOT_FOUND));
+            .orElseThrow(() -> new NotFoundException(ErrorMessage.CONTAINER_NOT_FOUND));
 
         boolean listContainer = containerRepository.findByNumber(billOfLading.getId(), username,
             container.getNumber(), inbound.getPickupTime(), freeTime);
         if (!listContainer) {
-          throw new InternalException(ErrorConstant.CONTAINER_BUSY);
+          throw new InternalException(ErrorMessage.CONTAINER_BUSY);
         }
 
         String driverUserName = container.getDriver().getUsername();
         Driver driver = driverRepository.findByUsername(driverUserName)
-            .orElseThrow(() -> new NotFoundException(ErrorConstant.DRIVER_NOT_FOUND));
+            .orElseThrow(() -> new NotFoundException(ErrorMessage.DRIVER_NOT_FOUND));
 
         String trailer = container.getTrailer().getLicensePlate();
         ContainerSemiTrailer containerSemiTrailer = containerSemiTrailerRepository.findByLicensePlate(trailer)
-            .orElseThrow(() -> new NotFoundException(ErrorConstant.TRAILER_NOT_FOUND));
+            .orElseThrow(() -> new NotFoundException(ErrorMessage.TRAILER_NOT_FOUND));
 
         String tractor = container.getTractor().getLicensePlate();
         ContainerTractor containerTractor = containerTractorRepository.findByLicensePlate(tractor)
-            .orElseThrow(() -> new NotFoundException(ErrorConstant.TRACTOR_NOT_FOUND));
+            .orElseThrow(() -> new NotFoundException(ErrorMessage.TRACTOR_NOT_FOUND));
 
         boolean containersByDriver = containerRepository.findByDriver(driver.getId(), username, inbound.getPickupTime(),
             freeTime, billOfLading.getId());
         if (!containersByDriver) {
-          throw new InternalException(ErrorConstant.DRIVER_BUSY);
+          throw new InternalException(ErrorMessage.DRIVER_BUSY);
         }
 
         boolean listContainerByTractor = containerRepository.findByTractor(containerTractor.getId(), username,
             inbound.getPickupTime(), freeTime, billOfLading.getId());
         if (!listContainerByTractor) {
-          throw new InternalException(ErrorConstant.TRACTOR_BUSY);
+          throw new InternalException(ErrorMessage.TRACTOR_BUSY);
         }
 
         boolean listContainerByTrailer = containerRepository.findByTrailer(containerSemiTrailer.getId(), username,
             inbound.getPickupTime(), freeTime, billOfLading.getId());
         if (!listContainerByTrailer) {
-          throw new InternalException(ErrorConstant.TRAILER_BUSY);
+          throw new InternalException(ErrorMessage.TRAILER_BUSY);
         }
       }
     }
@@ -278,10 +278,10 @@ public class InboundServiceImpl implements InboundService {
   public Inbound editInbound(Map<String, Object> updates, Long id, String username) {
 
     Inbound inbound = inboundRepository.findById(id)
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.INBOUND_NOT_FOUND));
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.INBOUND_NOT_FOUND));
 
     if (!inbound.getForwarder().getUsername().equals(username)) {
-      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
+      throw new ForbiddenException(ErrorMessage.USER_ACCESS_DENIED);
     }
 
     BillOfLading billOfLading = inbound.getBillOfLading();
@@ -289,7 +289,7 @@ public class InboundServiceImpl implements InboundService {
     setContainers.forEach(item -> {
       if (item.getStatus().equalsIgnoreCase(EnumSupplyStatus.COMBINED.name())
           || item.getStatus().equalsIgnoreCase(EnumSupplyStatus.BIDDING.name())) {
-        throw new InternalException(ErrorConstant.INBOUND_IS_IN_TRANSACTION);
+        throw new InternalException(ErrorMessage.INBOUND_IS_IN_TRANSACTION);
       }
     });
 
@@ -297,7 +297,7 @@ public class InboundServiceImpl implements InboundService {
     if (updates.get("shippingLine") != null
         && !Tool.isEqual(inbound.getShippingLine().getCompanyCode(), shippingLineRequest)) {
       ShippingLine shippingLine = shippingLineRepository.findByCompanyCode(shippingLineRequest)
-          .orElseThrow(() -> new NotFoundException(ErrorConstant.SHIPPINGLINE_NOT_FOUND));
+          .orElseThrow(() -> new NotFoundException(ErrorMessage.SHIPPINGLINE_NOT_FOUND));
       inbound.setShippingLine(shippingLine);
     }
 
@@ -305,7 +305,7 @@ public class InboundServiceImpl implements InboundService {
     if (updates.get("containerType") != null
         && !Tool.isEqual(inbound.getContainerType().getName(), containerTypeRequest)) {
       ContainerType containerType = containerTypeRepository.findByName(containerTypeRequest)
-          .orElseThrow(() -> new NotFoundException(ErrorConstant.CONTAINER_TYPE_NOT_FOUND));
+          .orElseThrow(() -> new NotFoundException(ErrorMessage.CONTAINER_TYPE_NOT_FOUND));
       inbound.setContainerType(containerType);
     }
 
@@ -329,21 +329,21 @@ public class InboundServiceImpl implements InboundService {
         boolean listContainer = containerRepository.findByNumber(billOfLading.getId(), username,
             containerNumber, pickupTime, billOfLading.getFreeTime());
         if (!listContainer) {
-          throw new InternalException(ErrorConstant.CONTAINER_BUSY);
+          throw new InternalException(ErrorMessage.CONTAINER_BUSY);
         }
 
         Long driverId = item.getDriver().getId();
         boolean listContainerByDriver = containerRepository.findByDriver(driverId, username, pickupTime,
             billOfLading.getFreeTime(), billOfLading.getId());
         if (!listContainerByDriver) {
-          throw new InternalException(ErrorConstant.DRIVER_BUSY);
+          throw new InternalException(ErrorMessage.DRIVER_BUSY);
         }
 
         Long tractorId = item.getTractor().getId();
         boolean listContainerByTractor = containerRepository.findByTractor(tractorId, username, pickupTime,
             billOfLading.getFreeTime(), billOfLading.getId());
         if (!listContainerByTractor) {
-          throw new InternalException(ErrorConstant.TRACTOR_BUSY);
+          throw new InternalException(ErrorMessage.TRACTOR_BUSY);
 
         }
 
@@ -351,7 +351,7 @@ public class InboundServiceImpl implements InboundService {
         boolean listContainerByTrailer = containerRepository.findByTrailer(trailerId, username, pickupTime,
             billOfLading.getFreeTime(), billOfLading.getId());
         if (!listContainerByTrailer) {
-          throw new InternalException(ErrorConstant.TRAILER_BUSY);
+          throw new InternalException(ErrorMessage.TRAILER_BUSY);
 
         }
 
@@ -360,7 +360,7 @@ public class InboundServiceImpl implements InboundService {
       if (inbound.getBillOfLading().getFreeTime().isAfter(pickupTime)) {
         inbound.setPickupTime(pickupTime);
       } else {
-        throw new InternalException(ErrorConstant.INBOUND_INVALID_FREETIME);
+        throw new InternalException(ErrorMessage.INBOUND_INVALID_FREETIME);
       }
     }
 
@@ -378,10 +378,10 @@ public class InboundServiceImpl implements InboundService {
   public void removeInbound(Long id, String username) {
 
     Inbound inbound = inboundRepository.findById(id)
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.INBOUND_NOT_FOUND));
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.INBOUND_NOT_FOUND));
 
     if (!inbound.getForwarder().getUsername().equals(username)) {
-      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
+      throw new ForbiddenException(ErrorMessage.USER_ACCESS_DENIED);
     }
 
     BillOfLading billOfLading = inbound.getBillOfLading();
@@ -389,7 +389,7 @@ public class InboundServiceImpl implements InboundService {
     containers.forEach(item -> {
       if (item.getStatus().equalsIgnoreCase(EnumSupplyStatus.COMBINED.name())
           || item.getStatus().equalsIgnoreCase(EnumSupplyStatus.BIDDING.name())) {
-        throw new InternalException(ErrorConstant.CONTAINER_BUSY);
+        throw new InternalException(ErrorMessage.CONTAINER_BUSY);
       }
     });
     inboundRepository.delete(inbound);
@@ -398,7 +398,7 @@ public class InboundServiceImpl implements InboundService {
   @Override
   public Page<Inbound> getInboundsByOutboundAndForwarder(Long id, String username, PaginationRequest request) {
     Outbound outbound = outboundRepository.findById(id)
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.OUTBOUND_NOT_FOUND));
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.OUTBOUND_NOT_FOUND));
     PageRequest pageRequest = PageRequest.of(request.getPage(), request.getLimit(),
         Sort.by(Sort.Direction.DESC, "createdAt"));
     String shippingLine = outbound.getShippingLine().getCompanyCode();
@@ -429,7 +429,7 @@ public class InboundServiceImpl implements InboundService {
   @Override
   public Inbound getInboundByContainer(Long id) {
     Inbound inbound = inboundRepository.findInboundByContainer(id)
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.INBOUND_NOT_FOUND));
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.INBOUND_NOT_FOUND));
     return inbound;
   }
 

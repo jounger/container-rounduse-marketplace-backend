@@ -14,7 +14,7 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 
 import com.crm.common.Constant;
-import com.crm.common.ErrorConstant;
+import com.crm.common.ErrorMessage;
 import com.crm.common.Tool;
 import com.crm.enums.EnumBidStatus;
 import com.crm.enums.EnumBiddingStatus;
@@ -72,25 +72,25 @@ public class BidServiceImpl implements BidService {
     Bid bid = new Bid();
 
     BiddingDocument biddingDocument = biddingDocumentRepository.findById(bidDocId)
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.BIDDINGDOCUMENT_NOT_FOUND));
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.BIDDINGDOCUMENT_NOT_FOUND));
     bid.setBiddingDocument(biddingDocument);
 
     // check if bidding document is time out
     String status = biddingDocument.getStatus();
     if (status.equalsIgnoreCase(EnumBiddingStatus.CANCELED.name())
         || biddingDocument.getBidClosing().isBefore(LocalDateTime.now())) {
-      throw new InternalException(ErrorConstant.BIDDINGDOCUMENT_TIME_OUT);
+      throw new InternalException(ErrorMessage.BIDDINGDOCUMENT_TIME_OUT);
     }
 
     Forwarder bidder = forwarderRepository.findByUsername(username)
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.FORWARDER_NOT_FOUND));
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.FORWARDER_NOT_FOUND));
     bid.setBidder(bidder);
 
     // check duplicate forwarder in one bidding document
     List<Bid> bids = new ArrayList<>(biddingDocument.getBids());
     bids.forEach(bidOfBidding -> {
       if (bidOfBidding.getBidder().getId() == bidder.getId()) {
-        throw new DuplicateRecordException(ErrorConstant.BID_INVALID_CREATE);
+        throw new DuplicateRecordException(ErrorMessage.BID_INVALID_CREATE);
       }
     });
 
@@ -98,15 +98,15 @@ public class BidServiceImpl implements BidService {
     Outbound outbound = biddingDocument.getOutbound();
     Booking booking = outbound.getBooking();
     if (containersId.size() > booking.getUnit()) {
-      throw new InternalException(ErrorConstant.CONTAINER_MORE_OR_LESS_THAN_NEEDED);
+      throw new InternalException(ErrorMessage.CONTAINER_MORE_OR_LESS_THAN_NEEDED);
     }
     if ((booking.getUnit() > containersId.size() && !biddingDocument.getIsMultipleAward())
         || (containersId.size() < booking.getUnit() && !biddingDocument.getIsMultipleAward())) {
-      throw new InternalException(ErrorConstant.CONTAINER_MORE_OR_LESS_THAN_NEEDED);
+      throw new InternalException(ErrorMessage.CONTAINER_MORE_OR_LESS_THAN_NEEDED);
     }
     containersId.forEach(containerId -> {
       Container container = containerRepository.findById(containerId)
-          .orElseThrow(() -> new NotFoundException(ErrorConstant.CONTAINER_NOT_FOUND));
+          .orElseThrow(() -> new NotFoundException(ErrorMessage.CONTAINER_NOT_FOUND));
       if (containerRepository.existsByOutbound(containerId, outbound.getShippingLine().getCompanyCode(),
           outbound.getContainerType().getName(), Arrays.asList(EnumSupplyStatus.CREATED.name()),
           outbound.getPackingTime(), booking.getCutOffTime(), booking.getPortOfLoading().getNameCode())) {
@@ -115,14 +115,14 @@ public class BidServiceImpl implements BidService {
         container.setStatus(EnumSupplyStatus.BIDDING.name());
         containerRepository.save(container);
       } else {
-        throw new NotFoundException(ErrorConstant.CONTAINER_NOT_SUITABLE);
+        throw new NotFoundException(ErrorMessage.CONTAINER_NOT_SUITABLE);
       }
       bid.setBidValidityPeriod(LocalDateTime.now().plusHours(Constant.BID_VALIDITY_PERIOD));
     });
 
     Double bidPrice = request.getBidPrice();
     if (bidPrice <= biddingDocument.getBidFloorPrice()) {
-      throw new InternalException(ErrorConstant.BID_INVALID_BID_PRICE);
+      throw new InternalException(ErrorMessage.BID_INVALID_BID_PRICE);
     }
     bid.setBidPrice(request.getBidPrice());
 
@@ -145,35 +145,34 @@ public class BidServiceImpl implements BidService {
 
   @Override
   public Bid getBid(Long id, String username) {
-    Bid bid = bidRepository.findById(id).orElseThrow(() -> new NotFoundException(ErrorConstant.BID_NOT_FOUND));
+    Bid bid = bidRepository.findById(id).orElseThrow(() -> new NotFoundException(ErrorMessage.BID_NOT_FOUND));
     if (!(bid.getBidder().getUsername().equals(username)
         || bid.getBiddingDocument().getOfferee().getUsername().equals(username))) {
-      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
+      throw new ForbiddenException(ErrorMessage.USER_ACCESS_DENIED);
     }
     return bid;
   }
 
   @Override
-  public Bid getBidByBiddingDocumentAndForwarder(Long biddingDocumentId, String username) {
-    Bid bid = bidRepository.findByBiddingDocumentAndForwarder(biddingDocumentId, username)
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.BID_NOT_FOUND));
-    return bid;
-  }
-
-  @Override
-  public Page<Bid> getBidsByBiddingDocument(Long id, PaginationRequest request) {
-    Page<Bid> bids = bidRepository.findByBiddingDocument(id,
-        PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Direction.DESC, "createdAt")));
+  public Page<Bid> getBidsByBiddingDocument(Long id, String username, PaginationRequest request) {
+    if (!biddingDocumentRepository.existsById(id)) {
+      throw new NotFoundException(ErrorMessage.BIDDINGDOCUMENT_NOT_FOUND);
+    }
+    if (!supplierRepository.existsByUsername(username)) {
+      throw new NotFoundException(ErrorMessage.USER_NOT_FOUND);
+    }
+    PageRequest page = PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Direction.DESC, "createdAt"));
+    Page<Bid> bids = bidRepository.findByBiddingDocument(id, username, page);
     return bids;
   }
 
   @Override
   public Page<Bid> getBidsByBiddingDocumentAndExistCombined(Long id, String username, PaginationRequest request) {
     if (!biddingDocumentRepository.existsById(id)) {
-      throw new NotFoundException(ErrorConstant.BIDDINGDOCUMENT_NOT_FOUND);
+      throw new NotFoundException(ErrorMessage.BIDDINGDOCUMENT_NOT_FOUND);
     }
     if (!supplierRepository.existsByUsername(username)) {
-      throw new NotFoundException(ErrorConstant.USER_NOT_FOUND);
+      throw new NotFoundException(ErrorMessage.USER_NOT_FOUND);
     }
     PageRequest page = PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Direction.DESC, "createdAt"));
     Page<Bid> bids = bidRepository.findByBiddingDocumentAndExistCombined(id, username, page);
@@ -196,20 +195,20 @@ public class BidServiceImpl implements BidService {
 
   @Override
   public Bid editBid(Long id, String username, Map<String, Object> updates) {
-    Bid bid = bidRepository.findById(id).orElseThrow(() -> new NotFoundException(ErrorConstant.BID_NOT_FOUND));
+    Bid bid = bidRepository.findById(id).orElseThrow(() -> new NotFoundException(ErrorMessage.BID_NOT_FOUND));
     User user = userRepository.findByUsername(username)
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.USER_NOT_FOUND));
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.USER_NOT_FOUND));
     Role role = user.getRoles().iterator().next();
 
     if (role.getName().equalsIgnoreCase("ROLE_FORWARDER")) {
       String bidStatus = bid.getStatus();
       if (!bidStatus.equalsIgnoreCase(EnumBidStatus.PENDING.name())) {
-        throw new InternalException(ErrorConstant.BID_INVALID_EDIT);
+        throw new InternalException(ErrorMessage.BID_INVALID_EDIT);
       }
 
       LocalDateTime bidValidityPeriod = bid.getBidValidityPeriod();
       if (bidValidityPeriod.isAfter(LocalDateTime.now())) {
-        throw new InternalException(ErrorConstant.BID_EDIT_BEFORE_VALIDITY_TIME);
+        throw new InternalException(ErrorMessage.BID_EDIT_BEFORE_VALIDITY_TIME);
       }
     }
 
@@ -220,7 +219,7 @@ public class BidServiceImpl implements BidService {
     String biddingStatus = biddingDocument.getStatus();
     if (biddingStatus.equalsIgnoreCase(EnumBiddingStatus.CANCELED.name())
         || biddingDocument.getBidClosing().isBefore(LocalDateTime.now())) {
-      throw new InternalException(ErrorConstant.BIDDINGDOCUMENT_TIME_OUT);
+      throw new InternalException(ErrorMessage.BIDDINGDOCUMENT_TIME_OUT);
     }
 
     String bidPriceString = String.valueOf(updates.get("bidPrice"));
@@ -258,12 +257,12 @@ public class BidServiceImpl implements BidService {
 
   @Override
   public Bid editBidWhenCombined(Long id, String username, List<Long> containersId) {
-    Bid bid = bidRepository.findById(id).orElseThrow(() -> new NotFoundException(ErrorConstant.BID_NOT_FOUND));
+    Bid bid = bidRepository.findById(id).orElseThrow(() -> new NotFoundException(ErrorMessage.BID_NOT_FOUND));
     User user = userRepository.findByUsername(username)
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.USER_NOT_FOUND));
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.USER_NOT_FOUND));
     Role role = user.getRoles().iterator().next();
     if (!role.getName().equalsIgnoreCase("ROLE_MERCHANT")) {
-      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
+      throw new ForbiddenException(ErrorMessage.USER_ACCESS_DENIED);
     }
 
     bid.setDateOfDecision(LocalDateTime.now());
@@ -275,10 +274,10 @@ public class BidServiceImpl implements BidService {
     Long combinedContainers = containerRepository.countCombinedContainersByBiddingDocument(biddingDocument.getId());
 
     if (containersId.size() < 1) {
-      throw new NotFoundException(ErrorConstant.CONTAINER_NOT_FOUND);
+      throw new NotFoundException(ErrorMessage.CONTAINER_NOT_FOUND);
     }
     if (booking.getUnit() < combinedContainers + containersId.size()) {
-      throw new InternalException(ErrorConstant.CONTAINER_MORE_OR_LESS_THAN_NEEDED);
+      throw new InternalException(ErrorMessage.CONTAINER_MORE_OR_LESS_THAN_NEEDED);
     }
     if (booking.getUnit() == combinedContainers + containersId.size()) {
       biddingDocument.setStatus(EnumBiddingStatus.COMBINED.name());
@@ -289,7 +288,7 @@ public class BidServiceImpl implements BidService {
     containersId.forEach(containerId -> {
       if (containerRepository.isContainedByBid(containerId, id)) {
         Container container = containerRepository.findById(containerId)
-            .orElseThrow(() -> new NotFoundException(ErrorConstant.CONTAINER_NOT_FOUND));
+            .orElseThrow(() -> new NotFoundException(ErrorMessage.CONTAINER_NOT_FOUND));
         container.setStatus(EnumSupplyStatus.COMBINED.name());
         containerRepository.save(container);
       }
@@ -302,7 +301,7 @@ public class BidServiceImpl implements BidService {
 
   @Override
   public void removeBid(Long id, String username) {
-    Bid bid = bidRepository.findById(id).orElseThrow(() -> new NotFoundException(ErrorConstant.BID_NOT_FOUND));
+    Bid bid = bidRepository.findById(id).orElseThrow(() -> new NotFoundException(ErrorMessage.BID_NOT_FOUND));
     if (bid.getBidder().getUsername() != username) {
       throw new NotFoundException("Access denied.");
     }
@@ -315,15 +314,15 @@ public class BidServiceImpl implements BidService {
 
       bidRepository.deleteById(id);
     } else {
-      throw new NotFoundException(ErrorConstant.BID_NOT_FOUND);
+      throw new NotFoundException(ErrorMessage.BID_NOT_FOUND);
     }
   }
 
   @Override
   public Bid replaceContainer(Long id, String username, ReplaceContainerRequest request) {
-    Bid bid = bidRepository.findById(id).orElseThrow(() -> new NotFoundException(ErrorConstant.BID_NOT_FOUND));
+    Bid bid = bidRepository.findById(id).orElseThrow(() -> new NotFoundException(ErrorMessage.BID_NOT_FOUND));
     if (!bid.getBidder().getUsername().equals(username)) {
-      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
+      throw new ForbiddenException(ErrorMessage.USER_ACCESS_DENIED);
     }
     BiddingDocument biddingDocument = bid.getBiddingDocument();
     Outbound outbound = biddingDocument.getOutbound();
@@ -331,9 +330,9 @@ public class BidServiceImpl implements BidService {
     Long oldContId = request.getOldContainerId();
     Long newContId = request.getNewContainerId();
     Container oldContainer = containerRepository.findById(oldContId)
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.CONTAINER_NOT_FOUND));
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.CONTAINER_NOT_FOUND));
     Container newContainer = containerRepository.findById(newContId)
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.CONTAINER_NOT_FOUND));
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.CONTAINER_NOT_FOUND));
 
     bid.getContainers().remove(oldContainer);
     oldContainer.setStatus(EnumSupplyStatus.CREATED.name());
@@ -346,7 +345,7 @@ public class BidServiceImpl implements BidService {
       newContainer.setStatus(EnumSupplyStatus.BIDDING.name());
       containerRepository.save(newContainer);
     } else {
-      throw new NotFoundException(ErrorConstant.CONTAINER_NOT_SUITABLE);
+      throw new NotFoundException(ErrorMessage.CONTAINER_NOT_SUITABLE);
     }
 
     bid.setBidValidityPeriod(LocalDateTime.now().plusHours(Constant.BID_VALIDITY_PERIOD));
@@ -356,25 +355,25 @@ public class BidServiceImpl implements BidService {
 
   @Override
   public Bid addContainer(Long id, String username, Long containerId) {
-    Bid bid = bidRepository.findById(id).orElseThrow(() -> new NotFoundException(ErrorConstant.BID_NOT_FOUND));
+    Bid bid = bidRepository.findById(id).orElseThrow(() -> new NotFoundException(ErrorMessage.BID_NOT_FOUND));
     if (!bid.getBidder().getUsername().equals(username)) {
-      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
+      throw new ForbiddenException(ErrorMessage.USER_ACCESS_DENIED);
     }
 
     if (!bid.getStatus().equalsIgnoreCase(EnumBidStatus.PENDING.name())) {
-      throw new InternalException(ErrorConstant.BID_INVALID_EDIT);
+      throw new InternalException(ErrorMessage.BID_INVALID_EDIT);
     }
 
     BiddingDocument biddingDocument = bid.getBiddingDocument();
     if (biddingDocument.getIsMultipleAward() == false) {
-      throw new InternalException(ErrorConstant.CONTAINER_CAN_NOT_ADD_OR_REMOVE);
+      throw new InternalException(ErrorMessage.CONTAINER_CAN_NOT_ADD_OR_REMOVE);
     }
     Outbound outbound = biddingDocument.getOutbound();
     Booking booking = outbound.getBooking();
     Container container = containerRepository.findById(containerId)
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.CONTAINER_NOT_FOUND));
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.CONTAINER_NOT_FOUND));
     if (bid.getContainers().size() >= booking.getUnit()) {
-      throw new InternalException(ErrorConstant.CONTAINER_MORE_OR_LESS_THAN_NEEDED);
+      throw new InternalException(ErrorMessage.CONTAINER_MORE_OR_LESS_THAN_NEEDED);
     }
     if (containerRepository.existsByOutbound(containerId, outbound.getShippingLine().getCompanyCode(),
         outbound.getContainerType().getName(), Arrays.asList(EnumSupplyStatus.CREATED.name()),
@@ -383,7 +382,7 @@ public class BidServiceImpl implements BidService {
       bid.getContainers().add(container);
       containerRepository.save(container);
     } else {
-      throw new NotFoundException(ErrorConstant.CONTAINER_NOT_SUITABLE);
+      throw new NotFoundException(ErrorMessage.CONTAINER_NOT_SUITABLE);
     }
 
     bid.setBidValidityPeriod(LocalDateTime.now().plusHours(Constant.BID_VALIDITY_PERIOD));
@@ -393,26 +392,26 @@ public class BidServiceImpl implements BidService {
 
   @Override
   public Bid removeContainer(Long id, String username, Long containerId) {
-    Bid bid = bidRepository.findById(id).orElseThrow(() -> new NotFoundException(ErrorConstant.BID_NOT_FOUND));
+    Bid bid = bidRepository.findById(id).orElseThrow(() -> new NotFoundException(ErrorMessage.BID_NOT_FOUND));
     if (!bid.getBidder().getUsername().equals(username)) {
-      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
+      throw new ForbiddenException(ErrorMessage.USER_ACCESS_DENIED);
     }
 
     if (!bid.getStatus().equalsIgnoreCase(EnumBidStatus.PENDING.name())) {
-      throw new InternalException(ErrorConstant.BID_INVALID_EDIT);
+      throw new InternalException(ErrorMessage.BID_INVALID_EDIT);
     }
 
     BiddingDocument biddingDocument = bid.getBiddingDocument();
     if (biddingDocument.getIsMultipleAward() == false) {
-      throw new InternalException(ErrorConstant.CONTAINER_CAN_NOT_ADD_OR_REMOVE);
+      throw new InternalException(ErrorMessage.CONTAINER_CAN_NOT_ADD_OR_REMOVE);
     }
     Container container = containerRepository.findById(containerId)
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.CONTAINER_NOT_FOUND));
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.CONTAINER_NOT_FOUND));
     if (bid.getContainers().size() == 1) {
-      throw new InternalException(ErrorConstant.CONTAINER_CAN_NOT_BE_ZERO);
+      throw new InternalException(ErrorMessage.CONTAINER_CAN_NOT_BE_ZERO);
     }
     if (!bid.getContainers().contains(container)) {
-      throw new NotFoundException(ErrorConstant.CONTAINER_NOT_FOUND);
+      throw new NotFoundException(ErrorMessage.CONTAINER_NOT_FOUND);
     }
     container.setStatus(EnumSupplyStatus.CREATED.name());
     containerRepository.save(container);

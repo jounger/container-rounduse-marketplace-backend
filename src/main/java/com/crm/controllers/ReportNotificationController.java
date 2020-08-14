@@ -9,6 +9,7 @@ import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -22,11 +23,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.crm.common.Constant;
+import com.crm.common.SuccessMessage;
 import com.crm.models.ReportNotification;
 import com.crm.models.dto.ReportNotificationDto;
 import com.crm.models.mapper.ReportNotificationMapper;
 import com.crm.payload.request.PaginationRequest;
-import com.crm.payload.response.MessageResponse;
+import com.crm.payload.response.DefaultResponse;
 import com.crm.payload.response.PaginationResponse;
 import com.crm.services.ReportNotificationService;
 
@@ -93,14 +96,25 @@ public class ReportNotificationController {
       @RequestBody Map<String, Object> updates) {
     ReportNotification reportNotification = reportNotificationService.editReportNotification(id, updates);
     ReportNotificationDto reportNotificationDto = ReportNotificationMapper.toReportNotificationDto(reportNotification);
-    return ResponseEntity.ok(reportNotificationDto);
+
+    // Set default response body
+    DefaultResponse<ReportNotificationDto> defaultResponse = new DefaultResponse<>();
+    defaultResponse.setMessage(Constant.EMPTY_STRING);
+    defaultResponse.setData(reportNotificationDto);
+
+    return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 
   @Transactional
   @DeleteMapping("/{id}")
   public ResponseEntity<?> deleteReportNotification(@PathVariable Long id) {
     reportNotificationService.removeReportNotification(id);
-    return ResponseEntity.ok(new MessageResponse("Report Notification deleted successfully."));
+
+    // Set default response body
+    DefaultResponse<ReportNotificationDto> defaultResponse = new DefaultResponse<>();
+    defaultResponse.setMessage(SuccessMessage.DELETE_NOTIFICATION_SUCCESSFULLY);
+
+    return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 
 }

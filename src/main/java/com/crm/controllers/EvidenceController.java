@@ -9,6 +9,7 @@ import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -24,15 +25,21 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
+import com.crm.common.SuccessMessage;
+import com.crm.enums.EnumFileType;
 import com.crm.models.Evidence;
+import com.crm.models.FileUpload;
 import com.crm.models.dto.EvidenceDto;
 import com.crm.models.mapper.EvidenceMapper;
 import com.crm.payload.request.EvidenceRequest;
+import com.crm.payload.request.FileUploadRequest;
 import com.crm.payload.request.PaginationRequest;
-import com.crm.payload.response.MessageResponse;
+import com.crm.payload.response.DefaultResponse;
 import com.crm.payload.response.PaginationResponse;
 import com.crm.services.EvidenceService;
+import com.crm.services.FileUploadService;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -42,23 +49,41 @@ public class EvidenceController {
   @Autowired
   private EvidenceService evidenceService;
 
+  @Autowired
+  private FileUploadService fileUploadService;
+
   @Transactional
   @PostMapping("/contract/{id}")
   @PreAuthorize("hasRole('MERCHANT') or hasRole('FORWARDER')")
-  public ResponseEntity<?> createEvidence(@PathVariable("id") Long id, @Valid @RequestBody EvidenceRequest request) {
-    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
-        .getPrincipal();
+  public ResponseEntity<?> createEvidence(@PathVariable("id") Long id, @RequestParam("file") MultipartFile file) {
+    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
+
+    FileUploadRequest fileUploadRequest = new FileUploadRequest();
+    fileUploadRequest.setFile(file);
+    fileUploadRequest.setType(EnumFileType.DOCUMENT.name());
+
+    FileUpload fileUpload = fileUploadService.createFileUpload(username, fileUploadRequest);
+    String filePath = fileUpload.getPath() + fileUpload.getName();
+
+    EvidenceRequest request = new EvidenceRequest();
+    request.setDocumentPath(filePath);
+
     Evidence evidence = evidenceService.createEvidence(id, username, request);
     EvidenceDto evidenceDto = EvidenceMapper.toEvidenceDto(evidence);
-    return ResponseEntity.ok(evidenceDto);
+
+    // Set default response body
+    DefaultResponse<EvidenceDto> defaultResponse = new DefaultResponse<>();
+    defaultResponse.setMessage(SuccessMessage.CREATE_EVIDENCE_SUCCESSFULLY);
+    defaultResponse.setData(evidenceDto);
+
+    return ResponseEntity.status(HttpStatus.CREATED).body(defaultResponse);
   }
 
   @PreAuthorize("hasRole('MERCHANT') or hasRole('FORWARDER')")
   @GetMapping("/user")
   public ResponseEntity<?> getEvidencesByUser(@Valid PaginationRequest request) {
-    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
-        .getPrincipal();
+    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
 
     Page<Evidence> pages = evidenceService.getEvidencesByUser(username, request);
@@ -76,12 +101,11 @@ public class EvidenceController {
 
     return ResponseEntity.ok(response);
   }
-  
+
   @PreAuthorize("hasRole('MODERATOR') or hasRole('MERCHANT') or hasRole('FORWARDER')")
   @GetMapping("/contract/{id}")
   public ResponseEntity<?> getEvidencesByContract(@PathVariable("id") Long id, @Valid PaginationRequest request) {
-    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
-        .getPrincipal();
+    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
 
     Page<Evidence> pages = evidenceService.getEvidencesByContract(id, username, request);
@@ -123,22 +147,31 @@ public class EvidenceController {
   @PreAuthorize("hasRole('MERCHANT') or hasRole('FORWARDER')")
   @RequestMapping(value = "/{id}", method = RequestMethod.PATCH, consumes = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<?> editEvidence(@PathVariable("id") Long id, @RequestBody Map<String, Object> updates) {
-    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
-        .getPrincipal();
+    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
     Evidence evidence = evidenceService.editEvidence(id, username, updates);
     EvidenceDto evidenceDto = EvidenceMapper.toEvidenceDto(evidence);
-    return ResponseEntity.ok(evidenceDto);
+
+    // Set default response body
+    DefaultResponse<EvidenceDto> defaultResponse = new DefaultResponse<>();
+    defaultResponse.setMessage(SuccessMessage.EDIT_EVIDENCE_SUCCESSFULLY);
+    defaultResponse.setData(evidenceDto);
+
+    return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 
   @Transactional
   @PreAuthorize("hasRole('MERCHANT') or hasRole('FORWARDER')")
   @DeleteMapping("/{id}")
   public ResponseEntity<?> deleteEvidence(@PathVariable Long id) {
-    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
-        .getPrincipal();
+    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
     evidenceService.removeEvidence(id, username);
-    return ResponseEntity.ok(new MessageResponse("Evidence deleted successfully."));
+
+    // Set default response body
+    DefaultResponse<EvidenceDto> defaultResponse = new DefaultResponse<>();
+    defaultResponse.setMessage(SuccessMessage.DELETE_EVIDENCE_SUCCESSFULLY);
+
+    return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 }

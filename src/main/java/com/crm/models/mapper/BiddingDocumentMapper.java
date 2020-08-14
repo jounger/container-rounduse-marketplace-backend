@@ -17,7 +17,7 @@ public class BiddingDocumentMapper {
     biddingDocumentDto.setId(biddingDocument.getId());
     
     String merchantUsername = biddingDocument.getOfferee().getUsername();
-    biddingDocumentDto.setMerchant(merchantUsername);
+    biddingDocumentDto.setOfferee(merchantUsername);
 
     OutboundDto outboundDto = OutboundMapper.toOutboundDto(biddingDocument.getOutbound());
     biddingDocumentDto.setOutbound(outboundDto);
@@ -41,11 +41,6 @@ public class BiddingDocumentMapper {
 
     Double bidFloorPrice = biddingDocument.getBidFloorPrice();
     biddingDocumentDto.setBidFloorPrice(bidFloorPrice);
-
-    if (biddingDocument.getDiscount() != null) {
-      String bidDiscountCode = biddingDocument.getDiscount().getCode();
-      biddingDocumentDto.setBidDiscountCode(bidDiscountCode);
-    }
 
     Double priceLeadership = biddingDocument.getPriceLeadership();
     biddingDocumentDto.setPriceLeadership(priceLeadership);

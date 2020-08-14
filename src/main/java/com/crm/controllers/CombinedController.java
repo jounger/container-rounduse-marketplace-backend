@@ -2,12 +2,15 @@ package com.crm.controllers;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 
 import javax.transaction.Transactional;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -22,13 +25,16 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.crm.common.SuccessMessage;
 import com.crm.models.Combined;
 import com.crm.models.dto.CombinedDto;
 import com.crm.models.mapper.CombinedMapper;
 import com.crm.payload.request.CombinedRequest;
 import com.crm.payload.request.PaginationRequest;
+import com.crm.payload.response.DefaultResponse;
 import com.crm.payload.response.PaginationResponse;
 import com.crm.services.CombinedService;
+import com.crm.services.ShippingInfoService;
 import com.crm.websocket.controller.NotificationBroadcast;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
@@ -40,24 +46,42 @@ public class CombinedController {
   private CombinedService combinedService;
 
   @Autowired
+  private ShippingInfoService shippingInfoService;
+
+  @Autowired
   private NotificationBroadcast notificationBroadcast;
+
+  @Autowired
+  @Qualifier("cachedThreadPool")
+  private ExecutorService executorService;
 
   @Transactional
   @PreAuthorize("hasRole('MERCHANT')")
   @PostMapping("/bid/{id}")
   public ResponseEntity<?> createCombined(@PathVariable("id") Long id, @Valid @RequestBody CombinedRequest request) {
-    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
-        .getPrincipal();
+    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
 
     Combined combined = combinedService.createCombined(id, username, request);
     CombinedDto combinedDto = CombinedMapper.toCombinedDto(combined);
 
+    executorService.submit(new Runnable() {
+      @Override
+      public void run() {
+        shippingInfoService.createShippingInfosForCombined(combined, request.getContainers());
+      }
+    });
+
     // CREATE NOTIFICATION
     notificationBroadcast.broadcastCreateCombinedToDriver(combined);
     // END NOTIFICATION
 
-    return ResponseEntity.ok(combinedDto);
+    // Set default response body
+    DefaultResponse<CombinedDto> defaultResponse = new DefaultResponse<>();
+    defaultResponse.setMessage(SuccessMessage.EDIT_BID_SUCCESSFULLY);
+    defaultResponse.setData(combinedDto);
+
+    return ResponseEntity.status(HttpStatus.CREATED).body(defaultResponse);
   }
 
   @PreAuthorize("hasRole('MERCHANT') or hasRole('FORWARDER')")
@@ -72,8 +96,7 @@ public class CombinedController {
   @GetMapping("/user")
   public ResponseEntity<?> getCombinedsByUser(@Valid PaginationRequest request) {
 
-    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
-        .getPrincipal();
+    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
 
     Page<Combined> pages = combinedService.getCombinedsByUser(username, request);
@@ -97,8 +120,7 @@ public class CombinedController {
   public ResponseEntity<?> getCombinedsByBiddingDocument(@PathVariable("id") Long id,
       @Valid PaginationRequest request) {
 
-    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
-        .getPrincipal();
+    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
 
     Page<Combined> pages = combinedService.getCombinedsByBiddingDocument(id, username, request);
@@ -121,11 +143,16 @@ public class CombinedController {
   @PreAuthorize("hasRole('FORWARDER') or hasRole('MERCHANT') or hasRole('DRIVER')")
   @RequestMapping(value = "/{id}", method = RequestMethod.PATCH, consumes = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<?> editCombined(@PathVariable("id") Long id, @RequestBody String isCanceled) {
-    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
-        .getPrincipal();
+    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
-    Combined Combined = combinedService.editCombined(id, username, isCanceled);
-    CombinedDto CombinedDto = CombinedMapper.toCombinedDto(Combined);
-    return ResponseEntity.ok(CombinedDto);
+    Combined combined = combinedService.editCombined(id, username, isCanceled);
+    CombinedDto combinedDto = CombinedMapper.toCombinedDto(combined);
+
+    // Set default response body
+    DefaultResponse<CombinedDto> defaultResponse = new DefaultResponse<>();
+    defaultResponse.setMessage(SuccessMessage.EDIT_BID_SUCCESSFULLY);
+    defaultResponse.setData(combinedDto);
+
+    return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 }

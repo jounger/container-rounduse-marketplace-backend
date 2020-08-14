@@ -11,6 +11,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
@@ -48,9 +49,16 @@ public class Contract {
   @OneToOne
   @JoinColumn(name = "combined_id")
   private Combined combined;
+  
+  @Column(name = "price")
+  private Double price;
 
   @Column(name = "fines_against_contract_violations")
   private Double finesAgainstContractViolations;
+
+  @ManyToOne
+  @JoinColumn(name = "discount_id")
+  private Discount discount;
 
   @Column(name = "required")
   private Boolean required;

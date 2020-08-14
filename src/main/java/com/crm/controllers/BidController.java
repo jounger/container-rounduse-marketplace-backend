@@ -9,6 +9,7 @@ import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -25,13 +26,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.crm.common.SuccessMessage;
 import com.crm.models.Bid;
 import com.crm.models.dto.BidDto;
 import com.crm.models.mapper.BidMapper;
 import com.crm.payload.request.BidRequest;
 import com.crm.payload.request.PaginationRequest;
 import com.crm.payload.request.ReplaceContainerRequest;
-import com.crm.payload.response.MessageResponse;
+import com.crm.payload.response.DefaultResponse;
 import com.crm.payload.response.PaginationResponse;
 import com.crm.services.BidService;
 import com.crm.websocket.controller.NotificationBroadcast;
@@ -62,7 +64,12 @@ public class BidController {
     notificationBroadcast.broadcastCreateBidToMerchant(bid);
     // END NOTIFICATION
 
-    return ResponseEntity.ok(bidDto);
+    // Set default response body
+    DefaultResponse<BidDto> defaultResponse = new DefaultResponse<>();
+    defaultResponse.setMessage(SuccessMessage.CREATE_BID_SUCCESSFULLY);
+    defaultResponse.setData(bidDto);
+
+    return ResponseEntity.status(HttpStatus.CREATED).body(defaultResponse);
   }
 
   @PreAuthorize("hasRole('MERCHANT') or hasRole('FORWARDER')")
@@ -71,16 +78,6 @@ public class BidController {
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
     Bid bid = bidService.getBid(id, username);
-    BidDto bidDto = BidMapper.toBidDto(bid);
-    return ResponseEntity.ok(bidDto);
-  }
-
-  @PreAuthorize("hasRole('FORWARDER')")
-  @GetMapping("/bidding-document/{id}")
-  public ResponseEntity<?> getBidByBiddingDocumentAndForwarder(@PathVariable Long id) {
-    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    String username = userDetails.getUsername();
-    Bid bid = bidService.getBidByBiddingDocumentAndForwarder(id, username);
     BidDto bidDto = BidMapper.toBidDto(bid);
     return ResponseEntity.ok(bidDto);
   }
@@ -108,11 +105,12 @@ public class BidController {
     return ResponseEntity.ok(response);
   }
 
-  @PreAuthorize("hasRole('MERCHANT')")
-  @GetMapping("/merchant/{id}")
+  @PreAuthorize("hasRole('MERCHANT') or hasRole('FORWARDER')")
+  @GetMapping("/bidding-document/{id}")
   public ResponseEntity<?> getBidsByBiddingDocument(@PathVariable Long id, @Valid PaginationRequest request) {
-
-    Page<Bid> pages = bidService.getBidsByBiddingDocument(id, request);
+    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    String username = userDetails.getUsername();
+    Page<Bid> pages = bidService.getBidsByBiddingDocument(id, username, request);
 
     PaginationResponse<BidDto> response = new PaginationResponse<>();
     response.setPageNumber(request.getPage());
@@ -159,13 +157,18 @@ public class BidController {
     Bid bid = bidService.getBid(id, username);
     String status = bid.getStatus();
     Bid bidEdit = bidService.editBid(id, username, updates);
-    BidDto BidDto = BidMapper.toBidDto(bidEdit);
+    BidDto bidDto = BidMapper.toBidDto(bidEdit);
 
     // CREATE NOTIFICATION
     notificationBroadcast.broadcastEditBidToMerchantOrForwarder(status, bidEdit);
     // END NOTIFICATION
 
-    return ResponseEntity.ok(BidDto);
+    // Set default response body
+    DefaultResponse<BidDto> defaultResponse = new DefaultResponse<>();
+    defaultResponse.setMessage(SuccessMessage.EDIT_BID_SUCCESSFULLY);
+    defaultResponse.setData(bidDto);
+
+    return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 
   @Transactional
@@ -175,9 +178,14 @@ public class BidController {
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
     Bid bid = bidService.addContainer(id, username, containerId);
-    BidDto BidDto = BidMapper.toBidDto(bid);
+    BidDto bidDto = BidMapper.toBidDto(bid);
 
-    return ResponseEntity.ok(BidDto);
+    // Set default response body
+    DefaultResponse<BidDto> defaultResponse = new DefaultResponse<>();
+    defaultResponse.setMessage(SuccessMessage.EDIT_BID_SUCCESSFULLY);
+    defaultResponse.setData(bidDto);
+
+    return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 
   @Transactional
@@ -187,9 +195,14 @@ public class BidController {
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
     Bid bid = bidService.removeContainer(id, username, containerId);
-    BidDto BidDto = BidMapper.toBidDto(bid);
+    BidDto bidDto = BidMapper.toBidDto(bid);
 
-    return ResponseEntity.ok(BidDto);
+    // Set default response body
+    DefaultResponse<BidDto> defaultResponse = new DefaultResponse<>();
+    defaultResponse.setMessage(SuccessMessage.EDIT_BID_SUCCESSFULLY);
+    defaultResponse.setData(bidDto);
+
+    return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 
   @Transactional
@@ -199,9 +212,9 @@ public class BidController {
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
     Bid bid = bidService.replaceContainer(id, username, request);
-    BidDto BidDto = BidMapper.toBidDto(bid);
+    BidDto bidDto = BidMapper.toBidDto(bid);
 
-    return ResponseEntity.ok(BidDto);
+    return ResponseEntity.ok(bidDto);
   }
 
   @Transactional
@@ -217,7 +230,11 @@ public class BidController {
     notificationBroadcast.broadcastRemoveBidToMerchant(bid);
     // END NOTIFICATION
 
-    return ResponseEntity.ok(new MessageResponse("Bidding document deleted successfully."));
+    // Set default response body
+    DefaultResponse<BidDto> defaultResponse = new DefaultResponse<>();
+    defaultResponse.setMessage(SuccessMessage.DELETE_BID_SUCCESSFULLY);
+
+    return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 
 }

@@ -28,6 +28,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.crm.common.ErrorMessage;
+import com.crm.common.SuccessMessage;
 import com.crm.exception.NotFoundException;
 import com.crm.models.Forwarder;
 import com.crm.models.Merchant;
@@ -36,8 +38,8 @@ import com.crm.models.dto.UserDto;
 import com.crm.models.mapper.SupplierMapper;
 import com.crm.payload.request.SignInRequest;
 import com.crm.payload.request.SupplierRequest;
+import com.crm.payload.response.DefaultResponse;
 import com.crm.payload.response.JwtResponse;
-import com.crm.payload.response.MessageResponse;
 import com.crm.security.jwt.AuthTokenFilter;
 import com.crm.security.jwt.JwtUntils;
 import com.crm.security.services.UserDetailsImpl;
@@ -87,6 +89,7 @@ public class AuthController {
     userInfo.setEmail(userDetails.getEmail());
     userInfo.setStatus(userDetails.getStatus());
     userInfo.setAddress(userDetails.getAddress());
+    userInfo.setProfileImagePath(userDetails.getProfileImagePath());
 
     JwtResponse response = new JwtResponse();
     response.setIdToken(jwt);
@@ -95,7 +98,13 @@ public class AuthController {
     HttpHeaders responseHeaders = new HttpHeaders();
     responseHeaders.set("Access-Control-Expose-Headers", "Authorization");
     responseHeaders.set("Authorization", "Bearer " + jwt);
-    return ResponseEntity.ok().headers(responseHeaders).body(response);
+
+    // Set default response body
+    DefaultResponse<JwtResponse> defaultResponse = new DefaultResponse<>();
+    defaultResponse.setMessage(SuccessMessage.SIGN_IN_SUCCESSFULLY);
+    defaultResponse.setData(response);
+
+    return ResponseEntity.status(HttpStatus.CREATED).headers(responseHeaders).body(defaultResponse);
   }
 
   @PostMapping("/signup")
@@ -109,10 +118,15 @@ public class AuthController {
       Merchant merchant = merchantService.createMerchant(request);
       supplierDto = SupplierMapper.toSupplierDto(merchant);
     } else {
-      throw new NotFoundException("Role is not found.");
+      throw new NotFoundException(ErrorMessage.ROLE_NOT_FOUND);
     }
 
-    return ResponseEntity.ok(supplierDto);
+    // Set default response body
+    DefaultResponse<SupplierDto> defaultResponse = new DefaultResponse<>();
+    defaultResponse.setMessage(SuccessMessage.SIGN_UP_SUCCESSFULLY);
+    defaultResponse.setData(supplierDto);
+
+    return ResponseEntity.status(HttpStatus.CREATED).body(defaultResponse);
   }
 
   @GetMapping("/refresh")
@@ -133,12 +147,13 @@ public class AuthController {
     } catch (Exception e) {
       logger.error("Cannot set user authentication: {}", e);
     }
-    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new MessageResponse("Cannot authenticate this JWT"));
+    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Cannot authenticate this JWT");
   }
 
   @GetMapping("/user")
   public ResponseEntity<?> fetchUser(HttpServletRequest request, HttpServletResponse response) {
     try {
+      String jwt = AuthTokenFilter.parseJwt(request);
       UsernamePasswordAuthenticationToken authentication = authUserByToken(request);
       if (authentication != null) {
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
@@ -154,8 +169,10 @@ public class AuthController {
         userInfo.setEmail(userDetails.getEmail());
         userInfo.setStatus(userDetails.getStatus());
         userInfo.setAddress(userDetails.getAddress());
+        userInfo.setProfileImagePath(userDetails.getProfileImagePath());
 
         JwtResponse responseJwt = new JwtResponse();
+        responseJwt.setIdToken(jwt);
         responseJwt.setUserInfo(userInfo);
 
         return ResponseEntity.ok().body(responseJwt);
@@ -163,7 +180,7 @@ public class AuthController {
     } catch (Exception e) {
       logger.error("Cannot set user authentication: {}", e);
     }
-    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new MessageResponse("Cannot authenticate this JWT"));
+    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Cannot authenticate this JWT");
   }
 
   private UsernamePasswordAuthenticationToken authUserByToken(HttpServletRequest request)

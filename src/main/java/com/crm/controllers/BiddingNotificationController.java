@@ -9,8 +9,10 @@ import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -22,15 +24,18 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.crm.common.Constant;
+import com.crm.common.SuccessMessage;
 import com.crm.models.BiddingNotification;
 import com.crm.models.dto.BiddingNotificationDto;
 import com.crm.models.mapper.BiddingNotificationMapper;
 import com.crm.payload.request.PaginationRequest;
-import com.crm.payload.response.MessageResponse;
+import com.crm.payload.response.DefaultResponse;
 import com.crm.payload.response.PaginationResponse;
 import com.crm.services.BiddingNotificationService;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
+@PreAuthorize("hasRole('MERCHANT') or hasRole('FORWARDER')")
 @RestController
 @RequestMapping("/api/bidding-notification")
 public class BiddingNotificationController {
@@ -105,14 +110,25 @@ public class BiddingNotificationController {
     BiddingNotification biddingNotification = biddingNotificationService.editBiddingNotification(id, updates);
     BiddingNotificationDto biddingNotificationDto = BiddingNotificationMapper
         .toBiddingNotificationDto(biddingNotification);
-    return ResponseEntity.ok(biddingNotificationDto);
+
+    // Set default response body
+    DefaultResponse<BiddingNotificationDto> defaultResponse = new DefaultResponse<>();
+    defaultResponse.setMessage(Constant.EMPTY_STRING);
+    defaultResponse.setData(biddingNotificationDto);
+
+    return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 
   @Transactional
   @DeleteMapping("/{id}")
   public ResponseEntity<?> deleteBiddingNotification(@PathVariable Long id) {
     biddingNotificationService.removeBiddingNotification(id);
-    return ResponseEntity.ok(new MessageResponse("Bidding Notification deleted successfully."));
+
+    // Set default response body
+    DefaultResponse<BiddingNotificationDto> defaultResponse = new DefaultResponse<>();
+    defaultResponse.setMessage(SuccessMessage.DELETE_NOTIFICATION_SUCCESSFULLY);
+
+    return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 
 }

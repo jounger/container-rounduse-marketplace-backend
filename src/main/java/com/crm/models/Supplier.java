@@ -57,6 +57,10 @@ public class Supplier extends User {
   @Size(min = 5, max = 200)
   private String companyAddress;
 
+  @Size(min = 5, max = 200)
+  @Column(name = "brc_scan_path")
+  private String brcScanPath;
+
   @Column(name = "tin", length = 20)
   private String tin;
 
@@ -77,10 +81,11 @@ public class Supplier extends User {
 
   @OneToMany(mappedBy = "sender")
   private Collection<Report> reports = new ArrayList<>();
-  
+
   @OneToMany(mappedBy = "recipient")
   private Collection<Payment> receivedPayments = new ArrayList<>();
-  
+
   @OneToMany(mappedBy = "sender")
   private Collection<Payment> sentPayments = new ArrayList<>();
+
 }

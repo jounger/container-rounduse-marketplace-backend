@@ -8,6 +8,7 @@ import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -20,12 +21,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.crm.common.SuccessMessage;
 import com.crm.models.Role;
 import com.crm.models.dto.RoleDto;
 import com.crm.models.mapper.RoleMapper;
 import com.crm.payload.request.PaginationRequest;
 import com.crm.payload.request.RoleRequest;
-import com.crm.payload.response.MessageResponse;
+import com.crm.payload.response.DefaultResponse;
 import com.crm.payload.response.PaginationResponse;
 import com.crm.services.RoleService;
 
@@ -44,7 +46,13 @@ public class RoleController {
   public ResponseEntity<?> createRole(@Valid @RequestBody RoleRequest request) {
     Role role = roleService.createRole(request);
     RoleDto roleDto = RoleMapper.toRoleDto(role);
-    return ResponseEntity.ok(roleDto);
+
+    // Set default response body
+    DefaultResponse<RoleDto> defaultResponse = new DefaultResponse<>();
+    defaultResponse.setMessage(SuccessMessage.CREATE_ROLE_SUCCESSFULLY);
+    defaultResponse.setData(roleDto);
+
+    return ResponseEntity.status(HttpStatus.CREATED).body(defaultResponse);
   }
 
   @GetMapping("")
@@ -71,7 +79,13 @@ public class RoleController {
   public ResponseEntity<?> updateRole(@Valid @RequestBody RoleRequest request) {
     Role role = roleService.updateRole(request);
     RoleDto roleDto = RoleMapper.toRoleDto(role);
-    return ResponseEntity.ok(roleDto);
+
+    // Set default response body
+    DefaultResponse<RoleDto> defaultResponse = new DefaultResponse<>();
+    defaultResponse.setMessage(SuccessMessage.EDIT_ROLE_SUCCESSFULLY);
+    defaultResponse.setData(roleDto);
+
+    return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 
   @Transactional
@@ -79,7 +93,12 @@ public class RoleController {
   @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<?> removeRole(@PathVariable Long id) {
     roleService.removeRole(id);
-    return ResponseEntity.ok(new MessageResponse("Role has been deleted successfully"));
+
+    // Set default response body
+    DefaultResponse<RoleDto> defaultResponse = new DefaultResponse<>();
+    defaultResponse.setMessage(SuccessMessage.DELETE_ROLE_SUCCESSFULLY);
+
+    return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 
 }

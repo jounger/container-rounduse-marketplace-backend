@@ -7,7 +7,7 @@ import com.crm.models.Forwarder;
 import com.crm.models.dto.ForwarderDto;
 
 public class ForwarderMapper {
-  
+
   public static ForwarderDto toForwarderDto(Forwarder forwarder) {
     ForwarderDto forwarderDto = new ForwarderDto();
     forwarderDto.setId(forwarder.getId());
@@ -16,6 +16,7 @@ public class ForwarderMapper {
     forwarderDto.setEmail(forwarder.getEmail());
     forwarderDto.setPhone(forwarder.getPhone());
     forwarderDto.setStatus(forwarder.getStatus());
+    forwarderDto.setProfileImagePath(forwarder.getProfileImagePath());
 
     Set<String> forwarderRoles = new HashSet<>();
     forwarder.getRoles().forEach(role -> forwarderRoles.add(RoleMapper.toRoleDto(role).getName()));
@@ -30,6 +31,7 @@ public class ForwarderMapper {
     forwarderDto.setTin(forwarder.getTin());
     forwarderDto.setFax(forwarder.getFax());
     forwarderDto.setRatingValue(forwarder.getRatingValue());
+
     return forwarderDto;
   }
 }

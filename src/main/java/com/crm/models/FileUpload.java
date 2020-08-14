@@ -13,6 +13,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.UniqueConstraint;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 
 import org.springframework.data.annotation.CreatedDate;
@@ -33,30 +35,39 @@ import lombok.ToString;
 @NoArgsConstructor
 @ToString
 @Entity
-@Table(name = "evidence")
+@Table(name = "file_upload", uniqueConstraints = @UniqueConstraint(columnNames = "name"))
 @EntityListeners(AuditingEntityListener.class)
 @JsonIgnoreProperties(value = { "createdAt", "updatedAt" }, allowGetters = true)
-public class Evidence {
+public class FileUpload {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "id", updatable = false, nullable = false)
   private Long id;
-
+  
   @ManyToOne
-  @JoinColumn(name = "contract_id")
-  private Contract contract;
+  @JoinColumn(name = "user_id")
+  private User owner;
 
-  @ManyToOne
-  @JoinColumn(name = "supplier_id")
-  private Supplier sender;
+  @Column(name = "name")
+  @NotBlank
+  @Size(min = 5, max = 100)
+  private String name;
 
+  @Column(name = "origin_name")
+  @NotBlank
   @Size(min = 5, max = 200)
-  @Column(name = "document_path")
-  private String documentPath;
+  private String originName;
 
-  @Column(name = "is_valid")
-  private Boolean isValid;
+  @Column(name = "path")
+  @NotBlank
+  @Size(min = 5, max = 200)
+  private String path;
+  
+  @Column(name = "type")
+  @NotBlank
+  @Size(min = 2, max = 10)
+  private String type;
 
   @Column(name = "created_at", nullable = false, updatable = false)
   @Temporal(TemporalType.TIMESTAMP)

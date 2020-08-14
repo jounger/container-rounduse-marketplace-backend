@@ -16,11 +16,12 @@ public class ShippingLineMapper {
     shippingLineDto.setEmail(shippingLine.getEmail());
     shippingLineDto.setPhone(shippingLine.getPhone());
     shippingLineDto.setStatus(shippingLine.getStatus());
-    
+    shippingLineDto.setProfileImagePath(shippingLine.getProfileImagePath());
+
     Set<String> shippingLineRoles = new HashSet<>();
     shippingLine.getRoles().forEach(role -> shippingLineRoles.add(RoleMapper.toRoleDto(role).getName()));
     shippingLineDto.setRoles(shippingLineRoles);
-    
+
     shippingLineDto.setWebsite(shippingLine.getWebsite());
     shippingLineDto.setContactPerson(shippingLine.getContactPerson());
     shippingLineDto.setCompanyName(shippingLine.getCompanyName());
@@ -28,6 +29,7 @@ public class ShippingLineMapper {
     shippingLineDto.setCompanyDescription(shippingLine.getCompanyDescription());
     shippingLineDto.setTin(shippingLine.getTin());
     shippingLineDto.setFax(shippingLine.getFax());
+
     return shippingLineDto;
-}
+  }
 }

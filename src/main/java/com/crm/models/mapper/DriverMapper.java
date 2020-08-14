@@ -15,6 +15,8 @@ public class DriverMapper {
     driverDto.setEmail(driver.getEmail());
     driverDto.setPhone(driver.getPhone());
     driverDto.setStatus(driver.getStatus());
+    driverDto.setProfileImagePath(driver.getProfileImagePath());
+
     Set<String> roles = new HashSet<>();
     driver.getRoles().forEach(role -> roles.add(role.getName()));
     driverDto.setRoles(roles);

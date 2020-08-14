@@ -5,10 +5,8 @@ import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -174,25 +172,4 @@ public class UserServiceImplTest {
     assertThat(actualPages.getContent().get(0).getUsername()).isEqualTo("nguyenvanan");
   }
 
-  @Test
-  public void whenChangeStatus_thenReturnUser() {
-    // given
-    User user1 = new User();
-    user1.setId(1L);
-    user1.setUsername("nguyenvanan");
-    user1.setStatus("PENDING");
-
-    Map<String, Object> updates = new HashMap<>();
-    updates.put("status", "ACTIVE");
-
-    // when
-    when(userRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(user1));
-    user1.setStatus("ACTIVE");
-    when(userRepository.save(Mockito.any(User.class))).thenReturn(user1);
-
-    // then
-    User actualResult = userServiceImpl.changeStatus(user1.getId(), updates);
-    assertThat(actualResult.getId()).isEqualTo(1L);
-    assertThat(actualResult.getStatus()).isEqualTo(updates.get("status"));
-  }
 }

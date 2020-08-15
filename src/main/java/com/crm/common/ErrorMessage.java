@@ -67,10 +67,6 @@ public class ErrorMessage {
   public static final String TIN_DUPLICATE = "Mã số thuế đã được sử dụng";
   public static final String FAX_DUPLICATE = "Địa chỉ thư điện tử đã được sử dụng";
 
-  // Supplier
-  public static final String TIN_DUPLICATE = "Mã số thuế đã được sử dụng";
-  public static final String FAX_DUPLICATE = "Địa chỉ thư điện tử đã được sử dụng";
-
   // Outbound
   public static final String OUTBOUND_NOT_FOUND = "Không tìm thấy hàng xuất khẩu";
   public static final String OUTBOUND_IS_IN_TRANSACTION = "Hàng nhập đã được đấu thầu";

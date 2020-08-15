@@ -62,16 +62,6 @@ public class CombinedServiceImpl implements CombinedService {
     if(biddingDocument.getBidClosing().isBefore(LocalDateTime.now())) {
       throw new NotFoundException(ErrorMessage.BIDDINGDOCUMENT_TIME_OUT);
     }
-    List<Long> containersId = new ArrayList<>();
-    List<Container> containers = new ArrayList<Container>(bid.getContainers());
-    if (!biddingDocument.getIsMultipleAward()) {
-      for (int i = 0; i < containers.size(); i++) {
-        Container container = containers.get(i);
-        containersId.add(container.getId());
-      }
-    }else {
-      containersId = request.getContainers();
-    }
 
     combined.setBid(bid);
     combined.setIsCanceled(false);

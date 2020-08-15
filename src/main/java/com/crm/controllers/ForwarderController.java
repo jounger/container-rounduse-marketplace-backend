@@ -41,7 +41,8 @@ public class ForwarderController {
   private ForwarderService forwarderService;
 
   @Transactional
-  @PostMapping("hasRole('MODERATOR')")
+  @PreAuthorize("hasRole('MODERATOR')")
+  @PostMapping("")
   public ResponseEntity<?> createForwarder(@Valid @RequestBody ForwarderRequest request) {
     Forwarder forwarder = forwarderService.createForwarder(request);
     ForwarderDto forwarderDto = ForwarderMapper.toForwarderDto(forwarder);

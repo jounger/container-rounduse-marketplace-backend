@@ -106,7 +106,7 @@ public class OperatorServiceImpl implements OperatorService {
       if (!userRepository.existsByEmail(email)) {
         operator.setEmail(email);
       } else {
-        throw new DuplicateRecordException(ErrorMessage.USER_ALREADY_EXISTS);
+        throw new DuplicateRecordException(ErrorMessage.USER_EMAIL_ALREADY_EXISTS);
       }
     }
 

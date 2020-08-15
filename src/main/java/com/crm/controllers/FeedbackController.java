@@ -52,8 +52,7 @@ public class FeedbackController {
   @PostMapping("/report/{id}")
   @PreAuthorize("hasRole('MODERATOR')")
   public ResponseEntity<?> createFeedback(@PathVariable("id") Long id, @Valid @RequestBody FeedbackRequest request) {
-    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
-        .getPrincipal();
+    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
     Feedback payment = paymentService.createFeedback(id, username, request);
     FeedbackDto feedbackDto = FeedbackMapper.toFeedbackDto(payment);
@@ -75,24 +74,27 @@ public class FeedbackController {
   @PreAuthorize("hasRole('FORWARDER')")
   public ResponseEntity<?> createFeedbackToModerator(@RequestParam Long id, @RequestParam String name,
       @Valid @RequestBody FeedbackRequest request) {
-    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
-        .getPrincipal();
+    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
-    Feedback payment = paymentService.createFeedback(id, username, request);
-    FeedbackDto paymentDto = FeedbackMapper.toFeedbackDto(payment);
+    Feedback feedback = paymentService.createFeedback(id, username, request);
+    FeedbackDto feedbackDto = FeedbackMapper.toFeedbackDto(feedback);
 
     // CREATE NOTIFICATION
-    notificationBroadcast.broadcastCreateFeedbackToModerator(name, payment);
+    notificationBroadcast.broadcastCreateFeedbackToModerator(name, feedback);
     // END NOTIFICATION
 
-    return ResponseEntity.ok(paymentDto);
+    // Set default response body
+    DefaultResponse<FeedbackDto> defaultResponse = new DefaultResponse<>();
+    defaultResponse.setMessage(SuccessMessage.CREATE_FEEDBACK_SUCCESSFULLY);
+    defaultResponse.setData(feedbackDto);
+
+    return ResponseEntity.status(HttpStatus.CREATED).body(defaultResponse);
   }
 
   @PreAuthorize("hasRole('MODERATOR') or hasRole('FORWARDER')")
   @GetMapping("/report/{id}")
   public ResponseEntity<?> getFeedbacksByReport(@PathVariable Long id, @Valid PaginationRequest request) {
-    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
-        .getPrincipal();
+    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
 
     Page<Feedback> pages = paymentService.getFeedbacksByReport(id, username, request);
@@ -156,8 +158,7 @@ public class FeedbackController {
   @PreAuthorize("hasRole('MODERATOR') or hasRole('FORWARDER')")
   @RequestMapping(value = "/{id}", method = RequestMethod.PATCH, consumes = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<?> editFeedback(@PathVariable("id") Long id, @RequestBody Map<String, Object> updates) {
-    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
-        .getPrincipal();
+    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
     Feedback payment = paymentService.editFeedback(id, username, updates);
     FeedbackDto feedbackDto = FeedbackMapper.toFeedbackDto(payment);
@@ -174,8 +175,7 @@ public class FeedbackController {
   @PreAuthorize("hasRole('MODERATOR') or hasRole('FORWARDER')")
   @DeleteMapping("/{id}")
   public ResponseEntity<?> deleteFeedback(@PathVariable Long id) {
-    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
-        .getPrincipal();
+    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
     paymentService.removeFeedback(id, username);
 

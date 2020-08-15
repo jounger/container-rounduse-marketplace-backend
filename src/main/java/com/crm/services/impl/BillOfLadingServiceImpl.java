@@ -79,7 +79,7 @@ public class BillOfLadingServiceImpl implements BillOfLadingService {
     }
 
     if (request.getUnit() < billOfLading.getContainers().size()) {
-      throw new InternalException(ErrorMessage.CONTAINER_MORE_OR_LESS_THAN_NEEDED);
+      throw new InternalException(ErrorMessage.CONTAINER_LESS_THAN_NEEDED);
     }
     billOfLading.setUnit(request.getUnit());
 
@@ -161,7 +161,7 @@ public class BillOfLadingServiceImpl implements BillOfLadingService {
     if (updates.get("unit") != null && !Tool.isEqual(billOfLading.getUnit(), unitRequest)) {
       int unit = Integer.parseInt(unitRequest);
       if (unit < billOfLading.getContainers().size()) {
-        throw new InternalException(ErrorMessage.CONTAINER_MORE_OR_LESS_THAN_NEEDED);
+        throw new InternalException(ErrorMessage.CONTAINER_LESS_THAN_NEEDED);
       }
       billOfLading.setUnit(unit);
     }

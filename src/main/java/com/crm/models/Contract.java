@@ -81,4 +81,7 @@ public class Contract {
 
   @OneToMany(mappedBy = "contract")
   private Collection<Rating> ratings = new ArrayList<>();
+  
+  @OneToMany(mappedBy = "contract")
+  private Collection<ShippingInfo> shippingInfos = new ArrayList<>();
 }

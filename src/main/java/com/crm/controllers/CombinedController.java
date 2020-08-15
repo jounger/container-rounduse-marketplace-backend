@@ -34,8 +34,6 @@ import com.crm.payload.request.PaginationRequest;
 import com.crm.payload.response.DefaultResponse;
 import com.crm.payload.response.PaginationResponse;
 import com.crm.services.CombinedService;
-import com.crm.services.ShippingInfoService;
-import com.crm.websocket.controller.NotificationBroadcast;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -44,12 +42,6 @@ public class CombinedController {
 
   @Autowired
   private CombinedService combinedService;
-
-  @Autowired
-  private ShippingInfoService shippingInfoService;
-
-  @Autowired
-  private NotificationBroadcast notificationBroadcast;
 
   @Autowired
   @Qualifier("cachedThreadPool")
@@ -64,17 +56,6 @@ public class CombinedController {
 
     Combined combined = combinedService.createCombined(id, username, request);
     CombinedDto combinedDto = CombinedMapper.toCombinedDto(combined);
-
-    executorService.submit(new Runnable() {
-      @Override
-      public void run() {
-        shippingInfoService.createShippingInfosForCombined(combined, request.getContainers());
-      }
-    });
-
-    // CREATE NOTIFICATION
-    notificationBroadcast.broadcastCreateCombinedToDriver(combined);
-    // END NOTIFICATION
 
     // Set default response body
     DefaultResponse<CombinedDto> defaultResponse = new DefaultResponse<>();

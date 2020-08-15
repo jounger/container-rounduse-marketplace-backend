@@ -1,13 +1,16 @@
 package com.crm.controllers;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
 
 import javax.transaction.Transactional;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -49,6 +52,10 @@ public class BidController {
   @Autowired
   private NotificationBroadcast notificationBroadcast;
 
+  @Autowired
+  @Qualifier("cachedThreadPool")
+  private ExecutorService executorService;
+
   @Transactional
   @PreAuthorize("hasRole('FORWARDER')")
   @PostMapping("/bidding-document/{id}")
@@ -78,7 +85,15 @@ public class BidController {
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
     Bid bid = bidService.getBid(id, username);
-    BidDto bidDto = BidMapper.toBidDto(bid);
+    
+    //get expired date
+    List<Bid> expiredBids = bidService.getExpiredBids(Arrays.asList(bid));
+    // update and return data but not save into database
+    List<Bid> result = bidService.updatedExpiredBids(Arrays.asList(bid));
+    // update data into database
+    bidExpiredTrigger(expiredBids);
+
+    BidDto bidDto = BidMapper.toBidDto(result.get(0));
     return ResponseEntity.ok(bidDto);
   }
 
@@ -235,6 +250,15 @@ public class BidController {
     defaultResponse.setMessage(SuccessMessage.DELETE_BID_SUCCESSFULLY);
 
     return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
+  }
+
+  public void bidExpiredTrigger(List<Bid> bids) {
+    executorService.submit(new Runnable() {
+      @Override
+      public void run() {
+        bidService.editExpiredBids(bids);
+      }
+    });
   }
 
 }

@@ -27,6 +27,7 @@ import com.crm.models.ShippingInfo;
 import com.crm.models.dto.ShippingInfoDto;
 import com.crm.models.mapper.ShippingInfoMapper;
 import com.crm.payload.request.PaginationRequest;
+import com.crm.payload.request.ShippingInfoRequest;
 import com.crm.payload.response.DefaultResponse;
 import com.crm.payload.response.PaginationResponse;
 import com.crm.services.ShippingInfoService;
@@ -140,10 +141,10 @@ public class ShippingInfoController {
   @Transactional
   @PreAuthorize("hasRole('DRIVER') or hasRole('FORWARDER')")
   @PatchMapping(value = "/{id}")
-  public ResponseEntity<?> editShippingInfo(@PathVariable("id") Long id, @RequestBody String status) {
+  public ResponseEntity<?> editShippingInfo(@PathVariable("id") Long id, @RequestBody ShippingInfoRequest request) {
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
-    ShippingInfo shippingInfo = shippingInfoService.editShippingInfo(id, username, status);
+    ShippingInfo shippingInfo = shippingInfoService.editShippingInfo(id, username, request);
     ShippingInfoDto shippingInfoDto = ShippingInfoMapper.toShippingInfoDto(shippingInfo);
 
     // Set default response body

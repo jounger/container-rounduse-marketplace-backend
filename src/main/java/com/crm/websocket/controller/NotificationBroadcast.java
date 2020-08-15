@@ -26,6 +26,7 @@ import com.crm.models.BiddingDocument;
 import com.crm.models.BiddingNotification;
 import com.crm.models.Combined;
 import com.crm.models.Container;
+import com.crm.models.Contract;
 import com.crm.models.DriverNotification;
 import com.crm.models.Feedback;
 import com.crm.models.Forwarder;
@@ -207,10 +208,11 @@ public class NotificationBroadcast {
     });
   }
 
-  public void broadcastCreateCombinedToDriver(Combined combined) {
+  public void broadcastCreateContractToDriver(Contract contract) {
     executorService.submit(new Runnable() {
       @Override
       public void run() {
+        Combined combined = contract.getCombined();
         Bid bidNew = combined.getBid();
         BiddingNotification notification = new BiddingNotification();
         BiddingNotificationRequest notifyRequest = new BiddingNotificationRequest();
@@ -240,7 +242,7 @@ public class NotificationBroadcast {
         shippingLineNotification = shippingLineNotificationService
             .createShippingLineNotification(shippingLineNotificationRequest);
 
-        Collection<ShippingInfo> shippingInfos = combined.getShippingInfos();
+        Collection<ShippingInfo> shippingInfos = contract.getShippingInfos();
         
         if (listContainerBid.size() > 0) {
           List<DriverNotification> driverNotifications = new ArrayList<>();

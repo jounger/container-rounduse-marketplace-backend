@@ -11,18 +11,14 @@ public class ContractMapper {
 
     contractDto.setPrice(contract.getPrice());
 
-    if (contract.getFinesAgainstContractViolations() != null) {
-      contractDto.setFinesAgainstContractViolation(contract.getFinesAgainstContractViolations());
-    }
+    contractDto.setFinesAgainstContractViolation(contract.getFinesAgainstContractViolations());
 
     if (contract.getDiscount() != null) {
       String discountCode = contract.getDiscount().getCode();
       contractDto.setDiscountCode(discountCode);
     }
 
-    if (contract.getRequired() != null) {
-      contractDto.setRequired(contract.getRequired());
-    }
+    contractDto.setRequired(contract.getRequired());
 
     return contractDto;
   }

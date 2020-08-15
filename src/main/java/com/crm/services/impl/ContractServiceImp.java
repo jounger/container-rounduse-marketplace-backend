@@ -1,5 +1,7 @@
 package com.crm.services.impl;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -20,6 +22,7 @@ import com.crm.exception.NotFoundException;
 import com.crm.models.Bid;
 import com.crm.models.BiddingDocument;
 import com.crm.models.Combined;
+import com.crm.models.Container;
 import com.crm.models.Contract;
 import com.crm.models.Discount;
 import com.crm.models.Supplier;
@@ -28,8 +31,11 @@ import com.crm.payload.request.PaginationRequest;
 import com.crm.repository.CombinedRepository;
 import com.crm.repository.ContractRepository;
 import com.crm.repository.DiscountRepository;
+import com.crm.services.BidService;
 import com.crm.services.ContractService;
+import com.crm.services.ShippingInfoService;
 import com.crm.specification.builder.ContractSpecificationsBuilder;
+import com.crm.websocket.controller.NotificationBroadcast;
 
 @Service
 public class ContractServiceImp implements ContractService {
@@ -43,6 +49,15 @@ public class ContractServiceImp implements ContractService {
   @Autowired
   private DiscountRepository discountRepository;
 
+  @Autowired
+  private BidService bidService;
+
+  @Autowired
+  private ShippingInfoService shippingInfoService;
+
+  @Autowired
+  private NotificationBroadcast notificationBroadcast;
+
   @Override
   public Contract createContract(Long id, String username, ContractRequest request) {
     Contract contract = new Contract();
@@ -51,10 +66,25 @@ public class ContractServiceImp implements ContractService {
         .orElseThrow(() -> new NotFoundException(ErrorMessage.COMBINED_NOT_FOUND));
     contract.setCombined(combined);
 
-    contract.setPrice(request.getPrice());
-
+    List<Long> containersId = new ArrayList<>();
     Bid bid = combined.getBid();
+    List<Container> containers = new ArrayList<Container>(bid.getContainers());
     BiddingDocument biddingDocument = bid.getBiddingDocument();
+    if (!biddingDocument.getIsMultipleAward()) {
+      for (Container container : containers) {
+        containersId.add(container.getId());
+      }
+    } else {
+      containersId = request.getContainers();
+    }
+
+    if (containersId == null || containersId.size() == 0) {
+      throw new NotFoundException(ErrorMessage.CONTAINER_NOT_FOUND);
+    }
+
+    Double price = (bid.getBidPrice() / bid.getContainers().size()) * containersId.size();
+
+    contract.setPrice(price);
     Supplier offeree = biddingDocument.getOfferee();
     Boolean required = request.getRequired();
     contract.setRequired(required);
@@ -78,6 +108,14 @@ public class ContractServiceImp implements ContractService {
     }
 
     Contract _contract = contractRepository.save(contract);
+
+    bid = bidService.editBidWhenCombined(bid.getId(), username, containersId);
+
+    shippingInfoService.createShippingInfosForContract(contract, containersId);
+
+    // CREATE NOTIFICATION
+    notificationBroadcast.broadcastCreateContractToDriver(contract);
+    // END NOTIFICATION
     return _contract;
   }
 

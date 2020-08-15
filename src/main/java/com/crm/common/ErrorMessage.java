@@ -20,12 +20,12 @@ public class ErrorMessage {
   // Combined
   public static final String COMBINED_NOT_FOUND = "Không tìm thấy hàng ghép";
   public static final String COMBINED_STATUS_NOT_FOUND = "Không tìm thấy trạng thái của hàng ghép";
-  
+
   // ShippingInfo
-  public static final String SHIPPING_INFO_NOT_FOUND = "Không tìm thấy hàng ghép";
-  public static final String SHIPPING_INFO_INVALID_EDIT = "Không thể sửa hồ sơ mời thầu sau khi đã được ghép hoặc hủy bỏ";
+  public static final String SHIPPING_INFO_NOT_FOUND = "Không tìm thấy chi tiết đơn vận chuyển";
+  public static final String SHIPPING_INFO_INVALID_EDIT = "Không thể cập nhật trạng thái chi tiết đơn vận chuyển";
   public static final String SHIPPING_INFO_STATUS_NOT_FOUND = "Không tìm thấy trạng thái của việc vận chuyển hàng";
-  
+
   // Contract
   public static final String CONTRACT_NOT_FOUND = "Không tìm thấy hợp đồng";
   public static final String CONTRACT_INVALID_FINES = "Phần trăm phạt hợp đồng không hợp lệ";
@@ -62,8 +62,8 @@ public class ErrorMessage {
 
   // Supply
   public static final String SUPPLY_CODE_DUPLICATE = "Mã hàng đã tồn tại";
-  
-  //Supplier
+
+  // Supplier
   public static final String TIN_DUPLICATE = "Mã số thuế đã được sử dụng";
   public static final String FAX_DUPLICATE = "Địa chỉ thư điện tử đã được sử dụng";
 

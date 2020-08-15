@@ -3,12 +3,12 @@ INSERT INTO crm_db.role (name, created_at, updated_at) VALUES ('ROLE_ADMIN',CURD
 
 
 # USER:
-INSERT INTO crm_db.user (created_at,email,fullname,password,phone,status,updated_at,username,address) VALUES (CURDATE(),'admin@crm.com','Nguyen Van A','$2a$10$fKNzue5vXDqZWgzxtuIDWuozd30wiGRXfkzEgnFeUc6MKAIrIyG4i','0967390098','ACTIVE',CURDATE(),'admin','Ba Dinh, Ha Noi, Vietnam');
-INSERT INTO crm_db.user (created_at,email,fullname,password,phone,status,updated_at,username,address) VALUES (CURDATE(),'moderator@crm.com','Nguyen Van A','$2a$10$fKNzue5vXDqZWgzxtuIDWuozd30wiGRXfkzEgnFeUc6MKAIrIyG4i','0967390098','ACTIVE',CURDATE(),'moderator','Ba Dinh, Ha Noi, Vietnam');
-INSERT INTO crm_db.user (created_at,email,fullname,password,phone,status,updated_at,username,address) VALUES (CURDATE(),'shippingline@crm.com','Nguyen Van A','$2a$10$fKNzue5vXDqZWgzxtuIDWuozd30wiGRXfkzEgnFeUc6MKAIrIyG4i','0967390098','ACTIVE',CURDATE(),'shippingline','Ba Dinh, Ha Noi, Vietnam');
-INSERT INTO crm_db.user (created_at,email,fullname,password,phone,status,updated_at,username,address) VALUES (CURDATE(),'forwarder@crm.com','Nguyen Van A','$2a$10$fKNzue5vXDqZWgzxtuIDWuozd30wiGRXfkzEgnFeUc6MKAIrIyG4i','0967390098','ACTIVE',CURDATE(),'forwarder','Ba Dinh, Ha Noi, Vietnam');
-INSERT INTO crm_db.user (created_at,email,fullname,password,phone,status,updated_at,username,address) VALUES (CURDATE(),'merchant@crm.com','Nguyen Van A','$2a$10$fKNzue5vXDqZWgzxtuIDWuozd30wiGRXfkzEgnFeUc6MKAIrIyG4i','0967390098','ACTIVE',CURDATE(),'merchant','Ba Dinh, Ha Noi, Vietnam');
-INSERT INTO crm_db.user (created_at,email,fullname,password,phone,status,updated_at,username,address) VALUES (CURDATE(),'driver@crm.com','Nguyen Van A','$2a$10$fKNzue5vXDqZWgzxtuIDWuozd30wiGRXfkzEgnFeUc6MKAIrIyG4i','0967390098','ACTIVE',CURDATE(),'driver','Ba Dinh, Ha Noi, Vietnam');
+INSERT INTO crm_db.user (created_at,email,fullname,password,phone,status,updated_at,username,address) VALUES (CURDATE(),'admin@crm.com','Nguyen Van A','$2a$10$fKNzue5vXDqZWgzxtuIDWuozd30wiGRXfkzEgnFeUc6MKAIrIyG4i','0967390091','ACTIVE',CURDATE(),'admin','Ba Dinh, Ha Noi, Vietnam');
+INSERT INTO crm_db.user (created_at,email,fullname,password,phone,status,updated_at,username,address) VALUES (CURDATE(),'moderator@crm.com','Nguyen Van B','$2a$10$fKNzue5vXDqZWgzxtuIDWuozd30wiGRXfkzEgnFeUc6MKAIrIyG4i','0967390092','ACTIVE',CURDATE(),'moderator','Ba Dinh, Ha Noi, Vietnam');
+INSERT INTO crm_db.user (created_at,email,fullname,password,phone,status,updated_at,username,address) VALUES (CURDATE(),'shippingline@crm.com','Nguyen Van C','$2a$10$fKNzue5vXDqZWgzxtuIDWuozd30wiGRXfkzEgnFeUc6MKAIrIyG4i','0967390093','ACTIVE',CURDATE(),'shippingline','Ba Dinh, Ha Noi, Vietnam');
+INSERT INTO crm_db.user (created_at,email,fullname,password,phone,status,updated_at,username,address) VALUES (CURDATE(),'forwarder@crm.com','Nguyen Van D','$2a$10$fKNzue5vXDqZWgzxtuIDWuozd30wiGRXfkzEgnFeUc6MKAIrIyG4i','0967390094','ACTIVE',CURDATE(),'forwarder','Ba Dinh, Ha Noi, Vietnam');
+INSERT INTO crm_db.user (created_at,email,fullname,password,phone,status,updated_at,username,address) VALUES (CURDATE(),'merchant@crm.com','Nguyen Van E','$2a$10$fKNzue5vXDqZWgzxtuIDWuozd30wiGRXfkzEgnFeUc6MKAIrIyG4i','0967390095','ACTIVE',CURDATE(),'merchant','Ba Dinh, Ha Noi, Vietnam');
+INSERT INTO crm_db.user (created_at,email,fullname,password,phone,status,updated_at,username,address) VALUES (CURDATE(),'driver@crm.com','Nguyen Van F','$2a$10$fKNzue5vXDqZWgzxtuIDWuozd30wiGRXfkzEgnFeUc6MKAIrIyG4i','0967390096','ACTIVE',CURDATE(),'driver','Ba Dinh, Ha Noi, Vietnam');
 
 # MAP USER - ROLE:
 INSERT INTO crm_db.user_role (user_id,role_id) VALUES ('1','1');
@@ -27,7 +27,7 @@ INSERT INTO crm_db.operator (user_id, is_root) VALUES ('2', 0);
 INSERT INTO crm_db.shipping_line (user_id) VALUES ('3');
 INSERT INTO crm_db.forwarder (user_id) VALUES ('4');
 INSERT INTO crm_db.merchant (user_id) VALUES ('5');
-INSERT INTO crm_db.driver (driver_license,fullname,user_id,forwarder_id) VALUES ('292883943','Nguyen Van B','6','4');
+INSERT INTO crm_db.driver (driver_license,user_id,forwarder_id) VALUES ('292883943','6','4');
 
 # PORT
 INSERT INTO crm_db.port (address,fullname,name_code,created_at,updated_at) VALUES ('Hai Phong, Viet Nam','Port Of Haiphong Joint Stock Company','HAIPHONGPORT',CURDATE(),CURDATE());

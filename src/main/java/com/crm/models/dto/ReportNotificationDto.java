@@ -9,7 +9,5 @@ public class ReportNotificationDto extends NotificationDto {
 
   private ReportDto relatedResource;
 
-  private String message;
-
   private String action;
 }

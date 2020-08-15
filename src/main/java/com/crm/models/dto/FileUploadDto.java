@@ -9,19 +9,17 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class FeedbackDto {
+public class FileUploadDto {
 
   private Long id;
 
-  private ReportDto report;
+  private UserDto owner;
 
-  private UserDto sender;
+  private String name;
 
-  private UserDto recipient;
+  private String originName;
 
-  private String message;
+  private String path;
 
-  private Integer satisfactionPoints;
-
-  private String sendDate;
+  private String type;
 }

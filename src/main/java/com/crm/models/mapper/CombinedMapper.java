@@ -10,6 +10,10 @@ import com.crm.models.dto.ContractDto;
 public class CombinedMapper {
 
   public static CombinedDto toCombinedDto(Combined combined) {
+    if (combined == null) {
+      return null;
+    }
+
     CombinedDto combinedDto = new CombinedDto();
 
     combinedDto.setId(combined.getId());

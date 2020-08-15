@@ -9,6 +9,10 @@ import com.crm.models.dto.OperatorDto;
 public class OperatorMapper {
 
   public static OperatorDto toOperatorDto(Operator operator) {
+    if (operator == null) {
+      return null;
+    }
+
     OperatorDto operatorDto = new OperatorDto();
     operatorDto.setId(operator.getId());
     operatorDto.setUsername(operator.getUsername());

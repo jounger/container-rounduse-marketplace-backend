@@ -9,7 +9,5 @@ public class BiddingNotificationDto extends NotificationDto {
 
   private BiddingDocumentDto relatedResource;
 
-  private String message;
-
   private String action;
 }

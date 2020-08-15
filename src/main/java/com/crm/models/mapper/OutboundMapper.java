@@ -8,15 +8,17 @@ import com.crm.models.dto.OutboundDto;
 public class OutboundMapper {
 
   public static OutboundDto toOutboundDto(Outbound outbound) {
+    if (outbound == null) {
+      return null;
+    }
+
     OutboundDto dto = new OutboundDto();
 
     dto.setId(outbound.getId());
     dto.setCode(outbound.getCode());
-    String shippingLine = outbound.getShippingLine().getCompanyCode();
-    dto.setShippingLine(shippingLine);
+    dto.setShippingLine(ShippingLineMapper.toShippingLineDto(outbound.getShippingLine()));
 
-    String containerType = outbound.getContainerType().getName();
-    dto.setContainerType(containerType);
+    dto.setContainerType(ContainerTypeMapper.toContainerTypeDto(outbound.getContainerType()));
     dto.setStatus(outbound.getStatus());
 
     BookingDto bookingDto = BookingMapper.toBookingDto(outbound.getBooking());

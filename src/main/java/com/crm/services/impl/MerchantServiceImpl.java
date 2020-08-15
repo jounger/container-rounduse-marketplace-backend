@@ -62,7 +62,7 @@ public class MerchantServiceImpl implements MerchantService {
     merchant.setCompanyCode(request.getCompanyCode());
     merchant.setCompanyDescription(request.getCompanyDescription());
     merchant.setCompanyAddress(request.getCompanyAddress());
-    merchant.setContactPerson(request.getContactPerson());
+    merchant.setFullname(request.getFullname());
     merchant.setTin(request.getTin());
     merchant.setFax(request.getFax());
     merchant.setRatingValue(0D);
@@ -131,9 +131,9 @@ public class MerchantServiceImpl implements MerchantService {
       merchant.setWebsite(website);
     }
 
-    String contactPerson = String.valueOf(updates.get("contactPerson"));
-    if (updates.get("contactPerson") != null && !Tool.isEqual(merchant.getContactPerson(), contactPerson)) {
-      merchant.setContactPerson(contactPerson);
+    String fullname = String.valueOf(updates.get("fullname"));
+    if (updates.get("fullname") != null && !Tool.isEqual(merchant.getFullname(), fullname)) {
+      merchant.setFullname(fullname);
     }
 
     String companyName = String.valueOf(updates.get("companyName"));

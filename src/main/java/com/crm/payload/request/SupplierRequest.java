@@ -18,10 +18,6 @@ public class SupplierRequest extends SignUpRequest {
   private String website;
 
   @NotBlank
-  @Size(min = 5, max = 50)
-  private String contactPerson;
-
-  @NotBlank
   @Size(min = 5, max = 100)
   private String companyName;
 
@@ -43,7 +39,7 @@ public class SupplierRequest extends SignUpRequest {
 
   @NotBlank
   @NotEmpty
-  @Size(min=5, max = 20)
+  @Size(min = 5, max = 20)
   private String fax;
 
   private Integer ratingValue;

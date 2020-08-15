@@ -15,7 +15,7 @@ public class ContractDto {
 
   private Double price;
 
-  private String discountCode;
+  private DiscountDto discountCode;
 
   private Double finesAgainstContractViolation;
 

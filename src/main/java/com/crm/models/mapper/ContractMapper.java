@@ -6,6 +6,10 @@ import com.crm.models.dto.ContractDto;
 public class ContractMapper {
 
   public static ContractDto toContractDto(Contract contract) {
+    if (contract == null) {
+      return null;
+    }
+    
     ContractDto contractDto = new ContractDto();
     contractDto.setId(contract.getId());
 
@@ -14,8 +18,7 @@ public class ContractMapper {
     contractDto.setFinesAgainstContractViolation(contract.getFinesAgainstContractViolations());
 
     if (contract.getDiscount() != null) {
-      String discountCode = contract.getDiscount().getCode();
-      contractDto.setDiscountCode(discountCode);
+      contractDto.setDiscountCode(DiscountMapper.toDiscountDto(contract.getDiscount()));
     }
 
     contractDto.setRequired(contract.getRequired());

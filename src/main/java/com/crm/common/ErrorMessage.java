@@ -62,6 +62,10 @@ public class ErrorMessage {
 
   // Supply
   public static final String SUPPLY_CODE_DUPLICATE = "Mã hàng đã tồn tại";
+  
+  //Supplier
+  public static final String TIN_DUPLICATE = "Mã số thuế đã được sử dụng";
+  public static final String FAX_DUPLICATE = "Địa chỉ thư điện tử đã được sử dụng";
 
   // Supplier
   public static final String TIN_DUPLICATE = "Mã số thuế đã được sử dụng";

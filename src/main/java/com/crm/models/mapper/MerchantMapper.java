@@ -9,6 +9,10 @@ import com.crm.models.dto.MerchantDto;
 public class MerchantMapper {
 
   public static MerchantDto toMerchantDto(Merchant merchant) {
+    if (merchant == null) {
+      return null;
+    }
+
     MerchantDto merchantDto = new MerchantDto();
     merchantDto.setId(merchant.getId());
     merchantDto.setUsername(merchant.getUsername());
@@ -23,7 +27,7 @@ public class MerchantMapper {
     merchantDto.setRoles(merchantRoles);
 
     merchantDto.setWebsite(merchant.getWebsite());
-    merchantDto.setContactPerson(merchant.getContactPerson());
+    merchantDto.setFullname(merchant.getFullname());
     merchantDto.setCompanyName(merchant.getCompanyName());
     merchantDto.setCompanyCode(merchant.getCompanyCode());
     merchantDto.setCompanyDescription(merchant.getCompanyDescription());

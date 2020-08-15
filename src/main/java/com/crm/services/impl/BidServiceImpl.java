@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
@@ -49,6 +51,8 @@ import com.crm.services.BidService;
 
 @Service
 public class BidServiceImpl implements BidService {
+  
+  private static final Logger logger = LoggerFactory.getLogger(BidServiceImpl.class);
 
   @Autowired
   private BidRepository bidRepository;
@@ -175,6 +179,7 @@ public class BidServiceImpl implements BidService {
 
   @Override
   public Page<Bid> getBidsByBiddingDocument(Long id, String username, PaginationRequest request) {
+    logger.info("{} get bids from Bidding document {}", username, id);
     if (!biddingDocumentRepository.existsById(id)) {
       throw new NotFoundException(ErrorMessage.BIDDINGDOCUMENT_NOT_FOUND);
     }

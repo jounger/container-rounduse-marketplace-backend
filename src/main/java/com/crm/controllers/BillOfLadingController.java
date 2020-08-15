@@ -8,27 +8,27 @@ import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.crm.common.SuccessMessage;
 import com.crm.models.BillOfLading;
 import com.crm.models.dto.BillOfLadingDto;
 import com.crm.models.mapper.BillOfLadingMapper;
-import com.crm.payload.request.BillOfLadingRequest;
 import com.crm.payload.request.PaginationRequest;
+import com.crm.payload.response.DefaultResponse;
 import com.crm.payload.response.PaginationResponse;
 import com.crm.services.BillOfLadingService;
 
@@ -42,21 +42,12 @@ public class BillOfLadingController {
 
   @GetMapping("/inbound/{id}")
   @PreAuthorize("hasRole('FORWARDER') or hasRole('MERCHANT')")
-  public ResponseEntity<?> getBillOfLadingsByInbound(@PathVariable Long id, @Valid PaginationRequest request) {
+  public ResponseEntity<?> getBillOfLadingByInbound(@PathVariable Long id, @Valid PaginationRequest request) {
 
-    Page<BillOfLading> pages = billOfLadingService.getBillOfLadingsByInbound(id, request);
-    PaginationResponse<BillOfLadingDto> response = new PaginationResponse<>();
-    response.setPageNumber(request.getPage());
-    response.setPageSize(request.getLimit());
-    response.setTotalElements(pages.getTotalElements());
-    response.setTotalPages(pages.getTotalPages());
-
-    List<BillOfLading> billOfLadings = pages.getContent();
-    List<BillOfLadingDto> BillOfLadingsDto = new ArrayList<>();
-    billOfLadings.forEach(billOfLading -> BillOfLadingsDto.add(BillOfLadingMapper.toBillOfLadingDto(billOfLading)));
-    response.setContents(BillOfLadingsDto);
-
-    return ResponseEntity.ok(response);
+    BillOfLading billOfLading = billOfLadingService.getBillOfLadingByInbound(id);
+    BillOfLadingDto billOfLadingDto = new BillOfLadingDto();
+    billOfLadingDto = BillOfLadingMapper.toBillOfLadingDto(billOfLading);
+    return ResponseEntity.ok(billOfLadingDto);
   }
 
   @GetMapping("/filter")
@@ -97,31 +88,22 @@ public class BillOfLadingController {
     return ResponseEntity.ok(billOfLadingDto);
   }
 
-  @Transactional
-  @PutMapping("")
-  @PreAuthorize("hasRole('FORWARDER')")
-  public ResponseEntity<?> updateBillOfLading(@Valid @RequestBody BillOfLadingRequest request) {
-
-    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
-        .getPrincipal();
-    String username = userDetails.getUsername();
-
-    BillOfLading billOfLading = billOfLadingService.updateBillOfLading(username, request);
-    BillOfLadingDto billOfLadingDto = BillOfLadingMapper.toBillOfLadingDto(billOfLading);
-    return ResponseEntity.ok(billOfLadingDto);
-  }
-
   @RequestMapping(value = "/{id}", method = RequestMethod.PATCH, consumes = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("hasRole('FORWARDER')")
   public ResponseEntity<?> editBillOfLading(@RequestBody Map<String, Object> updates, @PathVariable("id") Long id) {
 
-    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
-        .getPrincipal();
+    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
 
     BillOfLading billOfLading = billOfLadingService.editBillOfLading(updates, id, username);
     BillOfLadingDto billOfLadingDto = new BillOfLadingDto();
     billOfLadingDto = BillOfLadingMapper.toBillOfLadingDto(billOfLading);
-    return ResponseEntity.ok(billOfLadingDto);
+
+    // Set default response body
+    DefaultResponse<BillOfLadingDto> defaultResponse = new DefaultResponse<>();
+    defaultResponse.setMessage(SuccessMessage.EDIT_BILL_OF_LADING_SUCCESSFULLY);
+    defaultResponse.setData(billOfLadingDto);
+
+    return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 }

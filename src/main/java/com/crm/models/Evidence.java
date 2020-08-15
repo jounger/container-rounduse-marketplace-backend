@@ -13,6 +13,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.validation.constraints.Size;
 
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -45,13 +46,14 @@ public class Evidence {
   @ManyToOne
   @JoinColumn(name = "contract_id")
   private Contract contract;
-  
+
   @ManyToOne
   @JoinColumn(name = "supplier_id")
   private Supplier sender;
 
-  @Column(name = "evidence")
-  private String evidence;
+  @Size(min = 5, max = 200)
+  @Column(name = "document_path")
+  private String documentPath;
 
   @Column(name = "is_valid")
   private Boolean isValid;

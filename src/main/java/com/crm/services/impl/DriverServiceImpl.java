@@ -12,7 +12,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.crm.common.Constant;
-import com.crm.common.ErrorConstant;
+import com.crm.common.ErrorMessage;
 import com.crm.common.Tool;
 import com.crm.enums.EnumUserStatus;
 import com.crm.exception.DuplicateRecordException;
@@ -52,7 +52,7 @@ public class DriverServiceImpl implements DriverService {
   public Driver createDriver(String username, DriverRequest request) {
     if (userRepository.existsByUsername(request.getUsername()) || userRepository.existsByEmail(request.getEmail())
         || userRepository.existsByPhone(request.getPhone())) {
-      throw new DuplicateRecordException(ErrorConstant.USER_ALREADY_EXISTS);
+      throw new DuplicateRecordException(ErrorMessage.USER_ALREADY_EXISTS);
     }
     Driver driver = new Driver();
     driver.setUsername(request.getUsername());
@@ -67,7 +67,7 @@ public class DriverServiceImpl implements DriverService {
 
     Set<Role> roles = new HashSet<>();
     Role userRole = roleRepository.findByName("ROLE_DRIVER")
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.ROLE_NOT_FOUND));
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.ROLE_NOT_FOUND));
     roles.add(userRole);
     driver.setRoles(roles);
 
@@ -75,7 +75,7 @@ public class DriverServiceImpl implements DriverService {
     driver.setDriverLicense(request.getDriverLicense());
 
     Forwarder forwarder = forwarderRepository.findByUsername(username)
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.FORWARDER_NOT_FOUND));
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.FORWARDER_NOT_FOUND));
     driver.setForwarder(forwarder);
 
     Geolocation location = new Geolocation();
@@ -92,7 +92,7 @@ public class DriverServiceImpl implements DriverService {
   @Override
   public Driver getDriver(Long id) {
     Driver driver = driverRepository.findById(id)
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.DRIVER_NOT_FOUND));
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.DRIVER_NOT_FOUND));
     return driver;
   }
 
@@ -114,10 +114,10 @@ public class DriverServiceImpl implements DriverService {
   public Driver editDriver(Long id, String username, Map<String, Object> updates) {
     if (forwarderRepository.existsByUsername(username)) {
       Driver driver = driverRepository.findById(id)
-          .orElseThrow(() -> new NotFoundException(ErrorConstant.DRIVER_NOT_FOUND));
+          .orElseThrow(() -> new NotFoundException(ErrorMessage.DRIVER_NOT_FOUND));
 
       if (!driver.getForwarder().getUsername().equals(username)) {
-        throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
+        throw new ForbiddenException(ErrorMessage.USER_ACCESS_DENIED);
       }
 
       String email = String.valueOf(updates.get("email"));
@@ -125,7 +125,7 @@ public class DriverServiceImpl implements DriverService {
         if (!userRepository.existsByEmail(email)) {
           driver.setEmail(email);
         } else {
-          throw new DuplicateRecordException(ErrorConstant.USER_EMAIL_ALREADY_EXISTS);
+          throw new DuplicateRecordException(ErrorMessage.USER_EMAIL_ALREADY_EXISTS);
         }
       }
 
@@ -134,7 +134,7 @@ public class DriverServiceImpl implements DriverService {
         if (!userRepository.existsByPhone(phone)) {
           driver.setPhone(phone);
         } else {
-          throw new DuplicateRecordException(ErrorConstant.USER_PHONE_ALREADY_EXISTS);
+          throw new DuplicateRecordException(ErrorMessage.USER_PHONE_ALREADY_EXISTS);
         }
       }
 
@@ -156,14 +156,18 @@ public class DriverServiceImpl implements DriverService {
 
       String driverLicense = String.valueOf(updates.get("driverLicense"));
       if (updates.get("driverLicense") != null && !Tool.isEqual(driver.getDriverLicense(), driverLicense)) {
-        driver.setDriverLicense(driverLicense);
+        if(!driverRepository.existsByDriverLicense(driverLicense)) {
+          driver.setDriverLicense(driverLicense);
+        }else {
+          throw new DuplicateRecordException(ErrorMessage.DRIVER_LICENSE_ALREADY_EXIST);
+        }
       }
 
       Driver _driver = driverRepository.save(driver);
 
       return _driver;
     } else {
-      throw new NotFoundException(ErrorConstant.FORWARDER_NOT_FOUND);
+      throw new NotFoundException(ErrorMessage.FORWARDER_NOT_FOUND);
     }
   }
 
@@ -172,20 +176,20 @@ public class DriverServiceImpl implements DriverService {
     if (forwarderRepository.existsByUsername(username)) {
 
       Driver driver = driverRepository.findById(id)
-          .orElseThrow(() -> new NotFoundException(ErrorConstant.DRIVER_NOT_FOUND));
-
+          .orElseThrow(() -> new NotFoundException(ErrorMessage.DRIVER_NOT_FOUND));
+      driverRepository.delete(driver);
       if (!driver.getForwarder().getUsername().equals(username)) {
-        throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
+        throw new ForbiddenException(ErrorMessage.USER_ACCESS_DENIED);
       }
     } else {
-      throw new NotFoundException(ErrorConstant.FORWARDER_NOT_FOUND);
+      throw new NotFoundException(ErrorMessage.FORWARDER_NOT_FOUND);
     }
   }
 
   @Override
-  public Driver getDriverByUserName(String username) {
+  public Driver getDriverByUsername(String username) {
     Driver driver = driverRepository.findByUsername(username)
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.DRIVER_NOT_FOUND));
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.DRIVER_NOT_FOUND));
     return driver;
   }
 

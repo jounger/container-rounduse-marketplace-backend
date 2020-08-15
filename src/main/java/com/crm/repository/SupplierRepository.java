@@ -21,11 +21,15 @@ public interface SupplierRepository extends JpaRepository<Supplier, Long>, JpaSp
   Boolean existsByEmail(String email);
 
   Boolean existsByPhone(String phone);
-  
+
   Boolean existsByCompanyCode(String companyCode);
 
+  Boolean existsByTin(String tin);
+
+  Boolean existsByFax(String fax);
+
   Page<Supplier> findByStatus(String status, Pageable pageable);
-  
+
   @Query(value = "FROM Supplier s LEFT JOIN s.roles r WHERE r.name in ('ROLE_MERCHANT','ROLE_FORWARER')")
   Page<Supplier> findByRole(Pageable pageable);
 }

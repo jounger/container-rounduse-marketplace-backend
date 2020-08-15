@@ -9,6 +9,7 @@ import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -22,12 +23,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.crm.common.SuccessMessage;
 import com.crm.models.ShippingLine;
 import com.crm.models.dto.ShippingLineDto;
 import com.crm.models.mapper.ShippingLineMapper;
 import com.crm.payload.request.PaginationRequest;
 import com.crm.payload.request.ShippingLineRequest;
-import com.crm.payload.response.MessageResponse;
+import com.crm.payload.response.DefaultResponse;
 import com.crm.payload.response.PaginationResponse;
 import com.crm.services.ShippingLineService;
 
@@ -45,7 +47,13 @@ public class ShippingLineController {
   public ResponseEntity<?> createShippingLine(@Valid @RequestBody ShippingLineRequest request) {
     ShippingLine shippingLine = shippingLineService.createShippingLine(request);
     ShippingLineDto shippingLineDto = ShippingLineMapper.toShippingLineDto(shippingLine);
-    return ResponseEntity.ok(shippingLineDto);
+
+    // Set default response body
+    DefaultResponse<ShippingLineDto> defaultResponse = new DefaultResponse<>();
+    defaultResponse.setMessage(SuccessMessage.CREATE_SHIPPING_LINE_SUCCESSFULLY);
+    defaultResponse.setData(shippingLineDto);
+
+    return ResponseEntity.status(HttpStatus.CREATED).body(defaultResponse);
   }
 
   @GetMapping("")
@@ -80,7 +88,13 @@ public class ShippingLineController {
   public ResponseEntity<?> editShippingLine(@PathVariable("id") Long id, @RequestBody Map<String, Object> updates) {
     ShippingLine shippingLine = shippingLineService.editShippingLine(id, updates);
     ShippingLineDto shippingLineDto = ShippingLineMapper.toShippingLineDto(shippingLine);
-    return ResponseEntity.ok(shippingLineDto);
+
+    // Set default response body
+    DefaultResponse<ShippingLineDto> defaultResponse = new DefaultResponse<>();
+    defaultResponse.setMessage(SuccessMessage.EDIT_SHIPPING_LINE_SUCCESSFULLY);
+    defaultResponse.setData(shippingLineDto);
+
+    return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 
   @Transactional
@@ -88,6 +102,11 @@ public class ShippingLineController {
   @DeleteMapping("/{id}")
   public ResponseEntity<?> deleteShippingLine(@PathVariable Long id) {
     shippingLineService.removeShippingLine(id);
-    return ResponseEntity.ok(new MessageResponse("Bidding document deleted successfully."));
+
+    // Set default response body
+    DefaultResponse<ShippingLineDto> defaultResponse = new DefaultResponse<>();
+    defaultResponse.setMessage(SuccessMessage.DELETE_SHIPPING_LINE_SUCCESSFULLY);
+
+    return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 }

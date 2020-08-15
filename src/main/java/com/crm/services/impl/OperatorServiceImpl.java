@@ -9,7 +9,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.crm.common.ErrorConstant;
+import com.crm.common.ErrorMessage;
 import com.crm.common.Tool;
 import com.crm.enums.EnumUserStatus;
 import com.crm.exception.DuplicateRecordException;
@@ -43,7 +43,7 @@ public class OperatorServiceImpl implements OperatorService {
 
     if (userRepository.existsByUsername(request.getUsername()) || userRepository.existsByEmail(request.getEmail())
         || userRepository.existsByPhone(request.getPhone())) {
-      throw new DuplicateRecordException(ErrorConstant.USER_ALREADY_EXISTS);
+      throw new DuplicateRecordException(ErrorMessage.USER_ALREADY_EXISTS);
     }
     Operator operator = new Operator();
     operator.setUsername(request.getUsername());
@@ -54,14 +54,14 @@ public class OperatorServiceImpl implements OperatorService {
     String role = request.getRoles().iterator().next();
     if (role.equalsIgnoreCase("ROLE_MODERATOR")) {
       Role userRole = roleRepository.findByName("ROLE_MODERATOR")
-          .orElseThrow(() -> new NotFoundException(ErrorConstant.ROLE_NOT_FOUND));
+          .orElseThrow(() -> new NotFoundException(ErrorMessage.ROLE_NOT_FOUND));
       operator.getRoles().add(userRole);
     } else if (role.equalsIgnoreCase("ROLE_ADMIN")) {
       Role userRole = roleRepository.findByName("ROLE_ADMIN")
-          .orElseThrow(() -> new NotFoundException(ErrorConstant.ROLE_NOT_FOUND));
+          .orElseThrow(() -> new NotFoundException(ErrorMessage.ROLE_NOT_FOUND));
       operator.getRoles().add(userRole);
     } else {
-      throw new NotFoundException(ErrorConstant.ROLE_NOT_FOUND);
+      throw new NotFoundException(ErrorMessage.ROLE_NOT_FOUND);
     }
 
     operator.setPhone(request.getPhone());
@@ -85,28 +85,28 @@ public class OperatorServiceImpl implements OperatorService {
   @Override
   public Operator getOperatorById(Long id) {
     Operator operator = operatorRepository.findById(id)
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.OPERATOR_NOT_FOUND));
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.OPERATOR_NOT_FOUND));
     return operator;
   }
 
   @Override
   public Operator getOperatorByUsername(String username) {
     Operator operator = operatorRepository.findByUsername(username)
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.OPERATOR_NOT_FOUND));
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.OPERATOR_NOT_FOUND));
     return operator;
   }
 
   @Override
   public Operator editOperator(Long id, Map<String, Object> updates) {
     Operator operator = operatorRepository.findById(id)
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.OPERATOR_NOT_FOUND));
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.OPERATOR_NOT_FOUND));
 
     String email = String.valueOf(updates.get("email"));
     if (updates.get("email") != null && !Tool.isEqual(operator.getEmail(), email)) {
       if (!userRepository.existsByEmail(email)) {
         operator.setEmail(email);
       } else {
-        throw new DuplicateRecordException(ErrorConstant.USER_ALREADY_EXISTS);
+        throw new DuplicateRecordException(ErrorMessage.USER_EMAIL_ALREADY_EXISTS);
       }
     }
 
@@ -115,7 +115,7 @@ public class OperatorServiceImpl implements OperatorService {
       if (!userRepository.existsByPhone(phone)) {
         operator.setPhone(phone);
       } else {
-        throw new DuplicateRecordException(ErrorConstant.USER_PHONE_ALREADY_EXISTS);
+        throw new DuplicateRecordException(ErrorMessage.USER_PHONE_ALREADY_EXISTS);
       }
     }
 
@@ -128,7 +128,7 @@ public class OperatorServiceImpl implements OperatorService {
     if (updates.get("status") != null && !Tool.isEqual(operator.getStatus(), status)) {
       EnumUserStatus eStatus = EnumUserStatus.findByName(status);
       if (eStatus == null) {
-        throw new NotFoundException(ErrorConstant.USER_STATUS_NOT_FOUND);
+        throw new NotFoundException(ErrorMessage.USER_STATUS_NOT_FOUND);
       }
       operator.setStatus(eStatus.name());
     }
@@ -148,7 +148,7 @@ public class OperatorServiceImpl implements OperatorService {
     if (operatorRepository.existsById(id)) {
       operatorRepository.deleteById(id);
     } else {
-      throw new NotFoundException(ErrorConstant.OPERATOR_NOT_FOUND);
+      throw new NotFoundException(ErrorMessage.OPERATOR_NOT_FOUND);
     }
   }
 

@@ -18,6 +18,8 @@ public interface DriverRepository extends JpaRepository<Driver, Long>{
 	
 	Boolean existsByUsername(String username);
 	
+	Boolean existsByDriverLicense(String driverLicense);
+	
 	Optional<Driver> findByUsername(String username);
 	
 	@Query(value = "FROM Driver d WHERE d.forwarder.username = :username")

@@ -1,5 +1,7 @@
 package com.crm.repository;
 
+import java.util.Optional;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -20,5 +22,9 @@ public interface OutboundRepository extends JpaRepository<Outbound, Long>, JpaSp
 
   @Query(value = "SELECT o FROM Outbound o WHERE o.merchant.username = :username AND o.status = :status")
   Page<Outbound> findByMerchant(@Param("username") String username, @Param("status") String status, Pageable pageable);
+
+  @Query(value = "SELECT DISTINCT o FROM Outbound o LEFT JOIN o.biddingDocuments bd"
+      + " LEFT JOIN bd.bids b LEFT JOIN b.combined c WHERE c.id = :id")
+  Optional<Outbound> findByCombined(@Param("id") Long combinedId);
 
 }

@@ -1,21 +1,20 @@
 package com.crm.services.impl;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import com.crm.common.ErrorConstant;
+import com.crm.common.ErrorMessage;
 import com.crm.common.Tool;
 import com.crm.enums.EnumBidStatus;
-import com.crm.enums.EnumShippingStatus;
 import com.crm.exception.DuplicateRecordException;
 import com.crm.exception.ForbiddenException;
 import com.crm.exception.InternalException;
@@ -25,28 +24,19 @@ import com.crm.models.BiddingDocument;
 import com.crm.models.Combined;
 import com.crm.models.Container;
 import com.crm.models.Contract;
-import com.crm.models.Outbound;
-import com.crm.models.ShippingInfo;
 import com.crm.models.Supplier;
 import com.crm.models.User;
 import com.crm.payload.request.CombinedRequest;
 import com.crm.payload.request.ContractRequest;
 import com.crm.payload.request.PaginationRequest;
-import com.crm.payload.request.ShippingInfoRequest;
 import com.crm.repository.BidRepository;
 import com.crm.repository.CombinedRepository;
-import com.crm.repository.ContainerRepository;
 import com.crm.repository.UserRepository;
 import com.crm.services.BidService;
 import com.crm.services.CombinedService;
-import com.crm.services.ShippingInfoService;
 
 @Service
 public class CombinedServiceImpl implements CombinedService {
-
-  @Autowired
-  @Qualifier("cachedThreadPool")
-  private ExecutorService executorService;
 
   @Autowired
   private CombinedRepository combinedRepository;
@@ -58,25 +48,33 @@ public class CombinedServiceImpl implements CombinedService {
   private UserRepository userRepository;
 
   @Autowired
-  private ContainerRepository containerRepository;
-
-  @Autowired
   private BidService bidService;
-
-  @Autowired
-  private ShippingInfoService shippingInfoService;
 
   @Override
   public Combined createCombined(Long bidId, String username, CombinedRequest request) {
     Combined combined = new Combined();
 
-    Bid bid = bidRepository.findById(bidId).orElseThrow(() -> new NotFoundException(ErrorConstant.BID_NOT_FOUND));
+    Bid bid = bidRepository.findById(bidId).orElseThrow(() -> new NotFoundException(ErrorMessage.BID_NOT_FOUND));
     if (bid.getCombined() != null) {
-      throw new DuplicateRecordException(ErrorConstant.BID_INVALID_CREATE);
+      throw new DuplicateRecordException(ErrorMessage.BID_INVALID_CREATE);
     }
-    List<Long> containersId = request.getContainers();
+    BiddingDocument biddingDocument = bid.getBiddingDocument();
+    if(biddingDocument.getBidClosing().isBefore(LocalDateTime.now())) {
+      throw new NotFoundException(ErrorMessage.BIDDINGDOCUMENT_TIME_OUT);
+    }
+    List<Long> containersId = new ArrayList<>();
+    List<Container> containers = new ArrayList<Container>(bid.getContainers());
+    if (!biddingDocument.getIsMultipleAward()) {
+      for (int i = 0; i < containers.size(); i++) {
+        Container container = containers.get(i);
+        containersId.add(container.getId());
+      }
+    }else {
+      containersId = request.getContainers();
+    }
+
     if (request.getContainers() == null || request.getContainers().size() == 0) {
-      throw new NotFoundException(ErrorConstant.CONTAINER_NOT_FOUND);
+      throw new NotFoundException(ErrorMessage.CONTAINER_NOT_FOUND);
     }
 
     bid = bidService.editBidWhenCombined(bidId, username, containersId);
@@ -84,7 +82,6 @@ public class CombinedServiceImpl implements CombinedService {
 
     combined.setIsCanceled(false);
     bid = combined.getBid();
-    BiddingDocument biddingDocument = bid.getBiddingDocument();
     Supplier offeree = biddingDocument.getOfferee();
     ContractRequest contracRequest = request.getContract();
     Contract contract = new Contract();
@@ -96,10 +93,10 @@ public class CombinedServiceImpl implements CombinedService {
       if (fines > 0) {
         contract.setFinesAgainstContractViolations(fines);
       } else {
-        throw new InternalException(ErrorConstant.CONTRACT_INVALID_FINES);
+        throw new InternalException(ErrorMessage.CONTRACT_INVALID_FINES);
       }
     } else if (!username.equals(offeree.getUsername())) {
-      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
+      throw new ForbiddenException(ErrorMessage.USER_ACCESS_DENIED);
     }
 
     combined.setContract(contract);
@@ -107,33 +104,7 @@ public class CombinedServiceImpl implements CombinedService {
 
     Combined _combined = combinedRepository.save(combined);
 
-    Outbound outbound = biddingDocument.getOutbound();
-    createShippingInfosForCombined(_combined, outbound, containersId);
-
     return _combined;
-  }
-
-  public void createShippingInfosForCombined(Combined combined, Outbound outbound, List<Long> containers) {
-    executorService.submit(new Runnable() {
-      @Override
-      public void run() {
-        ShippingInfoRequest shippingInfoRequest = new ShippingInfoRequest();
-        shippingInfoRequest.setCombined(combined.getId());
-        shippingInfoRequest.setOutbound(outbound.getId());
-        shippingInfoRequest.setStatus(EnumShippingStatus.INFO_RECEIVED.name());
-        containers.forEach(containerId -> {
-          try {
-            Container container = containerRepository.findById(containerId)
-                .orElseThrow(() -> new NotFoundException(ErrorConstant.CONTAINER_NOT_FOUND));
-            shippingInfoRequest.setContainer(container.getId());
-            ShippingInfo shippingInfo = shippingInfoService.createShippingInfo(shippingInfoRequest);
-            combined.getShippingInfos().add(shippingInfo);
-          } catch (NumberFormatException e) {
-            throw new NumberFormatException(ErrorConstant.CONTAINER_NOT_FOUND);
-          }
-        });
-      }
-    });
   }
 
   @Override
@@ -146,14 +117,14 @@ public class CombinedServiceImpl implements CombinedService {
   @Override
   public Combined getCombined(Long id) {
     Combined combined = combinedRepository.findById(id)
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.COMBINED_NOT_FOUND));
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.COMBINED_NOT_FOUND));
     return combined;
   }
 
   @Override
   public Page<Combined> getCombinedsByUser(String username, PaginationRequest request) {
     User user = userRepository.findByUsername(username)
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.USER_NOT_FOUND));
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.USER_NOT_FOUND));
     String role = user.getRoles().iterator().next().getName();
     Page<Combined> combineds = null;
     if (role.equalsIgnoreCase("ROLE_MERCHANT")) {
@@ -176,7 +147,7 @@ public class CombinedServiceImpl implements CombinedService {
   @Override
   public Combined editCombined(Long id, String username, String isCanceled) {
     Combined combined = combinedRepository.findById(id)
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.COMBINED_NOT_FOUND));
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.COMBINED_NOT_FOUND));
 
     Bid bid = combined.getBid();
     if (!Tool.isBlank(isCanceled)) {
@@ -194,7 +165,7 @@ public class CombinedServiceImpl implements CombinedService {
     if (combinedRepository.existsById(id)) {
       combinedRepository.deleteById(id);
     } else {
-      throw new NotFoundException(ErrorConstant.COMBINED_NOT_FOUND);
+      throw new NotFoundException(ErrorMessage.COMBINED_NOT_FOUND);
     }
   }
 

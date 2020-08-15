@@ -9,13 +9,13 @@ public class ShippingInfoMapper {
 
   public static ShippingInfoDto toShippingInfoDto(ShippingInfo shippingInfo) {
     ShippingInfoDto shippingInfoDto = new ShippingInfoDto();
-    shippingInfo.setId(shippingInfo.getId());
+    shippingInfoDto.setId(shippingInfo.getId());
 
     Outbound outbound = shippingInfo.getOutbound();
-    shippingInfoDto.setSupplyCode(outbound.getCode());
+    shippingInfoDto.setOutbound(OutboundMapper.toOutboundDto(outbound));
 
     Container container = shippingInfo.getContainer();
-    shippingInfoDto.setContainerNumber(container.getContainerNumber());
+    shippingInfoDto.setContainer(ContainerMapper.toContainerDto(container));
 
     shippingInfoDto.setStatus(shippingInfo.getStatus());
 

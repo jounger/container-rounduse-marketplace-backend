@@ -9,6 +9,7 @@ import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -25,12 +26,13 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.crm.common.SuccessMessage;
 import com.crm.models.Feedback;
 import com.crm.models.dto.FeedbackDto;
 import com.crm.models.mapper.FeedbackMapper;
 import com.crm.payload.request.FeedbackRequest;
 import com.crm.payload.request.PaginationRequest;
-import com.crm.payload.response.MessageResponse;
+import com.crm.payload.response.DefaultResponse;
 import com.crm.payload.response.PaginationResponse;
 import com.crm.services.FeedbackService;
 import com.crm.websocket.controller.NotificationBroadcast;
@@ -50,17 +52,21 @@ public class FeedbackController {
   @PostMapping("/report/{id}")
   @PreAuthorize("hasRole('MODERATOR')")
   public ResponseEntity<?> createFeedback(@PathVariable("id") Long id, @Valid @RequestBody FeedbackRequest request) {
-    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
-        .getPrincipal();
+    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
     Feedback payment = paymentService.createFeedback(id, username, request);
-    FeedbackDto paymentDto = FeedbackMapper.toFeedbackDto(payment);
+    FeedbackDto feedbackDto = FeedbackMapper.toFeedbackDto(payment);
 
     // CREATE NOTIFICATION
     notificationBroadcast.broadcastCreateFeedbackToUser(payment);
     // END NOTIFICATION
 
-    return ResponseEntity.ok(paymentDto);
+    // Set default response body
+    DefaultResponse<FeedbackDto> defaultResponse = new DefaultResponse<>();
+    defaultResponse.setMessage(SuccessMessage.CREATE_FEEDBACK_SUCCESSFULLY);
+    defaultResponse.setData(feedbackDto);
+
+    return ResponseEntity.status(HttpStatus.CREATED).body(defaultResponse);
   }
 
   @Transactional
@@ -68,24 +74,27 @@ public class FeedbackController {
   @PreAuthorize("hasRole('FORWARDER')")
   public ResponseEntity<?> createFeedbackToModerator(@RequestParam Long id, @RequestParam String name,
       @Valid @RequestBody FeedbackRequest request) {
-    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
-        .getPrincipal();
+    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
-    Feedback payment = paymentService.createFeedback(id, username, request);
-    FeedbackDto paymentDto = FeedbackMapper.toFeedbackDto(payment);
+    Feedback feedback = paymentService.createFeedback(id, username, request);
+    FeedbackDto feedbackDto = FeedbackMapper.toFeedbackDto(feedback);
 
     // CREATE NOTIFICATION
-    notificationBroadcast.broadcastCreateFeedbackToModerator(name, payment);
+    notificationBroadcast.broadcastCreateFeedbackToModerator(name, feedback);
     // END NOTIFICATION
 
-    return ResponseEntity.ok(paymentDto);
+    // Set default response body
+    DefaultResponse<FeedbackDto> defaultResponse = new DefaultResponse<>();
+    defaultResponse.setMessage(SuccessMessage.CREATE_FEEDBACK_SUCCESSFULLY);
+    defaultResponse.setData(feedbackDto);
+
+    return ResponseEntity.status(HttpStatus.CREATED).body(defaultResponse);
   }
 
   @PreAuthorize("hasRole('MODERATOR') or hasRole('FORWARDER')")
   @GetMapping("/report/{id}")
   public ResponseEntity<?> getFeedbacksByReport(@PathVariable Long id, @Valid PaginationRequest request) {
-    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
-        .getPrincipal();
+    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
 
     Page<Feedback> pages = paymentService.getFeedbacksByReport(id, username, request);
@@ -149,22 +158,31 @@ public class FeedbackController {
   @PreAuthorize("hasRole('MODERATOR') or hasRole('FORWARDER')")
   @RequestMapping(value = "/{id}", method = RequestMethod.PATCH, consumes = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<?> editFeedback(@PathVariable("id") Long id, @RequestBody Map<String, Object> updates) {
-    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
-        .getPrincipal();
+    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
     Feedback payment = paymentService.editFeedback(id, username, updates);
-    FeedbackDto paymentDto = FeedbackMapper.toFeedbackDto(payment);
-    return ResponseEntity.ok(paymentDto);
+    FeedbackDto feedbackDto = FeedbackMapper.toFeedbackDto(payment);
+
+    // Set default response body
+    DefaultResponse<FeedbackDto> defaultResponse = new DefaultResponse<>();
+    defaultResponse.setMessage(SuccessMessage.EDIT_FEEDBACK_SUCCESSFULLY);
+    defaultResponse.setData(feedbackDto);
+
+    return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 
   @Transactional
   @PreAuthorize("hasRole('MODERATOR') or hasRole('FORWARDER')")
   @DeleteMapping("/{id}")
   public ResponseEntity<?> deleteFeedback(@PathVariable Long id) {
-    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
-        .getPrincipal();
+    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
     paymentService.removeFeedback(id, username);
-    return ResponseEntity.ok(new MessageResponse("Feedback deleted successfully."));
+
+    // Set default response body
+    DefaultResponse<FeedbackDto> defaultResponse = new DefaultResponse<>();
+    defaultResponse.setMessage(SuccessMessage.DELETE_FEEDBACK_SUCCESSFULLY);
+
+    return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 }

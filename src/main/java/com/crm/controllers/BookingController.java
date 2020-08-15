@@ -8,6 +8,7 @@ import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -17,18 +18,18 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.crm.common.SuccessMessage;
 import com.crm.models.Booking;
 import com.crm.models.dto.BookingDto;
 import com.crm.models.mapper.BookingMapper;
-import com.crm.payload.request.BookingRequest;
 import com.crm.payload.request.PaginationRequest;
+import com.crm.payload.response.DefaultResponse;
 import com.crm.payload.response.PaginationResponse;
 import com.crm.services.BookingService;
 
@@ -42,21 +43,11 @@ public class BookingController {
 
   @GetMapping("/outbound/{id}")
   @PreAuthorize("hasRole('FORWARDER') or hasRole('MERCHANT')")
-  public ResponseEntity<?> getBookingsByOutbound(@PathVariable Long id, @Valid PaginationRequest request) {
+  public ResponseEntity<?> getBookingByOutbound(@PathVariable Long id, @Valid PaginationRequest request) {
 
-    Page<Booking> pages = bookingService.getBookingsByOutbound(id, request);
-    PaginationResponse<BookingDto> response = new PaginationResponse<>();
-    response.setPageNumber(request.getPage());
-    response.setPageSize(request.getLimit());
-    response.setTotalElements(pages.getTotalElements());
-    response.setTotalPages(pages.getTotalPages());
-
-    List<Booking> bookings = pages.getContent();
-    List<BookingDto> bookingsDto = new ArrayList<>();
-    bookings.forEach(booking -> bookingsDto.add(BookingMapper.toBookingDto(booking)));
-    response.setContents(bookingsDto);
-
-    return ResponseEntity.ok(response);
+    Booking booking = bookingService.getBookingByOutbound(id);
+    BookingDto bookingDto = BookingMapper.toBookingDto(booking);
+    return ResponseEntity.ok(bookingDto);
   }
 
   @GetMapping("/filter")
@@ -96,30 +87,22 @@ public class BookingController {
   }
 
   @Transactional
-  @PutMapping("")
-  @PreAuthorize("hasRole('MERCHANT')")
-  public ResponseEntity<?> updateBooking(@Valid @RequestBody BookingRequest request) {
-
-    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
-        .getPrincipal();
-    String username = userDetails.getUsername();
-
-    Booking booking = bookingService.updateBooking(username, request);
-    BookingDto bookingDto = BookingMapper.toBookingDto(booking);
-    return ResponseEntity.ok(bookingDto);
-  }
-
   @RequestMapping(value = "/{id}", method = RequestMethod.PATCH, consumes = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("hasRole('MERCHANT')")
   public ResponseEntity<?> editBooking(@RequestBody Map<String, Object> updates, @PathVariable("id") Long id) {
 
-    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
-        .getPrincipal();
+    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
 
     Booking booking = bookingService.editBooking(updates, id, username);
     BookingDto bookingDto = new BookingDto();
     bookingDto = BookingMapper.toBookingDto(booking);
-    return ResponseEntity.ok(bookingDto);
+
+    // Set default response body
+    DefaultResponse<BookingDto> defaultResponse = new DefaultResponse<>();
+    defaultResponse.setMessage(SuccessMessage.EDIT_BOOKING_SUCCESSFULLY);
+    defaultResponse.setData(bookingDto);
+
+    return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 }

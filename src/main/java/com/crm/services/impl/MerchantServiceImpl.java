@@ -11,7 +11,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.crm.common.ErrorConstant;
+import com.crm.common.ErrorMessage;
 import com.crm.common.Tool;
 import com.crm.enums.EnumUserStatus;
 import com.crm.exception.DuplicateRecordException;
@@ -49,7 +49,7 @@ public class MerchantServiceImpl implements MerchantService {
     if (userRepository.existsByUsername(request.getUsername()) || userRepository.existsByEmail(request.getEmail())
         || userRepository.existsByPhone(request.getPhone())
         || supplierRepository.existsByCompanyCode(request.getCompanyCode())) {
-      throw new DuplicateRecordException(ErrorConstant.USER_NOT_FOUND);
+      throw new DuplicateRecordException(ErrorMessage.USER_NOT_FOUND);
     }
     Merchant merchant = new Merchant();
     merchant.setUsername(request.getUsername());
@@ -69,7 +69,7 @@ public class MerchantServiceImpl implements MerchantService {
 
     Set<Role> roles = new HashSet<>();
     Role userRole = roleRepository.findByName("ROLE_MERCHANT")
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.ROLE_NOT_FOUND));
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.ROLE_NOT_FOUND));
     roles.add(userRole);
     merchant.setRoles(roles);
 
@@ -83,7 +83,7 @@ public class MerchantServiceImpl implements MerchantService {
   @Override
   public Merchant getMerchant(Long id) {
     Merchant merchant = merchantRepository.findById(id)
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.MERCHANT_NOT_FOUND));
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.MERCHANT_NOT_FOUND));
     return merchant;
   }
 
@@ -97,12 +97,12 @@ public class MerchantServiceImpl implements MerchantService {
   @Override
   public Merchant editMerchant(Long id, Map<String, Object> updates) {
     Merchant merchant = merchantRepository.findById(id)
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.MERCHANT_NOT_FOUND));
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.MERCHANT_NOT_FOUND));
 
     String email = String.valueOf(updates.get("email"));
     if (updates.get("email") != null && !Tool.isEqual(merchant.getEmail(), email)) {
       if (userRepository.existsByEmail(email)) {
-        throw new DuplicateRecordException(ErrorConstant.USER_EMAIL_ALREADY_EXISTS);
+        throw new DuplicateRecordException(ErrorMessage.USER_EMAIL_ALREADY_EXISTS);
       }
       merchant.setEmail(email);
     }
@@ -110,7 +110,7 @@ public class MerchantServiceImpl implements MerchantService {
     String phone = String.valueOf(updates.get("phone"));
     if (updates.get("phone") != null && !Tool.isEqual(merchant.getPhone(), phone)) {
       if (userRepository.existsByPhone(phone)) {
-        throw new DuplicateRecordException(ErrorConstant.USER_PHONE_ALREADY_EXISTS);
+        throw new DuplicateRecordException(ErrorMessage.USER_PHONE_ALREADY_EXISTS);
       }
       merchant.setPhone(phone);
     }
@@ -144,7 +144,7 @@ public class MerchantServiceImpl implements MerchantService {
     String companyCode = String.valueOf(updates.get("companyCode"));
     if (updates.get("companyCode") != null && !Tool.isEqual(merchant.getCompanyCode(), companyCode)) {
       if (supplierRepository.existsByCompanyCode(companyCode)) {
-        throw new DuplicateRecordException(ErrorConstant.COMPANY_CODE_ALREADY_EXISTS);
+        throw new DuplicateRecordException(ErrorMessage.COMPANY_CODE_ALREADY_EXISTS);
       }
       merchant.setCompanyCode(companyCode);
     }
@@ -157,11 +157,17 @@ public class MerchantServiceImpl implements MerchantService {
 
     String tin = String.valueOf(updates.get("tin"));
     if (updates.get("tin") != null && !Tool.isEqual(merchant.getTin(), tin)) {
+      if (supplierRepository.existsByTin(tin)) {
+        throw new DuplicateRecordException(ErrorMessage.TIN_DUPLICATE);
+      }
       merchant.setTin(tin);
     }
 
     String fax = String.valueOf(updates.get("fax"));
     if (updates.get("fax") != null && !Tool.isEqual(merchant.getFax(), fax)) {
+      if (supplierRepository.existsByFax(fax)) {
+        throw new DuplicateRecordException(ErrorMessage.FAX_DUPLICATE);
+      }
       merchant.setFax(fax);
     }
 
@@ -174,7 +180,7 @@ public class MerchantServiceImpl implements MerchantService {
     if (merchantRepository.existsById(id)) {
       merchantRepository.deleteById(id);
     } else {
-      throw new NotFoundException(ErrorConstant.MERCHANT_NOT_FOUND);
+      throw new NotFoundException(ErrorMessage.MERCHANT_NOT_FOUND);
     }
 
   }

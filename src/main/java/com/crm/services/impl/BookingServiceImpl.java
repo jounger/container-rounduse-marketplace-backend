@@ -13,7 +13,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import com.crm.common.Constant;
-import com.crm.common.ErrorConstant;
+import com.crm.common.ErrorMessage;
 import com.crm.common.Tool;
 import com.crm.enums.EnumSupplyStatus;
 import com.crm.exception.ForbiddenException;
@@ -21,10 +21,10 @@ import com.crm.exception.InternalException;
 import com.crm.exception.NotFoundException;
 import com.crm.models.Booking;
 import com.crm.models.Port;
-import com.crm.payload.request.BookingRequest;
 import com.crm.payload.request.PaginationRequest;
 import com.crm.repository.BookingRepository;
 import com.crm.repository.MerchantRepository;
+import com.crm.repository.OutboundRepository;
 import com.crm.repository.PortRepository;
 import com.crm.services.BookingService;
 import com.crm.specification.builder.BookingSpecificationsBuilder;
@@ -41,73 +41,40 @@ public class BookingServiceImpl implements BookingService {
   @Autowired
   private PortRepository portRepository;
 
-  @Override
-  public Page<Booking> getBookingsByOutbound(Long id, PaginationRequest request) {
-
-    PageRequest pageRequest = PageRequest.of(request.getPage(), request.getLimit(),
-        Sort.by(Sort.Direction.DESC, "createdAt"));
-    Page<Booking> pages = bookingRepository.findByOutbound(id, pageRequest);
-    return pages;
-
-  }
+  @Autowired
+  private OutboundRepository outboundRepository;
 
   @Override
-  public Booking updateBooking(String username, BookingRequest request) {
-
-    Booking booking = bookingRepository.findById(request.getId())
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.BOOKING_NOT_FOUND));
-
-    if (!booking.getOutbound().getMerchant().getUsername().equals(username)) {
-      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
+  public Booking getBookingByOutbound(Long id) {
+    if (!outboundRepository.existsById(id)) {
+      throw new NotFoundException(ErrorMessage.OUTBOUND_NOT_FOUND);
     }
+    Booking booking = bookingRepository.findByOutbound(id)
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.BOOKING_NOT_FOUND));
+    return booking;
 
-    if (booking.getOutbound().getStatus().equals(EnumSupplyStatus.COMBINED.name())
-        || booking.getOutbound().getStatus().equals(EnumSupplyStatus.BIDDING.name())) {
-      throw new InternalException(ErrorConstant.OUTBOUND_IS_IN_TRANSACTION);
-    }
-
-    String number = request.getNumber();
-    if (number != null && !number.isEmpty()) {
-      booking.setNumber(number);
-    }
-
-    Port portOfLoading = portRepository.findByNameCode(request.getPortOfLoading())
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.PORT_NOT_FOUND));
-    booking.setPortOfLoading(portOfLoading);
-
-    booking.setUnit(request.getUnit());
-
-    if (request.getCutOffTime() != null && !request.getCutOffTime().isEmpty()) {
-      LocalDateTime cutOffTime = Tool.convertToLocalDateTime(request.getCutOffTime());
-      booking.setCutOffTime(cutOffTime);
-    }
-
-    booking.setIsFcl(request.getIsFcl());
-
-    Booking _booking = bookingRepository.save(booking);
-    return _booking;
   }
 
   @Override
   public Booking editBooking(Map<String, Object> updates, Long id, String username) {
 
     Booking booking = bookingRepository.findById(id)
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.BOOKING_NOT_FOUND));
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.BOOKING_NOT_FOUND));
 
     if (!booking.getOutbound().getMerchant().getUsername().equals(username)) {
-      throw new ForbiddenException(ErrorConstant.USER_ACCESS_DENIED);
+      throw new ForbiddenException(ErrorMessage.USER_ACCESS_DENIED);
     }
 
     if (booking.getOutbound().getStatus().equals(EnumSupplyStatus.COMBINED.name())
         || booking.getOutbound().getStatus().equals(EnumSupplyStatus.BIDDING.name())) {
-      throw new InternalException(ErrorConstant.OUTBOUND_IS_IN_TRANSACTION);
+      throw new InternalException(ErrorMessage.OUTBOUND_IS_IN_TRANSACTION);
     }
 
     String portOfLoadingRequest = String.valueOf(updates.get("portOfLoading"));
     if (updates.get("portOfLoading") != null
         && !Tool.isEqual(booking.getPortOfLoading().getNameCode(), portOfLoadingRequest)) {
       Port portOfLoading = portRepository.findByNameCode(portOfLoadingRequest)
-          .orElseThrow(() -> new NotFoundException(ErrorConstant.PORT_NOT_FOUND));
+          .orElseThrow(() -> new NotFoundException(ErrorMessage.PORT_NOT_FOUND));
       booking.setPortOfLoading(portOfLoading);
     }
 
@@ -141,14 +108,14 @@ public class BookingServiceImpl implements BookingService {
   @Override
   public Booking getBookingById(Long id) {
     Booking booking = bookingRepository.findById(id)
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.BOOKING_NOT_FOUND));
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.BOOKING_NOT_FOUND));
     return booking;
   }
 
   @Override
   public Booking getBookingsByNumber(String number) {
     Booking booking = bookingRepository.findByNumber(number)
-        .orElseThrow(() -> new NotFoundException(ErrorConstant.BOOKING_NOT_FOUND));
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.BOOKING_NOT_FOUND));
     return booking;
   }
 

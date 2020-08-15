@@ -9,6 +9,10 @@ import com.crm.models.dto.DriverDto;
 public class DriverMapper {
 
   public static DriverDto toDriverDto(Driver driver) {
+    if (driver == null) {
+      return null;
+    }
+
     DriverDto driverDto = new DriverDto();
     driverDto.setId(driver.getId());
     driverDto.setUsername(driver.getUsername());

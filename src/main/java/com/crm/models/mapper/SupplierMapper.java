@@ -9,6 +9,10 @@ import com.crm.models.dto.SupplierDto;
 public class SupplierMapper {
 
   public static SupplierDto toSupplierDto(Supplier supplier) {
+    if (supplier == null) {
+      return null;
+    }
+
     SupplierDto supplierDto = new SupplierDto();
     supplierDto.setId(supplier.getId());
     supplierDto.setUsername(supplier.getUsername());
@@ -23,7 +27,7 @@ public class SupplierMapper {
     supplierDto.setRoles(supplierRoles);
 
     supplierDto.setWebsite(supplier.getWebsite());
-    supplierDto.setContactPerson(supplier.getContactPerson());
+    supplierDto.setFullname(supplier.getFullname());
     supplierDto.setCompanyName(supplier.getCompanyName());
     supplierDto.setCompanyCode(supplier.getCompanyCode());
     supplierDto.setCompanyDescription(supplier.getCompanyDescription());

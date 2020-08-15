@@ -8,10 +8,14 @@ import com.crm.models.dto.ReportNotificationDto;
 public class ReportNotificationMapper {
 
   public static ReportNotificationDto toReportNotificationDto(ReportNotification reportNotification) {
+    if (reportNotification == null) {
+      return null;
+    }
+
     ReportNotificationDto reportNotificationDto = new ReportNotificationDto();
 
     reportNotificationDto.setId(reportNotification.getId());
-    reportNotificationDto.setRecipient(reportNotification.getRecipient().getUsername());
+    reportNotificationDto.setRecipient(UserMapper.toUserDto(reportNotification.getRecipient()));
     reportNotificationDto.setIsRead(reportNotification.getIsRead());
     reportNotificationDto.setIsHide(reportNotificationDto.getIsHide());
 

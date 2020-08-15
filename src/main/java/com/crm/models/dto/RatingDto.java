@@ -11,12 +11,12 @@ import lombok.Setter;
 @AllArgsConstructor
 public class RatingDto {
   private Long id;
-  
-  private String sender;
-  
-  private String receiver;
-  
+
+  private SupplierDto sender;
+
+  private SupplierDto receiver;
+
   private ContractDto contract;
-  
+
   private Integer ratingValue;
 }

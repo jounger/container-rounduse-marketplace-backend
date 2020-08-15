@@ -78,7 +78,7 @@ public class ForwarderServiceImpl implements ForwarderService {
     forwarder.setCompanyCode(request.getCompanyCode());
     forwarder.setCompanyDescription(request.getCompanyDescription());
     forwarder.setCompanyAddress(request.getCompanyAddress());
-    forwarder.setContactPerson(request.getContactPerson());
+    forwarder.setFullname(request.getFullname());
     forwarder.setTin(request.getTin());
     forwarder.setFax(request.getFax());
     forwarder.setRatingValue(0D);
@@ -139,9 +139,9 @@ public class ForwarderServiceImpl implements ForwarderService {
       forwarder.setWebsite(website);
     }
 
-    String contactPerson = String.valueOf(updates.get("contactPerson"));
-    if (updates.get("contactPerson") != null && !Tool.isEqual(forwarder.getContactPerson(), contactPerson)) {
-      forwarder.setContactPerson(contactPerson);
+    String fullname = String.valueOf(updates.get("fullname"));
+    if (updates.get("fullname") != null && !Tool.isEqual(forwarder.getFullname(), fullname)) {
+      forwarder.setFullname(fullname);
     }
 
     String companyName = String.valueOf(updates.get("companyName"));

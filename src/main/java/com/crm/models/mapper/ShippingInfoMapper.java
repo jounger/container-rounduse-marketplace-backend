@@ -8,6 +8,10 @@ import com.crm.models.dto.ShippingInfoDto;
 public class ShippingInfoMapper {
 
   public static ShippingInfoDto toShippingInfoDto(ShippingInfo shippingInfo) {
+    if (shippingInfo == null) {
+      return null;
+    }
+
     ShippingInfoDto shippingInfoDto = new ShippingInfoDto();
     shippingInfoDto.setId(shippingInfo.getId());
 

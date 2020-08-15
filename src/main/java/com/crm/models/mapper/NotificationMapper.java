@@ -6,10 +6,14 @@ import com.crm.models.dto.NotificationDto;
 
 public class NotificationMapper {
   public static NotificationDto toNotificationDto(Notification notification) {
+    if (notification == null) {
+      return null;
+    }
+
     NotificationDto notificationDto = new NotificationDto();
 
     notificationDto.setId(notification.getId());
-    notificationDto.setRecipient(notification.getRecipient().getUsername());
+    notificationDto.setRecipient(UserMapper.toUserDto(notification.getRecipient()));
     notificationDto.setIsRead(notification.getIsRead());
     notificationDto.setIsHide(notification.getIsHide());
     notificationDto.setMessage(notification.getMessage());

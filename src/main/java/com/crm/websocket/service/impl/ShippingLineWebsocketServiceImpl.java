@@ -21,7 +21,7 @@ public class ShippingLineWebsocketServiceImpl implements ShippingLineWebSocketSe
 
     ShippingLineNotificationDto shippingLineNotificationDto = ShippingLineNotificationMapper
         .toShippingLineNotificationDto(notification);
-    messagingTemplate.convertAndSendToUser(shippingLineNotificationDto.getRecipient(),
+    messagingTemplate.convertAndSendToUser(shippingLineNotificationDto.getRecipient().getUsername(),
         Constant.SHIPPING_LINE_NOTIFICATION, shippingLineNotificationDto);
   }
 

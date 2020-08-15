@@ -6,10 +6,14 @@ import com.crm.models.dto.BookingDto;
 
 public class BookingMapper {
   public static BookingDto toBookingDto(Booking booking) {
+    if (booking == null) {
+      return null;
+    }
+
     BookingDto dto = new BookingDto();
 
     dto.setId(booking.getId());
-    dto.setPortOfLoading(booking.getPortOfLoading().getNameCode());
+    dto.setPortOfLoading(PortMapper.toPortDto(booking.getPortOfLoading()));
     dto.setNumber(booking.getNumber());
     dto.setUnit(booking.getUnit());
 

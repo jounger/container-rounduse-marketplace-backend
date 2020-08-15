@@ -98,7 +98,11 @@ public class BiddingDocumentServiceImpl implements BiddingDocumentService {
     }
 
     biddingDocument.setBidPackagePrice(request.getBidPackagePrice());
-    biddingDocument.setBidFloorPrice(request.getBidFloorPrice());
+    if (request.getIsMultipleAward()) {
+      biddingDocument.setBidFloorPrice(0D);
+    } else {
+      biddingDocument.setBidFloorPrice(request.getBidFloorPrice());
+    }
     biddingDocument.setPriceLeadership(request.getBidPackagePrice());
 
     biddingDocument.setStatus(EnumBiddingStatus.BIDDING.name());

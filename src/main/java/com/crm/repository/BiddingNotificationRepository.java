@@ -1,5 +1,7 @@
 package com.crm.repository;
 
+import java.util.Optional;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -25,4 +27,7 @@ public interface BiddingNotificationRepository extends JpaRepository<BiddingNoti
   @Query(value = "FROM BiddingNotification bn WHERE bn.recipient.username = :username AND bn.type = :status")
   Page<BiddingNotification> findByUserAndStatus(@Param("username") String username,
       @Param("status") String status, Pageable pageable);
+  
+  @Query(value = "FROM BiddingNotification bn WHERE bn.recipient.username = :username AND bn.relatedResource.id = :id")
+  Optional<BiddingNotification> findByUserAndBiddingDocument(@Param("username") String username, @Param("id") Long id);
 }

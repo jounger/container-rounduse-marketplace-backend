@@ -7,8 +7,6 @@ import lombok.Setter;
 @Setter
 public class DriverDto extends UserDto {
 
-  private String fullname;
-
   private String driverLicense;
 
   private GeolocationDto location;

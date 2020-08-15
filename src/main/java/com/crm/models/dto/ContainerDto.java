@@ -9,7 +9,7 @@ public class ContainerDto {
 
   private Long id;
 
-  private String driver;
+  private DriverDto driver;
 
   private ContainerSemiTrailerDto trailer;
 

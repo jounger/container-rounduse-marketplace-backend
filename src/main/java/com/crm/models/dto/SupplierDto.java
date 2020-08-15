@@ -13,8 +13,6 @@ public class SupplierDto extends UserDto {
 
   private String website;
 
-  private String contactPerson;
-
   private String companyName;
 
   private String companyCode;

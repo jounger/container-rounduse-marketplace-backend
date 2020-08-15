@@ -8,15 +8,19 @@ import com.crm.models.dto.FeedbackDto;
 public class FeedbackMapper {
 
   public static FeedbackDto toFeedbackDto(Feedback feedback) {
+    if (feedback == null) {
+      return null;
+    }
+
     FeedbackDto feedbackDto = new FeedbackDto();
 
     feedbackDto.setId(feedback.getId());
-    feedbackDto.setReport(feedback.getReport().getId());
+    feedbackDto.setReport(ReportMapper.toReportDto(feedback.getReport()));
 
     User sender = feedback.getSender();
-    feedbackDto.setSender(sender.getUsername());
+    feedbackDto.setSender(UserMapper.toUserDto(sender));
     User recipient = feedback.getRecipient();
-    feedbackDto.setRecipient(recipient.getUsername());
+    feedbackDto.setRecipient(UserMapper.toUserDto(recipient));
 
     feedbackDto.setMessage(feedback.getMessage());
     feedbackDto.setSatisfactionPoints(feedback.getSatisfactionPoints());

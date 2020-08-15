@@ -13,11 +13,11 @@ public class PaymentDto {
 
   private Long id;
 
-  private String sender;
+  private SupplierDto sender;
 
-  private String recipient;
+  private SupplierDto recipient;
 
-  private Long contract;
+  private ContractDto contract;
 
   private String detail;
 

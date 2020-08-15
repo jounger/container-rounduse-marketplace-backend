@@ -9,11 +9,11 @@ import lombok.Setter;
 @Getter
 @Setter
 public class BidDto {
- 
+
   private Long id;
-  
-  //forwarder username
-  private String bidder; 
+
+  // forwarder username
+  private ForwarderDto bidder;
 
   private List<ContainerDto> containers = new ArrayList<>();
 
@@ -22,8 +22,8 @@ public class BidDto {
   private String bidDate;
 
   private String bidValidityPeriod;
-  
+
   private String dateOfDecision;
-  
+
   private String status;
 }

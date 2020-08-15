@@ -9,7 +9,7 @@ public class NotificationDto {
 
   private Long id;
 
-  private String recipient;
+  private UserDto recipient;
 
   private String title;
 

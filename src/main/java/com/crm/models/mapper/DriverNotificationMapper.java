@@ -8,10 +8,14 @@ import com.crm.models.dto.ShippingInfoDto;
 public class DriverNotificationMapper {
 
   public static DriverNotificationDto toDriverNotificationDto(DriverNotification driverNotification) {
+    if (driverNotification == null) {
+      return null;
+    }
+
     DriverNotificationDto driverNotificationDto = new DriverNotificationDto();
 
     driverNotificationDto.setId(driverNotification.getId());
-    driverNotificationDto.setRecipient(driverNotification.getRecipient().getUsername());
+    driverNotificationDto.setRecipient(UserMapper.toUserDto(driverNotification.getRecipient()));
     driverNotificationDto.setIsRead(driverNotification.getIsRead());
     driverNotificationDto.setIsHide(driverNotificationDto.getIsHide());
 

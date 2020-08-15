@@ -64,7 +64,7 @@ public class ShippingLineServiceImpl implements ShippingLineService {
     shippingLine.setAddress(request.getAddress());
     shippingLine.setStatus(EnumUserStatus.ACTIVE.name());
     shippingLine.setWebsite(request.getWebsite());
-    shippingLine.setContactPerson(request.getContactPerson());
+    shippingLine.setFullname(request.getFullname());
     shippingLine.setCompanyName(request.getCompanyName());
     shippingLine.setCompanyCode(request.getCompanyCode());
     shippingLine.setCompanyDescription(request.getCompanyDescription());
@@ -128,9 +128,9 @@ public class ShippingLineServiceImpl implements ShippingLineService {
       shippingLine.setWebsite(website);
     }
 
-    String contactPerson = String.valueOf(updates.get("contactPerson"));
-    if (updates.get("contactPerson") != null && !Tool.isEqual(shippingLine.getContactPerson(), contactPerson)) {
-      shippingLine.setContactPerson(contactPerson);
+    String fullname = String.valueOf(updates.get("fullname"));
+    if (updates.get("fullname") != null && !Tool.isEqual(shippingLine.getFullname(), fullname)) {
+      shippingLine.setFullname(fullname);
     }
 
     String companyName = String.valueOf(updates.get("companyName"));

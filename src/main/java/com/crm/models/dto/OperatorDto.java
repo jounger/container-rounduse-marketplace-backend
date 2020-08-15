@@ -6,8 +6,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class OperatorDto extends UserDto {
-  
-  private String fullname;
 
   private Boolean isRoot;
 }

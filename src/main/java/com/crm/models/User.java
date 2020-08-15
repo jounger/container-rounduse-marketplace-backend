@@ -70,6 +70,11 @@ public class User {
   @Size(min = 10, max = 10)
   private String phone;
 
+  @Column(name = "fullname", length = 50)
+  @NotBlank
+  @Size(min = 5, max = 50)
+  private String fullname;
+
   @Column(name = "email")
   @NotBlank
   @Size(min = 5, max = 50)

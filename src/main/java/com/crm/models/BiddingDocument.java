@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
@@ -95,6 +96,6 @@ public class BiddingDocument {
   @OneToMany(mappedBy = "report")
   private Collection<Report> reports = new ArrayList<>();
 
-  @OneToMany(mappedBy = "relatedResource")
+  @OneToMany(mappedBy = "relatedResource", cascade = CascadeType.REMOVE)
   private Collection<BiddingNotification> biddingNotifications = new ArrayList<>();
 }

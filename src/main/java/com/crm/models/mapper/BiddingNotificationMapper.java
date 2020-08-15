@@ -8,10 +8,14 @@ import com.crm.models.dto.BiddingNotificationDto;
 public class BiddingNotificationMapper {
 
   public static BiddingNotificationDto toBiddingNotificationDto(BiddingNotification biddingNotification) {
+    if (biddingNotification == null) {
+      return null;
+    }
+
     BiddingNotificationDto biddingNotificationDto = new BiddingNotificationDto();
 
     biddingNotificationDto.setId(biddingNotification.getId());
-    biddingNotificationDto.setRecipient(biddingNotification.getRecipient().getUsername());
+    biddingNotificationDto.setRecipient(UserMapper.toUserDto(biddingNotification.getRecipient()));
     biddingNotificationDto.setIsRead(biddingNotification.getIsRead());
     biddingNotificationDto.setIsHide(biddingNotification.getIsHide());
 

@@ -19,7 +19,7 @@ public class ReportWebSocketServiceImpl implements ReportWebSocketService {
   @Override
   public void sendReportNotifyToModeratorOrUser(ReportNotification notification) {
     ReportNotificationDto notificationDto = ReportNotificationMapper.toReportNotificationDto(notification);
-    messagingTemplate.convertAndSendToUser(notificationDto.getRecipient(), Constant.REPORT_NOTIFICATION,
+    messagingTemplate.convertAndSendToUser(notificationDto.getRecipient().getUsername(), Constant.REPORT_NOTIFICATION,
         notificationDto);
   }
 

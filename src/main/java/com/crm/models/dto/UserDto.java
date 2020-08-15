@@ -22,6 +22,8 @@ public class UserDto {
 
   private String phone;
 
+  private String fullname;
+
   private String status;
 
   private Set<String> roles = new HashSet<>();

@@ -13,7 +13,7 @@ public class ReportDto {
 
   private Long id;
 
-  private String sender;
+  private SupplierDto sender;
 
   private BiddingDocumentDto report;
 

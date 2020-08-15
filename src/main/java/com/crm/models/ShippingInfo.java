@@ -43,8 +43,8 @@ public class ShippingInfo {
   private Long id;
   
   @ManyToOne
-  @JoinColumn(name = "combined_id")
-  private Combined combined;
+  @JoinColumn(name = "contract_id")
+  private Contract contract;
   
   @ManyToOne
   @JoinColumn(name = "outbound_id")

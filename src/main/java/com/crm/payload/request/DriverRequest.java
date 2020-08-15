@@ -10,9 +10,6 @@ import lombok.Setter;
 public class DriverRequest extends SignUpRequest {
 
   @NotBlank
-  private String fullname;
-
-  @NotBlank
   private String driverLicense;
 
   private GeolocationRequest location;

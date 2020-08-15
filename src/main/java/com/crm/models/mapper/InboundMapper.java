@@ -7,14 +7,16 @@ import com.crm.models.dto.InboundDto;
 
 public class InboundMapper {
   public static InboundDto toInboundDto(Inbound inbound) {
+    if (inbound == null) {
+      return null;
+    }
+
     InboundDto inboundDto = new InboundDto();
     inboundDto.setId(inbound.getId());
     inboundDto.setCode(inbound.getCode());
-    String shippingLine = inbound.getShippingLine().getCompanyCode();
-    inboundDto.setShippingLine(shippingLine);
+    inboundDto.setShippingLine(ShippingLineMapper.toShippingLineDto(inbound.getShippingLine()));
 
-    String containerType = inbound.getContainerType().getName();
-    inboundDto.setContainerType(containerType);
+    inboundDto.setContainerType(ContainerTypeMapper.toContainerTypeDto(inbound.getContainerType()));
 
     if (inbound.getEmptyTime() != null) {
       String emptyTime = Tool.convertLocalDateTimeToString(inbound.getEmptyTime());

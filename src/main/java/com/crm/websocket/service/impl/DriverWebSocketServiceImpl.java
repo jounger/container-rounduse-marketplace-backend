@@ -19,7 +19,7 @@ public class DriverWebSocketServiceImpl implements DriverWebSocketService {
   @Override
   public void sendBiddingNotifyToDriver(DriverNotification notification) {
     DriverNotificationDto driverNotificationDto = DriverNotificationMapper.toDriverNotificationDto(notification);
-    messagingTemplate.convertAndSendToUser(driverNotificationDto.getRecipient(), Constant.DRIVER_NOTIFICATION,
-        driverNotificationDto);
+    messagingTemplate.convertAndSendToUser(driverNotificationDto.getRecipient().getUsername(),
+        Constant.DRIVER_NOTIFICATION, driverNotificationDto);
   }
 }

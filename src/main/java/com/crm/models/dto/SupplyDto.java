@@ -11,8 +11,8 @@ public class SupplyDto {
 
   private String code;
 
-  private String shippingLine;
+  private ShippingLineDto shippingLine;
 
-  private String containerType;
+  private ContainerTypeDto containerType;
 
 }

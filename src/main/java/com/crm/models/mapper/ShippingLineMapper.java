@@ -9,6 +9,10 @@ import com.crm.models.dto.ShippingLineDto;
 public class ShippingLineMapper {
 
   public static ShippingLineDto toShippingLineDto(Supplier shippingLine) {
+    if (shippingLine == null) {
+      return null;
+    }
+
     ShippingLineDto shippingLineDto = new ShippingLineDto();
     shippingLineDto.setId(shippingLine.getId());
     shippingLineDto.setUsername(shippingLine.getUsername());
@@ -23,7 +27,7 @@ public class ShippingLineMapper {
     shippingLineDto.setRoles(shippingLineRoles);
 
     shippingLineDto.setWebsite(shippingLine.getWebsite());
-    shippingLineDto.setContactPerson(shippingLine.getContactPerson());
+    shippingLineDto.setFullname(shippingLine.getFullname());
     shippingLineDto.setCompanyName(shippingLine.getCompanyName());
     shippingLineDto.setCompanyCode(shippingLine.getCompanyCode());
     shippingLineDto.setCompanyDescription(shippingLine.getCompanyDescription());

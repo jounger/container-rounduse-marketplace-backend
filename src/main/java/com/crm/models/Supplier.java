@@ -33,10 +33,6 @@ public class Supplier extends User {
   @Column(name = "website", length = 50)
   private String website;
 
-  @Column(name = "contact_person", length = 100)
-  @Size(min = 5, max = 50)
-  private String contactPerson;
-
   @Column(name = "company_name", length = 100)
   @NotBlank
   @Size(min = 5, max = 100)

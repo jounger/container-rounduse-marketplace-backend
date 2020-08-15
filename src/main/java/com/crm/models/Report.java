@@ -58,7 +58,7 @@ public class Report {
 
   @Column(name = "title")
   @NotBlank
-  @Size(min = 2, max = 50)
+  @Size(min = 2, max = 100)
   private String title;
 
   @Column(name = "detail")

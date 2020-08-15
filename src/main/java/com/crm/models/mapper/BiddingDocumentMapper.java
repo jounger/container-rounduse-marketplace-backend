@@ -12,21 +12,24 @@ import com.crm.models.dto.OutboundDto;
 public class BiddingDocumentMapper {
 
   public static BiddingDocumentDto toBiddingDocumentDto(BiddingDocument biddingDocument) {
+    if (biddingDocument == null) {
+      return null;
+    }
+
     BiddingDocumentDto biddingDocumentDto = new BiddingDocumentDto();
 
     biddingDocumentDto.setId(biddingDocument.getId());
-    
-    String merchantUsername = biddingDocument.getOfferee().getUsername();
-    biddingDocumentDto.setOfferee(merchantUsername);
+
+    biddingDocumentDto.setOfferee(MerchantMapper.toMerchantDto(biddingDocument.getOfferee()));
 
     OutboundDto outboundDto = OutboundMapper.toOutboundDto(biddingDocument.getOutbound());
     biddingDocumentDto.setOutbound(outboundDto);
-    
+
     biddingDocumentDto.setIsMultipleAward(biddingDocument.getIsMultipleAward());
 
     List<BidDto> bidsDto = new ArrayList<>();
     biddingDocumentDto.setBids(bidsDto);
-    
+
     String currencyOfPayment = biddingDocument.getCurrencyOfPayment();
     biddingDocumentDto.setCurrencyOfPayment(currencyOfPayment);
 
@@ -44,7 +47,7 @@ public class BiddingDocumentMapper {
 
     Double priceLeadership = biddingDocument.getPriceLeadership();
     biddingDocumentDto.setPriceLeadership(priceLeadership);
-    
+
     String status = biddingDocument.getStatus();
     biddingDocumentDto.setStatus(status);
 

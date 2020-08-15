@@ -9,6 +9,10 @@ import com.crm.models.dto.ForwarderDto;
 public class ForwarderMapper {
 
   public static ForwarderDto toForwarderDto(Forwarder forwarder) {
+    if (forwarder == null) {
+      return null;
+    }
+
     ForwarderDto forwarderDto = new ForwarderDto();
     forwarderDto.setId(forwarder.getId());
     forwarderDto.setUsername(forwarder.getUsername());
@@ -23,7 +27,7 @@ public class ForwarderMapper {
     forwarderDto.setRoles(forwarderRoles);
 
     forwarderDto.setWebsite(forwarder.getWebsite());
-    forwarderDto.setContactPerson(forwarder.getContactPerson());
+    forwarderDto.setFullname(forwarder.getFullname());
     forwarderDto.setCompanyName(forwarder.getCompanyName());
     forwarderDto.setCompanyCode(forwarder.getCompanyCode());
     forwarderDto.setCompanyDescription(forwarder.getCompanyDescription());

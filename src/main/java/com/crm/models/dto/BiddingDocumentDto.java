@@ -12,7 +12,7 @@ public class BiddingDocumentDto {
   private Long id;
 
   // merchant username
-  private String offeree;
+  private MerchantDto offeree;
 
   private OutboundDto outbound;
 

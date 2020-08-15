@@ -9,10 +9,14 @@ public class ShippingLineNotificationMapper {
 
   public static ShippingLineNotificationDto toShippingLineNotificationDto(
       ShippingLineNotification shippingLineNotification) {
+    if (shippingLineNotification == null) {
+      return null;
+    }
+
     ShippingLineNotificationDto shippingLineNotificationDto = new ShippingLineNotificationDto();
 
     shippingLineNotificationDto.setId(shippingLineNotification.getId());
-    shippingLineNotificationDto.setRecipient(shippingLineNotification.getRecipient().getUsername());
+    shippingLineNotificationDto.setRecipient(UserMapper.toUserDto(shippingLineNotification.getRecipient()));
     shippingLineNotificationDto.setIsRead(shippingLineNotification.getIsRead());
     shippingLineNotificationDto.setIsHide(shippingLineNotificationDto.getIsHide());
 

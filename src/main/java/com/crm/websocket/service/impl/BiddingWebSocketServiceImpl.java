@@ -25,7 +25,7 @@ public class BiddingWebSocketServiceImpl implements BiddingWebSocketService {
     BiddingNotificationDto notificationDto = BiddingNotificationMapper.toBiddingNotificationDto(notification);
     logger.info("Send to: {}", notificationDto.getRecipient());
     logger.info("Notification: {}", notificationDto.toString());
-    messagingTemplate.convertAndSendToUser(notificationDto.getRecipient(), Constant.BIDDING_NOTIFICATION,
+    messagingTemplate.convertAndSendToUser(notificationDto.getRecipient().getUsername(), Constant.BIDDING_NOTIFICATION,
         notificationDto);
   }
 }

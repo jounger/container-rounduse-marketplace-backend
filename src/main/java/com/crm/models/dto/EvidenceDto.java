@@ -13,7 +13,7 @@ public class EvidenceDto {
 
   private Long Id;
 
-  private String sender;
+  private SupplierDto sender;
 
   private String documentPath;
 

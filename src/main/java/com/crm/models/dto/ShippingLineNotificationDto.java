@@ -9,7 +9,5 @@ public class ShippingLineNotificationDto extends NotificationDto {
 
   private CombinedDto relatedResource;
 
-  private String message;
-
   private String action;
 }

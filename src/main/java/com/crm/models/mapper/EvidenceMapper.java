@@ -7,11 +7,15 @@ import com.crm.models.dto.EvidenceDto;
 public class EvidenceMapper {
 
   public static EvidenceDto toEvidenceDto(Evidence evidence) {
+    if (evidence == null) {
+      return null;
+    }
+
     EvidenceDto evidenceDto = new EvidenceDto();
     evidenceDto.setId(evidence.getId());
 
     Supplier sender = evidence.getSender();
-    evidenceDto.setSender(sender.getUsername());
+    evidenceDto.setSender(SupplierMapper.toSupplierDto(sender));
     evidenceDto.setDocumentPath(evidence.getDocumentPath());
     evidenceDto.setIsValid(evidence.getIsValid());
 

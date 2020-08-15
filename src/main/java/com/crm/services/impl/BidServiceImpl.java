@@ -5,8 +5,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -25,6 +29,7 @@ import com.crm.exception.InternalException;
 import com.crm.exception.NotFoundException;
 import com.crm.models.Bid;
 import com.crm.models.BiddingDocument;
+import com.crm.models.BiddingNotification;
 import com.crm.models.Booking;
 import com.crm.models.Container;
 import com.crm.models.Forwarder;
@@ -36,6 +41,7 @@ import com.crm.payload.request.PaginationRequest;
 import com.crm.payload.request.ReplaceContainerRequest;
 import com.crm.repository.BidRepository;
 import com.crm.repository.BiddingDocumentRepository;
+import com.crm.repository.BiddingNotificationRepository;
 import com.crm.repository.ContainerRepository;
 import com.crm.repository.ForwarderRepository;
 import com.crm.repository.OutboundRepository;
@@ -45,6 +51,8 @@ import com.crm.services.BidService;
 
 @Service
 public class BidServiceImpl implements BidService {
+  
+  private static final Logger logger = LoggerFactory.getLogger(BidServiceImpl.class);
 
   @Autowired
   private BidRepository bidRepository;
@@ -66,6 +74,13 @@ public class BidServiceImpl implements BidService {
 
   @Autowired
   private SupplierRepository supplierRepository;
+
+  @Autowired
+  private BiddingNotificationRepository biddingNotificationRepository;
+
+  @Autowired
+  @Qualifier("cachedThreadPool")
+  private ExecutorService executorService;
 
   @Override
   public Bid createBid(Long bidDocId, String username, BidRequest request) {
@@ -139,6 +154,12 @@ public class BidServiceImpl implements BidService {
     }
     biddingDocumentRepository.save(biddingDocument);
 
+    BiddingNotification biddingNotification = biddingNotificationRepository
+        .findByUserAndBiddingDocument(username, bidDocId)
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.BIDDINGDOCUMENT_NOT_FOUND));
+    biddingNotification.setIsHide(true);
+    biddingNotificationRepository.save(biddingNotification);
+
     return _bid;
   }
 
@@ -149,11 +170,16 @@ public class BidServiceImpl implements BidService {
         || bid.getBiddingDocument().getOfferee().getUsername().equals(username))) {
       throw new ForbiddenException(ErrorMessage.USER_ACCESS_DENIED);
     }
+    if (bid.getBiddingDocument().getBidClosing().isBefore(LocalDateTime.now()) && bid.getDateOfDecision() == null) {
+      bid.setStatus(EnumBidStatus.EXPIRED.name());
+
+    }
     return bid;
   }
 
   @Override
   public Page<Bid> getBidsByBiddingDocument(Long id, String username, PaginationRequest request) {
+    logger.info("{} get bids from Bidding document {}", username, id);
     if (!biddingDocumentRepository.existsById(id)) {
       throw new NotFoundException(ErrorMessage.BIDDINGDOCUMENT_NOT_FOUND);
     }
@@ -424,6 +450,41 @@ public class BidServiceImpl implements BidService {
     bid.setBidValidityPeriod(LocalDateTime.now().plusHours(Constant.BID_VALIDITY_PERIOD));
     Bid _bid = bidRepository.save(bid);
     return _bid;
+  }
+
+  @Override
+  public List<Bid> getExpiredBids(List<Bid> bids) {
+    List<Bid> result = new ArrayList<Bid>();
+    bids.forEach(bid -> {
+      if (bid.getBiddingDocument().getBidClosing().isBefore(LocalDateTime.now()) && bid.getDateOfDecision() == null) {
+        result.add(bid);
+      }
+    });
+    return result;
+  }
+
+  @Override
+  public List<Bid> updatedExpiredBids(List<Bid> bids) {
+    List<Bid> result = new ArrayList<Bid>();
+    bids.forEach(bid -> {
+      if (bid.getBiddingDocument().getBidClosing().isBefore(LocalDateTime.now()) && bid.getDateOfDecision() == null) {
+        bid.setStatus(EnumBidStatus.EXPIRED.name());
+      }
+      result.add(bid);
+    });
+    return result;
+  }
+
+  @Override
+  public void editExpiredBids(List<Bid> bids) {
+    bids.forEach(bid -> {
+      bid.setStatus(EnumBidStatus.EXPIRED.name());
+      bidRepository.save(bid);
+      bid.getContainers().forEach(container -> {
+        container.setStatus(EnumSupplyStatus.CREATED.name());
+        containerRepository.save(container);
+      });
+    });
   }
 
 }

@@ -1,9 +1,7 @@
 package com.crm.services.impl;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,15 +14,11 @@ import com.crm.common.ErrorMessage;
 import com.crm.common.Tool;
 import com.crm.enums.EnumBidStatus;
 import com.crm.exception.DuplicateRecordException;
-import com.crm.exception.ForbiddenException;
-import com.crm.exception.InternalException;
 import com.crm.exception.NotFoundException;
 import com.crm.models.Bid;
 import com.crm.models.BiddingDocument;
 import com.crm.models.Combined;
-import com.crm.models.Container;
 import com.crm.models.Contract;
-import com.crm.models.Supplier;
 import com.crm.models.User;
 import com.crm.payload.request.CombinedRequest;
 import com.crm.payload.request.ContractRequest;
@@ -34,6 +28,7 @@ import com.crm.repository.CombinedRepository;
 import com.crm.repository.UserRepository;
 import com.crm.services.BidService;
 import com.crm.services.CombinedService;
+import com.crm.services.ContractService;
 
 @Service
 public class CombinedServiceImpl implements CombinedService {
@@ -50,6 +45,9 @@ public class CombinedServiceImpl implements CombinedService {
   @Autowired
   private BidService bidService;
 
+  @Autowired
+  private ContractService contractService;
+
   @Override
   public Combined createCombined(Long bidId, String username, CombinedRequest request) {
     Combined combined = new Combined();
@@ -62,47 +60,16 @@ public class CombinedServiceImpl implements CombinedService {
     if(biddingDocument.getBidClosing().isBefore(LocalDateTime.now())) {
       throw new NotFoundException(ErrorMessage.BIDDINGDOCUMENT_TIME_OUT);
     }
-    List<Long> containersId = new ArrayList<>();
-    List<Container> containers = new ArrayList<Container>(bid.getContainers());
-    if (!biddingDocument.getIsMultipleAward()) {
-      for (int i = 0; i < containers.size(); i++) {
-        Container container = containers.get(i);
-        containersId.add(container.getId());
-      }
-    }else {
-      containersId = request.getContainers();
-    }
 
-    if (request.getContainers() == null || request.getContainers().size() == 0) {
-      throw new NotFoundException(ErrorMessage.CONTAINER_NOT_FOUND);
-    }
-
-    bid = bidService.editBidWhenCombined(bidId, username, containersId);
     combined.setBid(bid);
-
     combined.setIsCanceled(false);
-    bid = combined.getBid();
-    Supplier offeree = biddingDocument.getOfferee();
-    ContractRequest contracRequest = request.getContract();
-    Contract contract = new Contract();
-    Boolean required = contracRequest.getRequired();
-    contract.setRequired(required);
-    contract.setFinesAgainstContractViolations(0D);
-    if (username.equals(offeree.getUsername()) && required == true) {
-      Double fines = contracRequest.getFinesAgainstContractViolations();
-      if (fines > 0) {
-        contract.setFinesAgainstContractViolations(fines);
-      } else {
-        throw new InternalException(ErrorMessage.CONTRACT_INVALID_FINES);
-      }
-    } else if (!username.equals(offeree.getUsername())) {
-      throw new ForbiddenException(ErrorMessage.USER_ACCESS_DENIED);
-    }
-
-    combined.setContract(contract);
-    contract.setCombined(combined);
 
     Combined _combined = combinedRepository.save(combined);
+    ContractRequest contractRequest = request.getContract();
+
+    Contract contract = contractService.createContract(combined.getId(), username, contractRequest);
+    combined.setContract(contract);
+    contract.setCombined(combined);
 
     return _combined;
   }

@@ -2,7 +2,7 @@ package com.crm.enums;
 
 public enum EnumUserStatus {
   
-  PENDING, ACTIVE, BANNED;
+  PENDING, ACTIVE, BANNED, REJECT;
 
   public static EnumUserStatus findByName(String name) {
     for (EnumUserStatus status : EnumUserStatus.values()) {

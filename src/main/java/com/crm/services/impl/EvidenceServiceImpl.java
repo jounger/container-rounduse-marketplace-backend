@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import com.crm.common.Constant;
 import com.crm.common.ErrorMessage;
 import com.crm.common.Tool;
+import com.crm.enums.EnumShippingStatus;
 import com.crm.exception.ForbiddenException;
 import com.crm.exception.InternalException;
 import com.crm.exception.NotFoundException;
@@ -28,10 +29,12 @@ import com.crm.payload.request.EvidenceRequest;
 import com.crm.payload.request.PaginationRequest;
 import com.crm.repository.ContractRepository;
 import com.crm.repository.EvidenceRepository;
+import com.crm.repository.ShippingInfoRepository;
 import com.crm.repository.SupplierRepository;
 import com.crm.repository.UserRepository;
 import com.crm.services.EvidenceService;
 import com.crm.specification.builder.EvidenceSpecificationsBuilder;
+import com.crm.websocket.controller.NotificationBroadcast;
 
 @Service
 public class EvidenceServiceImpl implements EvidenceService {
@@ -47,6 +50,12 @@ public class EvidenceServiceImpl implements EvidenceService {
 
   @Autowired
   private UserRepository userRepository;
+
+  @Autowired
+  private ShippingInfoRepository shippingInfoRepository;
+
+  @Autowired
+  private NotificationBroadcast notificationBroadcast;
 
   @Override
   public Evidence createEvidence(Long id, String username, EvidenceRequest request) {
@@ -151,6 +160,16 @@ public class EvidenceServiceImpl implements EvidenceService {
     }
 
     Evidence _evidence = evidenceRepository.save(evidence);
+
+    if (contract.getRequired() == true && evidenceRepository.existsValidEvidence(id)
+        && evidence.getIsValid() == true) {
+      contract.getShippingInfos().forEach(item -> {
+        item.setStatus(EnumShippingStatus.INFO_RECEIVED.name());
+        shippingInfoRepository.save(item);
+      });
+      notificationBroadcast.broadcastCreateContractToDriver(contract);
+    }
+
     return _evidence;
   }
 

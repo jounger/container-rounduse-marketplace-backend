@@ -15,17 +15,13 @@ public class ContractMapper {
 
     contractDto.setPrice(contract.getPrice());
 
-    if (contract.getFinesAgainstContractViolations() != null) {
-      contractDto.setFinesAgainstContractViolation(contract.getFinesAgainstContractViolations());
-    }
+    contractDto.setFinesAgainstContractViolation(contract.getFinesAgainstContractViolations());
 
     if (contract.getDiscount() != null) {
       contractDto.setDiscountCode(DiscountMapper.toDiscountDto(contract.getDiscount()));
     }
 
-    if (contract.getRequired() != null) {
-      contractDto.setRequired(contract.getRequired());
-    }
+    contractDto.setRequired(contract.getRequired());
 
     return contractDto;
   }

@@ -66,8 +66,5 @@ public class Combined {
 
   @OneToOne(mappedBy = "combined", cascade = CascadeType.ALL)
   private Contract contract;
-  
-  @OneToMany(mappedBy = "combined")
-  private Collection<ShippingInfo> shippingInfos = new ArrayList<>();
 
 }

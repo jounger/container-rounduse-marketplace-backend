@@ -10,11 +10,14 @@ import org.springframework.stereotype.Service;
 
 import com.crm.common.ErrorMessage;
 import com.crm.enums.EnumShippingStatus;
+import com.crm.enums.EnumSupplyStatus;
 import com.crm.exception.ForbiddenException;
+import com.crm.exception.InternalException;
 import com.crm.exception.NotFoundException;
 import com.crm.models.Bid;
 import com.crm.models.Combined;
 import com.crm.models.Container;
+import com.crm.models.Contract;
 import com.crm.models.Driver;
 import com.crm.models.Forwarder;
 import com.crm.models.Merchant;
@@ -26,6 +29,8 @@ import com.crm.payload.request.ShippingInfoRequest;
 import com.crm.repository.BidRepository;
 import com.crm.repository.CombinedRepository;
 import com.crm.repository.ContainerRepository;
+import com.crm.repository.ContractRepository;
+import com.crm.repository.EvidenceRepository;
 import com.crm.repository.OutboundRepository;
 import com.crm.repository.ShippingInfoRepository;
 import com.crm.repository.UserRepository;
@@ -38,13 +43,19 @@ public class ShippingInfoServiceImpl implements ShippingInfoService {
   private ShippingInfoRepository shippingInfoRepository;
 
   @Autowired
-  private CombinedRepository combinedRepository;
+  private ContractRepository contractRepository;
 
   @Autowired
   private OutboundRepository outboundRepository;
 
   @Autowired
+  private CombinedRepository combinedRepository;
+
+  @Autowired
   private ContainerRepository containerRepository;
+
+  @Autowired
+  private EvidenceRepository evidenceRepository;
 
   @Autowired
   private BidRepository bidRepository;
@@ -55,35 +66,39 @@ public class ShippingInfoServiceImpl implements ShippingInfoService {
   @Override
   public ShippingInfo createShippingInfo(ShippingInfoRequest request) {
     ShippingInfo shippingInfo = new ShippingInfo();
-    Combined combined = combinedRepository.findById(request.getCombined())
-        .orElseThrow(() -> new NotFoundException(ErrorMessage.COMBINED_NOT_FOUND));
-    shippingInfo.setCombined(combined);
+    Contract contract = contractRepository.findById(request.getContract())
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.CONTRACT_NOT_FOUND));
+    shippingInfo.setContract(contract);
     Outbound outbound = outboundRepository.findById(request.getOutbound())
         .orElseThrow(() -> new NotFoundException(ErrorMessage.OUTBOUND_NOT_FOUND));
     shippingInfo.setOutbound(outbound);
     Container container = containerRepository.findById(request.getContainer())
         .orElseThrow(() -> new NotFoundException(ErrorMessage.CONTAINER_NOT_FOUND_IN_BID));
     shippingInfo.setContainer(container);
-    shippingInfo.setStatus(EnumShippingStatus.INFO_RECEIVED.name());
+    shippingInfo.setStatus(request.getStatus());
 
     ShippingInfo _shippingInfo = shippingInfoRepository.save(shippingInfo);
     return _shippingInfo;
   }
 
   @Override
-  public void createShippingInfosForCombined(Combined combined, List<Long> containers) {
+  public void createShippingInfosForContract(Contract contract, List<Long> containers) {
     ShippingInfoRequest shippingInfoRequest = new ShippingInfoRequest();
-    shippingInfoRequest.setCombined(combined.getId());
-    Outbound outbound = outboundRepository.findByCombined(combined.getId())
+    shippingInfoRequest.setContract(contract.getId());
+    Outbound outbound = outboundRepository.findByCombined(contract.getCombined().getId())
         .orElseThrow(() -> new NotFoundException(ErrorMessage.OUTBOUND_NOT_FOUND));
     shippingInfoRequest.setOutbound(outbound.getId());
-    shippingInfoRequest.setStatus(EnumShippingStatus.INFO_RECEIVED.name());
+    if (contract.getRequired() == true) {
+      shippingInfoRequest.setStatus(EnumShippingStatus.PENDING.name());
+    } else {
+      shippingInfoRequest.setStatus(EnumShippingStatus.INFO_RECEIVED.name());
+    }
     containers.forEach(containerId -> {
       Container container = containerRepository.findById(containerId)
           .orElseThrow(() -> new NotFoundException(ErrorMessage.CONTAINER_NOT_FOUND));
       shippingInfoRequest.setContainer(container.getId());
       ShippingInfo shippingInfo = createShippingInfo(shippingInfoRequest);
-      combined.getShippingInfos().add(shippingInfo);
+      contract.getShippingInfos().add(shippingInfo);
     });
 
   }
@@ -135,18 +150,33 @@ public class ShippingInfoServiceImpl implements ShippingInfoService {
   }
 
   @Override
-  public ShippingInfo editShippingInfo(Long id, String username, String status) {
+  public ShippingInfo editShippingInfo(Long id, String username, ShippingInfoRequest request) {
+    String status = request.getStatus();
     ShippingInfo shippingInfo = shippingInfoRepository.findById(id)
         .orElseThrow(() -> new NotFoundException(ErrorMessage.SHIPPING_INFO_NOT_FOUND));
     Container container = shippingInfo.getContainer();
-    if (!container.getDriver().getUsername().equals(username)) {
+    if (!(container.getDriver().getUsername().equals(username) || shippingInfoRepository.isForwarder(id, username))) {
       throw new ForbiddenException(ErrorMessage.USER_ACCESS_DENIED);
+    }
+    if (!evidenceRepository.isEditableShippingInfo(id)) {
+      throw new InternalException(ErrorMessage.SHIPPING_INFO_INVALID_EDIT);
     }
     EnumShippingStatus eStatus = EnumShippingStatus.findByName(status);
     if (eStatus == null) {
       throw new NotFoundException(ErrorMessage.SHIPPING_INFO_STATUS_NOT_FOUND);
     }
+
     shippingInfo.setStatus(eStatus.name());
+    if (eStatus.name().equals(EnumShippingStatus.DELIVERED.name())) {
+      container.setStatus(EnumSupplyStatus.DELIVERED.name());
+      containerRepository.save(container);
+    }
+
+    Outbound outbound = shippingInfo.getOutbound();
+    if (shippingInfoRepository.isAllDeliveredByOutbound(outbound.getId())) {
+      outbound.setStatus(EnumSupplyStatus.DELIVERED.name());
+      outboundRepository.save(outbound);
+    }
 
     ShippingInfo _shippingInfo = shippingInfoRepository.save(shippingInfo);
     return _shippingInfo;

@@ -9,7 +9,7 @@ public class ShippingInfoRequest {
 
   private Long id;
   
-  private Long combined;
+  private Long contract;
   
   private Long outbound;
   

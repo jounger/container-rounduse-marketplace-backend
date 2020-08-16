@@ -144,6 +144,29 @@ public class BiddingDocumentController {
     return ResponseEntity.ok(biddingDocumentDto);
   }
 
+  @PreAuthorize("hasRole('FORWARDER')")
+  @GetMapping("/inbound/{id}")
+  public ResponseEntity<?> getBiddingDocumentsByInbound(@PathVariable("id") Long id, @Valid PaginationRequest request) {
+
+    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    String username = userDetails.getUsername();
+    Page<BiddingDocument> pages = biddingDocumentService.getBiddingDocumentsByInbound(id, username, request);
+
+    PaginationResponse<BiddingDocumentDto> response = new PaginationResponse<>();
+    response.setPageNumber(request.getPage());
+    response.setPageSize(request.getLimit());
+    response.setTotalElements(pages.getTotalElements());
+    response.setTotalPages(pages.getTotalPages());
+
+    List<BiddingDocument> biddingDocuments = pages.getContent();
+    List<BiddingDocumentDto> biddingDocumentsDto = new ArrayList<>();
+    biddingDocuments.forEach(
+        biddingDocument -> biddingDocumentsDto.add(BiddingDocumentMapper.toBiddingDocumentDto(biddingDocument)));
+    response.setContents(biddingDocumentsDto);
+
+    return ResponseEntity.ok(response);
+  }
+
   @Transactional
   @PreAuthorize("hasRole('MERCHANT')")
   @RequestMapping(value = "/{id}", method = RequestMethod.PATCH, consumes = MediaType.APPLICATION_JSON_VALUE)

@@ -1,5 +1,6 @@
 package com.crm.services.impl;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +32,7 @@ import com.crm.payload.request.PaginationRequest;
 import com.crm.repository.CombinedRepository;
 import com.crm.repository.ContractRepository;
 import com.crm.repository.DiscountRepository;
+import com.crm.repository.SupplierRepository;
 import com.crm.services.BidService;
 import com.crm.services.ContractService;
 import com.crm.services.ShippingInfoService;
@@ -58,6 +60,9 @@ public class ContractServiceImp implements ContractService {
   @Autowired
   private NotificationBroadcast notificationBroadcast;
 
+  @Autowired
+  private SupplierRepository supplierDtoRepository;
+
   @Override
   public Contract createContract(Long id, String username, ContractRequest request) {
     Contract contract = new Contract();
@@ -65,6 +70,10 @@ public class ContractServiceImp implements ContractService {
     Combined combined = combinedRepository.findById(id)
         .orElseThrow(() -> new NotFoundException(ErrorMessage.COMBINED_NOT_FOUND));
     contract.setCombined(combined);
+
+    Supplier sender = supplierDtoRepository.findByUsername(username)
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.USER_NOT_FOUND));
+    contract.setSender(sender);
 
     List<Long> containersId = new ArrayList<>();
     Bid bid = combined.getBid();
@@ -89,6 +98,7 @@ public class ContractServiceImp implements ContractService {
     Boolean required = request.getRequired();
     contract.setRequired(required);
     contract.setFinesAgainstContractViolations(0D);
+    contract.setCreationDate(LocalDateTime.now());
 
     String discountCodeString = request.getDiscountCode();
     if (discountCodeString != null && !discountCodeString.isEmpty()) {

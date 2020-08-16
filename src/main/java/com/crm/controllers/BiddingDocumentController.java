@@ -7,6 +7,8 @@ import java.util.Map;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -40,6 +42,8 @@ import com.crm.websocket.controller.NotificationBroadcast;
 @RestController
 @RequestMapping("/api/bidding-document")
 public class BiddingDocumentController {
+
+  private static final Logger logger = LoggerFactory.getLogger(SupplierController.class);
 
   @Autowired
   private BiddingDocumentService biddingDocumentService;
@@ -171,7 +175,10 @@ public class BiddingDocumentController {
   @PreAuthorize("hasRole('MERCHANT')")
   @RequestMapping(value = "/{id}", method = RequestMethod.PATCH, consumes = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<?> editBiddingDocument(@PathVariable("id") Long id, @RequestBody Map<String, Object> updates) {
-    BiddingDocument biddingDocument = biddingDocumentService.editBiddingDocument(id, updates);
+
+    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    String username = userDetails.getUsername();
+    BiddingDocument biddingDocument = biddingDocumentService.editBiddingDocument(id, username, updates);
     BiddingDocumentDto biddingDocumentDto = BiddingDocumentMapper.toBiddingDocumentDto(biddingDocument);
 
     // Set default response body
@@ -179,6 +186,8 @@ public class BiddingDocumentController {
     defaultResponse.setMessage(SuccessMessage.EDIT_BIDDING_DUCUMENT_SUCCESSFULLY);
     defaultResponse.setData(biddingDocumentDto);
 
+    logger.info("User {} editBiddingDocument from id {} with request: {}", username, id,
+        updates.toString());
     return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 
@@ -194,6 +203,7 @@ public class BiddingDocumentController {
     DefaultResponse<BiddingDocumentDto> defaultResponse = new DefaultResponse<>();
     defaultResponse.setMessage(SuccessMessage.DELETE_BIDDING_DUCUMENT_SUCCESSFULLY);
 
+    logger.info("User {} deleteBiddingDocument bidding document id {}", username, id);
     return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 }

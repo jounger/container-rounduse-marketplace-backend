@@ -7,6 +7,8 @@ import java.util.Map;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -46,6 +48,8 @@ import com.crm.services.FileUploadService;
 @RequestMapping("/api/evidence")
 public class EvidenceController {
 
+  private static final Logger logger = LoggerFactory.getLogger(SupplierController.class);
+
   @Autowired
   private EvidenceService evidenceService;
 
@@ -77,6 +81,7 @@ public class EvidenceController {
     defaultResponse.setMessage(SuccessMessage.CREATE_EVIDENCE_SUCCESSFULLY);
     defaultResponse.setData(evidenceDto);
 
+    logger.info("User {} createEvidence with request: {}", username, request.toString());
     return ResponseEntity.status(HttpStatus.CREATED).body(defaultResponse);
   }
 
@@ -157,6 +162,7 @@ public class EvidenceController {
     defaultResponse.setMessage(SuccessMessage.EDIT_EVIDENCE_SUCCESSFULLY);
     defaultResponse.setData(evidenceDto);
 
+    logger.info("User {} editEvidence from id {} with request: {}", username, id, updates.toString());
     return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 
@@ -172,6 +178,7 @@ public class EvidenceController {
     DefaultResponse<EvidenceDto> defaultResponse = new DefaultResponse<>();
     defaultResponse.setMessage(SuccessMessage.DELETE_EVIDENCE_SUCCESSFULLY);
 
+    logger.info("User {} deleteEvidence with id {}", username, id);
     return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 }

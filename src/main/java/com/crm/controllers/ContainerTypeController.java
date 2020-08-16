@@ -6,6 +6,8 @@ import java.util.Map;
 
 import javax.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -39,6 +41,8 @@ import com.crm.services.ContainerTypeService;
 @RestController
 @RequestMapping("/api/container-type")
 public class ContainerTypeController {
+
+  private static final Logger logger = LoggerFactory.getLogger(SupplierController.class);
 
   @Autowired
   private ContainerTypeService containerTypeService;
@@ -127,6 +131,7 @@ public class ContainerTypeController {
     defaultResponse.setMessage(SuccessMessage.EDIT_CONTAINER_TYPE_SUCCESSFULLY);
     defaultResponse.setData(containerTypeDto);
 
+    logger.info("editContainerType from id {} with request: {}", id, updates.toString());
     return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 

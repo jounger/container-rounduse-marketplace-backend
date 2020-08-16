@@ -20,6 +20,7 @@ public class UserMapper {
     userDto.setPhone(user.getPhone());
     userDto.setStatus(user.getStatus());
     userDto.setProfileImagePath(user.getProfileImagePath());
+    userDto.setFullname(user.getFullname());
 
     Set<String> roles = new HashSet<>();
     user.getRoles().forEach(role -> roles.add(role.getName()));

@@ -75,11 +75,20 @@ public class ForwarderServiceImpl implements ForwarderService {
     forwarder.setStatus(EnumUserStatus.PENDING.name());
     forwarder.setWebsite(request.getWebsite());
     forwarder.setCompanyName(request.getCompanyName());
+    if (supplierRepository.existsByCompanyCode(request.getCompanyCode())) {
+      throw new DuplicateRecordException(ErrorMessage.COMPANY_CODE_ALREADY_EXISTS);
+    }
     forwarder.setCompanyCode(request.getCompanyCode());
     forwarder.setCompanyDescription(request.getCompanyDescription());
     forwarder.setCompanyAddress(request.getCompanyAddress());
     forwarder.setFullname(request.getFullname());
+    if (supplierRepository.existsByTin(request.getTin())) {
+      throw new DuplicateRecordException(ErrorMessage.TIN_DUPLICATE);
+    }
     forwarder.setTin(request.getTin());
+    if (supplierRepository.existsByFax(request.getFax())) {
+      throw new DuplicateRecordException(ErrorMessage.FAX_DUPLICATE);
+    }
     forwarder.setFax(request.getFax());
     forwarder.setRatingValue(0D);
 

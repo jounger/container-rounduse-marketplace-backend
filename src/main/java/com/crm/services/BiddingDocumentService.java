@@ -15,12 +15,14 @@ public interface BiddingDocumentService {
   BiddingDocument getBiddingDocument(Long id);
 
   BiddingDocument getBiddingDocumentByBid(Long id, String username);
-  
+
   BiddingDocument getBiddingDocumentByCombined(Long id, String username);
 
   Page<BiddingDocument> getBiddingDocumentsByExistCombined(String username, PaginationRequest request);
 
   Page<BiddingDocument> getBiddingDocuments(String username, PaginationRequest request);
+
+  Page<BiddingDocument> getBiddingDocumentsByInbound(Long id, String username, PaginationRequest request);
 
   // update full biddingDocument
   BiddingDocument updateBiddingDocument(BiddingDocumentRequest request);

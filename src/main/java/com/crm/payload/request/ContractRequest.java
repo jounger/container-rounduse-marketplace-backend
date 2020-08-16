@@ -14,6 +14,8 @@ public class ContractRequest {
 
   private Long combined;
 
+  private String supplier;
+
   private Double price;
 
   private Double finesAgainstContractViolations;

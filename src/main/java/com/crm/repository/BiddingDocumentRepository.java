@@ -1,5 +1,7 @@
 package com.crm.repository;
 
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -39,4 +41,11 @@ public interface BiddingDocumentRepository extends JpaRepository<BiddingDocument
   @Query(value = "SELECT DISTINCT bd FROM BiddingDocument bd LEFT JOIN bd.bids b "
       + "WHERE (bd.offeree.username = :username OR b.bidder.username = :username) AND b.combined.id IS NOT NULL")
   Page<BiddingDocument> findByExistCombined(@Param("username") String username, Pageable pageable);
+
+  @Query(value = "SELECT bd FROM BiddingDocument bd LEFT JOIN bd.outbound o LEFT JOIN o.booking bk WHERE o.shippingLine.companyCode = :shippingLine"
+      + " AND o.containerType.name = :containerType" + " AND bd.status IN :status" + " AND o.packingTime > :emptyTime"
+      + " AND bk.cutOffTime < :freeTime")
+  Page<BiddingDocument> findByInbound(@Param("shippingLine") String shippingLine, @Param("containerType") String containerType,
+      @Param("status") List<String> status, @Param("emptyTime") LocalDateTime emptyTime,
+      @Param("freeTime") LocalDateTime freeTime, Pageable pageable);
 }

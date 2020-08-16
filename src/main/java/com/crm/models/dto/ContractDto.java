@@ -13,6 +13,8 @@ public class ContractDto {
 
   private Long Id;
 
+  private SupplierDto sender;
+
   private Double price;
 
   private DiscountDto discountCode;
@@ -20,5 +22,7 @@ public class ContractDto {
   private Double finesAgainstContractViolation;
 
   private Boolean required;
+
+  private String creationDate;
 
 }

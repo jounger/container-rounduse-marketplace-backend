@@ -84,4 +84,6 @@ public class Supplier extends User {
   @OneToMany(mappedBy = "sender")
   private Collection<Payment> sentPayments = new ArrayList<>();
 
+  @OneToMany(mappedBy = "sender")
+  private Collection<Contract> contracts = new ArrayList<>();
 }

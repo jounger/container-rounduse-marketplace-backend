@@ -118,9 +118,9 @@ public class CombinedServiceImplTest {
     ContractRequest contract = new ContractRequest();
     contract.setRequired(true);
     contract.setFinesAgainstContractViolations(2D);
+    contract.setContainers(containersId);
 
     CombinedRequest request = new CombinedRequest();
-    request.setContainers(containersId);
     request.setContract(contract);
 
     Combined combined = new Combined();
@@ -195,9 +195,9 @@ public class CombinedServiceImplTest {
     ContractRequest contract = new ContractRequest();
     contract.setRequired(true);
     contract.setFinesAgainstContractViolations(-2D);
+    contract.setContainers(containersId);
 
     CombinedRequest request = new CombinedRequest();
-    request.setContainers(containersId);
     request.setContract(contract);
 
     // when

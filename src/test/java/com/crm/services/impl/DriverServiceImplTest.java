@@ -497,7 +497,7 @@ public class DriverServiceImplTest {
     when(driverRepository.findByUsername(Mockito.anyString())).thenReturn(Optional.of(driver));
 
     // then
-    Driver actualResult = driverServiceImpl.getDriverByUserName(driver.getUsername());
+    Driver actualResult = driverServiceImpl.getDriverByUsername(driver.getUsername());
     logger.info("actualResult: {}", actualResult);
     assertThat(actualResult).isNotNull();
     assertThat(actualResult.getId()).isEqualTo(1L);
@@ -536,7 +536,7 @@ public class DriverServiceImplTest {
 
     // then
     Assertions.assertThrows(NotFoundException.class, () -> {
-      driverServiceImpl.getDriverByUserName(driver.getUsername());
+      driverServiceImpl.getDriverByUsername(driver.getUsername());
     });
   }
 

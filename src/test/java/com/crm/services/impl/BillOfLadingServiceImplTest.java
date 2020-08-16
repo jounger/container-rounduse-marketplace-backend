@@ -370,7 +370,7 @@ public class BillOfLadingServiceImplTest {
   }
 
   @Test
-  @DisplayName("Edit BillOfLading when BillOfLading")
+  @DisplayName("Edit BillOfLading when BillOfLading NotFound")
   public void whenEditBillOfLading_thenReturnNotFoundException_BillOfLading() {
     // given
 

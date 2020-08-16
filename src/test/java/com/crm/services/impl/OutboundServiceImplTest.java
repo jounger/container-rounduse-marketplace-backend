@@ -185,7 +185,7 @@ public class OutboundServiceImplTest {
 
   @Test
   @DisplayName("Get outbounds success")
-  public void whenGetOutbounds_thenReturnInboundPages() {
+  public void whenGetOutbounds_thenReturnOutboundPages() {
     // given
     Merchant merchant = new Merchant();
     merchant.setId(1L);
@@ -235,7 +235,7 @@ public class OutboundServiceImplTest {
 
   @Test
   @DisplayName("Get outbounds by status success")
-  public void whenGetOutboundsByStatus_thenReturnInboundPages() {
+  public void whenGetOutboundsByStatus_thenReturnOutboundPages() {
     // given
     Merchant merchant = new Merchant();
     merchant.setId(1L);
@@ -285,7 +285,7 @@ public class OutboundServiceImplTest {
 
   @Test
   @DisplayName("Get outbounds By Merchant success")
-  public void whenGetOutboundsByMerchant_thenReturnInboundPages() {
+  public void whenGetOutboundsByMerchant_thenReturnOutboundPages() {
     // given
     Merchant merchant = new Merchant();
     merchant.setId(1L);
@@ -335,7 +335,7 @@ public class OutboundServiceImplTest {
 
   @Test
   @DisplayName("Get outbounds by merchant and status success")
-  public void whenGetOutboundsByMerchantAndStatus_thenReturnInboundPages() {
+  public void whenGetOutboundsByMerchantAndStatus_thenReturnOutboundPages() {
     // given
     Merchant merchant = new Merchant();
     merchant.setId(1L);
@@ -387,7 +387,7 @@ public class OutboundServiceImplTest {
 
   @Test
   @DisplayName("Create outbound success")
-  public void whenCreateOutbound_thenReturnInbound() {
+  public void whenCreateOutbound_thenReturnOutbound() {
     // given
 
     Merchant merchant = new Merchant();

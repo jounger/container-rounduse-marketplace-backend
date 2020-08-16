@@ -6,6 +6,8 @@ import java.util.Map;
 
 import javax.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -38,6 +40,8 @@ import com.crm.services.DiscountService;
 @RestController
 @RequestMapping("/api/discount")
 public class DiscountController {
+
+  private static final Logger logger = LoggerFactory.getLogger(SupplierController.class);
 
   @Autowired
   private DiscountService discountService;
@@ -104,6 +108,7 @@ public class DiscountController {
     defaultResponse.setMessage(SuccessMessage.EDIT_DISCOUNT_SUCCESSFULLY);
     defaultResponse.setData(discountDto);
 
+    logger.info("editDiscount from id {} with request: {}", id, updates.toString());
     return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 
@@ -117,6 +122,7 @@ public class DiscountController {
     DefaultResponse<DiscountDto> defaultResponse = new DefaultResponse<>();
     defaultResponse.setMessage(SuccessMessage.DELETE_DISCOUNT_SUCCESSFULLY);
 
+    logger.info("deleteDiscount from discount id {}", id);
     return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 }

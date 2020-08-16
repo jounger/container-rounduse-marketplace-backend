@@ -6,6 +6,8 @@ import java.util.Map;
 
 import javax.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -38,6 +40,8 @@ import com.crm.services.PortService;
 @RestController
 @RequestMapping("/api/port")
 public class PortController {
+
+  private static final Logger logger = LoggerFactory.getLogger(SupplierController.class);
 
   @Autowired
   private PortService portService;
@@ -88,6 +92,7 @@ public class PortController {
     defaultResponse.setMessage(SuccessMessage.CREATE_PORT_SUCCESSFULLY);
     defaultResponse.setData(portDto);
 
+    logger.info("Create Port with request: {}", request.toString());
     return ResponseEntity.status(HttpStatus.CREATED).body(defaultResponse);
   }
 
@@ -102,6 +107,7 @@ public class PortController {
     defaultResponse.setMessage(SuccessMessage.EDIT_PORT_SUCCESSFULLY);
     defaultResponse.setData(portDto);
 
+    logger.info("editPort from id {} with request: {}", id, updates.toString());
     return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 
@@ -115,6 +121,7 @@ public class PortController {
     DefaultResponse<PortDto> defaultResponse = new DefaultResponse<>();
     defaultResponse.setMessage(SuccessMessage.DELETE_PORT_SUCCESSFULLY);
 
+    logger.info("DeletePort from port id {}", id);
     return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 }

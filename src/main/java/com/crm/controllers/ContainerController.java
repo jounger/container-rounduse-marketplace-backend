@@ -6,6 +6,8 @@ import java.util.Map;
 
 import javax.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -39,6 +41,8 @@ import com.crm.services.ContainerService;
 @RestController
 @RequestMapping("/api/container")
 public class ContainerController {
+
+  private static final Logger logger = LoggerFactory.getLogger(SupplierController.class);
 
   @Autowired
   private ContainerService containerService;
@@ -146,6 +150,7 @@ public class ContainerController {
     defaultResponse.setMessage(SuccessMessage.CREATE_CONTAINER_SUCCESSFULLY);
     defaultResponse.setData(containerDto);
 
+    logger.info("User {} createContainer with request: {}", username, request.toString());
     return ResponseEntity.status(HttpStatus.CREATED).body(defaultResponse);
   }
 
@@ -159,12 +164,13 @@ public class ContainerController {
     Container container = containerService.editContainer(updates, id, username);
     ContainerDto containerDto = new ContainerDto();
     containerDto = ContainerMapper.toContainerDto(container);
-    
+
     // Set default response body
     DefaultResponse<ContainerDto> defaultResponse = new DefaultResponse<>();
     defaultResponse.setMessage(SuccessMessage.EDIT_CONTAINER_SUCCESSFULLY);
     defaultResponse.setData(containerDto);
 
+    logger.info("User {} editContainer from id {} with request: {}", username, id, updates.toString());
     return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 
@@ -177,11 +183,12 @@ public class ContainerController {
     String username = userDetails.getUsername();
 
     containerService.removeContainer(id, username);
-    
+
     // Set default response body
     DefaultResponse<ContainerDto> defaultResponse = new DefaultResponse<>();
     defaultResponse.setMessage(SuccessMessage.DELETE_CONTAINER_SUCCESSFULLY);
 
+    logger.info("User {} deleteContainer with id {}", username, id);
     return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 

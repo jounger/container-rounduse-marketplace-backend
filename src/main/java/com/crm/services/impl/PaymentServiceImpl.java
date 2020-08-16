@@ -52,17 +52,21 @@ public class PaymentServiceImpl implements PaymentService {
   public Payment createPayment(Long id, String username, PaymentRequest request) {
     Payment payment = new Payment();
 
-    Supplier sender = supplierRepository.findByUsername(username)
-        .orElseThrow(() -> new NotFoundException(ErrorMessage.SENDER_NOT_FOUND));
-    payment.setSender(sender);
-
-    Supplier recipient = supplierRepository.findByUsername(request.getRecipient())
-        .orElseThrow(() -> new NotFoundException(ErrorMessage.RECIPIENT_NOT_FOUND));
-    payment.setRecipient(recipient);
-
     Contract contract = contractRepository.findById(id)
         .orElseThrow(() -> new NotFoundException(ErrorMessage.CONTRACT_NOT_FOUND));
     payment.setContract(contract);
+
+    Supplier merchant = contract.getSender();
+    Supplier forwarder = contract.getCombined().getBid().getBidder();
+    if (username.equals(merchant.getUsername())) {
+      payment.setSender(merchant);
+      payment.setRecipient(forwarder);
+    } else if (username.equals(forwarder.getUsername())) {
+      payment.setSender(forwarder);
+      payment.setRecipient(merchant);
+    } else {
+      throw new ForbiddenException(ErrorMessage.USER_ACCESS_DENIED);
+    }
 
     payment.setDetail(request.getDetail());
     if (request.getAmount() > 0) {
@@ -80,7 +84,11 @@ public class PaymentServiceImpl implements PaymentService {
       throw new NotFoundException(ErrorMessage.PAYMENT_TYPE_NOT_FOUND);
     }
 
-    payment.setPaymentDate(LocalDateTime.now());
+    if (request.getPaymentDate() == null) {
+      payment.setPaymentDate(LocalDateTime.now());
+    } else {
+      payment.setPaymentDate(Tool.convertToLocalDateTime(request.getPaymentDate()));
+    }
 
     Payment _payment = paymentRepository.save(payment);
     return _payment;
@@ -101,7 +109,8 @@ public class PaymentServiceImpl implements PaymentService {
     }
     Page<Payment> payments = null;
     PageRequest page = PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt"));
-    User user = userRepository.findByUsername(username).orElseThrow(() -> new NotFoundException(ErrorMessage.USER_NOT_FOUND));
+    User user = userRepository.findByUsername(username)
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.USER_NOT_FOUND));
     String role = user.getRoles().iterator().next().getName();
 
     if (role.equalsIgnoreCase("ROLE_MODERATOR")) {
@@ -132,7 +141,8 @@ public class PaymentServiceImpl implements PaymentService {
 
   @Override
   public Payment editPayment(Long id, String username, Map<String, Object> updates) {
-    Payment payment = paymentRepository.findById(id).orElseThrow(() -> new NotFoundException(ErrorMessage.PAYMENT_NOT_FOUND));
+    Payment payment = paymentRepository.findById(id)
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.PAYMENT_NOT_FOUND));
 
     if (payment.getSender().getUsername().equals(username)) {
       String detail = String.valueOf(updates.get("detail"));
@@ -159,7 +169,8 @@ public class PaymentServiceImpl implements PaymentService {
 
   @Override
   public void removePayment(Long id, String paymentname) {
-    Payment payment = paymentRepository.findById(id).orElseThrow(() -> new NotFoundException(ErrorMessage.PAYMENT_NOT_FOUND));
+    Payment payment = paymentRepository.findById(id)
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.PAYMENT_NOT_FOUND));
     Supplier sender = supplierRepository.findByUsername(paymentname)
         .orElseThrow(() -> new NotFoundException(ErrorMessage.USER_NOT_FOUND));
     if (payment.getSender().equals(sender)) {

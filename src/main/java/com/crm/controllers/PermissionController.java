@@ -6,6 +6,8 @@ import java.util.List;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -36,6 +38,8 @@ import com.crm.services.PermissionService;
 @RequestMapping("/api/permission")
 public class PermissionController {
 
+  private static final Logger logger = LoggerFactory.getLogger(SupplierController.class);
+
   @Autowired
   private PermissionService permissionService;
 
@@ -51,6 +55,7 @@ public class PermissionController {
     defaultResponse.setMessage(SuccessMessage.CREATE_PERMISSION_SUCCESSFULLY);
     defaultResponse.setData(permissionDto);
 
+    logger.info("createPermission with request: {}", request.toString());
     return ResponseEntity.status(HttpStatus.CREATED).body(defaultResponse);
   }
 
@@ -84,6 +89,7 @@ public class PermissionController {
     defaultResponse.setMessage(SuccessMessage.EDIT_PERMISSION_SUCCESSFULLY);
     defaultResponse.setData(permissionDto);
 
+    logger.info("updatePermission with request: {}", request.toString());
     return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 
@@ -97,6 +103,7 @@ public class PermissionController {
     DefaultResponse<PermissionDto> defaultResponse = new DefaultResponse<>();
     defaultResponse.setMessage(SuccessMessage.DELETE_PERMISSION_SUCCESSFULLY);
 
+    logger.info("deletePermission with id: {}", id);
     return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 }

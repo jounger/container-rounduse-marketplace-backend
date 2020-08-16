@@ -7,6 +7,8 @@ import java.util.Map;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -39,6 +41,8 @@ import com.crm.services.NotificationService;
 @RequestMapping("/api/notification")
 public class NotificationController {
 
+  private static final Logger logger = LoggerFactory.getLogger(SupplierController.class);
+
   @Autowired
   NotificationService notificationService;
 
@@ -65,8 +69,7 @@ public class NotificationController {
   @GetMapping("/user")
   public ResponseEntity<?> getNotificationsByUser(@Valid PaginationRequest request) {
 
-    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
-        .getPrincipal();
+    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
 
     Page<Notification> pages = notificationService.getNotificationsByUser(username, request);
@@ -95,6 +98,7 @@ public class NotificationController {
     defaultResponse.setMessage(Constant.EMPTY_STRING);
     defaultResponse.setData(notificationDto);
 
+    logger.info("editNotification from id {} with request: {}", id, updates.toString());
     return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 
@@ -107,6 +111,7 @@ public class NotificationController {
     DefaultResponse<NotificationDto> defaultResponse = new DefaultResponse<>();
     defaultResponse.setMessage(SuccessMessage.DELETE_NOTIFICATION_SUCCESSFULLY);
 
+    logger.info("deleteNotification with id: {}", id);
     return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 }

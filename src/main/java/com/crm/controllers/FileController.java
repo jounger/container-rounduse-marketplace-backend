@@ -53,6 +53,7 @@ public class FileController {
     uploadFileResponse.setFileType(file.getContentType());
     uploadFileResponse.setSize(file.getSize());
 
+    logger.info("uploadFile with file name: {}", fileName);
     return ResponseEntity.status(HttpStatus.CREATED).body(uploadFileResponse);
   }
 
@@ -73,7 +74,9 @@ public class FileController {
       uploadFileResponse.setSize(file.getSize());
 
       uploadFileResponses.add(uploadFileResponse);
+      logger.info("uploadMultipleFiles with file name: {}", fileName);
     });
+
     return ResponseEntity.status(HttpStatus.CREATED).body(uploadFileResponses);
   }
 

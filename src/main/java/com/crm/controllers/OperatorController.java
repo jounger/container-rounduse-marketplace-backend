@@ -6,6 +6,8 @@ import java.util.Map;
 
 import javax.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -39,6 +41,8 @@ import com.crm.services.OperatorService;
 @RequestMapping("/api/operator")
 public class OperatorController {
 
+  private static final Logger logger = LoggerFactory.getLogger(SupplierController.class);
+
   @Autowired
   private OperatorService operatorService;
 
@@ -53,6 +57,7 @@ public class OperatorController {
     defaultResponse.setMessage(SuccessMessage.CREATE_OPERATOR_SUCCESSFULLY);
     defaultResponse.setData(operatorDto);
 
+    logger.info("createOperator with request: {}", request.toString());
     return ResponseEntity.status(HttpStatus.CREATED).body(defaultResponse);
   }
 
@@ -104,6 +109,7 @@ public class OperatorController {
     defaultResponse.setMessage(SuccessMessage.EDIT_OPERATOR_SUCCESSFULLY);
     defaultResponse.setData(operatorDto);
 
+    logger.info("editOperator from id {} with request: {}", id, updates.toString());
     return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 
@@ -117,6 +123,7 @@ public class OperatorController {
     DefaultResponse<OperatorDto> defaultResponse = new DefaultResponse<>();
     defaultResponse.setMessage(SuccessMessage.DELETE_OPERATOR_SUCCESSFULLY);
 
+    logger.info("deleteOperator with id: {}", id);
     return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 }

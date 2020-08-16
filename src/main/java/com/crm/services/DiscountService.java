@@ -18,8 +18,6 @@ public interface DiscountService {
 
   Discount createDiscount(DiscountRequest request);
 
-  Discount updateDiscount(DiscountRequest request);
-
   Discount editDiscount(Map<String, Object> updates, Long id);
 
   void removeDiscount(Long id);

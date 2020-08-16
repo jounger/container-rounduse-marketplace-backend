@@ -6,6 +6,8 @@ import java.util.Map;
 
 import javax.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -36,6 +38,8 @@ import com.crm.services.BillOfLadingService;
 @RestController
 @RequestMapping("/api/bill-of-lading")
 public class BillOfLadingController {
+
+  private static final Logger logger = LoggerFactory.getLogger(SupplierController.class);
 
   @Autowired
   BillOfLadingService billOfLadingService;
@@ -104,6 +108,7 @@ public class BillOfLadingController {
     defaultResponse.setMessage(SuccessMessage.EDIT_BILL_OF_LADING_SUCCESSFULLY);
     defaultResponse.setData(billOfLadingDto);
 
+    logger.info("User {} editBillOfLading from id {} with request: {}", username, id, updates.toString());
     return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 }

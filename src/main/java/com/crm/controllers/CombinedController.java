@@ -7,6 +7,8 @@ import java.util.concurrent.ExecutorService;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
@@ -40,6 +42,8 @@ import com.crm.services.CombinedService;
 @RequestMapping("/api/combined")
 public class CombinedController {
 
+  private static final Logger logger = LoggerFactory.getLogger(SupplierController.class);
+
   @Autowired
   private CombinedService combinedService;
 
@@ -62,6 +66,7 @@ public class CombinedController {
     defaultResponse.setMessage(SuccessMessage.EDIT_BID_SUCCESSFULLY);
     defaultResponse.setData(combinedDto);
 
+    logger.info("User {} createCombined with request: {}", username, request.toString());
     return ResponseEntity.status(HttpStatus.CREATED).body(defaultResponse);
   }
 
@@ -74,8 +79,8 @@ public class CombinedController {
   }
 
   @PreAuthorize("hasRole('MERCHANT') or hasRole('FORWARDER')")
-  @GetMapping("/user")
-  public ResponseEntity<?> getCombinedsByUser(@Valid PaginationRequest request) {
+  @GetMapping("")
+  public ResponseEntity<?> getCombineds(@Valid PaginationRequest request) {
 
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
@@ -123,10 +128,10 @@ public class CombinedController {
   @Transactional
   @PreAuthorize("hasRole('FORWARDER') or hasRole('MERCHANT') or hasRole('DRIVER')")
   @RequestMapping(value = "/{id}", method = RequestMethod.PATCH, consumes = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<?> editCombined(@PathVariable("id") Long id, @RequestBody String isCanceled) {
+  public ResponseEntity<?> editCombined(@PathVariable("id") Long id, @RequestBody CombinedRequest isCanceled) {
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
-    Combined combined = combinedService.editCombined(id, username, isCanceled);
+    Combined combined = combinedService.editCombined(id, username, isCanceled.getIsCanceled().toString());
     CombinedDto combinedDto = CombinedMapper.toCombinedDto(combined);
 
     // Set default response body
@@ -134,6 +139,8 @@ public class CombinedController {
     defaultResponse.setMessage(SuccessMessage.EDIT_BID_SUCCESSFULLY);
     defaultResponse.setData(combinedDto);
 
+    logger.info("User {} editCombined from id {} with request: {}", username, id,
+        isCanceled.toString());
     return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 }

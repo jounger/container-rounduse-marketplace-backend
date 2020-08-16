@@ -10,6 +10,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
@@ -56,6 +57,7 @@ public class Payment {
   private Contract contract;
 
   @Column(name = "detail")
+  @Lob
   @Size(min = 2)
   private String detail;
 

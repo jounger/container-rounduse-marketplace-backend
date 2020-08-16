@@ -134,6 +134,7 @@ public class OutboundController {
     defaultResponse.setMessage(SuccessMessage.CREATE_OUTBOUND_SUCCESSFULLY);
     defaultResponse.setData(outboundDto);
 
+    logger.info("User {} createOutbound with request: {}", username, request.toString());
     return ResponseEntity.status(HttpStatus.CREATED).body(defaultResponse);
   }
 
@@ -154,6 +155,7 @@ public class OutboundController {
     defaultResponse.setMessage(SuccessMessage.EDIT_OUTBOUND_SUCCESSFULLY);
     defaultResponse.setData(outboundDto);
 
+    logger.info("User {} editOutbound from id {} with request: {}", username, id, updates.toString());
     return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 
@@ -171,6 +173,7 @@ public class OutboundController {
     DefaultResponse<OutboundDto> defaultResponse = new DefaultResponse<>();
     defaultResponse.setMessage(SuccessMessage.DELETE_OUTBOUND_SUCCESSFULLY);
 
+    logger.info("User {} deleteOutbound with id {}", username, id);
     return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 }

@@ -7,6 +7,8 @@ import java.util.Map;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -42,6 +44,8 @@ import com.crm.websocket.controller.NotificationBroadcast;
 @RequestMapping("/api/report")
 public class ReportController {
 
+  private static final Logger logger = LoggerFactory.getLogger(SupplierController.class);
+
   @Autowired
   private ReportService reportService;
 
@@ -66,6 +70,7 @@ public class ReportController {
     defaultResponse.setMessage(SuccessMessage.CREATE_REPORT_SUCCESSFULLY);
     defaultResponse.setData(reportDto);
 
+    logger.info("User {} createReport with request: {}", username, request.toString());
     return ResponseEntity.status(HttpStatus.CREATED).body(defaultResponse);
   }
 
@@ -160,6 +165,7 @@ public class ReportController {
     defaultResponse.setMessage(SuccessMessage.EDIT_REPORT_SUCCESSFULLY);
     defaultResponse.setData(reportDto);
 
+    logger.info("User {} editReport from id {} with request: {}", username, id, updates.toString());
     return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 
@@ -175,6 +181,7 @@ public class ReportController {
     DefaultResponse<ReportDto> defaultResponse = new DefaultResponse<>();
     defaultResponse.setMessage(SuccessMessage.DELETE_REPORT_SUCCESSFULLY);
 
+    logger.info("User {} deleteReport with id: {}", username, id);
     return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 }

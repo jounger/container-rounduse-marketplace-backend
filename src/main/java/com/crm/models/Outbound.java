@@ -8,6 +8,7 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
+import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
@@ -35,6 +36,7 @@ public class Outbound extends Supply {
   private Merchant merchant;
 
   @Column(name = "goods_description")
+  @Lob
   private String goodsDescription;
 
   @Column(name = "packing_time")

@@ -24,11 +24,8 @@ public interface BiddingDocumentService {
 
   Page<BiddingDocument> getBiddingDocumentsByInbound(Long id, String username, PaginationRequest request);
 
-  // update full biddingDocument
-  BiddingDocument updateBiddingDocument(BiddingDocumentRequest request);
-
   // update part biddingDocument
-  BiddingDocument editBiddingDocument(Long id, Map<String, Object> updates);
+  BiddingDocument editBiddingDocument(Long id, String username, Map<String, Object> updates);
 
   void removeBiddingDocument(Long id, String username);
 

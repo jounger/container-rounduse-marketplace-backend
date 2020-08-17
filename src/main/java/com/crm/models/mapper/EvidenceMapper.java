@@ -17,7 +17,7 @@ public class EvidenceMapper {
     Supplier sender = evidence.getSender();
     evidenceDto.setSender(SupplierMapper.toSupplierDto(sender));
     evidenceDto.setDocumentPath(evidence.getDocumentPath());
-    evidenceDto.setIsValid(evidence.getIsValid());
+    evidenceDto.setStatus(evidence.getStatus());
 
     return evidenceDto;
   }

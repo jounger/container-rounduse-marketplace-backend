@@ -35,6 +35,7 @@ import com.crm.payload.request.PaginationRequest;
 import com.crm.payload.response.DefaultResponse;
 import com.crm.payload.response.PaginationResponse;
 import com.crm.services.ContractService;
+import com.crm.websocket.controller.NotificationBroadcast;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -43,6 +44,9 @@ public class ContractController {
 
   @Autowired
   private ContractService contractService;
+
+  @Autowired
+  private NotificationBroadcast notificationBroadcast;
 
   @Transactional
   @PostMapping("/combined/{id}")
@@ -127,6 +131,7 @@ public class ContractController {
     defaultResponse.setMessage(SuccessMessage.EDIT_CONTRACT_SUCCESSFULLY);
     defaultResponse.setData(contractDto);
 
+    notificationBroadcast.broadcastEditContractToForwarder(contract);
     return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 

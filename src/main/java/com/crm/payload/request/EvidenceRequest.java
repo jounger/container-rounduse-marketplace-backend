@@ -13,5 +13,5 @@ public class EvidenceRequest {
 
   private String documentPath;
 
-  private Boolean isValid;
+  private String status;
 }

@@ -24,13 +24,11 @@ import com.crm.models.BiddingDocument;
 import com.crm.models.Combined;
 import com.crm.models.Container;
 import com.crm.models.Contract;
-import com.crm.models.Discount;
 import com.crm.models.Supplier;
 import com.crm.payload.request.ContractRequest;
 import com.crm.payload.request.PaginationRequest;
 import com.crm.repository.CombinedRepository;
 import com.crm.repository.ContractRepository;
-import com.crm.repository.DiscountRepository;
 import com.crm.repository.SupplierRepository;
 import com.crm.services.BidService;
 import com.crm.services.ContractService;
@@ -46,9 +44,6 @@ public class ContractServiceImp implements ContractService {
 
   @Autowired
   private CombinedRepository combinedRepository;
-
-  @Autowired
-  private DiscountRepository discountRepository;
 
   @Autowired
   private BidService bidService;
@@ -74,7 +69,7 @@ public class ContractServiceImp implements ContractService {
     BiddingDocument biddingDocument = bid.getBiddingDocument();
 
     Supplier offeree = biddingDocument.getOfferee();
-    if (username.equals(offeree.getUsername())) {
+    if (!username.equals(offeree.getUsername())) {
       throw new ForbiddenException(ErrorMessage.USER_ACCESS_DENIED);
     }
 
@@ -106,12 +101,12 @@ public class ContractServiceImp implements ContractService {
     contract.setFinesAgainstContractViolations(0D);
     contract.setCreationDate(LocalDateTime.now());
 
-    String discountCodeString = request.getDiscountCode();
-    if (!Tool.isBlank(discountCodeString)) {
-      Discount discount = discountRepository.findByCode(discountCodeString)
-          .orElseThrow(() -> new NotFoundException(ErrorMessage.DISCOUNT_NOT_FOUND));
-      contract.setDiscount(discount);
-    }
+//    String discountCodeString = request.getDiscountCode();
+//    if (!Tool.isBlank(discountCodeString)) {
+//      Discount discount = discountRepository.findByCode(discountCodeString)
+//          .orElseThrow(() -> new NotFoundException(ErrorMessage.DISCOUNT_NOT_FOUND));
+//      contract.setDiscount(discount);
+//    }
 
     Double fines = 0D;
     if (required == true) {

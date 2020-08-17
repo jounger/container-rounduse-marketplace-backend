@@ -45,7 +45,15 @@ public interface BiddingDocumentRepository extends JpaRepository<BiddingDocument
   @Query(value = "SELECT bd FROM BiddingDocument bd LEFT JOIN bd.outbound o LEFT JOIN o.booking bk WHERE o.shippingLine.companyCode = :shippingLine"
       + " AND o.containerType.name = :containerType" + " AND bd.status IN :status" + " AND o.packingTime > :emptyTime"
       + " AND bk.cutOffTime < :freeTime")
-  Page<BiddingDocument> findByInbound(@Param("shippingLine") String shippingLine, @Param("containerType") String containerType,
-      @Param("status") List<String> status, @Param("emptyTime") LocalDateTime emptyTime,
-      @Param("freeTime") LocalDateTime freeTime, Pageable pageable);
+  Page<BiddingDocument> findByInbound(@Param("shippingLine") String shippingLine,
+      @Param("containerType") String containerType, @Param("status") List<String> status,
+      @Param("emptyTime") LocalDateTime emptyTime, @Param("freeTime") LocalDateTime freeTime, Pageable pageable);
+
+  @Query(value = "SELECT CASE WHEN COUNT(b) = 0 THEN TRUE ELSE FALSE END "
+      + "FROM BiddingDocument bd JOIN bd.bids b LEFT JOIN b.bidder f" + " WHERE bd.id = :id AND f.username = :username")
+  boolean isBidderByBiddingDocument(@Param("id") Long id, @Param("username") String username);
+
+  @Query(value = "SELECT CASE WHEN COUNT(bd) > 0 THEN TRUE ELSE FALSE END "
+      + "FROM BiddingDocument bd JOIN bd.bids b" + " WHERE bd.id = :id AND b.status = 'ACCEPTED'")
+  boolean existsCombinedBid(@Param("id") Long id);
 }

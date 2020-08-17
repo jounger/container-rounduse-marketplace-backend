@@ -3,14 +3,13 @@ package com.crm.services.impl;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -48,10 +47,11 @@ import com.crm.repository.OutboundRepository;
 import com.crm.repository.SupplierRepository;
 import com.crm.repository.UserRepository;
 import com.crm.services.BidService;
+import com.crm.services.BiddingDocumentService;
 
 @Service
 public class BidServiceImpl implements BidService {
-  
+
   private static final Logger logger = LoggerFactory.getLogger(BidServiceImpl.class);
 
   @Autowired
@@ -79,8 +79,7 @@ public class BidServiceImpl implements BidService {
   private BiddingNotificationRepository biddingNotificationRepository;
 
   @Autowired
-  @Qualifier("cachedThreadPool")
-  private ExecutorService executorService;
+  private BiddingDocumentService biddingDocumentService;
 
   @Override
   public Bid createBid(Long bidDocId, String username, BidRequest request) {
@@ -92,7 +91,7 @@ public class BidServiceImpl implements BidService {
 
     // check if bidding document is time out
     String status = biddingDocument.getStatus();
-    if (status.equalsIgnoreCase(EnumBiddingStatus.CANCELED.name())
+    if (status.equalsIgnoreCase(EnumBiddingStatus.CANCELED.name()) || status.equals(EnumBiddingStatus.EXPIRED.name())
         || biddingDocument.getBidClosing().isBefore(LocalDateTime.now())) {
       throw new InternalException(ErrorMessage.BIDDINGDOCUMENT_TIME_OUT);
     }
@@ -121,6 +120,9 @@ public class BidServiceImpl implements BidService {
     containersId.forEach(containerId -> {
       Container container = containerRepository.findById(containerId)
           .orElseThrow(() -> new NotFoundException(ErrorMessage.CONTAINER_NOT_FOUND));
+      if (container.getBillOfLading().getFreeTime().isBefore(LocalDateTime.now())) {
+        throw new InternalException(ErrorMessage.INBOUND_INVALID_FREETIME);
+      }
       if (containerRepository.existsByOutbound(containerId, outbound.getShippingLine().getCompanyCode(),
           outbound.getContainerType().getName(), Arrays.asList(EnumSupplyStatus.CREATED.name()),
           outbound.getPackingTime(), booking.getCutOffTime(), booking.getPortOfLoading().getNameCode())) {
@@ -453,38 +455,48 @@ public class BidServiceImpl implements BidService {
   }
 
   @Override
-  public List<Bid> getExpiredBids(List<Bid> bids) {
-    List<Bid> result = new ArrayList<Bid>();
-    bids.forEach(bid -> {
-      if (bid.getBiddingDocument().getBidClosing().isBefore(LocalDateTime.now()) && bid.getDateOfDecision() == null) {
-        result.add(bid);
-      }
-    });
-    return result;
-  }
-
-  @Override
-  public List<Bid> updatedExpiredBids(List<Bid> bids) {
-    List<Bid> result = new ArrayList<Bid>();
-    bids.forEach(bid -> {
-      if (bid.getBiddingDocument().getBidClosing().isBefore(LocalDateTime.now()) && bid.getDateOfDecision() == null) {
-        bid.setStatus(EnumBidStatus.EXPIRED.name());
-      }
-      result.add(bid);
-    });
-    return result;
-  }
-
-  @Override
-  public void editExpiredBids(List<Bid> bids) {
-    bids.forEach(bid -> {
-      bid.setStatus(EnumBidStatus.EXPIRED.name());
-      bidRepository.save(bid);
-      bid.getContainers().forEach(container -> {
+  public void editExpiredBids(Bid bid, String status) {
+    Collection<Container> containers = bid.getContainers();
+    bid.setStatus(status);
+    if (status.equalsIgnoreCase(EnumBidStatus.REJECTED.name())) {
+      bid.setDateOfDecision(LocalDateTime.now());
+      containers.forEach(container -> {
         container.setStatus(EnumSupplyStatus.CREATED.name());
         containerRepository.save(container);
       });
-    });
+    }
+
+    if (status.equalsIgnoreCase(EnumBidStatus.CANCELED.name())
+        || status.equalsIgnoreCase(EnumBidStatus.EXPIRED.name())) {
+      containers.forEach(container -> {
+        container.setStatus(EnumSupplyStatus.CREATED.name());
+        containerRepository.save(container);
+      });
+    }
+
+    bidRepository.save(bid);
+
+  }
+
+  @Override
+  public List<Bid> updateExpiredBidFromList(List<Bid> bids) {
+    List<Bid> result = new ArrayList<Bid>();
+    for (Bid bid : bids) {
+      BiddingDocument biddingDocument = bid.getBiddingDocument();
+      String status = bid.getStatus();
+      boolean existsCombinedBid = biddingDocumentRepository.existsCombinedBid(biddingDocument.getId());
+      if (biddingDocument.getBidClosing().isBefore(LocalDateTime.now()) && existsCombinedBid
+          && biddingDocument.getStatus().equals(EnumBiddingStatus.BIDDING.name())) {
+        status = EnumBiddingStatus.EXPIRED.name();
+        if (existsCombinedBid) {
+          status = EnumSupplyStatus.COMBINED.name();
+        }
+        biddingDocumentService.updateExpiredBiddingDocuments(biddingDocument.getId(), status);
+        bid.setStatus(status);
+      }
+      result.add(bid);
+    }
+    return result;
   }
 
 }

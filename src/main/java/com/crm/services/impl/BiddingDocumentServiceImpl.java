@@ -1,10 +1,15 @@
 package com.crm.services.impl;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -20,6 +25,7 @@ import com.crm.enums.EnumSupplyStatus;
 import com.crm.exception.ForbiddenException;
 import com.crm.exception.InternalException;
 import com.crm.exception.NotFoundException;
+import com.crm.models.Bid;
 import com.crm.models.BiddingDocument;
 import com.crm.models.BillOfLading;
 import com.crm.models.Inbound;
@@ -36,6 +42,7 @@ import com.crm.repository.InboundRepository;
 import com.crm.repository.MerchantRepository;
 import com.crm.repository.OutboundRepository;
 import com.crm.repository.UserRepository;
+import com.crm.services.BidService;
 import com.crm.services.BiddingDocumentService;
 
 @Service
@@ -65,6 +72,13 @@ public class BiddingDocumentServiceImpl implements BiddingDocumentService {
   @Autowired
   private InboundRepository inboundRepository;
 
+  @Autowired
+  @Qualifier("cachedThreadPool")
+  private ExecutorService executorService;
+
+  @Autowired
+  private BidService bidService;
+
   @Override
   public BiddingDocument createBiddingDocument(String username, BiddingDocumentRequest request) {
     BiddingDocument biddingDocument = new BiddingDocument();
@@ -91,8 +105,11 @@ public class BiddingDocumentServiceImpl implements BiddingDocumentService {
     biddingDocument.setBidOpening(LocalDateTime.now());
 
     LocalDateTime packingTime = outbound.getPackingTime();
+    if (packingTime.isBefore(LocalDateTime.now())) {
+      throw new InternalException(ErrorMessage.BIDDINGDOCUMENT_INVALID_OPENING_TIME);
+    }
     LocalDateTime bidClosing = Tool.convertToLocalDateTime(request.getBidClosing());
-    if (bidClosing.isBefore(LocalDateTime.now()) || bidClosing.isAfter(packingTime)) {
+    if (bidClosing.isAfter(packingTime) || bidClosing.isBefore(LocalDateTime.now())) {
       throw new InternalException(ErrorMessage.BIDDINGDOCUMENT_INVALID_CLOSING_TIME);
     }
     biddingDocument.setBidClosing(bidClosing);
@@ -184,7 +201,8 @@ public class BiddingDocumentServiceImpl implements BiddingDocumentService {
   public BiddingDocument editBiddingDocument(Long id, String username, Map<String, Object> updates) {
     BiddingDocument biddingDocument = biddingDocumentRepository.findById(id)
         .orElseThrow(() -> new NotFoundException(ErrorMessage.BIDDINGDOCUMENT_NOT_FOUND));
-    if(!biddingDocument.getOfferee().getUsername().equals(username)) {
+    if (!(biddingDocument.getOfferee().getUsername().equals(username)
+        || biddingDocumentRepository.isBidderByBiddingDocument(id, username))) {
       throw new ForbiddenException(ErrorMessage.USER_ACCESS_DENIED);
     }
 
@@ -243,6 +261,23 @@ public class BiddingDocumentServiceImpl implements BiddingDocumentService {
           bidRepository.save(bid);
         });
       }
+      if (eStatus.name().equalsIgnoreCase(EnumBiddingStatus.EXPIRED.name())) {
+        outbound = biddingDocument.getOutbound();
+        outbound.setStatus(EnumSupplyStatus.CREATED.name());
+        outboundRepository.save(outbound);
+
+        biddingDocument.getBids().forEach(bid -> {
+          if (bid.getStatus().equals(EnumBidStatus.ACCEPTED.name())) {
+            bid.setStatus(EnumBidStatus.REJECTED.name());
+            bid.setDateOfDecision(LocalDateTime.now());
+            bid.getContainers().forEach(container -> {
+              container.setStatus(EnumSupplyStatus.CREATED.name());
+              containerRepository.save(container);
+            });
+            bidRepository.save(bid);
+          }
+        });
+      }
     }
 
     BiddingDocument _biddingDocument = biddingDocumentRepository.save(biddingDocument);
@@ -251,14 +286,13 @@ public class BiddingDocumentServiceImpl implements BiddingDocumentService {
 
   @Override
   public void removeBiddingDocument(Long id, String username) {
-    Merchant merchant = merchantRepository.findByUsername(username)
-        .orElseThrow(() -> new NotFoundException(ErrorMessage.MERCHANT_NOT_FOUND));
     BiddingDocument biddingDocument = biddingDocumentRepository.findById(id)
         .orElseThrow(() -> new NotFoundException(ErrorMessage.BIDDINGDOCUMENT_NOT_FOUND));
-    if (!biddingDocument.getOfferee().equals(merchant)) {
+    if (!biddingDocument.getOfferee().getUsername().equals(username)) {
       throw new ForbiddenException(ErrorMessage.USER_ACCESS_DENIED);
     }
-    if (!biddingDocument.getStatus().equalsIgnoreCase(EnumBiddingStatus.CANCELED.name())) {
+    if (!(biddingDocument.getStatus().equalsIgnoreCase(EnumBiddingStatus.CANCELED.name())
+        || biddingDocument.getStatus().equalsIgnoreCase(EnumBiddingStatus.EXPIRED.name()))) {
       throw new InternalException(ErrorMessage.BIDDINGDOCUMENT_IS_IN_TRANSACTION);
     }
     biddingDocumentRepository.deleteById(id);
@@ -279,6 +313,53 @@ public class BiddingDocumentServiceImpl implements BiddingDocumentService {
         billOfLading.getFreeTime(), page);
 
     return pages;
+  }
+
+  @Override
+  public void updateExpiredBiddingDocuments(Long id, String status) {
+    BiddingDocument biddingDocument = biddingDocumentRepository.getOne(id);
+    Collection<Bid> bids = new ArrayList<>();
+    bids = biddingDocument.getBids();
+    biddingDocument.setStatus(status);
+    Outbound outbound = biddingDocument.getOutbound();
+    String bidStatus = EnumBidStatus.EXPIRED.name();
+    if (status.equalsIgnoreCase(EnumBiddingStatus.EXPIRED.name())) {
+      outbound.setStatus(EnumSupplyStatus.CREATED.name());
+      outboundRepository.save(outbound);
+    }
+    if (status.equalsIgnoreCase(EnumBiddingStatus.COMBINED.name())) {
+      outbound = biddingDocument.getOutbound();
+      outbound.setStatus(EnumSupplyStatus.COMBINED.name());
+      outboundRepository.save(outbound);
+      bidStatus = EnumBidStatus.ACCEPTED.name();
+    }
+    if (!bids.isEmpty()) {
+      for (Bid bid : bids) {
+        bidService.editExpiredBids(bid, bidStatus);
+      }
+    }
+    biddingDocumentRepository.save(biddingDocument);
+  }
+
+  @Override
+  public List<BiddingDocument> updateExpiredBiddingDocumentFromList(List<BiddingDocument> biddingDocuments) {
+    List<BiddingDocument> result = new ArrayList<BiddingDocument>();
+
+    for (BiddingDocument biddingDocument : biddingDocuments) {
+      String status = biddingDocument.getStatus();
+      boolean existsCombinedBid = biddingDocumentRepository.existsCombinedBid(biddingDocument.getId());
+      if (biddingDocument.getBidClosing().isBefore(LocalDateTime.now())
+          && biddingDocument.getStatus().equals(EnumBiddingStatus.BIDDING.name())) {
+        status = EnumBiddingStatus.EXPIRED.name();
+        if (existsCombinedBid) {
+          status = EnumBiddingStatus.COMBINED.name();
+        }
+        updateExpiredBiddingDocuments(biddingDocument.getId(), status);
+        biddingDocument.setStatus(status);
+      }
+      result.add(biddingDocument);
+    }
+    return result;
   }
 
 }

@@ -31,4 +31,6 @@ public interface ContainerService {
 
   void removeContainer(Long id, String username);
 
+  List<Container> updateExpiredContainerFromList(List<Container> containers);
+
 }

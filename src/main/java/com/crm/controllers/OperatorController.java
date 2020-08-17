@@ -14,6 +14,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -101,7 +103,9 @@ public class OperatorController {
   @PreAuthorize("hasRole('ADMIN') or hasRole('MODERATOR')")
   @RequestMapping(value = "/{id}", method = RequestMethod.PATCH, consumes = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<?> editOperator(@PathVariable("id") Long id, @RequestBody Map<String, Object> updates) {
-    Operator operator = operatorService.editOperator(id, updates);
+    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    String username = userDetails.getUsername();
+    Operator operator = operatorService.editOperator(id, username, updates);
     OperatorDto operatorDto = OperatorMapper.toOperatorDto(operator);
 
     // Set default response body
@@ -109,7 +113,7 @@ public class OperatorController {
     defaultResponse.setMessage(SuccessMessage.EDIT_OPERATOR_SUCCESSFULLY);
     defaultResponse.setData(operatorDto);
 
-    logger.info("editOperator from id {} with request: {}", id, updates.toString());
+    logger.info("{} editOperator from id {} with request: {}", username, id, updates.toString());
     return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 
@@ -117,13 +121,15 @@ public class OperatorController {
   @DeleteMapping("/{id}")
   @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<?> removeOperator(@PathVariable Long id) {
-    operatorService.removeOperator(id);
+    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    String username = userDetails.getUsername();
+    operatorService.removeOperator(id, username);
 
     // Set default response body
     DefaultResponse<OperatorDto> defaultResponse = new DefaultResponse<>();
     defaultResponse.setMessage(SuccessMessage.DELETE_OPERATOR_SUCCESSFULLY);
 
-    logger.info("deleteOperator with id: {}", id);
+    logger.info("{} deleteOperator with id: {}", username, id);
     return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 }

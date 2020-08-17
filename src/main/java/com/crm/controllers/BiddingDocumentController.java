@@ -1,6 +1,7 @@
 package com.crm.controllers;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -89,8 +90,9 @@ public class BiddingDocumentController {
     response.setTotalPages(pages.getTotalPages());
 
     List<BiddingDocument> biddingDocuments = pages.getContent();
+    List<BiddingDocument> result = biddingDocumentService.updateExpiredBiddingDocumentFromList(biddingDocuments);
     List<BiddingDocumentDto> biddingDocumentsDto = new ArrayList<>();
-    biddingDocuments.forEach(
+    result.forEach(
         biddingDocument -> biddingDocumentsDto.add(BiddingDocumentMapper.toBiddingDocumentDto(biddingDocument)));
     response.setContents(biddingDocumentsDto);
 
@@ -112,8 +114,9 @@ public class BiddingDocumentController {
     response.setTotalPages(pages.getTotalPages());
 
     List<BiddingDocument> biddingDocuments = pages.getContent();
+    List<BiddingDocument> result = biddingDocumentService.updateExpiredBiddingDocumentFromList(biddingDocuments);
     List<BiddingDocumentDto> biddingDocumentsDto = new ArrayList<>();
-    biddingDocuments.forEach(
+    result.forEach(
         biddingDocument -> biddingDocumentsDto.add(BiddingDocumentMapper.toBiddingDocumentDto(biddingDocument)));
     response.setContents(biddingDocumentsDto);
 
@@ -124,7 +127,9 @@ public class BiddingDocumentController {
   @GetMapping("/{id}")
   public ResponseEntity<?> getBiddingDocument(@PathVariable Long id) {
     BiddingDocument biddingDocument = biddingDocumentService.getBiddingDocument(id);
-    BiddingDocumentDto biddingDocumentDto = BiddingDocumentMapper.toBiddingDocumentDto(biddingDocument);
+    List<BiddingDocument> result = biddingDocumentService
+        .updateExpiredBiddingDocumentFromList(Arrays.asList(biddingDocument));
+    BiddingDocumentDto biddingDocumentDto = BiddingDocumentMapper.toBiddingDocumentDto(result.get(0));
     return ResponseEntity.ok(biddingDocumentDto);
   }
 
@@ -134,7 +139,9 @@ public class BiddingDocumentController {
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
     BiddingDocument biddingDocument = biddingDocumentService.getBiddingDocumentByBid(id, username);
-    BiddingDocumentDto biddingDocumentDto = BiddingDocumentMapper.toBiddingDocumentDto(biddingDocument);
+    List<BiddingDocument> result = biddingDocumentService
+        .updateExpiredBiddingDocumentFromList(Arrays.asList(biddingDocument));
+    BiddingDocumentDto biddingDocumentDto = BiddingDocumentMapper.toBiddingDocumentDto(result.get(0));
     return ResponseEntity.ok(biddingDocumentDto);
   }
 
@@ -144,7 +151,9 @@ public class BiddingDocumentController {
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
     BiddingDocument biddingDocument = biddingDocumentService.getBiddingDocumentByCombined(id, username);
-    BiddingDocumentDto biddingDocumentDto = BiddingDocumentMapper.toBiddingDocumentDto(biddingDocument);
+    List<BiddingDocument> result = biddingDocumentService
+        .updateExpiredBiddingDocumentFromList(Arrays.asList(biddingDocument));
+    BiddingDocumentDto biddingDocumentDto = BiddingDocumentMapper.toBiddingDocumentDto(result.get(0));
     return ResponseEntity.ok(biddingDocumentDto);
   }
 
@@ -163,8 +172,9 @@ public class BiddingDocumentController {
     response.setTotalPages(pages.getTotalPages());
 
     List<BiddingDocument> biddingDocuments = pages.getContent();
+    List<BiddingDocument> result = biddingDocumentService.updateExpiredBiddingDocumentFromList(biddingDocuments);
     List<BiddingDocumentDto> biddingDocumentsDto = new ArrayList<>();
-    biddingDocuments.forEach(
+    result.forEach(
         biddingDocument -> biddingDocumentsDto.add(BiddingDocumentMapper.toBiddingDocumentDto(biddingDocument)));
     response.setContents(biddingDocumentsDto);
 
@@ -186,8 +196,7 @@ public class BiddingDocumentController {
     defaultResponse.setMessage(SuccessMessage.EDIT_BIDDING_DUCUMENT_SUCCESSFULLY);
     defaultResponse.setData(biddingDocumentDto);
 
-    logger.info("User {} editBiddingDocument from id {} with request: {}", username, id,
-        updates.toString());
+    logger.info("User {} editBiddingDocument from id {} with request: {}", username, id, updates.toString());
     return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 

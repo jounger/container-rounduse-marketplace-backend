@@ -55,8 +55,9 @@ public class Evidence {
   @Column(name = "document_path")
   private String documentPath;
 
-  @Column(name = "is_valid")
-  private Boolean isValid;
+  // EnumEvidenceStatus
+  @Column(name = "status")
+  private String status;
 
   @Column(name = "created_at", nullable = false, updatable = false)
   @Temporal(TemporalType.TIMESTAMP)

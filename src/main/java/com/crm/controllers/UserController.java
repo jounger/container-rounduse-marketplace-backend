@@ -162,7 +162,7 @@ public class UserController {
     UserDto userDto = UserMapper.toUserDto(user);
 
     DefaultResponse<UserDto> defaultResponse = new DefaultResponse<>();
-    defaultResponse.setMessage("Update profile successful");
+    defaultResponse.setMessage(SuccessMessage.PROFILE_CHANGE_SUCCESSFULLY);
     defaultResponse.setData(userDto);
     logger.info("{} do uploadProfileImage with path: {}", username, filePath);
 

@@ -196,7 +196,8 @@ public class BiddingDocumentController {
     defaultResponse.setMessage(SuccessMessage.EDIT_BIDDING_DUCUMENT_SUCCESSFULLY);
     defaultResponse.setData(biddingDocumentDto);
 
-    logger.info("User {} editBiddingDocument from id {} with request: {}", username, id, updates.toString());
+    logger.info("User {} editBiddingDocument from id {} with request: {}", username, id,
+        updates.toString());
     return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 

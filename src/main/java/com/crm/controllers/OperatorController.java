@@ -113,7 +113,7 @@ public class OperatorController {
     defaultResponse.setMessage(SuccessMessage.EDIT_OPERATOR_SUCCESSFULLY);
     defaultResponse.setData(operatorDto);
 
-    logger.info("{} editOperator from id {} with request: {}", username, id, updates.toString());
+    logger.info("editOperator from id {} with request: {}", id, updates.toString());
     return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 

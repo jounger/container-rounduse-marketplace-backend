@@ -34,7 +34,6 @@ import com.crm.services.BidService;
 import com.crm.services.ContractService;
 import com.crm.services.ShippingInfoService;
 import com.crm.specification.builder.ContractSpecificationsBuilder;
-import com.crm.websocket.controller.NotificationBroadcast;
 
 @Service
 public class ContractServiceImp implements ContractService {
@@ -50,9 +49,6 @@ public class ContractServiceImp implements ContractService {
 
   @Autowired
   private ShippingInfoService shippingInfoService;
-
-  @Autowired
-  private NotificationBroadcast notificationBroadcast;
 
   @Autowired
   private SupplierRepository supplierDtoRepository;
@@ -120,9 +116,6 @@ public class ContractServiceImp implements ContractService {
 
     shippingInfoService.createShippingInfosForContract(contract, containersId);
 
-    // CREATE NOTIFICATION
-    notificationBroadcast.broadcastCreateContractToDriver(contract);
-    // END NOTIFICATION
     return _contract;
   }
 

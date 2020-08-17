@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.crm.common.FileUploadMessage;
 import com.crm.exception.FileStorageException;
 import com.crm.exception.MyFileNotFoundException;
 import com.crm.services.FileStorageService;
@@ -35,7 +36,7 @@ public class FileStorageServiceImpl implements FileStorageService {
     try {
       // Check if the file's name contains invalid characters
       if (fileName.contains("..")) {
-        throw new FileStorageException("Sorry! Filename contains invalid path sequence " + fileName);
+        throw new FileStorageException(FileUploadMessage.FILE_UPLOAD_PATH_INVALID + fileName);
       }
       Files.createDirectories(this.fileStorageLocation);
       // Copy file to the target location (Replacing existing file with the same name)
@@ -44,7 +45,7 @@ public class FileStorageServiceImpl implements FileStorageService {
 
       return fileName;
     } catch (IOException ex) {
-      throw new FileStorageException("Could not store file " + fileName + ". Please try again!", ex);
+      throw new FileStorageException(FileUploadMessage.COULD_NOT_STORE_FILE + fileName, ex);
     }
   }
 
@@ -57,7 +58,7 @@ public class FileStorageServiceImpl implements FileStorageService {
     try {
       // Check if the file's name contains invalid characters
       if (fileName.contains("..")) {
-        throw new FileStorageException("Sorry! Filename contains invalid path sequence " + fileName);
+        throw new FileStorageException(FileUploadMessage.FILE_UPLOAD_PATH_INVALID + fileName);
       }
       Files.createDirectories(this.fileStorageLocation);
       // Copy file to the target location (Replacing existing file with the same name)
@@ -66,7 +67,7 @@ public class FileStorageServiceImpl implements FileStorageService {
 
       return fileName;
     } catch (IOException ex) {
-      throw new FileStorageException("Could not store file " + fileName + ". Please try again!", ex);
+      throw new FileStorageException(FileUploadMessage.COULD_NOT_STORE_FILE + fileName, ex);
     }
   }
 
@@ -79,10 +80,10 @@ public class FileStorageServiceImpl implements FileStorageService {
       if (resource.exists()) {
         return resource;
       } else {
-        throw new MyFileNotFoundException("File not found " + fileName);
+        throw new MyFileNotFoundException(FileUploadMessage.FILE_UPLOAD_NOTFOUND + fileName);
       }
     } catch (MalformedURLException ex) {
-      throw new MyFileNotFoundException("File not found " + fileName, ex);
+      throw new MyFileNotFoundException(FileUploadMessage.FILE_UPLOAD_NOTFOUND + fileName, ex);
     }
   }
 

@@ -181,41 +181,12 @@ public class BiddingDocumentServiceImpl implements BiddingDocumentService {
   }
 
   @Override
-  public BiddingDocument updateBiddingDocument(BiddingDocumentRequest request) {
-    BiddingDocument biddingDocument = biddingDocumentRepository.findById(request.getId())
-        .orElseThrow(() -> new NotFoundException(ErrorMessage.BIDDINGDOCUMENT_NOT_FOUND));
-
-    if (biddingDocument.getStatus().equalsIgnoreCase(EnumBiddingStatus.COMBINED.name())) {
-      throw new InternalException(ErrorMessage.BIDDINGDOCUMENT_IS_IN_TRANSACTION);
-    }
-
-    Outbound outbound = biddingDocument.getOutbound();
-    LocalDateTime packingTime = outbound.getPackingTime();
-    LocalDateTime bidClosingTime = Tool.convertToLocalDateTime(request.getBidClosing());
-    if (bidClosingTime.isBefore(LocalDateTime.now()) || bidClosingTime.isAfter(packingTime)) {
-      throw new InternalException(ErrorMessage.BIDDINGDOCUMENT_INVALID_CLOSING_TIME);
-    }
-    biddingDocument.setBidClosing(bidClosingTime);
-
-    EnumCurrency currencyOfPayment = EnumCurrency.findByName(request.getCurrencyOfPayment());
-    if (currencyOfPayment == null) {
-      currencyOfPayment = EnumCurrency.VND;
-    } else {
-      biddingDocument.setCurrencyOfPayment(currencyOfPayment.name());
-    }
-
-    biddingDocument.setBidPackagePrice(request.getBidPackagePrice());
-    biddingDocument.setBidFloorPrice(request.getBidFloorPrice());
-    biddingDocument.setPriceLeadership(request.getPriceLeadership());
-
-    BiddingDocument _biddingDocument = biddingDocumentRepository.save(biddingDocument);
-    return _biddingDocument;
-  }
-
-  @Override
-  public BiddingDocument editBiddingDocument(Long id, Map<String, Object> updates) {
+  public BiddingDocument editBiddingDocument(Long id, String username, Map<String, Object> updates) {
     BiddingDocument biddingDocument = biddingDocumentRepository.findById(id)
         .orElseThrow(() -> new NotFoundException(ErrorMessage.BIDDINGDOCUMENT_NOT_FOUND));
+    if(!biddingDocument.getOfferee().getUsername().equals(username)) {
+      throw new ForbiddenException(ErrorMessage.USER_ACCESS_DENIED);
+    }
 
     if (biddingDocument.getStatus().equalsIgnoreCase(EnumBiddingStatus.COMBINED.name())) {
       throw new InternalException(ErrorMessage.BIDDINGDOCUMENT_IS_IN_TRANSACTION);

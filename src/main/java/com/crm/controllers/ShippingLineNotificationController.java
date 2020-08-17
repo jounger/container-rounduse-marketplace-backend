@@ -7,6 +7,8 @@ import java.util.Map;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -39,6 +41,8 @@ import com.crm.services.ShippingLineNotificationService;
 @RestController
 @RequestMapping("/api/shipping-line-notification")
 public class ShippingLineNotificationController {
+
+  private static final Logger logger = LoggerFactory.getLogger(SupplierController.class);
 
   @Autowired
   ShippingLineNotificationService shippingLineNotificationService;
@@ -109,6 +113,7 @@ public class ShippingLineNotificationController {
     defaultResponse.setMessage(Constant.EMPTY_STRING);
     defaultResponse.setData(shippingLineNotificationDto);
 
+    logger.info("editShippingLineNotification from id {} with request {}", id, updates.toString());
     return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 

@@ -7,6 +7,8 @@ import java.util.Map;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -39,6 +41,8 @@ import com.crm.services.BiddingNotificationService;
 @RestController
 @RequestMapping("/api/bidding-notification")
 public class BiddingNotificationController {
+
+  private static final Logger logger = LoggerFactory.getLogger(SupplierController.class);
 
   @Autowired
   private BiddingNotificationService biddingNotificationService;
@@ -116,6 +120,7 @@ public class BiddingNotificationController {
     defaultResponse.setMessage(Constant.EMPTY_STRING);
     defaultResponse.setData(biddingNotificationDto);
 
+    logger.info("editBiddingNotification from id {} with request: {}", id, updates.toString());
     return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 
@@ -128,6 +133,7 @@ public class BiddingNotificationController {
     DefaultResponse<BiddingNotificationDto> defaultResponse = new DefaultResponse<>();
     defaultResponse.setMessage(SuccessMessage.DELETE_NOTIFICATION_SUCCESSFULLY);
 
+    logger.info("deleteBiddingNotification id {}", id);
     return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 

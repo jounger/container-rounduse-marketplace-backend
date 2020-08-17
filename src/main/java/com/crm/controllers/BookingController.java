@@ -6,6 +6,8 @@ import java.util.Map;
 
 import javax.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -37,6 +39,8 @@ import com.crm.services.BookingService;
 @RestController
 @RequestMapping("/api/booking")
 public class BookingController {
+
+  private static final Logger logger = LoggerFactory.getLogger(SupplierController.class);
 
   @Autowired
   BookingService bookingService;
@@ -103,6 +107,7 @@ public class BookingController {
     defaultResponse.setMessage(SuccessMessage.EDIT_BOOKING_SUCCESSFULLY);
     defaultResponse.setData(bookingDto);
 
+    logger.info("User {} editBooking from id {} with request: {}", username, id, updates.toString());
     return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 }

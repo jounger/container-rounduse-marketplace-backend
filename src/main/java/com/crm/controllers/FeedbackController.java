@@ -7,6 +7,8 @@ import java.util.Map;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -42,6 +44,8 @@ import com.crm.websocket.controller.NotificationBroadcast;
 @RequestMapping("/api/feedback")
 public class FeedbackController {
 
+  private static final Logger logger = LoggerFactory.getLogger(SupplierController.class);
+
   @Autowired
   private FeedbackService paymentService;
 
@@ -66,6 +70,7 @@ public class FeedbackController {
     defaultResponse.setMessage(SuccessMessage.CREATE_FEEDBACK_SUCCESSFULLY);
     defaultResponse.setData(feedbackDto);
 
+    logger.info("User {} createFeedback with request: {}", username, request.toString());
     return ResponseEntity.status(HttpStatus.CREATED).body(defaultResponse);
   }
 
@@ -168,6 +173,7 @@ public class FeedbackController {
     defaultResponse.setMessage(SuccessMessage.EDIT_FEEDBACK_SUCCESSFULLY);
     defaultResponse.setData(feedbackDto);
 
+    logger.info("User {} editFeedback from id {} with request: {}", username, id, updates.toString());
     return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 
@@ -183,6 +189,7 @@ public class FeedbackController {
     DefaultResponse<FeedbackDto> defaultResponse = new DefaultResponse<>();
     defaultResponse.setMessage(SuccessMessage.DELETE_FEEDBACK_SUCCESSFULLY);
 
+    logger.info("User {} deleteFeedback with id {}", username, id);
     return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 }

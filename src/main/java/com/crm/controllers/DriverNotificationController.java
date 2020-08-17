@@ -7,6 +7,8 @@ import java.util.Map;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -39,6 +41,8 @@ import com.crm.services.DriverNotificationService;
 @RestController
 @RequestMapping("/api/driver-notification")
 public class DriverNotificationController {
+
+  private static final Logger logger = LoggerFactory.getLogger(SupplierController.class);
 
   @Autowired
   DriverNotificationService driverNotificationService;
@@ -98,12 +102,13 @@ public class DriverNotificationController {
       @RequestBody Map<String, Object> updates) {
     DriverNotification driverNotification = driverNotificationService.editDriverNotification(id, updates);
     DriverNotificationDto driverNotificationDto = DriverNotificationMapper.toDriverNotificationDto(driverNotification);
-    
+
     // Set default response body
     DefaultResponse<DriverNotificationDto> defaultResponse = new DefaultResponse<>();
     defaultResponse.setMessage(Constant.EMPTY_STRING);
     defaultResponse.setData(driverNotificationDto);
 
+    logger.info("editDriverNotification from id {} with request: {}", id, updates.toString());
     return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 
@@ -116,6 +121,7 @@ public class DriverNotificationController {
     DefaultResponse<DriverNotificationDto> defaultResponse = new DefaultResponse<>();
     defaultResponse.setMessage(SuccessMessage.DELETE_NOTIFICATION_SUCCESSFULLY);
 
+    logger.info("deleteDriverNotification from report id {}", id);
     return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 }

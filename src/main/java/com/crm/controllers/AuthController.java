@@ -115,9 +115,11 @@ public class AuthController {
     if (role.equals("FORWARDER") || role.equals("ROLE_FORWARDER")) {
       Forwarder forwarder = forwarderService.createForwarder(request);
       supplierDto = SupplierMapper.toSupplierDto(forwarder);
+      logger.info("createForwarder with request: {}", request.toString());
     } else if (role.equals("MERCHANT") || role.equals("ROLE_MERCHANT")) {
       Merchant merchant = merchantService.createMerchant(request);
       supplierDto = SupplierMapper.toSupplierDto(merchant);
+      logger.info("createMerchant with request: {}", request.toString());
     } else {
       throw new NotFoundException(ErrorMessage.ROLE_NOT_FOUND);
     }

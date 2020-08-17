@@ -7,6 +7,8 @@ import java.util.Map;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -42,6 +44,8 @@ import com.crm.websocket.controller.NotificationBroadcast;
 @RequestMapping("/api/contract")
 public class ContractController {
 
+  private static final Logger logger = LoggerFactory.getLogger(SupplierController.class);
+
   @Autowired
   private ContractService contractService;
 
@@ -62,6 +66,7 @@ public class ContractController {
     defaultResponse.setMessage(SuccessMessage.CREATE_CONTRACT_SUCCESSFULLY);
     defaultResponse.setData(contractDto);
 
+    logger.info("User {} createContract with request: {}", username, request.toString());
     return ResponseEntity.status(HttpStatus.CREATED).body(defaultResponse);
   }
 
@@ -147,6 +152,7 @@ public class ContractController {
     DefaultResponse<ContractDto> defaultResponse = new DefaultResponse<>();
     defaultResponse.setMessage(SuccessMessage.DELETE_CONTRACT_SUCCESSFULLY);
 
+    logger.info("User {} deleteContract with id {}", username, id);
     return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 }

@@ -91,7 +91,7 @@ public class UserController {
   @GetMapping("")
   @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN')")
   public ResponseEntity<?> getUsers(@Valid PaginationRequest request) {
-    logger.info("Page request: {}", request.getPage());
+    
     Page<User> pages = userService.getUsers(request);
     PaginationResponse<UserDto> response = new PaginationResponse<>();
     response.setPageNumber(request.getPage());
@@ -112,6 +112,7 @@ public class UserController {
   @RequestMapping(value = "/{username}", method = RequestMethod.PATCH, consumes = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<?> editUser(@PathVariable("username") String username,
       @RequestBody Map<String, Object> updates) {
+
     User user = userService.editUser(username, updates);
     UserDto userDto = UserMapper.toUserDto(user);
 
@@ -119,6 +120,7 @@ public class UserController {
     DefaultResponse<UserDto> defaultResponse = new DefaultResponse<>();
     defaultResponse.setMessage(SuccessMessage.EDIT_USER_SUCCESSFULLY);
     defaultResponse.setData(userDto);
+    logger.info("Moderator editUser {} with request {}", username, updates.toString());
 
     return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
@@ -136,6 +138,7 @@ public class UserController {
     DefaultResponse<UserDto> defaultResponse = new DefaultResponse<>();
     defaultResponse.setMessage(SuccessMessage.CHANGE_PASSWORD_SUCCESSFULLY);
     defaultResponse.setData(userDto);
+    logger.info("{} changePassword with request {}", username, request.toString());
 
     return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
@@ -161,6 +164,7 @@ public class UserController {
     DefaultResponse<UserDto> defaultResponse = new DefaultResponse<>();
     defaultResponse.setMessage(SuccessMessage.PROFILE_CHANGE_SUCCESSFULLY);
     defaultResponse.setData(userDto);
+    logger.info("{} do uploadProfileImage with path: {}", username, filePath);
 
     return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
@@ -168,19 +172,19 @@ public class UserController {
   @PostMapping("/reset-password")
   public ResponseEntity<?> getResetPasswordToken(@Valid @RequestBody ResetPasswordRequest request)
       throws MessagingException, IOException {
-    logger.info("Reset password with email: {}", request.getEmail());
     userService.getResetPasswordToken(request.getEmail());
     DefaultResponse<UserDto> response = new DefaultResponse<UserDto>();
     response.setMessage(SuccessMessage.GENERATE_RESET_PASSWORD_TOKEN_SUCCESSFULLY);
+    logger.info("Reset password with email: {}", request.getEmail());
     return ResponseEntity.status(HttpStatus.OK).body(response);
   }
 
   @GetMapping("/reset-password")
   public ResponseEntity<?> isValidResetPasswordToken(@Valid @RequestBody ResetPasswordRequest request) {
-    logger.info("Reset Password Token: {}", request.getToken());
     Boolean isValidResetPasswordToken = userService.isValidResetPasswrodTolken(request.getToken());
     DefaultResponse<Boolean> response = new DefaultResponse<Boolean>();
     response.setData(isValidResetPasswordToken);
+    logger.info("Reset Password Token: {}", request.getToken());
     return ResponseEntity.status(HttpStatus.OK).body(response);
   }
 
@@ -188,11 +192,11 @@ public class UserController {
   public ResponseEntity<?> resetPasswordByToken(HttpServletRequest httpRequest,
       @Valid @RequestBody ResetPasswordRequest request) {
     String token = httpRequest.getHeader("Authentication");
-    logger.info("Reset Password Token: {}", token);
-    logger.info("Reset Password Token: {}", request);
     userService.resetPasswordByToken(token, request.getNewPassword());
     DefaultResponse<Boolean> response = new DefaultResponse<Boolean>();
     response.setMessage(SuccessMessage.CHANGE_PASSWORD_SUCCESSFULLY);
+    logger.info("Reset Password Token: {}", token);
+    logger.info("Reset Password Token: {}", request);
     return ResponseEntity.status(HttpStatus.OK).body(response);
   }
 }

@@ -18,7 +18,6 @@ import com.crm.common.Constant;
 import com.crm.common.ErrorMessage;
 import com.crm.common.Tool;
 import com.crm.exception.ForbiddenException;
-import com.crm.exception.InternalException;
 import com.crm.exception.NotFoundException;
 import com.crm.models.Bid;
 import com.crm.models.BiddingDocument;
@@ -67,14 +66,21 @@ public class ContractServiceImp implements ContractService {
         .orElseThrow(() -> new NotFoundException(ErrorMessage.COMBINED_NOT_FOUND));
     contract.setCombined(combined);
 
+    Bid bid = combined.getBid();
+    BiddingDocument biddingDocument = bid.getBiddingDocument();
+
+    Supplier offeree = biddingDocument.getOfferee();
+    if (username.equals(offeree.getUsername())) {
+      throw new ForbiddenException(ErrorMessage.USER_ACCESS_DENIED);
+    }
+
     Supplier sender = supplierDtoRepository.findByUsername(username)
         .orElseThrow(() -> new NotFoundException(ErrorMessage.USER_NOT_FOUND));
     contract.setSender(sender);
 
     List<Long> containersId = new ArrayList<>();
-    Bid bid = combined.getBid();
     List<Container> containers = new ArrayList<Container>(bid.getContainers());
-    BiddingDocument biddingDocument = bid.getBiddingDocument();
+
     if (!biddingDocument.getIsMultipleAward()) {
       for (Container container : containers) {
         containersId.add(container.getId());
@@ -90,28 +96,24 @@ public class ContractServiceImp implements ContractService {
     Double price = (bid.getBidPrice() / bid.getContainers().size()) * containersId.size();
 
     contract.setPrice(price);
-    Supplier offeree = biddingDocument.getOfferee();
+
     Boolean required = request.getRequired();
     contract.setRequired(required);
     contract.setFinesAgainstContractViolations(0D);
     contract.setCreationDate(LocalDateTime.now());
 
     String discountCodeString = request.getDiscountCode();
-    if (discountCodeString != null && !discountCodeString.isEmpty()) {
+    if (!Tool.isBlank(discountCodeString)) {
       Discount discount = discountRepository.findByCode(discountCodeString)
           .orElseThrow(() -> new NotFoundException(ErrorMessage.DISCOUNT_NOT_FOUND));
       contract.setDiscount(discount);
     }
-    if (username.equals(offeree.getUsername()) && required == true) {
-      Double fines = request.getFinesAgainstContractViolations();
-      if (fines > 0) {
-        contract.setFinesAgainstContractViolations(fines);
-      } else {
-        throw new InternalException(ErrorMessage.CONTRACT_INVALID_FINES);
-      }
-    } else {
-      throw new ForbiddenException(ErrorMessage.USER_ACCESS_DENIED);
+
+    Double fines = 0D;
+    if (required == true) {
+      fines = request.getFinesAgainstContractViolations();
     }
+    contract.setFinesAgainstContractViolations(fines);
 
     Contract _contract = contractRepository.save(contract);
 

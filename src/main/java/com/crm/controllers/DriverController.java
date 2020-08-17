@@ -122,6 +122,7 @@ public class DriverController {
     defaultResponse.setMessage(SuccessMessage.CREATE_DRIVER_SUCCESSFULLY);
     defaultResponse.setData(driverDto);
 
+    logger.info("User {} createDriver with request: {}", username, request.toString());
     return ResponseEntity.status(HttpStatus.CREATED).body(defaultResponse);
   }
 
@@ -141,6 +142,7 @@ public class DriverController {
     defaultResponse.setMessage(SuccessMessage.EDIT_DRIVER_SUCCESSFULLY);
     defaultResponse.setData(driverDto);
 
+    logger.info("User {} editDriver from id {} with request: {}", username, id, updates.toString());
     return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 
@@ -158,6 +160,7 @@ public class DriverController {
     DefaultResponse<DriverDto> defaultResponse = new DefaultResponse<>();
     defaultResponse.setMessage(SuccessMessage.DELETE_DRIVER_SUCCESSFULLY);
 
+    logger.info("User {} deleteDriver with id {}", username, id);
     return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 }

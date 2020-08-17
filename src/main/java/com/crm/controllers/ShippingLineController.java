@@ -7,6 +7,8 @@ import java.util.Map;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -38,6 +40,8 @@ import com.crm.services.ShippingLineService;
 @RequestMapping("/api/shipping-line")
 public class ShippingLineController {
 
+  private static final Logger logger = LoggerFactory.getLogger(SupplierController.class);
+
   @Autowired
   private ShippingLineService shippingLineService;
 
@@ -53,6 +57,7 @@ public class ShippingLineController {
     defaultResponse.setMessage(SuccessMessage.CREATE_SHIPPING_LINE_SUCCESSFULLY);
     defaultResponse.setData(shippingLineDto);
 
+    logger.info("createShippingLine with code: {}", shippingLine.getCompanyCode());
     return ResponseEntity.status(HttpStatus.CREATED).body(defaultResponse);
   }
 
@@ -94,6 +99,7 @@ public class ShippingLineController {
     defaultResponse.setMessage(SuccessMessage.EDIT_SHIPPING_LINE_SUCCESSFULLY);
     defaultResponse.setData(shippingLineDto);
 
+    logger.info("editShippingLine from id: {} with request", id, updates.toString());
     return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 
@@ -107,6 +113,7 @@ public class ShippingLineController {
     DefaultResponse<ShippingLineDto> defaultResponse = new DefaultResponse<>();
     defaultResponse.setMessage(SuccessMessage.DELETE_SHIPPING_LINE_SUCCESSFULLY);
 
+    logger.info("deleteShippingLine with id: {}", id);
     return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 }

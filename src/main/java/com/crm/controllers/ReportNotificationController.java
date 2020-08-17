@@ -7,6 +7,8 @@ import java.util.Map;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -37,6 +39,8 @@ import com.crm.services.ReportNotificationService;
 @RestController
 @RequestMapping("/api/report-notification")
 public class ReportNotificationController {
+
+  private static final Logger logger = LoggerFactory.getLogger(SupplierController.class);
 
   @Autowired
   ReportNotificationService reportNotificationService;
@@ -102,6 +106,7 @@ public class ReportNotificationController {
     defaultResponse.setMessage(Constant.EMPTY_STRING);
     defaultResponse.setData(reportNotificationDto);
 
+    logger.info("editReportNotification from id: { with request: {}", id, updates.toString());
     return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 
@@ -114,6 +119,7 @@ public class ReportNotificationController {
     DefaultResponse<ReportNotificationDto> defaultResponse = new DefaultResponse<>();
     defaultResponse.setMessage(SuccessMessage.DELETE_NOTIFICATION_SUCCESSFULLY);
 
+    logger.info("deleteReportNotification with id: {}", id);
     return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 

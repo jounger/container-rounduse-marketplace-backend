@@ -112,6 +112,7 @@ public class ErrorMessage {
 
   // User
   public static final String USER_NOT_FOUND = "Người dùng không tìm thấy";
+  public static final String USERNAME_OR_PASSWORD_NOT_CORRECT = "Tài khoản hoặc mật khẩu không đúng";
   public static final String USER_STATUS_NOT_FOUND = "Không tìm thấy vai trò";
   public static final String USER_ADDRESS_NOT_FOUND = "Không tìm thấy địa chỉ trên";
   public static final String USER_ACCESS_DENIED = "Truy cập bị từ chối";

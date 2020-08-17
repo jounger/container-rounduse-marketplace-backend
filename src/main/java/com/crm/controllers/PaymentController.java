@@ -7,6 +7,8 @@ import java.util.Map;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -41,6 +43,8 @@ import com.crm.services.PaymentService;
 @RequestMapping("/api/payment")
 public class PaymentController {
 
+  private static final Logger logger = LoggerFactory.getLogger(SupplierController.class);
+
   @Autowired
   private PaymentService paymentService;
 
@@ -58,6 +62,7 @@ public class PaymentController {
     defaultResponse.setMessage(SuccessMessage.CREATE_PAYMENT_SUCCESSFULLY);
     defaultResponse.setData(paymentDto);
 
+    logger.info("User {} createPayment with request: {}", username, request.toString());
     return ResponseEntity.status(HttpStatus.CREATED).body(defaultResponse);
   }
 
@@ -138,6 +143,7 @@ public class PaymentController {
     defaultResponse.setMessage(SuccessMessage.EDIT_PAYMENT_SUCCESSFULLY);
     defaultResponse.setData(paymentDto);
 
+    logger.info("User {} editPayment from id {} with request: {}", username, id, updates.toString());
     return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 
@@ -153,6 +159,7 @@ public class PaymentController {
     DefaultResponse<PaymentDto> defaultResponse = new DefaultResponse<>();
     defaultResponse.setMessage(SuccessMessage.DELETE_PAYMENT_SUCCESSFULLY);
 
+    logger.info("User {} deletePayment with id {}", username, id);
     return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 }

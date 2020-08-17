@@ -169,13 +169,11 @@ public class EvidenceServiceImpl implements EvidenceService {
         item.setStatus(EnumShippingStatus.INFO_RECEIVED.name());
         shippingInfoRepository.save(item);
       });
-      notificationBroadcast.broadcastCreateContractToDriver(contract);
       notificationBroadcast.broadcastCreateContractToShippingLine(contract);
+      notificationBroadcast.broadcastCreateContractToDriver(contract);
     }
 
-    if (contract.getRequired() == true) {
-      notificationBroadcast.broadcastAcceptOrRejectEvidenceToForwarder(contract, evidence.getStatus());
-    }
+    notificationBroadcast.broadcastAcceptOrRejectEvidenceToForwarder(contract, evidence.getStatus());
 
     return _evidence;
   }

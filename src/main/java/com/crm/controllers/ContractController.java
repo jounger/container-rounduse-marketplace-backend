@@ -136,6 +136,7 @@ public class ContractController {
     defaultResponse.setMessage(SuccessMessage.EDIT_CONTRACT_SUCCESSFULLY);
     defaultResponse.setData(contractDto);
 
+    notificationBroadcast.broadcastEditContractToForwarder(contract);
     logger.info("User {} editContract from id {} with request: {}", username, id, updates.toString());
     return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }

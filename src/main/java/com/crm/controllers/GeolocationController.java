@@ -32,7 +32,7 @@ import com.crm.services.GeolocationService;
 @RequestMapping("/api/geolocation")
 public class GeolocationController {
 
-  private static final Logger logger = LoggerFactory.getLogger(SupplierController.class);
+  private static final Logger logger = LoggerFactory.getLogger(GeolocationController.class);
 
   @Autowired
   GeolocationService geolocationService;

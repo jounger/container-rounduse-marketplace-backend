@@ -43,7 +43,7 @@ import com.crm.services.OperatorService;
 @RequestMapping("/api/operator")
 public class OperatorController {
 
-  private static final Logger logger = LoggerFactory.getLogger(SupplierController.class);
+  private static final Logger logger = LoggerFactory.getLogger(OperatorController.class);
 
   @Autowired
   private OperatorService operatorService;

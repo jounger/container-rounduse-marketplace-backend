@@ -43,7 +43,7 @@ import com.crm.services.InboundService;
 @RequestMapping("/api/inbound")
 public class InboundController {
 
-  private static final Logger logger = LoggerFactory.getLogger(SupplierController.class);
+  private static final Logger logger = LoggerFactory.getLogger(InboundController.class);
 
   @Autowired
   private InboundService inboundService;

@@ -48,7 +48,7 @@ import com.crm.websocket.controller.NotificationBroadcast;
 @RequestMapping("/api/bid")
 public class BidController {
 
-  private static final Logger logger = LoggerFactory.getLogger(SupplierController.class);
+  private static final Logger logger = LoggerFactory.getLogger(Bid.class);
 
   @Autowired
   private BidService bidService;

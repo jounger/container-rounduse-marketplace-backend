@@ -44,7 +44,7 @@ import com.crm.websocket.controller.NotificationBroadcast;
 @RequestMapping("/api/bidding-document")
 public class BiddingDocumentController {
 
-  private static final Logger logger = LoggerFactory.getLogger(SupplierController.class);
+  private static final Logger logger = LoggerFactory.getLogger(BiddingDocumentController.class);
 
   @Autowired
   private BiddingDocumentService biddingDocumentService;
@@ -72,6 +72,7 @@ public class BiddingDocumentController {
     defaultResponse.setMessage(SuccessMessage.CREATE_BIDDING_DUCUMENT_SUCCESSFULLY);
     defaultResponse.setData(biddingDocumentDto);
 
+    logger.info("User {} createBiddingDocument with request {}", username, request.toString());
     return ResponseEntity.status(HttpStatus.CREATED).body(defaultResponse);
   }
 
@@ -196,8 +197,7 @@ public class BiddingDocumentController {
     defaultResponse.setMessage(SuccessMessage.EDIT_BIDDING_DUCUMENT_SUCCESSFULLY);
     defaultResponse.setData(biddingDocumentDto);
 
-    logger.info("User {} editBiddingDocument from id {} with request: {}", username, id,
-        updates.toString());
+    logger.info("User {} editBiddingDocument from id {} with request: {}", username, id, updates.toString());
     return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 
@@ -213,7 +213,7 @@ public class BiddingDocumentController {
     DefaultResponse<BiddingDocumentDto> defaultResponse = new DefaultResponse<>();
     defaultResponse.setMessage(SuccessMessage.DELETE_BIDDING_DUCUMENT_SUCCESSFULLY);
 
-    logger.info("User {} deleteBiddingDocument bidding document id {}", username, id);
+    logger.info("User {} deleteBiddingDocument with id {}", username, id);
     return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 }

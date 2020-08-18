@@ -3,7 +3,6 @@ package com.crm.models.mapper;
 import com.crm.common.Tool;
 import com.crm.models.Bid;
 import com.crm.models.dto.BidDto;
-import com.crm.models.dto.ContainerDto;
 
 public class BidMapper {
 
@@ -17,11 +16,6 @@ public class BidMapper {
     bidDto.setId(bid.getId());
 
     bidDto.setBidder(ForwarderMapper.toForwarderDto(bid.getBidder()));
-
-    bid.getContainers().forEach(container -> {
-      ContainerDto containerDto = ContainerMapper.toContainerDto(container);
-      bidDto.getContainers().add(containerDto);
-    });
 
     Double bidPrice = bid.getBidPrice();
     bidDto.setBidPrice(bidPrice);

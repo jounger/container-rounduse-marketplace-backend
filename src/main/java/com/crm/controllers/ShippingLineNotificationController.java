@@ -42,7 +42,7 @@ import com.crm.services.ShippingLineNotificationService;
 @RequestMapping("/api/shipping-line-notification")
 public class ShippingLineNotificationController {
 
-  private static final Logger logger = LoggerFactory.getLogger(SupplierController.class);
+  private static final Logger logger = LoggerFactory.getLogger(ShippingLineNotificationController.class);
 
   @Autowired
   ShippingLineNotificationService shippingLineNotificationService;

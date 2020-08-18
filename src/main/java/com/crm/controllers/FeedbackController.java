@@ -44,7 +44,7 @@ import com.crm.websocket.controller.NotificationBroadcast;
 @RequestMapping("/api/feedback")
 public class FeedbackController {
 
-  private static final Logger logger = LoggerFactory.getLogger(SupplierController.class);
+  private static final Logger logger = LoggerFactory.getLogger(FeedbackController.class);
 
   @Autowired
   private FeedbackService paymentService;

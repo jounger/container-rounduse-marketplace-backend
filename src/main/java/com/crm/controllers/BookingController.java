@@ -40,7 +40,7 @@ import com.crm.services.BookingService;
 @RequestMapping("/api/booking")
 public class BookingController {
 
-  private static final Logger logger = LoggerFactory.getLogger(SupplierController.class);
+  private static final Logger logger = LoggerFactory.getLogger(BookingController.class);
 
   @Autowired
   BookingService bookingService;

@@ -43,7 +43,7 @@ import com.crm.services.ContainerService;
 @RequestMapping("/api/container")
 public class ContainerController {
 
-  private static final Logger logger = LoggerFactory.getLogger(SupplierController.class);
+  private static final Logger logger = LoggerFactory.getLogger(ContainerController.class);
 
   @Autowired
   private ContainerService containerService;

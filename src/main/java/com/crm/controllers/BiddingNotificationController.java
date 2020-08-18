@@ -57,28 +57,8 @@ public class BiddingNotificationController {
    * ResponseEntity.ok(biddingNotificationDto); }
    */
 
-  @GetMapping("/user/{id}")
-  public ResponseEntity<?> getBiddingNotificationsByUser(@PathVariable Long id, @Valid PaginationRequest request) {
-
-    Page<BiddingNotification> pages = biddingNotificationService.getBiddingNotificationsByUser(id, request);
-
-    PaginationResponse<BiddingNotificationDto> response = new PaginationResponse<>();
-    response.setPageNumber(request.getPage());
-    response.setPageSize(request.getLimit());
-    response.setTotalElements(pages.getTotalElements());
-    response.setTotalPages(pages.getTotalPages());
-
-    List<BiddingNotification> biddingNotifications = pages.getContent();
-    List<BiddingNotificationDto> biddingNotificationsDto = new ArrayList<>();
-    biddingNotifications.forEach(biddingNotification -> biddingNotificationsDto
-        .add(BiddingNotificationMapper.toBiddingNotificationDto(biddingNotification)));
-    response.setContents(biddingNotificationsDto);
-
-    return ResponseEntity.ok(response);
-  }
-
   @GetMapping("")
-  public ResponseEntity<?> getBiddingNotificationsByUser(@Valid PaginationRequest request) {
+  public ResponseEntity<?> getBiddingNotifications(@Valid PaginationRequest request) {
 
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();

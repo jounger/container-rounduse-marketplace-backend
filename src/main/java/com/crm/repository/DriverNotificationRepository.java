@@ -18,11 +18,13 @@ public interface DriverNotificationRepository extends JpaRepository<DriverNotifi
   @Query(value = "FROM DriverNotification dn WHERE dn.recipient.username = :username")
   Page<DriverNotification> findByUser(@Param("username") String username, Pageable pageable);
 
-  @Query(value = "FROM DriverNotification dn WHERE dn.recipient.id = :id AND dn.type = :status")
-  Page<DriverNotification> findByUserAndStatus(@Param("id") Long id, @Param("status") String status,
+  @Query(value = "FROM DriverNotification dn WHERE dn.recipient.id = :id AND dn.action = :status")
+  Page<DriverNotification> findByUserAndStatus(@Param("id") Long id, @Param("status") String status, Pageable pageable);
+
+  @Query(value = "FROM DriverNotification dn WHERE dn.recipient.username = :username AND dn.action = :status")
+  Page<DriverNotification> findByUserAndStatus(@Param("username") String username, @Param("status") String status,
       Pageable pageable);
 
-  @Query(value = "FROM DriverNotification dn WHERE dn.recipient.username = :username AND dn.type = :status")
-  Page<DriverNotification> findByUserAndStatus(@Param("username") String username,
-      @Param("status") String status, Pageable pageable);
+  @Query(value = "FROM DriverNotification dn WHERE dn.type = :status")
+  Page<DriverNotification> findByType(@Param("status") String status, Pageable pageable);
 }

@@ -67,7 +67,7 @@ public class NotificationController {
   }
 
   @GetMapping("/user")
-  public ResponseEntity<?> getNotificationsByUser(@Valid PaginationRequest request) {
+  public ResponseEntity<?> getNotifications(@Valid PaginationRequest request) {
 
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();

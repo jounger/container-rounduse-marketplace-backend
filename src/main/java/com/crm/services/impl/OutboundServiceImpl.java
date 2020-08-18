@@ -1,11 +1,15 @@
 package com.crm.services.impl;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -15,12 +19,14 @@ import org.springframework.stereotype.Service;
 import com.crm.common.Constant;
 import com.crm.common.ErrorMessage;
 import com.crm.common.Tool;
+import com.crm.enums.EnumBiddingStatus;
 import com.crm.enums.EnumSupplyStatus;
 import com.crm.enums.EnumUnit;
 import com.crm.exception.DuplicateRecordException;
 import com.crm.exception.ForbiddenException;
 import com.crm.exception.InternalException;
 import com.crm.exception.NotFoundException;
+import com.crm.models.BiddingDocument;
 import com.crm.models.Booking;
 import com.crm.models.ContainerType;
 import com.crm.models.Merchant;
@@ -30,12 +36,14 @@ import com.crm.models.ShippingLine;
 import com.crm.payload.request.BookingRequest;
 import com.crm.payload.request.OutboundRequest;
 import com.crm.payload.request.PaginationRequest;
+import com.crm.repository.BiddingDocumentRepository;
 import com.crm.repository.ContainerTypeRepository;
 import com.crm.repository.MerchantRepository;
 import com.crm.repository.OutboundRepository;
 import com.crm.repository.PortRepository;
 import com.crm.repository.ShippingLineRepository;
 import com.crm.repository.SupplyRepository;
+import com.crm.services.BiddingDocumentService;
 import com.crm.services.OutboundService;
 import com.crm.specification.builder.OutboundSpecificationsBuilder;
 
@@ -59,6 +67,16 @@ public class OutboundServiceImpl implements OutboundService {
 
   @Autowired
   private SupplyRepository supplyRepository;
+
+  @Autowired
+  private BiddingDocumentRepository biddingDocumentRepository;
+
+  @Autowired
+  private BiddingDocumentService biddingDocumentService;
+
+  @Autowired
+  @Qualifier("cachedThreadPool")
+  private ExecutorService executorService;
 
   @Override
   public Outbound getOutboundById(Long id) {
@@ -286,4 +304,29 @@ public class OutboundServiceImpl implements OutboundService {
     // Return result
     return pages;
   }
+
+  @Override
+  public List<Outbound> updateExpiredOutboundFromList(List<Outbound> outbounds) {
+    List<Outbound> result = new ArrayList<Outbound>();
+    for (Outbound outbound : outbounds) {
+      if (!outbound.getBiddingDocuments().isEmpty()) {
+        BiddingDocument biddingDocument = (BiddingDocument) outbound.getBiddingDocuments()
+            .toArray()[outbound.getBiddingDocuments().size() - 1];
+        boolean existsCombinedBid = biddingDocumentRepository.existsCombinedBid(biddingDocument.getId());
+        if (biddingDocument.getBidClosing().isBefore(LocalDateTime.now()) && existsCombinedBid
+            && biddingDocument.getStatus().equals(EnumBiddingStatus.BIDDING.name())) {
+          String status = EnumBiddingStatus.EXPIRED.name();
+          biddingDocumentService.updateExpiredBiddingDocuments(biddingDocument.getId(), status);
+        }
+        if (existsCombinedBid) {
+          outbound.setStatus(EnumSupplyStatus.COMBINED.name());
+        } else {
+          outbound.setStatus(EnumSupplyStatus.CREATED.name());
+        }
+      }
+      result.add(outbound);
+    }
+    return result;
+  }
+
 }

@@ -43,7 +43,7 @@ import com.crm.services.ContainerSemiTrailerService;
 @RequestMapping("/api/container-semi-trailer")
 public class ContainerSemiTrailerController {
 
-  private static final Logger logger = LoggerFactory.getLogger(SupplierController.class);
+  private static final Logger logger = LoggerFactory.getLogger(ContainerSemiTrailerController.class);
 
   @Autowired
   ContainerSemiTrailerService containerSemiTrailerService;

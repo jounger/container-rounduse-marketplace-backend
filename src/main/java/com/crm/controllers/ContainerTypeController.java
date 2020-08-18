@@ -42,7 +42,7 @@ import com.crm.services.ContainerTypeService;
 @RequestMapping("/api/container-type")
 public class ContainerTypeController {
 
-  private static final Logger logger = LoggerFactory.getLogger(SupplierController.class);
+  private static final Logger logger = LoggerFactory.getLogger(ContainerTypeController.class);
 
   @Autowired
   private ContainerTypeService containerTypeService;

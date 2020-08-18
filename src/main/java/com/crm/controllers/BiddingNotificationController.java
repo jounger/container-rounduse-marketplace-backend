@@ -42,7 +42,7 @@ import com.crm.services.BiddingNotificationService;
 @RequestMapping("/api/bidding-notification")
 public class BiddingNotificationController {
 
-  private static final Logger logger = LoggerFactory.getLogger(SupplierController.class);
+  private static final Logger logger = LoggerFactory.getLogger(BiddingNotificationController.class);
 
   @Autowired
   private BiddingNotificationService biddingNotificationService;

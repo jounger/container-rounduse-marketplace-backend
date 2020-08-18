@@ -40,7 +40,7 @@ import com.crm.services.ReportNotificationService;
 @RequestMapping("/api/report-notification")
 public class ReportNotificationController {
 
-  private static final Logger logger = LoggerFactory.getLogger(SupplierController.class);
+  private static final Logger logger = LoggerFactory.getLogger(ReportNotificationController.class);
 
   @Autowired
   ReportNotificationService reportNotificationService;

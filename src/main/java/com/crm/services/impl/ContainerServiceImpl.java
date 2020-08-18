@@ -1,12 +1,16 @@
 package com.crm.services.impl;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -14,12 +18,14 @@ import org.springframework.stereotype.Service;
 
 import com.crm.common.ErrorMessage;
 import com.crm.common.Tool;
+import com.crm.enums.EnumBiddingStatus;
 import com.crm.enums.EnumSupplyStatus;
 import com.crm.exception.DuplicateRecordException;
 import com.crm.exception.ForbiddenException;
 import com.crm.exception.InternalException;
 import com.crm.exception.NotFoundException;
 import com.crm.models.Bid;
+import com.crm.models.BiddingDocument;
 import com.crm.models.BillOfLading;
 import com.crm.models.Container;
 import com.crm.models.ContainerSemiTrailer;
@@ -28,11 +34,13 @@ import com.crm.models.Driver;
 import com.crm.payload.request.ContainerRequest;
 import com.crm.payload.request.PaginationRequest;
 import com.crm.repository.BidRepository;
+import com.crm.repository.BiddingDocumentRepository;
 import com.crm.repository.BillOfLadingRepository;
 import com.crm.repository.ContainerRepository;
 import com.crm.repository.ContainerSemiTrailerRepository;
 import com.crm.repository.ContainerTractorRepository;
 import com.crm.repository.DriverRepository;
+import com.crm.services.BiddingDocumentService;
 import com.crm.services.ContainerService;
 
 @Service
@@ -55,6 +63,16 @@ public class ContainerServiceImpl implements ContainerService {
 
   @Autowired
   private BidRepository bidRepository;
+
+  @Autowired
+  private BiddingDocumentRepository biddingDocumentRepository;
+
+  @Autowired
+  private BiddingDocumentService biddingDocumentService;
+
+  @Autowired
+  @Qualifier("cachedThreadPool")
+  private ExecutorService executorService;
 
   @Override
   public Page<Container> getContainersByInbound(Long id, PaginationRequest request) {
@@ -102,8 +120,7 @@ public class ContainerServiceImpl implements ContainerService {
     }
 
     containers.forEach(item -> {
-      if (item.getNumber().equals(request.getNumber())
-          || item.getDriver().getUsername().equals(request.getDriver())
+      if (item.getNumber().equals(request.getNumber()) || item.getDriver().getUsername().equals(request.getDriver())
           || item.getTrailer().getLicensePlate().equals(request.getTrailer())
           || item.getTractor().getLicensePlate().equals(request.getTractor())) {
         throw new DuplicateRecordException(ErrorMessage.CONTAINER_ALREADY_EXISTS);
@@ -111,8 +128,8 @@ public class ContainerServiceImpl implements ContainerService {
     });
 
     String containerNumber = request.getNumber();
-    boolean listContainer = containerRepository.findByNumber(containerNumber,
-        billOfLading.getInbound().getPickupTime(), billOfLading.getFreeTime(), username);
+    boolean listContainer = containerRepository.findByNumber(containerNumber, billOfLading.getInbound().getPickupTime(),
+        billOfLading.getFreeTime(), username);
     if (!listContainer) {
       throw new InternalException(ErrorMessage.CONTAINER_BUSY);
     }
@@ -188,8 +205,7 @@ public class ContainerServiceImpl implements ContainerService {
 
     Set<Container> containers = new HashSet<>(billOfLading.getContainers());
     containers.forEach(item -> {
-      if (item.getNumber().equals(request.getNumber())
-          || item.getDriver().getUsername().equals(request.getDriver())
+      if (item.getNumber().equals(request.getNumber()) || item.getDriver().getUsername().equals(request.getDriver())
           || item.getTrailer().getLicensePlate().equals(request.getTrailer())
           || item.getTractor().getLicensePlate().equals(request.getTractor())) {
         if (item.getId().equals(request.getId())) {
@@ -381,8 +397,8 @@ public class ContainerServiceImpl implements ContainerService {
       }
     });
 
-    boolean listContainer = containerRepository.findByNumber(billOfLading.getId(), username,
-        container.getNumber(), billOfLading.getInbound().getPickupTime(), billOfLading.getFreeTime());
+    boolean listContainer = containerRepository.findByNumber(billOfLading.getId(), username, container.getNumber(),
+        billOfLading.getInbound().getPickupTime(), billOfLading.getFreeTime());
     if (!listContainer) {
       throw new InternalException(ErrorMessage.CONTAINER_BUSY);
     }
@@ -412,5 +428,29 @@ public class ContainerServiceImpl implements ContainerService {
 
     List<Container> containers = containerRepository.findByBidAndStatus(id, status);
     return containers;
+  }
+
+  @Override
+  public List<Container> updateExpiredContainerFromList(List<Container> containers) {
+    List<Container> result = new ArrayList<Container>();
+    for (Container container : containers) {
+      if (!container.getBids().isEmpty()) {
+        Bid bid = (Bid) container.getBids().toArray()[container.getBids().size() - 1];
+        BiddingDocument biddingDocument = bid.getBiddingDocument();
+        boolean existsCombinedContainer = biddingDocumentRepository.existsCombinedBid(biddingDocument.getId());
+        if (biddingDocument.getBidClosing().isBefore(LocalDateTime.now()) && existsCombinedContainer
+            && biddingDocument.getStatus().equals(EnumBiddingStatus.BIDDING.name())) {
+          String status = EnumBiddingStatus.EXPIRED.name();
+          biddingDocumentService.updateExpiredBiddingDocuments(biddingDocument.getId(), status);
+          if (existsCombinedContainer) {
+            container.setStatus(EnumSupplyStatus.COMBINED.name());
+          } else {
+            container.setStatus(EnumSupplyStatus.CREATED.name());
+          }
+        }
+      }
+      result.add(container);
+    }
+    return result;
   }
 }

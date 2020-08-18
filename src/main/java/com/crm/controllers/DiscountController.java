@@ -41,7 +41,7 @@ import com.crm.services.DiscountService;
 @RequestMapping("/api/discount")
 public class DiscountController {
 
-  private static final Logger logger = LoggerFactory.getLogger(SupplierController.class);
+  private static final Logger logger = LoggerFactory.getLogger(DiscountController.class);
 
   @Autowired
   private DiscountService discountService;

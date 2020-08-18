@@ -40,7 +40,7 @@ import com.crm.services.ForwarderService;
 @RequestMapping("/api/forwarder")
 public class ForwarderController {
 
-  private static final Logger logger = LoggerFactory.getLogger(SupplierController.class);
+  private static final Logger logger = LoggerFactory.getLogger(ForwarderController.class);
 
   @Autowired
   private ForwarderService forwarderService;

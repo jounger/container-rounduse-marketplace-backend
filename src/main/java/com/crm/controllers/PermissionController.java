@@ -38,7 +38,7 @@ import com.crm.services.PermissionService;
 @RequestMapping("/api/permission")
 public class PermissionController {
 
-  private static final Logger logger = LoggerFactory.getLogger(SupplierController.class);
+  private static final Logger logger = LoggerFactory.getLogger(PermissionController.class);
 
   @Autowired
   private PermissionService permissionService;

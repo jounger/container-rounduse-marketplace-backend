@@ -16,9 +16,9 @@ public interface OperatorService {
 
   Page<Operator> getOperators(PaginationRequest request);
 
-  Operator editOperator(Long id, Map<String, Object> updates);
+  Operator editOperator(Long id, String username, Map<String, Object> updates);
 
-  void removeOperator(Long id);
+  void removeOperator(Long id, String username);
 
   Operator getOperatorByUsername(String username);
 }

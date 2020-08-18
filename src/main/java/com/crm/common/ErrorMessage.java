@@ -16,7 +16,8 @@ public class ErrorMessage {
   public static final String BID_INVALID_CREATE = "Chỉ được tạo 1 hồ sơ dự thầu cho 1 hồ sơ đấu thầu";
   public static final String BID_INVALID_BID_PRICE = "Giá thầu phải bằng hoặc cao hơn giá sàn";
   public static final String BID_INVALID_PENDING_EDIT = "Hồ sơ dự thầu chỉ được sửa khi ở trạng thái chờ";
-  public static final String BID_EDIT_BEFORE_VALIDITY_TIME = "Vui lòng chỉnh sửa sau thời gian hiệu lực";
+  public static final String BID_EDIT_BEFORE_FREEZE_TIME = "Vui lòng chỉnh sửa sau thời gian đóng băng";
+  public static final String BID_INVALID_VALIDITY_PERIOD = "Thời gian hiệu lực của hồ sơ dự thầu phải sau thời gian hiện tại";
 
   // Combined
   public static final String COMBINED_NOT_FOUND = "Không tìm thấy hàng ghép";

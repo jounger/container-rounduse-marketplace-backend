@@ -1,24 +1,24 @@
 package com.crm.models.mapper;
 
-import com.crm.models.Evidence;
+import com.crm.models.ContractDocument;
 import com.crm.models.Supplier;
-import com.crm.models.dto.EvidenceDto;
+import com.crm.models.dto.ContractDocumentDto;
 
-public class EvidenceMapper {
+public class ContractDocumentMapper {
 
-  public static EvidenceDto toEvidenceDto(Evidence evidence) {
-    if (evidence == null) {
+  public static ContractDocumentDto toEvidenceDto(ContractDocument contractDocument) {
+    if (contractDocument == null) {
       return null;
     }
 
-    EvidenceDto evidenceDto = new EvidenceDto();
-    evidenceDto.setId(evidence.getId());
+    ContractDocumentDto contractDocumentDto = new ContractDocumentDto();
+    contractDocumentDto.setId(contractDocument.getId());
 
-    Supplier sender = evidence.getSender();
-    evidenceDto.setSender(SupplierMapper.toSupplierDto(sender));
-    evidenceDto.setDocumentPath(evidence.getDocumentPath());
-    evidenceDto.setStatus(evidence.getStatus());
+    Supplier sender = contractDocument.getSender();
+    contractDocumentDto.setSender(SupplierMapper.toSupplierDto(sender));
+    contractDocumentDto.setDocumentPath(contractDocument.getDocumentPath());
+    contractDocumentDto.setStatus(contractDocument.getStatus());
 
-    return evidenceDto;
+    return contractDocumentDto;
   }
 }

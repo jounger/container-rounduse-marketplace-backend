@@ -4,21 +4,21 @@ import java.util.Map;
 
 import org.springframework.data.domain.Page;
 
-import com.crm.models.Payment;
+import com.crm.models.Invoice;
 import com.crm.payload.request.PaginationRequest;
-import com.crm.payload.request.PaymentRequest;
+import com.crm.payload.request.InvoiceRequest;
 
-public interface PaymentService {
+public interface InvoiceService {
   
-  Payment createPayment(Long id, String username, PaymentRequest request);
+  Invoice createPayment(Long id, String username, InvoiceRequest request);
   
-  Page<Payment> getPaymentsByUser(String username, PaginationRequest request);
+  Page<Invoice> getPaymentsByUser(String username, PaginationRequest request);
   
-  Page<Payment> getPaymentsByContract(Long id, String username, PaginationRequest request);
+  Page<Invoice> getPaymentsByContract(Long id, String username, PaginationRequest request);
   
-  Page<Payment> searchPayments(PaginationRequest request, String search);
+  Page<Invoice> searchPayments(PaginationRequest request, String search);
   
-  Payment editPayment(Long id, String username, Map<String, Object> updates);
+  Invoice editPayment(Long id, String username, Map<String, Object> updates);
   
   void removePayment(Long id, String username);
 

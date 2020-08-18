@@ -4,21 +4,21 @@ import java.util.Map;
 
 import org.springframework.data.domain.Page;
 
-import com.crm.models.Evidence;
-import com.crm.payload.request.EvidenceRequest;
+import com.crm.models.ContractDocument;
+import com.crm.payload.request.ContractDocumentRequest;
 import com.crm.payload.request.PaginationRequest;
 
-public interface EvidenceService {
+public interface ContractDocumentService {
 
-  Evidence createEvidence(Long id, String username, EvidenceRequest request);
+  ContractDocument createEvidence(Long id, String username, ContractDocumentRequest request);
 
-  Page<Evidence> getEvidencesByUser(String username, PaginationRequest request);
+  Page<ContractDocument> getEvidencesByUser(String username, PaginationRequest request);
   
-  Page<Evidence> getEvidencesByContract(Long id, String username, PaginationRequest request);
+  Page<ContractDocument> getEvidencesByContract(Long id, String username, PaginationRequest request);
 
-  Page<Evidence> searchEvidences(PaginationRequest request, String search);
+  Page<ContractDocument> searchEvidences(PaginationRequest request, String search);
 
-  Evidence editEvidence(Long id, String username, Map<String, Object> updates);
+  ContractDocument editEvidence(Long id, String username, Map<String, Object> updates);
 
   void removeEvidence(Long id, String username);
 }

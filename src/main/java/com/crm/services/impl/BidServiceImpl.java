@@ -532,7 +532,8 @@ public class BidServiceImpl implements BidService {
         }
         biddingDocumentService.updateExpiredBiddingDocuments(biddingDocument.getId(), status);
       }
-      if (bid.getValidityPeriod().isBefore(LocalDateTime.now())) {
+      if (bid.getValidityPeriod().isBefore(LocalDateTime.now())
+          && bid.getStatus().equals(EnumBidStatus.PENDING.name())) {
         bid.setStatus(EnumBidStatus.EXPIRED.name());
         editExpiredBids(bid, EnumBidStatus.EXPIRED.name());
       }

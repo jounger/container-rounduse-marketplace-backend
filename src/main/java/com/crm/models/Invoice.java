@@ -34,10 +34,10 @@ import lombok.ToString;
 @NoArgsConstructor
 @ToString
 @Entity
-@Table(name = "payment")
+@Table(name = "invoice")
 @EntityListeners(AuditingEntityListener.class)
 @JsonIgnoreProperties(value = { "createdAt" }, allowGetters = true)
-public class Payment {
+public class Invoice {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)

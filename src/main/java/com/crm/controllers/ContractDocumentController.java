@@ -31,27 +31,27 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.crm.common.SuccessMessage;
 import com.crm.enums.EnumFileType;
-import com.crm.models.Evidence;
+import com.crm.models.ContractDocument;
 import com.crm.models.FileUpload;
-import com.crm.models.dto.EvidenceDto;
-import com.crm.models.mapper.EvidenceMapper;
-import com.crm.payload.request.EvidenceRequest;
+import com.crm.models.dto.ContractDocumentDto;
+import com.crm.models.mapper.ContractDocumentMapper;
+import com.crm.payload.request.ContractDocumentRequest;
 import com.crm.payload.request.FileUploadRequest;
 import com.crm.payload.request.PaginationRequest;
 import com.crm.payload.response.DefaultResponse;
 import com.crm.payload.response.PaginationResponse;
-import com.crm.services.EvidenceService;
+import com.crm.services.ContractDocumentService;
 import com.crm.services.FileUploadService;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 @RequestMapping("/api/evidence")
-public class EvidenceController {
+public class ContractDocumentController {
 
-  private static final Logger logger = LoggerFactory.getLogger(EvidenceController.class);
+  private static final Logger logger = LoggerFactory.getLogger(ContractDocumentController.class);
 
   @Autowired
-  private EvidenceService evidenceService;
+  private ContractDocumentService contractDocumentService;
 
   @Autowired
   private FileUploadService fileUploadService;
@@ -70,16 +70,16 @@ public class EvidenceController {
     FileUpload fileUpload = fileUploadService.createFileUpload(username, fileUploadRequest);
     String filePath = fileUpload.getPath() + fileUpload.getName();
 
-    EvidenceRequest request = new EvidenceRequest();
+    ContractDocumentRequest request = new ContractDocumentRequest();
     request.setDocumentPath(filePath);
 
-    Evidence evidence = evidenceService.createEvidence(id, username, request);
-    EvidenceDto evidenceDto = EvidenceMapper.toEvidenceDto(evidence);
+    ContractDocument contractDocument = contractDocumentService.createEvidence(id, username, request);
+    ContractDocumentDto contractDocumentDto = ContractDocumentMapper.toEvidenceDto(contractDocument);
 
     // Set default response body
-    DefaultResponse<EvidenceDto> defaultResponse = new DefaultResponse<>();
+    DefaultResponse<ContractDocumentDto> defaultResponse = new DefaultResponse<>();
     defaultResponse.setMessage(SuccessMessage.CREATE_EVIDENCE_SUCCESSFULLY);
-    defaultResponse.setData(evidenceDto);
+    defaultResponse.setData(contractDocumentDto);
 
     logger.info("User {} createEvidence with request: {}", username, request.toString());
     return ResponseEntity.status(HttpStatus.CREATED).body(defaultResponse);
@@ -91,17 +91,17 @@ public class EvidenceController {
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
 
-    Page<Evidence> pages = evidenceService.getEvidencesByUser(username, request);
+    Page<ContractDocument> pages = contractDocumentService.getEvidencesByUser(username, request);
 
-    PaginationResponse<EvidenceDto> response = new PaginationResponse<>();
+    PaginationResponse<ContractDocumentDto> response = new PaginationResponse<>();
     response.setPageNumber(request.getPage());
     response.setPageSize(request.getLimit());
     response.setTotalElements(pages.getTotalElements());
     response.setTotalPages(pages.getTotalPages());
 
-    List<Evidence> evidences = pages.getContent();
-    List<EvidenceDto> evidencesDto = new ArrayList<>();
-    evidences.forEach(evidence -> evidencesDto.add(EvidenceMapper.toEvidenceDto(evidence)));
+    List<ContractDocument> contractDocuments = pages.getContent();
+    List<ContractDocumentDto> evidencesDto = new ArrayList<>();
+    contractDocuments.forEach(evidence -> evidencesDto.add(ContractDocumentMapper.toEvidenceDto(evidence)));
     response.setContents(evidencesDto);
 
     return ResponseEntity.ok(response);
@@ -113,17 +113,17 @@ public class EvidenceController {
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
 
-    Page<Evidence> pages = evidenceService.getEvidencesByContract(id, username, request);
+    Page<ContractDocument> pages = contractDocumentService.getEvidencesByContract(id, username, request);
 
-    PaginationResponse<EvidenceDto> response = new PaginationResponse<>();
+    PaginationResponse<ContractDocumentDto> response = new PaginationResponse<>();
     response.setPageNumber(request.getPage());
     response.setPageSize(request.getLimit());
     response.setTotalElements(pages.getTotalElements());
     response.setTotalPages(pages.getTotalPages());
 
-    List<Evidence> evidences = pages.getContent();
-    List<EvidenceDto> evidencesDto = new ArrayList<>();
-    evidences.forEach(evidence -> evidencesDto.add(EvidenceMapper.toEvidenceDto(evidence)));
+    List<ContractDocument> contractDocuments = pages.getContent();
+    List<ContractDocumentDto> evidencesDto = new ArrayList<>();
+    contractDocuments.forEach(evidence -> evidencesDto.add(ContractDocumentMapper.toEvidenceDto(evidence)));
     response.setContents(evidencesDto);
 
     return ResponseEntity.ok(response);
@@ -133,16 +133,16 @@ public class EvidenceController {
   @GetMapping("/filter")
   public ResponseEntity<?> searchEvidences(@Valid PaginationRequest request,
       @RequestParam(value = "search") String search) {
-    Page<Evidence> pages = evidenceService.searchEvidences(request, search);
-    PaginationResponse<EvidenceDto> response = new PaginationResponse<>();
+    Page<ContractDocument> pages = contractDocumentService.searchEvidences(request, search);
+    PaginationResponse<ContractDocumentDto> response = new PaginationResponse<>();
     response.setPageNumber(request.getPage());
     response.setPageSize(request.getLimit());
     response.setTotalElements(pages.getTotalElements());
     response.setTotalPages(pages.getTotalPages());
 
-    List<Evidence> evidences = pages.getContent();
-    List<EvidenceDto> evidencesDto = new ArrayList<>();
-    evidences.forEach(evidence -> evidencesDto.add(EvidenceMapper.toEvidenceDto(evidence)));
+    List<ContractDocument> contractDocuments = pages.getContent();
+    List<ContractDocumentDto> evidencesDto = new ArrayList<>();
+    contractDocuments.forEach(evidence -> evidencesDto.add(ContractDocumentMapper.toEvidenceDto(evidence)));
     response.setContents(evidencesDto);
 
     return ResponseEntity.ok(response);
@@ -154,13 +154,13 @@ public class EvidenceController {
   public ResponseEntity<?> editEvidence(@PathVariable("id") Long id, @RequestBody Map<String, Object> updates) {
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
-    Evidence evidence = evidenceService.editEvidence(id, username, updates);
-    EvidenceDto evidenceDto = EvidenceMapper.toEvidenceDto(evidence);
+    ContractDocument contractDocument = contractDocumentService.editEvidence(id, username, updates);
+    ContractDocumentDto contractDocumentDto = ContractDocumentMapper.toEvidenceDto(contractDocument);
 
     // Set default response body
-    DefaultResponse<EvidenceDto> defaultResponse = new DefaultResponse<>();
+    DefaultResponse<ContractDocumentDto> defaultResponse = new DefaultResponse<>();
     defaultResponse.setMessage(SuccessMessage.EDIT_EVIDENCE_SUCCESSFULLY);
-    defaultResponse.setData(evidenceDto);
+    defaultResponse.setData(contractDocumentDto);
 
     logger.info("User {} editEvidence from id {} with request: {}", username, id, updates.toString());
     return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
@@ -172,10 +172,10 @@ public class EvidenceController {
   public ResponseEntity<?> deleteEvidence(@PathVariable Long id) {
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
-    evidenceService.removeEvidence(id, username);
+    contractDocumentService.removeEvidence(id, username);
 
     // Set default response body
-    DefaultResponse<EvidenceDto> defaultResponse = new DefaultResponse<>();
+    DefaultResponse<ContractDocumentDto> defaultResponse = new DefaultResponse<>();
     defaultResponse.setMessage(SuccessMessage.DELETE_EVIDENCE_SUCCESSFULLY);
 
     logger.info("User {} deleteEvidence with id {}", username, id);

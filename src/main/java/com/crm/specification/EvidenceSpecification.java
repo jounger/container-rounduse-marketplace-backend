@@ -1,8 +1,8 @@
 package com.crm.specification;
 
-import com.crm.models.Evidence;
+import com.crm.models.ContractDocument;
 
-public class EvidenceSpecification extends GeneticSpecification<Evidence>{
+public class EvidenceSpecification extends GeneticSpecification<ContractDocument>{
 
   private static final long serialVersionUID = 1L;
 

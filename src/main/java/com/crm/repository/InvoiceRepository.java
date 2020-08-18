@@ -8,17 +8,17 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import com.crm.models.Payment;
+import com.crm.models.Invoice;
 
 @Repository
-public interface PaymentRepository extends JpaRepository<Payment, Long>, JpaSpecificationExecutor<Payment> {
+public interface InvoiceRepository extends JpaRepository<Invoice, Long>, JpaSpecificationExecutor<Invoice> {
 
   @Query(value = "FROM Payment p WHERE p.sender.username = :username OR p.recipient.username = :username")
-  Page<Payment> findByUser(@Param("username") String username, Pageable pageable);
+  Page<Invoice> findByUser(@Param("username") String username, Pageable pageable);
 
   @Query(value = "FROM Payment p WHERE p.contract.id = :id")
-  Page<Payment> findByContract(@Param("id") Long id, Pageable pageable);
+  Page<Invoice> findByContract(@Param("id") Long id, Pageable pageable);
 
   @Query(value = "FROM Payment p WHERE p.contract.id = :id AND (p.sender.username = :username OR p.recipient.username = :username)")
-  Page<Payment> findByContract(@Param("id") Long id, @Param("username") String username, Pageable pageable);
+  Page<Invoice> findByContract(@Param("id") Long id, @Param("username") String username, Pageable pageable);
 }

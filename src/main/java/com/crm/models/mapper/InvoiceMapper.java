@@ -1,41 +1,41 @@
 package com.crm.models.mapper;
 
-import com.crm.models.Payment;
-import com.crm.models.dto.PaymentDto;
+import com.crm.models.Invoice;
+import com.crm.models.dto.InvoiceDto;
 
-public class PaymentMapper {
+public class InvoiceMapper {
 
-  public static PaymentDto toPaymentDto(Payment payment) {
-    if (payment == null) {
+  public static InvoiceDto toPaymentDto(Invoice invoice) {
+    if (invoice == null) {
       return null;
     }
 
-    PaymentDto paymentDto = new PaymentDto();
+    InvoiceDto invoiceDto = new InvoiceDto();
 
-    paymentDto.setId(payment.getId());
+    invoiceDto.setId(invoice.getId());
 
-    paymentDto.setSender(SupplierMapper.toSupplierDto(payment.getSender()));
+    invoiceDto.setSender(SupplierMapper.toSupplierDto(invoice.getSender()));
 
-    paymentDto.setRecipient(SupplierMapper.toSupplierDto(payment.getRecipient()));
+    invoiceDto.setRecipient(SupplierMapper.toSupplierDto(invoice.getRecipient()));
 
-    paymentDto.setContract(ContractMapper.toContractDto(payment.getContract()));
+    invoiceDto.setContract(ContractMapper.toContractDto(invoice.getContract()));
 
-    String detail = payment.getDetail();
-    paymentDto.setDetail(detail);
+    String detail = invoice.getDetail();
+    invoiceDto.setDetail(detail);
 
-    Double amount = payment.getAmount();
-    paymentDto.setAmount(amount);
+    Double amount = invoice.getAmount();
+    invoiceDto.setAmount(amount);
 
-    Boolean isPaid = payment.getIsPaid();
-    paymentDto.setIsPaid(isPaid);
+    Boolean isPaid = invoice.getIsPaid();
+    invoiceDto.setIsPaid(isPaid);
 
-    String type = payment.getType();
-    paymentDto.setType(type);
+    String type = invoice.getType();
+    invoiceDto.setType(type);
 
-    String paymentDate = payment.getPaymentDate().toString();
-    paymentDto.setPaymentDate(paymentDate);
+    String paymentDate = invoice.getPaymentDate().toString();
+    invoiceDto.setPaymentDate(paymentDate);
 
-    return paymentDto;
+    return invoiceDto;
 
   }
 }

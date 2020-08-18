@@ -8,6 +8,7 @@ public class ErrorMessage {
   public static final String BIDDINGDOCUMENT_STATUS_NOT_FOUND = "Không tìm thấy trạng thái của hồ sơ mời thầu";
   public static final String BIDDINGDOCUMENT_IS_IN_TRANSACTION = "Hồ sơ mời thầu đã được ghép hoặc đang được đấu thầu";
   public static final String BIDDINGDOCUMENT_TIME_OUT = "Hồ sơ mời thầu đã hết hạn";
+  public static final String BIDDINGDOCUMENT_ACCEPT_INVALID_BID = "Hồ sơ dự thầu đã hết hạn";
 
   // Bid
   public static final String BID_NOT_FOUND = "Không tìm thấy hồ sơ dự thầu";

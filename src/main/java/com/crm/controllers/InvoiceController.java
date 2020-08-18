@@ -29,38 +29,38 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.crm.common.SuccessMessage;
-import com.crm.models.Payment;
-import com.crm.models.dto.PaymentDto;
-import com.crm.models.mapper.PaymentMapper;
+import com.crm.models.Invoice;
+import com.crm.models.dto.InvoiceDto;
+import com.crm.models.mapper.InvoiceMapper;
 import com.crm.payload.request.PaginationRequest;
-import com.crm.payload.request.PaymentRequest;
+import com.crm.payload.request.InvoiceRequest;
 import com.crm.payload.response.DefaultResponse;
 import com.crm.payload.response.PaginationResponse;
-import com.crm.services.PaymentService;
+import com.crm.services.InvoiceService;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 @RequestMapping("/api/payment")
-public class PaymentController {
+public class InvoiceController {
 
-  private static final Logger logger = LoggerFactory.getLogger(PaymentController.class);
+  private static final Logger logger = LoggerFactory.getLogger(InvoiceController.class);
 
   @Autowired
-  private PaymentService paymentService;
+  private InvoiceService invoiceService;
 
   @Transactional
   @PostMapping("/contract/{id}")
   @PreAuthorize("hasRole('MERCHANT') or hasRole('FORWARDER')")
-  public ResponseEntity<?> createPayment(@PathVariable("id") Long id, @Valid @RequestBody PaymentRequest request) {
+  public ResponseEntity<?> createPayment(@PathVariable("id") Long id, @Valid @RequestBody InvoiceRequest request) {
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
-    Payment payment = paymentService.createPayment(id, username, request);
-    PaymentDto paymentDto = PaymentMapper.toPaymentDto(payment);
+    Invoice invoice = invoiceService.createPayment(id, username, request);
+    InvoiceDto invoiceDto = InvoiceMapper.toPaymentDto(invoice);
 
     // Set default response body
-    DefaultResponse<PaymentDto> defaultResponse = new DefaultResponse<>();
+    DefaultResponse<InvoiceDto> defaultResponse = new DefaultResponse<>();
     defaultResponse.setMessage(SuccessMessage.CREATE_PAYMENT_SUCCESSFULLY);
-    defaultResponse.setData(paymentDto);
+    defaultResponse.setData(invoiceDto);
 
     logger.info("User {} createPayment with request: {}", username, request.toString());
     return ResponseEntity.status(HttpStatus.CREATED).body(defaultResponse);
@@ -72,17 +72,17 @@ public class PaymentController {
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
 
-    Page<Payment> pages = paymentService.getPaymentsByContract(id, username, request);
+    Page<Invoice> pages = invoiceService.getPaymentsByContract(id, username, request);
 
-    PaginationResponse<PaymentDto> response = new PaginationResponse<>();
+    PaginationResponse<InvoiceDto> response = new PaginationResponse<>();
     response.setPageNumber(request.getPage());
     response.setPageSize(request.getLimit());
     response.setTotalElements(pages.getTotalElements());
     response.setTotalPages(pages.getTotalPages());
 
-    List<Payment> payments = pages.getContent();
-    List<PaymentDto> paymentsDto = new ArrayList<>();
-    payments.forEach(payment -> paymentsDto.add(PaymentMapper.toPaymentDto(payment)));
+    List<Invoice> invoices = pages.getContent();
+    List<InvoiceDto> paymentsDto = new ArrayList<>();
+    invoices.forEach(payment -> paymentsDto.add(InvoiceMapper.toPaymentDto(payment)));
     response.setContents(paymentsDto);
 
     return ResponseEntity.ok(response);
@@ -94,17 +94,17 @@ public class PaymentController {
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
 
-    Page<Payment> pages = paymentService.getPaymentsByUser(username, request);
+    Page<Invoice> pages = invoiceService.getPaymentsByUser(username, request);
 
-    PaginationResponse<PaymentDto> response = new PaginationResponse<>();
+    PaginationResponse<InvoiceDto> response = new PaginationResponse<>();
     response.setPageNumber(request.getPage());
     response.setPageSize(request.getLimit());
     response.setTotalElements(pages.getTotalElements());
     response.setTotalPages(pages.getTotalPages());
 
-    List<Payment> payments = pages.getContent();
-    List<PaymentDto> paymentsDto = new ArrayList<>();
-    payments.forEach(payment -> paymentsDto.add(PaymentMapper.toPaymentDto(payment)));
+    List<Invoice> invoices = pages.getContent();
+    List<InvoiceDto> paymentsDto = new ArrayList<>();
+    invoices.forEach(payment -> paymentsDto.add(InvoiceMapper.toPaymentDto(payment)));
     response.setContents(paymentsDto);
 
     return ResponseEntity.ok(response);
@@ -114,16 +114,16 @@ public class PaymentController {
   @GetMapping("/filter")
   public ResponseEntity<?> searchPayments(@Valid PaginationRequest request,
       @RequestParam(value = "search") String search) {
-    Page<Payment> pages = paymentService.searchPayments(request, search);
-    PaginationResponse<PaymentDto> response = new PaginationResponse<>();
+    Page<Invoice> pages = invoiceService.searchPayments(request, search);
+    PaginationResponse<InvoiceDto> response = new PaginationResponse<>();
     response.setPageNumber(request.getPage());
     response.setPageSize(request.getLimit());
     response.setTotalElements(pages.getTotalElements());
     response.setTotalPages(pages.getTotalPages());
 
-    List<Payment> payments = pages.getContent();
-    List<PaymentDto> paymentsDto = new ArrayList<>();
-    payments.forEach(payment -> paymentsDto.add(PaymentMapper.toPaymentDto(payment)));
+    List<Invoice> invoices = pages.getContent();
+    List<InvoiceDto> paymentsDto = new ArrayList<>();
+    invoices.forEach(payment -> paymentsDto.add(InvoiceMapper.toPaymentDto(payment)));
     response.setContents(paymentsDto);
 
     return ResponseEntity.ok(response);
@@ -135,13 +135,13 @@ public class PaymentController {
   public ResponseEntity<?> editPayment(@PathVariable("id") Long id, @RequestBody Map<String, Object> updates) {
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
-    Payment payment = paymentService.editPayment(id, username, updates);
-    PaymentDto paymentDto = PaymentMapper.toPaymentDto(payment);
+    Invoice invoice = invoiceService.editPayment(id, username, updates);
+    InvoiceDto invoiceDto = InvoiceMapper.toPaymentDto(invoice);
 
     // Set default response body
-    DefaultResponse<PaymentDto> defaultResponse = new DefaultResponse<>();
+    DefaultResponse<InvoiceDto> defaultResponse = new DefaultResponse<>();
     defaultResponse.setMessage(SuccessMessage.EDIT_PAYMENT_SUCCESSFULLY);
-    defaultResponse.setData(paymentDto);
+    defaultResponse.setData(invoiceDto);
 
     logger.info("User {} editPayment from id {} with request: {}", username, id, updates.toString());
     return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
@@ -153,10 +153,10 @@ public class PaymentController {
   public ResponseEntity<?> deletePayment(@PathVariable Long id) {
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
-    paymentService.removePayment(id, username);
+    invoiceService.removePayment(id, username);
 
     // Set default response body
-    DefaultResponse<PaymentDto> defaultResponse = new DefaultResponse<>();
+    DefaultResponse<InvoiceDto> defaultResponse = new DefaultResponse<>();
     defaultResponse.setMessage(SuccessMessage.DELETE_PAYMENT_SUCCESSFULLY);
 
     logger.info("User {} deletePayment with id {}", username, id);

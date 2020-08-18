@@ -45,28 +45,8 @@ public class ReportNotificationController {
   @Autowired
   ReportNotificationService reportNotificationService;
 
-  @GetMapping("/user/{id}")
-  public ResponseEntity<?> getReportNotificationsByUser(@PathVariable Long id, @Valid PaginationRequest request) {
-
-    Page<ReportNotification> pages = reportNotificationService.getReportNotificationsByUser(id, request);
-
-    PaginationResponse<ReportNotificationDto> response = new PaginationResponse<>();
-    response.setPageNumber(request.getPage());
-    response.setPageSize(request.getLimit());
-    response.setTotalElements(pages.getTotalElements());
-    response.setTotalPages(pages.getTotalPages());
-
-    List<ReportNotification> reportNotifications = pages.getContent();
-    List<ReportNotificationDto> reportNotificationsDto = new ArrayList<>();
-    reportNotifications.forEach(reportNotification -> reportNotificationsDto
-        .add(ReportNotificationMapper.toReportNotificationDto(reportNotification)));
-    response.setContents(reportNotificationsDto);
-
-    return ResponseEntity.ok(response);
-  }
-
   @GetMapping("")
-  public ResponseEntity<?> getReportNotificationsByUser(@Valid PaginationRequest request) {
+  public ResponseEntity<?> getReportNotifications(@Valid PaginationRequest request) {
 
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();

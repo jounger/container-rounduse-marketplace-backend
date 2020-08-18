@@ -18,10 +18,13 @@ public interface ReportNotificationRepository extends JpaRepository<ReportNotifi
   @Query(value = "FROM ReportNotification rn WHERE rn.recipient.username = :username")
   Page<ReportNotification> findByUser(@Param("username") String username, Pageable pageable);
 
-  @Query(value = "FROM ReportNotification rn WHERE rn.recipient.id = :id AND rn.type = :status")
+  @Query(value = "FROM ReportNotification rn WHERE rn.recipient.id = :id AND rn.action = :status")
   Page<ReportNotification> findByUserAndStatus(@Param("id") Long id, @Param("status") String status, Pageable pageable);
 
-  @Query(value = "FROM ReportNotification rn WHERE rn.recipient.username = :username AND rn.type = :status")
+  @Query(value = "FROM ReportNotification rn WHERE rn.recipient.username = :username AND rn.action = :status")
   Page<ReportNotification> findByUserAndStatus(@Param("username") String username, @Param("status") String status,
       Pageable pageable);
+
+  @Query(value = "FROM ReportNotification rn WHERE rn.type = :status")
+  Page<ReportNotification> findByType(@Param("status") String status, Pageable pageable);
 }

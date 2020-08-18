@@ -72,8 +72,15 @@ public class ReportNotificationServiceImpl implements ReportNotificationService 
 
   @Override
   public Page<ReportNotification> getReportNotifications(PaginationRequest request) {
-    Page<ReportNotification> reportNotifications = reportNotificationRepository
-        .findAll(PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt")));
+    String status = request.getStatus();
+    Page<ReportNotification> reportNotifications = null;
+    if (status != null && !status.isEmpty()) {
+      reportNotifications = reportNotificationRepository.findByType(status,
+          PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt")));
+    } else {
+      reportNotifications = reportNotificationRepository
+          .findAll(PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt")));
+    }
     return reportNotifications;
   }
 

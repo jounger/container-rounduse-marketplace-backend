@@ -14,7 +14,7 @@ public interface DriverService {
 
   Driver getDriver(Long id);
 
-  Driver getDriverByUserName(String username);
+  Driver getDriverByUsername(String username);
 
   Page<Driver> getDrivers(PaginationRequest request);
 

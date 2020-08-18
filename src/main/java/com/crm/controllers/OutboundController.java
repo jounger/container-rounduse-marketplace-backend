@@ -6,6 +6,8 @@ import java.util.Map;
 
 import javax.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -40,6 +42,8 @@ import com.crm.services.OutboundService;
 @RestController
 @RequestMapping("/api/outbound")
 public class OutboundController {
+
+  private static final Logger logger = LoggerFactory.getLogger(OutboundController.class);
 
   @Autowired
   private OutboundService outBoundService;
@@ -95,9 +99,10 @@ public class OutboundController {
   @GetMapping("/merchant")
   @PreAuthorize("hasRole('MERCHANT')")
   public ResponseEntity<?> getOutboundsByMerchant(@Valid PaginationRequest request) {
-
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
+
+    logger.info("{} do getOutboundsByMerchant", username);
 
     Page<Outbound> pages = outBoundService.getOutboundsByMerchant(username, request);
     PaginationResponse<OutboundDto> response = new PaginationResponse<>();
@@ -129,6 +134,7 @@ public class OutboundController {
     defaultResponse.setMessage(SuccessMessage.CREATE_OUTBOUND_SUCCESSFULLY);
     defaultResponse.setData(outboundDto);
 
+    logger.info("User {} createOutbound with request: {}", username, request.toString());
     return ResponseEntity.status(HttpStatus.CREATED).body(defaultResponse);
   }
 
@@ -149,6 +155,7 @@ public class OutboundController {
     defaultResponse.setMessage(SuccessMessage.EDIT_OUTBOUND_SUCCESSFULLY);
     defaultResponse.setData(outboundDto);
 
+    logger.info("User {} editOutbound from id {} with request: {}", username, id, updates.toString());
     return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 
@@ -166,6 +173,7 @@ public class OutboundController {
     DefaultResponse<OutboundDto> defaultResponse = new DefaultResponse<>();
     defaultResponse.setMessage(SuccessMessage.DELETE_OUTBOUND_SUCCESSFULLY);
 
+    logger.info("User {} deleteOutbound with id {}", username, id);
     return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 }

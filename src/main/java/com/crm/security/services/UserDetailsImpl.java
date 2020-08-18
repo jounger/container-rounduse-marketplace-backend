@@ -9,6 +9,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import com.crm.enums.EnumUserStatus;
 import com.crm.models.User;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -22,53 +23,47 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserDetailsImpl implements UserDetails {
+
   private static final long serialVersionUID = 1L;
 
   private Long id;
+
   private String username;
+
+  private String fullname;
 
   @JsonIgnore
   private String password;
+
   private String email;
+
   private String phone;
+
   private String address;
+
   private String status;
-  
+
+  private String profileImagePath;
+
   private Collection<? extends GrantedAuthority> authorities;
 
   public static UserDetailsImpl build(User user) {
-    List<GrantedAuthority> authorities = user.getRoles()
-        .stream().map(role -> new SimpleGrantedAuthority(role.getName()))
-        .collect(Collectors.toList());
-    return new UserDetailsImpl(user.getId(), 
-        user.getUsername(), 
-        user.getPassword(), 
-        user.getEmail(), 
-        user.getPhone(), 
-        user.getAddress(),
-        user.getStatus().toString(),
-        authorities);
 
-  }
+    List<GrantedAuthority> authorities = user.getRoles().stream()
+        .map(role -> new SimpleGrantedAuthority(role.getName())).collect(Collectors.toList());
 
-  public Long getId() {
-    return id;
-  }
-
-  public String getEmail() {
-    return email;
-  }
-
-  public String getPhone() {
-    return phone;
-  }
-
-  public String getAddress() {
-	  return address;
-  }
-
-  public String getStatus() {
-	  return status;
+    UserDetailsImpl userDetailsImpl = new UserDetailsImpl();
+    userDetailsImpl.setId(user.getId());
+    userDetailsImpl.setUsername(user.getUsername());
+    userDetailsImpl.setFullname(user.getFullname());
+    userDetailsImpl.setPassword(user.getPassword());
+    userDetailsImpl.setEmail(user.getEmail());
+    userDetailsImpl.setPhone(user.getPhone());
+    userDetailsImpl.setAddress(user.getAddress());
+    userDetailsImpl.setStatus(user.getStatus());
+    userDetailsImpl.setProfileImagePath(user.getProfileImagePath());
+    userDetailsImpl.setAuthorities(authorities);
+    return userDetailsImpl;
   }
 
   @Override
@@ -97,7 +92,9 @@ public class UserDetailsImpl implements UserDetails {
 
   @Override
   public boolean isAccountNonLocked() {
-    // TODO Auto-generated method stub
+    if (this.status.equals(EnumUserStatus.BANNED.name())) {
+      return false;
+    }
     return true;
   }
 
@@ -115,9 +112,9 @@ public class UserDetailsImpl implements UserDetails {
 
   @Override
   public boolean equals(Object o) {
-    if(this == o)
+    if (this == o)
       return true;
-    if(o == null || getClass() != o.getClass())
+    if (o == null || getClass() != o.getClass())
       return false;
     UserDetailsImpl userDetails = (UserDetailsImpl) o;
     return Objects.equals(id, userDetails.id);

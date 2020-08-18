@@ -7,6 +7,8 @@ import java.util.Map;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -37,6 +39,9 @@ import com.crm.services.ForwarderService;
 @RestController
 @RequestMapping("/api/forwarder")
 public class ForwarderController {
+
+  private static final Logger logger = LoggerFactory.getLogger(SupplierController.class);
+
   @Autowired
   private ForwarderService forwarderService;
 
@@ -52,6 +57,7 @@ public class ForwarderController {
     defaultResponse.setMessage(SuccessMessage.CREATE_FORWARDER_SUCCESSFULLY);
     defaultResponse.setData(forwarderDto);
 
+    logger.info("createForwarder with request: {}", request.toString());
     return ResponseEntity.status(HttpStatus.CREATED).body(defaultResponse);
   }
 
@@ -115,6 +121,7 @@ public class ForwarderController {
     defaultResponse.setMessage(SuccessMessage.EDIT_FORWARDER_SUCCESSFULLY);
     defaultResponse.setData(forwarderDto);
 
+    logger.info("editForwarder from id {} with request: {}", id, updates.toString());
     return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 
@@ -128,6 +135,7 @@ public class ForwarderController {
     DefaultResponse<ForwarderDto> defaultResponse = new DefaultResponse<>();
     defaultResponse.setMessage(SuccessMessage.DELETE_FORWARDER_SUCCESSFULLY);
 
+    logger.info("deleteForwarder from id {}", id);
     return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 }

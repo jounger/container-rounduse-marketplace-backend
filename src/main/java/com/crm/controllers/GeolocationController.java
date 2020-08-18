@@ -4,6 +4,8 @@ import java.util.Map;
 
 import javax.transaction.Transactional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -30,6 +32,8 @@ import com.crm.services.GeolocationService;
 @RequestMapping("/api/geolocation")
 public class GeolocationController {
 
+  private static final Logger logger = LoggerFactory.getLogger(SupplierController.class);
+
   @Autowired
   GeolocationService geolocationService;
 
@@ -38,8 +42,7 @@ public class GeolocationController {
   @RequestMapping(value = "/{id}", method = RequestMethod.PATCH, consumes = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<?> editGeolocation(@PathVariable("id") Long id, @RequestBody Map<String, Object> updates) {
 
-    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
-        .getPrincipal();
+    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
 
     Geolocation geolocation = geolocationService.editGeolocation(id, username, updates);
@@ -50,6 +53,7 @@ public class GeolocationController {
     defaultResponse.setMessage(SuccessMessage.EDIT_GEOLOCATION_SUCCESSFULLY);
     defaultResponse.setData(geolocationDto);
 
+    logger.info("User {} editGeolocation from id {} with request: {}", username, id, updates.toString());
     return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 

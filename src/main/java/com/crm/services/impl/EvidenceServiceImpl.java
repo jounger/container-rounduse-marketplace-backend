@@ -14,6 +14,8 @@ import org.springframework.stereotype.Service;
 import com.crm.common.Constant;
 import com.crm.common.ErrorMessage;
 import com.crm.common.Tool;
+import com.crm.enums.EnumEvidenceStatus;
+import com.crm.enums.EnumShippingStatus;
 import com.crm.exception.ForbiddenException;
 import com.crm.exception.InternalException;
 import com.crm.exception.NotFoundException;
@@ -28,10 +30,12 @@ import com.crm.payload.request.EvidenceRequest;
 import com.crm.payload.request.PaginationRequest;
 import com.crm.repository.ContractRepository;
 import com.crm.repository.EvidenceRepository;
+import com.crm.repository.ShippingInfoRepository;
 import com.crm.repository.SupplierRepository;
 import com.crm.repository.UserRepository;
 import com.crm.services.EvidenceService;
 import com.crm.specification.builder.EvidenceSpecificationsBuilder;
+import com.crm.websocket.controller.NotificationBroadcast;
 
 @Service
 public class EvidenceServiceImpl implements EvidenceService {
@@ -48,6 +52,12 @@ public class EvidenceServiceImpl implements EvidenceService {
   @Autowired
   private UserRepository userRepository;
 
+  @Autowired
+  private ShippingInfoRepository shippingInfoRepository;
+
+  @Autowired
+  private NotificationBroadcast notificationBroadcast;
+
   @Override
   public Evidence createEvidence(Long id, String username, EvidenceRequest request) {
     Evidence evidence = new Evidence();
@@ -62,20 +72,22 @@ public class EvidenceServiceImpl implements EvidenceService {
     BiddingDocument biddingDocument = bid.getBiddingDocument();
     Supplier offeree = biddingDocument.getOfferee();
     if (username.equals(bidder.getUsername()) || username.equals(offeree.getUsername())) {
-      Supplier supplier = supplierRepository.findByUsername(username).orElseThrow(() -> new NotFoundException(ErrorMessage.SENDER_NOT_FOUND));
+      Supplier supplier = supplierRepository.findByUsername(username)
+          .orElseThrow(() -> new NotFoundException(ErrorMessage.SENDER_NOT_FOUND));
       evidence.setSender(supplier);
-      String evidenceString = request.getEvidence();
-      if (!Tool.isBlank(evidenceString)) {
-        evidence.setEvidence(evidenceString);
+
+      if (!Tool.isBlank(request.getDocumentPath())) {
+        evidence.setDocumentPath(request.getDocumentPath());
       } else {
         throw new InternalException(ErrorMessage.EVIDENCE_INVALID);
       }
-      evidence.setIsValid(false);
+      evidence.setStatus(EnumEvidenceStatus.PENDING.name());
     } else {
       throw new ForbiddenException(ErrorMessage.USER_ACCESS_DENIED);
     }
 
     Evidence _evidence = evidenceRepository.save(evidence);
+    notificationBroadcast.broadcastCreateEvidenceToMerchant(contract);
     return _evidence;
   }
 
@@ -93,7 +105,8 @@ public class EvidenceServiceImpl implements EvidenceService {
     }
     Page<Evidence> evidences = null;
     PageRequest page = PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt"));
-    User user = userRepository.findByUsername(username).orElseThrow(() -> new NotFoundException(ErrorMessage.USER_NOT_FOUND));
+    User user = userRepository.findByUsername(username)
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.USER_NOT_FOUND));
     String role = user.getRoles().iterator().next().getName();
 
     if (role.equalsIgnoreCase("ROLE_MODERATOR")) {
@@ -137,19 +150,32 @@ public class EvidenceServiceImpl implements EvidenceService {
     if (!username.equals(bidder.getUsername()) && !username.equals(offeree.getUsername())) {
       throw new ForbiddenException(ErrorMessage.USER_ACCESS_DENIED);
     }
-    String evidenceString = String.valueOf(updates.get("evidence"));
-    if (updates.get("evidence") != null && !Tool.isBlank(evidenceString)) {
-      evidence.setEvidence(evidenceString);
-    }
-    
-    String isValid = String.valueOf(updates.get("isValid"));
-    if (updates.get("isValid") != null && !Tool.isEqual(evidence.getIsValid(), isValid)) {
-      evidence.setIsValid(Boolean.valueOf(isValid));
+
+    if (username.equals(evidence.getSender().getUsername())) {
+      // YOU CANNOT SET EVIDEN TO VALID BY YOURSELF
+      throw new ForbiddenException(ErrorMessage.USER_ACCESS_DENIED);
+    } else {
+      String status = String.valueOf(updates.get("status"));
+      if (updates.get("status") != null && !Tool.isEqual(evidence.getStatus(), status)) {
+        evidence.setStatus(EnumEvidenceStatus.findByName(status).name());
+      }
     }
 
     Evidence _evidence = evidenceRepository.save(evidence);
-    return _evidence;
 
+    if (contract.getRequired() == true && evidenceRepository.existsValidEvidence(id, EnumEvidenceStatus.ACCEPTED.name())
+        && evidence.getStatus().equals(EnumEvidenceStatus.ACCEPTED.name())) {
+      contract.getShippingInfos().forEach(item -> {
+        item.setStatus(EnumShippingStatus.INFO_RECEIVED.name());
+        shippingInfoRepository.save(item);
+      });
+      notificationBroadcast.broadcastCreateContractToShippingLine(contract);
+      notificationBroadcast.broadcastCreateContractToDriver(contract);
+    }
+
+    notificationBroadcast.broadcastAcceptOrRejectEvidenceToForwarder(contract, evidence.getStatus());
+
+    return _evidence;
   }
 
   @Override

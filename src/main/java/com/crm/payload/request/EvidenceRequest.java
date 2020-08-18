@@ -2,16 +2,18 @@ package com.crm.payload.request;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 @Getter
 @Setter
+@ToString
 public class EvidenceRequest {
 
   private Long id;
-  
+
   private String sender;
-  
-  private String evidence;
-  
-  private Boolean isValid;
+
+  private String documentPath;
+
+  private String status;
 }

@@ -84,11 +84,13 @@ public class AuthController {
     UserDto userInfo = new UserDto();
     userInfo.setId(userDetails.getId());
     userInfo.setUsername(userDetails.getUsername());
+    userInfo.setFullname(userDetails.getFullname());
     userInfo.setPhone(userDetails.getPhone());
     userInfo.setRoles(roles);
     userInfo.setEmail(userDetails.getEmail());
     userInfo.setStatus(userDetails.getStatus());
     userInfo.setAddress(userDetails.getAddress());
+    userInfo.setProfileImagePath(userDetails.getProfileImagePath());
 
     JwtResponse response = new JwtResponse();
     response.setIdToken(jwt);
@@ -113,9 +115,11 @@ public class AuthController {
     if (role.equals("FORWARDER") || role.equals("ROLE_FORWARDER")) {
       Forwarder forwarder = forwarderService.createForwarder(request);
       supplierDto = SupplierMapper.toSupplierDto(forwarder);
+      logger.info("createForwarder with request: {}", request.toString());
     } else if (role.equals("MERCHANT") || role.equals("ROLE_MERCHANT")) {
       Merchant merchant = merchantService.createMerchant(request);
       supplierDto = SupplierMapper.toSupplierDto(merchant);
+      logger.info("createMerchant with request: {}", request.toString());
     } else {
       throw new NotFoundException(ErrorMessage.ROLE_NOT_FOUND);
     }
@@ -152,6 +156,7 @@ public class AuthController {
   @GetMapping("/user")
   public ResponseEntity<?> fetchUser(HttpServletRequest request, HttpServletResponse response) {
     try {
+      String jwt = AuthTokenFilter.parseJwt(request);
       UsernamePasswordAuthenticationToken authentication = authUserByToken(request);
       if (authentication != null) {
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
@@ -162,13 +167,16 @@ public class AuthController {
         UserDto userInfo = new UserDto();
         userInfo.setId(userDetails.getId());
         userInfo.setUsername(userDetails.getUsername());
+        userInfo.setFullname(userDetails.getFullname());
         userInfo.setPhone(userDetails.getPhone());
         userInfo.setRoles(roles);
         userInfo.setEmail(userDetails.getEmail());
         userInfo.setStatus(userDetails.getStatus());
         userInfo.setAddress(userDetails.getAddress());
+        userInfo.setProfileImagePath(userDetails.getProfileImagePath());
 
         JwtResponse responseJwt = new JwtResponse();
+        responseJwt.setIdToken(jwt);
         responseJwt.setUserInfo(userInfo);
 
         return ResponseEntity.ok().body(responseJwt);

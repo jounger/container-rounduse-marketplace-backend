@@ -6,6 +6,8 @@ import java.util.Map;
 
 import javax.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -40,6 +42,8 @@ import com.crm.services.ContainerSemiTrailerService;
 @RestController
 @RequestMapping("/api/container-semi-trailer")
 public class ContainerSemiTrailerController {
+
+  private static final Logger logger = LoggerFactory.getLogger(SupplierController.class);
 
   @Autowired
   ContainerSemiTrailerService containerSemiTrailerService;
@@ -146,6 +150,7 @@ public class ContainerSemiTrailerController {
     defaultResponse.setMessage(SuccessMessage.CREATE_CONTAINER_SEMI_TRAILER_SUCCESSFULLY);
     defaultResponse.setData(containerSemiTrailerDto);
 
+    logger.info("User {} createContainerSemiTrailer with request: {}", username, request.toString());
     return ResponseEntity.status(HttpStatus.CREATED).body(defaultResponse);
   }
 
@@ -167,6 +172,8 @@ public class ContainerSemiTrailerController {
     defaultResponse.setMessage(SuccessMessage.EDIT_CONTAINER_SEMI_TRAILER_SUCCESSFULLY);
     defaultResponse.setData(containerSemiTrailerDto);
 
+    logger.info("User {} editContainerSemiTrailer from trailer id {} with request: {}", username, id,
+        updates.toString());
     return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 
@@ -184,6 +191,7 @@ public class ContainerSemiTrailerController {
     DefaultResponse<ContainerSemiTrailerDto> defaultResponse = new DefaultResponse<>();
     defaultResponse.setMessage(SuccessMessage.DELETE_CONTAINER_SEMI_TRAILER_SUCCESSFULLY);
 
+    logger.info("User {} deleteContainerSemiTrailer with id {}", username, id);
     return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 

@@ -7,6 +7,8 @@ import java.util.concurrent.ExecutorService;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
@@ -34,22 +36,16 @@ import com.crm.payload.request.PaginationRequest;
 import com.crm.payload.response.DefaultResponse;
 import com.crm.payload.response.PaginationResponse;
 import com.crm.services.CombinedService;
-import com.crm.services.ShippingInfoService;
-import com.crm.websocket.controller.NotificationBroadcast;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 @RequestMapping("/api/combined")
 public class CombinedController {
 
+  private static final Logger logger = LoggerFactory.getLogger(SupplierController.class);
+
   @Autowired
   private CombinedService combinedService;
-
-  @Autowired
-  private ShippingInfoService shippingInfoService;
-
-  @Autowired
-  private NotificationBroadcast notificationBroadcast;
 
   @Autowired
   @Qualifier("cachedThreadPool")
@@ -65,22 +61,12 @@ public class CombinedController {
     Combined combined = combinedService.createCombined(id, username, request);
     CombinedDto combinedDto = CombinedMapper.toCombinedDto(combined);
 
-    executorService.submit(new Runnable() {
-      @Override
-      public void run() {
-        shippingInfoService.createShippingInfosForCombined(combined, request.getContainers());
-      }
-    });
-
-    // CREATE NOTIFICATION
-    notificationBroadcast.broadcastCreateCombinedToDriver(combined);
-    // END NOTIFICATION
-
     // Set default response body
     DefaultResponse<CombinedDto> defaultResponse = new DefaultResponse<>();
     defaultResponse.setMessage(SuccessMessage.EDIT_BID_SUCCESSFULLY);
     defaultResponse.setData(combinedDto);
 
+    logger.info("User {} createCombined with request: {}", username, request.toString());
     return ResponseEntity.status(HttpStatus.CREATED).body(defaultResponse);
   }
 
@@ -93,8 +79,8 @@ public class CombinedController {
   }
 
   @PreAuthorize("hasRole('MERCHANT') or hasRole('FORWARDER')")
-  @GetMapping("/user")
-  public ResponseEntity<?> getCombinedsByUser(@Valid PaginationRequest request) {
+  @GetMapping("")
+  public ResponseEntity<?> getCombineds(@Valid PaginationRequest request) {
 
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
@@ -142,10 +128,10 @@ public class CombinedController {
   @Transactional
   @PreAuthorize("hasRole('FORWARDER') or hasRole('MERCHANT') or hasRole('DRIVER')")
   @RequestMapping(value = "/{id}", method = RequestMethod.PATCH, consumes = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<?> editCombined(@PathVariable("id") Long id, @RequestBody String isCanceled) {
+  public ResponseEntity<?> editCombined(@PathVariable("id") Long id, @RequestBody CombinedRequest isCanceled) {
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
-    Combined combined = combinedService.editCombined(id, username, isCanceled);
+    Combined combined = combinedService.editCombined(id, username, isCanceled.getIsCanceled().toString());
     CombinedDto combinedDto = CombinedMapper.toCombinedDto(combined);
 
     // Set default response body
@@ -153,6 +139,8 @@ public class CombinedController {
     defaultResponse.setMessage(SuccessMessage.EDIT_BID_SUCCESSFULLY);
     defaultResponse.setData(combinedDto);
 
+    logger.info("User {} editCombined from id {} with request: {}", username, id,
+        isCanceled.toString());
     return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 }

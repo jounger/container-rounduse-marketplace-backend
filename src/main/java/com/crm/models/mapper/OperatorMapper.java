@@ -9,12 +9,18 @@ import com.crm.models.dto.OperatorDto;
 public class OperatorMapper {
 
   public static OperatorDto toOperatorDto(Operator operator) {
+    if (operator == null) {
+      return null;
+    }
+
     OperatorDto operatorDto = new OperatorDto();
     operatorDto.setId(operator.getId());
     operatorDto.setUsername(operator.getUsername());
     operatorDto.setEmail(operator.getEmail());
     operatorDto.setPhone(operator.getPhone());
     operatorDto.setStatus(operator.getStatus());
+    operatorDto.setProfileImagePath(operator.getProfileImagePath());
+
     Set<String> roles = new HashSet<>();
     operator.getRoles().forEach(role -> roles.add(role.getName()));
     operatorDto.setRoles(roles);

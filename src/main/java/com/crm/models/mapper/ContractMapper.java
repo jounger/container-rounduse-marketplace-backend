@@ -1,28 +1,33 @@
 package com.crm.models.mapper;
 
+import com.crm.common.Tool;
 import com.crm.models.Contract;
+import com.crm.models.Supplier;
 import com.crm.models.dto.ContractDto;
 
 public class ContractMapper {
 
   public static ContractDto toContractDto(Contract contract) {
+    if (contract == null) {
+      return null;
+    }
+
     ContractDto contractDto = new ContractDto();
     contractDto.setId(contract.getId());
 
+    Supplier sender = contract.getSender();
+    contractDto.setSender(SupplierMapper.toSupplierDto(sender));
+
     contractDto.setPrice(contract.getPrice());
 
-    if (contract.getFinesAgainstContractViolations() != null) {
-      contractDto.setFinesAgainstContractViolation(contract.getFinesAgainstContractViolations());
-    }
+    contractDto.setFinesAgainstContractViolation(contract.getFinesAgainstContractViolations());
 
     if (contract.getDiscount() != null) {
-      String discountCode = contract.getDiscount().getCode();
-      contractDto.setDiscountCode(discountCode);
+      contractDto.setDiscountCode(DiscountMapper.toDiscountDto(contract.getDiscount()));
     }
 
-    if (contract.getRequired() != null) {
-      contractDto.setRequired(contract.getRequired());
-    }
+    contractDto.setRequired(contract.getRequired());
+    contractDto.setCreationDate(Tool.convertLocalDateTimeToString(contract.getCreationDate()));
 
     return contractDto;
   }

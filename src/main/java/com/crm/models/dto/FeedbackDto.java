@@ -13,11 +13,11 @@ public class FeedbackDto {
 
   private Long id;
 
-  private Long report;
+  private ReportDto report;
 
-  private String sender;
+  private UserDto sender;
 
-  private String recipient;
+  private UserDto recipient;
 
   private String message;
 

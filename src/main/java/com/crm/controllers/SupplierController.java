@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.crm.common.SuccessMessage;
+import com.crm.enums.EnumUserStatus;
 import com.crm.models.Supplier;
 import com.crm.models.dto.SupplierDto;
 import com.crm.models.mapper.SupplierMapper;
@@ -47,7 +48,6 @@ public class SupplierController {
   @PreAuthorize("hasRole('MODERATOR')")
   @GetMapping("")
   public ResponseEntity<?> getSuppliers(@Valid PaginationRequest request) {
-    logger.info("Page request: {}", request.getPage());
 
     Page<Supplier> pages = supplierService.getSuppliers(request);
     PaginationResponse<SupplierDto> response = new PaginationResponse<>();
@@ -145,7 +145,19 @@ public class SupplierController {
   public ResponseEntity<?> reviewRegister(@PathVariable("id") Long id, @RequestBody Map<String, Object> updates) {
     Supplier supplier = supplierService.editSupplier(updates, id);
     SupplierDto supplierDto = SupplierMapper.toSupplierDto(supplier);
-    return ResponseEntity.ok(supplierDto);
+
+    // Set default response body
+    DefaultResponse<SupplierDto> defaultResponse = new DefaultResponse<>();
+    String status = supplier.getStatus();
+    if (status.equals(EnumUserStatus.ACTIVE.name())) {
+      defaultResponse.setMessage(SuccessMessage.ACCEPT_SUPPLIER_SUCCESSFULLY);
+    }
+    if (status.equals(EnumUserStatus.REJECT.name())) {
+      defaultResponse.setMessage(SuccessMessage.REJECT_SUPPLIER_SUCCESSFULLY);
+    }
+    defaultResponse.setData(supplierDto);
+    logger.info("Moderator does reviewRegister: {}", supplier.getUsername());
+    return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 
   @Transactional
@@ -160,6 +172,7 @@ public class SupplierController {
     defaultResponse.setMessage(SuccessMessage.EDIT_SUPPLIER_SUCCESSFULLY);
     defaultResponse.setData(supplierDto);
 
+    logger.info("editSupplier from id {} with request: {}", id, updates.toString());
     return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 }

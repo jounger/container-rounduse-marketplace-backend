@@ -16,9 +16,7 @@ public interface BidService {
 
   Bid getBid(Long id, String username);
 
-  Bid getBidByBiddingDocumentAndForwarder(Long biddingDocument, String username);
-
-  Page<Bid> getBidsByBiddingDocument(Long id, PaginationRequest request);
+  Page<Bid> getBidsByBiddingDocument(Long id, String username, PaginationRequest request);
 
   Page<Bid> getBidsByBiddingDocumentAndExistCombined(Long id, String username, PaginationRequest request);
 
@@ -33,8 +31,14 @@ public interface BidService {
   // update part biddingDocument
   Bid editBid(Long id, String username, Map<String, Object> updates);
   
+  void editExpiredBids(List<Bid> bids);
+
   Bid editBidWhenCombined(Long id, String username, List<Long> containersId);
 
   void removeBid(Long id, String username);
+
+  List<Bid> getExpiredBids(List<Bid> bids);
+
+  List<Bid> updatedExpiredBids(List<Bid> bids);
 
 }

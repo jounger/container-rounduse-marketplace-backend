@@ -25,4 +25,14 @@ public interface EvidenceRepository extends JpaRepository<Evidence, Long>, JpaSp
 
   @Query(value = "SELECT e FROM Evidence e LEFT JOIN e.contract c WHERE c.id = :id")
   Page<Evidence> findByContract(@Param("id") Long contractId, Pageable pageable);
+
+  @Query(value = "SELECT CASE WHEN COUNT(e) > 0 THEN TRUE ELSE FALSE END"
+      + " FROM Evidence e LEFT JOIN e.contract c LEFT JOIN c.shippingInfos si"
+      + " WHERE si.id = :id AND e.status = :status")
+  Boolean isEditableShippingInfo(@Param("id") Long shippingInfoId, @Param("status") String status);
+
+  @Query(value = "SELECT CASE WHEN COUNT(e) = 1 THEN TRUE ELSE FALSE END"
+      + " FROM Evidence e LEFT JOIN e.contract c LEFT JOIN c.shippingInfos si"
+      + " WHERE e.id = :id AND e.status = :status")
+  Boolean existsValidEvidence(@Param("id") Long evidenceId, @Param("status") String status);
 }

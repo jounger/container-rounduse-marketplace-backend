@@ -31,11 +31,6 @@ import lombok.ToString;
 @PrimaryKeyJoinColumn(name = "user_id")
 public class Driver extends User {
 
-  @Column(name = "fullname", length = 50)
-  @NotBlank
-  @Size(min = 5, max = 50)
-  private String fullname;
-
   @Column(name = "driver_license", length = 50)
   @NotBlank
   @Size(min = 5, max = 50)

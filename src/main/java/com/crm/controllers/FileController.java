@@ -44,8 +44,8 @@ public class FileController {
   public ResponseEntity<?> uploadFile(@RequestParam("file") MultipartFile file) {
     String fileName = fileStorageService.storeFile(file);
 
-    String fileDownloadUri = ServletUriComponentsBuilder.fromCurrentContextPath().path("/api/file/download/").path(fileName)
-        .toUriString();
+    String fileDownloadUri = ServletUriComponentsBuilder.fromCurrentContextPath().path("/api/file/download/")
+        .path(fileName).toUriString();
 
     UploadFileResponse uploadFileResponse = new UploadFileResponse();
     uploadFileResponse.setFileName(fileName);
@@ -53,6 +53,7 @@ public class FileController {
     uploadFileResponse.setFileType(file.getContentType());
     uploadFileResponse.setSize(file.getSize());
 
+    logger.info("uploadFile with file name: {}", fileName);
     return ResponseEntity.status(HttpStatus.CREATED).body(uploadFileResponse);
   }
 
@@ -73,7 +74,9 @@ public class FileController {
       uploadFileResponse.setSize(file.getSize());
 
       uploadFileResponses.add(uploadFileResponse);
+      logger.info("uploadMultipleFiles with file name: {}", fileName);
     });
+
     return ResponseEntity.status(HttpStatus.CREATED).body(uploadFileResponses);
   }
 

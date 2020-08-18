@@ -13,10 +13,10 @@ public class EvidenceDto {
 
   private Long Id;
 
-  private String sender;
+  private SupplierDto sender;
 
-  private String evidence;
+  private String documentPath;
 
-  private Boolean isValid;
+  private String status;
 
 }

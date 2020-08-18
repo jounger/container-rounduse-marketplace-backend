@@ -1,5 +1,6 @@
 package com.crm.models;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -49,7 +50,11 @@ public class Contract {
   @OneToOne
   @JoinColumn(name = "combined_id")
   private Combined combined;
-  
+
+  @ManyToOne
+  @JoinColumn(name = "suppier_id")
+  private Supplier sender;
+
   @Column(name = "price")
   private Double price;
 
@@ -62,6 +67,9 @@ public class Contract {
 
   @Column(name = "required")
   private Boolean required;
+
+  @Column(name = "creation_date")
+  private LocalDateTime creationDate;
 
   @Column(name = "created_at", nullable = false, updatable = false)
   @Temporal(TemporalType.TIMESTAMP)
@@ -81,4 +89,7 @@ public class Contract {
 
   @OneToMany(mappedBy = "contract")
   private Collection<Rating> ratings = new ArrayList<>();
+
+  @OneToMany(mappedBy = "contract")
+  private Collection<ShippingInfo> shippingInfos = new ArrayList<>();
 }

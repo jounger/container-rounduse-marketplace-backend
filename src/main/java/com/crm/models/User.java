@@ -70,6 +70,11 @@ public class User {
   @Size(min = 10, max = 10)
   private String phone;
 
+  @Column(name = "fullname", length = 50)
+  @NotBlank
+  @Size(min = 5, max = 50)
+  private String fullname;
+
   @Column(name = "email")
   @NotBlank
   @Size(min = 5, max = 50)
@@ -81,13 +86,17 @@ public class User {
   @Size(min = 5, max = 200)
   private String address;
 
+  @Size(min = 5, max = 200)
+  @JoinColumn(name = "profile_image_path")
+  private String profileImagePath;
+
   // EnumUserStatus
   @Column(name = "status")
   @NotBlank
   @Size(min = 2, max = 20)
   private String status;
-  
-  @ManyToMany(cascade = {CascadeType.MERGE, CascadeType.PERSIST},fetch = FetchType.EAGER)
+
+  @ManyToMany(cascade = { CascadeType.MERGE, CascadeType.PERSIST }, fetch = FetchType.EAGER)
   @JoinTable(name = "user_role", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
   private Collection<Role> roles = new ArrayList<>();
 
@@ -106,6 +115,9 @@ public class User {
 
   @OneToMany(mappedBy = "sender")
   private Collection<Feedback> feedbacks = new ArrayList<>();
+
+  @OneToMany(mappedBy = "owner")
+  private Collection<FileUpload> fileUploads = new ArrayList<>();
 
   // DO NOT DELETE CODE BELLOW
 

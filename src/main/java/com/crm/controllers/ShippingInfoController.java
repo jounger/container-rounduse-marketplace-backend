@@ -1,4 +1,4 @@
- package com.crm.controllers;
+package com.crm.controllers;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,6 +6,8 @@ import java.util.List;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -27,6 +29,7 @@ import com.crm.models.ShippingInfo;
 import com.crm.models.dto.ShippingInfoDto;
 import com.crm.models.mapper.ShippingInfoMapper;
 import com.crm.payload.request.PaginationRequest;
+import com.crm.payload.request.ShippingInfoRequest;
 import com.crm.payload.response.DefaultResponse;
 import com.crm.payload.response.PaginationResponse;
 import com.crm.services.ShippingInfoService;
@@ -35,6 +38,8 @@ import com.crm.services.ShippingInfoService;
 @RestController
 @RequestMapping("/api/shipping-info")
 public class ShippingInfoController {
+
+  private static final Logger logger = LoggerFactory.getLogger(SupplierController.class);
 
   @Autowired
   private ShippingInfoService shippingInfoService;
@@ -140,17 +145,19 @@ public class ShippingInfoController {
   @Transactional
   @PreAuthorize("hasRole('DRIVER') or hasRole('FORWARDER')")
   @PatchMapping(value = "/{id}")
-  public ResponseEntity<?> editShippingInfo(@PathVariable("id") Long id, @RequestBody String status) {
+  public ResponseEntity<?> editShippingInfo(@PathVariable("id") Long id, @RequestBody ShippingInfoRequest request) {
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
-    ShippingInfo shippingInfo = shippingInfoService.editShippingInfo(id, username, status);
+    ShippingInfo shippingInfo = shippingInfoService.editShippingInfo(id, username, request);
     ShippingInfoDto shippingInfoDto = ShippingInfoMapper.toShippingInfoDto(shippingInfo);
 
     // Set default response body
     DefaultResponse<ShippingInfoDto> defaultResponse = new DefaultResponse<>();
     defaultResponse.setMessage(SuccessMessage.EDIT_SHIPPING_INFO_SUCCESSFULLY);
     defaultResponse.setData(shippingInfoDto);
+    
 
+    logger.info("User{} does editShippingInfo from id {} with request {}", username, id, request.toString());
     return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 
@@ -165,7 +172,8 @@ public class ShippingInfoController {
     // Set default response body
     DefaultResponse<ShippingInfoDto> defaultResponse = new DefaultResponse<>();
     defaultResponse.setMessage(SuccessMessage.DELETE_SHIPPING_INFO_SUCCESSFULLY);
-
+    
+    logger.info("{} does editShippingInfo with id: {}", username, id);
     return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 

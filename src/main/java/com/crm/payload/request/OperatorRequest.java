@@ -1,16 +1,13 @@
 package com.crm.payload.request;
 
-import javax.validation.constraints.NotBlank;
-
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 @Getter
 @Setter
+@ToString
 public class OperatorRequest extends SignUpRequest {
-  
-  @NotBlank
-  private String fullname;
 
   private Boolean isRoot;
 }

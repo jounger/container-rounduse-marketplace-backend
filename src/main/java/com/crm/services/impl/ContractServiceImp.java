@@ -1,5 +1,8 @@
 package com.crm.services.impl;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -15,11 +18,11 @@ import com.crm.common.Constant;
 import com.crm.common.ErrorMessage;
 import com.crm.common.Tool;
 import com.crm.exception.ForbiddenException;
-import com.crm.exception.InternalException;
 import com.crm.exception.NotFoundException;
 import com.crm.models.Bid;
 import com.crm.models.BiddingDocument;
 import com.crm.models.Combined;
+import com.crm.models.Container;
 import com.crm.models.Contract;
 import com.crm.models.Discount;
 import com.crm.models.Supplier;
@@ -28,7 +31,10 @@ import com.crm.payload.request.PaginationRequest;
 import com.crm.repository.CombinedRepository;
 import com.crm.repository.ContractRepository;
 import com.crm.repository.DiscountRepository;
+import com.crm.repository.SupplierRepository;
+import com.crm.services.BidService;
 import com.crm.services.ContractService;
+import com.crm.services.ShippingInfoService;
 import com.crm.specification.builder.ContractSpecificationsBuilder;
 
 @Service
@@ -43,6 +49,15 @@ public class ContractServiceImp implements ContractService {
   @Autowired
   private DiscountRepository discountRepository;
 
+  @Autowired
+  private BidService bidService;
+
+  @Autowired
+  private ShippingInfoService shippingInfoService;
+
+  @Autowired
+  private SupplierRepository supplierDtoRepository;
+
   @Override
   public Contract createContract(Long id, String username, ContractRequest request) {
     Contract contract = new Contract();
@@ -51,33 +66,61 @@ public class ContractServiceImp implements ContractService {
         .orElseThrow(() -> new NotFoundException(ErrorMessage.COMBINED_NOT_FOUND));
     contract.setCombined(combined);
 
-    contract.setPrice(request.getPrice());
-
     Bid bid = combined.getBid();
     BiddingDocument biddingDocument = bid.getBiddingDocument();
+
     Supplier offeree = biddingDocument.getOfferee();
+    if (username.equals(offeree.getUsername())) {
+      throw new ForbiddenException(ErrorMessage.USER_ACCESS_DENIED);
+    }
+
+    Supplier sender = supplierDtoRepository.findByUsername(username)
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.USER_NOT_FOUND));
+    contract.setSender(sender);
+
+    List<Long> containersId = new ArrayList<>();
+    List<Container> containers = new ArrayList<Container>(bid.getContainers());
+
+    if (!biddingDocument.getIsMultipleAward()) {
+      for (Container container : containers) {
+        containersId.add(container.getId());
+      }
+    } else {
+      containersId = request.getContainers();
+    }
+
+    if (containersId == null || containersId.size() == 0) {
+      throw new NotFoundException(ErrorMessage.CONTAINER_NOT_FOUND);
+    }
+
+    Double price = (bid.getBidPrice() / bid.getContainers().size()) * containersId.size();
+
+    contract.setPrice(price);
+
     Boolean required = request.getRequired();
     contract.setRequired(required);
     contract.setFinesAgainstContractViolations(0D);
+    contract.setCreationDate(LocalDateTime.now());
 
     String discountCodeString = request.getDiscountCode();
-    if (discountCodeString != null && !discountCodeString.isEmpty()) {
+    if (!Tool.isBlank(discountCodeString)) {
       Discount discount = discountRepository.findByCode(discountCodeString)
           .orElseThrow(() -> new NotFoundException(ErrorMessage.DISCOUNT_NOT_FOUND));
       contract.setDiscount(discount);
     }
-    if (username.equals(offeree.getUsername()) && required == true) {
-      Double fines = request.getFinesAgainstContractViolations();
-      if (fines > 0) {
-        contract.setFinesAgainstContractViolations(fines);
-      } else {
-        throw new InternalException(ErrorMessage.CONTRACT_INVALID_FINES);
-      }
-    } else {
-      throw new ForbiddenException(ErrorMessage.USER_ACCESS_DENIED);
+
+    Double fines = 0D;
+    if (required == true) {
+      fines = request.getFinesAgainstContractViolations();
     }
+    contract.setFinesAgainstContractViolations(fines);
 
     Contract _contract = contractRepository.save(contract);
+
+    bid = bidService.editBidWhenCombined(bid.getId(), username, containersId);
+
+    shippingInfoService.createShippingInfosForContract(contract, containersId);
+
     return _contract;
   }
 

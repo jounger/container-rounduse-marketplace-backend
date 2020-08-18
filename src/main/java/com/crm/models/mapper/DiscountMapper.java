@@ -6,6 +6,9 @@ import com.crm.models.dto.DiscountDto;
 
 public class DiscountMapper {
   public static DiscountDto toDiscountDto(Discount discount) {
+    if (discount == null) {
+      return null;
+    }
 
     DiscountDto discountDto = new DiscountDto();
     discountDto.setId(discount.getId());

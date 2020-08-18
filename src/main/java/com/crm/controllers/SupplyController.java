@@ -14,12 +14,12 @@ import com.crm.services.SupplyService;
 @RestController
 @RequestMapping("/api/supply")
 public class SupplyController {
-  
+
   @Autowired
   private SupplyService supplyService;
-  
+
   @GetMapping("/{code}")
-  public ResponseEntity<?> existsByCode(@PathVariable("code") String code){
+  public ResponseEntity<?> existsByCode(@PathVariable("code") String code) {
     Boolean response = supplyService.existsByCode(code);
     return ResponseEntity.ok(response);
   }

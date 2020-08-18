@@ -9,7 +9,7 @@ public class BookingDto {
 
   private Long id;
 
-  private String portOfLoading;
+  private PortDto portOfLoading;
 
   private String number;
 

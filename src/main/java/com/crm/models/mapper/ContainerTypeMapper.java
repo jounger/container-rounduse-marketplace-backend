@@ -5,6 +5,10 @@ import com.crm.models.dto.ContainerTypeDto;
 
 public class ContainerTypeMapper {
   public static ContainerTypeDto toContainerTypeDto(ContainerType containerType) {
+    if (containerType == null) {
+      return null;
+    }
+
     ContainerTypeDto containerTypeDto = new ContainerTypeDto();
     containerTypeDto.setId(containerType.getId());
     containerTypeDto.setName(containerType.getName());

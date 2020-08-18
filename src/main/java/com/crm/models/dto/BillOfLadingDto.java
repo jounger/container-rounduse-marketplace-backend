@@ -12,7 +12,7 @@ public class BillOfLadingDto {
 
   private Long id;
 
-  private String portOfDelivery;
+  private PortDto portOfDelivery;
 
   private String number;
 

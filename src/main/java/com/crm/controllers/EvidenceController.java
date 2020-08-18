@@ -7,6 +7,8 @@ import java.util.Map;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -25,31 +27,52 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.crm.common.SuccessMessage;
+import com.crm.enums.EnumFileType;
 import com.crm.models.Evidence;
+import com.crm.models.FileUpload;
 import com.crm.models.dto.EvidenceDto;
 import com.crm.models.mapper.EvidenceMapper;
 import com.crm.payload.request.EvidenceRequest;
+import com.crm.payload.request.FileUploadRequest;
 import com.crm.payload.request.PaginationRequest;
 import com.crm.payload.response.DefaultResponse;
 import com.crm.payload.response.PaginationResponse;
 import com.crm.services.EvidenceService;
+import com.crm.services.FileUploadService;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 @RequestMapping("/api/evidence")
 public class EvidenceController {
 
+  private static final Logger logger = LoggerFactory.getLogger(SupplierController.class);
+
   @Autowired
   private EvidenceService evidenceService;
+
+  @Autowired
+  private FileUploadService fileUploadService;
 
   @Transactional
   @PostMapping("/contract/{id}")
   @PreAuthorize("hasRole('MERCHANT') or hasRole('FORWARDER')")
-  public ResponseEntity<?> createEvidence(@PathVariable("id") Long id, @Valid @RequestBody EvidenceRequest request) {
+  public ResponseEntity<?> createEvidence(@PathVariable("id") Long id, @RequestParam("file") MultipartFile file) {
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
+
+    FileUploadRequest fileUploadRequest = new FileUploadRequest();
+    fileUploadRequest.setFile(file);
+    fileUploadRequest.setType(EnumFileType.DOCUMENT.name());
+
+    FileUpload fileUpload = fileUploadService.createFileUpload(username, fileUploadRequest);
+    String filePath = fileUpload.getPath() + fileUpload.getName();
+
+    EvidenceRequest request = new EvidenceRequest();
+    request.setDocumentPath(filePath);
+
     Evidence evidence = evidenceService.createEvidence(id, username, request);
     EvidenceDto evidenceDto = EvidenceMapper.toEvidenceDto(evidence);
 
@@ -58,6 +81,7 @@ public class EvidenceController {
     defaultResponse.setMessage(SuccessMessage.CREATE_EVIDENCE_SUCCESSFULLY);
     defaultResponse.setData(evidenceDto);
 
+    logger.info("User {} createEvidence with request: {}", username, request.toString());
     return ResponseEntity.status(HttpStatus.CREATED).body(defaultResponse);
   }
 
@@ -138,6 +162,7 @@ public class EvidenceController {
     defaultResponse.setMessage(SuccessMessage.EDIT_EVIDENCE_SUCCESSFULLY);
     defaultResponse.setData(evidenceDto);
 
+    logger.info("User {} editEvidence from id {} with request: {}", username, id, updates.toString());
     return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 
@@ -153,6 +178,7 @@ public class EvidenceController {
     DefaultResponse<EvidenceDto> defaultResponse = new DefaultResponse<>();
     defaultResponse.setMessage(SuccessMessage.DELETE_EVIDENCE_SUCCESSFULLY);
 
+    logger.info("User {} deleteEvidence with id {}", username, id);
     return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 }

@@ -72,46 +72,17 @@ public class DiscountServiceImpl implements DiscountService {
   }
 
   @Override
-  public Discount updateDiscount(DiscountRequest request) {
-    Discount discount = discountRepository.findById(request.getId())
-        .orElseThrow(() -> new NotFoundException(ErrorMessage.DISCOUNT_NOT_FOUND));
-
-    if (discountRepository.existsByCode(request.getCode())) {
-      if (request.getCode().equals(discount.getCode())) {
-      } else {
-        throw new DuplicateRecordException(ErrorMessage.DISCOUNT_ALREADY_EXISTS);
-      }
-    }
-    discount.setCode(request.getCode());
-
-    discount.setDetail(request.getDetail());
-    if (request.getCurrency() != null && !request.getCurrency().isEmpty()) {
-      discount.setCurrency(EnumCurrency.findByName(request.getCurrency()).name());
-    } else {
-      throw new NotFoundException(ErrorMessage.CURRENCY_NOT_FOUND);
-    }
-    discount.setPercent(request.getPercent());
-    discount.setMaximumDiscount(request.getMaximumDiscount());
-    if (request.getExpiredDate() != null && !request.getExpiredDate().isEmpty()) {
-      LocalDateTime expiredDate = Tool.convertToLocalDateTime(request.getExpiredDate());
-      discount.setExpiredDate(expiredDate);
-    }
-    Discount _discount = discountRepository.save(discount);
-    return _discount;
-  }
-
-  @Override
   public Discount editDiscount(Map<String, Object> updates, Long id) {
     Discount discount = discountRepository.findById(id)
         .orElseThrow(() -> new NotFoundException(ErrorMessage.DISCOUNT_NOT_FOUND));
 
-    String code = String.valueOf(updates.get("code"));
-    if (updates.get("code") != null && !Tool.isEqual(discount.getCode(), code)) {
-      if (discountRepository.existsByCode(code)) {
-        throw new DuplicateRecordException(ErrorMessage.DISCOUNT_ALREADY_EXISTS);
-      }
-      discount.setCode(code);
-    }
+//    String code = String.valueOf(updates.get("code"));
+//    if (updates.get("code") != null && !Tool.isEqual(discount.getCode(), code)) {
+//      if (discountRepository.existsByCode(code)) {
+//        throw new DuplicateRecordException(ErrorMessage.DISCOUNT_ALREADY_EXISTS);
+//      }
+//      discount.setCode(code);
+//    }
 
     String detail = String.valueOf(updates.get("detail"));
     if (updates.get("detail") != null && !Tool.isEqual(discount.getDetail(), detail)) {
@@ -128,15 +99,15 @@ public class DiscountServiceImpl implements DiscountService {
       }
     }
 
-    String percent = String.valueOf(updates.get("percent"));
-    if (updates.get("percent") != null && !Tool.isEqual(discount.getPercent(), percent)) {
-      discount.setPercent(Double.valueOf(percent));
-    }
+//    String percent = String.valueOf(updates.get("percent"));
+//    if (updates.get("percent") != null && !Tool.isEqual(discount.getPercent(), percent)) {
+//      discount.setPercent(Double.valueOf(percent));
+//    }
 
-    String maximumDiscount = String.valueOf(updates.get("maximumDiscount"));
-    if (updates.get("maximumDiscount") != null && !Tool.isEqual(discount.getMaximumDiscount(), maximumDiscount)) {
-      discount.setMaximumDiscount(Double.valueOf(maximumDiscount));
-    }
+//    String maximumDiscount = String.valueOf(updates.get("maximumDiscount"));
+//    if (updates.get("maximumDiscount") != null && !Tool.isEqual(discount.getMaximumDiscount(), maximumDiscount)) {
+//      discount.setMaximumDiscount(Double.valueOf(maximumDiscount));
+//    }
 
     String expiredDateString = String.valueOf(updates.get("expiredDate"));
     if (updates.get("expiredDate") != null && !Tool.isEqual(discount.getExpiredDate().toString(), expiredDateString)) {

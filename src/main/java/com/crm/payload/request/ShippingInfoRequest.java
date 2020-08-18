@@ -2,14 +2,16 @@ package com.crm.payload.request;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 @Getter
 @Setter
+@ToString
 public class ShippingInfoRequest {
 
   private Long id;
   
-  private Long combined;
+  private Long contract;
   
   private Long outbound;
   

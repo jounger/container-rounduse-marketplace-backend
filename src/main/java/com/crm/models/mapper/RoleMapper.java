@@ -10,7 +10,10 @@ import com.crm.models.dto.RoleDto;
 public class RoleMapper {
 
   public static RoleDto toRoleDto(Role role) {
-    
+    if (role == null) {
+      return null;
+    }
+
     RoleDto roleDto = new RoleDto();
     roleDto.setId(role.getId());
     roleDto.setName(role.getName());
@@ -18,6 +21,6 @@ public class RoleMapper {
     ArrayList<Permission> permissions = new ArrayList<Permission>(role.getPermissions());
     permissions.forEach(permission -> permissionsDto.add(permission.getName()));
     roleDto.setPermissions(permissionsDto);
-    return roleDto;    
+    return roleDto;
   }
 }

@@ -20,7 +20,7 @@ public class SuccessMessage {
   public static final String DELETE_NOTIFICATION_SUCCESSFULLY = "Xóa thông báo thành công";
 
   // ContainerController
-  public static final String CREATE_CONTAINER_SUCCESSFULLY = "Thêm mới container thành công";
+  public static final String CREATE_CONTAINER_SUCCESSFULLY = "Khai báo container thành công";
   public static final String DELETE_CONTAINER_SUCCESSFULLY = "Xóa container thành công";
   public static final String EDIT_CONTAINER_SUCCESSFULLY = "Cập nhật container thành công";
 
@@ -31,12 +31,12 @@ public class SuccessMessage {
   public static final String EDIT_BOOKING_SUCCESSFULLY = "Cập nhật đơn đặt container thành công";
 
   // ContainerSemiTrailerController
-  public static final String CREATE_CONTAINER_SEMI_TRAILER_SUCCESSFULLY = "Thêm mới rơ móc thành công";
+  public static final String CREATE_CONTAINER_SEMI_TRAILER_SUCCESSFULLY = "Khai báo rơ móc thành công";
   public static final String DELETE_CONTAINER_SEMI_TRAILER_SUCCESSFULLY = "Xóa rơ móc thành công";
   public static final String EDIT_CONTAINER_SEMI_TRAILER_SUCCESSFULLY = "Cập nhật rơ móc thành công";
 
   // ContainerTractorController
-  public static final String CREATE_CONTAINER_TRACTOR_SUCCESSFULLY = "Thêm mới đầu kéo thành công";
+  public static final String CREATE_CONTAINER_TRACTOR_SUCCESSFULLY = "Khai báo đầu kéo thành công";
   public static final String DELETE_CONTAINER_TRACTOR_SUCCESSFULLY = "Xóa đầu kéo thành công";
   public static final String EDIT_CONTAINER_TRACTOR_SUCCESSFULLY = "Cập nhật đầu kéo thành công";
 
@@ -65,7 +65,7 @@ public class SuccessMessage {
   public static final String DELETE_EVIDENCE_SUCCESSFULLY = "Xóa bằng chứng thành công";
   public static final String EDIT_EVIDENCE_SUCCESSFULLY = "Cập nhật bằng chứng thành công";
 
-  // EvidenceController
+  // FeedbackController
   public static final String CREATE_FEEDBACK_SUCCESSFULLY = "Thêm mới phản hồi thành công";
   public static final String DELETE_FEEDBACK_SUCCESSFULLY = "Xóa phản hồi thành công";
   public static final String EDIT_FEEDBACK_SUCCESSFULLY = "Cập phản hồi chứng thành công";
@@ -81,7 +81,7 @@ public class SuccessMessage {
   public static final String EDIT_GEOLOCATION_SUCCESSFULLY = "Cập nhật vị trí container thành công";
 
   // InboundController
-  public static final String CREATE_INBOUND_SUCCESSFULLY = "Tạo mới hàng nhập thành công";
+  public static final String CREATE_INBOUND_SUCCESSFULLY = "Khai báo hàng nhập thành công";
   public static final String DELETE_INBOUND_SUCCESSFULLY = "Xóa hàng nhập thành công";
   public static final String EDIT_INBOUND_SUCCESSFULLY = "Cập nhật hàng nhập thành công";
 
@@ -96,12 +96,12 @@ public class SuccessMessage {
   public static final String EDIT_OPERATOR_SUCCESSFULLY = "Cập nhật quản trị viên thành công";
 
   // OutboundController
-  public static final String CREATE_OUTBOUND_SUCCESSFULLY = "Tạo mới hàng xuất thành công";
+  public static final String CREATE_OUTBOUND_SUCCESSFULLY = "Khai báo hàng xuất thành công";
   public static final String DELETE_OUTBOUND_SUCCESSFULLY = "Xóa hàng xuất thành công";
   public static final String EDIT_OUTBOUND_SUCCESSFULLY = "Cập nhật hàng xuất thành công";
 
   // PaymentController
-  public static final String CREATE_PAYMENT_SUCCESSFULLY = "Tạo mới hóa đơn thành công";
+  public static final String CREATE_PAYMENT_SUCCESSFULLY = "Khai báo hóa đơn thành công";
   public static final String DELETE_PAYMENT_SUCCESSFULLY = "Xóa hóa đơn thành công";
   public static final String EDIT_PAYMENT_SUCCESSFULLY = "Cập nhật hóa đơn thành công";
 
@@ -142,11 +142,14 @@ public class SuccessMessage {
 
   // SupplierController
   public static final String EDIT_SUPPLIER_SUCCESSFULLY = "Cập nhật nhà cung cấp thành công";
+  public static final String ACCEPT_SUPPLIER_SUCCESSFULLY = "Đơn đăng ký đã được chấp nhận";
+  public static final String REJECT_SUPPLIER_SUCCESSFULLY = "Đơn đăng ký đã được từ chối";
 
   // UserController
   public static final String EDIT_USER_SUCCESSFULLY = "Cập nhật người dùng thành công";
   public static final String CHANGE_PASSWORD_SUCCESSFULLY = "Thay đổi mật khẩu thành công";
   public static final String GENERATE_RESET_PASSWORD_TOKEN_SUCCESSFULLY = "Tạo đường dẫn cài lại mật khẩu thành công. Vui lòng kiểm tra email!";
   public static final String RESET_PASSWORD_SUCCESSFULLY = "Đặt lại mật khẩu thành công";
+  public static final String PROFILE_CHANGE_SUCCESSFULLY = "Thay đổi ảnh đại diện thành công";
 
 }

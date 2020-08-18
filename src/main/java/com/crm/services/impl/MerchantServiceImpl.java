@@ -49,7 +49,7 @@ public class MerchantServiceImpl implements MerchantService {
     if (userRepository.existsByUsername(request.getUsername()) || userRepository.existsByEmail(request.getEmail())
         || userRepository.existsByPhone(request.getPhone())
         || supplierRepository.existsByCompanyCode(request.getCompanyCode())) {
-      throw new DuplicateRecordException(ErrorMessage.USER_NOT_FOUND);
+      throw new DuplicateRecordException(ErrorMessage.USER_ALREADY_EXISTS);
     }
     Merchant merchant = new Merchant();
     merchant.setUsername(request.getUsername());
@@ -59,11 +59,20 @@ public class MerchantServiceImpl implements MerchantService {
     merchant.setStatus(EnumUserStatus.PENDING.name());
     merchant.setWebsite(request.getWebsite());
     merchant.setCompanyName(request.getCompanyName());
+    if (supplierRepository.existsByCompanyCode(request.getCompanyCode())) {
+      throw new DuplicateRecordException(ErrorMessage.COMPANY_CODE_ALREADY_EXISTS);
+    }
     merchant.setCompanyCode(request.getCompanyCode());
     merchant.setCompanyDescription(request.getCompanyDescription());
     merchant.setCompanyAddress(request.getCompanyAddress());
-    merchant.setContactPerson(request.getContactPerson());
+    merchant.setFullname(request.getFullname());
+    if (supplierRepository.existsByTin(request.getTin())) {
+      throw new DuplicateRecordException(ErrorMessage.TIN_DUPLICATE);
+    }
     merchant.setTin(request.getTin());
+    if (supplierRepository.existsByFax(request.getFax())) {
+      throw new DuplicateRecordException(ErrorMessage.FAX_DUPLICATE);
+    }
     merchant.setFax(request.getFax());
     merchant.setRatingValue(0D);
 
@@ -131,9 +140,9 @@ public class MerchantServiceImpl implements MerchantService {
       merchant.setWebsite(website);
     }
 
-    String contactPerson = String.valueOf(updates.get("contactPerson"));
-    if (updates.get("contactPerson") != null && !Tool.isEqual(merchant.getContactPerson(), contactPerson)) {
-      merchant.setContactPerson(contactPerson);
+    String fullname = String.valueOf(updates.get("fullname"));
+    if (updates.get("fullname") != null && !Tool.isEqual(merchant.getFullname(), fullname)) {
+      merchant.setFullname(fullname);
     }
 
     String companyName = String.valueOf(updates.get("companyName"));
@@ -157,11 +166,17 @@ public class MerchantServiceImpl implements MerchantService {
 
     String tin = String.valueOf(updates.get("tin"));
     if (updates.get("tin") != null && !Tool.isEqual(merchant.getTin(), tin)) {
+      if (supplierRepository.existsByTin(tin)) {
+        throw new DuplicateRecordException(ErrorMessage.TIN_DUPLICATE);
+      }
       merchant.setTin(tin);
     }
 
     String fax = String.valueOf(updates.get("fax"));
     if (updates.get("fax") != null && !Tool.isEqual(merchant.getFax(), fax)) {
+      if (supplierRepository.existsByFax(fax)) {
+        throw new DuplicateRecordException(ErrorMessage.FAX_DUPLICATE);
+      }
       merchant.setFax(fax);
     }
 

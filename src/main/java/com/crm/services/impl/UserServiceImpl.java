@@ -30,6 +30,7 @@ import com.crm.enums.EnumUserStatus;
 import com.crm.exception.DuplicateRecordException;
 import com.crm.exception.InternalException;
 import com.crm.exception.NotFoundException;
+import com.crm.models.FileUpload;
 import com.crm.models.Role;
 import com.crm.models.User;
 import com.crm.payload.request.ChangePasswordRequest;
@@ -91,8 +92,9 @@ public class UserServiceImpl implements UserService {
     }
     String encoder = passwordEncoder.encode(request.getPassword());
     user.setPassword(encoder);
-    userRepository.save(user);
-    return user;
+
+    User _user = userRepository.save(user);
+    return _user;
   }
 
   @Override
@@ -128,23 +130,43 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
-  public User changeStatus(Long id, Map<String, Object> updates) {
+  public User editProfileImage(String username, FileUpload profileImage) {
+    User user = userRepository.findByUsername(username)
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.USER_NOT_FOUND));
+
+    if (profileImage != null) {
+//      user.setProfileImage(profileImage);
+    }
+
+    User _user = userRepository.save(user);
+
+    return _user;
+  }
+
+  @Override
+  public User editUser(String username, Map<String, Object> updates) {
+    User user = userRepository.findByUsername(username)
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.USER_NOT_FOUND));
+
     String status = String.valueOf(updates.get("status"));
     EnumUserStatus eStatus = EnumUserStatus.findByName(status);
     if (status != null && eStatus != null) {
-      User user = userRepository.findById(id).orElseThrow(() -> new NotFoundException(ErrorMessage.USER_NOT_FOUND));
       user.setStatus(eStatus.name());
-      userRepository.save(user);
-      return user;
-    } else {
-      throw new NotFoundException("Status is not found.");
     }
+
+    String profileImagePath = String.valueOf(updates.get("profileImagePath"));
+    if (updates.get("profileImagePath") != null) {
+      user.setProfileImagePath(profileImagePath);
+    }
+
+    User _user = userRepository.save(user);
+    return _user;
   }
 
   @Override
   public List<User> getUsersByRole(String roleName) {
     List<User> users = userRepository.findByRole(roleName);
-    if (users == null) {
+    if (users.size() == 0) {
       throw new NotFoundException("Error: User is not found");
     }
     return users;

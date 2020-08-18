@@ -20,12 +20,12 @@ public class ErrorMessage {
   // Combined
   public static final String COMBINED_NOT_FOUND = "Không tìm thấy hàng ghép";
   public static final String COMBINED_STATUS_NOT_FOUND = "Không tìm thấy trạng thái của hàng ghép";
-  
+
   // ShippingInfo
-  public static final String SHIPPING_INFO_NOT_FOUND = "Không tìm thấy hàng ghép";
-  public static final String SHIPPING_INFO_INVALID_EDIT = "Không thể sửa hồ sơ mời thầu sau khi đã được ghép hoặc hủy bỏ";
+  public static final String SHIPPING_INFO_NOT_FOUND = "Không tìm thấy chi tiết đơn vận chuyển";
+  public static final String SHIPPING_INFO_INVALID_EDIT = "Không thể cập nhật trạng thái chi tiết đơn vận chuyển";
   public static final String SHIPPING_INFO_STATUS_NOT_FOUND = "Không tìm thấy trạng thái của việc vận chuyển hàng";
-  
+
   // Contract
   public static final String CONTRACT_NOT_FOUND = "Không tìm thấy hợp đồng";
   public static final String CONTRACT_INVALID_FINES = "Phần trăm phạt hợp đồng không hợp lệ";
@@ -50,7 +50,8 @@ public class ErrorMessage {
   public static final String RATING_NOT_FOUND = "Không tìm thấy đánh giá";
 
   // Container
-  public static final String CONTAINER_MORE_OR_LESS_THAN_NEEDED = "Số lượng container vượt quá cho phép hoặc chưa đủ";
+  public static final String CONTAINER_LESS_THAN_NEEDED = "Số lượng container chưa đủ yêu cầu";
+  public static final String CONTAINER_MORE_THAN_NEEDED = "Số lượng container vượt quá yêu cầu";
   public static final String CONTAINER_NOT_FOUND = "Không tìm thấy container";
   public static final String CONTAINER_NOT_FOUND_IN_BID = "Không tìm thấy container này trong hồ sơ dự thầu";
   public static final String CONTAINER_NOT_SUITABLE = "Container không phù hợp";
@@ -61,6 +62,10 @@ public class ErrorMessage {
 
   // Supply
   public static final String SUPPLY_CODE_DUPLICATE = "Mã hàng đã tồn tại";
+  
+  //Supplier
+  public static final String TIN_DUPLICATE = "Mã số thuế đã được sử dụng";
+  public static final String FAX_DUPLICATE = "Địa chỉ thư điện tử đã được sử dụng";
 
   // Outbound
   public static final String OUTBOUND_NOT_FOUND = "Không tìm thấy hàng xuất khẩu";
@@ -107,15 +112,16 @@ public class ErrorMessage {
 
   // User
   public static final String USER_NOT_FOUND = "Người dùng không tìm thấy";
+  public static final String USERNAME_OR_PASSWORD_NOT_CORRECT = "Tài khoản hoặc mật khẩu không đúng";
   public static final String USER_STATUS_NOT_FOUND = "Không tìm thấy vai trò";
   public static final String USER_ADDRESS_NOT_FOUND = "Không tìm thấy địa chỉ trên";
   public static final String USER_ACCESS_DENIED = "Truy cập bị từ chối";
   public static final String RECIPIENT_NOT_FOUND = "Không tìm thấy người nhận";
   public static final String SENDER_NOT_FOUND = "Không tìm thấy người gửi";
-  public static final String USER_EMAIL_ALREADY_EXISTS = "Email đã tồn tại";
-  public static final String USER_PHONE_ALREADY_EXISTS = "Số điện thoại đã tồn tại";
-  public static final String COMPANY_CODE_ALREADY_EXISTS = "Mã công ty đã tồn tại";
-  public static final String USERNAME_ALREADY_EXISTS = "Tên đăng nhập đã tồn tại";
+  public static final String USER_EMAIL_ALREADY_EXISTS = "Email đã được sử dụng";
+  public static final String USER_PHONE_ALREADY_EXISTS = "Số điện thoại đã được sử dụng";
+  public static final String COMPANY_CODE_ALREADY_EXISTS = "Mã công ty đã được sử dụng";
+  public static final String USERNAME_ALREADY_EXISTS = "Tên đăng nhập đã được sử dụng";
   public static final String PASSWORD_NOT_CORRECT = "Mật khẩu không đúng";
   public static final String NEW_PASSWORD_NOT_VALID = "Mật khẩu mới không hợp lệ";
   public static final String USER_ALREADY_EXISTS = "Tên đăng nhập, số điện thoại, email hoặc mã công ty đã tồn tại";
@@ -135,8 +141,9 @@ public class ErrorMessage {
   public static final String FORWARDER_NOT_FOUND = "Không tìm thấy chủ xe";
 
   // Driver
-  public static final String DRIVER_NOT_FOUND = "Không tìm thấy lái xe";
+  public static final String DRIVER_LICENSE_ALREADY_EXIST = "Bằng lái xe đã được xử dụng";
   public static final String DRIVER_BUSY = "Lái xe đã được ghép trong hồ sơ đấu thầu khác";
+  public static final String DRIVER_NOT_FOUND = "Không tìm thấy lái xe";
 
   // Geolocation
   public static final String GEOLOCATION_NOT_FOUND = "Không tìm thấy vị trí của lái xe";

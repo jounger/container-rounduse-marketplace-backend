@@ -223,7 +223,7 @@ class ContractControllerIT {
 
   @Test
   @WithMockUser(username = "merchant", roles = { "MERCHANT" })
-  void createContract_thenStatusOk_andReturnCombined() throws JsonProcessingException, Exception {
+  void createContract_thenStatusOk_andReturnContract() throws JsonProcessingException, Exception {
     // given
     ContractRequest request = new ContractRequest();
     request.setRequired(false);
@@ -244,7 +244,7 @@ class ContractControllerIT {
 
   @Test
   @WithMockUser(username = "merchant", roles = { "MERCHANT" })
-  void getContractByCombined_thenStatusOk_andReturnCombined() throws JsonProcessingException, Exception {
+  void getContractByCombined_thenStatusOk_andReturnContract() throws JsonProcessingException, Exception {
     // given
     when(contractService.getContractByCombined(Mockito.anyLong(), Mockito.anyString())).thenReturn(contract);
 
@@ -260,7 +260,7 @@ class ContractControllerIT {
 
   @Test
   @WithMockUser(username = "forwarder", roles = { "FORWARDER" })
-  void searchContracts_thenStatusOk_andReturnInbounds() throws Exception {
+  void searchContracts_thenStatusOk_andReturnContracts() throws Exception {
     // given
     String search = "required:false";
     requestParams.add("search", search);
@@ -280,7 +280,7 @@ class ContractControllerIT {
 
   @Test
   @WithMockUser(username = "forwarder", roles = { "FORWARDER" })
-  void getContractsByUser_thenStatusOk_andReturnCombineds() throws JsonProcessingException, Exception {
+  void getContractsByUser_thenStatusOk_andReturnContracts() throws JsonProcessingException, Exception {
     // given
     when(contractService.getContractsByUser(Mockito.anyString(), Mockito.any(PaginationRequest.class)))
         .thenReturn(pages);
@@ -298,7 +298,7 @@ class ContractControllerIT {
 
   @Test
   @WithMockUser(username = "forwarder", roles = { "FORWARDER" })
-  void editContract_thenStatusOk_andReturnBid() throws Exception {
+  void editContract_thenStatusOk_andReturnContract() throws Exception {
     // given
     contract.setRequired(true);
     Map<String, Object> updates = new HashMap<String, Object>();

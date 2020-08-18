@@ -10,6 +10,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,72 +34,88 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.util.LinkedMultiValueMap;
 
-import com.crm.models.ContainerType;
-import com.crm.payload.request.ContainerTypeRequest;
+import com.crm.models.Operator;
+import com.crm.models.Permission;
+import com.crm.models.Role;
+import com.crm.payload.request.OperatorRequest;
 import com.crm.payload.request.PaginationRequest;
-import com.crm.services.ContainerTypeService;
+import com.crm.services.OperatorService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @SpringBootTest
 @AutoConfigureMockMvc
 @ContextConfiguration
-class ContainerTypeControllerIT {
+class OperatorControllerIT {
 
-  private static final Logger logger = LoggerFactory.getLogger(ContainerTypeControllerIT.class);
+  private static final Logger logger = LoggerFactory.getLogger(OperatorControllerIT.class);
 
   @Autowired
   protected MockMvc mockMvc;
 
   @MockBean
-  private ContainerTypeService containerTypeService;
+  private OperatorService operatorService;
 
   @Autowired
   private ObjectMapper objectMapper;
 
   PaginationRequest paginationRequest;
 
-  Page<ContainerType> pages;
+  Page<Operator> pages;
 
-  List<ContainerType> containerTypes;
+  List<Operator> operators;
 
   LinkedMultiValueMap<String, String> requestParams;
 
-  ContainerType containerType;
+  Operator operator;
 
   @BeforeEach
   public void setUp() {
 
-    containerType = new ContainerType();
-    containerType.setId(1L);
-    containerType.setName("CT12");
-    containerType.setDescription("des");
+    operator = new Operator();
+    operator.setId(1L);
+    operator.setUsername("operator");
+
+    Collection<Role> roles = new ArrayList<Role>();
+    Role role = new Role();
+    role.setId(1L);
+    role.setName("ROLE_MODERATOR");
+    Collection<Permission> permissions = new ArrayList<Permission>();
+    Permission permission = new Permission();
+    permission.setId(1L);
+    permission.setName("EDIT");
+    role.setPermissions(permissions);
+
+    operator.setRoles(roles);
 
     requestParams = new LinkedMultiValueMap<>();
     requestParams.add("page", "0");
     requestParams.add("limit", "10");
 
-    List<ContainerType> containerTypes = new ArrayList<ContainerType>();
-    containerTypes.add(containerType);
-    pages = new PageImpl<ContainerType>(containerTypes);
+    List<Operator> operators = new ArrayList<Operator>();
+    operators.add(operator);
+    pages = new PageImpl<Operator>(operators);
   }
 
   @Test
-  @WithMockUser(username = "moderator", roles = { "MODERATOR" })
-  void createContainerType_thenStatusOk_andReturnContainerType() throws JsonProcessingException, Exception {
+  @WithMockUser(username = "admin", roles = { "ADMIN" })
+  void createOperator_thenStatusOk_andReturnOperator() throws JsonProcessingException, Exception {
     // given
-    ContainerTypeRequest request = new ContainerTypeRequest();
-    request.setDescription("ád2sd2w");
-    request.setName("CT12");
-
-    when(containerTypeService.createContainerType(Mockito.any(ContainerTypeRequest.class))).thenReturn(containerType);
+    OperatorRequest request = new OperatorRequest();
+    request.setUsername("operator");
+    request.setPassword("12342434");
+    request.setEmail("mail@gmail.com");
+    request.setPhone("0965415415");
+    request.setAddress("Ha Tay");
+    request.setFullname("Van A");
+    when(operatorService.createOperator(Mockito.any(OperatorRequest.class))).thenReturn(operator);
 
     // when and then
     MvcResult result = mockMvc
-        .perform(post("/api/container-type").contentType(MediaType.APPLICATION_JSON_VALUE)
+        .perform(post("/api/operator").contentType(MediaType.APPLICATION_JSON_VALUE)
             .content(objectMapper.writeValueAsString(request)))
         .andDo(print()).andExpect(status().isCreated()).andExpect(jsonPath("$.data.id").value(1))
-        .andExpect(jsonPath("$.data.description").value("des")).andReturn();
+        .andExpect(jsonPath("$.data.username").value("operator")).andReturn();
 
     // print response
     MockHttpServletResponse response = result.getResponse();
@@ -107,14 +124,14 @@ class ContainerTypeControllerIT {
 
   @Test
   @WithMockUser(username = "moderator", roles = { "MODERATOR" })
-  void getContainerType_thenStatusOk_andReturnContainerType() throws JsonProcessingException, Exception {
+  void getOperator_thenStatusOk_andReturnOperator() throws JsonProcessingException, Exception {
     // given
-    when(containerTypeService.getContainerTypeById(Mockito.anyLong())).thenReturn(containerType);
+    when(operatorService.getOperatorById(Mockito.anyLong())).thenReturn(operator);
 
     // when and then
-    MvcResult result = mockMvc.perform(get("/api/container-type/1").contentType(MediaType.APPLICATION_JSON_VALUE))
+    MvcResult result = mockMvc.perform(get("/api/operator/1").contentType(MediaType.APPLICATION_JSON_VALUE))
         .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.id").value(1))
-        .andExpect(jsonPath("$.description").value("des")).andReturn();
+        .andExpect(jsonPath("$.username").value("operator")).andReturn();
 
     // print response
     MockHttpServletResponse response = result.getResponse();
@@ -122,37 +139,35 @@ class ContainerTypeControllerIT {
   }
 
   @Test
-  @WithMockUser(username = "forwarder", roles = { "FORWARDER" })
-  void searchContainerTypes_thenStatusOk_andReturnContainerTypes() throws Exception {
+  @WithMockUser(username = "moderator", roles = { "MODERATOR" })
+  void getOperatorByUsername_thenStatusOk_andReturnOperator() throws JsonProcessingException, Exception {
     // given
-    String search = "required:false";
-    requestParams.add("search", search);
-    when(containerTypeService.searchContainerTypes(Mockito.any(PaginationRequest.class), Mockito.anyString()))
-        .thenReturn(pages);
+    requestParams = new LinkedMultiValueMap<String, String>();
+    requestParams.add("username", "moderator");
+    when(operatorService.getOperatorByUsername(Mockito.anyString())).thenReturn(operator);
 
     // when and then
     MvcResult result = mockMvc
-        .perform(get("/api/container-type/filter").contentType(MediaType.APPLICATION_JSON).params(requestParams)
+        .perform(get("/api/operator/username").contentType(MediaType.APPLICATION_JSON_VALUE).params(requestParams))
+        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.id").value(1))
+        .andExpect(jsonPath("$.username").value("operator")).andReturn();
+
+    // print response
+    MockHttpServletResponse response = result.getResponse();
+    logger.info("Reponse: {}", response.getContentAsString());
+  }
+
+  @Test
+  @WithMockUser(username = "moderator", roles = { "MODERATOR" })
+  void getOperators_thenStatusOk_andReturnOperators() throws Exception {
+    when(operatorService.getOperators(Mockito.any(PaginationRequest.class))).thenReturn(pages);
+
+    // when and then
+    MvcResult result = mockMvc
+        .perform(get("/api/operator").contentType(MediaType.APPLICATION_JSON).params(requestParams)
             .accept(MediaType.APPLICATION_JSON))
         .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.data[0].id").value(1))
-        .andExpect(jsonPath("$.data[0].description").value("des")).andReturn();
-
-    // print response
-    MockHttpServletResponse response = result.getResponse();
-    logger.info("Reponse: {}", response.getContentAsString());
-  }
-
-  @Test
-  @WithMockUser(username = "forwarder", roles = { "FORWARDER" })
-  void getContainerTypes_thenStatusOk_andReturnContainerTypes() throws JsonProcessingException, Exception {
-    // given
-    when(containerTypeService.getContainerTypes(Mockito.any(PaginationRequest.class))).thenReturn(pages);
-
-    // when and then
-    MvcResult result = mockMvc
-        .perform(get("/api/container-type").contentType(MediaType.APPLICATION_JSON_VALUE).params(requestParams))
-        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.data[0].id").value(1))
-        .andExpect(jsonPath("$.data[0].description").value("des")).andReturn();
+        .andExpect(jsonPath("$.data[0].username").value("operator")).andReturn();
 
     // print response
     MockHttpServletResponse response = result.getResponse();
@@ -161,19 +176,19 @@ class ContainerTypeControllerIT {
 
   @Test
   @WithMockUser(username = "moderator", roles = { "MODERATOR" })
-  void editContainerType_thenStatusOk_andReturnContainerType() throws Exception {
+  void editOperator_thenStatusOk_andReturnOperator() throws Exception {
     // given
-    containerType.setDescription("123456");
+    operator.setFullname("123456");
     Map<String, Object> updates = new HashMap<String, Object>();
-    updates.put("description", "123456");
-    when(containerTypeService.editContainerType(Mockito.anyMap(), Mockito.anyLong())).thenReturn(containerType);
+    updates.put("fullName", "123456");
+    when(operatorService.editOperator(Mockito.anyLong(), Mockito.anyMap())).thenReturn(operator);
 
     // when and then
     MvcResult result = mockMvc
-        .perform(patch("/api/container-type/1").contentType(MediaType.APPLICATION_JSON_VALUE)
+        .perform(patch("/api/operator/1").contentType(MediaType.APPLICATION_JSON_VALUE)
             .content(objectMapper.writeValueAsString(updates)))
         .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.data.id").value(1))
-        .andExpect(jsonPath("$.data.description").value("123456")).andReturn();
+        .andExpect(jsonPath("$.data.fullname").value("123456")).andReturn();
 
     // print response
     MockHttpServletResponse response = result.getResponse();
@@ -181,13 +196,13 @@ class ContainerTypeControllerIT {
   }
 
   @Test
-  @WithMockUser(username = "moderator", roles = { "MODERATOR" })
-  void deleteContainerType_thenStatusOk_AndReturnMessage() throws Exception {
+  @WithMockUser(username = "admin", roles = { "ADMIN" })
+  void deleteOperator_thenStatusOk_AndReturnMessage() throws Exception {
 
     // when and then
-    MvcResult result = mockMvc.perform(delete("/api/container-type/1").contentType(MediaType.APPLICATION_JSON_VALUE))
+    MvcResult result = mockMvc.perform(delete("/api/operator/1").contentType(MediaType.APPLICATION_JSON_VALUE))
         .andDo(print()).andExpect(status().isOk())
-        .andExpect(jsonPath("$.message").value("Xóa loại container thành công")).andReturn();
+        .andExpect(jsonPath("$.message").value("Xóa quản trị viên thành công")).andReturn();
 
     // print response
     MockHttpServletResponse response = result.getResponse();

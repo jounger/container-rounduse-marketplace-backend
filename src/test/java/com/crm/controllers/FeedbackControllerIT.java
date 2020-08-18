@@ -9,6 +9,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -33,88 +34,85 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.util.LinkedMultiValueMap;
 
-import com.crm.models.ContainerType;
-import com.crm.payload.request.ContainerTypeRequest;
+import com.crm.models.Feedback;
+import com.crm.models.Forwarder;
+import com.crm.models.Operator;
+import com.crm.models.Report;
+import com.crm.payload.request.FeedbackRequest;
 import com.crm.payload.request.PaginationRequest;
-import com.crm.services.ContainerTypeService;
+import com.crm.services.FeedbackService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @SpringBootTest
 @AutoConfigureMockMvc
 @ContextConfiguration
-class ContainerTypeControllerIT {
+class FeedbackControllerIT {
 
-  private static final Logger logger = LoggerFactory.getLogger(ContainerTypeControllerIT.class);
+  private static final Logger logger = LoggerFactory.getLogger(FeedbackControllerIT.class);
 
   @Autowired
   protected MockMvc mockMvc;
 
   @MockBean
-  private ContainerTypeService containerTypeService;
+  private FeedbackService feedbackService;
 
   @Autowired
   private ObjectMapper objectMapper;
 
   PaginationRequest paginationRequest;
 
-  Page<ContainerType> pages;
+  Page<Feedback> pages;
 
-  List<ContainerType> containerTypes;
+  List<Feedback> feedbacks;
 
   LinkedMultiValueMap<String, String> requestParams;
 
-  ContainerType containerType;
+  Feedback feedback;
 
   @BeforeEach
   public void setUp() {
+    Operator operator = new Operator();
+    operator.setUsername("operator");
+    Forwarder forwarder = new Forwarder();
+    forwarder.setUsername("forwarder");
+    
+    Report report = new Report();
+    report.setId(1L);
 
-    containerType = new ContainerType();
-    containerType.setId(1L);
-    containerType.setName("CT12");
-    containerType.setDescription("des");
+    feedback = new Feedback();
+    feedback.setId(1L);
+    feedback.setSatisfactionPoints(3);
+    feedback.setMessage("abc");
+    feedback.setRecipient(forwarder);
+    feedback.setSender(operator);
+    feedback.setReport(report);
+    feedback.setSendDate(LocalDateTime.now());
 
     requestParams = new LinkedMultiValueMap<>();
     requestParams.add("page", "0");
     requestParams.add("limit", "10");
 
-    List<ContainerType> containerTypes = new ArrayList<ContainerType>();
-    containerTypes.add(containerType);
-    pages = new PageImpl<ContainerType>(containerTypes);
+    List<Feedback> feedbacks = new ArrayList<Feedback>();
+    feedbacks.add(feedback);
+    pages = new PageImpl<Feedback>(feedbacks);
   }
 
   @Test
   @WithMockUser(username = "moderator", roles = { "MODERATOR" })
-  void createContainerType_thenStatusOk_andReturnContainerType() throws JsonProcessingException, Exception {
+  void createFeedback_thenStatusOk_andReturnFeedback() throws JsonProcessingException, Exception {
     // given
-    ContainerTypeRequest request = new ContainerTypeRequest();
-    request.setDescription("ád2sd2w");
-    request.setName("CT12");
-
-    when(containerTypeService.createContainerType(Mockito.any(ContainerTypeRequest.class))).thenReturn(containerType);
+    FeedbackRequest request = new FeedbackRequest();
+    request.setMessage("abc");
+    when(feedbackService.createFeedback(Mockito.anyLong(), Mockito.anyString(), Mockito.any(FeedbackRequest.class)))
+        .thenReturn(feedback);
 
     // when and then
     MvcResult result = mockMvc
-        .perform(post("/api/container-type").contentType(MediaType.APPLICATION_JSON_VALUE)
+        .perform(post("/api/feedback/report/1").contentType(MediaType.APPLICATION_JSON_VALUE)
             .content(objectMapper.writeValueAsString(request)))
         .andDo(print()).andExpect(status().isCreated()).andExpect(jsonPath("$.data.id").value(1))
-        .andExpect(jsonPath("$.data.description").value("des")).andReturn();
-
-    // print response
-    MockHttpServletResponse response = result.getResponse();
-    logger.info("Reponse: {}", response.getContentAsString());
-  }
-
-  @Test
-  @WithMockUser(username = "moderator", roles = { "MODERATOR" })
-  void getContainerType_thenStatusOk_andReturnContainerType() throws JsonProcessingException, Exception {
-    // given
-    when(containerTypeService.getContainerTypeById(Mockito.anyLong())).thenReturn(containerType);
-
-    // when and then
-    MvcResult result = mockMvc.perform(get("/api/container-type/1").contentType(MediaType.APPLICATION_JSON_VALUE))
-        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.id").value(1))
-        .andExpect(jsonPath("$.description").value("des")).andReturn();
+        .andExpect(jsonPath("$.data.sender").value("operator")).andReturn();
 
     // print response
     MockHttpServletResponse response = result.getResponse();
@@ -123,36 +121,58 @@ class ContainerTypeControllerIT {
 
   @Test
   @WithMockUser(username = "forwarder", roles = { "FORWARDER" })
-  void searchContainerTypes_thenStatusOk_andReturnContainerTypes() throws Exception {
+  void createFeedbackToModerator_thenStatusOk_andReturnFeedback() throws JsonProcessingException, Exception {
     // given
-    String search = "required:false";
-    requestParams.add("search", search);
-    when(containerTypeService.searchContainerTypes(Mockito.any(PaginationRequest.class), Mockito.anyString()))
+    FeedbackRequest request = new FeedbackRequest();
+    request.setMessage("abc");
+    requestParams.add("id", "1");
+    requestParams.add("name", "forwarder");
+
+    when(feedbackService.createFeedback(Mockito.anyLong(), Mockito.anyString(), Mockito.any(FeedbackRequest.class)))
+        .thenReturn(feedback);
+
+    // when and then
+    MvcResult result = mockMvc
+        .perform(post("/api/feedback").contentType(MediaType.APPLICATION_JSON_VALUE).params(requestParams)
+            .content(objectMapper.writeValueAsString(request)))
+        .andDo(print()).andExpect(status().isCreated()).andExpect(jsonPath("$.data.id").value(1))
+        .andExpect(jsonPath("$.data.recipient").value("forwarder")).andReturn();
+
+    // print response
+    MockHttpServletResponse response = result.getResponse();
+    logger.info("Reponse: {}", response.getContentAsString());
+  }
+
+  @Test
+  @WithMockUser(username = "forwarder", roles = { "FORWARDER" })
+  void getFeedbacksByReport_thenStatusOk_andReturnFeedbacks() throws JsonProcessingException, Exception {
+    // given
+    when(feedbackService.getFeedbacksByReport(Mockito.anyLong(), Mockito.anyString(),
+        Mockito.any(PaginationRequest.class))).thenReturn(pages);
+
+    // when and then
+    MvcResult result = mockMvc
+        .perform(get("/api/feedback/report/1").contentType(MediaType.APPLICATION_JSON_VALUE).params(requestParams))
+        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.data[0].id").value(1))
+        .andExpect(jsonPath("$.data[0].recipient").value("forwarder")).andReturn();
+
+    // print response
+    MockHttpServletResponse response = result.getResponse();
+    logger.info("Reponse: {}", response.getContentAsString());
+  }
+
+  @Test
+  @WithMockUser(username = "forwarder", roles = { "FORWARDER" })
+  void getFeedbacksByUser_thenStatusOk_andReturnFeedbacks() throws JsonProcessingException, Exception {
+    // given
+    when(feedbackService.getFeedbacksByUser(Mockito.anyString(), Mockito.any(PaginationRequest.class)))
         .thenReturn(pages);
 
     // when and then
     MvcResult result = mockMvc
-        .perform(get("/api/container-type/filter").contentType(MediaType.APPLICATION_JSON).params(requestParams)
-            .accept(MediaType.APPLICATION_JSON))
+        .perform(get("/api/feedback/user").contentType(MediaType.APPLICATION_JSON_VALUE).params(requestParams))
         .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.data[0].id").value(1))
-        .andExpect(jsonPath("$.data[0].description").value("des")).andReturn();
-
-    // print response
-    MockHttpServletResponse response = result.getResponse();
-    logger.info("Reponse: {}", response.getContentAsString());
-  }
-
-  @Test
-  @WithMockUser(username = "forwarder", roles = { "FORWARDER" })
-  void getContainerTypes_thenStatusOk_andReturnContainerTypes() throws JsonProcessingException, Exception {
-    // given
-    when(containerTypeService.getContainerTypes(Mockito.any(PaginationRequest.class))).thenReturn(pages);
-
-    // when and then
-    MvcResult result = mockMvc
-        .perform(get("/api/container-type").contentType(MediaType.APPLICATION_JSON_VALUE).params(requestParams))
-        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.data[0].id").value(1))
-        .andExpect(jsonPath("$.data[0].description").value("des")).andReturn();
+        .andExpect(jsonPath("$.data[0].sender").value("operator")).andReturn();
 
     // print response
     MockHttpServletResponse response = result.getResponse();
@@ -161,19 +181,19 @@ class ContainerTypeControllerIT {
 
   @Test
   @WithMockUser(username = "moderator", roles = { "MODERATOR" })
-  void editContainerType_thenStatusOk_andReturnContainerType() throws Exception {
+  void editFeedback_thenStatusOk_andReturnFeedback() throws Exception {
     // given
-    containerType.setDescription("123456");
+    feedback.setMessage("123456");
     Map<String, Object> updates = new HashMap<String, Object>();
-    updates.put("description", "123456");
-    when(containerTypeService.editContainerType(Mockito.anyMap(), Mockito.anyLong())).thenReturn(containerType);
+    updates.put("code", "123456");
+    when(feedbackService.editFeedback(Mockito.anyLong(), Mockito.anyString(), Mockito.anyMap())).thenReturn(feedback);
 
     // when and then
     MvcResult result = mockMvc
-        .perform(patch("/api/container-type/1").contentType(MediaType.APPLICATION_JSON_VALUE)
+        .perform(patch("/api/feedback/1").contentType(MediaType.APPLICATION_JSON_VALUE)
             .content(objectMapper.writeValueAsString(updates)))
         .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.data.id").value(1))
-        .andExpect(jsonPath("$.data.description").value("123456")).andReturn();
+        .andExpect(jsonPath("$.data.message").value("123456")).andReturn();
 
     // print response
     MockHttpServletResponse response = result.getResponse();
@@ -182,12 +202,12 @@ class ContainerTypeControllerIT {
 
   @Test
   @WithMockUser(username = "moderator", roles = { "MODERATOR" })
-  void deleteContainerType_thenStatusOk_AndReturnMessage() throws Exception {
+  void deleteFeedback_thenStatusOk_AndReturnMessage() throws Exception {
 
     // when and then
-    MvcResult result = mockMvc.perform(delete("/api/container-type/1").contentType(MediaType.APPLICATION_JSON_VALUE))
-        .andDo(print()).andExpect(status().isOk())
-        .andExpect(jsonPath("$.message").value("Xóa loại container thành công")).andReturn();
+    MvcResult result = mockMvc.perform(delete("/api/feedback/1").contentType(MediaType.APPLICATION_JSON_VALUE))
+        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.message").value("Xóa phản hồi thành công"))
+        .andReturn();
 
     // print response
     MockHttpServletResponse response = result.getResponse();

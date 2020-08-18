@@ -33,72 +33,71 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.util.LinkedMultiValueMap;
 
-import com.crm.models.ContainerType;
-import com.crm.payload.request.ContainerTypeRequest;
+import com.crm.models.Port;
 import com.crm.payload.request.PaginationRequest;
-import com.crm.services.ContainerTypeService;
+import com.crm.payload.request.PortRequest;
+import com.crm.services.PortService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @SpringBootTest
 @AutoConfigureMockMvc
 @ContextConfiguration
-class ContainerTypeControllerIT {
+class PortControllerIT {
 
-  private static final Logger logger = LoggerFactory.getLogger(ContainerTypeControllerIT.class);
+  private static final Logger logger = LoggerFactory.getLogger(PortControllerIT.class);
 
   @Autowired
   protected MockMvc mockMvc;
 
   @MockBean
-  private ContainerTypeService containerTypeService;
+  private PortService portService;
 
   @Autowired
   private ObjectMapper objectMapper;
 
   PaginationRequest paginationRequest;
 
-  Page<ContainerType> pages;
+  Page<Port> pages;
 
-  List<ContainerType> containerTypes;
+  List<Port> ports;
 
   LinkedMultiValueMap<String, String> requestParams;
 
-  ContainerType containerType;
+  Port port;
 
   @BeforeEach
   public void setUp() {
 
-    containerType = new ContainerType();
-    containerType.setId(1L);
-    containerType.setName("CT12");
-    containerType.setDescription("des");
+    port = new Port();
+    port.setId(1L);
+    port.setFullname("123");
 
     requestParams = new LinkedMultiValueMap<>();
     requestParams.add("page", "0");
     requestParams.add("limit", "10");
 
-    List<ContainerType> containerTypes = new ArrayList<ContainerType>();
-    containerTypes.add(containerType);
-    pages = new PageImpl<ContainerType>(containerTypes);
+    List<Port> ports = new ArrayList<Port>();
+    ports.add(port);
+    pages = new PageImpl<Port>(ports);
   }
 
   @Test
   @WithMockUser(username = "moderator", roles = { "MODERATOR" })
-  void createContainerType_thenStatusOk_andReturnContainerType() throws JsonProcessingException, Exception {
+  void createPort_thenStatusOk_andReturnPort() throws JsonProcessingException, Exception {
     // given
-    ContainerTypeRequest request = new ContainerTypeRequest();
-    request.setDescription("ád2sd2w");
-    request.setName("CT12");
+    PortRequest request = new PortRequest();
+    request.setFullname("123");
+    request.setNameCode("123");
 
-    when(containerTypeService.createContainerType(Mockito.any(ContainerTypeRequest.class))).thenReturn(containerType);
+    when(portService.createPort(Mockito.any(PortRequest.class))).thenReturn(port);
 
     // when and then
     MvcResult result = mockMvc
-        .perform(post("/api/container-type").contentType(MediaType.APPLICATION_JSON_VALUE)
+        .perform(post("/api/port").contentType(MediaType.APPLICATION_JSON_VALUE)
             .content(objectMapper.writeValueAsString(request)))
         .andDo(print()).andExpect(status().isCreated()).andExpect(jsonPath("$.data.id").value(1))
-        .andExpect(jsonPath("$.data.description").value("des")).andReturn();
+        .andExpect(jsonPath("$.data.fullname").value("123")).andReturn();
 
     // print response
     MockHttpServletResponse response = result.getResponse();
@@ -107,14 +106,14 @@ class ContainerTypeControllerIT {
 
   @Test
   @WithMockUser(username = "moderator", roles = { "MODERATOR" })
-  void getContainerType_thenStatusOk_andReturnContainerType() throws JsonProcessingException, Exception {
+  void getPort_thenStatusOk_andReturnPort() throws JsonProcessingException, Exception {
     // given
-    when(containerTypeService.getContainerTypeById(Mockito.anyLong())).thenReturn(containerType);
+    when(portService.getPortById(Mockito.anyLong())).thenReturn(port);
 
     // when and then
-    MvcResult result = mockMvc.perform(get("/api/container-type/1").contentType(MediaType.APPLICATION_JSON_VALUE))
-        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.id").value(1))
-        .andExpect(jsonPath("$.description").value("des")).andReturn();
+    MvcResult result = mockMvc.perform(get("/api/port/1").contentType(MediaType.APPLICATION_JSON_VALUE)).andDo(print())
+        .andExpect(status().isOk()).andExpect(jsonPath("$.id").value(1))
+        .andExpect(jsonPath("$.fullname").value("123")).andReturn();
 
     // print response
     MockHttpServletResponse response = result.getResponse();
@@ -123,36 +122,15 @@ class ContainerTypeControllerIT {
 
   @Test
   @WithMockUser(username = "forwarder", roles = { "FORWARDER" })
-  void searchContainerTypes_thenStatusOk_andReturnContainerTypes() throws Exception {
+  void getPorts_thenStatusOk_andReturnPorts() throws JsonProcessingException, Exception {
     // given
-    String search = "required:false";
-    requestParams.add("search", search);
-    when(containerTypeService.searchContainerTypes(Mockito.any(PaginationRequest.class), Mockito.anyString()))
-        .thenReturn(pages);
+    when(portService.getPorts(Mockito.any(PaginationRequest.class))).thenReturn(pages);
 
     // when and then
     MvcResult result = mockMvc
-        .perform(get("/api/container-type/filter").contentType(MediaType.APPLICATION_JSON).params(requestParams)
-            .accept(MediaType.APPLICATION_JSON))
-        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.data[0].id").value(1))
-        .andExpect(jsonPath("$.data[0].description").value("des")).andReturn();
-
-    // print response
-    MockHttpServletResponse response = result.getResponse();
-    logger.info("Reponse: {}", response.getContentAsString());
-  }
-
-  @Test
-  @WithMockUser(username = "forwarder", roles = { "FORWARDER" })
-  void getContainerTypes_thenStatusOk_andReturnContainerTypes() throws JsonProcessingException, Exception {
-    // given
-    when(containerTypeService.getContainerTypes(Mockito.any(PaginationRequest.class))).thenReturn(pages);
-
-    // when and then
-    MvcResult result = mockMvc
-        .perform(get("/api/container-type").contentType(MediaType.APPLICATION_JSON_VALUE).params(requestParams))
-        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.data[0].id").value(1))
-        .andExpect(jsonPath("$.data[0].description").value("des")).andReturn();
+        .perform(get("/api/port").contentType(MediaType.APPLICATION_JSON_VALUE).params(requestParams)).andDo(print())
+        .andExpect(status().isOk()).andExpect(jsonPath("$.data[0].id").value(1))
+        .andExpect(jsonPath("$.data[0].fullname").value("123")).andReturn();
 
     // print response
     MockHttpServletResponse response = result.getResponse();
@@ -161,19 +139,19 @@ class ContainerTypeControllerIT {
 
   @Test
   @WithMockUser(username = "moderator", roles = { "MODERATOR" })
-  void editContainerType_thenStatusOk_andReturnContainerType() throws Exception {
+  void editPort_thenStatusOk_andReturnPort() throws Exception {
     // given
-    containerType.setDescription("123456");
+    port.setFullname("123456");
     Map<String, Object> updates = new HashMap<String, Object>();
-    updates.put("description", "123456");
-    when(containerTypeService.editContainerType(Mockito.anyMap(), Mockito.anyLong())).thenReturn(containerType);
+    updates.put("fullname", "123456");
+    when(portService.editPort(Mockito.anyMap(), Mockito.anyLong())).thenReturn(port);
 
     // when and then
     MvcResult result = mockMvc
-        .perform(patch("/api/container-type/1").contentType(MediaType.APPLICATION_JSON_VALUE)
+        .perform(patch("/api/port/1").contentType(MediaType.APPLICATION_JSON_VALUE)
             .content(objectMapper.writeValueAsString(updates)))
         .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.data.id").value(1))
-        .andExpect(jsonPath("$.data.description").value("123456")).andReturn();
+        .andExpect(jsonPath("$.data.fullname").value("123456")).andReturn();
 
     // print response
     MockHttpServletResponse response = result.getResponse();
@@ -182,12 +160,12 @@ class ContainerTypeControllerIT {
 
   @Test
   @WithMockUser(username = "moderator", roles = { "MODERATOR" })
-  void deleteContainerType_thenStatusOk_AndReturnMessage() throws Exception {
+  void deletePort_thenStatusOk_AndReturnMessage() throws Exception {
 
     // when and then
-    MvcResult result = mockMvc.perform(delete("/api/container-type/1").contentType(MediaType.APPLICATION_JSON_VALUE))
+    MvcResult result = mockMvc.perform(delete("/api/port/1").contentType(MediaType.APPLICATION_JSON_VALUE))
         .andDo(print()).andExpect(status().isOk())
-        .andExpect(jsonPath("$.message").value("Xóa loại container thành công")).andReturn();
+        .andExpect(jsonPath("$.message").value("Xóa bến cảng thành công")).andReturn();
 
     // print response
     MockHttpServletResponse response = result.getResponse();

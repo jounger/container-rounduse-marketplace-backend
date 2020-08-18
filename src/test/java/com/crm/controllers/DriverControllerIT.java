@@ -10,6 +10,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,88 +34,96 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.util.LinkedMultiValueMap;
 
-import com.crm.models.ContainerType;
-import com.crm.payload.request.ContainerTypeRequest;
+import com.crm.models.Driver;
+import com.crm.models.Forwarder;
+import com.crm.models.Permission;
+import com.crm.models.Role;
+import com.crm.payload.request.DriverRequest;
 import com.crm.payload.request.PaginationRequest;
-import com.crm.services.ContainerTypeService;
+import com.crm.services.DriverService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @SpringBootTest
 @AutoConfigureMockMvc
 @ContextConfiguration
-class ContainerTypeControllerIT {
+class DriverControllerIT {
 
-  private static final Logger logger = LoggerFactory.getLogger(ContainerTypeControllerIT.class);
+  private static final Logger logger = LoggerFactory.getLogger(DriverControllerIT.class);
 
   @Autowired
   protected MockMvc mockMvc;
 
   @MockBean
-  private ContainerTypeService containerTypeService;
+  private DriverService driverService;
 
   @Autowired
   private ObjectMapper objectMapper;
 
   PaginationRequest paginationRequest;
 
-  Page<ContainerType> pages;
+  Page<Driver> pages;
 
-  List<ContainerType> containerTypes;
+  List<Driver> drivers;
 
   LinkedMultiValueMap<String, String> requestParams;
 
-  ContainerType containerType;
+  Driver driver;
 
   @BeforeEach
   public void setUp() {
 
-    containerType = new ContainerType();
-    containerType.setId(1L);
-    containerType.setName("CT12");
-    containerType.setDescription("des");
+    driver = new Driver();
+    driver.setId(1L);
+    driver.setUsername("driver");
+
+    Collection<Role> roles = new ArrayList<Role>();
+    Role role = new Role();
+    role.setId(1L);
+    role.setName("ROLE_DRIVER");
+    Collection<Permission> permissions = new ArrayList<Permission>();
+    Permission permission = new Permission();
+    permission.setId(1L);
+    permission.setName("EDIT");
+    role.setPermissions(permissions);
+
+    driver.setRoles(roles);
+
+    Forwarder forwarder = new Forwarder();
+    forwarder.setId(2L);
+    forwarder.setUsername("forwarder");
+
+    driver.setForwarder(forwarder);
 
     requestParams = new LinkedMultiValueMap<>();
     requestParams.add("page", "0");
     requestParams.add("limit", "10");
 
-    List<ContainerType> containerTypes = new ArrayList<ContainerType>();
-    containerTypes.add(containerType);
-    pages = new PageImpl<ContainerType>(containerTypes);
+    List<Driver> drivers = new ArrayList<Driver>();
+    drivers.add(driver);
+    pages = new PageImpl<Driver>(drivers);
   }
 
   @Test
-  @WithMockUser(username = "moderator", roles = { "MODERATOR" })
-  void createContainerType_thenStatusOk_andReturnContainerType() throws JsonProcessingException, Exception {
+  @WithMockUser(username = "forwarder", roles = { "FORWARDER" })
+  void createDriver_thenStatusOk_andReturnDriver() throws JsonProcessingException, Exception {
     // given
-    ContainerTypeRequest request = new ContainerTypeRequest();
-    request.setDescription("ád2sd2w");
-    request.setName("CT12");
-
-    when(containerTypeService.createContainerType(Mockito.any(ContainerTypeRequest.class))).thenReturn(containerType);
+    DriverRequest request = new DriverRequest();
+    request.setUsername("driver");
+    request.setPassword("12342434");
+    request.setEmail("mail@gmail.com");
+    request.setPhone("0965415415");
+    request.setAddress("Ha Tay");
+    request.setFullname("Van A");
+    request.setDriverLicense("1sd3s3ssad");
+    when(driverService.createDriver(Mockito.anyString(), Mockito.any(DriverRequest.class))).thenReturn(driver);
 
     // when and then
     MvcResult result = mockMvc
-        .perform(post("/api/container-type").contentType(MediaType.APPLICATION_JSON_VALUE)
+        .perform(post("/api/driver/forwarder").contentType(MediaType.APPLICATION_JSON_VALUE)
             .content(objectMapper.writeValueAsString(request)))
         .andDo(print()).andExpect(status().isCreated()).andExpect(jsonPath("$.data.id").value(1))
-        .andExpect(jsonPath("$.data.description").value("des")).andReturn();
-
-    // print response
-    MockHttpServletResponse response = result.getResponse();
-    logger.info("Reponse: {}", response.getContentAsString());
-  }
-
-  @Test
-  @WithMockUser(username = "moderator", roles = { "MODERATOR" })
-  void getContainerType_thenStatusOk_andReturnContainerType() throws JsonProcessingException, Exception {
-    // given
-    when(containerTypeService.getContainerTypeById(Mockito.anyLong())).thenReturn(containerType);
-
-    // when and then
-    MvcResult result = mockMvc.perform(get("/api/container-type/1").contentType(MediaType.APPLICATION_JSON_VALUE))
-        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.id").value(1))
-        .andExpect(jsonPath("$.description").value("des")).andReturn();
+        .andExpect(jsonPath("$.data.username").value("driver")).andReturn();
 
     // print response
     MockHttpServletResponse response = result.getResponse();
@@ -123,19 +132,50 @@ class ContainerTypeControllerIT {
 
   @Test
   @WithMockUser(username = "forwarder", roles = { "FORWARDER" })
-  void searchContainerTypes_thenStatusOk_andReturnContainerTypes() throws Exception {
+  void getDriver_thenStatusOk_andReturnDriver() throws JsonProcessingException, Exception {
     // given
-    String search = "required:false";
-    requestParams.add("search", search);
-    when(containerTypeService.searchContainerTypes(Mockito.any(PaginationRequest.class), Mockito.anyString()))
-        .thenReturn(pages);
+    when(driverService.getDriver(Mockito.anyLong())).thenReturn(driver);
+
+    // when and then
+    MvcResult result = mockMvc.perform(get("/api/driver/1").contentType(MediaType.APPLICATION_JSON_VALUE))
+        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.id").value(1))
+        .andExpect(jsonPath("$.username").value("driver")).andReturn();
+
+    // print response
+    MockHttpServletResponse response = result.getResponse();
+    logger.info("Reponse: {}", response.getContentAsString());
+  }
+
+  @Test
+  @WithMockUser(username = "forwarder", roles = { "FORWARDER" })
+  void getDriverByUsername_thenStatusOk_andReturnDriver() throws JsonProcessingException, Exception {
+    // given
+    requestParams = new LinkedMultiValueMap<String, String>();
+    requestParams.add("username", "driver");
+    when(driverService.getDriverByUserName(Mockito.anyString())).thenReturn(driver);
 
     // when and then
     MvcResult result = mockMvc
-        .perform(get("/api/container-type/filter").contentType(MediaType.APPLICATION_JSON).params(requestParams)
+        .perform(get("/api/driver").contentType(MediaType.APPLICATION_JSON_VALUE).params(requestParams)).andDo(print())
+        .andExpect(status().isOk()).andExpect(jsonPath("$.id").value(1))
+        .andExpect(jsonPath("$.username").value("driver")).andReturn();
+
+    // print response
+    MockHttpServletResponse response = result.getResponse();
+    logger.info("Reponse: {}", response.getContentAsString());
+  }
+
+  @Test
+  @WithMockUser(username = "forwarder", roles = { "FORWARDER" })
+  void getDrivers_thenStatusOk_andReturnDrivers() throws Exception {
+    when(driverService.getDrivers(Mockito.any(PaginationRequest.class))).thenReturn(pages);
+
+    // when and then
+    MvcResult result = mockMvc
+        .perform(get("/api/driver").contentType(MediaType.APPLICATION_JSON).params(requestParams)
             .accept(MediaType.APPLICATION_JSON))
         .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.data[0].id").value(1))
-        .andExpect(jsonPath("$.data[0].description").value("des")).andReturn();
+        .andExpect(jsonPath("$.data[0].username").value("driver")).andReturn();
 
     // print response
     MockHttpServletResponse response = result.getResponse();
@@ -144,36 +184,19 @@ class ContainerTypeControllerIT {
 
   @Test
   @WithMockUser(username = "forwarder", roles = { "FORWARDER" })
-  void getContainerTypes_thenStatusOk_andReturnContainerTypes() throws JsonProcessingException, Exception {
+  void editDriver_thenStatusOk_andReturnDriver() throws Exception {
     // given
-    when(containerTypeService.getContainerTypes(Mockito.any(PaginationRequest.class))).thenReturn(pages);
-
-    // when and then
-    MvcResult result = mockMvc
-        .perform(get("/api/container-type").contentType(MediaType.APPLICATION_JSON_VALUE).params(requestParams))
-        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.data[0].id").value(1))
-        .andExpect(jsonPath("$.data[0].description").value("des")).andReturn();
-
-    // print response
-    MockHttpServletResponse response = result.getResponse();
-    logger.info("Reponse: {}", response.getContentAsString());
-  }
-
-  @Test
-  @WithMockUser(username = "moderator", roles = { "MODERATOR" })
-  void editContainerType_thenStatusOk_andReturnContainerType() throws Exception {
-    // given
-    containerType.setDescription("123456");
+    driver.setFullname("123456");
     Map<String, Object> updates = new HashMap<String, Object>();
-    updates.put("description", "123456");
-    when(containerTypeService.editContainerType(Mockito.anyMap(), Mockito.anyLong())).thenReturn(containerType);
+    updates.put("fullName", "123456");
+    when(driverService.editDriver(Mockito.anyLong(), Mockito.anyString(), Mockito.anyMap())).thenReturn(driver);
 
     // when and then
     MvcResult result = mockMvc
-        .perform(patch("/api/container-type/1").contentType(MediaType.APPLICATION_JSON_VALUE)
+        .perform(patch("/api/driver/1").contentType(MediaType.APPLICATION_JSON_VALUE)
             .content(objectMapper.writeValueAsString(updates)))
         .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.data.id").value(1))
-        .andExpect(jsonPath("$.data.description").value("123456")).andReturn();
+        .andExpect(jsonPath("$.data.fullname").value("123456")).andReturn();
 
     // print response
     MockHttpServletResponse response = result.getResponse();
@@ -181,13 +204,13 @@ class ContainerTypeControllerIT {
   }
 
   @Test
-  @WithMockUser(username = "moderator", roles = { "MODERATOR" })
-  void deleteContainerType_thenStatusOk_AndReturnMessage() throws Exception {
+  @WithMockUser(username = "forwarder", roles = { "FORWARDER" })
+  void deleteDriver_thenStatusOk_AndReturnMessage() throws Exception {
 
     // when and then
-    MvcResult result = mockMvc.perform(delete("/api/container-type/1").contentType(MediaType.APPLICATION_JSON_VALUE))
-        .andDo(print()).andExpect(status().isOk())
-        .andExpect(jsonPath("$.message").value("Xóa loại container thành công")).andReturn();
+    MvcResult result = mockMvc.perform(delete("/api/driver/1").contentType(MediaType.APPLICATION_JSON_VALUE))
+        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.message").value("Xóa lái xe thành công"))
+        .andReturn();
 
     // print response
     MockHttpServletResponse response = result.getResponse();

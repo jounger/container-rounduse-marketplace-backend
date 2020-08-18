@@ -33,88 +33,76 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.util.LinkedMultiValueMap;
 
-import com.crm.models.ContainerType;
-import com.crm.payload.request.ContainerTypeRequest;
+import com.crm.models.Evidence;
+import com.crm.models.Merchant;
+import com.crm.payload.request.EvidenceRequest;
 import com.crm.payload.request.PaginationRequest;
-import com.crm.services.ContainerTypeService;
+import com.crm.services.EvidenceService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @SpringBootTest
 @AutoConfigureMockMvc
 @ContextConfiguration
-class ContainerTypeControllerIT {
+class EvidenceControllerIT {
 
-  private static final Logger logger = LoggerFactory.getLogger(ContainerTypeControllerIT.class);
+  private static final Logger logger = LoggerFactory.getLogger(EvidenceControllerIT.class);
 
   @Autowired
   protected MockMvc mockMvc;
 
   @MockBean
-  private ContainerTypeService containerTypeService;
+  private EvidenceService evidenceService;
 
   @Autowired
   private ObjectMapper objectMapper;
 
   PaginationRequest paginationRequest;
 
-  Page<ContainerType> pages;
+  Page<Evidence> pages;
 
-  List<ContainerType> containerTypes;
+  List<Evidence> evidences;
 
   LinkedMultiValueMap<String, String> requestParams;
 
-  ContainerType containerType;
+  Evidence evidence;
 
   @BeforeEach
   public void setUp() {
+    
+    Merchant merchant = new Merchant();
+    merchant.setUsername("merchant");
 
-    containerType = new ContainerType();
-    containerType.setId(1L);
-    containerType.setName("CT12");
-    containerType.setDescription("des");
+    evidence = new Evidence();
+    evidence.setId(1L);
+    evidence.setIsValid(false);
+    evidence.setSender(merchant);
 
     requestParams = new LinkedMultiValueMap<>();
     requestParams.add("page", "0");
     requestParams.add("limit", "10");
 
-    List<ContainerType> containerTypes = new ArrayList<ContainerType>();
-    containerTypes.add(containerType);
-    pages = new PageImpl<ContainerType>(containerTypes);
+    List<Evidence> evidences = new ArrayList<Evidence>();
+    evidences.add(evidence);
+    pages = new PageImpl<Evidence>(evidences);
   }
 
   @Test
-  @WithMockUser(username = "moderator", roles = { "MODERATOR" })
-  void createContainerType_thenStatusOk_andReturnContainerType() throws JsonProcessingException, Exception {
+  @WithMockUser(username = "forwarder", roles = { "FORWARDER" })
+  void createEvidence_thenStatusOk_andReturnEvidence() throws JsonProcessingException, Exception {
     // given
-    ContainerTypeRequest request = new ContainerTypeRequest();
-    request.setDescription("ád2sd2w");
-    request.setName("CT12");
-
-    when(containerTypeService.createContainerType(Mockito.any(ContainerTypeRequest.class))).thenReturn(containerType);
+    EvidenceRequest request = new EvidenceRequest();
+    request.setSender("merchant");
+    ;
+    when(evidenceService.createEvidence(Mockito.anyLong(), Mockito.anyString(), Mockito.any(EvidenceRequest.class)))
+        .thenReturn(evidence);
 
     // when and then
     MvcResult result = mockMvc
-        .perform(post("/api/container-type").contentType(MediaType.APPLICATION_JSON_VALUE)
+        .perform(post("/api/evidence/contract/1").contentType(MediaType.APPLICATION_JSON_VALUE)
             .content(objectMapper.writeValueAsString(request)))
         .andDo(print()).andExpect(status().isCreated()).andExpect(jsonPath("$.data.id").value(1))
-        .andExpect(jsonPath("$.data.description").value("des")).andReturn();
-
-    // print response
-    MockHttpServletResponse response = result.getResponse();
-    logger.info("Reponse: {}", response.getContentAsString());
-  }
-
-  @Test
-  @WithMockUser(username = "moderator", roles = { "MODERATOR" })
-  void getContainerType_thenStatusOk_andReturnContainerType() throws JsonProcessingException, Exception {
-    // given
-    when(containerTypeService.getContainerTypeById(Mockito.anyLong())).thenReturn(containerType);
-
-    // when and then
-    MvcResult result = mockMvc.perform(get("/api/container-type/1").contentType(MediaType.APPLICATION_JSON_VALUE))
-        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.id").value(1))
-        .andExpect(jsonPath("$.description").value("des")).andReturn();
+        .andExpect(jsonPath("$.data.isValid").value(false)).andReturn();
 
     // print response
     MockHttpServletResponse response = result.getResponse();
@@ -123,19 +111,16 @@ class ContainerTypeControllerIT {
 
   @Test
   @WithMockUser(username = "forwarder", roles = { "FORWARDER" })
-  void searchContainerTypes_thenStatusOk_andReturnContainerTypes() throws Exception {
+  void getEvidencesByUser_thenStatusOk_andReturnEvidences() throws JsonProcessingException, Exception {
     // given
-    String search = "required:false";
-    requestParams.add("search", search);
-    when(containerTypeService.searchContainerTypes(Mockito.any(PaginationRequest.class), Mockito.anyString()))
+    when(evidenceService.getEvidencesByUser(Mockito.anyString(), Mockito.any(PaginationRequest.class)))
         .thenReturn(pages);
 
     // when and then
     MvcResult result = mockMvc
-        .perform(get("/api/container-type/filter").contentType(MediaType.APPLICATION_JSON).params(requestParams)
-            .accept(MediaType.APPLICATION_JSON))
+        .perform(get("/api/evidence/user").contentType(MediaType.APPLICATION_JSON_VALUE).params(requestParams))
         .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.data[0].id").value(1))
-        .andExpect(jsonPath("$.data[0].description").value("des")).andReturn();
+        .andExpect(jsonPath("$.data[0].isValid").value("false")).andReturn();
 
     // print response
     MockHttpServletResponse response = result.getResponse();
@@ -144,15 +129,16 @@ class ContainerTypeControllerIT {
 
   @Test
   @WithMockUser(username = "forwarder", roles = { "FORWARDER" })
-  void getContainerTypes_thenStatusOk_andReturnContainerTypes() throws JsonProcessingException, Exception {
+  void getEvidencesByContract_thenStatusOk_andReturnEvidences() throws JsonProcessingException, Exception {
     // given
-    when(containerTypeService.getContainerTypes(Mockito.any(PaginationRequest.class))).thenReturn(pages);
+    when(evidenceService.getEvidencesByContract(Mockito.anyLong(), Mockito.anyString(),
+        Mockito.any(PaginationRequest.class))).thenReturn(pages);
 
     // when and then
     MvcResult result = mockMvc
-        .perform(get("/api/container-type").contentType(MediaType.APPLICATION_JSON_VALUE).params(requestParams))
+        .perform(get("/api/evidence/contract/1").contentType(MediaType.APPLICATION_JSON_VALUE).params(requestParams))
         .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.data[0].id").value(1))
-        .andExpect(jsonPath("$.data[0].description").value("des")).andReturn();
+        .andExpect(jsonPath("$.data[0].isValid").value("false")).andReturn();
 
     // print response
     MockHttpServletResponse response = result.getResponse();
@@ -160,20 +146,40 @@ class ContainerTypeControllerIT {
   }
 
   @Test
-  @WithMockUser(username = "moderator", roles = { "MODERATOR" })
-  void editContainerType_thenStatusOk_andReturnContainerType() throws Exception {
+  @WithMockUser(username = "forwarder", roles = { "FORWARDER" })
+  void searchEvidences_thenStatusOk_andReturnEvidences() throws Exception {
     // given
-    containerType.setDescription("123456");
-    Map<String, Object> updates = new HashMap<String, Object>();
-    updates.put("description", "123456");
-    when(containerTypeService.editContainerType(Mockito.anyMap(), Mockito.anyLong())).thenReturn(containerType);
+    String search = "required:false";
+    requestParams.add("search", search);
+    when(evidenceService.searchEvidences(Mockito.any(PaginationRequest.class), Mockito.anyString())).thenReturn(pages);
 
     // when and then
     MvcResult result = mockMvc
-        .perform(patch("/api/container-type/1").contentType(MediaType.APPLICATION_JSON_VALUE)
+        .perform(get("/api/evidence/filter").contentType(MediaType.APPLICATION_JSON).params(requestParams)
+            .accept(MediaType.APPLICATION_JSON))
+        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.data[0].id").value(1))
+        .andExpect(jsonPath("$.data[0].isValid").value("false")).andReturn();
+
+    // print response
+    MockHttpServletResponse response = result.getResponse();
+    logger.info("Reponse: {}", response.getContentAsString());
+  }
+
+  @Test
+  @WithMockUser(username = "forwarder", roles = { "FORWARDER" })
+  void editEvidence_thenStatusOk_andReturnEvidence() throws Exception {
+    // given
+    evidence.setIsValid(true);
+    Map<String, Object> updates = new HashMap<String, Object>();
+    updates.put("isValid", "true");
+    when(evidenceService.editEvidence(Mockito.anyLong(), Mockito.anyString(), Mockito.anyMap())).thenReturn(evidence);
+
+    // when and then
+    MvcResult result = mockMvc
+        .perform(patch("/api/evidence/1").contentType(MediaType.APPLICATION_JSON_VALUE)
             .content(objectMapper.writeValueAsString(updates)))
         .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.data.id").value(1))
-        .andExpect(jsonPath("$.data.description").value("123456")).andReturn();
+        .andExpect(jsonPath("$.data.isValid").value(true)).andReturn();
 
     // print response
     MockHttpServletResponse response = result.getResponse();
@@ -181,13 +187,13 @@ class ContainerTypeControllerIT {
   }
 
   @Test
-  @WithMockUser(username = "moderator", roles = { "MODERATOR" })
-  void deleteContainerType_thenStatusOk_AndReturnMessage() throws Exception {
+  @WithMockUser(username = "forwarder", roles = { "FORWARDER" })
+  void deleteEvidence_thenStatusOk_AndReturnMessage() throws Exception {
 
     // when and then
-    MvcResult result = mockMvc.perform(delete("/api/container-type/1").contentType(MediaType.APPLICATION_JSON_VALUE))
-        .andDo(print()).andExpect(status().isOk())
-        .andExpect(jsonPath("$.message").value("Xóa loại container thành công")).andReturn();
+    MvcResult result = mockMvc.perform(delete("/api/evidence/1").contentType(MediaType.APPLICATION_JSON_VALUE))
+        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.message").value("Xóa bằng chứng thành công"))
+        .andReturn();
 
     // print response
     MockHttpServletResponse response = result.getResponse();

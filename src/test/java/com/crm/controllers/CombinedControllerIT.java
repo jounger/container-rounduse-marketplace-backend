@@ -278,7 +278,7 @@ class CombinedControllerIT {
 
   @Test
   @WithMockUser(username = "merchant", roles = { "MERCHANT" })
-  void getCombinedsByBiddingDocument_thenStatusOk_andReturnBids() throws JsonProcessingException, Exception {
+  void getCombinedsByBiddingDocument_thenStatusOk_andReturnCombineds() throws JsonProcessingException, Exception {
     // given
     when(combinedService.getCombinedsByBiddingDocument(Mockito.anyLong(), Mockito.anyString(),
         Mockito.any(PaginationRequest.class))).thenReturn(pages);
@@ -297,7 +297,7 @@ class CombinedControllerIT {
 
   @Test
   @WithMockUser(username = "forwarder", roles = { "FORWARDER" })
-  void editCombined_thenStatusOk_andReturnBid() throws Exception {
+  void editCombined_thenStatusOk_andReturnCombined() throws Exception {
     // given
     combined.setIsCanceled(true);
     Map<String, Object> updates = new HashMap<String, Object>();

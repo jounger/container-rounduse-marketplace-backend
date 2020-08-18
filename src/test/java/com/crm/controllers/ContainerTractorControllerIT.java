@@ -207,7 +207,7 @@ class ContainerTractorControllerIT {
 
   @Test
   @WithMockUser(username = "forwarder", roles = { "FORWARDER" })
-  void searchContainerTractors_thenStatusOk_andReturnInbounds() throws Exception {
+  void searchContainerTractors_thenStatusOk_andReturnContainerTractors() throws Exception {
     // given
     String search = "licensePlate:29A-3231";
     requestParams.add("search", search);

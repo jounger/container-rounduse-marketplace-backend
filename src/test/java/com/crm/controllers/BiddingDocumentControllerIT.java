@@ -157,8 +157,8 @@ class BiddingDocumentControllerIT {
     MvcResult result = mockMvc
         .perform(post("/api/bidding-document").contentType(MediaType.APPLICATION_JSON_VALUE)
             .content(objectMapper.writeValueAsString(request)))
-        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.id").value(1))
-        .andExpect(jsonPath("$.bidOpening").value(Tool.convertLocalDateTimeToString(timeNow))).andReturn();
+        .andDo(print()).andExpect(status().isCreated()).andExpect(jsonPath("$.data.id").value(1))
+        .andExpect(jsonPath("$.data.bidOpening").value(Tool.convertLocalDateTimeToString(timeNow))).andReturn();
 
     // print response
     MockHttpServletResponse response = result.getResponse();
@@ -195,7 +195,7 @@ class BiddingDocumentControllerIT {
     MvcResult result = mockMvc
         .perform(get("/api/bidding-document").contentType(MediaType.APPLICATION_JSON_VALUE).params(requestParams))
         .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.data[0].id").value(1))
-        .andExpect(jsonPath("$.data[0].merchant").value("merchant")).andReturn();
+        .andExpect(jsonPath("$.data[0].offeree").value("merchant")).andReturn();
 
     // print response
     MockHttpServletResponse response = result.getResponse();
@@ -213,7 +213,7 @@ class BiddingDocumentControllerIT {
     MvcResult result = mockMvc
         .perform(get("/api/bidding-document/bid/1").contentType(MediaType.APPLICATION_JSON_VALUE).params(requestParams))
         .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.id").value(1))
-        .andExpect(jsonPath("$.merchant").value("merchant")).andReturn();
+        .andExpect(jsonPath("$.offeree").value("merchant")).andReturn();
 
     // print response
     MockHttpServletResponse response = result.getResponse();
@@ -257,8 +257,8 @@ class BiddingDocumentControllerIT {
     MvcResult result = mockMvc
         .perform(patch("/api/bidding-document/1").contentType(MediaType.APPLICATION_JSON_VALUE)
             .content(objectMapper.writeValueAsString(updates)))
-        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.id").value(1))
-        .andExpect(jsonPath("$.bidFloorPrice").value(1800D)).andReturn();
+        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.data.id").value(1))
+        .andExpect(jsonPath("$.data.bidFloorPrice").value(1800D)).andReturn();
 
     // print response
     MockHttpServletResponse response = result.getResponse();
@@ -272,7 +272,7 @@ class BiddingDocumentControllerIT {
     // when and then
     MvcResult result = mockMvc.perform(delete("/api/bidding-document/1").contentType(MediaType.APPLICATION_JSON_VALUE))
         .andDo(print()).andExpect(status().isOk())
-        .andExpect(jsonPath("$.message").value("Bidding document deleted successfully")).andReturn();
+        .andExpect(jsonPath("$.message").value("Xóa hồ sơ đấu thầu thành công")).andReturn();
 
     // print response
     MockHttpServletResponse response = result.getResponse();

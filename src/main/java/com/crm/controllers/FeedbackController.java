@@ -78,14 +78,19 @@ public class FeedbackController {
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication()
         .getPrincipal();
     String username = userDetails.getUsername();
-    Feedback payment = paymentService.createFeedback(id, username, request);
-    FeedbackDto paymentDto = FeedbackMapper.toFeedbackDto(payment);
+    Feedback feedback = paymentService.createFeedback(id, username, request);
+    FeedbackDto feedbackDto = FeedbackMapper.toFeedbackDto(feedback);
 
     // CREATE NOTIFICATION
-    notificationBroadcast.broadcastCreateFeedbackToModerator(name, payment);
+    notificationBroadcast.broadcastCreateFeedbackToModerator(name, feedback);
     // END NOTIFICATION
 
-    return ResponseEntity.ok(paymentDto);
+    // Set default response body
+    DefaultResponse<FeedbackDto> defaultResponse = new DefaultResponse<>();
+    defaultResponse.setMessage(SuccessMessage.CREATE_FEEDBACK_SUCCESSFULLY);
+    defaultResponse.setData(feedbackDto);
+
+    return ResponseEntity.status(HttpStatus.CREATED).body(defaultResponse);
   }
 
   @PreAuthorize("hasRole('MODERATOR') or hasRole('FORWARDER')")

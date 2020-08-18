@@ -50,7 +50,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @ContextConfiguration
 class OutboundControllerIT {
 
-  private static final Logger logger = LoggerFactory.getLogger(InboundControllerIT.class);
+  private static final Logger logger = LoggerFactory.getLogger(OutboundControllerIT.class);
 
   @Autowired
   protected MockMvc mockMvc;
@@ -169,7 +169,7 @@ class OutboundControllerIT {
 
   @Test
   @WithMockUser(username = "forwarder", roles = { "FORWARDER" })
-  void searchInbounds_thenStatusOk_andReturnInbounds() throws Exception {
+  void searchOutbounds_thenStatusOk_andReturnOutbounds() throws Exception {
     // given
     String search = "packingStation:Noi";
     requestParams.add("search", search);
@@ -224,7 +224,7 @@ class OutboundControllerIT {
 
   @Test
   @WithMockUser(username = "merchant", roles = { "MERCHANT" })
-  void editInbound_thenStatusOk_andReturnInbound() throws Exception {
+  void editOutbound_thenStatusOk_andReturnOutbound() throws Exception {
     // given
     Map<String, String> updates = new HashMap<String, String>();
     updates.put("packingStation", "Ha Tay");

@@ -48,7 +48,7 @@ import com.crm.services.FileUploadService;
 @RequestMapping("/api/evidence")
 public class EvidenceController {
 
-  private static final Logger logger = LoggerFactory.getLogger(SupplierController.class);
+  private static final Logger logger = LoggerFactory.getLogger(EvidenceController.class);
 
   @Autowired
   private EvidenceService evidenceService;

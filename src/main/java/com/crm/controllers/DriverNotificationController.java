@@ -42,7 +42,7 @@ import com.crm.services.DriverNotificationService;
 @RequestMapping("/api/driver-notification")
 public class DriverNotificationController {
 
-  private static final Logger logger = LoggerFactory.getLogger(SupplierController.class);
+  private static final Logger logger = LoggerFactory.getLogger(DriverNotificationController.class);
 
   @Autowired
   DriverNotificationService driverNotificationService;

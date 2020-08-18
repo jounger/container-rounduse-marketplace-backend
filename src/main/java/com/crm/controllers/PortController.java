@@ -41,7 +41,7 @@ import com.crm.services.PortService;
 @RequestMapping("/api/port")
 public class PortController {
 
-  private static final Logger logger = LoggerFactory.getLogger(SupplierController.class);
+  private static final Logger logger = LoggerFactory.getLogger(PortController.class);
 
   @Autowired
   private PortService portService;

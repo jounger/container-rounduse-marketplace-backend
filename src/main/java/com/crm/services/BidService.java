@@ -24,21 +24,19 @@ public interface BidService {
 
   Bid replaceContainer(Long id, String username, ReplaceContainerRequest request);
 
-  Bid addContainer(Long id, String username, Long containerId);
+  Bid addContainer(Long id, String username, BidRequest request);
 
   Bid removeContainer(Long id, String username, Long containerId);
 
   // update part biddingDocument
   Bid editBid(Long id, String username, Map<String, Object> updates);
-  
-  void editExpiredBids(List<Bid> bids);
 
   Bid editBidWhenCombined(Long id, String username, List<Long> containersId);
 
   void removeBid(Long id, String username);
 
-  List<Bid> getExpiredBids(List<Bid> bids);
+  void editExpiredBids(Bid bid, String status);
 
-  List<Bid> updatedExpiredBids(List<Bid> bids);
+  List<Bid> updateExpiredBidFromList(List<Bid> bids);
 
 }

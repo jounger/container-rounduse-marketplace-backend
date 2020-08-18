@@ -42,7 +42,7 @@ import com.crm.services.CombinedService;
 @RequestMapping("/api/combined")
 public class CombinedController {
 
-  private static final Logger logger = LoggerFactory.getLogger(SupplierController.class);
+  private static final Logger logger = LoggerFactory.getLogger(CombinedController.class);
 
   @Autowired
   private CombinedService combinedService;

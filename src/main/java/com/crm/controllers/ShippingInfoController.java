@@ -39,7 +39,7 @@ import com.crm.services.ShippingInfoService;
 @RequestMapping("/api/shipping-info")
 public class ShippingInfoController {
 
-  private static final Logger logger = LoggerFactory.getLogger(SupplierController.class);
+  private static final Logger logger = LoggerFactory.getLogger(ShippingInfoController.class);
 
   @Autowired
   private ShippingInfoService shippingInfoService;

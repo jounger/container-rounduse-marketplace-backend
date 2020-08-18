@@ -43,7 +43,7 @@ import com.crm.services.PaymentService;
 @RequestMapping("/api/payment")
 public class PaymentController {
 
-  private static final Logger logger = LoggerFactory.getLogger(SupplierController.class);
+  private static final Logger logger = LoggerFactory.getLogger(PaymentController.class);
 
   @Autowired
   private PaymentService paymentService;

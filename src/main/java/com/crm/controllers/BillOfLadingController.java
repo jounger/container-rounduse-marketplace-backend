@@ -39,7 +39,7 @@ import com.crm.services.BillOfLadingService;
 @RequestMapping("/api/bill-of-lading")
 public class BillOfLadingController {
 
-  private static final Logger logger = LoggerFactory.getLogger(SupplierController.class);
+  private static final Logger logger = LoggerFactory.getLogger(BillOfLadingController.class);
 
   @Autowired
   BillOfLadingService billOfLadingService;

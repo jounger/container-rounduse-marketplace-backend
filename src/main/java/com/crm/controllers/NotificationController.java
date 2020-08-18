@@ -41,7 +41,7 @@ import com.crm.services.NotificationService;
 @RequestMapping("/api/notification")
 public class NotificationController {
 
-  private static final Logger logger = LoggerFactory.getLogger(SupplierController.class);
+  private static final Logger logger = LoggerFactory.getLogger(NotificationController.class);
 
   @Autowired
   NotificationService notificationService;

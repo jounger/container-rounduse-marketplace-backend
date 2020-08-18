@@ -4,6 +4,7 @@ public class ErrorMessage {
   // Bidding
   public static final String BIDDINGDOCUMENT_NOT_FOUND = "Không tìm thấy hồ sơ mời thầu";
   public static final String BIDDINGDOCUMENT_INVALID_CLOSING_TIME = "Thời gian đóng thầu phải sau thời gian hiện tại và trước thời gian đóng hàng";
+  public static final String BIDDINGDOCUMENT_INVALID_OPENING_TIME = "Thời gian mở thầu phải sau thời gian đóng hàng";
   public static final String BIDDINGDOCUMENT_STATUS_NOT_FOUND = "Không tìm thấy trạng thái của hồ sơ mời thầu";
   public static final String BIDDINGDOCUMENT_IS_IN_TRANSACTION = "Hồ sơ mời thầu đã được ghép hoặc đang được đấu thầu";
   public static final String BIDDINGDOCUMENT_TIME_OUT = "Hồ sơ mời thầu đã hết hạn";

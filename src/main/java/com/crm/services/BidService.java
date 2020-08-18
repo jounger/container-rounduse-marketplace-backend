@@ -24,7 +24,7 @@ public interface BidService {
 
   Bid replaceContainer(Long id, String username, ReplaceContainerRequest request);
 
-  Bid addContainer(Long id, String username, Long containerId);
+  Bid addContainer(Long id, String username, BidRequest request);
 
   Bid removeContainer(Long id, String username, Long containerId);
 

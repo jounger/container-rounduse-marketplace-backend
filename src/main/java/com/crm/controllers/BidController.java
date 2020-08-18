@@ -191,10 +191,10 @@ public class BidController {
   @Transactional
   @PreAuthorize("hasRole('FORWARDER')")
   @PostMapping(value = "/{id}/container/{contId}")
-  public ResponseEntity<?> addContainer(@PathVariable("id") Long id, @PathVariable("contId") Long containerId) {
+  public ResponseEntity<?> addContainers(@PathVariable("id") Long id,@Valid @RequestBody BidRequest request) {
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
-    Bid bid = bidService.addContainer(id, username, containerId);
+    Bid bid = bidService.addContainer(id, username, request);
     BidDto bidDto = BidMapper.toBidDto(bid);
 
     // Set default response body
@@ -202,7 +202,7 @@ public class BidController {
     defaultResponse.setMessage(SuccessMessage.EDIT_BID_SUCCESSFULLY);
     defaultResponse.setData(bidDto);
 
-    logger.info("User {} addContainer into bid id {} with container id: {}", username, id, containerId);
+    logger.info("User {} addContainer into bid id {} with request: {}", username, id, request.toString());
     return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 

@@ -386,7 +386,7 @@ public class BidServiceImpl implements BidService {
   }
 
   @Override
-  public Bid addContainer(Long id, String username, Long containerId) {
+  public Bid addContainer(Long id, String username, BidRequest request) {
     Bid bid = bidRepository.findById(id).orElseThrow(() -> new NotFoundException(ErrorMessage.BID_NOT_FOUND));
     if (!bid.getBidder().getUsername().equals(username)) {
       throw new ForbiddenException(ErrorMessage.USER_ACCESS_DENIED);
@@ -402,20 +402,23 @@ public class BidServiceImpl implements BidService {
     }
     Outbound outbound = biddingDocument.getOutbound();
     Booking booking = outbound.getBooking();
-    Container container = containerRepository.findById(containerId)
-        .orElseThrow(() -> new NotFoundException(ErrorMessage.CONTAINER_NOT_FOUND));
-    if (bid.getContainers().size() >= booking.getUnit()) {
-      throw new InternalException(ErrorMessage.CONTAINER_MORE_THAN_NEEDED);
-    }
-    if (containerRepository.existsByOutbound(containerId, outbound.getShippingLine().getCompanyCode(),
-        outbound.getContainerType().getName(), Arrays.asList(EnumSupplyStatus.CREATED.name()),
-        outbound.getPackingTime(), booking.getCutOffTime(), booking.getPortOfLoading().getNameCode())) {
-      container.setStatus(EnumSupplyStatus.BIDDING.name());
-      bid.getContainers().add(container);
-      containerRepository.save(container);
-    } else {
-      throw new NotFoundException(ErrorMessage.CONTAINER_NOT_SUITABLE);
-    }
+    List<Long> containers = request.getContainers();
+    containers.forEach(containerId -> {
+      Container container = containerRepository.findById(containerId)
+          .orElseThrow(() -> new NotFoundException(ErrorMessage.CONTAINER_NOT_FOUND));
+      if (bid.getContainers().size() >= booking.getUnit()) {
+        throw new InternalException(ErrorMessage.CONTAINER_MORE_THAN_NEEDED);
+      }
+      if (containerRepository.existsByOutbound(containerId, outbound.getShippingLine().getCompanyCode(),
+          outbound.getContainerType().getName(), Arrays.asList(EnumSupplyStatus.CREATED.name()),
+          outbound.getPackingTime(), booking.getCutOffTime(), booking.getPortOfLoading().getNameCode())) {
+        container.setStatus(EnumSupplyStatus.BIDDING.name());
+        bid.getContainers().add(container);
+        containerRepository.save(container);
+      } else {
+        throw new NotFoundException(ErrorMessage.CONTAINER_NOT_SUITABLE + ": " + container.getNumber());
+      }
+    });
 
     bid.setBidValidityPeriod(LocalDateTime.now().plusHours(Constant.BID_VALIDITY_PERIOD));
     Bid _bid = bidRepository.save(bid);

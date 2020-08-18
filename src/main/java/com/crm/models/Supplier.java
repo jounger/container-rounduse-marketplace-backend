@@ -7,6 +7,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
+import javax.persistence.Lob;
 import javax.persistence.OneToMany;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
@@ -45,6 +46,7 @@ public class Supplier extends User {
 
   @Column(name = "company_description", length = 100)
   @NotBlank
+  @Lob
   @Size(min = 5, max = 200)
   private String companyDescription;
 
@@ -84,4 +86,6 @@ public class Supplier extends User {
   @OneToMany(mappedBy = "sender")
   private Collection<Payment> sentPayments = new ArrayList<>();
 
+  @OneToMany(mappedBy = "sender")
+  private Collection<Contract> contracts = new ArrayList<>();
 }

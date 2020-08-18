@@ -48,7 +48,6 @@ public class SupplierController {
   @PreAuthorize("hasRole('MODERATOR')")
   @GetMapping("")
   public ResponseEntity<?> getSuppliers(@Valid PaginationRequest request) {
-    logger.info("Page request: {}", request.getPage());
 
     Page<Supplier> pages = supplierService.getSuppliers(request);
     PaginationResponse<SupplierDto> response = new PaginationResponse<>();
@@ -157,7 +156,7 @@ public class SupplierController {
       defaultResponse.setMessage(SuccessMessage.REJECT_SUPPLIER_SUCCESSFULLY);
     }
     defaultResponse.setData(supplierDto);
-
+    logger.info("Moderator does reviewRegister: {}", supplier.getUsername());
     return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 
@@ -173,6 +172,7 @@ public class SupplierController {
     defaultResponse.setMessage(SuccessMessage.EDIT_SUPPLIER_SUCCESSFULLY);
     defaultResponse.setData(supplierDto);
 
+    logger.info("editSupplier from id {} with request: {}", id, updates.toString());
     return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 }

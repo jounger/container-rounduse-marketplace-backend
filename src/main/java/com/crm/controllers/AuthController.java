@@ -84,6 +84,7 @@ public class AuthController {
     UserDto userInfo = new UserDto();
     userInfo.setId(userDetails.getId());
     userInfo.setUsername(userDetails.getUsername());
+    userInfo.setFullname(userDetails.getFullname());
     userInfo.setPhone(userDetails.getPhone());
     userInfo.setRoles(roles);
     userInfo.setEmail(userDetails.getEmail());
@@ -114,9 +115,11 @@ public class AuthController {
     if (role.equals("FORWARDER") || role.equals("ROLE_FORWARDER")) {
       Forwarder forwarder = forwarderService.createForwarder(request);
       supplierDto = SupplierMapper.toSupplierDto(forwarder);
+      logger.info("createForwarder with request: {}", request.toString());
     } else if (role.equals("MERCHANT") || role.equals("ROLE_MERCHANT")) {
       Merchant merchant = merchantService.createMerchant(request);
       supplierDto = SupplierMapper.toSupplierDto(merchant);
+      logger.info("createMerchant with request: {}", request.toString());
     } else {
       throw new NotFoundException(ErrorMessage.ROLE_NOT_FOUND);
     }
@@ -164,6 +167,7 @@ public class AuthController {
         UserDto userInfo = new UserDto();
         userInfo.setId(userDetails.getId());
         userInfo.setUsername(userDetails.getUsername());
+        userInfo.setFullname(userDetails.getFullname());
         userInfo.setPhone(userDetails.getPhone());
         userInfo.setRoles(roles);
         userInfo.setEmail(userDetails.getEmail());

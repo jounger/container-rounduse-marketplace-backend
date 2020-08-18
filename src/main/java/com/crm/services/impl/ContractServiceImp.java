@@ -1,5 +1,6 @@
 package com.crm.services.impl;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -17,7 +18,6 @@ import com.crm.common.Constant;
 import com.crm.common.ErrorMessage;
 import com.crm.common.Tool;
 import com.crm.exception.ForbiddenException;
-import com.crm.exception.InternalException;
 import com.crm.exception.NotFoundException;
 import com.crm.models.Bid;
 import com.crm.models.BiddingDocument;
@@ -31,11 +31,11 @@ import com.crm.payload.request.PaginationRequest;
 import com.crm.repository.CombinedRepository;
 import com.crm.repository.ContractRepository;
 import com.crm.repository.DiscountRepository;
+import com.crm.repository.SupplierRepository;
 import com.crm.services.BidService;
 import com.crm.services.ContractService;
 import com.crm.services.ShippingInfoService;
 import com.crm.specification.builder.ContractSpecificationsBuilder;
-import com.crm.websocket.controller.NotificationBroadcast;
 
 @Service
 public class ContractServiceImp implements ContractService {
@@ -56,7 +56,7 @@ public class ContractServiceImp implements ContractService {
   private ShippingInfoService shippingInfoService;
 
   @Autowired
-  private NotificationBroadcast notificationBroadcast;
+  private SupplierRepository supplierDtoRepository;
 
   @Override
   public Contract createContract(Long id, String username, ContractRequest request) {
@@ -66,10 +66,21 @@ public class ContractServiceImp implements ContractService {
         .orElseThrow(() -> new NotFoundException(ErrorMessage.COMBINED_NOT_FOUND));
     contract.setCombined(combined);
 
-    List<Long> containersId = new ArrayList<>();
     Bid bid = combined.getBid();
-    List<Container> containers = new ArrayList<Container>(bid.getContainers());
     BiddingDocument biddingDocument = bid.getBiddingDocument();
+
+    Supplier offeree = biddingDocument.getOfferee();
+    if (username.equals(offeree.getUsername())) {
+      throw new ForbiddenException(ErrorMessage.USER_ACCESS_DENIED);
+    }
+
+    Supplier sender = supplierDtoRepository.findByUsername(username)
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.USER_NOT_FOUND));
+    contract.setSender(sender);
+
+    List<Long> containersId = new ArrayList<>();
+    List<Container> containers = new ArrayList<Container>(bid.getContainers());
+
     if (!biddingDocument.getIsMultipleAward()) {
       for (Container container : containers) {
         containersId.add(container.getId());
@@ -85,27 +96,24 @@ public class ContractServiceImp implements ContractService {
     Double price = (bid.getBidPrice() / bid.getContainers().size()) * containersId.size();
 
     contract.setPrice(price);
-    Supplier offeree = biddingDocument.getOfferee();
+
     Boolean required = request.getRequired();
     contract.setRequired(required);
     contract.setFinesAgainstContractViolations(0D);
+    contract.setCreationDate(LocalDateTime.now());
 
     String discountCodeString = request.getDiscountCode();
-    if (discountCodeString != null && !discountCodeString.isEmpty()) {
+    if (!Tool.isBlank(discountCodeString)) {
       Discount discount = discountRepository.findByCode(discountCodeString)
           .orElseThrow(() -> new NotFoundException(ErrorMessage.DISCOUNT_NOT_FOUND));
       contract.setDiscount(discount);
     }
-    if (username.equals(offeree.getUsername()) && required == true) {
-      Double fines = request.getFinesAgainstContractViolations();
-      if (fines > 0) {
-        contract.setFinesAgainstContractViolations(fines);
-      } else {
-        throw new InternalException(ErrorMessage.CONTRACT_INVALID_FINES);
-      }
-    } else {
-      throw new ForbiddenException(ErrorMessage.USER_ACCESS_DENIED);
+
+    Double fines = 0D;
+    if (required == true) {
+      fines = request.getFinesAgainstContractViolations();
     }
+    contract.setFinesAgainstContractViolations(fines);
 
     Contract _contract = contractRepository.save(contract);
 
@@ -113,9 +121,6 @@ public class ContractServiceImp implements ContractService {
 
     shippingInfoService.createShippingInfosForContract(contract, containersId);
 
-    // CREATE NOTIFICATION
-    notificationBroadcast.broadcastCreateContractToDriver(contract);
-    // END NOTIFICATION
     return _contract;
   }
 

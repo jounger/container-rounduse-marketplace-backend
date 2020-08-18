@@ -80,7 +80,19 @@ public class ExceptionController {
     logger.error("MyFile Not Found Error: {}", ex.getMessage());
 
     ErrorResponse error = new ErrorResponse();
-    error.setStatus(HttpStatus.FORBIDDEN);
+    error.setStatus(HttpStatus.NOT_FOUND);
+    error.setMessage(ex.getMessage());
+    return error;
+  }
+
+  @ExceptionHandler(UnauthorizedException.class)
+  @ResponseStatus(HttpStatus.UNAUTHORIZED)
+  public ErrorResponse handlerException(UnauthorizedException ex, WebRequest req) {
+
+    logger.error("Unauthorized Error: {}", ex.getMessage());
+
+    ErrorResponse error = new ErrorResponse();
+    error.setStatus(HttpStatus.UNAUTHORIZED);
     error.setMessage(ex.getMessage());
     return error;
   }

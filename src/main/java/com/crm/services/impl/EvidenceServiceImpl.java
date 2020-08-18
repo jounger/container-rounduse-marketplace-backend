@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import com.crm.common.Constant;
 import com.crm.common.ErrorMessage;
 import com.crm.common.Tool;
+import com.crm.enums.EnumEvidenceStatus;
 import com.crm.enums.EnumShippingStatus;
 import com.crm.exception.ForbiddenException;
 import com.crm.exception.InternalException;
@@ -80,12 +81,13 @@ public class EvidenceServiceImpl implements EvidenceService {
       } else {
         throw new InternalException(ErrorMessage.EVIDENCE_INVALID);
       }
-      evidence.setIsValid(false);
+      evidence.setStatus(EnumEvidenceStatus.PENDING.name());
     } else {
       throw new ForbiddenException(ErrorMessage.USER_ACCESS_DENIED);
     }
 
     Evidence _evidence = evidenceRepository.save(evidence);
+    notificationBroadcast.broadcastCreateEvidenceToMerchant(contract);
     return _evidence;
   }
 
@@ -153,22 +155,25 @@ public class EvidenceServiceImpl implements EvidenceService {
       // YOU CANNOT SET EVIDEN TO VALID BY YOURSELF
       throw new ForbiddenException(ErrorMessage.USER_ACCESS_DENIED);
     } else {
-      String isValid = String.valueOf(updates.get("isValid"));
-      if (updates.get("isValid") != null && !Tool.isEqual(evidence.getIsValid(), isValid)) {
-        evidence.setIsValid(Boolean.valueOf(isValid));
+      String status = String.valueOf(updates.get("status"));
+      if (updates.get("status") != null && !Tool.isEqual(evidence.getStatus(), status)) {
+        evidence.setStatus(EnumEvidenceStatus.findByName(status).name());
       }
     }
 
     Evidence _evidence = evidenceRepository.save(evidence);
 
-    if (contract.getRequired() == true && evidenceRepository.existsValidEvidence(id)
-        && evidence.getIsValid() == true) {
+    if (contract.getRequired() == true && evidenceRepository.existsValidEvidence(id, EnumEvidenceStatus.ACCEPTED.name())
+        && evidence.getStatus().equals(EnumEvidenceStatus.ACCEPTED.name())) {
       contract.getShippingInfos().forEach(item -> {
         item.setStatus(EnumShippingStatus.INFO_RECEIVED.name());
         shippingInfoRepository.save(item);
       });
+      notificationBroadcast.broadcastCreateContractToShippingLine(contract);
       notificationBroadcast.broadcastCreateContractToDriver(contract);
     }
+
+    notificationBroadcast.broadcastAcceptOrRejectEvidenceToForwarder(contract, evidence.getStatus());
 
     return _evidence;
   }

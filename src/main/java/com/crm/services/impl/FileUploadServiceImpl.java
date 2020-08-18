@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.crm.common.ErrorMessage;
+import com.crm.common.FileUploadMessage;
 import com.crm.enums.EnumFileType;
 import com.crm.exception.NotFoundException;
 import com.crm.models.FileUpload;
@@ -58,7 +59,7 @@ public class FileUploadServiceImpl implements FileUploadService {
   @Override
   public FileUpload getFileUpload(String name) {
     FileUpload fileUpload = fileUploadRepository.findByName(name)
-        .orElseThrow(() -> new NotFoundException("File's not found"));
+        .orElseThrow(() -> new NotFoundException(FileUploadMessage.FILE_UPLOAD_NOTFOUND));
     return fileUpload;
   }
 

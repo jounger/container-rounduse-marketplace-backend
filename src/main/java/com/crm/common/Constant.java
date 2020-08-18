@@ -11,6 +11,8 @@ public class Constant {
 
   public static final String REPORT_NOTIFICATION = "/queue/report-notification";
 
+  public static final String EVIDENCE_NOTIFICATION = "/queue/evidence-notification";
+
   public static final String SEARCH_REGEX = "(\\w+?)(:|!|<|>|~)(\\w+?),";
 
   // BID_VALIDITY_PERIOD as bid.bidValidityPeriod

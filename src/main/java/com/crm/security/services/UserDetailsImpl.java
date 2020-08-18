@@ -30,6 +30,8 @@ public class UserDetailsImpl implements UserDetails {
 
   private String username;
 
+  private String fullname;
+
   @JsonIgnore
   private String password;
 
@@ -53,6 +55,7 @@ public class UserDetailsImpl implements UserDetails {
     UserDetailsImpl userDetailsImpl = new UserDetailsImpl();
     userDetailsImpl.setId(user.getId());
     userDetailsImpl.setUsername(user.getUsername());
+    userDetailsImpl.setFullname(user.getFullname());
     userDetailsImpl.setPassword(user.getPassword());
     userDetailsImpl.setEmail(user.getEmail());
     userDetailsImpl.setPhone(user.getPhone());

@@ -49,7 +49,7 @@ public class MerchantServiceImpl implements MerchantService {
     if (userRepository.existsByUsername(request.getUsername()) || userRepository.existsByEmail(request.getEmail())
         || userRepository.existsByPhone(request.getPhone())
         || supplierRepository.existsByCompanyCode(request.getCompanyCode())) {
-      throw new DuplicateRecordException(ErrorMessage.USER_NOT_FOUND);
+      throw new DuplicateRecordException(ErrorMessage.USER_ALREADY_EXISTS);
     }
     Merchant merchant = new Merchant();
     merchant.setUsername(request.getUsername());
@@ -59,11 +59,20 @@ public class MerchantServiceImpl implements MerchantService {
     merchant.setStatus(EnumUserStatus.PENDING.name());
     merchant.setWebsite(request.getWebsite());
     merchant.setCompanyName(request.getCompanyName());
+    if (supplierRepository.existsByCompanyCode(request.getCompanyCode())) {
+      throw new DuplicateRecordException(ErrorMessage.COMPANY_CODE_ALREADY_EXISTS);
+    }
     merchant.setCompanyCode(request.getCompanyCode());
     merchant.setCompanyDescription(request.getCompanyDescription());
     merchant.setCompanyAddress(request.getCompanyAddress());
     merchant.setFullname(request.getFullname());
+    if (supplierRepository.existsByTin(request.getTin())) {
+      throw new DuplicateRecordException(ErrorMessage.TIN_DUPLICATE);
+    }
     merchant.setTin(request.getTin());
+    if (supplierRepository.existsByFax(request.getFax())) {
+      throw new DuplicateRecordException(ErrorMessage.FAX_DUPLICATE);
+    }
     merchant.setFax(request.getFax());
     merchant.setRatingValue(0D);
 

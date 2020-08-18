@@ -150,5 +150,6 @@ public class SuccessMessage {
   public static final String CHANGE_PASSWORD_SUCCESSFULLY = "Thay đổi mật khẩu thành công";
   public static final String GENERATE_RESET_PASSWORD_TOKEN_SUCCESSFULLY = "Tạo đường dẫn cài lại mật khẩu thành công. Vui lòng kiểm tra email!";
   public static final String RESET_PASSWORD_SUCCESSFULLY = "Đặt lại mật khẩu thành công";
+  public static final String PROFILE_CHANGE_SUCCESSFULLY = "Thay đổi ảnh đại diện thành công";
 
 }

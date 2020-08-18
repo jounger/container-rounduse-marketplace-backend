@@ -1,6 +1,7 @@
 package com.crm.services.impl;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +21,8 @@ import com.crm.exception.ForbiddenException;
 import com.crm.exception.InternalException;
 import com.crm.exception.NotFoundException;
 import com.crm.models.BiddingDocument;
+import com.crm.models.BillOfLading;
+import com.crm.models.Inbound;
 import com.crm.models.Merchant;
 import com.crm.models.Outbound;
 import com.crm.models.User;
@@ -29,6 +32,7 @@ import com.crm.repository.BidRepository;
 import com.crm.repository.BiddingDocumentRepository;
 import com.crm.repository.CombinedRepository;
 import com.crm.repository.ContainerRepository;
+import com.crm.repository.InboundRepository;
 import com.crm.repository.MerchantRepository;
 import com.crm.repository.OutboundRepository;
 import com.crm.repository.UserRepository;
@@ -57,6 +61,9 @@ public class BiddingDocumentServiceImpl implements BiddingDocumentService {
 
   @Autowired
   private CombinedRepository combinedRepository;
+
+  @Autowired
+  private InboundRepository inboundRepository;
 
   @Override
   public BiddingDocument createBiddingDocument(String username, BiddingDocumentRequest request) {
@@ -174,41 +181,12 @@ public class BiddingDocumentServiceImpl implements BiddingDocumentService {
   }
 
   @Override
-  public BiddingDocument updateBiddingDocument(BiddingDocumentRequest request) {
-    BiddingDocument biddingDocument = biddingDocumentRepository.findById(request.getId())
-        .orElseThrow(() -> new NotFoundException(ErrorMessage.BIDDINGDOCUMENT_NOT_FOUND));
-
-    if (biddingDocument.getStatus().equalsIgnoreCase(EnumBiddingStatus.COMBINED.name())) {
-      throw new InternalException(ErrorMessage.BIDDINGDOCUMENT_IS_IN_TRANSACTION);
-    }
-
-    Outbound outbound = biddingDocument.getOutbound();
-    LocalDateTime packingTime = outbound.getPackingTime();
-    LocalDateTime bidClosingTime = Tool.convertToLocalDateTime(request.getBidClosing());
-    if (bidClosingTime.isBefore(LocalDateTime.now()) || bidClosingTime.isAfter(packingTime)) {
-      throw new InternalException(ErrorMessage.BIDDINGDOCUMENT_INVALID_CLOSING_TIME);
-    }
-    biddingDocument.setBidClosing(bidClosingTime);
-
-    EnumCurrency currencyOfPayment = EnumCurrency.findByName(request.getCurrencyOfPayment());
-    if (currencyOfPayment == null) {
-      currencyOfPayment = EnumCurrency.VND;
-    } else {
-      biddingDocument.setCurrencyOfPayment(currencyOfPayment.name());
-    }
-
-    biddingDocument.setBidPackagePrice(request.getBidPackagePrice());
-    biddingDocument.setBidFloorPrice(request.getBidFloorPrice());
-    biddingDocument.setPriceLeadership(request.getPriceLeadership());
-
-    BiddingDocument _biddingDocument = biddingDocumentRepository.save(biddingDocument);
-    return _biddingDocument;
-  }
-
-  @Override
-  public BiddingDocument editBiddingDocument(Long id, Map<String, Object> updates) {
+  public BiddingDocument editBiddingDocument(Long id, String username, Map<String, Object> updates) {
     BiddingDocument biddingDocument = biddingDocumentRepository.findById(id)
         .orElseThrow(() -> new NotFoundException(ErrorMessage.BIDDINGDOCUMENT_NOT_FOUND));
+    if(!biddingDocument.getOfferee().getUsername().equals(username)) {
+      throw new ForbiddenException(ErrorMessage.USER_ACCESS_DENIED);
+    }
 
     if (biddingDocument.getStatus().equalsIgnoreCase(EnumBiddingStatus.COMBINED.name())) {
       throw new InternalException(ErrorMessage.BIDDINGDOCUMENT_IS_IN_TRANSACTION);
@@ -284,6 +262,23 @@ public class BiddingDocumentServiceImpl implements BiddingDocumentService {
       throw new InternalException(ErrorMessage.BIDDINGDOCUMENT_IS_IN_TRANSACTION);
     }
     biddingDocumentRepository.deleteById(id);
+  }
+
+  @Override
+  public Page<BiddingDocument> getBiddingDocumentsByInbound(Long id, String username, PaginationRequest request) {
+    Inbound inbound = inboundRepository.findById(id)
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.INBOUND_NOT_FOUND));
+    if (!inbound.getForwarder().getUsername().equals(username)) {
+      throw new ForbiddenException(ErrorMessage.USER_ACCESS_DENIED);
+    }
+    BillOfLading billOfLading = inbound.getBillOfLading();
+
+    PageRequest page = PageRequest.of(request.getPage(), request.getLimit(), Sort.by("createdAt").descending());
+    Page<BiddingDocument> pages = biddingDocumentRepository.findByInbound(inbound.getShippingLine().getCompanyCode(),
+        inbound.getContainerType().getName(), Arrays.asList("BIDDING"), inbound.getEmptyTime(),
+        billOfLading.getFreeTime(), page);
+
+    return pages;
   }
 
 }

@@ -209,7 +209,7 @@ public class InboundServiceImpl implements InboundService {
     setContainers.forEach(item -> {
       if (item.getStatus().equalsIgnoreCase(EnumSupplyStatus.COMBINED.name())
           || item.getStatus().equalsIgnoreCase(EnumSupplyStatus.BIDDING.name())) {
-        throw new ForbiddenException(ErrorMessage.USER_ACCESS_DENIED);
+        throw new InternalException(ErrorMessage.CONTAINER_BUSY);
       }
     });
 

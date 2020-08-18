@@ -6,6 +6,8 @@ import java.util.List;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -37,6 +39,8 @@ import com.crm.services.RoleService;
 @PreAuthorize("hasRole('ADMIN')")
 public class RoleController {
 
+  private static final Logger logger = LoggerFactory.getLogger(SupplierController.class);
+
   @Autowired
   private RoleService roleService;
 
@@ -52,6 +56,7 @@ public class RoleController {
     defaultResponse.setMessage(SuccessMessage.CREATE_ROLE_SUCCESSFULLY);
     defaultResponse.setData(roleDto);
 
+    logger.info("Create role: {}", request.toString());
     return ResponseEntity.status(HttpStatus.CREATED).body(defaultResponse);
   }
 
@@ -85,6 +90,7 @@ public class RoleController {
     defaultResponse.setMessage(SuccessMessage.EDIT_ROLE_SUCCESSFULLY);
     defaultResponse.setData(roleDto);
 
+    logger.info("Update role: {}", request.toString());
     return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 
@@ -98,6 +104,7 @@ public class RoleController {
     DefaultResponse<RoleDto> defaultResponse = new DefaultResponse<>();
     defaultResponse.setMessage(SuccessMessage.DELETE_ROLE_SUCCESSFULLY);
 
+    logger.info("Remove role with id: {}", id);
     return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 

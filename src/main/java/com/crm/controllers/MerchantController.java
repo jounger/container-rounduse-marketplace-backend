@@ -7,6 +7,8 @@ import java.util.Map;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -38,6 +40,8 @@ import com.crm.services.MerchantService;
 @RequestMapping("/api/merchant")
 public class MerchantController {
 
+  private static final Logger logger = LoggerFactory.getLogger(SupplierController.class);
+
   @Autowired
   private MerchantService merchantService;
 
@@ -52,6 +56,7 @@ public class MerchantController {
     defaultResponse.setMessage(SuccessMessage.CREATE_MERCHANT_SUCCESSFULLY);
     defaultResponse.setData(merchantDto);
 
+    logger.info("createMerchant with request: {}", request.toString());
     return ResponseEntity.status(HttpStatus.CREATED).body(defaultResponse);
   }
 
@@ -95,6 +100,7 @@ public class MerchantController {
     defaultResponse.setMessage(SuccessMessage.EDIT_MERCHANT_SUCCESSFULLY);
     defaultResponse.setData(merchantDto);
 
+    logger.info("editMerchant from id with request: {}", id, updates.toString());
     return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 
@@ -108,6 +114,7 @@ public class MerchantController {
     DefaultResponse<MerchantDto> defaultResponse = new DefaultResponse<>();
     defaultResponse.setMessage(SuccessMessage.DELETE_MERCHANT_SUCCESSFULLY);
 
+    logger.info("deleteMerchant with id: {}", id);
     return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 }

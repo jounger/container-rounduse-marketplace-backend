@@ -9,6 +9,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.crm.common.ErrorMessage;
+import com.crm.enums.EnumEvidenceStatus;
 import com.crm.enums.EnumShippingStatus;
 import com.crm.enums.EnumSupplyStatus;
 import com.crm.exception.ForbiddenException;
@@ -35,6 +36,7 @@ import com.crm.repository.OutboundRepository;
 import com.crm.repository.ShippingInfoRepository;
 import com.crm.repository.UserRepository;
 import com.crm.services.ShippingInfoService;
+import com.crm.websocket.controller.NotificationBroadcast;
 
 @Service
 public class ShippingInfoServiceImpl implements ShippingInfoService {
@@ -62,6 +64,9 @@ public class ShippingInfoServiceImpl implements ShippingInfoService {
 
   @Autowired
   private UserRepository userRepository;
+
+  @Autowired
+  private NotificationBroadcast notificationBroadcast;
 
   @Override
   public ShippingInfo createShippingInfo(ShippingInfoRequest request) {
@@ -101,6 +106,13 @@ public class ShippingInfoServiceImpl implements ShippingInfoService {
       contract.getShippingInfos().add(shippingInfo);
     });
 
+    notificationBroadcast.broadcastCreateContractToForwarder(contract);
+    if (contract.getRequired() == false) {
+      // CREATE NOTIFICATION
+      notificationBroadcast.broadcastCreateContractToDriver(contract);
+      notificationBroadcast.broadcastCreateContractToShippingLine(contract);
+      // END NOTIFICATION
+    }
   }
 
   @Override
@@ -158,7 +170,7 @@ public class ShippingInfoServiceImpl implements ShippingInfoService {
     if (!(container.getDriver().getUsername().equals(username) || shippingInfoRepository.isForwarder(id, username))) {
       throw new ForbiddenException(ErrorMessage.USER_ACCESS_DENIED);
     }
-    if (!evidenceRepository.isEditableShippingInfo(id)) {
+    if (!evidenceRepository.isEditableShippingInfo(id, EnumEvidenceStatus.ACCEPTED.name())) {
       throw new InternalException(ErrorMessage.SHIPPING_INFO_INVALID_EDIT);
     }
     EnumShippingStatus eStatus = EnumShippingStatus.findByName(status);

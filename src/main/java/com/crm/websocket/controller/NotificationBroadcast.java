@@ -13,9 +13,11 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
+import com.crm.common.NotificationMessage;
 import com.crm.enums.EnumBidStatus;
 import com.crm.enums.EnumBiddingNotification;
 import com.crm.enums.EnumDriverNotification;
+import com.crm.enums.EnumEvidenceStatus;
 import com.crm.enums.EnumNotificationType;
 import com.crm.enums.EnumReportNotification;
 import com.crm.enums.EnumReportStatus;
@@ -49,6 +51,7 @@ import com.crm.services.ShippingLineNotificationService;
 import com.crm.services.UserService;
 import com.crm.websocket.service.BiddingWebSocketService;
 import com.crm.websocket.service.DriverWebSocketService;
+import com.crm.websocket.service.EvidenceWebSocketService;
 import com.crm.websocket.service.ReportWebSocketService;
 import com.crm.websocket.service.ShippingLineWebSocketService;
 
@@ -69,6 +72,9 @@ public class NotificationBroadcast {
 
   @Autowired
   private BiddingWebSocketService biddingWebSocketService;
+
+  @Autowired
+  private EvidenceWebSocketService evidenceWebSocketService;
 
   @Autowired
   private ForwarderService forwarderService;
@@ -103,7 +109,8 @@ public class NotificationBroadcast {
         // Create new message notifications and save to Database
         notifyRequest.setRecipient(offeree.getUsername());
         notifyRequest.setRelatedResource(bid.getBiddingDocument().getId());
-        notifyRequest.setMessage(String.format("You got a new Bid from %s", bid.getBidder().getUsername()));
+        notifyRequest
+            .setMessage(String.format(NotificationMessage.SEND_BID_TO_MERCHANT, bid.getBidder().getCompanyName()));
         notifyRequest.setAction(EnumBiddingNotification.ADDED.name());
         notifyRequest.setType(EnumNotificationType.BIDDING.name());
         BiddingNotification notification = biddingNotificationService.createBiddingNotification(notifyRequest);
@@ -127,7 +134,8 @@ public class NotificationBroadcast {
         if (bidNew.getStatus().equals(status)) {
           notifyRequest.setRecipient(offeree.getUsername());
           notifyRequest.setRelatedResource(bidNew.getBiddingDocument().getId());
-          notifyRequest.setMessage(String.format("Bid have been MODIFIED by %s", bidNew.getBidder().getUsername()));
+          notifyRequest.setMessage(String.format(NotificationMessage.SEND_BID_MODIFIED_NOTIFICATION_TO_MERCHANT,
+              bidNew.getBidder().getCompanyName()));
           notifyRequest.setAction(EnumBiddingNotification.MODIFIED.name());
           notifyRequest.setType(EnumNotificationType.BIDDING.name());
           notification = biddingNotificationService.createBiddingNotification(notifyRequest);
@@ -138,7 +146,8 @@ public class NotificationBroadcast {
         } else if (bidNew.getStatus().equals(EnumBidStatus.REJECTED.name())) {
           notifyRequest.setRecipient(bidNew.getBidder().getUsername());
           notifyRequest.setRelatedResource(bidNew.getBiddingDocument().getId());
-          notifyRequest.setMessage(String.format("Your Bid have REJECTED from %s", offeree.getUsername()));
+          notifyRequest.setMessage(
+              String.format(NotificationMessage.SEND_BID_REJECT_NOTIFICATION_TO_FORWARDER, offeree.getCompanyName()));
           notifyRequest.setAction(EnumBiddingNotification.REJECTED.name());
           notifyRequest.setType(EnumNotificationType.BIDDING.name());
           notification = biddingNotificationService.createBiddingNotification(notifyRequest);
@@ -161,7 +170,8 @@ public class NotificationBroadcast {
         // Create new message notifications and save to Database
         notifyRequest.setRecipient(offeree.getUsername());
         notifyRequest.setRelatedResource(bid.getBiddingDocument().getId());
-        notifyRequest.setMessage(String.format("Bid have been REMOVED by %s", bid.getBidder().getUsername()));
+        notifyRequest.setMessage(String.format(NotificationMessage.SEND_BID_REMOVE_NOTIFICATION_TO_MERCHANT,
+            bid.getBidder().getCompanyName()));
         notifyRequest.setAction(EnumBiddingNotification.REMOVED.name());
         notifyRequest.setType(EnumNotificationType.BIDDING.name());
         BiddingNotification notification = biddingNotificationService.createBiddingNotification(notifyRequest);
@@ -192,8 +202,8 @@ public class NotificationBroadcast {
         for (Forwarder f : forwarders) {
           notifyRequest.setRecipient(f.getUsername());
           notifyRequest.setRelatedResource(biddingDocument.getId());
-          notifyRequest.setMessage(
-              String.format("You got a new Bidding Document from %s", biddingDocument.getOfferee().getUsername()));
+          notifyRequest.setMessage(String.format(NotificationMessage.SEND_BIDDING_DOCUMENT_TO_FORWARDER,
+              biddingDocument.getOfferee().getCompanyName()));
           notifyRequest.setAction(EnumBiddingNotification.ADDED.name());
           notifyRequest.setType(EnumNotificationType.BIDDING.name());
           BiddingNotification notification = biddingNotificationService.createBiddingNotification(notifyRequest);
@@ -214,36 +224,14 @@ public class NotificationBroadcast {
       public void run() {
         Combined combined = contract.getCombined();
         Bid bidNew = combined.getBid();
-        BiddingNotification notification = new BiddingNotification();
-        BiddingNotificationRequest notifyRequest = new BiddingNotificationRequest();
         Merchant offeree = bidNew.getBiddingDocument().getOfferee();
 //        List<Container> listContainerBid = containerService.getContainersByBidAndStatus(bidNew.getId(),
 //            EnumSupplyStatus.COMBINED.name());
         Collection<Container> listContainerBid = bidNew.getContainers().stream()
             .filter(ex -> ex.getStatus().equals(EnumSupplyStatus.COMBINED.name())).collect(Collectors.toList());
 
-        notifyRequest.setRecipient(bidNew.getBidder().getUsername());
-        notifyRequest.setRelatedResource(bidNew.getBiddingDocument().getId());
-        notifyRequest.setMessage(String.format("Your Bid have ACCEPTED from %s", offeree.getUsername()));
-        notifyRequest.setAction(EnumBiddingNotification.ACCEPTED.name());
-        notifyRequest.setType(EnumNotificationType.BIDDING.name());
-        notification = biddingNotificationService.createBiddingNotification(notifyRequest);
-
-        ShippingLineNotification shippingLineNotification = new ShippingLineNotification();
-        ShippingLineNotificationRequest shippingLineNotificationRequest = new ShippingLineNotificationRequest();
-        String numberOfContainer = String.valueOf(listContainerBid.size());
-        String shippingLine = bidNew.getBiddingDocument().getOutbound().getShippingLine().getUsername();
-        shippingLineNotificationRequest.setRecipient(shippingLine);
-        shippingLineNotificationRequest.setRelatedResource(combined.getId());
-        shippingLineNotificationRequest.setMessage(String.format("%s and %s want to borrow %s container from you",
-            offeree.getUsername(), bidNew.getBidder().getUsername(), numberOfContainer));
-        shippingLineNotificationRequest.setAction(EnumShippingLineNotification.REQUEST.name());
-        shippingLineNotificationRequest.setType(EnumNotificationType.SHPIPPING_LINE.name());
-        shippingLineNotification = shippingLineNotificationService
-            .createShippingLineNotification(shippingLineNotificationRequest);
-
         Collection<ShippingInfo> shippingInfos = contract.getShippingInfos();
-        
+
         if (listContainerBid.size() > 0) {
           List<DriverNotification> driverNotifications = new ArrayList<>();
           shippingInfos.forEach(shippingInfo -> {
@@ -252,8 +240,9 @@ public class NotificationBroadcast {
             String driverUserName = shippingInfo.getContainer().getDriver().getUsername();
             driverNotifyRequest.setRecipient(driverUserName);
             driverNotifyRequest.setRelatedResource(shippingInfo.getId());
-            driverNotifyRequest.setMessage(String.format("%s and %s want you driver container %s",
-                offeree.getUsername(), bidNew.getBidder().getUsername(), shippingInfo.getContainer().getNumber()));
+            driverNotifyRequest.setMessage(
+                String.format(NotificationMessage.SEND_TASK_NOTIFICATION_TO_DRIVER, offeree.getCompanyName(),
+                    bidNew.getBidder().getCompanyName(), shippingInfo.getContainer().getNumber()));
             driverNotifyRequest.setType(EnumNotificationType.DRIVER.name());
             driverNotifyRequest.setAction(EnumDriverNotification.TASK.name());
             driverNotification = driverNotificationService.createDriverNotification(driverNotifyRequest);
@@ -265,13 +254,157 @@ public class NotificationBroadcast {
             driverWebSocketService.sendBiddingNotifyToDriver(driverNotification);
           });
         }
+      }
+    });
+  }
+
+  public void broadcastCreateContractToForwarder(Contract contract) {
+    executorService.submit(new Runnable() {
+      @Override
+      public void run() {
+        Combined combined = contract.getCombined();
+        Bid bidNew = combined.getBid();
+        BiddingNotification notification = new BiddingNotification();
+        BiddingNotificationRequest notifyRequest = new BiddingNotificationRequest();
+        Merchant offeree = bidNew.getBiddingDocument().getOfferee();
+//        List<Container> listContainerBid = containerService.getContainersByBidAndStatus(bidNew.getId(),
+//            EnumSupplyStatus.COMBINED.name());
+
+        notifyRequest.setRecipient(bidNew.getBidder().getUsername());
+        notifyRequest.setRelatedResource(bidNew.getBiddingDocument().getId());
+        if (contract.getRequired()) {
+          notifyRequest.setMessage(
+              String.format(NotificationMessage.SEND_CONTRACT_REQUIREMENT_NOTIFICATION, offeree.getCompanyName()));
+          notifyRequest.setAction(EnumBiddingNotification.ACCEPTED.name());
+          notifyRequest.setType(EnumNotificationType.CONTRACT.name());
+        } else {
+          notifyRequest.setMessage(
+              String.format(NotificationMessage.SEND_BID_ACCEPT_NOTIFICATION_TO_FORWARDER, offeree.getCompanyName()));
+          notifyRequest.setAction(EnumBiddingNotification.ACCEPTED.name());
+          notifyRequest.setType(EnumNotificationType.BIDDING.name());
+        }
+        notification = biddingNotificationService.createBiddingNotification(notifyRequest);
 
         // Send notification to Forwarder
         logger.info("notification : {}", notification.getId());
         biddingWebSocketService.sendBiddingNotifyToUser(notification);
+      }
+    });
+  }
+
+  public void broadcastCreateContractToShippingLine(Contract contract) {
+    executorService.submit(new Runnable() {
+      @Override
+      public void run() {
+        Combined combined = contract.getCombined();
+        Bid bidNew = combined.getBid();
+        Merchant offeree = bidNew.getBiddingDocument().getOfferee();
+//        List<Container> listContainerBid = containerService.getContainersByBidAndStatus(bidNew.getId(),
+//            EnumSupplyStatus.COMBINED.name());
+        Collection<Container> listContainerBid = bidNew.getContainers().stream()
+            .filter(ex -> ex.getStatus().equals(EnumSupplyStatus.COMBINED.name())).collect(Collectors.toList());
+
+        ShippingLineNotification shippingLineNotification = new ShippingLineNotification();
+        ShippingLineNotificationRequest shippingLineNotificationRequest = new ShippingLineNotificationRequest();
+        String numberOfContainer = String.valueOf(listContainerBid.size());
+        String shippingLine = bidNew.getBiddingDocument().getOutbound().getShippingLine().getUsername();
+        shippingLineNotificationRequest.setRecipient(shippingLine);
+        shippingLineNotificationRequest.setRelatedResource(combined.getId());
+        shippingLineNotificationRequest
+            .setMessage(String.format(NotificationMessage.SEND_REQUEST_BORROW_NOTIFICATION_TO_SHIPPING_LINE,
+                offeree.getCompanyName(), bidNew.getBidder().getCompanyName(), numberOfContainer));
+        shippingLineNotificationRequest.setAction(EnumShippingLineNotification.REQUEST.name());
+        shippingLineNotificationRequest.setType(EnumNotificationType.SHPIPPING_LINE.name());
+        shippingLineNotification = shippingLineNotificationService
+            .createShippingLineNotification(shippingLineNotificationRequest);
 
         // Send notification to ShippingLine
         shippingLineWebSocketService.sendCombinedNotifyToShippingLine(shippingLineNotification);
+      }
+    });
+  }
+
+  public void broadcastCreateEvidenceToMerchant(Contract contract) {
+    executorService.submit(new Runnable() {
+      @Override
+      public void run() {
+        Combined combined = contract.getCombined();
+        Bid bidNew = combined.getBid();
+        BiddingNotification notification = new BiddingNotification();
+        BiddingNotificationRequest notifyRequest = new BiddingNotificationRequest();
+        Merchant offeree = bidNew.getBiddingDocument().getOfferee();
+//        List<Container> listContainerBid = containerService.getContainersByBidAndStatus(bidNew.getId(),
+//            EnumSupplyStatus.COMBINED.name());
+
+        notifyRequest.setRecipient(offeree.getUsername());
+        notifyRequest.setRelatedResource(bidNew.getBiddingDocument().getId());
+        notifyRequest.setMessage(
+            String.format(NotificationMessage.SEND_CREATE_EVIDENCE_NOTIFICATION, bidNew.getBidder().getCompanyName()));
+        notifyRequest.setAction(EnumBiddingNotification.ADDED.name());
+        notifyRequest.setType(EnumNotificationType.CONTRACT.name());
+        notification = biddingNotificationService.createBiddingNotification(notifyRequest);
+
+        // Send notification to Merchant
+        logger.info("notification : {}", notification.getId());
+        evidenceWebSocketService.sendEvidenceNotifyToUser(notification);
+      }
+    });
+  }
+
+  public void broadcastAcceptOrRejectEvidenceToForwarder(Contract contract, String isValid) {
+    executorService.submit(new Runnable() {
+      @Override
+      public void run() {
+        Combined combined = contract.getCombined();
+        Bid bidNew = combined.getBid();
+        BiddingNotification notification = new BiddingNotification();
+        BiddingNotificationRequest notifyRequest = new BiddingNotificationRequest();
+        Merchant offeree = bidNew.getBiddingDocument().getOfferee();
+//        List<Container> listContainerBid = containerService.getContainersByBidAndStatus(bidNew.getId(),
+//            EnumSupplyStatus.COMBINED.name());
+
+        notifyRequest.setRecipient(bidNew.getBidder().getUsername());
+        notifyRequest.setRelatedResource(bidNew.getBiddingDocument().getId());
+        if (isValid.equals(EnumEvidenceStatus.ACCEPTED.name())) {
+          notifyRequest.setMessage(
+              String.format(NotificationMessage.SEND_ACCEPT_EVIDENCE_NOTIFICATION, offeree.getCompanyName()));
+          notifyRequest.setAction(EnumBiddingNotification.ACCEPTED.name());
+        } else if (isValid.equals(EnumEvidenceStatus.REJECTED.name())) {
+          notifyRequest.setMessage(
+              String.format(NotificationMessage.SEND_REJECT_EVIDENCE_NOTIFICATION, offeree.getCompanyName()));
+          notifyRequest.setAction(EnumBiddingNotification.REJECTED.name());
+        }
+        notifyRequest.setType(EnumNotificationType.CONTRACT.name());
+        notification = biddingNotificationService.createBiddingNotification(notifyRequest);
+
+        // Send notification to Forwarder
+        logger.info("notification : {}", notification.getId());
+        evidenceWebSocketService.sendEvidenceNotifyToUser(notification);
+      }
+    });
+  }
+
+  public void broadcastEditContractToForwarder(Contract contract) {
+    executorService.submit(new Runnable() {
+      @Override
+      public void run() {
+        Combined combined = contract.getCombined();
+        Bid bidNew = combined.getBid();
+        BiddingNotification notification = new BiddingNotification();
+        BiddingNotificationRequest notifyRequest = new BiddingNotificationRequest();
+        Merchant offeree = bidNew.getBiddingDocument().getOfferee();
+
+        notifyRequest.setRecipient(offeree.getUsername());
+        notifyRequest.setRelatedResource(bidNew.getBiddingDocument().getId());
+        notifyRequest.setMessage(
+            String.format(NotificationMessage.SEND_EDIT_CONTRACT_NOTIFICATION, bidNew.getBidder().getCompanyName()));
+        notifyRequest.setAction(EnumBiddingNotification.MODIFIED.name());
+        notifyRequest.setType(EnumNotificationType.CONTRACT.name());
+        notification = biddingNotificationService.createBiddingNotification(notifyRequest);
+
+        // Send notification to Forwarder
+        logger.info("notification : {}", notification.getId());
+        evidenceWebSocketService.sendEvidenceNotifyToUser(notification);
       }
     });
   }
@@ -290,7 +423,8 @@ public class NotificationBroadcast {
           notifyRequest.setRecipient(moderator.getUsername());
           notifyRequest.setTitle(report.getTitle());
           notifyRequest.setRelatedResource(report.getId());
-          notifyRequest.setMessage(String.format("You got a new Report from %s", report.getSender().getUsername()));
+          notifyRequest.setMessage(String.format(NotificationMessage.SEND_REPORT_NOTIFICATION_TO_MODERATOR,
+              report.getSender().getCompanyName()));
           notifyRequest.setAction(EnumReportNotification.NEW.name());
           notifyRequest.setType(EnumNotificationType.REPORT.name());
           ReportNotification notification = reportNotificationService.createReportNotification(notifyRequest);
@@ -319,12 +453,12 @@ public class NotificationBroadcast {
             notifyRequest.setTitle(report.getTitle());
             notifyRequest.setRelatedResource(report.getId());
             if (report.getStatus().equals(EnumReportStatus.RESOLVED.name())) {
-              notifyRequest.setMessage(
-                  String.format("Report %s has been RESOLVED by %s", report.getId(), report.getSender().getUsername()));
+              notifyRequest.setMessage(String.format(NotificationMessage.SEND_REPORT_RESOLVED_NOTIFICATION,
+                  report.getId(), report.getSender().getCompanyName()));
               notifyRequest.setAction(EnumReportNotification.RESOLVED.name());
             } else {
-              notifyRequest.setMessage(
-                  String.format("Report %s has been Updated by %s", report.getId(), report.getSender().getUsername()));
+              notifyRequest.setMessage(String.format(NotificationMessage.SEND_REPORT_UPDATE_STRING_NOTIFICATION,
+                  report.getId(), report.getSender().getCompanyName()));
               notifyRequest.setAction(EnumReportNotification.UPDATE.name());
             }
             notifyRequest.setType(EnumNotificationType.REPORT.name());
@@ -342,7 +476,8 @@ public class NotificationBroadcast {
           notifyRequest.setRecipient(report.getSender().getUsername());
           notifyRequest.setTitle(report.getTitle());
           notifyRequest.setRelatedResource(report.getId());
-          notifyRequest.setMessage(String.format("Report %s has been %s", report.getId(), report.getStatus()));
+          notifyRequest.setMessage(String.format(NotificationMessage.SEND_REPORT_NOTIFICATION_TO_FORWARDER,
+              report.getId(), report.getStatus()));
           notifyRequest.setAction(report.getStatus());
           notifyRequest.setType(EnumNotificationType.REPORT.name());
           ReportNotification notification = reportNotificationService.createReportNotification(notifyRequest);
@@ -365,7 +500,8 @@ public class NotificationBroadcast {
         notifyRequest.setRecipient(feedback.getReport().getSender().getUsername());
         notifyRequest.setTitle(feedback.getReport().getTitle());
         notifyRequest.setRelatedResource(feedback.getReport().getId());
-        notifyRequest.setMessage(String.format("You got a new Feedback from %s", feedback.getSender().getUsername()));
+        notifyRequest.setMessage(
+            String.format(NotificationMessage.SEND_FEEDBACK_NOTIFICATION, feedback.getSender().getUsername()));
         notifyRequest.setAction(EnumReportNotification.FEEDBACK.name());
         notifyRequest.setType(EnumNotificationType.REPORT.name());
         ReportNotification notification = reportNotificationService.createReportNotification(notifyRequest);
@@ -387,7 +523,8 @@ public class NotificationBroadcast {
         notifyRequest.setRecipient(name);
         notifyRequest.setTitle(feedback.getReport().getTitle());
         notifyRequest.setRelatedResource(feedback.getReport().getId());
-        notifyRequest.setMessage(String.format("You got a new Feedback from %s", feedback.getSender().getUsername()));
+        notifyRequest.setMessage(
+            String.format(NotificationMessage.SEND_FEEDBACK_NOTIFICATION, feedback.getSender().getUsername()));
         notifyRequest.setAction(EnumReportNotification.FEEDBACK.name());
         notifyRequest.setType(EnumNotificationType.REPORT.name());
         ReportNotification notification = reportNotificationService.createReportNotification(notifyRequest);

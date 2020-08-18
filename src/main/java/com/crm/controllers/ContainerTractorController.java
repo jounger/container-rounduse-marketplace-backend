@@ -6,6 +6,8 @@ import java.util.Map;
 
 import javax.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -40,6 +42,8 @@ import com.crm.services.ContainerTractorService;
 @RestController
 @RequestMapping("/api/container-tractor")
 public class ContainerTractorController {
+
+  private static final Logger logger = LoggerFactory.getLogger(SupplierController.class);
 
   @Autowired
   ContainerTractorService containerTractorService;
@@ -142,6 +146,7 @@ public class ContainerTractorController {
     defaultResponse.setMessage(SuccessMessage.CREATE_CONTAINER_TRACTOR_SUCCESSFULLY);
     defaultResponse.setData(containerTractorDto);
 
+    logger.info("User {} createContainerTractor with request: {}", username, request.toString());
     return ResponseEntity.status(HttpStatus.CREATED).body(defaultResponse);
   }
 
@@ -161,6 +166,8 @@ public class ContainerTractorController {
     defaultResponse.setMessage(SuccessMessage.EDIT_CONTAINER_TRACTOR_SUCCESSFULLY);
     defaultResponse.setData(containerTractorDto);
 
+    logger.info("User {} editContainerTractor from tractor id {} with request: {}", username, id,
+        updates.toString());
     return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 
@@ -178,6 +185,7 @@ public class ContainerTractorController {
     DefaultResponse<ContainerTractorDto> defaultResponse = new DefaultResponse<>();
     defaultResponse.setMessage(SuccessMessage.DELETE_CONTAINER_TRACTOR_SUCCESSFULLY);
 
+    logger.info("User {} deleteContainerTractor with id {}", username, id);
     return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 }

@@ -1,6 +1,7 @@
 package com.crm.security;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -22,60 +23,58 @@ import com.crm.security.services.UserDetailsServiceImpl;
 
 @Configuration
 @EnableWebSecurity
-@EnableGlobalMethodSecurity(
-    prePostEnabled=true)
-public class WebSecurityConfig extends WebSecurityConfigurerAdapter{
+@EnableGlobalMethodSecurity(prePostEnabled = true)
+public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
   @Autowired
   private UserDetailsServiceImpl userDetailsService;
-  
+
   @Autowired
   private AuthEntryPointJwt authEntryPointJwt;
-  
+
+  @Value("${frontend-host}")
+  private String FRONTEND_HOST;
+
   @Bean
   public AuthTokenFilter authenticationJwtTokenFilter() {
     return new AuthTokenFilter();
   }
-  
+
   @Bean
   public WebMvcConfigurer corsConfigurer() {
-      return new WebMvcConfigurer() {
-          @Override
-          public void addCorsMappings(CorsRegistry registry) {
-              registry.addMapping("/api/**").allowedOrigins("http://localhost:8080"); // base on frontend server port
-          }
-      };
+    return new WebMvcConfigurer() {
+      @Override
+      public void addCorsMappings(CorsRegistry registry) {
+        registry.addMapping("/api/**").allowedOrigins(FRONTEND_HOST); // base on frontend server port
+      }
+    };
   }
-  
+
   @Override
   public void configure(AuthenticationManagerBuilder authenticationManagerBuilder) throws Exception {
     authenticationManagerBuilder.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder());
   }
-  
+
   @Bean
   @Override
   public AuthenticationManager authenticationManagerBean() throws Exception {
     return super.authenticationManagerBean();
   }
-  
+
   @Bean
   public PasswordEncoder passwordEncoder() {
     return new BCryptPasswordEncoder();
   }
-  
+
   @Override
   protected void configure(HttpSecurity http) throws Exception {
-    http.cors().and().csrf().disable()
-      .exceptionHandling().authenticationEntryPoint(authEntryPointJwt).and()
-      .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
-      .authorizeRequests().antMatchers("/api/auth/**").permitAll()
-      .antMatchers("/stomp/**").permitAll()
-      .antMatchers("/api/user/reset-password").permitAll()
-      .antMatchers("/api/file/download/**").permitAll()
-      .antMatchers("/api/admin/**").authenticated()
-      .anyRequest().authenticated();
-    
+    http.cors().and().csrf().disable().exceptionHandling().authenticationEntryPoint(authEntryPointJwt).and()
+        .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and().authorizeRequests()
+        .antMatchers("/api/auth/**").permitAll().antMatchers("/stomp/**").permitAll()
+        .antMatchers("/api/user/reset-password").permitAll().antMatchers("/api/file/download/**").permitAll()
+        .antMatchers("/api/admin/**").authenticated().anyRequest().authenticated();
+
     http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
   }
-  
+
 }

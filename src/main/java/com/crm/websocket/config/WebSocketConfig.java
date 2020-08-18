@@ -8,6 +8,7 @@ import javax.servlet.ServletException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
@@ -41,6 +42,9 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
   @Autowired
   private JwtUntils jwtUntils;
 
+  @Value("${frontend-host}")
+  private String FRONTEND_HOST;
+
   @Override
   public void configureMessageBroker(MessageBrokerRegistry config) {
     config.enableSimpleBroker("/topic", "/queue", "/user");
@@ -50,7 +54,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
   @Override
   public void registerStompEndpoints(StompEndpointRegistry registry) {
-    registry.addEndpoint("/stomp").setAllowedOrigins("http://localhost:8080").withSockJS();
+    registry.addEndpoint("/stomp").setAllowedOrigins(FRONTEND_HOST).withSockJS();
   }
 
   @Override

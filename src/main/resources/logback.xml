@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
   
-  <property name="LOG_PATH" value="C:/Users/Public/Logs" />
+  <property name="LOG_PATH" value="/opt/tomcat/webapps/logs" />
 
   <appender name="Console"
     class="ch.qos.logback.core.ConsoleAppender">

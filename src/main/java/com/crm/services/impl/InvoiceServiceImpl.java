@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service;
 import com.crm.common.Constant;
 import com.crm.common.ErrorMessage;
 import com.crm.common.Tool;
-import com.crm.enums.EnumPaymentType;
+import com.crm.enums.EnumInvoiceType;
 import com.crm.exception.ForbiddenException;
 import com.crm.exception.InternalException;
 import com.crm.exception.NotFoundException;
@@ -31,7 +31,7 @@ import com.crm.repository.InvoiceRepository;
 import com.crm.repository.SupplierRepository;
 import com.crm.repository.UserRepository;
 import com.crm.services.InvoiceService;
-import com.crm.specification.builder.PaymentSpecificationsBuilder;
+import com.crm.specification.builder.InvoiceSpecificationsBuilder;
 
 @Service
 public class InvoiceServiceImpl implements InvoiceService {
@@ -49,7 +49,7 @@ public class InvoiceServiceImpl implements InvoiceService {
   private UserRepository userRepository;
 
   @Override
-  public Invoice createPayment(Long id, String username, InvoiceRequest request) {
+  public Invoice createInvoice(Long id, String username, InvoiceRequest request) {
     Invoice invoice = new Invoice();
 
     Contract contract = contractRepository.findById(id)
@@ -77,7 +77,7 @@ public class InvoiceServiceImpl implements InvoiceService {
 
     invoice.setIsPaid(false);
 
-    EnumPaymentType type = EnumPaymentType.findByName(request.getType());
+    EnumInvoiceType type = EnumInvoiceType.findByName(request.getType());
     if (type != null) {
       invoice.setType(type.name());
     } else {
@@ -96,14 +96,14 @@ public class InvoiceServiceImpl implements InvoiceService {
   }
 
   @Override
-  public Page<Invoice> getPaymentsByUser(String username, PaginationRequest request) {
+  public Page<Invoice> getInvoicesByUser(String username, PaginationRequest request) {
     PageRequest page = PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Direction.DESC, "createdAt"));
     Page<Invoice> invoices = invoiceRepository.findByUser(username, page);
     return invoices;
   }
 
   @Override
-  public Page<Invoice> getPaymentsByContract(Long id, String username, PaginationRequest request) {
+  public Page<Invoice> getInvoicesByContract(Long id, String username, PaginationRequest request) {
     if (!contractRepository.existsById(id)) {
       throw new NotFoundException(ErrorMessage.CONTRACT_NOT_FOUND);
     }
@@ -122,8 +122,8 @@ public class InvoiceServiceImpl implements InvoiceService {
   }
 
   @Override
-  public Page<Invoice> searchPayments(PaginationRequest request, String search) {
-    PaymentSpecificationsBuilder builder = new PaymentSpecificationsBuilder();
+  public Page<Invoice> searchInvoices(PaginationRequest request, String search) {
+    InvoiceSpecificationsBuilder builder = new InvoiceSpecificationsBuilder();
     Pattern pattern = Pattern.compile(Constant.SEARCH_REGEX, Pattern.UNICODE_CHARACTER_CLASS);
     Matcher matcher = pattern.matcher(search + ",");
     while (matcher.find()) {
@@ -140,7 +140,7 @@ public class InvoiceServiceImpl implements InvoiceService {
   }
 
   @Override
-  public Invoice editPayment(Long id, String username, Map<String, Object> updates) {
+  public Invoice editInvoice(Long id, String username, Map<String, Object> updates) {
     Invoice invoice = invoiceRepository.findById(id)
         .orElseThrow(() -> new NotFoundException(ErrorMessage.PAYMENT_NOT_FOUND));
 
@@ -168,7 +168,7 @@ public class InvoiceServiceImpl implements InvoiceService {
   }
 
   @Override
-  public void removePayment(Long id, String paymentname) {
+  public void removeInvoice(Long id, String paymentname) {
     Invoice invoice = invoiceRepository.findById(id)
         .orElseThrow(() -> new NotFoundException(ErrorMessage.PAYMENT_NOT_FOUND));
     Supplier sender = supplierRepository.findByUsername(paymentname)

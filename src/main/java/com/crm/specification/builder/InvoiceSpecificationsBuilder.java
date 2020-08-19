@@ -3,20 +3,20 @@ package com.crm.specification.builder;
 import org.springframework.data.jpa.domain.Specification;
 
 import com.crm.models.Invoice;
-import com.crm.specification.PaymentSpecification;
+import com.crm.specification.InvoiceSpecification;
 
-public class PaymentSpecificationsBuilder extends GeneticSpecificationsBuilder<Invoice>{
+public class InvoiceSpecificationsBuilder extends GeneticSpecificationsBuilder<Invoice>{
 
   @Override
   public Specification<Invoice> build() {
     if (super.params.size() == 0) {
       return null;
     }
-    PaymentSpecification paymentSpecification = new PaymentSpecification();
-    paymentSpecification.setCriteria(super.params.get(0));
-    Specification<Invoice> result = paymentSpecification;
+    InvoiceSpecification invoiceSpecification = new InvoiceSpecification();
+    invoiceSpecification.setCriteria(super.params.get(0));
+    Specification<Invoice> result = invoiceSpecification;
     for (int i = 1; i < super.params.size(); i++) {
-      PaymentSpecification _paymentSpecification = new PaymentSpecification();
+      InvoiceSpecification _paymentSpecification = new InvoiceSpecification();
       _paymentSpecification.setCriteria(super.params.get(i));
       result = Specification.where(result).and(_paymentSpecification);
     }

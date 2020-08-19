@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -28,14 +29,15 @@ import com.crm.common.Constant;
 import com.crm.common.ErrorMessage;
 import com.crm.enums.EnumUserStatus;
 import com.crm.exception.DuplicateRecordException;
-import com.crm.exception.InternalException;
 import com.crm.exception.NotFoundException;
 import com.crm.models.FileUpload;
+import com.crm.models.PasswordResetToken;
 import com.crm.models.Role;
 import com.crm.models.User;
 import com.crm.payload.request.ChangePasswordRequest;
 import com.crm.payload.request.PaginationRequest;
 import com.crm.payload.request.SignUpRequest;
+import com.crm.repository.PasswordResetTokenRepository;
 import com.crm.repository.RoleRepository;
 import com.crm.repository.UserRepository;
 import com.crm.services.UserService;
@@ -52,6 +54,9 @@ public class UserServiceImpl implements UserService {
 
   @Autowired
   private PasswordEncoder passwordEncoder;
+
+  @Autowired
+  private PasswordResetTokenRepository passwordResetTokenRepository;
 
   @Autowired
   private JavaMailSender javaMailSender;
@@ -186,13 +191,21 @@ public class UserServiceImpl implements UserService {
 
   @Override
   public void getResetPasswordToken(String email) throws MessagingException, IOException {
-    if (!userRepository.existsByEmail(email)) {
-      throw new NotFoundException(ErrorMessage.USER_NOT_FOUND);
-    }
-    String expireDate = LocalDateTime.now().plusHours(3).toString();
-    String rawToken = email + "+" + expireDate;
+    User user = userRepository.findByEmail(email).orElseThrow(() -> new NotFoundException(ErrorMessage.USER_NOT_FOUND));
+
+    PasswordResetToken passwordResetToken = new PasswordResetToken();
+    passwordResetToken.setUser(user);
+    passwordResetToken.setExpiredDate(LocalDateTime.now().plusHours(3));
+
+    String rawToken = randomString();
     // encode data using BASE64
     String token = DatatypeConverter.printBase64Binary(rawToken.getBytes());
+    passwordResetToken.setToken(token);
+
+    passwordResetTokenRepository.save(passwordResetToken);
+
+    
+
     sendEmailWithAttachment(email, token);
   }
 
@@ -212,8 +225,8 @@ public class UserServiceImpl implements UserService {
     // true = text/html
     helper.setText("<p>Chúng tôi biết được bạn đã quên mật khẩu tại CRuM. Xin lỗi vì sự bất tiện này!</p>" + "<p></p>"
         + "<p>Đừng lo lắng! Bạn có thể sử dụng đường dẫn dưới đây để cài lại mật khẩu của mình:</p>" + "<p></p>"
-        + "<a href=\'https://www.containerrounduse.com/reset-password/" + token + "'>https://www.containerrounduse.com/reset-password/" + token
-        + "</a>" + "<p></p>"
+        + "<a href=\'https://www.containerrounduse.com/reset-password/" + token
+        + "'>https://www.containerrounduse.com/reset-password/" + token + "</a>" + "<p></p>"
         + "<p>Đường dẫn trên sẽ hết hạn trong vòng 3 tiếng nếu bạn không sử dụng. Để lấy đường dẫn đặt lại mật khẩu mới, "
         + "hãy truy cập </p><a href=\\'https://www.containerrounduse.com/forgot-password'>https://www.containerrounduse.com/forgot-password</a>"
         + "<p>Trân trọng,</p>" + "<p>Container Round User Inc</p>", true);
@@ -224,40 +237,45 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
-  public Boolean isValidResetPasswrodTolken(String token) {
-    String rawToken = new String(DatatypeConverter.parseBase64Binary(token));
-    String[] parts = rawToken.split("\\+", 2);
-    String email = parts[0];
-    String expireDate = parts[1];
-    LocalDateTime parse = null;
-    try {
-      parse = LocalDateTime.parse(expireDate);
-    } catch (Exception e) {
-      throw new InternalException(ErrorMessage.INVALID_RESET_PASSWORD_TOKEN);
-    }
-
-    if (userRepository.existsByEmail(email) && LocalDateTime.now().isBefore(parse)) {
+  public Boolean isValidResetPasswordTolken(String token) {
+    PasswordResetToken resetToken = passwordResetTokenRepository.findByToken(token)
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.INVALID_RESET_PASSWORD_TOKEN));
+    if (resetToken.getExpiredDate().isAfter(LocalDateTime.now())) {
       return true;
     } else {
-      throw new InternalException(ErrorMessage.INVALID_RESET_PASSWORD_TOKEN);
+      passwordResetTokenRepository.delete(resetToken);
+      return false;
     }
+
   }
 
   @Override
   public void resetPasswordByToken(String token, String newPassword) {
     // split token
-    String rawToken = new String(DatatypeConverter.parseBase64Binary(token));
-    String[] parts = rawToken.split("\\+", 2);
-    String email = parts[0];
-    // check if user exists
-    User user = userRepository.findByEmail(email).orElseThrow(() -> new NotFoundException(ErrorMessage.USER_NOT_FOUND));
+    PasswordResetToken passwordResetToken = passwordResetTokenRepository.findByToken(token)
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.INVALID_RESET_PASSWORD_TOKEN));
     // check valid new password
     if (newPassword.length() < 6 && newPassword.length() > 120) {
       throw new InvalidParameterException(ErrorMessage.NEW_PASSWORD_NOT_VALID);
     }
     // set new password
+    User user = passwordResetToken.getUser();
     String password = passwordEncoder.encode(newPassword);
     user.setPassword(password);
     userRepository.save(user);
+  }
+
+  // generate random String with length of 32
+  public String randomString() {
+    int leftLimit = 48; // numeral '0'
+    int rightLimit = 122; // letter 'z'
+    int targetStringLength = 32;
+    Random random = new Random();
+
+    String generatedString = random.ints(leftLimit, rightLimit + 1)
+        .filter(i -> (i <= 57 || i >= 65) && (i <= 90 || i >= 97)).limit(targetStringLength)
+        .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append).toString();
+
+    return generatedString;
   }
 }

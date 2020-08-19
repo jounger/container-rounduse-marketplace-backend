@@ -5,7 +5,7 @@ import com.crm.models.dto.InvoiceDto;
 
 public class InvoiceMapper {
 
-  public static InvoiceDto toPaymentDto(Invoice invoice) {
+  public static InvoiceDto toInvoiceDto(Invoice invoice) {
     if (invoice == null) {
       return null;
     }

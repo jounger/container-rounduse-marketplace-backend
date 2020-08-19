@@ -51,28 +51,28 @@ public class InvoiceController {
   @Transactional
   @PostMapping("/contract/{id}")
   @PreAuthorize("hasRole('MERCHANT') or hasRole('FORWARDER')")
-  public ResponseEntity<?> createPayment(@PathVariable("id") Long id, @Valid @RequestBody InvoiceRequest request) {
+  public ResponseEntity<?> createInvoice(@PathVariable("id") Long id, @Valid @RequestBody InvoiceRequest request) {
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
-    Invoice invoice = invoiceService.createPayment(id, username, request);
-    InvoiceDto invoiceDto = InvoiceMapper.toPaymentDto(invoice);
+    Invoice invoice = invoiceService.createInvoice(id, username, request);
+    InvoiceDto invoiceDto = InvoiceMapper.toInvoiceDto(invoice);
 
     // Set default response body
     DefaultResponse<InvoiceDto> defaultResponse = new DefaultResponse<>();
     defaultResponse.setMessage(SuccessMessage.CREATE_PAYMENT_SUCCESSFULLY);
     defaultResponse.setData(invoiceDto);
 
-    logger.info("User {} createPayment with request: {}", username, request.toString());
+    logger.info("User {} createInvoice with request: {}", username, request.toString());
     return ResponseEntity.status(HttpStatus.CREATED).body(defaultResponse);
   }
 
   @PreAuthorize("hasRole('MODERATOR') or hasRole('MERCHANT') or hasRole('FORWARDER')")
   @GetMapping("/contract/{id}")
-  public ResponseEntity<?> getPaymentsByContract(@PathVariable("id") Long id, @Valid PaginationRequest request) {
+  public ResponseEntity<?> getInvoicesByContract(@PathVariable("id") Long id, @Valid PaginationRequest request) {
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
 
-    Page<Invoice> pages = invoiceService.getPaymentsByContract(id, username, request);
+    Page<Invoice> pages = invoiceService.getInvoicesByContract(id, username, request);
 
     PaginationResponse<InvoiceDto> response = new PaginationResponse<>();
     response.setPageNumber(request.getPage());
@@ -82,7 +82,7 @@ public class InvoiceController {
 
     List<Invoice> invoices = pages.getContent();
     List<InvoiceDto> paymentsDto = new ArrayList<>();
-    invoices.forEach(payment -> paymentsDto.add(InvoiceMapper.toPaymentDto(payment)));
+    invoices.forEach(payment -> paymentsDto.add(InvoiceMapper.toInvoiceDto(payment)));
     response.setContents(paymentsDto);
 
     return ResponseEntity.ok(response);
@@ -90,11 +90,11 @@ public class InvoiceController {
 
   @PreAuthorize("hasRole('MERCHANT') or hasRole('FORWARDER')")
   @GetMapping("/user")
-  public ResponseEntity<?> getPaymentsByUser(@Valid PaginationRequest request) {
+  public ResponseEntity<?> getInvoicesByUser(@Valid PaginationRequest request) {
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
 
-    Page<Invoice> pages = invoiceService.getPaymentsByUser(username, request);
+    Page<Invoice> pages = invoiceService.getInvoicesByUser(username, request);
 
     PaginationResponse<InvoiceDto> response = new PaginationResponse<>();
     response.setPageNumber(request.getPage());
@@ -104,7 +104,7 @@ public class InvoiceController {
 
     List<Invoice> invoices = pages.getContent();
     List<InvoiceDto> paymentsDto = new ArrayList<>();
-    invoices.forEach(payment -> paymentsDto.add(InvoiceMapper.toPaymentDto(payment)));
+    invoices.forEach(payment -> paymentsDto.add(InvoiceMapper.toInvoiceDto(payment)));
     response.setContents(paymentsDto);
 
     return ResponseEntity.ok(response);
@@ -112,9 +112,9 @@ public class InvoiceController {
 
   @PreAuthorize("hasRole('MERCHANT') or hasRole('FORWARDER')")
   @GetMapping("/filter")
-  public ResponseEntity<?> searchPayments(@Valid PaginationRequest request,
+  public ResponseEntity<?> searchInvoices(@Valid PaginationRequest request,
       @RequestParam(value = "search") String search) {
-    Page<Invoice> pages = invoiceService.searchPayments(request, search);
+    Page<Invoice> pages = invoiceService.searchInvoices(request, search);
     PaginationResponse<InvoiceDto> response = new PaginationResponse<>();
     response.setPageNumber(request.getPage());
     response.setPageSize(request.getLimit());
@@ -123,7 +123,7 @@ public class InvoiceController {
 
     List<Invoice> invoices = pages.getContent();
     List<InvoiceDto> paymentsDto = new ArrayList<>();
-    invoices.forEach(payment -> paymentsDto.add(InvoiceMapper.toPaymentDto(payment)));
+    invoices.forEach(payment -> paymentsDto.add(InvoiceMapper.toInvoiceDto(payment)));
     response.setContents(paymentsDto);
 
     return ResponseEntity.ok(response);
@@ -132,34 +132,34 @@ public class InvoiceController {
   @Transactional
   @PreAuthorize("hasRole('MERCHANT') or hasRole('FORWARDER')")
   @RequestMapping(value = "/{id}", method = RequestMethod.PATCH, consumes = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<?> editPayment(@PathVariable("id") Long id, @RequestBody Map<String, Object> updates) {
+  public ResponseEntity<?> editInvoice(@PathVariable("id") Long id, @RequestBody Map<String, Object> updates) {
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
-    Invoice invoice = invoiceService.editPayment(id, username, updates);
-    InvoiceDto invoiceDto = InvoiceMapper.toPaymentDto(invoice);
+    Invoice invoice = invoiceService.editInvoice(id, username, updates);
+    InvoiceDto invoiceDto = InvoiceMapper.toInvoiceDto(invoice);
 
     // Set default response body
     DefaultResponse<InvoiceDto> defaultResponse = new DefaultResponse<>();
     defaultResponse.setMessage(SuccessMessage.EDIT_PAYMENT_SUCCESSFULLY);
     defaultResponse.setData(invoiceDto);
 
-    logger.info("User {} editPayment from id {} with request: {}", username, id, updates.toString());
+    logger.info("User {} editInvoice from id {} with request: {}", username, id, updates.toString());
     return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 
   @Transactional
   @PreAuthorize("hasRole('MERCHANT') or hasRole('FORWARDER')")
   @DeleteMapping("/{id}")
-  public ResponseEntity<?> deletePayment(@PathVariable Long id) {
+  public ResponseEntity<?> deleteInvoice(@PathVariable Long id) {
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
-    invoiceService.removePayment(id, username);
+    invoiceService.removeInvoice(id, username);
 
     // Set default response body
     DefaultResponse<InvoiceDto> defaultResponse = new DefaultResponse<>();
     defaultResponse.setMessage(SuccessMessage.DELETE_PAYMENT_SUCCESSFULLY);
 
-    logger.info("User {} deletePayment with id {}", username, id);
+    logger.info("User {} deleteInvoice with id {}", username, id);
     return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 }

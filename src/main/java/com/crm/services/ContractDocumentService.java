@@ -10,15 +10,15 @@ import com.crm.payload.request.PaginationRequest;
 
 public interface ContractDocumentService {
 
-  ContractDocument createEvidence(Long id, String username, ContractDocumentRequest request);
+  ContractDocument createContractDocument(Long id, String username, ContractDocumentRequest request);
 
-  Page<ContractDocument> getEvidencesByUser(String username, PaginationRequest request);
+  Page<ContractDocument> getContractDocumentsByUser(String username, PaginationRequest request);
   
-  Page<ContractDocument> getEvidencesByContract(Long id, String username, PaginationRequest request);
+  Page<ContractDocument> getContractDocumentsByContract(Long id, String username, PaginationRequest request);
 
-  Page<ContractDocument> searchEvidences(PaginationRequest request, String search);
+  Page<ContractDocument> searchContractDocuments(PaginationRequest request, String search);
 
-  ContractDocument editEvidence(Long id, String username, Map<String, Object> updates);
+  ContractDocument editContractDocument(Long id, String username, Map<String, Object> updates);
 
-  void removeEvidence(Long id, String username);
+  void removeContractDocument(Long id, String username);
 }

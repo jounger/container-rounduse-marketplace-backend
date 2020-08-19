@@ -6,7 +6,7 @@ import com.crm.models.dto.ContractDocumentDto;
 
 public class ContractDocumentMapper {
 
-  public static ContractDocumentDto toEvidenceDto(ContractDocument contractDocument) {
+  public static ContractDocumentDto toContractDocumentDto(ContractDocument contractDocument) {
     if (contractDocument == null) {
       return null;
     }

@@ -9,17 +9,17 @@ import com.crm.payload.request.PaginationRequest;
 import com.crm.payload.request.InvoiceRequest;
 
 public interface InvoiceService {
-  
-  Invoice createPayment(Long id, String username, InvoiceRequest request);
-  
-  Page<Invoice> getPaymentsByUser(String username, PaginationRequest request);
-  
-  Page<Invoice> getPaymentsByContract(Long id, String username, PaginationRequest request);
-  
-  Page<Invoice> searchPayments(PaginationRequest request, String search);
-  
-  Invoice editPayment(Long id, String username, Map<String, Object> updates);
-  
-  void removePayment(Long id, String username);
+
+  Invoice createInvoice(Long id, String username, InvoiceRequest request);
+
+  Page<Invoice> getInvoicesByUser(String username, PaginationRequest request);
+
+  Page<Invoice> getInvoicesByContract(Long id, String username, PaginationRequest request);
+
+  Page<Invoice> searchInvoices(PaginationRequest request, String search);
+
+  Invoice editInvoice(Long id, String username, Map<String, Object> updates);
+
+  void removeInvoice(Long id, String username);
 
 }

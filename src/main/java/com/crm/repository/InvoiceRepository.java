@@ -13,12 +13,12 @@ import com.crm.models.Invoice;
 @Repository
 public interface InvoiceRepository extends JpaRepository<Invoice, Long>, JpaSpecificationExecutor<Invoice> {
 
-  @Query(value = "FROM Payment p WHERE p.sender.username = :username OR p.recipient.username = :username")
+  @Query(value = "FROM Invoice p WHERE p.sender.username = :username OR p.recipient.username = :username")
   Page<Invoice> findByUser(@Param("username") String username, Pageable pageable);
 
-  @Query(value = "FROM Payment p WHERE p.contract.id = :id")
+  @Query(value = "FROM Invoice p WHERE p.contract.id = :id")
   Page<Invoice> findByContract(@Param("id") Long id, Pageable pageable);
 
-  @Query(value = "FROM Payment p WHERE p.contract.id = :id AND (p.sender.username = :username OR p.recipient.username = :username)")
+  @Query(value = "FROM Invoice p WHERE p.contract.id = :id AND (p.sender.username = :username OR p.recipient.username = :username)")
   Page<Invoice> findByContract(@Param("id") Long id, @Param("username") String username, Pageable pageable);
 }

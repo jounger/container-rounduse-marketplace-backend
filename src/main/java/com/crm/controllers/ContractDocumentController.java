@@ -59,7 +59,7 @@ public class ContractDocumentController {
   @Transactional
   @PostMapping("/contract/{id}")
   @PreAuthorize("hasRole('MERCHANT') or hasRole('FORWARDER')")
-  public ResponseEntity<?> createEvidence(@PathVariable("id") Long id, @RequestParam("file") MultipartFile file) {
+  public ResponseEntity<?> createContractDocument(@PathVariable("id") Long id, @RequestParam("file") MultipartFile file) {
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
 
@@ -73,25 +73,25 @@ public class ContractDocumentController {
     ContractDocumentRequest request = new ContractDocumentRequest();
     request.setDocumentPath(filePath);
 
-    ContractDocument contractDocument = contractDocumentService.createEvidence(id, username, request);
-    ContractDocumentDto contractDocumentDto = ContractDocumentMapper.toEvidenceDto(contractDocument);
+    ContractDocument contractDocument = contractDocumentService.createContractDocument(id, username, request);
+    ContractDocumentDto contractDocumentDto = ContractDocumentMapper.toContractDocumentDto(contractDocument);
 
     // Set default response body
     DefaultResponse<ContractDocumentDto> defaultResponse = new DefaultResponse<>();
     defaultResponse.setMessage(SuccessMessage.CREATE_EVIDENCE_SUCCESSFULLY);
     defaultResponse.setData(contractDocumentDto);
 
-    logger.info("User {} createEvidence with request: {}", username, request.toString());
+    logger.info("User {} createContractDocument with request: {}", username, request.toString());
     return ResponseEntity.status(HttpStatus.CREATED).body(defaultResponse);
   }
 
   @PreAuthorize("hasRole('MERCHANT') or hasRole('FORWARDER')")
   @GetMapping("/user")
-  public ResponseEntity<?> getEvidencesByUser(@Valid PaginationRequest request) {
+  public ResponseEntity<?> getContractDocumentsByUser(@Valid PaginationRequest request) {
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
 
-    Page<ContractDocument> pages = contractDocumentService.getEvidencesByUser(username, request);
+    Page<ContractDocument> pages = contractDocumentService.getContractDocumentsByUser(username, request);
 
     PaginationResponse<ContractDocumentDto> response = new PaginationResponse<>();
     response.setPageNumber(request.getPage());
@@ -101,7 +101,7 @@ public class ContractDocumentController {
 
     List<ContractDocument> contractDocuments = pages.getContent();
     List<ContractDocumentDto> evidencesDto = new ArrayList<>();
-    contractDocuments.forEach(evidence -> evidencesDto.add(ContractDocumentMapper.toEvidenceDto(evidence)));
+    contractDocuments.forEach(evidence -> evidencesDto.add(ContractDocumentMapper.toContractDocumentDto(evidence)));
     response.setContents(evidencesDto);
 
     return ResponseEntity.ok(response);
@@ -109,11 +109,11 @@ public class ContractDocumentController {
 
   @PreAuthorize("hasRole('MODERATOR') or hasRole('MERCHANT') or hasRole('FORWARDER')")
   @GetMapping("/contract/{id}")
-  public ResponseEntity<?> getEvidencesByContract(@PathVariable("id") Long id, @Valid PaginationRequest request) {
+  public ResponseEntity<?> getContractDocumentsByContract(@PathVariable("id") Long id, @Valid PaginationRequest request) {
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
 
-    Page<ContractDocument> pages = contractDocumentService.getEvidencesByContract(id, username, request);
+    Page<ContractDocument> pages = contractDocumentService.getContractDocumentsByContract(id, username, request);
 
     PaginationResponse<ContractDocumentDto> response = new PaginationResponse<>();
     response.setPageNumber(request.getPage());
@@ -123,7 +123,7 @@ public class ContractDocumentController {
 
     List<ContractDocument> contractDocuments = pages.getContent();
     List<ContractDocumentDto> evidencesDto = new ArrayList<>();
-    contractDocuments.forEach(evidence -> evidencesDto.add(ContractDocumentMapper.toEvidenceDto(evidence)));
+    contractDocuments.forEach(evidence -> evidencesDto.add(ContractDocumentMapper.toContractDocumentDto(evidence)));
     response.setContents(evidencesDto);
 
     return ResponseEntity.ok(response);
@@ -131,9 +131,9 @@ public class ContractDocumentController {
 
   @PreAuthorize("hasRole('MERCHANT') or hasRole('FORWARDER')")
   @GetMapping("/filter")
-  public ResponseEntity<?> searchEvidences(@Valid PaginationRequest request,
+  public ResponseEntity<?> searchContractDocuments(@Valid PaginationRequest request,
       @RequestParam(value = "search") String search) {
-    Page<ContractDocument> pages = contractDocumentService.searchEvidences(request, search);
+    Page<ContractDocument> pages = contractDocumentService.searchContractDocuments(request, search);
     PaginationResponse<ContractDocumentDto> response = new PaginationResponse<>();
     response.setPageNumber(request.getPage());
     response.setPageSize(request.getLimit());
@@ -142,7 +142,7 @@ public class ContractDocumentController {
 
     List<ContractDocument> contractDocuments = pages.getContent();
     List<ContractDocumentDto> evidencesDto = new ArrayList<>();
-    contractDocuments.forEach(evidence -> evidencesDto.add(ContractDocumentMapper.toEvidenceDto(evidence)));
+    contractDocuments.forEach(evidence -> evidencesDto.add(ContractDocumentMapper.toContractDocumentDto(evidence)));
     response.setContents(evidencesDto);
 
     return ResponseEntity.ok(response);
@@ -151,34 +151,34 @@ public class ContractDocumentController {
   @Transactional
   @PreAuthorize("hasRole('MERCHANT') or hasRole('FORWARDER')")
   @RequestMapping(value = "/{id}", method = RequestMethod.PATCH, consumes = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<?> editEvidence(@PathVariable("id") Long id, @RequestBody Map<String, Object> updates) {
+  public ResponseEntity<?> editContractDocument(@PathVariable("id") Long id, @RequestBody Map<String, Object> updates) {
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
-    ContractDocument contractDocument = contractDocumentService.editEvidence(id, username, updates);
-    ContractDocumentDto contractDocumentDto = ContractDocumentMapper.toEvidenceDto(contractDocument);
+    ContractDocument contractDocument = contractDocumentService.editContractDocument(id, username, updates);
+    ContractDocumentDto contractDocumentDto = ContractDocumentMapper.toContractDocumentDto(contractDocument);
 
     // Set default response body
     DefaultResponse<ContractDocumentDto> defaultResponse = new DefaultResponse<>();
     defaultResponse.setMessage(SuccessMessage.EDIT_EVIDENCE_SUCCESSFULLY);
     defaultResponse.setData(contractDocumentDto);
 
-    logger.info("User {} editEvidence from id {} with request: {}", username, id, updates.toString());
+    logger.info("User {} editContractDocument from id {} with request: {}", username, id, updates.toString());
     return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 
   @Transactional
   @PreAuthorize("hasRole('MERCHANT') or hasRole('FORWARDER')")
   @DeleteMapping("/{id}")
-  public ResponseEntity<?> deleteEvidence(@PathVariable Long id) {
+  public ResponseEntity<?> deleteContractDocument(@PathVariable Long id) {
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
-    contractDocumentService.removeEvidence(id, username);
+    contractDocumentService.removeContractDocument(id, username);
 
     // Set default response body
     DefaultResponse<ContractDocumentDto> defaultResponse = new DefaultResponse<>();
     defaultResponse.setMessage(SuccessMessage.DELETE_EVIDENCE_SUCCESSFULLY);
 
-    logger.info("User {} deleteEvidence with id {}", username, id);
+    logger.info("User {} deleteContractDocument with id {}", username, id);
     return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 }

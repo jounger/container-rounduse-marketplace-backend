@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 import com.crm.common.Constant;
 import com.crm.common.ErrorMessage;
 import com.crm.common.Tool;
-import com.crm.enums.EnumEvidenceStatus;
+import com.crm.enums.EnumContractDocumentStatus;
 import com.crm.enums.EnumShippingStatus;
 import com.crm.exception.ForbiddenException;
 import com.crm.exception.InternalException;
@@ -34,7 +34,7 @@ import com.crm.repository.ShippingInfoRepository;
 import com.crm.repository.SupplierRepository;
 import com.crm.repository.UserRepository;
 import com.crm.services.ContractDocumentService;
-import com.crm.specification.builder.EvidenceSpecificationsBuilder;
+import com.crm.specification.builder.ContractDocumentSpecificationsBuilder;
 import com.crm.websocket.controller.NotificationBroadcast;
 
 @Service
@@ -59,7 +59,7 @@ public class ContractDocumentServiceImpl implements ContractDocumentService {
   private NotificationBroadcast notificationBroadcast;
 
   @Override
-  public ContractDocument createEvidence(Long id, String username, ContractDocumentRequest request) {
+  public ContractDocument createContractDocument(Long id, String username, ContractDocumentRequest request) {
     ContractDocument contractDocument = new ContractDocument();
 
     Contract contract = contractRepository.findById(id)
@@ -81,25 +81,25 @@ public class ContractDocumentServiceImpl implements ContractDocumentService {
       } else {
         throw new InternalException(ErrorMessage.EVIDENCE_INVALID);
       }
-      contractDocument.setStatus(EnumEvidenceStatus.PENDING.name());
+      contractDocument.setStatus(EnumContractDocumentStatus.PENDING.name());
     } else {
       throw new ForbiddenException(ErrorMessage.USER_ACCESS_DENIED);
     }
 
     ContractDocument _evidence = contractDocumentRepository.save(contractDocument);
-    notificationBroadcast.broadcastCreateEvidenceToMerchant(contract);
+    notificationBroadcast.broadcastCreateContractDocumentToMerchant(contract);
     return _evidence;
   }
 
   @Override
-  public Page<ContractDocument> getEvidencesByUser(String username, PaginationRequest request) {
+  public Page<ContractDocument> getContractDocumentsByUser(String username, PaginationRequest request) {
     PageRequest page = PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt"));
     Page<ContractDocument> contractDocuments = contractDocumentRepository.findByUser(username, page);
     return contractDocuments;
   }
 
   @Override
-  public Page<ContractDocument> getEvidencesByContract(Long id, String username, PaginationRequest request) {
+  public Page<ContractDocument> getContractDocumentsByContract(Long id, String username, PaginationRequest request) {
     if (!contractRepository.existsById(id)) {
       throw new NotFoundException(ErrorMessage.CONTRACT_NOT_FOUND);
     }
@@ -118,9 +118,9 @@ public class ContractDocumentServiceImpl implements ContractDocumentService {
   }
 
   @Override
-  public Page<ContractDocument> searchEvidences(PaginationRequest request, String search) {
+  public Page<ContractDocument> searchContractDocuments(PaginationRequest request, String search) {
     // Extract data from search string
-    EvidenceSpecificationsBuilder builder = new EvidenceSpecificationsBuilder();
+    ContractDocumentSpecificationsBuilder builder = new ContractDocumentSpecificationsBuilder();
     Pattern pattern = Pattern.compile(Constant.SEARCH_REGEX, Pattern.UNICODE_CHARACTER_CLASS);
     Matcher matcher = pattern.matcher(search + ",");
     while (matcher.find()) {
@@ -137,7 +137,7 @@ public class ContractDocumentServiceImpl implements ContractDocumentService {
   }
 
   @Override
-  public ContractDocument editEvidence(Long id, String username, Map<String, Object> updates) {
+  public ContractDocument editContractDocument(Long id, String username, Map<String, Object> updates) {
     ContractDocument contractDocument = contractDocumentRepository.findById(id)
         .orElseThrow(() -> new NotFoundException(ErrorMessage.EVIDENCE_NOT_FOUND));
     Contract contract = contractDocument.getContract();
@@ -157,14 +157,14 @@ public class ContractDocumentServiceImpl implements ContractDocumentService {
     } else {
       String status = String.valueOf(updates.get("status"));
       if (updates.get("status") != null && !Tool.isEqual(contractDocument.getStatus(), status)) {
-        contractDocument.setStatus(EnumEvidenceStatus.findByName(status).name());
+        contractDocument.setStatus(EnumContractDocumentStatus.findByName(status).name());
       }
     }
 
     ContractDocument _evidence = contractDocumentRepository.save(contractDocument);
 
-    if (contract.getRequired() == true && contractDocumentRepository.existsValidEvidence(id, EnumEvidenceStatus.ACCEPTED.name())
-        && contractDocument.getStatus().equals(EnumEvidenceStatus.ACCEPTED.name())) {
+    if (contract.getRequired() == true && contractDocumentRepository.existsValidContractDocument(id, EnumContractDocumentStatus.ACCEPTED.name())
+        && contractDocument.getStatus().equals(EnumContractDocumentStatus.ACCEPTED.name())) {
       contract.getShippingInfos().forEach(item -> {
         item.setStatus(EnumShippingStatus.INFO_RECEIVED.name());
         shippingInfoRepository.save(item);
@@ -173,13 +173,13 @@ public class ContractDocumentServiceImpl implements ContractDocumentService {
       notificationBroadcast.broadcastCreateContractToDriver(contract);
     }
 
-    notificationBroadcast.broadcastAcceptOrRejectEvidenceToForwarder(contract, contractDocument.getStatus());
+    notificationBroadcast.broadcastAcceptOrRejectContractDocumentToForwarder(contract, contractDocument.getStatus());
 
     return _evidence;
   }
 
   @Override
-  public void removeEvidence(Long id, String username) {
+  public void removeContractDocument(Long id, String username) {
     ContractDocument contractDocument = contractDocumentRepository.findById(id)
         .orElseThrow(() -> new NotFoundException(ErrorMessage.EVIDENCE_NOT_FOUND));
     Contract contract = contractDocument.getContract();

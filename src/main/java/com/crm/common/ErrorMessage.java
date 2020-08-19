@@ -51,6 +51,7 @@ public class ErrorMessage {
 
   // Rating
   public static final String RATING_NOT_FOUND = "Không tìm thấy đánh giá";
+  public static final String RATING_ONE_PER_CONTRACT = "Bạn chỉ có thể đánh giá hợp đồng này một lần";
 
   // Container
   public static final String CONTAINER_LESS_THAN_NEEDED = "Số lượng container chưa đủ yêu cầu";

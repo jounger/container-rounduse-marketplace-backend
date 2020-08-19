@@ -29,6 +29,12 @@ public class ContractMapper {
     contractDto.setRequired(contract.getRequired());
     contractDto.setCreationDate(Tool.convertLocalDateTimeToString(contract.getCreationDate()));
 
+    if (contract.getRatings() != null) {
+      contract.getRatings().forEach(rating -> {
+        contractDto.getRatings().add(RatingMapper.toRatingDto(rating));
+      });
+    }
+
     return contractDto;
   }
 }

@@ -72,8 +72,7 @@ public class ContractController {
 
   @GetMapping("/combined/{id}")
   @PreAuthorize("hasRole('MERCHANT') or hasRole('FORWARDER')")
-  public ResponseEntity<?> getContractByCombined(@PathVariable("id") Long id,
-      @Valid @RequestBody ContractRequest request) {
+  public ResponseEntity<?> getContractByCombined(@PathVariable("id") Long id) {
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
     Contract contract = contractService.getContractByCombined(id, username);

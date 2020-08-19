@@ -16,28 +16,28 @@ import org.springframework.stereotype.Service;
 import com.crm.common.Constant;
 import com.crm.common.ErrorMessage;
 import com.crm.common.Tool;
-import com.crm.enums.EnumPaymentType;
+import com.crm.enums.EnumInvoiceType;
 import com.crm.exception.ForbiddenException;
 import com.crm.exception.InternalException;
 import com.crm.exception.NotFoundException;
 import com.crm.models.Contract;
-import com.crm.models.Payment;
+import com.crm.models.Invoice;
 import com.crm.models.Supplier;
 import com.crm.models.User;
 import com.crm.payload.request.PaginationRequest;
-import com.crm.payload.request.PaymentRequest;
+import com.crm.payload.request.InvoiceRequest;
 import com.crm.repository.ContractRepository;
-import com.crm.repository.PaymentRepository;
+import com.crm.repository.InvoiceRepository;
 import com.crm.repository.SupplierRepository;
 import com.crm.repository.UserRepository;
-import com.crm.services.PaymentService;
-import com.crm.specification.builder.PaymentSpecificationsBuilder;
+import com.crm.services.InvoiceService;
+import com.crm.specification.builder.InvoiceSpecificationsBuilder;
 
 @Service
-public class PaymentServiceImpl implements PaymentService {
+public class InvoiceServiceImpl implements InvoiceService {
 
   @Autowired
-  private PaymentRepository paymentRepository;
+  private InvoiceRepository invoiceRepository;
 
   @Autowired
   private SupplierRepository supplierRepository;
@@ -49,81 +49,81 @@ public class PaymentServiceImpl implements PaymentService {
   private UserRepository userRepository;
 
   @Override
-  public Payment createPayment(Long id, String username, PaymentRequest request) {
-    Payment payment = new Payment();
+  public Invoice createInvoice(Long id, String username, InvoiceRequest request) {
+    Invoice invoice = new Invoice();
 
     Contract contract = contractRepository.findById(id)
         .orElseThrow(() -> new NotFoundException(ErrorMessage.CONTRACT_NOT_FOUND));
-    payment.setContract(contract);
+    invoice.setContract(contract);
 
     Supplier merchant = contract.getSender();
     Supplier forwarder = contract.getCombined().getBid().getBidder();
     if (username.equals(merchant.getUsername())) {
-      payment.setSender(merchant);
-      payment.setRecipient(forwarder);
+      invoice.setSender(merchant);
+      invoice.setRecipient(forwarder);
     } else if (username.equals(forwarder.getUsername())) {
-      payment.setSender(forwarder);
-      payment.setRecipient(merchant);
+      invoice.setSender(forwarder);
+      invoice.setRecipient(merchant);
     } else {
       throw new ForbiddenException(ErrorMessage.USER_ACCESS_DENIED);
     }
 
-    payment.setDetail(request.getDetail());
+    invoice.setDetail(request.getDetail());
     if (request.getAmount() > 0) {
-      payment.setAmount(request.getAmount());
+      invoice.setAmount(request.getAmount());
     } else {
       throw new InternalException(ErrorMessage.PAYMENT_INVALID_AMOUNT);
     }
 
-    payment.setIsPaid(false);
+    invoice.setIsPaid(false);
 
-    EnumPaymentType type = EnumPaymentType.findByName(request.getType());
+    EnumInvoiceType type = EnumInvoiceType.findByName(request.getType());
     if (type != null) {
-      payment.setType(type.name());
+      invoice.setType(type.name());
     } else {
       throw new NotFoundException(ErrorMessage.PAYMENT_TYPE_NOT_FOUND);
     }
 
     if (request.getPaymentDate() == null) {
-      payment.setPaymentDate(LocalDateTime.now());
+      invoice.setPaymentDate(LocalDateTime.now());
     } else {
-      payment.setPaymentDate(Tool.convertToLocalDateTime(request.getPaymentDate()));
+      invoice.setPaymentDate(Tool.convertToLocalDateTime(request.getPaymentDate()));
     }
 
-    Payment _payment = paymentRepository.save(payment);
+    Invoice _payment = invoiceRepository.save(invoice);
     return _payment;
 
   }
 
   @Override
-  public Page<Payment> getPaymentsByUser(String username, PaginationRequest request) {
+  public Page<Invoice> getInvoicesByUser(String username, PaginationRequest request) {
     PageRequest page = PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Direction.DESC, "createdAt"));
-    Page<Payment> payments = paymentRepository.findByUser(username, page);
-    return payments;
+    Page<Invoice> invoices = invoiceRepository.findByUser(username, page);
+    return invoices;
   }
 
   @Override
-  public Page<Payment> getPaymentsByContract(Long id, String username, PaginationRequest request) {
+  public Page<Invoice> getInvoicesByContract(Long id, String username, PaginationRequest request) {
     if (!contractRepository.existsById(id)) {
       throw new NotFoundException(ErrorMessage.CONTRACT_NOT_FOUND);
     }
-    Page<Payment> payments = null;
+    Page<Invoice> invoices = null;
     PageRequest page = PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt"));
     User user = userRepository.findByUsername(username)
         .orElseThrow(() -> new NotFoundException(ErrorMessage.USER_NOT_FOUND));
     String role = user.getRoles().iterator().next().getName();
 
     if (role.equalsIgnoreCase("ROLE_MODERATOR")) {
-      payments = paymentRepository.findByContract(id, page);
+      invoices = invoiceRepository.findByContract(id, page);
     } else {
-      payments = paymentRepository.findByContract(id, username, page);
+      invoices = invoiceRepository.findByContract(id, username, page);
     }
-    return payments;
+    return invoices;
   }
 
   @Override
-  public Page<Payment> searchPayments(PaginationRequest request, String search) {
-    PaymentSpecificationsBuilder builder = new PaymentSpecificationsBuilder();
+  public Page<Invoice> searchInvoices(PaginationRequest request, String search) {
+    InvoiceSpecificationsBuilder builder = new InvoiceSpecificationsBuilder();
     Pattern pattern = Pattern.compile(Constant.SEARCH_REGEX, Pattern.UNICODE_CHARACTER_CLASS);
     Matcher matcher = pattern.matcher(search + ",");
     while (matcher.find()) {
@@ -131,50 +131,50 @@ public class PaymentServiceImpl implements PaymentService {
       builder.with(matcher.group(1), matcher.group(2), matcher.group(3));
     }
     // Build specification
-    Specification<Payment> spec = builder.build();
+    Specification<Invoice> spec = builder.build();
     PageRequest page = PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt"));
     // Filter with repository
-    Page<Payment> pages = paymentRepository.findAll(spec, page);
+    Page<Invoice> pages = invoiceRepository.findAll(spec, page);
     // Return result
     return pages;
   }
 
   @Override
-  public Payment editPayment(Long id, String username, Map<String, Object> updates) {
-    Payment payment = paymentRepository.findById(id)
+  public Invoice editInvoice(Long id, String username, Map<String, Object> updates) {
+    Invoice invoice = invoiceRepository.findById(id)
         .orElseThrow(() -> new NotFoundException(ErrorMessage.PAYMENT_NOT_FOUND));
 
-    if (payment.getSender().getUsername().equals(username)) {
+    if (invoice.getSender().getUsername().equals(username)) {
       String detail = String.valueOf(updates.get("detail"));
       if (updates.get("detail") != null && !Tool.isBlank(detail)) {
-        payment.setDetail(detail);
+        invoice.setDetail(detail);
       }
 
       String amount = String.valueOf(updates.get("amount"));
-      if (updates.get("amount") != null && !Tool.isEqual(payment.getAmount(), amount)) {
-        payment.setAmount(Double.valueOf(amount));
+      if (updates.get("amount") != null && !Tool.isEqual(invoice.getAmount(), amount)) {
+        invoice.setAmount(Double.valueOf(amount));
       }
     }
 
-    if (payment.getRecipient().getUsername().equals(username)) {
+    if (invoice.getRecipient().getUsername().equals(username)) {
       Boolean isPaidString = (Boolean) updates.get("isPaid");
       if (updates.get("isPaid") != null && isPaidString != null) {
-        payment.setIsPaid(isPaidString);
+        invoice.setIsPaid(isPaidString);
       }
     }
 
-    Payment _payment = paymentRepository.save(payment);
+    Invoice _payment = invoiceRepository.save(invoice);
     return _payment;
   }
 
   @Override
-  public void removePayment(Long id, String paymentname) {
-    Payment payment = paymentRepository.findById(id)
+  public void removeInvoice(Long id, String paymentname) {
+    Invoice invoice = invoiceRepository.findById(id)
         .orElseThrow(() -> new NotFoundException(ErrorMessage.PAYMENT_NOT_FOUND));
     Supplier sender = supplierRepository.findByUsername(paymentname)
         .orElseThrow(() -> new NotFoundException(ErrorMessage.USER_NOT_FOUND));
-    if (payment.getSender().equals(sender)) {
-      paymentRepository.deleteById(id);
+    if (invoice.getSender().equals(sender)) {
+      invoiceRepository.deleteById(id);
     } else {
       throw new ForbiddenException(ErrorMessage.USER_ACCESS_DENIED);
     }

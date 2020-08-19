@@ -1,11 +1,11 @@
 package com.crm.enums;
 
-public enum EnumPaymentType {
+public enum EnumInvoiceType {
   
   FINES, PAYMENT;
   
-  public static EnumPaymentType findByName(String name) {
-    for (EnumPaymentType type : EnumPaymentType.values()) {
+  public static EnumInvoiceType findByName(String name) {
+    for (EnumInvoiceType type : EnumInvoiceType.values()) {
       if (type.name().equalsIgnoreCase(name)) {
         return type;
       }

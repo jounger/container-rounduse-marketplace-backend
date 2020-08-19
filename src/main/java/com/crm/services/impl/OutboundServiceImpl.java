@@ -312,16 +312,19 @@ public class OutboundServiceImpl implements OutboundService {
       if (!outbound.getBiddingDocuments().isEmpty()) {
         BiddingDocument biddingDocument = (BiddingDocument) outbound.getBiddingDocuments()
             .toArray()[outbound.getBiddingDocuments().size() - 1];
+        String status = biddingDocument.getStatus();
         boolean existsCombinedBid = biddingDocumentRepository.existsCombinedBid(biddingDocument.getId());
-        if (biddingDocument.getBidClosing().isBefore(LocalDateTime.now()) && existsCombinedBid
+        if (biddingDocument.getBidClosing().isBefore(LocalDateTime.now())
             && biddingDocument.getStatus().equals(EnumBiddingStatus.BIDDING.name())) {
-          String status = EnumBiddingStatus.EXPIRED.name();
+          if (!existsCombinedBid) {
+            status = EnumBiddingStatus.EXPIRED.name();
+            outbound.setStatus(EnumSupplyStatus.CREATED.name());
+          }
+          if (existsCombinedBid) {
+            status = EnumBiddingStatus.COMBINED.name();
+            outbound.setStatus(EnumSupplyStatus.COMBINED.name());
+          }
           biddingDocumentService.updateExpiredBiddingDocuments(biddingDocument.getId(), status);
-        }
-        if (existsCombinedBid) {
-          outbound.setStatus(EnumSupplyStatus.COMBINED.name());
-        } else {
-          outbound.setStatus(EnumSupplyStatus.CREATED.name());
         }
       }
       result.add(outbound);

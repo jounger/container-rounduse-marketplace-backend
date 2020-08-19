@@ -18,6 +18,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -119,6 +120,8 @@ public class User {
   @OneToMany(mappedBy = "owner")
   private Collection<FileUpload> fileUploads = new ArrayList<>();
 
+  @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+  private PasswordResetToken PasswordResetToken = new PasswordResetToken();
   // DO NOT DELETE CODE BELLOW
 
   @Override

@@ -66,8 +66,11 @@ public class Bid {
   @Column(name = "bid_date")
   private LocalDateTime bidDate;
 
-  @Column(name = "bid_validity_period")
-  private LocalDateTime bidValidityPeriod;
+  @Column(name = "freeze_time")
+  private LocalDateTime freezeTime;
+  
+  @Column(name = "validity_period")
+  private LocalDateTime validityPeriod;
 
   @Column(name = "date_of_decision")
   private LocalDateTime dateOfDecision;

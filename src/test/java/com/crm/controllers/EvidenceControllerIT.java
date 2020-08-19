@@ -75,7 +75,7 @@ class EvidenceControllerIT {
 
     evidence = new Evidence();
     evidence.setId(1L);
-    evidence.setIsValid(false);
+    evidence.setStatus("PENDING");
     evidence.setSender(merchant);
 
     requestParams = new LinkedMultiValueMap<>();
@@ -169,7 +169,7 @@ class EvidenceControllerIT {
   @WithMockUser(username = "forwarder", roles = { "FORWARDER" })
   void editEvidence_thenStatusOk_andReturnEvidence() throws Exception {
     // given
-    evidence.setIsValid(true);
+    evidence.setStatus("ACCEPTED");
     Map<String, Object> updates = new HashMap<String, Object>();
     updates.put("isValid", "true");
     when(evidenceService.editEvidence(Mockito.anyLong(), Mockito.anyString(), Mockito.anyMap())).thenReturn(evidence);
@@ -179,7 +179,7 @@ class EvidenceControllerIT {
         .perform(patch("/api/evidence/1").contentType(MediaType.APPLICATION_JSON_VALUE)
             .content(objectMapper.writeValueAsString(updates)))
         .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.data.id").value(1))
-        .andExpect(jsonPath("$.data.isValid").value(true)).andReturn();
+        .andExpect(jsonPath("$.data.isValid").value("ACCEPTED")).andReturn();
 
     // print response
     MockHttpServletResponse response = result.getResponse();

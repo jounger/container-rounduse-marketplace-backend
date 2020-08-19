@@ -249,7 +249,7 @@ class BiddingDocumentControllerIT {
   void updateBiddingDocument_thenStatusOk_andReturnBiddingDocument() throws Exception {
     // given
     biddingDocument.setBidFloorPrice(1800D);
-    when(biddingDocumentService.editBiddingDocument(Mockito.anyLong(), Mockito.anyMap())).thenReturn(biddingDocument);
+    when(biddingDocumentService.editBiddingDocument(Mockito.anyLong(), Mockito.anyString(), Mockito.anyMap())).thenReturn(biddingDocument);
     Map<String, Object> updates = new HashMap<String, Object>();
     updates.put("bidFloorPrice", "1800");
 

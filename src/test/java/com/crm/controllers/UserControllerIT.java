@@ -64,7 +64,7 @@ public class UserControllerIT {
 
   @BeforeEach
   public void setUp() {
-    
+
     logger.info("------------------------------------");
     paginationRequest = new PaginationRequest();
     paginationRequest.setPage(0);
@@ -103,8 +103,7 @@ public class UserControllerIT {
     MvcResult mvcResult = mockMvc
         .perform(get("/api/user").params(requestParams).contentType(MediaType.APPLICATION_JSON_VALUE)).andDo(print())
         .andExpect(status().isOk()).andExpect(jsonPath("$.page").value(0))
-        .andExpect(jsonPath("$.totalElements").value(1)).andExpect(jsonPath("$.totalPages").value(1))
-        .andReturn();
+        .andExpect(jsonPath("$.totalElements").value(1)).andExpect(jsonPath("$.totalPages").value(1)).andReturn();
 
     // print response
     MockHttpServletResponse response = mvcResult.getResponse();
@@ -131,7 +130,7 @@ public class UserControllerIT {
     // RESPONSE
     MockHttpServletResponse response = mvcResult.getResponse();
     logger.info("Reponse: {}", response.getContentAsString());
-    
+
   }
 
   @Test
@@ -141,7 +140,6 @@ public class UserControllerIT {
     updates.put("status", "ACCEPTED");
     user.setStatus("ACCEPTED");
 
-    when(userService.changeStatus(Mockito.anyLong(), Mockito.anyMap())).thenReturn(user);
     when(userService.searchUsers(Mockito.any(PaginationRequest.class), Mockito.anyString())).thenReturn(pages);
     MvcResult mvcResult = mockMvc
         .perform(patch("/api/user/1").contentType(MediaType.APPLICATION_JSON)

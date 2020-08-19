@@ -55,6 +55,7 @@ import com.crm.models.Port;
 import com.crm.models.ShippingInfo;
 import com.crm.models.ShippingLine;
 import com.crm.payload.request.PaginationRequest;
+import com.crm.payload.request.ShippingInfoRequest;
 import com.crm.services.ShippingInfoService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -221,14 +222,14 @@ class ShippingInfoControllerIT {
 
     shippingInfo = new ShippingInfo();
     shippingInfo.setId(1L);
-    shippingInfo.setCombined(combined);
+    shippingInfo.setContract(contract);
     shippingInfo.setContainer(container);
     shippingInfo.setOutbound(outbound);
     shippingInfo.setStatus(EnumShippingStatus.INFO_RECEIVED.name());
 
     List<ShippingInfo> shippingInfos = new ArrayList<ShippingInfo>();
     shippingInfos.add(shippingInfo);
-    combined.setShippingInfos(shippingInfos);
+    contract.setShippingInfos(shippingInfos);
     pages = new PageImpl<ShippingInfo>(shippingInfos);
   }
 
@@ -329,7 +330,7 @@ class ShippingInfoControllerIT {
     shippingInfo.setStatus(EnumShippingStatus.SHIPPING.name());
     Map<String, Object> updates = new HashMap<String, Object>();
     updates.put("status", "SHIPPING");
-    when(shippingInfoService.editShippingInfo(Mockito.anyLong(), Mockito.anyString(), Mockito.anyString()))
+    when(shippingInfoService.editShippingInfo(Mockito.anyLong(), Mockito.anyString(), Mockito.any(ShippingInfoRequest.class)))
         .thenReturn(shippingInfo);
 
     // when and then

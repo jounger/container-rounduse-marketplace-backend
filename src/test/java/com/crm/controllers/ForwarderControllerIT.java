@@ -110,7 +110,6 @@ class ForwarderControllerIT {
     request.setCompanyCode("FOR");
     request.setCompanyDescription("ad2dce");
     request.setCompanyName("Forwarder 1wes");
-    request.setContactPerson("asd2sdad");
     request.setFax("32321123");
     request.setTin("23d235313");
     request.setWebsite("forwarder.com");

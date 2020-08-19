@@ -245,7 +245,8 @@ class BidControllerIT {
   @WithMockUser(username = "forwarder", roles = { "FORWARDER" })
   void getBidByBiddingDocumentAndForwarder_thenStatusOk_andReturnBid() throws JsonProcessingException, Exception {
     // given
-    when(bidService.getBidByBiddingDocumentAndForwarder(Mockito.anyLong(), Mockito.anyString())).thenReturn(bid);
+    when(bidService.getBidsByBiddingDocument(Mockito.anyLong(), Mockito.anyString(),
+        Mockito.any(PaginationRequest.class))).thenReturn(pages);
 
     // when and then
     MvcResult result = mockMvc.perform(get("/api/bid/bidding-document/1").contentType(MediaType.APPLICATION_JSON_VALUE))
@@ -261,8 +262,8 @@ class BidControllerIT {
   @WithMockUser(username = "merchant", roles = { "MERCHANT" })
   void getBidsByBiddingDocument_thenStatusOk_andReturnBids() throws JsonProcessingException, Exception {
     // given
-    when(bidService.getBidsByBiddingDocument(Mockito.anyLong(), Mockito.any(PaginationRequest.class)))
-        .thenReturn(pages);
+    when(bidService.getBidsByBiddingDocumentAndExistCombined(Mockito.anyLong(), Mockito.anyString(),
+        Mockito.any(PaginationRequest.class))).thenReturn(pages);
 
     // when and then
     MvcResult result = mockMvc

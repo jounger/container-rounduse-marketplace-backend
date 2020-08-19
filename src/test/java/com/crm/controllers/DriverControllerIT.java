@@ -152,7 +152,7 @@ class DriverControllerIT {
     // given
     requestParams = new LinkedMultiValueMap<String, String>();
     requestParams.add("username", "driver");
-    when(driverService.getDriverByUserName(Mockito.anyString())).thenReturn(driver);
+    when(driverService.getDriverByUsername(Mockito.anyString())).thenReturn(driver);
 
     // when and then
     MvcResult result = mockMvc

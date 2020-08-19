@@ -72,7 +72,6 @@ public class AuthControllerIT {
     roles.add(role);
     forwarder.setRoles(roles);
     forwarder.setWebsite("aha.com");
-    forwarder.setContactPerson("Nguyen Van A");
     forwarder.setCompanyName("Aha Logistic");
     forwarder.setCompanyCode("AHA");
     forwarder.setCompanyDescription("Cong ty xuat khau");
@@ -94,7 +93,6 @@ public class AuthControllerIT {
     roles.add("FORWARDER");
     request.setRoles(roles);
     request.setWebsite("aha.com");
-    request.setContactPerson("Nguyen Van A");
     request.setCompanyName("Aha Logistic");
     request.setCompanyCode("AHA");
     request.setCompanyDescription("Cong ty xuat khau");

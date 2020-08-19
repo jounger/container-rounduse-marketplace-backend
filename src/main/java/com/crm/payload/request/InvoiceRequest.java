@@ -7,8 +7,8 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class PaymentRequest {
-
+public class InvoiceRequest {
+  
   private Long id;
 
   private String sender;

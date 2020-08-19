@@ -42,7 +42,7 @@ import com.crm.services.RatingService;
 @RequestMapping("/api/rating")
 public class RatingController {
 
-  private static final Logger logger = LoggerFactory.getLogger(SupplierController.class);
+  private static final Logger logger = LoggerFactory.getLogger(RatingController.class);
 
   @Autowired
   private RatingService ratingService;

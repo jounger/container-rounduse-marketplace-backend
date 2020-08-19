@@ -1,6 +1,7 @@
 package com.crm.controllers;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -42,42 +43,24 @@ import com.crm.services.ContainerService;
 @RequestMapping("/api/container")
 public class ContainerController {
 
-  private static final Logger logger = LoggerFactory.getLogger(SupplierController.class);
+  private static final Logger logger = LoggerFactory.getLogger(ContainerController.class);
 
   @Autowired
   private ContainerService containerService;
-
-  @GetMapping("")
-  @PreAuthorize("hasRole('FORWARDER') or hasRole('MERCHANT')")
-  public ResponseEntity<?> getContainers(@Valid PaginationRequest request) {
-    Page<Container> pages = containerService.getContainers(request);
-    PaginationResponse<ContainerDto> response = new PaginationResponse<>();
-    response.setPageNumber(request.getPage());
-    response.setPageSize(request.getLimit());
-    response.setTotalElements(pages.getTotalElements());
-    response.setTotalPages(pages.getTotalPages());
-
-    List<Container> containers = pages.getContent();
-    List<ContainerDto> containerDto = new ArrayList<>();
-    containers.forEach(container -> containerDto.add(ContainerMapper.toContainerDto(container)));
-    response.setContents(containerDto);
-
-    return ResponseEntity.ok(response);
-  }
 
   @GetMapping("/{id}")
   @PreAuthorize("hasRole('FORWARDER') or hasRole('MERCHANT')")
   public ResponseEntity<?> getContainer(@PathVariable Long id) {
     Container container = containerService.getContainerById(id);
+    List<Container> result = containerService.updateExpiredContainerFromList(Arrays.asList(container));
     ContainerDto containerDto = new ContainerDto();
-    containerDto = ContainerMapper.toContainerDto(container);
+    containerDto = ContainerMapper.toContainerDto(result.get(0));
     return ResponseEntity.ok(containerDto);
   }
 
   @GetMapping("/bill-of-lading/{id}")
   @PreAuthorize("hasRole('FORWARDER') or hasRole('MERCHANT')")
   public ResponseEntity<?> getContainersByBillOfLading(@PathVariable Long id, @Valid PaginationRequest request) {
-
     Page<Container> pages = containerService.getContainersByBillOfLading(id, request);
     PaginationResponse<ContainerDto> response = new PaginationResponse<>();
     response.setPageNumber(request.getPage());
@@ -86,8 +69,9 @@ public class ContainerController {
     response.setTotalPages(pages.getTotalPages());
 
     List<Container> containers = pages.getContent();
+    List<Container> result = containerService.updateExpiredContainerFromList(containers);
     List<ContainerDto> containerDto = new ArrayList<>();
-    containers.forEach(container -> containerDto.add(ContainerMapper.toContainerDto(container)));
+    result.forEach(container -> containerDto.add(ContainerMapper.toContainerDto(container)));
     response.setContents(containerDto);
 
     return ResponseEntity.ok(response);
@@ -97,7 +81,6 @@ public class ContainerController {
   @GetMapping("/inbound/{id}")
   @PreAuthorize("hasRole('FORWARDER') or hasRole('MERCHANT')")
   public ResponseEntity<?> getContainersByInbound(@PathVariable Long id, @Valid PaginationRequest request) {
-
     Page<Container> pages = containerService.getContainersByInbound(id, request);
     PaginationResponse<ContainerDto> response = new PaginationResponse<>();
     response.setPageNumber(request.getPage());
@@ -106,8 +89,9 @@ public class ContainerController {
     response.setTotalPages(pages.getTotalPages());
 
     List<Container> containers = pages.getContent();
+    List<Container> result = containerService.updateExpiredContainerFromList(containers);
     List<ContainerDto> containerDto = new ArrayList<>();
-    containers.forEach(container -> containerDto.add(ContainerMapper.toContainerDto(container)));
+    result.forEach(container -> containerDto.add(ContainerMapper.toContainerDto(container)));
     response.setContents(containerDto);
 
     return ResponseEntity.ok(response);
@@ -117,7 +101,6 @@ public class ContainerController {
   @GetMapping("/bid/{id}")
   @PreAuthorize("hasRole('FORWARDER') or hasRole('MERCHANT')")
   public ResponseEntity<?> getContainersByBid(@PathVariable Long id, @Valid PaginationRequest request) {
-
     Page<Container> pages = containerService.getContainersByBid(id, request);
     PaginationResponse<ContainerDto> response = new PaginationResponse<>();
     response.setPageNumber(request.getPage());
@@ -126,8 +109,9 @@ public class ContainerController {
     response.setTotalPages(pages.getTotalPages());
 
     List<Container> containers = pages.getContent();
+    List<Container> result = containerService.updateExpiredContainerFromList(containers);
     List<ContainerDto> containerDto = new ArrayList<>();
-    containers.forEach(container -> containerDto.add(ContainerMapper.toContainerDto(container)));
+    result.forEach(container -> containerDto.add(ContainerMapper.toContainerDto(container)));
     response.setContents(containerDto);
 
     return ResponseEntity.ok(response);
@@ -138,7 +122,6 @@ public class ContainerController {
   @PostMapping("/bill-of-lading/{id}")
   @PreAuthorize("hasRole('FORWARDER')")
   public ResponseEntity<?> createContainer(@PathVariable Long id, @Valid @RequestBody ContainerRequest request) {
-
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
 
@@ -157,7 +140,6 @@ public class ContainerController {
   @PreAuthorize("hasRole('FORWARDER')")
   @RequestMapping(value = "/{id}", method = RequestMethod.PATCH, consumes = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<?> editContainer(@RequestBody Map<String, Object> updates, @PathVariable("id") Long id) {
-
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
 
@@ -178,7 +160,6 @@ public class ContainerController {
   @DeleteMapping("/{id}")
   @PreAuthorize("hasRole('FORWARDER')")
   public ResponseEntity<?> removeContainer(@PathVariable Long id) {
-
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
 

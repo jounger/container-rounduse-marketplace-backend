@@ -41,7 +41,7 @@ import com.crm.services.NotificationService;
 @RequestMapping("/api/notification")
 public class NotificationController {
 
-  private static final Logger logger = LoggerFactory.getLogger(SupplierController.class);
+  private static final Logger logger = LoggerFactory.getLogger(NotificationController.class);
 
   @Autowired
   NotificationService notificationService;
@@ -67,7 +67,7 @@ public class NotificationController {
   }
 
   @GetMapping("/user")
-  public ResponseEntity<?> getNotificationsByUser(@Valid PaginationRequest request) {
+  public ResponseEntity<?> getNotifications(@Valid PaginationRequest request) {
 
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();

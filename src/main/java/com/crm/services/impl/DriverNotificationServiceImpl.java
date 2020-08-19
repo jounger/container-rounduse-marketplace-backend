@@ -72,8 +72,15 @@ public class DriverNotificationServiceImpl implements DriverNotificationService 
 
   @Override
   public Page<DriverNotification> getDriverNotifications(PaginationRequest request) {
-    Page<DriverNotification> driverNotifications = driverNotificationRepository
-        .findAll(PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt")));
+    String status = request.getStatus();
+    Page<DriverNotification> driverNotifications = null;
+    if (status != null && !status.isEmpty()) {
+      driverNotifications = driverNotificationRepository.findByType(status,
+          PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt")));
+    } else {
+      driverNotifications = driverNotificationRepository
+          .findAll(PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt")));
+    }
     return driverNotifications;
   }
 

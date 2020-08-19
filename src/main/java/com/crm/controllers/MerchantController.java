@@ -40,7 +40,7 @@ import com.crm.services.MerchantService;
 @RequestMapping("/api/merchant")
 public class MerchantController {
 
-  private static final Logger logger = LoggerFactory.getLogger(SupplierController.class);
+  private static final Logger logger = LoggerFactory.getLogger(MerchantController.class);
 
   @Autowired
   private MerchantService merchantService;

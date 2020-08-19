@@ -33,10 +33,10 @@ import lombok.ToString;
 @NoArgsConstructor
 @ToString
 @Entity
-@Table(name = "evidence")
+@Table(name = "contract_document")
 @EntityListeners(AuditingEntityListener.class)
 @JsonIgnoreProperties(value = { "createdAt", "updatedAt" }, allowGetters = true)
-public class Evidence {
+public class ContractDocument {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)

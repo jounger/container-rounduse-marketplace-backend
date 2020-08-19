@@ -44,7 +44,7 @@ import com.crm.websocket.controller.NotificationBroadcast;
 @RequestMapping("/api/report")
 public class ReportController {
 
-  private static final Logger logger = LoggerFactory.getLogger(SupplierController.class);
+  private static final Logger logger = LoggerFactory.getLogger(ReportController.class);
 
   @Autowired
   private ReportService reportService;

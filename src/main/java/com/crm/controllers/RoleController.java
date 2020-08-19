@@ -39,7 +39,7 @@ import com.crm.services.RoleService;
 @PreAuthorize("hasRole('ADMIN')")
 public class RoleController {
 
-  private static final Logger logger = LoggerFactory.getLogger(SupplierController.class);
+  private static final Logger logger = LoggerFactory.getLogger(RoleController.class);
 
   @Autowired
   private RoleService roleService;

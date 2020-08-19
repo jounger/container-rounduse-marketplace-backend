@@ -44,7 +44,7 @@ import com.crm.websocket.controller.NotificationBroadcast;
 @RequestMapping("/api/contract")
 public class ContractController {
 
-  private static final Logger logger = LoggerFactory.getLogger(SupplierController.class);
+  private static final Logger logger = LoggerFactory.getLogger(ContractController.class);
 
   @Autowired
   private ContractService contractService;
@@ -137,6 +137,7 @@ public class ContractController {
     defaultResponse.setData(contractDto);
 
     notificationBroadcast.broadcastEditContractToForwarder(contract);
+    logger.info("User {} editContract from id {} with request: {}", username, id, updates.toString());
     return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 

@@ -16,11 +16,14 @@ public interface ShippingLineNotificationRepository extends JpaRepository<Shippi
   @Query(value = "FROM ShippingLineNotification sn WHERE sn.recipient.username = :username")
   Page<ShippingLineNotification> findByUser(@Param("username") String username, Pageable pageable);
 
-  @Query(value = "FROM ShippingLineNotification sn WHERE sn.recipient.id = :id AND sn.type = :status")
+  @Query(value = "FROM ShippingLineNotification sn WHERE sn.recipient.id = :id AND sn.action = :status")
   Page<ShippingLineNotification> findByUserAndStatus(@Param("id") Long id, @Param("status") String status,
       Pageable pageable);
 
-  @Query(value = "FROM ShippingLineNotification sn WHERE sn.recipient.username = :username AND sn.type = :status")
+  @Query(value = "FROM ShippingLineNotification sn WHERE sn.recipient.username = :username AND sn.action = :status")
   Page<ShippingLineNotification> findByUserAndStatus(@Param("username") String username, @Param("status") String status,
       Pageable pageable);
+
+  @Query(value = "FROM ShippingLineNotification sn WHERE sn.type = :status")
+  Page<ShippingLineNotification> findByType(@Param("status") String status, Pageable pageable);
 }

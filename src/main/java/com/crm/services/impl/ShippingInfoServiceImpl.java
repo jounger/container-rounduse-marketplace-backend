@@ -9,7 +9,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.crm.common.ErrorMessage;
-import com.crm.enums.EnumEvidenceStatus;
+import com.crm.enums.EnumContractDocumentStatus;
 import com.crm.enums.EnumShippingStatus;
 import com.crm.enums.EnumSupplyStatus;
 import com.crm.exception.ForbiddenException;
@@ -31,7 +31,7 @@ import com.crm.repository.BidRepository;
 import com.crm.repository.CombinedRepository;
 import com.crm.repository.ContainerRepository;
 import com.crm.repository.ContractRepository;
-import com.crm.repository.EvidenceRepository;
+import com.crm.repository.ContractDocumentRepository;
 import com.crm.repository.OutboundRepository;
 import com.crm.repository.ShippingInfoRepository;
 import com.crm.repository.UserRepository;
@@ -57,7 +57,7 @@ public class ShippingInfoServiceImpl implements ShippingInfoService {
   private ContainerRepository containerRepository;
 
   @Autowired
-  private EvidenceRepository evidenceRepository;
+  private ContractDocumentRepository contractDocumentRepository;
 
   @Autowired
   private BidRepository bidRepository;
@@ -170,7 +170,7 @@ public class ShippingInfoServiceImpl implements ShippingInfoService {
     if (!(container.getDriver().getUsername().equals(username) || shippingInfoRepository.isForwarder(id, username))) {
       throw new ForbiddenException(ErrorMessage.USER_ACCESS_DENIED);
     }
-    if (!evidenceRepository.isEditableShippingInfo(id, EnumEvidenceStatus.ACCEPTED.name())) {
+    if (!contractDocumentRepository.isEditableShippingInfo(id, EnumContractDocumentStatus.ACCEPTED.name())) {
       throw new InternalException(ErrorMessage.SHIPPING_INFO_INVALID_EDIT);
     }
     EnumShippingStatus eStatus = EnumShippingStatus.findByName(status);

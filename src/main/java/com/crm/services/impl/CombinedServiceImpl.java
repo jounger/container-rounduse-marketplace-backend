@@ -14,6 +14,7 @@ import com.crm.common.ErrorMessage;
 import com.crm.common.Tool;
 import com.crm.enums.EnumBidStatus;
 import com.crm.exception.DuplicateRecordException;
+import com.crm.exception.InternalException;
 import com.crm.exception.NotFoundException;
 import com.crm.models.Bid;
 import com.crm.models.BiddingDocument;
@@ -56,8 +57,11 @@ public class CombinedServiceImpl implements CombinedService {
     if (bid.getCombined() != null) {
       throw new DuplicateRecordException(ErrorMessage.BID_INVALID_CREATE);
     }
+    if (bid.getStatus().equals(EnumBidStatus.EXPIRED.name())) {
+      throw new InternalException(ErrorMessage.BIDDINGDOCUMENT_ACCEPT_INVALID_BID);
+    }
     BiddingDocument biddingDocument = bid.getBiddingDocument();
-    if(biddingDocument.getBidClosing().isBefore(LocalDateTime.now())) {
+    if (biddingDocument.getBidClosing().isBefore(LocalDateTime.now())) {
       throw new NotFoundException(ErrorMessage.BIDDINGDOCUMENT_TIME_OUT);
     }
 

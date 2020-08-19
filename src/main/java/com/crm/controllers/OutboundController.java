@@ -1,6 +1,7 @@
 package com.crm.controllers;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -52,8 +53,9 @@ public class OutboundController {
   @PreAuthorize("hasRole('FORWARDER') or hasRole('MERCHANT')")
   public ResponseEntity<?> getOutbound(@PathVariable Long id) {
     Outbound outbound = outBoundService.getOutboundById(id);
+    Outbound result = outBoundService.updateExpiredOutboundFromList(Arrays.asList(outbound)).get(0);
     OutboundDto outboundDto = new OutboundDto();
-    outboundDto = OutboundMapper.toOutboundDto(outbound);
+    outboundDto = OutboundMapper.toOutboundDto(result);
     return ResponseEntity.ok(outboundDto);
   }
 
@@ -61,7 +63,6 @@ public class OutboundController {
   @GetMapping("/filter")
   public ResponseEntity<?> searchOutbounds(@Valid PaginationRequest request,
       @RequestParam(value = "search") String search) {
-
     Page<Outbound> pages = outBoundService.searchOutbounds(request, search);
     PaginationResponse<OutboundDto> response = new PaginationResponse<>();
     response.setPageNumber(request.getPage());
@@ -70,8 +71,9 @@ public class OutboundController {
     response.setTotalPages(pages.getTotalPages());
 
     List<Outbound> outbounds = pages.getContent();
+    List<Outbound> result = outBoundService.updateExpiredOutboundFromList(outbounds);
     List<OutboundDto> outboundsDto = new ArrayList<>();
-    outbounds.forEach(outbound -> outboundsDto.add(OutboundMapper.toOutboundDto(outbound)));
+    result.forEach(outbound -> outboundsDto.add(OutboundMapper.toOutboundDto(outbound)));
     response.setContents(outboundsDto);
 
     return ResponseEntity.ok(response);
@@ -80,7 +82,6 @@ public class OutboundController {
   @GetMapping("")
   @PreAuthorize("hasRole('FORWARDER') or hasRole('MERCHANT')")
   public ResponseEntity<?> getOutbounds(@Valid PaginationRequest request) {
-
     Page<Outbound> pages = outBoundService.getOutbounds(request);
     PaginationResponse<OutboundDto> response = new PaginationResponse<>();
     response.setPageNumber(request.getPage());
@@ -89,8 +90,9 @@ public class OutboundController {
     response.setTotalPages(pages.getTotalPages());
 
     List<Outbound> outbounds = pages.getContent();
+    List<Outbound> result = outBoundService.updateExpiredOutboundFromList(outbounds);
     List<OutboundDto> outboundsDto = new ArrayList<>();
-    outbounds.forEach(outbound -> outboundsDto.add(OutboundMapper.toOutboundDto(outbound)));
+    result.forEach(outbound -> outboundsDto.add(OutboundMapper.toOutboundDto(outbound)));
     response.setContents(outboundsDto);
 
     return ResponseEntity.ok(response);
@@ -112,8 +114,9 @@ public class OutboundController {
     response.setTotalPages(pages.getTotalPages());
 
     List<Outbound> outbounds = pages.getContent();
+    List<Outbound> result = outBoundService.updateExpiredOutboundFromList(outbounds);
     List<OutboundDto> outboundsDto = new ArrayList<>();
-    outbounds.forEach(outbound -> outboundsDto.add(OutboundMapper.toOutboundDto(outbound)));
+    result.forEach(outbound -> outboundsDto.add(OutboundMapper.toOutboundDto(outbound)));
     response.setContents(outboundsDto);
 
     return ResponseEntity.ok(response);

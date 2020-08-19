@@ -42,34 +42,13 @@ import com.crm.services.ShippingLineNotificationService;
 @RequestMapping("/api/shipping-line-notification")
 public class ShippingLineNotificationController {
 
-  private static final Logger logger = LoggerFactory.getLogger(SupplierController.class);
+  private static final Logger logger = LoggerFactory.getLogger(ShippingLineNotificationController.class);
 
   @Autowired
   ShippingLineNotificationService shippingLineNotificationService;
 
-  @GetMapping("/user/{id}")
-  public ResponseEntity<?> getShippingLineNotificationsByUser(@PathVariable Long id, @Valid PaginationRequest request) {
-
-    Page<ShippingLineNotification> pages = shippingLineNotificationService.getShippingLineNotificationsByUser(id,
-        request);
-
-    PaginationResponse<ShippingLineNotificationDto> response = new PaginationResponse<>();
-    response.setPageNumber(request.getPage());
-    response.setPageSize(request.getLimit());
-    response.setTotalElements(pages.getTotalElements());
-    response.setTotalPages(pages.getTotalPages());
-
-    List<ShippingLineNotification> shippingLineNotifications = pages.getContent();
-    List<ShippingLineNotificationDto> shippingLineNotificationsDto = new ArrayList<>();
-    shippingLineNotifications.forEach(shippingLineNotification -> shippingLineNotificationsDto
-        .add(ShippingLineNotificationMapper.toShippingLineNotificationDto(shippingLineNotification)));
-    response.setContents(shippingLineNotificationsDto);
-
-    return ResponseEntity.ok(response);
-  }
-
   @GetMapping("")
-  public ResponseEntity<?> getShippingLineNotificationsByUser(@Valid PaginationRequest request) {
+  public ResponseEntity<?> getShippingLineNotifications(@Valid PaginationRequest request) {
 
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();

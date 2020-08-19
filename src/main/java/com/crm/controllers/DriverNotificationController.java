@@ -42,33 +42,13 @@ import com.crm.services.DriverNotificationService;
 @RequestMapping("/api/driver-notification")
 public class DriverNotificationController {
 
-  private static final Logger logger = LoggerFactory.getLogger(SupplierController.class);
+  private static final Logger logger = LoggerFactory.getLogger(DriverNotificationController.class);
 
   @Autowired
   DriverNotificationService driverNotificationService;
 
-  @GetMapping("/user/{id}")
-  public ResponseEntity<?> getDriverNotificationsByUser(@PathVariable Long id, @Valid PaginationRequest request) {
-
-    Page<DriverNotification> pages = driverNotificationService.getDriverNotificationsByUser(id, request);
-
-    PaginationResponse<DriverNotificationDto> response = new PaginationResponse<>();
-    response.setPageNumber(request.getPage());
-    response.setPageSize(request.getLimit());
-    response.setTotalElements(pages.getTotalElements());
-    response.setTotalPages(pages.getTotalPages());
-
-    List<DriverNotification> driverNotifications = pages.getContent();
-    List<DriverNotificationDto> driverNotificationsDto = new ArrayList<>();
-    driverNotifications.forEach(driverNotification -> driverNotificationsDto
-        .add(DriverNotificationMapper.toDriverNotificationDto(driverNotification)));
-    response.setContents(driverNotificationsDto);
-
-    return ResponseEntity.ok(response);
-  }
-
   @GetMapping("")
-  public ResponseEntity<?> getDriverNotificationsByUser(@Valid PaginationRequest request) {
+  public ResponseEntity<?> getDriverNotifications(@Valid PaginationRequest request) {
 
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();

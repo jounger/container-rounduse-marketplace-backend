@@ -3,7 +3,6 @@ package com.crm.models.mapper;
 import com.crm.common.Tool;
 import com.crm.models.Bid;
 import com.crm.models.dto.BidDto;
-import com.crm.models.dto.ContainerDto;
 
 public class BidMapper {
 
@@ -18,19 +17,17 @@ public class BidMapper {
 
     bidDto.setBidder(ForwarderMapper.toForwarderDto(bid.getBidder()));
 
-    bid.getContainers().forEach(container -> {
-      ContainerDto containerDto = ContainerMapper.toContainerDto(container);
-      bidDto.getContainers().add(containerDto);
-    });
-
     Double bidPrice = bid.getBidPrice();
     bidDto.setBidPrice(bidPrice);
 
     String bidDate = Tool.convertLocalDateTimeToString(bid.getBidDate());
     bidDto.setBidDate(bidDate);
 
-    String bidValidityPeriod = Tool.convertLocalDateTimeToString(bid.getBidValidityPeriod());
-    bidDto.setBidValidityPeriod(bidValidityPeriod);
+    String freezeTime = Tool.convertLocalDateTimeToString(bid.getFreezeTime());
+    bidDto.setFreezeTime(freezeTime);
+
+    String validityPeriod = Tool.convertLocalDateTimeToString(bid.getValidityPeriod());
+    bidDto.setValidityPeriod(validityPeriod);
 
     if (bid.getDateOfDecision() != null) {
       String dateOfDecision = Tool.convertLocalDateTimeToString(bid.getDateOfDecision());

@@ -7,7 +7,7 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class EvidenceRequest {
+public class ContractDocumentRequest {
 
   private Long id;
 

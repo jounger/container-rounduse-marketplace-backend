@@ -73,8 +73,15 @@ public class ShippingLineNotificationServiceImpl implements ShippingLineNotifica
 
   @Override
   public Page<ShippingLineNotification> getShippingLineNotifications(PaginationRequest request) {
-    Page<ShippingLineNotification> shippingLineNotification = shippingLineNotificationRepository
-        .findAll(PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt")));
+    String status = request.getStatus();
+    Page<ShippingLineNotification> shippingLineNotification = null;
+    if (status != null && !status.isEmpty()) {
+      shippingLineNotification = shippingLineNotificationRepository.findByType(status,
+          PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt")));
+    } else {
+      shippingLineNotification = shippingLineNotificationRepository
+          .findAll(PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt")));
+    }
     return shippingLineNotification;
   }
 

@@ -13,6 +13,7 @@ import com.crm.common.ErrorMessage;
 import com.crm.common.Tool;
 import com.crm.enums.EnumUserStatus;
 import com.crm.exception.DuplicateRecordException;
+import com.crm.exception.ForbiddenException;
 import com.crm.exception.NotFoundException;
 import com.crm.models.Operator;
 import com.crm.models.Role;
@@ -97,9 +98,19 @@ public class OperatorServiceImpl implements OperatorService {
   }
 
   @Override
-  public Operator editOperator(Long id, Map<String, Object> updates) {
+  public Operator editOperator(Long id, String username, Map<String, Object> updates) {
+    Operator currentOperator = operatorRepository.findByUsername(username)
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.OPERATOR_NOT_FOUND));
+    Role currentRole = currentOperator.getRoles().iterator().next();
+
     Operator operator = operatorRepository.findById(id)
         .orElseThrow(() -> new NotFoundException(ErrorMessage.OPERATOR_NOT_FOUND));
+    Role role = operator.getRoles().iterator().next();
+
+    if (!currentOperator.getIsRoot() && currentOperator.getUsername().equals(operator.getUsername())
+        && currentRole.getName().equals("ROLE_ADMIN") && role.getName().equals("ROLE_MODERATOR")) {
+      throw new ForbiddenException(ErrorMessage.USER_ACCESS_DENIED);
+    }
 
     String email = String.valueOf(updates.get("email"));
     if (updates.get("email") != null && !Tool.isEqual(operator.getEmail(), email)) {
@@ -143,7 +154,19 @@ public class OperatorServiceImpl implements OperatorService {
   }
 
   @Override
-  public void removeOperator(Long id) {
+  public void removeOperator(Long id, String username) {
+    Operator currentOperator = operatorRepository.findByUsername(username)
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.OPERATOR_NOT_FOUND));
+    Role currentRole = currentOperator.getRoles().iterator().next();
+
+    Operator operator = operatorRepository.findById(id)
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.OPERATOR_NOT_FOUND));
+    Role role = operator.getRoles().iterator().next();
+
+    if (!currentOperator.getIsRoot() && currentRole.getName().equals("ROLE_ADMIN")
+        && role.getName().equals("ROLE_MODERATOR")) {
+      throw new ForbiddenException(ErrorMessage.USER_ACCESS_DENIED);
+    }
 
     if (operatorRepository.existsById(id)) {
       operatorRepository.deleteById(id);

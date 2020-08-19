@@ -368,7 +368,7 @@ public class NotificationBroadcast {
         if (isValid.equals(EnumContractDocumentStatus.ACCEPTED.name())) {
           notifyRequest.setMessage(
               String.format(NotificationMessage.SEND_ACCEPT_EVIDENCE_NOTIFICATION, offeree.getCompanyName()));
-          notifyRequest.setAction(EnumBiddingNotification.ACCEPTED.name());
+          notifyRequest.setAction(EnumBiddingNotification.BID_ACCEPTED.name());
         } else if (isValid.equals(EnumContractDocumentStatus.REJECTED.name())) {
           notifyRequest.setMessage(
               String.format(NotificationMessage.SEND_REJECT_EVIDENCE_NOTIFICATION, offeree.getCompanyName()));

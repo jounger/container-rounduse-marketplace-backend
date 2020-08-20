@@ -8,6 +8,7 @@ public class ErrorMessage {
   public static final String BIDDINGDOCUMENT_STATUS_NOT_FOUND = "Không tìm thấy trạng thái của hồ sơ mời thầu";
   public static final String BIDDINGDOCUMENT_IS_IN_TRANSACTION = "Hồ sơ mời thầu đã được ghép hoặc đang được đấu thầu";
   public static final String BIDDINGDOCUMENT_TIME_OUT = "Hồ sơ mời thầu đã hết hạn";
+  public static final String BIDDINGDOCUMENT_ACCEPT_INVALID_BID = "Hồ sơ dự thầu đã hết hạn";
 
   // Bid
   public static final String BID_NOT_FOUND = "Không tìm thấy hồ sơ dự thầu";
@@ -16,7 +17,8 @@ public class ErrorMessage {
   public static final String BID_INVALID_CREATE = "Chỉ được tạo 1 hồ sơ dự thầu cho 1 hồ sơ đấu thầu";
   public static final String BID_INVALID_BID_PRICE = "Giá thầu phải bằng hoặc cao hơn giá sàn";
   public static final String BID_INVALID_PENDING_EDIT = "Hồ sơ dự thầu chỉ được sửa khi ở trạng thái chờ";
-  public static final String BID_EDIT_BEFORE_VALIDITY_TIME = "Vui lòng chỉnh sửa sau thời gian hiệu lực";
+  public static final String BID_EDIT_BEFORE_FREEZE_TIME = "Vui lòng chỉnh sửa sau thời gian đóng băng";
+  public static final String BID_INVALID_VALIDITY_PERIOD = "Thời gian hiệu lực của hồ sơ dự thầu phải sau thời gian hiện tại";
 
   // Combined
   public static final String COMBINED_NOT_FOUND = "Không tìm thấy hàng ghép";
@@ -49,6 +51,7 @@ public class ErrorMessage {
 
   // Rating
   public static final String RATING_NOT_FOUND = "Không tìm thấy đánh giá";
+  public static final String RATING_ONE_PER_CONTRACT = "Bạn chỉ có thể đánh giá hợp đồng này một lần";
 
   // Container
   public static final String CONTAINER_LESS_THAN_NEEDED = "Số lượng container chưa đủ yêu cầu";

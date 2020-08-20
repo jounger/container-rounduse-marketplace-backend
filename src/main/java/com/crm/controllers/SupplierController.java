@@ -152,7 +152,7 @@ public class SupplierController {
     if (status.equals(EnumUserStatus.ACTIVE.name())) {
       defaultResponse.setMessage(SuccessMessage.ACCEPT_SUPPLIER_SUCCESSFULLY);
     }
-    if (status.equals(EnumUserStatus.REJECT.name())) {
+    if (status.equals(EnumUserStatus.REJECTED.name())) {
       defaultResponse.setMessage(SuccessMessage.REJECT_SUPPLIER_SUCCESSFULLY);
     }
     defaultResponse.setData(supplierDto);

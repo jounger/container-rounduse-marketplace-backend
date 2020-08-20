@@ -53,8 +53,7 @@ public class ForwarderServiceImpl implements ForwarderService {
   @Override
   public Forwarder createForwarder(SupplierRequest request) {
     if (userRepository.existsByUsername(request.getUsername()) || userRepository.existsByEmail(request.getEmail())
-        || userRepository.existsByPhone(request.getPhone())
-        || supplierRepository.existsByCompanyCode(request.getCompanyCode())) {
+        || userRepository.existsByPhone(request.getPhone())) {
       throw new DuplicateRecordException(ErrorMessage.USER_ALREADY_EXISTS);
     }
     Forwarder forwarder = new Forwarder();

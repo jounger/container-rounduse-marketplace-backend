@@ -9,7 +9,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class EvidenceDto {
+public class ContractDocumentDto {
 
   private Long Id;
 

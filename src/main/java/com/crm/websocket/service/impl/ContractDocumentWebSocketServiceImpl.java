@@ -10,18 +10,18 @@ import com.crm.common.Constant;
 import com.crm.models.BiddingNotification;
 import com.crm.models.dto.BiddingNotificationDto;
 import com.crm.models.mapper.BiddingNotificationMapper;
-import com.crm.websocket.service.EvidenceWebSocketService;
+import com.crm.websocket.service.ContractDocumentWebSocketService;
 
 @Service
-public class EvidenceWebSocketServiceImpl implements EvidenceWebSocketService {
+public class ContractDocumentWebSocketServiceImpl implements ContractDocumentWebSocketService {
 
-  private static final Logger logger = LoggerFactory.getLogger(EvidenceWebSocketServiceImpl.class);
+  private static final Logger logger = LoggerFactory.getLogger(ContractDocumentWebSocketServiceImpl.class);
 
   @Autowired
   SimpMessagingTemplate messagingTemplate;
 
   @Override
-  public void sendEvidenceNotifyToUser(BiddingNotification notification) {
+  public void sendContractDocumentNotifyToUser(BiddingNotification notification) {
     BiddingNotificationDto notificationDto = BiddingNotificationMapper.toBiddingNotificationDto(notification);
     logger.info("Send to: {}", notificationDto.getRecipient());
     logger.info("Notification: {}", notificationDto.toString());

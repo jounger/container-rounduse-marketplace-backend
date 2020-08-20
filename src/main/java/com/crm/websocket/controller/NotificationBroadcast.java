@@ -17,7 +17,7 @@ import com.crm.common.NotificationMessage;
 import com.crm.enums.EnumBidStatus;
 import com.crm.enums.EnumBiddingNotification;
 import com.crm.enums.EnumDriverNotification;
-import com.crm.enums.EnumEvidenceStatus;
+import com.crm.enums.EnumContractDocumentStatus;
 import com.crm.enums.EnumNotificationType;
 import com.crm.enums.EnumReportNotification;
 import com.crm.enums.EnumReportStatus;
@@ -51,7 +51,7 @@ import com.crm.services.ShippingLineNotificationService;
 import com.crm.services.UserService;
 import com.crm.websocket.service.BiddingWebSocketService;
 import com.crm.websocket.service.DriverWebSocketService;
-import com.crm.websocket.service.EvidenceWebSocketService;
+import com.crm.websocket.service.ContractDocumentWebSocketService;
 import com.crm.websocket.service.ReportWebSocketService;
 import com.crm.websocket.service.ShippingLineWebSocketService;
 
@@ -74,7 +74,7 @@ public class NotificationBroadcast {
   private BiddingWebSocketService biddingWebSocketService;
 
   @Autowired
-  private EvidenceWebSocketService evidenceWebSocketService;
+  private ContractDocumentWebSocketService contractDocumentWebSocketService;
 
   @Autowired
   private ForwarderService forwarderService;
@@ -324,7 +324,7 @@ public class NotificationBroadcast {
     });
   }
 
-  public void broadcastCreateEvidenceToMerchant(Contract contract) {
+  public void broadcastCreateContractDocumentToMerchant(Contract contract) {
     executorService.submit(new Runnable() {
       @Override
       public void run() {
@@ -346,12 +346,12 @@ public class NotificationBroadcast {
 
         // Send notification to Merchant
         logger.info("notification : {}", notification.getId());
-        evidenceWebSocketService.sendEvidenceNotifyToUser(notification);
+        contractDocumentWebSocketService.sendContractDocumentNotifyToUser(notification);
       }
     });
   }
 
-  public void broadcastAcceptOrRejectEvidenceToForwarder(Contract contract, String isValid) {
+  public void broadcastAcceptOrRejectContractDocumentToForwarder(Contract contract, String isValid) {
     executorService.submit(new Runnable() {
       @Override
       public void run() {
@@ -365,11 +365,11 @@ public class NotificationBroadcast {
 
         notifyRequest.setRecipient(bidNew.getBidder().getUsername());
         notifyRequest.setRelatedResource(bidNew.getBiddingDocument().getId());
-        if (isValid.equals(EnumEvidenceStatus.ACCEPTED.name())) {
+        if (isValid.equals(EnumContractDocumentStatus.ACCEPTED.name())) {
           notifyRequest.setMessage(
               String.format(NotificationMessage.SEND_ACCEPT_EVIDENCE_NOTIFICATION, offeree.getCompanyName()));
-          notifyRequest.setAction(EnumBiddingNotification.CONTRACT_ACCEPTED.name());
-        } else if (isValid.equals(EnumEvidenceStatus.REJECTED.name())) {
+          notifyRequest.setAction(EnumBiddingNotification.BID_ACCEPTED.name());
+        } else if (isValid.equals(EnumContractDocumentStatus.REJECTED.name())) {
           notifyRequest.setMessage(
               String.format(NotificationMessage.SEND_REJECT_EVIDENCE_NOTIFICATION, offeree.getCompanyName()));
           notifyRequest.setAction(EnumBiddingNotification.CONTRACT_REJECTED.name());
@@ -379,7 +379,7 @@ public class NotificationBroadcast {
 
         // Send notification to Forwarder
         logger.info("notification : {}", notification.getId());
-        evidenceWebSocketService.sendEvidenceNotifyToUser(notification);
+        contractDocumentWebSocketService.sendContractDocumentNotifyToUser(notification);
       }
     });
   }
@@ -404,7 +404,7 @@ public class NotificationBroadcast {
 
         // Send notification to Forwarder
         logger.info("notification : {}", notification.getId());
-        evidenceWebSocketService.sendEvidenceNotifyToUser(notification);
+        contractDocumentWebSocketService.sendContractDocumentNotifyToUser(notification);
       }
     });
   }

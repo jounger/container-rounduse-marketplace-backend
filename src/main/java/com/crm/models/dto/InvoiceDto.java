@@ -9,7 +9,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class PaymentDto {
+public class InvoiceDto {
 
   private Long id;
 

@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 import com.crm.common.Constant;
 import com.crm.common.ErrorMessage;
 import com.crm.common.Tool;
-import com.crm.enums.EnumEvidenceStatus;
+import com.crm.enums.EnumContractDocumentStatus;
 import com.crm.enums.EnumShippingStatus;
 import com.crm.exception.ForbiddenException;
 import com.crm.exception.InternalException;
@@ -23,25 +23,25 @@ import com.crm.models.Bid;
 import com.crm.models.BiddingDocument;
 import com.crm.models.Combined;
 import com.crm.models.Contract;
-import com.crm.models.Evidence;
+import com.crm.models.ContractDocument;
 import com.crm.models.Supplier;
 import com.crm.models.User;
-import com.crm.payload.request.EvidenceRequest;
+import com.crm.payload.request.ContractDocumentRequest;
 import com.crm.payload.request.PaginationRequest;
 import com.crm.repository.ContractRepository;
-import com.crm.repository.EvidenceRepository;
+import com.crm.repository.ContractDocumentRepository;
 import com.crm.repository.ShippingInfoRepository;
 import com.crm.repository.SupplierRepository;
 import com.crm.repository.UserRepository;
-import com.crm.services.EvidenceService;
-import com.crm.specification.builder.EvidenceSpecificationsBuilder;
+import com.crm.services.ContractDocumentService;
+import com.crm.specification.builder.ContractDocumentSpecificationsBuilder;
 import com.crm.websocket.controller.NotificationBroadcast;
 
 @Service
-public class EvidenceServiceImpl implements EvidenceService {
+public class ContractDocumentServiceImpl implements ContractDocumentService {
 
   @Autowired
-  private EvidenceRepository evidenceRepository;
+  private ContractDocumentRepository contractDocumentRepository;
 
   @Autowired
   private ContractRepository contractRepository;
@@ -59,12 +59,12 @@ public class EvidenceServiceImpl implements EvidenceService {
   private NotificationBroadcast notificationBroadcast;
 
   @Override
-  public Evidence createEvidence(Long id, String username, EvidenceRequest request) {
-    Evidence evidence = new Evidence();
+  public ContractDocument createContractDocument(Long id, String username, ContractDocumentRequest request) {
+    ContractDocument contractDocument = new ContractDocument();
 
     Contract contract = contractRepository.findById(id)
         .orElseThrow(() -> new NotFoundException(ErrorMessage.COMBINED_NOT_FOUND));
-    evidence.setContract(contract);
+    contractDocument.setContract(contract);
 
     Combined combined = contract.getCombined();
     Bid bid = combined.getBid();
@@ -74,53 +74,53 @@ public class EvidenceServiceImpl implements EvidenceService {
     if (username.equals(bidder.getUsername()) || username.equals(offeree.getUsername())) {
       Supplier supplier = supplierRepository.findByUsername(username)
           .orElseThrow(() -> new NotFoundException(ErrorMessage.SENDER_NOT_FOUND));
-      evidence.setSender(supplier);
+      contractDocument.setSender(supplier);
 
       if (!Tool.isBlank(request.getDocumentPath())) {
-        evidence.setDocumentPath(request.getDocumentPath());
+        contractDocument.setDocumentPath(request.getDocumentPath());
       } else {
         throw new InternalException(ErrorMessage.EVIDENCE_INVALID);
       }
-      evidence.setStatus(EnumEvidenceStatus.PENDING.name());
+      contractDocument.setStatus(EnumContractDocumentStatus.PENDING.name());
     } else {
       throw new ForbiddenException(ErrorMessage.USER_ACCESS_DENIED);
     }
 
-    Evidence _evidence = evidenceRepository.save(evidence);
-    notificationBroadcast.broadcastCreateEvidenceToMerchant(contract);
+    ContractDocument _evidence = contractDocumentRepository.save(contractDocument);
+    notificationBroadcast.broadcastCreateContractDocumentToMerchant(contract);
     return _evidence;
   }
 
   @Override
-  public Page<Evidence> getEvidencesByUser(String username, PaginationRequest request) {
+  public Page<ContractDocument> getContractDocumentsByUser(String username, PaginationRequest request) {
     PageRequest page = PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt"));
-    Page<Evidence> evidences = evidenceRepository.findByUser(username, page);
-    return evidences;
+    Page<ContractDocument> contractDocuments = contractDocumentRepository.findByUser(username, page);
+    return contractDocuments;
   }
 
   @Override
-  public Page<Evidence> getEvidencesByContract(Long id, String username, PaginationRequest request) {
+  public Page<ContractDocument> getContractDocumentsByContract(Long id, String username, PaginationRequest request) {
     if (!contractRepository.existsById(id)) {
       throw new NotFoundException(ErrorMessage.CONTRACT_NOT_FOUND);
     }
-    Page<Evidence> evidences = null;
+    Page<ContractDocument> contractDocuments = null;
     PageRequest page = PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt"));
     User user = userRepository.findByUsername(username)
         .orElseThrow(() -> new NotFoundException(ErrorMessage.USER_NOT_FOUND));
     String role = user.getRoles().iterator().next().getName();
 
     if (role.equalsIgnoreCase("ROLE_MODERATOR")) {
-      evidences = evidenceRepository.findByContract(id, page);
+      contractDocuments = contractDocumentRepository.findByContract(id, page);
     } else {
-      evidences = evidenceRepository.findByContract(id, username, page);
+      contractDocuments = contractDocumentRepository.findByContract(id, username, page);
     }
-    return evidences;
+    return contractDocuments;
   }
 
   @Override
-  public Page<Evidence> searchEvidences(PaginationRequest request, String search) {
+  public Page<ContractDocument> searchContractDocuments(PaginationRequest request, String search) {
     // Extract data from search string
-    EvidenceSpecificationsBuilder builder = new EvidenceSpecificationsBuilder();
+    ContractDocumentSpecificationsBuilder builder = new ContractDocumentSpecificationsBuilder();
     Pattern pattern = Pattern.compile(Constant.SEARCH_REGEX, Pattern.UNICODE_CHARACTER_CLASS);
     Matcher matcher = pattern.matcher(search + ",");
     while (matcher.find()) {
@@ -128,19 +128,19 @@ public class EvidenceServiceImpl implements EvidenceService {
       builder.with(matcher.group(1), matcher.group(2), matcher.group(3));
     }
     // Build specification
-    Specification<Evidence> spec = builder.build();
+    Specification<ContractDocument> spec = builder.build();
     PageRequest page = PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt"));
     // Filter with repository
-    Page<Evidence> pages = evidenceRepository.findAll(spec, page);
+    Page<ContractDocument> pages = contractDocumentRepository.findAll(spec, page);
     // Return result
     return pages;
   }
 
   @Override
-  public Evidence editEvidence(Long id, String username, Map<String, Object> updates) {
-    Evidence evidence = evidenceRepository.findById(id)
+  public ContractDocument editContractDocument(Long id, String username, Map<String, Object> updates) {
+    ContractDocument contractDocument = contractDocumentRepository.findById(id)
         .orElseThrow(() -> new NotFoundException(ErrorMessage.EVIDENCE_NOT_FOUND));
-    Contract contract = evidence.getContract();
+    Contract contract = contractDocument.getContract();
     Combined combined = contract.getCombined();
     Bid bid = combined.getBid();
     Supplier bidder = bid.getBidder();
@@ -151,20 +151,20 @@ public class EvidenceServiceImpl implements EvidenceService {
       throw new ForbiddenException(ErrorMessage.USER_ACCESS_DENIED);
     }
 
-    if (username.equals(evidence.getSender().getUsername())) {
+    if (username.equals(contractDocument.getSender().getUsername())) {
       // YOU CANNOT SET EVIDEN TO VALID BY YOURSELF
       throw new ForbiddenException(ErrorMessage.USER_ACCESS_DENIED);
     } else {
       String status = String.valueOf(updates.get("status"));
-      if (updates.get("status") != null && !Tool.isEqual(evidence.getStatus(), status)) {
-        evidence.setStatus(EnumEvidenceStatus.findByName(status).name());
+      if (updates.get("status") != null && !Tool.isEqual(contractDocument.getStatus(), status)) {
+        contractDocument.setStatus(EnumContractDocumentStatus.findByName(status).name());
       }
     }
 
-    Evidence _evidence = evidenceRepository.save(evidence);
+    ContractDocument _evidence = contractDocumentRepository.save(contractDocument);
 
-    if (contract.getRequired() == true && evidenceRepository.existsValidEvidence(id, EnumEvidenceStatus.ACCEPTED.name())
-        && evidence.getStatus().equals(EnumEvidenceStatus.ACCEPTED.name())) {
+    if (contract.getRequired() == true && contractDocumentRepository.existsValidContractDocument(id, EnumContractDocumentStatus.ACCEPTED.name())
+        && contractDocument.getStatus().equals(EnumContractDocumentStatus.ACCEPTED.name())) {
       contract.getShippingInfos().forEach(item -> {
         item.setStatus(EnumShippingStatus.INFO_RECEIVED.name());
         shippingInfoRepository.save(item);
@@ -173,16 +173,16 @@ public class EvidenceServiceImpl implements EvidenceService {
       notificationBroadcast.broadcastCreateContractToDriver(contract);
     }
 
-    notificationBroadcast.broadcastAcceptOrRejectEvidenceToForwarder(contract, evidence.getStatus());
+    notificationBroadcast.broadcastAcceptOrRejectContractDocumentToForwarder(contract, contractDocument.getStatus());
 
     return _evidence;
   }
 
   @Override
-  public void removeEvidence(Long id, String username) {
-    Evidence evidence = evidenceRepository.findById(id)
+  public void removeContractDocument(Long id, String username) {
+    ContractDocument contractDocument = contractDocumentRepository.findById(id)
         .orElseThrow(() -> new NotFoundException(ErrorMessage.EVIDENCE_NOT_FOUND));
-    Contract contract = evidence.getContract();
+    Contract contract = contractDocument.getContract();
     Combined combined = contract.getCombined();
 
     Bid bid = combined.getBid();
@@ -190,7 +190,7 @@ public class EvidenceServiceImpl implements EvidenceService {
     BiddingDocument biddingDocument = bid.getBiddingDocument();
     Supplier offeree = biddingDocument.getOfferee();
     if (username.equals(bidder.getUsername()) || username.equals(offeree.getUsername())) {
-      evidenceRepository.deleteById(id);
+      contractDocumentRepository.deleteById(id);
     } else {
       throw new ForbiddenException(ErrorMessage.USER_ACCESS_DENIED);
     }

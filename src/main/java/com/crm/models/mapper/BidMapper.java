@@ -23,8 +23,11 @@ public class BidMapper {
     String bidDate = Tool.convertLocalDateTimeToString(bid.getBidDate());
     bidDto.setBidDate(bidDate);
 
-    String bidValidityPeriod = Tool.convertLocalDateTimeToString(bid.getBidValidityPeriod());
-    bidDto.setBidValidityPeriod(bidValidityPeriod);
+    String freezeTime = Tool.convertLocalDateTimeToString(bid.getFreezeTime());
+    bidDto.setFreezeTime(freezeTime);
+
+    String validityPeriod = Tool.convertLocalDateTimeToString(bid.getValidityPeriod());
+    bidDto.setValidityPeriod(validityPeriod);
 
     if (bid.getDateOfDecision() != null) {
       String dateOfDecision = Tool.convertLocalDateTimeToString(bid.getDateOfDecision());

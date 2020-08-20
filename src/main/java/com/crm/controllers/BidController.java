@@ -190,7 +190,7 @@ public class BidController {
 
   @Transactional
   @PreAuthorize("hasRole('FORWARDER')")
-  @PostMapping(value = "/{id}/container/{contId}")
+  @PostMapping(value = "/{id}/container")
   public ResponseEntity<?> addContainers(@PathVariable("id") Long id,@Valid @RequestBody BidRequest request) {
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();

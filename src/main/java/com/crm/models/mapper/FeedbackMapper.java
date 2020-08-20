@@ -13,10 +13,7 @@ public class FeedbackMapper {
     }
 
     FeedbackDto feedbackDto = new FeedbackDto();
-
     feedbackDto.setId(feedback.getId());
-    feedbackDto.setReport(ReportMapper.toReportDto(feedback.getReport()));
-
     User sender = feedback.getSender();
     feedbackDto.setSender(UserMapper.toUserDto(sender));
     User recipient = feedback.getRecipient();

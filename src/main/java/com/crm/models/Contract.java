@@ -82,10 +82,10 @@ public class Contract {
   private Date updatedAt;
 
   @OneToMany(mappedBy = "contract")
-  private Collection<Payment> payments = new ArrayList<>();
+  private Collection<Invoice> invoices = new ArrayList<>();
 
   @OneToMany(mappedBy = "contract")
-  private Collection<Evidence> evidences = new ArrayList<>();
+  private Collection<ContractDocument> contractDocuments = new ArrayList<>();
 
   @OneToMany(mappedBy = "contract")
   private Collection<Rating> ratings = new ArrayList<>();

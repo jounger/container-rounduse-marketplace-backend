@@ -204,8 +204,6 @@ public class UserServiceImpl implements UserService {
 
     passwordResetTokenRepository.save(passwordResetToken);
 
-    
-
     sendEmailWithAttachment(email, token);
   }
 

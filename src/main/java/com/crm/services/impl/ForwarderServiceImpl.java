@@ -1,6 +1,8 @@
 package com.crm.services.impl;
 
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -13,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import com.crm.common.ErrorMessage;
 import com.crm.common.Tool;
+import com.crm.enums.EnumSupplyStatus;
 import com.crm.enums.EnumUserStatus;
 import com.crm.exception.DuplicateRecordException;
 import com.crm.exception.NotFoundException;
@@ -210,9 +213,10 @@ public class ForwarderServiceImpl implements ForwarderService {
     String forwarder = outbound.getShippingLine().getCompanyCode();
     String containerType = outbound.getContainerType().getName();
     Booking booking = outbound.getBooking();
+    List<String> status = Arrays.asList(EnumSupplyStatus.BIDDING.name(), EnumSupplyStatus.CREATED.name());
 
     Page<Forwarder> forwarders = forwarderRepository.findByOutbound(forwarder, containerType, outbound.getPackingTime(),
-        booking.getCutOffTime(), pageRequest);
+        booking.getCutOffTime(), status, pageRequest);
     return forwarders;
   }
 

@@ -31,22 +31,19 @@ public interface ContainerRepository extends JpaRepository<Container, Long> {
    */
   @Query(value = "FROM Container c" + " WHERE c.billOfLading.inbound.shippingLine.companyCode = :shippingLine"
       + " AND c.billOfLading.inbound.containerType.name = :containerType" + " AND c.status IN :status"
-      + " AND c.billOfLading.inbound.emptyTime < :packingTime" + " AND c.billOfLading.freeTime > :cutOffTime"
-      + " AND c.billOfLading.portOfDelivery.nameCode = :portOfLoading")
+      + " AND c.billOfLading.inbound.emptyTime < :packingTime" + " AND c.billOfLading.freeTime > :cutOffTime")
   List<Container> findByOutbound(@Param("shippingLine") String shippingLine,
       @Param("containerType") String containerType, @Param("status") List<String> status,
-      @Param("packingTime") LocalDateTime packingTime, @Param("cutOffTime") LocalDateTime cutOffTime,
-      @Param("portOfLoading") String portOfLoading);
+      @Param("packingTime") LocalDateTime packingTime, @Param("cutOffTime") LocalDateTime cutOffTime);
 
   @Query(value = "SELECT CASE WHEN COUNT(c) > 0 THEN TRUE ELSE FALSE END FROM Container c"
       + " WHERE c.billOfLading.inbound.shippingLine.companyCode = :shippingLine"
       + " AND c.billOfLading.inbound.containerType.name = :containerType" + " AND c.status IN :status"
       + " AND c.billOfLading.inbound.emptyTime < :packingTime" + " AND c.billOfLading.freeTime > :cutOffTime"
-      + " AND c.billOfLading.portOfDelivery.nameCode = :portOfLoading AND c.id = :id")
+      + " AND c.id = :id")
   Boolean existsByOutbound(@Param("id") Long id, @Param("shippingLine") String shippingLine,
       @Param("containerType") String containerType, @Param("status") List<String> status,
-      @Param("packingTime") LocalDateTime packingTime, @Param("cutOffTime") LocalDateTime cutOffTime,
-      @Param("portOfLoading") String portOfLoading);
+      @Param("packingTime") LocalDateTime packingTime, @Param("cutOffTime") LocalDateTime cutOffTime);
 
   @Query(value = "SELECT c FROM Container c WHERE c.billOfLading.inbound.id = :id")
   Page<Container> findContainersByInbound(@Param("id") Long id, Pageable pageable);

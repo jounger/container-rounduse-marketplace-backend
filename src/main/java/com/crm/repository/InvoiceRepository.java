@@ -21,4 +21,5 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long>, JpaSpec
 
   @Query(value = "FROM Invoice p WHERE p.contract.id = :id AND (p.sender.username = :username OR p.recipient.username = :username)")
   Page<Invoice> findByContract(@Param("id") Long id, @Param("username") String username, Pageable pageable);
+
 }

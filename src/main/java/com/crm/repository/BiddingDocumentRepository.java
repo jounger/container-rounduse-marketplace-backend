@@ -1,6 +1,7 @@
 package com.crm.repository;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -42,9 +43,10 @@ public interface BiddingDocumentRepository extends JpaRepository<BiddingDocument
       + "WHERE (bd.offeree.username = :username OR b.bidder.username = :username) AND b.combined.id IS NOT NULL")
   Page<BiddingDocument> findByExistCombined(@Param("username") String username, Pageable pageable);
 
-  @Query(value = "SELECT bd FROM BiddingDocument bd LEFT JOIN bd.outbound o LEFT JOIN o.booking bk WHERE o.shippingLine.companyCode = :shippingLine"
-      + " AND o.containerType.name = :containerType" + " AND bd.status IN :status" + " AND o.packingTime > :emptyTime"
-      + " AND bk.cutOffTime < :freeTime")
+  @Query(value = "SELECT bd FROM BiddingDocument bd LEFT JOIN bd.outbound o LEFT JOIN o.booking bk"
+      + " WHERE o.shippingLine.companyCode = :shippingLine"
+      + " AND o.containerType.name = :containerType AND bd.status IN :status"
+      + " AND o.packingTime > :emptyTime AND bk.cutOffTime < :freeTime")
   Page<BiddingDocument> findByInbound(@Param("shippingLine") String shippingLine,
       @Param("containerType") String containerType, @Param("status") List<String> status,
       @Param("emptyTime") LocalDateTime emptyTime, @Param("freeTime") LocalDateTime freeTime, Pageable pageable);
@@ -53,7 +55,27 @@ public interface BiddingDocumentRepository extends JpaRepository<BiddingDocument
       + "FROM BiddingDocument bd JOIN bd.bids b LEFT JOIN b.bidder f" + " WHERE bd.id = :id AND f.username = :username")
   boolean isBidderByBiddingDocument(@Param("id") Long id, @Param("username") String username);
 
-  @Query(value = "SELECT CASE WHEN COUNT(bd) > 0 THEN TRUE ELSE FALSE END "
-      + "FROM BiddingDocument bd JOIN bd.bids b" + " WHERE bd.id = :id AND b.status = 'ACCEPTED'")
+  @Query(value = "SELECT CASE WHEN COUNT(bd) > 0 THEN TRUE ELSE FALSE END FROM BiddingDocument bd JOIN bd.bids b"
+      + " WHERE bd.id = :id AND b.status = 'ACCEPTED'")
   boolean existsCombinedBid(@Param("id") Long id);
+
+  @Query(value = "SELECT COUNT(bd) FROM BiddingDocument bd"
+      + " WHERE bd.createdAt > :startDate AND bd.createdAt < :endDate")
+  Integer countBiddingDocumentsByOperator(@Param("startDate") Date startDate, @Param("endDate") Date endDate);
+
+  @Query(value = "SELECT COUNT(bd) FROM BiddingDocument bd"
+      + " WHERE bd.createdAt > :startDate AND bd.createdAt < :endDate AND bd.status IN :statusList")
+  Integer countBiddingDocumentsByOperator(@Param("statusList") List<String> statusList, @Param("startDate") Date startDate,
+      @Param("endDate") Date endDate);
+
+  @Query(value = "SELECT COUNT(bd) FROM BiddingDocument bd WHERE bd.offeree.username = :username"
+      + " AND bd.createdAt > :startDate AND bd.createdAt < :endDate")
+  Integer countBiddingDocuments(@Param("username") String username, @Param("startDate") Date startDate,
+      @Param("endDate") Date endDate);
+
+  @Query(value = "SELECT COUNT(bd) FROM BiddingDocument bd"
+      + " WHERE bd.offeree.username = :username AND bd.status IN :statusList"
+      + " AND bd.createdAt > :startDate AND bd.createdAt < :endDate")
+  Integer countBiddingDocuments(@Param("username") String username, @Param("status") String status,
+      @Param("startDate") Date startDate, @Param("endDate") Date endDate);
 }

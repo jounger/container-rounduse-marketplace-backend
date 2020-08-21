@@ -47,7 +47,7 @@ INSERT INTO crm_db.container_type(cubic_capacity,description,door_open_height,do
 INSERT INTO crm_db.container_type(cubic_capacity,description,door_open_height,door_open_width,internal_height,internal_length,internal_width,name,gross_weight,tare_weight,unit_of_measurement,created_at,updated_at) VALUES ('37.4','20ft High Cube Dimensions','2.58','2.34','2.69','5.96','2.35','20HCD','30480','2100','KG',CURDATE(),CURDATE());
 
 # TRAILER & TRACTOR
-INSERT INTO crm_db.vehicle(id,created_at,license_plate,number_of_axles,updated_at,user_id) VALUES (1,'2020-07-12 00:48:56','30Z0779',2,'2020-07-12 00:48:56',4),(2,'2020-07-12 00:49:22','30A555.77',2,'2020-07-12 00:49:22',4);
+INSERT INTO crm_db.vehicle(id,created_at,license_plate,number_of_axles,updated_at,user_id) VALUES (1,CURDATE(),'71-C4056.77',2,CURDATE(),4),(2,CURDATE(),'71-C4092.99',2,CURDATE(),4);
 INSERT INTO crm_db.container_semi_trailer(type,unit_of_measurement,vehicle_id) VALUES ('T36','FT',2);
 INSERT INTO crm_db.container_tractor(vehicle_id) VALUES (1);
 

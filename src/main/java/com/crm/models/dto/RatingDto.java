@@ -19,4 +19,6 @@ public class RatingDto {
   private ContractDto contract;
 
   private Integer ratingValue;
+
+  private String comment;
 }

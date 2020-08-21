@@ -10,8 +10,8 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class BiddingNotificationRequest {
 
+public class BiddingNotificationRequest {
   private Long id;
 
   // recipient as User.username

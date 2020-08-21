@@ -40,7 +40,7 @@ import com.crm.services.InvoiceService;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
-@RequestMapping("/api/payment")
+@RequestMapping("/api/invoice")
 public class InvoiceController {
 
   private static final Logger logger = LoggerFactory.getLogger(InvoiceController.class);

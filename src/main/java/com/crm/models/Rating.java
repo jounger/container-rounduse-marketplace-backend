@@ -56,6 +56,9 @@ public class Rating {
   @Column(name = "rating_value")
   private Integer ratingValue;
 
+  @Column(name = "comment")
+  private String comment;
+
   @Column(name = "created_at", nullable = false, updatable = false)
   @Temporal(TemporalType.TIMESTAMP)
   @CreatedDate

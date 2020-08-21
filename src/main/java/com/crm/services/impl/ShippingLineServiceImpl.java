@@ -66,10 +66,23 @@ public class ShippingLineServiceImpl implements ShippingLineService {
     shippingLine.setWebsite(request.getWebsite());
     shippingLine.setFullname(request.getFullname());
     shippingLine.setCompanyName(request.getCompanyName());
+
+    if (supplierRepository.existsByCompanyCode(request.getCompanyCode())) {
+      throw new DuplicateRecordException(ErrorMessage.COMPANY_CODE_ALREADY_EXISTS);
+    }
     shippingLine.setCompanyCode(request.getCompanyCode());
+
     shippingLine.setCompanyDescription(request.getCompanyDescription());
     shippingLine.setCompanyAddress(request.getCompanyAddress());
+
+    if (supplierRepository.existsByTin(request.getTin())) {
+      throw new DuplicateRecordException(ErrorMessage.TIN_DUPLICATE);
+    }
     shippingLine.setTin(request.getTin());
+
+    if (supplierRepository.existsByFax(request.getFax())) {
+      throw new DuplicateRecordException(ErrorMessage.FAX_DUPLICATE);
+    }
     shippingLine.setFax(request.getFax());
 
     ShippingLine _shippingLine = shippingLineRepository.save(shippingLine);

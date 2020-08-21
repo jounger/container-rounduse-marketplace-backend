@@ -10,6 +10,12 @@ public class SuccessMessage {
   public static final String CREATE_BID_SUCCESSFULLY = "Tạo hồ sơ dự thầu thành công";
   public static final String DELETE_BID_SUCCESSFULLY = "Xóa hồ sơ dự thầu thành công";
   public static final String EDIT_BID_SUCCESSFULLY = "Cập nhật hồ sơ dự thầu thành công";
+  public static final String ACCEPT_BID_SUCCESSFULLY = "Đồng ý hồ sơ dự thầu thành công";
+  public static final String REJECT_BID_SUCCESSFULLY = "Từ chối hồ sơ dự thầu thành công";
+  public static final String CANCEL_BID_SUCCESSFULLY = "Hủy hồ sơ dự thầu thành công";
+  public static final String EDIT_ADD_CONTAINER_SUCCESSFULLY = "Thêm container vào hồ sơ dự thầu thành công";
+  public static final String EDIT_REMOVE_CONTAINER_SUCCESSFULLY = "Xóa container khỏi hồ sơ dự thành công";
+  public static final String EDIT_REPLACE_CONTAINER_SUCCESSFULLY = "Thay đổi container trong hồ sơ dự thầu thành công";
 
   // BiddingDocumentController
   public static final String CREATE_BIDDING_DUCUMENT_SUCCESSFULLY = "Tạo hồ sơ đấu thầu thành công";
@@ -58,7 +64,7 @@ public class SuccessMessage {
   // DriverController
   public static final String CREATE_DRIVER_SUCCESSFULLY = "Thêm mới lái xe thành công";
   public static final String DELETE_DRIVER_SUCCESSFULLY = "Xóa lái xe thành công";
-  public static final String EDIT_DRIVER_SUCCESSFULLY = "Cập nhật mã giảm giá thành công";
+  public static final String EDIT_DRIVER_SUCCESSFULLY = "Cập nhật lái xe thành công";
 
   // EvidenceController
   public static final String CREATE_EVIDENCE_SUCCESSFULLY = "Thêm mới bằng chứng thành công";

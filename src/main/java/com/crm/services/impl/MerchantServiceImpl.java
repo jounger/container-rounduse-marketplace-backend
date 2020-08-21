@@ -47,8 +47,7 @@ public class MerchantServiceImpl implements MerchantService {
   @Override
   public Merchant createMerchant(SupplierRequest request) {
     if (userRepository.existsByUsername(request.getUsername()) || userRepository.existsByEmail(request.getEmail())
-        || userRepository.existsByPhone(request.getPhone())
-        || supplierRepository.existsByCompanyCode(request.getCompanyCode())) {
+        || userRepository.existsByPhone(request.getPhone())) {
       throw new DuplicateRecordException(ErrorMessage.USER_ALREADY_EXISTS);
     }
     Merchant merchant = new Merchant();

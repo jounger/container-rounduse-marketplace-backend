@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import com.crm.common.Constant;
 import com.crm.common.ErrorMessage;
 import com.crm.common.Tool;
+import com.crm.exception.DuplicateRecordException;
 import com.crm.exception.ForbiddenException;
 import com.crm.exception.NotFoundException;
 import com.crm.models.Bid;
@@ -56,13 +57,14 @@ public class RatingServiceImpl implements RatingService {
         .orElseThrow(() -> new NotFoundException(ErrorMessage.SENDER_NOT_FOUND));
     rating.setContract(contract);
     if (!contractRepository.existsByUserAndContract(request.getContract(), username)) {
-      throw new ForbiddenException(ErrorMessage.USER_ACCESS_DENIED);
+      throw new DuplicateRecordException(ErrorMessage.USER_ACCESS_DENIED);
     }
 
     if (ratingRepository.existsByUserAndContract(request.getContract(), username)) {
-      throw new ForbiddenException(ErrorMessage.USER_ACCESS_DENIED);
+      throw new ForbiddenException(ErrorMessage.RATING_ONE_PER_CONTRACT);
     }
     rating.setRatingValue(request.getRatingValue());
+    rating.setComment(request.getComment());
     Rating _rating = ratingRepository.save(rating);
 
     LocalDateTime rewind = LocalDateTime.now().minusMonths(Constant.REWIND_MONTH);
@@ -179,6 +181,10 @@ public class RatingServiceImpl implements RatingService {
     String ratingValue = String.valueOf(updates.get("ratingValue"));
     if (updates.get("ratingValue") != null && !Tool.isEqual(rating.getRatingValue(), ratingValue)) {
       rating.setRatingValue(Integer.valueOf(ratingValue));
+    }
+    String comment = String.valueOf(updates.get("comment"));
+    if (updates.get("comment") != null && !Tool.isEqual(rating.getComment(), comment)) {
+      rating.setComment(comment);
     }
     Rating _rating = ratingRepository.save(rating);
 

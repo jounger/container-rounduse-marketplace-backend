@@ -45,7 +45,7 @@ import com.crm.services.FileUploadService;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
-@RequestMapping("/api/evidence")
+@RequestMapping("/api/contract-document")
 public class ContractDocumentController {
 
   private static final Logger logger = LoggerFactory.getLogger(ContractDocumentController.class);

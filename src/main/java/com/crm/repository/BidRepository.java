@@ -1,5 +1,8 @@
 package com.crm.repository;
 
+import java.util.Date;
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -39,4 +42,22 @@ public interface BidRepository extends JpaRepository<Bid, Long> {
   @Query(value = "SELECT CASE WHEN COUNT(b) = 0 THEN TRUE ELSE FALSE END "
       + "FROM Bid b JOIN b.containers c WHERE b.biddingDocument.id = :id AND c.status != 'COMBINED'")
   boolean isAllAcceptedByBiddingDocument(@Param("id") Long id);
+
+  @Query(value = "SELECT COUNT(b) FROM Bid b WHERE b.createdAt > :startDate AND b.createdAt < :endDate")
+  Integer countBidsByOperator(@Param("startDate") Date startDate, @Param("endDate") Date endDate);
+
+  @Query(value = "SELECT COUNT(b) FROM Bid b WHERE b.status = :statusList"
+      + " AND b.createdAt > :startDate AND b.createdAt < :endDate")
+  Integer countBidsByOperator(@Param("statusList") List<String> statusList, @Param("startDate") Date startDate,
+      @Param("endDate") Date endDate);
+
+  @Query(value = "SELECT COUNT(b) FROM Bid b WHERE b.bidder.username = :username"
+      + " AND b.createdAt > :startDate AND b.createdAt < :endDate")
+  Integer countBids(@Param("username") String username, @Param("startDate") Date startDate,
+      @Param("endDate") Date endDate);
+
+  @Query(value = "SELECT COUNT(b) FROM Bid b WHERE b.bidder.username = :username AND b.status IN :statusList"
+      + " AND b.createdAt > :startDate AND b.createdAt < :endDate")
+  Integer countBids(@Param("username") String username, @Param("statusList") List<String> statusList,
+      @Param("startDate") Date startDate, @Param("endDate") Date endDate);
 }

@@ -197,7 +197,8 @@ class ContractControllerIT {
     bid.setBiddingDocument(biddingDocument);
     bid.setBidDate(timeNow);
     bid.setBidPrice(2300D);
-    bid.setBidValidityPeriod(timeNow.plusHours(1));
+    bid.setFreezeTime(timeNow.plusHours(1));
+    bid.setValidityPeriod(timeNow.plusHours(1));
     bid.setStatus(EnumBidStatus.PENDING.name());
     bid.setContainers(containers);
 
@@ -208,6 +209,7 @@ class ContractControllerIT {
     contract = new Contract();
     contract.setId(1L);
     contract.setFinesAgainstContractViolations(8D);
+    contract.setCreationDate(timeNow.minusHours(1));
     contract.setRequired(false);
 
     combined = new Combined();
@@ -234,8 +236,8 @@ class ContractControllerIT {
     MvcResult result = mockMvc
         .perform(post("/api/contract/combined/1").contentType(MediaType.APPLICATION_JSON_VALUE)
             .content(objectMapper.writeValueAsString(request)))
-        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.id").value(1))
-        .andExpect(jsonPath("$.required").value(false)).andReturn();
+        .andDo(print()).andExpect(status().isCreated()).andExpect(jsonPath("$.data.id").value(1))
+        .andExpect(jsonPath("$.data.required").value(false)).andReturn();
 
     // print response
     MockHttpServletResponse response = result.getResponse();
@@ -309,8 +311,8 @@ class ContractControllerIT {
     MvcResult result = mockMvc
         .perform(patch("/api/contract/1").contentType(MediaType.APPLICATION_JSON_VALUE)
             .content(objectMapper.writeValueAsString(updates)))
-        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.id").value(1))
-        .andExpect(jsonPath("$.required").value(true)).andReturn();
+        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.data.id").value(1))
+        .andExpect(jsonPath("$.data.required").value(true)).andReturn();
 
     // print response
     MockHttpServletResponse response = result.getResponse();
@@ -324,7 +326,7 @@ class ContractControllerIT {
     // when and then
     MvcResult result = mockMvc.perform(delete("/api/contract/1").contentType(MediaType.APPLICATION_JSON_VALUE))
         .andDo(print()).andExpect(status().isOk())
-        .andExpect(jsonPath("$.message").value("Contract deleted successfully.")).andReturn();
+        .andExpect(jsonPath("$.message").value("Xóa hợp đồng thành công")).andReturn();
 
     // print response
     MockHttpServletResponse response = result.getResponse();

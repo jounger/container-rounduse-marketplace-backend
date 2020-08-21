@@ -181,7 +181,7 @@ class OperatorControllerIT {
     operator.setFullname("123456");
     Map<String, Object> updates = new HashMap<String, Object>();
     updates.put("fullName", "123456");
-    when(operatorService.editOperator(Mockito.anyLong(), Mockito.anyMap())).thenReturn(operator);
+    when(operatorService.editOperator(Mockito.anyLong(), Mockito.anyString(), Mockito.anyMap())).thenReturn(operator);
 
     // when and then
     MvcResult result = mockMvc

@@ -170,6 +170,7 @@ class BiddingDocumentControllerIT {
   void getBiddingDocument_thenStatusOk_andReturnBiddingDocument() throws Exception {
     // given
     when(biddingDocumentService.getBiddingDocument(Mockito.anyLong())).thenReturn(biddingDocument);
+    when(biddingDocumentService.updateExpiredBiddingDocumentFromList(Mockito.anyList())).thenReturn(listBidDoc);
 
     // when and then
     MvcResult result = mockMvc.perform(get("/api/bidding-document/1").contentType(MediaType.APPLICATION_JSON_VALUE))
@@ -188,6 +189,7 @@ class BiddingDocumentControllerIT {
     LinkedMultiValueMap<String, String> requestParams = new LinkedMultiValueMap<>();
     requestParams.add("page", "0");
     requestParams.add("limit", "10");
+    when(biddingDocumentService.updateExpiredBiddingDocumentFromList(Mockito.anyList())).thenReturn(listBidDoc);
     when(biddingDocumentService.getBiddingDocuments(Mockito.anyString(), Mockito.any(PaginationRequest.class)))
         .thenReturn(pages);
 
@@ -195,7 +197,7 @@ class BiddingDocumentControllerIT {
     MvcResult result = mockMvc
         .perform(get("/api/bidding-document").contentType(MediaType.APPLICATION_JSON_VALUE).params(requestParams))
         .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.data[0].id").value(1))
-        .andExpect(jsonPath("$.data[0].offeree").value("merchant")).andReturn();
+        .andExpect(jsonPath("$.data[0].offeree.username").value("merchant")).andReturn();
 
     // print response
     MockHttpServletResponse response = result.getResponse();
@@ -206,6 +208,7 @@ class BiddingDocumentControllerIT {
   @WithMockUser(username = "merchant", roles = { "MERCHANT" })
   void getBiddingDocumentByBid_thenStatusOk_andReturnBiddingDocument() throws Exception {
     // given
+    when(biddingDocumentService.updateExpiredBiddingDocumentFromList(Mockito.anyList())).thenReturn(listBidDoc);
     when(biddingDocumentService.getBiddingDocumentByBid(Mockito.anyLong(), Mockito.anyString()))
         .thenReturn(biddingDocument);
 
@@ -213,7 +216,7 @@ class BiddingDocumentControllerIT {
     MvcResult result = mockMvc
         .perform(get("/api/bidding-document/bid/1").contentType(MediaType.APPLICATION_JSON_VALUE).params(requestParams))
         .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.id").value(1))
-        .andExpect(jsonPath("$.offeree").value("merchant")).andReturn();
+        .andExpect(jsonPath("$.offeree.username").value("merchant")).andReturn();
 
     // print response
     MockHttpServletResponse response = result.getResponse();
@@ -225,6 +228,7 @@ class BiddingDocumentControllerIT {
   void getBiddingDocumentsByExistCombined_thenStatusOk_andReturnNull() throws Exception {
     // given
     // pages = Mockito.mock(Page.class);
+    when(biddingDocumentService.updateExpiredBiddingDocumentFromList(Mockito.anyList())).thenReturn(listBidDoc);
     List<BiddingDocument> listBidDoc1 = new ArrayList<BiddingDocument>();
     Page<BiddingDocument> pages1 = new PageImpl<BiddingDocument>(listBidDoc1);
     LinkedMultiValueMap<String, String> requestParams = new LinkedMultiValueMap<>();

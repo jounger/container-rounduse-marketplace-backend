@@ -209,8 +209,8 @@ class BookingControllerIT {
     MvcResult result = mockMvc
         .perform(patch("/api/booking/1").contentType(MediaType.APPLICATION_JSON_VALUE)
             .content(objectMapper.writeValueAsString(updates)))
-        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.id").value(1))
-        .andExpect(jsonPath("$.unit").value(5)).andReturn();
+        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.data.id").value(1))
+        .andExpect(jsonPath("$.data.unit").value(5)).andReturn();
 
     // print response
     MockHttpServletResponse response = result.getResponse();

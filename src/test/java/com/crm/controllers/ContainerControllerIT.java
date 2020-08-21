@@ -79,7 +79,7 @@ class ContainerControllerIT {
   Container container;
 
   List<Container> containers;
-  
+
   Bid bid;
 
   LinkedMultiValueMap<String, String> requestParams;
@@ -145,13 +145,14 @@ class ContainerControllerIT {
     inbound.setReturnStation("123456");
     inbound.setEmptyTime(timeNow.plusDays(3));
     inbound.setShippingLine(shippingLine);
-    
+
     bid = new Bid();
     bid.setId(1L);
     bid.setBidder(forwarder);
     bid.setBidDate(timeNow);
     bid.setBidPrice(2300D);
-    bid.setBidValidityPeriod(timeNow.plusHours(1));
+    bid.setFreezeTime(timeNow.plusHours(1));
+    bid.setValidityPeriod(timeNow.plusHours(1));
     bid.setStatus(EnumBidStatus.PENDING.name());
     bid.setContainers(containers);
 
@@ -177,8 +178,8 @@ class ContainerControllerIT {
     MvcResult result = mockMvc
         .perform(post("/api/container/bill-of-lading/1").contentType(MediaType.APPLICATION_JSON_VALUE)
             .content(objectMapper.writeValueAsString(request)))
-        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.id").value(1))
-        .andExpect(jsonPath("$.number").value("CN2d2d22")).andReturn();
+        .andDo(print()).andExpect(status().isCreated()).andExpect(jsonPath("$.data.id").value(1))
+        .andExpect(jsonPath("$.data.number").value("CN2d2d22")).andReturn();
 
     // print response
     MockHttpServletResponse response = result.getResponse();
@@ -190,6 +191,7 @@ class ContainerControllerIT {
   void getContainer_thenStatusOk_andReturnContainer() throws JsonProcessingException, Exception {
     // given
     when(containerService.getContainerById(Mockito.anyLong())).thenReturn(container);
+    when(containerService.updateExpiredContainerFromList(Mockito.anyList())).thenReturn(containers);
 
     // when and then
     MvcResult result = mockMvc.perform(get("/api/container/1").contentType(MediaType.APPLICATION_JSON_VALUE))
@@ -202,29 +204,12 @@ class ContainerControllerIT {
   }
 
   @Test
-  @WithMockUser(username = "forwarder", roles = { "FORWARDER" })
-  void getContainers_thenStatusOk_andReturnContainer()
-      throws JsonProcessingException, Exception {
-    // given
-    when(containerService.getContainers(Mockito.any(PaginationRequest.class))).thenReturn(pages);
-
-    // when and then
-    MvcResult result = mockMvc.perform(get("/api/container").contentType(MediaType.APPLICATION_JSON_VALUE).params(requestParams))
-        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.data[0].id").value(1))
-        .andExpect(jsonPath("$.data[0].number").value("CN2d2d22")).andReturn();
-
-    // print response
-    MockHttpServletResponse response = result.getResponse();
-    logger.info("Reponse: {}", response.getContentAsString());
-  }
-
-  @Test
   @WithMockUser(username = "merchant", roles = { "MERCHANT" })
-  void getContainersByBillOfLading_thenStatusOk_andReturnContainers()
-      throws JsonProcessingException, Exception {
+  void getContainersByBillOfLading_thenStatusOk_andReturnContainers() throws JsonProcessingException, Exception {
     // given
     when(containerService.getContainersByBillOfLading(Mockito.anyLong(), Mockito.any(PaginationRequest.class)))
         .thenReturn(pages);
+    when(containerService.updateExpiredContainerFromList(Mockito.anyList())).thenReturn(containers);
 
     // when and then
     MvcResult result = mockMvc
@@ -244,6 +229,7 @@ class ContainerControllerIT {
     // given
     when(containerService.getContainersByInbound(Mockito.anyLong(), Mockito.any(PaginationRequest.class)))
         .thenReturn(pages);
+    when(containerService.updateExpiredContainerFromList(Mockito.anyList())).thenReturn(containers);
 
     // when and then
     MvcResult result = mockMvc
@@ -262,6 +248,7 @@ class ContainerControllerIT {
     // given
     when(containerService.getContainersByBid(Mockito.anyLong(), Mockito.any(PaginationRequest.class)))
         .thenReturn(pages);
+    when(containerService.updateExpiredContainerFromList(Mockito.anyList())).thenReturn(containers);
 
     // when and then
     MvcResult result = mockMvc
@@ -288,8 +275,8 @@ class ContainerControllerIT {
     MvcResult result = mockMvc
         .perform(patch("/api/container/1").contentType(MediaType.APPLICATION_JSON_VALUE)
             .content(objectMapper.writeValueAsString(updates)))
-        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.id").value(1))
-        .andExpect(jsonPath("$.number").value("2s3d2w")).andReturn();
+        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.data.id").value(1))
+        .andExpect(jsonPath("$.data.number").value("2s3d2w")).andReturn();
 
     // print response
     MockHttpServletResponse response = result.getResponse();
@@ -303,8 +290,8 @@ class ContainerControllerIT {
 
     // when and then
     MvcResult result = mockMvc.perform(delete("/api/container/1").contentType(MediaType.APPLICATION_JSON_VALUE))
-        .andDo(print()).andExpect(status().isOk())
-        .andExpect(jsonPath("$.message").value("Container has remove successfully")).andReturn();
+        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.message").value("Xóa container thành công"))
+        .andReturn();
 
     // print response
     MockHttpServletResponse response = result.getResponse();

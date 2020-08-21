@@ -143,8 +143,8 @@ class OutboundControllerIT {
     MvcResult result = mockMvc
         .perform(post("/api/outbound").contentType(MediaType.APPLICATION_JSON_VALUE)
             .content(objectMapper.writeValueAsString(request)))
-        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.id").value(1))
-        .andExpect(jsonPath("$.goodsDescription").value("Abc")).andReturn();
+        .andDo(print()).andExpect(status().isCreated()).andExpect(jsonPath("$.data.id").value(1))
+        .andExpect(jsonPath("$.data.goodsDescription").value("Abc")).andReturn();
 
     // print response
     MockHttpServletResponse response = result.getResponse();
@@ -156,6 +156,7 @@ class OutboundControllerIT {
   void getOutbound_thenStatusOk_andReturnOutbound() throws Exception {
     // given
     when(outboundService.getOutboundById(Mockito.anyLong())).thenReturn(outbound);
+    when(outboundService.updateExpiredOutboundFromList(Mockito.anyList())).thenReturn(listOutbounds);
 
     // when and then
     MvcResult result = mockMvc.perform(get("/api/outbound/1").contentType(MediaType.APPLICATION_JSON_VALUE))
@@ -174,6 +175,7 @@ class OutboundControllerIT {
     String search = "packingStation:Noi";
     requestParams.add("search", search);
     when(outboundService.searchOutbounds(Mockito.any(PaginationRequest.class), Mockito.anyString())).thenReturn(pages);
+    when(outboundService.updateExpiredOutboundFromList(Mockito.anyList())).thenReturn(listOutbounds);
 
     // when and then
     MvcResult result = mockMvc
@@ -192,6 +194,7 @@ class OutboundControllerIT {
   void getOutbounds_thenStatusOk_andReturnOutbounds() throws Exception {
     // given
     when(outboundService.getOutbounds(Mockito.any(PaginationRequest.class))).thenReturn(pages);
+    when(outboundService.updateExpiredOutboundFromList(Mockito.anyList())).thenReturn(listOutbounds);
 
     // when and then
     MvcResult result = mockMvc
@@ -210,6 +213,7 @@ class OutboundControllerIT {
     // given
     when(outboundService.getOutboundsByMerchant(Mockito.anyString(), Mockito.any(PaginationRequest.class)))
         .thenReturn(pages);
+    when(outboundService.updateExpiredOutboundFromList(Mockito.anyList())).thenReturn(listOutbounds);
 
     // when and then
     MvcResult result = mockMvc
@@ -235,8 +239,8 @@ class OutboundControllerIT {
     MvcResult result = mockMvc
         .perform(patch("/api/outbound/1").contentType(MediaType.APPLICATION_JSON_VALUE)
             .content(objectMapper.writeValueAsString(updates)))
-        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.id").value(1))
-        .andExpect(jsonPath("$.packingStation").value("Ha Tay")).andReturn();
+        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.data.id").value(1))
+        .andExpect(jsonPath("$.data.packingStation").value("Ha Tay")).andReturn();
 
     // print response
     MockHttpServletResponse response = result.getResponse();
@@ -249,8 +253,8 @@ class OutboundControllerIT {
 
     // when and then
     MvcResult result = mockMvc.perform(delete("/api/outbound/1").contentType(MediaType.APPLICATION_JSON_VALUE))
-        .andDo(print()).andExpect(status().isOk())
-        .andExpect(jsonPath("$.message").value("Outbound has removed successfully")).andReturn();
+        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.message").value("Xóa hàng xuất thành công"))
+        .andReturn();
 
     // print response
     MockHttpServletResponse response = result.getResponse();

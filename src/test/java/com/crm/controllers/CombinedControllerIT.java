@@ -194,7 +194,8 @@ class CombinedControllerIT {
     bid.setBiddingDocument(biddingDocument);
     bid.setBidDate(timeNow);
     bid.setBidPrice(2300D);
-    bid.setBidValidityPeriod(timeNow.plusHours(1));
+    bid.setFreezeTime(timeNow.plusHours(1));
+    bid.setValidityPeriod(timeNow.plusHours(2));
     bid.setStatus(EnumBidStatus.PENDING.name());
     bid.setContainers(containers);
 
@@ -204,10 +205,11 @@ class CombinedControllerIT {
     requestParams = new LinkedMultiValueMap<>();
     requestParams.add("page", "0");
     requestParams.add("limit", "10");
-    
+
     Contract contract = new Contract();
     contract.setId(1L);
     contract.setFinesAgainstContractViolations(8D);
+    contract.setCreationDate(timeNow.minusHours(1));
     contract.setRequired(false);
 
     combined = new Combined();
@@ -234,8 +236,8 @@ class CombinedControllerIT {
     MvcResult result = mockMvc
         .perform(post("/api/combined/bid/1").contentType(MediaType.APPLICATION_JSON_VALUE)
             .content(objectMapper.writeValueAsString(request)))
-        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.id").value(1))
-        .andExpect(jsonPath("$.isCanceled").value(false)).andReturn();
+        .andDo(print()).andExpect(status().isCreated()).andExpect(jsonPath("$.data.id").value(1))
+        .andExpect(jsonPath("$.data.isCanceled").value(false)).andReturn();
 
     // print response
     MockHttpServletResponse response = result.getResponse();
@@ -260,14 +262,14 @@ class CombinedControllerIT {
 
   @Test
   @WithMockUser(username = "forwarder", roles = { "FORWARDER" })
-  void getCombinedsByUser_thenStatusOk_andReturnCombineds() throws JsonProcessingException, Exception {
+  void getCombineds_thenStatusOk_andReturnCombineds() throws JsonProcessingException, Exception {
     // given
     when(combinedService.getCombinedsByUser(Mockito.anyString(), Mockito.any(PaginationRequest.class)))
         .thenReturn(pages);
 
     // when and then
-    MvcResult result = mockMvc.perform(get("/api/combined/user").contentType(MediaType.APPLICATION_JSON_VALUE)
-        .params(requestParams))
+    MvcResult result = mockMvc
+        .perform(get("/api/combined").contentType(MediaType.APPLICATION_JSON_VALUE).params(requestParams))
         .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.data[0].id").value(1))
         .andExpect(jsonPath("$.data[0].isCanceled").value(false)).andReturn();
 
@@ -302,14 +304,15 @@ class CombinedControllerIT {
     combined.setIsCanceled(true);
     Map<String, Object> updates = new HashMap<String, Object>();
     updates.put("isCanceled", "true");
-    when(combinedService.editCombined(Mockito.anyLong(), Mockito.anyString(), Mockito.anyString())).thenReturn(combined);
+    when(combinedService.editCombined(Mockito.anyLong(), Mockito.anyString(), Mockito.anyString()))
+        .thenReturn(combined);
 
     // when and then
     MvcResult result = mockMvc
         .perform(patch("/api/combined/1").contentType(MediaType.APPLICATION_JSON_VALUE)
             .content(objectMapper.writeValueAsString(updates)))
-        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.id").value(1))
-        .andExpect(jsonPath("$.isCanceled").value(true)).andReturn();
+        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.data.id").value(1))
+        .andExpect(jsonPath("$.data.isCanceled").value(true)).andReturn();
 
     // print response
     MockHttpServletResponse response = result.getResponse();

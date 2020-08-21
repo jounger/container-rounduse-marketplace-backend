@@ -162,8 +162,8 @@ class InboundControllerIT {
     MvcResult result = mockMvc
         .perform(post("/api/inbound").contentType(MediaType.APPLICATION_JSON_VALUE)
             .content(objectMapper.writeValueAsString(request)))
-        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.id").value(1))
-        .andExpect(jsonPath("$.returnStation").value("123456")).andReturn();
+        .andDo(print()).andExpect(status().isCreated()).andExpect(jsonPath("$.data.id").value(1))
+        .andExpect(jsonPath("$.data.returnStation").value("123456")).andReturn();
 
     // print response
     MockHttpServletResponse response = result.getResponse();
@@ -321,8 +321,8 @@ class InboundControllerIT {
     MvcResult result = mockMvc
         .perform(patch("/api/inbound/1").contentType(MediaType.APPLICATION_JSON_VALUE)
             .content(objectMapper.writeValueAsString(updates)))
-        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.id").value(1))
-        .andExpect(jsonPath("$.returnStation").value("654321")).andReturn();
+        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.data.id").value(1))
+        .andExpect(jsonPath("$.data.returnStation").value("654321")).andReturn();
 
     // print response
     MockHttpServletResponse response = result.getResponse();
@@ -337,7 +337,7 @@ class InboundControllerIT {
     // when and then
     MvcResult result = mockMvc.perform(delete("/api/inbound/1").contentType(MediaType.APPLICATION_JSON_VALUE))
         .andDo(print()).andExpect(status().isOk())
-        .andExpect(jsonPath("$.message").value("Inbound has remove successfully")).andReturn();
+        .andExpect(jsonPath("$.message").value("Xóa hàng nhập thành công")).andReturn();
 
     // print response
     MockHttpServletResponse response = result.getResponse();

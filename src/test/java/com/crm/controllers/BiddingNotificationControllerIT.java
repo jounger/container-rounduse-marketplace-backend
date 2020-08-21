@@ -139,25 +139,6 @@ class BiddingNotificationControllerIT {
 
   @Test
   @WithMockUser(username = "merchant", roles = { "MERCHANT" })
-  void getBiddingNotificationsByUser_thenStatusOk_andReturnBiddingNotifications() throws Exception {
-    // given
-    when(biddingNotificationService.getBiddingNotificationsByUser(Mockito.anyLong(),
-        Mockito.any(PaginationRequest.class))).thenReturn(pages);
-
-    // when and then
-    MvcResult result = mockMvc
-        .perform(
-            get("/api/bidding-notification/user/1").contentType(MediaType.APPLICATION_JSON_VALUE).params(requestParams))
-        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.data[0].id").value(1))
-        .andExpect(jsonPath("$.data[0].isRead").value(false)).andReturn();
-
-    // print response
-    MockHttpServletResponse response = result.getResponse();
-    logger.info("Reponse: {}", response.getContentAsString());
-  }
-
-  @Test
-  @WithMockUser(username = "merchant", roles = { "MERCHANT" })
   void getBiddingNotificationsByUser2_thenStatusOk_andReturnBiddingNotifications() throws Exception {
     // given
     when(biddingNotificationService.getBiddingNotificationsByUser(Mockito.anyString(),

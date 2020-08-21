@@ -113,6 +113,7 @@ class ForwarderControllerIT {
     request.setFax("32321123");
     request.setTin("23d235313");
     request.setWebsite("forwarder.com");
+    request.setFullname("Nguyen Van A");
 
     when(forwarderService.createForwarder(Mockito.any(ForwarderRequest.class))).thenReturn(forwarder);
 

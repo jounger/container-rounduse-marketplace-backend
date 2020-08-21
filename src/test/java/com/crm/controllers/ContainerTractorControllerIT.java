@@ -161,8 +161,8 @@ class ContainerTractorControllerIT {
     MvcResult result = mockMvc
         .perform(post("/api/container-tractor").contentType(MediaType.APPLICATION_JSON_VALUE)
             .content(objectMapper.writeValueAsString(request)))
-        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.id").value(1))
-        .andExpect(jsonPath("$.licensePlate").value("29A-3231")).andReturn();
+        .andDo(print()).andExpect(status().isCreated()).andExpect(jsonPath("$.data.id").value(1))
+        .andExpect(jsonPath("$.data.licensePlate").value("29A-3231")).andReturn();
 
     // print response
     MockHttpServletResponse response = result.getResponse();
@@ -277,8 +277,8 @@ class ContainerTractorControllerIT {
     MvcResult result = mockMvc
         .perform(patch("/api/container-tractor/1").contentType(MediaType.APPLICATION_JSON_VALUE)
             .content(objectMapper.writeValueAsString(updates)))
-        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.id").value(1))
-        .andExpect(jsonPath("$.licensePlate").value("2s3d2w")).andReturn();
+        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.data.id").value(1))
+        .andExpect(jsonPath("$.data.licensePlate").value("2s3d2w")).andReturn();
 
     // print response
     MockHttpServletResponse response = result.getResponse();
@@ -293,7 +293,7 @@ class ContainerTractorControllerIT {
     // when and then
     MvcResult result = mockMvc.perform(delete("/api/container-tractor/1").contentType(MediaType.APPLICATION_JSON_VALUE))
         .andDo(print()).andExpect(status().isOk())
-        .andExpect(jsonPath("$.message").value("ContainerTractor has remove successfully")).andReturn();
+        .andExpect(jsonPath("$.message").value("Xóa đầu kéo thành công")).andReturn();
 
     // print response
     MockHttpServletResponse response = result.getResponse();

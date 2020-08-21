@@ -144,8 +144,8 @@ public class UserControllerIT {
     MvcResult mvcResult = mockMvc
         .perform(patch("/api/user/1").contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(updates)).accept(MediaType.APPLICATION_JSON))
-        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.id").value(1))
-        .andExpect(jsonPath("$..status").value("ACCEPTED")).andReturn();
+        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.data.id").value(1))
+        .andExpect(jsonPath("$.data.status").value("ACCEPTED")).andReturn();
 
     // RESPONSE
     MockHttpServletResponse response = mvcResult.getResponse();

@@ -198,7 +198,8 @@ class ShippingInfoControllerIT {
     bid.setBiddingDocument(biddingDocument);
     bid.setBidDate(timeNow);
     bid.setBidPrice(2300D);
-    bid.setBidValidityPeriod(timeNow.plusHours(1));
+    bid.setFreezeTime(timeNow.plusHours(1));
+    bid.setValidityPeriod(timeNow.minusHours(1));
     bid.setStatus(EnumBidStatus.PENDING.name());
     bid.setContainers(containers);
 
@@ -213,6 +214,7 @@ class ShippingInfoControllerIT {
     contract.setId(1L);
     contract.setFinesAgainstContractViolations(8D);
     contract.setRequired(false);
+    contract.setCreationDate(timeNow);
 
     combined = new Combined();
     combined.setId(1L);
@@ -337,8 +339,8 @@ class ShippingInfoControllerIT {
     MvcResult result = mockMvc
         .perform(patch("/api/shipping-info/1").contentType(MediaType.APPLICATION_JSON_VALUE)
             .content(objectMapper.writeValueAsString(updates)))
-        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.id").value(1))
-        .andExpect(jsonPath("$.status").value("SHIPPING")).andReturn();
+        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.data.id").value(1))
+        .andExpect(jsonPath("$.data.status").value("SHIPPING")).andReturn();
 
     // print response
     MockHttpServletResponse response = result.getResponse();
@@ -353,7 +355,7 @@ class ShippingInfoControllerIT {
     // when and then
     MvcResult result = mockMvc.perform(delete("/api/shipping-info/1").contentType(MediaType.APPLICATION_JSON_VALUE))
         .andDo(print()).andExpect(status().isOk())
-        .andExpect(jsonPath("$.message").value("ShippingInfo deleted successfully.")).andReturn();
+        .andExpect(jsonPath("$.message").value("Xóa chi tiết đơn vận chuyển thành công")).andReturn();
 
     // print response
     MockHttpServletResponse response = result.getResponse();

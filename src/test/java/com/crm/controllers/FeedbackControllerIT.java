@@ -112,7 +112,7 @@ class FeedbackControllerIT {
         .perform(post("/api/feedback/report/1").contentType(MediaType.APPLICATION_JSON_VALUE)
             .content(objectMapper.writeValueAsString(request)))
         .andDo(print()).andExpect(status().isCreated()).andExpect(jsonPath("$.data.id").value(1))
-        .andExpect(jsonPath("$.data.sender").value("operator")).andReturn();
+        .andExpect(jsonPath("$.data.sender.username").value("operator")).andReturn();
 
     // print response
     MockHttpServletResponse response = result.getResponse();
@@ -136,7 +136,7 @@ class FeedbackControllerIT {
         .perform(post("/api/feedback").contentType(MediaType.APPLICATION_JSON_VALUE).params(requestParams)
             .content(objectMapper.writeValueAsString(request)))
         .andDo(print()).andExpect(status().isCreated()).andExpect(jsonPath("$.data.id").value(1))
-        .andExpect(jsonPath("$.data.recipient").value("forwarder")).andReturn();
+        .andExpect(jsonPath("$.data.recipient.username").value("forwarder")).andReturn();
 
     // print response
     MockHttpServletResponse response = result.getResponse();
@@ -154,7 +154,7 @@ class FeedbackControllerIT {
     MvcResult result = mockMvc
         .perform(get("/api/feedback/report/1").contentType(MediaType.APPLICATION_JSON_VALUE).params(requestParams))
         .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.data[0].id").value(1))
-        .andExpect(jsonPath("$.data[0].recipient").value("forwarder")).andReturn();
+        .andExpect(jsonPath("$.data[0].recipient.username").value("forwarder")).andReturn();
 
     // print response
     MockHttpServletResponse response = result.getResponse();
@@ -172,7 +172,7 @@ class FeedbackControllerIT {
     MvcResult result = mockMvc
         .perform(get("/api/feedback/user").contentType(MediaType.APPLICATION_JSON_VALUE).params(requestParams))
         .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.data[0].id").value(1))
-        .andExpect(jsonPath("$.data[0].sender").value("operator")).andReturn();
+        .andExpect(jsonPath("$.data[0].sender.username").value("operator")).andReturn();
 
     // print response
     MockHttpServletResponse response = result.getResponse();

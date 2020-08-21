@@ -164,8 +164,8 @@ class ContainerSemiTrailerControllerIT {
     MvcResult result = mockMvc
         .perform(post("/api/container-semi-trailer").contentType(MediaType.APPLICATION_JSON_VALUE)
             .content(objectMapper.writeValueAsString(request)))
-        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.id").value(2))
-        .andExpect(jsonPath("$.licensePlate").value("29A-2353")).andReturn();
+        .andDo(print()).andExpect(status().isCreated()).andExpect(jsonPath("$.data.id").value(2))
+        .andExpect(jsonPath("$.data.licensePlate").value("29A-2353")).andReturn();
 
     // print response
     MockHttpServletResponse response = result.getResponse();
@@ -280,8 +280,8 @@ class ContainerSemiTrailerControllerIT {
     MvcResult result = mockMvc
         .perform(patch("/api/container-semi-trailer/1").contentType(MediaType.APPLICATION_JSON_VALUE)
             .content(objectMapper.writeValueAsString(updates)))
-        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.id").value(2))
-        .andExpect(jsonPath("$.licensePlate").value("2s3d2w")).andReturn();
+        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.data.id").value(2))
+        .andExpect(jsonPath("$.data.licensePlate").value("2s3d2w")).andReturn();
 
     // print response
     MockHttpServletResponse response = result.getResponse();
@@ -296,7 +296,7 @@ class ContainerSemiTrailerControllerIT {
     // when and then
     MvcResult result = mockMvc.perform(delete("/api/container-semi-trailer/1").contentType(MediaType.APPLICATION_JSON_VALUE))
         .andDo(print()).andExpect(status().isOk())
-        .andExpect(jsonPath("$.message").value("ContainerSemiTrailer has remove successfully")).andReturn();
+        .andExpect(jsonPath("$.message").value("Xóa rơ móc thành công")).andReturn();
 
     // print response
     MockHttpServletResponse response = result.getResponse();

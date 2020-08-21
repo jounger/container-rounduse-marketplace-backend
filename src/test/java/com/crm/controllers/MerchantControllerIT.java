@@ -113,6 +113,7 @@ class MerchantControllerIT {
     request.setFax("32321123");
     request.setTin("23d235313");
     request.setWebsite("merchant.com");
+    request.setFullname("Nguyen Van B");
 
     when(merchantService.createMerchant(Mockito.any(MerchantRequest.class))).thenReturn(merchant);
 

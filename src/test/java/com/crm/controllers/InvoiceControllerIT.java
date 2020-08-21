@@ -9,6 +9,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -33,76 +34,91 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.util.LinkedMultiValueMap;
 
-import com.crm.models.Evidence;
+import com.crm.models.Contract;
+import com.crm.models.Forwarder;
+import com.crm.models.Invoice;
 import com.crm.models.Merchant;
-import com.crm.payload.request.EvidenceRequest;
+import com.crm.payload.request.InvoiceRequest;
 import com.crm.payload.request.PaginationRequest;
-import com.crm.services.EvidenceService;
+import com.crm.services.InvoiceService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @SpringBootTest
 @AutoConfigureMockMvc
 @ContextConfiguration
-class EvidenceControllerIT {
+class InvoiceControllerIT {
 
-  private static final Logger logger = LoggerFactory.getLogger(EvidenceControllerIT.class);
+  private static final Logger logger = LoggerFactory.getLogger(InvoiceControllerIT.class);
 
   @Autowired
   protected MockMvc mockMvc;
 
   @MockBean
-  private EvidenceService evidenceService;
+  private InvoiceService invoiceService;
 
   @Autowired
   private ObjectMapper objectMapper;
 
   PaginationRequest paginationRequest;
 
-  Page<Evidence> pages;
+  Page<Invoice> pages;
 
-  List<Evidence> evidences;
+  List<Invoice> invoices;
 
   LinkedMultiValueMap<String, String> requestParams;
 
-  Evidence evidence;
+  Invoice invoice;
 
   @BeforeEach
   public void setUp() {
-    
+
+    invoice = new Invoice();
+    invoice.setId(1L);
+    invoice.setDetail("123");
+    invoice.setPaymentDate(LocalDateTime.now());
+
+    Contract contract = new Contract();
+    contract.setId(1L);
+    contract.setFinesAgainstContractViolations(8D);
+    contract.setRequired(false);
+    contract.setCreationDate(LocalDateTime.now());
+
+    invoice.setContract(contract);
+
     Merchant merchant = new Merchant();
     merchant.setUsername("merchant");
-
-    evidence = new Evidence();
-    evidence.setId(1L);
-    evidence.setStatus("PENDING");
-    evidence.setSender(merchant);
+    Forwarder forwarder = new Forwarder();
+    forwarder.setUsername("forwarder");
+    
+    invoice.setSender(merchant);
+    invoice.setRecipient(forwarder);
 
     requestParams = new LinkedMultiValueMap<>();
     requestParams.add("page", "0");
     requestParams.add("limit", "10");
 
-    List<Evidence> evidences = new ArrayList<Evidence>();
-    evidences.add(evidence);
-    pages = new PageImpl<Evidence>(evidences);
+    List<Invoice> payments = new ArrayList<Invoice>();
+    payments.add(invoice);
+    pages = new PageImpl<Invoice>(payments);
   }
 
   @Test
   @WithMockUser(username = "forwarder", roles = { "FORWARDER" })
-  void createEvidence_thenStatusOk_andReturnEvidence() throws JsonProcessingException, Exception {
+  void createInvoice_thenStatusOk_andReturnInvoice() throws JsonProcessingException, Exception {
     // given
-    EvidenceRequest request = new EvidenceRequest();
-    request.setSender("merchant");
-    ;
-    when(evidenceService.createEvidence(Mockito.anyLong(), Mockito.anyString(), Mockito.any(EvidenceRequest.class)))
-        .thenReturn(evidence);
+    InvoiceRequest request = new InvoiceRequest();
+    request.setDetail("123");
+
+    when(invoiceService.createInvoice(Mockito.anyLong(), Mockito.anyString(), Mockito.any(InvoiceRequest.class)))
+        .thenReturn(invoice);
 
     // when and then
     MvcResult result = mockMvc
-        .perform(post("/api/evidence/contract/1").contentType(MediaType.APPLICATION_JSON_VALUE)
+        .perform(post("/api/invoice/contract/1").contentType(MediaType.APPLICATION_JSON_VALUE)
             .content(objectMapper.writeValueAsString(request)))
         .andDo(print()).andExpect(status().isCreated()).andExpect(jsonPath("$.data.id").value(1))
-        .andExpect(jsonPath("$.data.isValid").value(false)).andReturn();
+        .andExpect(jsonPath("$.data.detail").value("123")).andReturn();
 
     // print response
     MockHttpServletResponse response = result.getResponse();
@@ -111,34 +127,16 @@ class EvidenceControllerIT {
 
   @Test
   @WithMockUser(username = "forwarder", roles = { "FORWARDER" })
-  void getEvidencesByUser_thenStatusOk_andReturnEvidences() throws JsonProcessingException, Exception {
+  void getInvoicesByContract_thenStatusOk_andReturnInvoices() throws JsonProcessingException, Exception {
     // given
-    when(evidenceService.getEvidencesByUser(Mockito.anyString(), Mockito.any(PaginationRequest.class)))
-        .thenReturn(pages);
-
-    // when and then
-    MvcResult result = mockMvc
-        .perform(get("/api/evidence/user").contentType(MediaType.APPLICATION_JSON_VALUE).params(requestParams))
-        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.data[0].id").value(1))
-        .andExpect(jsonPath("$.data[0].isValid").value("false")).andReturn();
-
-    // print response
-    MockHttpServletResponse response = result.getResponse();
-    logger.info("Reponse: {}", response.getContentAsString());
-  }
-
-  @Test
-  @WithMockUser(username = "forwarder", roles = { "FORWARDER" })
-  void getEvidencesByContract_thenStatusOk_andReturnEvidences() throws JsonProcessingException, Exception {
-    // given
-    when(evidenceService.getEvidencesByContract(Mockito.anyLong(), Mockito.anyString(),
+    when(invoiceService.getInvoicesByContract(Mockito.anyLong(), Mockito.anyString(),
         Mockito.any(PaginationRequest.class))).thenReturn(pages);
 
     // when and then
     MvcResult result = mockMvc
-        .perform(get("/api/evidence/contract/1").contentType(MediaType.APPLICATION_JSON_VALUE).params(requestParams))
+        .perform(get("/api/invoice/contract/1").contentType(MediaType.APPLICATION_JSON_VALUE).params(requestParams))
         .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.data[0].id").value(1))
-        .andExpect(jsonPath("$.data[0].isValid").value("false")).andReturn();
+        .andExpect(jsonPath("$.data[0].detail").value("123")).andReturn();
 
     // print response
     MockHttpServletResponse response = result.getResponse();
@@ -147,18 +145,35 @@ class EvidenceControllerIT {
 
   @Test
   @WithMockUser(username = "forwarder", roles = { "FORWARDER" })
-  void searchEvidences_thenStatusOk_andReturnEvidences() throws Exception {
+  void getInvoicesByUser_thenStatusOk_andReturnInvoices() throws JsonProcessingException, Exception {
     // given
-    String search = "required:false";
-    requestParams.add("search", search);
-    when(evidenceService.searchEvidences(Mockito.any(PaginationRequest.class), Mockito.anyString())).thenReturn(pages);
+    when(invoiceService.getInvoicesByUser(Mockito.anyString(), Mockito.any(PaginationRequest.class))).thenReturn(pages);
 
     // when and then
     MvcResult result = mockMvc
-        .perform(get("/api/evidence/filter").contentType(MediaType.APPLICATION_JSON).params(requestParams)
+        .perform(get("/api/invoice/user").contentType(MediaType.APPLICATION_JSON_VALUE).params(requestParams))
+        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.data[0].id").value(1))
+        .andExpect(jsonPath("$.data[0].detail").value("123")).andReturn();
+
+    // print response
+    MockHttpServletResponse response = result.getResponse();
+    logger.info("Reponse: {}", response.getContentAsString());
+  }
+
+  @Test
+  @WithMockUser(username = "forwarder", roles = { "FORWARDER" })
+  void searchInvoices_thenStatusOk_andReturnInvoices() throws Exception {
+    // given
+    String search = "detail:123";
+    requestParams.add("search", search);
+    when(invoiceService.searchInvoices(Mockito.any(PaginationRequest.class), Mockito.anyString())).thenReturn(pages);
+
+    // when and then
+    MvcResult result = mockMvc
+        .perform(get("/api/invoice/filter").contentType(MediaType.APPLICATION_JSON).params(requestParams)
             .accept(MediaType.APPLICATION_JSON))
         .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.data[0].id").value(1))
-        .andExpect(jsonPath("$.data[0].isValid").value("false")).andReturn();
+        .andExpect(jsonPath("$.data[0].detail").value("123")).andReturn();
 
     // print response
     MockHttpServletResponse response = result.getResponse();
@@ -167,19 +182,19 @@ class EvidenceControllerIT {
 
   @Test
   @WithMockUser(username = "forwarder", roles = { "FORWARDER" })
-  void editEvidence_thenStatusOk_andReturnEvidence() throws Exception {
+  void editInvoice_thenStatusOk_andReturnInvoice() throws Exception {
     // given
-    evidence.setStatus("ACCEPTED");
+    invoice.setDetail("123456");
     Map<String, Object> updates = new HashMap<String, Object>();
-    updates.put("isValid", "true");
-    when(evidenceService.editEvidence(Mockito.anyLong(), Mockito.anyString(), Mockito.anyMap())).thenReturn(evidence);
+    updates.put("detail", "123456");
+    when(invoiceService.editInvoice(Mockito.anyLong(), Mockito.anyString(), Mockito.anyMap())).thenReturn(invoice);
 
     // when and then
     MvcResult result = mockMvc
-        .perform(patch("/api/evidence/1").contentType(MediaType.APPLICATION_JSON_VALUE)
+        .perform(patch("/api/invoice/1").contentType(MediaType.APPLICATION_JSON_VALUE)
             .content(objectMapper.writeValueAsString(updates)))
         .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.data.id").value(1))
-        .andExpect(jsonPath("$.data.isValid").value("ACCEPTED")).andReturn();
+        .andExpect(jsonPath("$.data.detail").value("123456")).andReturn();
 
     // print response
     MockHttpServletResponse response = result.getResponse();
@@ -188,11 +203,11 @@ class EvidenceControllerIT {
 
   @Test
   @WithMockUser(username = "forwarder", roles = { "FORWARDER" })
-  void deleteEvidence_thenStatusOk_AndReturnMessage() throws Exception {
+  void deleteInvoice_thenStatusOk_AndReturnMessage() throws Exception {
 
     // when and then
-    MvcResult result = mockMvc.perform(delete("/api/evidence/1").contentType(MediaType.APPLICATION_JSON_VALUE))
-        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.message").value("Xóa bằng chứng thành công"))
+    MvcResult result = mockMvc.perform(delete("/api/invoice/1").contentType(MediaType.APPLICATION_JSON_VALUE))
+        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.message").value("Xóa hóa đơn thành công"))
         .andReturn();
 
     // print response

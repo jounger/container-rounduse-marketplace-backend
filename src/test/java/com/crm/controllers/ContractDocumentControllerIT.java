@@ -9,7 +9,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -33,91 +32,78 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.web.multipart.MultipartFile;
 
-import com.crm.models.Contract;
-import com.crm.models.Forwarder;
+import com.crm.models.ContractDocument;
 import com.crm.models.Merchant;
-import com.crm.models.Payment;
+import com.crm.payload.request.ContractDocumentRequest;
 import com.crm.payload.request.PaginationRequest;
-import com.crm.payload.request.PaymentRequest;
-import com.crm.services.PaymentService;
+import com.crm.services.ContractDocumentService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @SpringBootTest
 @AutoConfigureMockMvc
 @ContextConfiguration
-class PaymentControllerIT {
+class ContractDocumentControllerIT {
 
-  private static final Logger logger = LoggerFactory.getLogger(PaymentControllerIT.class);
+  private static final Logger logger = LoggerFactory.getLogger(ContractDocumentControllerIT.class);
 
   @Autowired
   protected MockMvc mockMvc;
 
   @MockBean
-  private PaymentService paymentService;
+  private ContractDocumentService contractDocumentService;
 
   @Autowired
   private ObjectMapper objectMapper;
 
   PaginationRequest paginationRequest;
 
-  Page<Payment> pages;
+  Page<ContractDocument> pages;
 
-  List<Payment> payments;
+  List<ContractDocument> contractDocuments;
 
   LinkedMultiValueMap<String, String> requestParams;
 
-  Payment payment;
+  ContractDocument contractDocument;
 
   @BeforeEach
   public void setUp() {
 
-    payment = new Payment();
-    payment.setId(1L);
-    payment.setDetail("123");
-    payment.setPaymentDate(LocalDateTime.now());
-
-    Contract contract = new Contract();
-    contract.setId(1L);
-    contract.setFinesAgainstContractViolations(8D);
-    contract.setRequired(false);
-
-    payment.setContract(contract);
-
     Merchant merchant = new Merchant();
     merchant.setUsername("merchant");
-    Forwarder forwarder = new Forwarder();
-    forwarder.setUsername("forwarder");
-    
-    payment.setSender(merchant);
-    payment.setRecipient(forwarder);
+
+    contractDocument = new ContractDocument();
+    contractDocument.setId(1L);
+    contractDocument.setStatus("PENDING");
+    contractDocument.setSender(merchant);
 
     requestParams = new LinkedMultiValueMap<>();
     requestParams.add("page", "0");
     requestParams.add("limit", "10");
 
-    List<Payment> payments = new ArrayList<Payment>();
-    payments.add(payment);
-    pages = new PageImpl<Payment>(payments);
+    List<ContractDocument> evidences = new ArrayList<ContractDocument>();
+    evidences.add(contractDocument);
+    pages = new PageImpl<ContractDocument>(evidences);
   }
 
   @Test
   @WithMockUser(username = "forwarder", roles = { "FORWARDER" })
-  void createPayment_thenStatusOk_andReturnPayment() throws JsonProcessingException, Exception {
+  void createContractDocument_thenStatusOk_andReturnContractDocument() throws JsonProcessingException, Exception {
     // given
-    PaymentRequest request = new PaymentRequest();
-    request.setDetail("123");
-
-    when(paymentService.createPayment(Mockito.anyLong(), Mockito.anyString(), Mockito.any(PaymentRequest.class)))
-        .thenReturn(payment);
+    ContractDocumentRequest request = new ContractDocumentRequest();
+    request.setSender("merchant");
+    MultipartFile file = new 
+    when(contractDocumentService.createContractDocument(Mockito.anyLong(), Mockito.anyString(),
+        Mockito.any(ContractDocumentRequest.class))).thenReturn(contractDocument);
 
     // when and then
     MvcResult result = mockMvc
-        .perform(post("/api/payment/contract/1").contentType(MediaType.APPLICATION_JSON_VALUE)
+        .perform(post("/api/contract-document/contract/1").contentType(MediaType.APPLICATION_JSON_VALUE)
             .content(objectMapper.writeValueAsString(request)))
         .andDo(print()).andExpect(status().isCreated()).andExpect(jsonPath("$.data.id").value(1))
-        .andExpect(jsonPath("$.data.detail").value("123")).andReturn();
+        .andExpect(jsonPath("$.data.status").value(false)).andReturn();
 
     // print response
     MockHttpServletResponse response = result.getResponse();
@@ -126,16 +112,36 @@ class PaymentControllerIT {
 
   @Test
   @WithMockUser(username = "forwarder", roles = { "FORWARDER" })
-  void getPaymentsByContract_thenStatusOk_andReturnPayments() throws JsonProcessingException, Exception {
+  void getContractDocumentsByUser_thenStatusOk_andReturnContractDocuments() throws JsonProcessingException, Exception {
     // given
-    when(paymentService.getPaymentsByContract(Mockito.anyLong(), Mockito.anyString(),
+    when(contractDocumentService.getContractDocumentsByUser(Mockito.anyString(), Mockito.any(PaginationRequest.class)))
+        .thenReturn(pages);
+
+    // when and then
+    MvcResult result = mockMvc
+        .perform(get("/api/contract-document/user").contentType(MediaType.APPLICATION_JSON_VALUE).params(requestParams))
+        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.data[0].id").value(1))
+        .andExpect(jsonPath("$.data[0].status").value("PENDING")).andReturn();
+
+    // print response
+    MockHttpServletResponse response = result.getResponse();
+    logger.info("Reponse: {}", response.getContentAsString());
+  }
+
+  @Test
+  @WithMockUser(username = "forwarder", roles = { "FORWARDER" })
+  void getContractDocumentsByContract_thenStatusOk_andReturnContractDocuments()
+      throws JsonProcessingException, Exception {
+    // given
+    when(contractDocumentService.getContractDocumentsByContract(Mockito.anyLong(), Mockito.anyString(),
         Mockito.any(PaginationRequest.class))).thenReturn(pages);
 
     // when and then
     MvcResult result = mockMvc
-        .perform(get("/api/payment/contract/1").contentType(MediaType.APPLICATION_JSON_VALUE).params(requestParams))
+        .perform(get("/api/contract-document/contract/1").contentType(MediaType.APPLICATION_JSON_VALUE)
+            .params(requestParams))
         .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.data[0].id").value(1))
-        .andExpect(jsonPath("$.data[0].detail").value("123")).andReturn();
+        .andExpect(jsonPath("$.data[0].status").value("PENDING")).andReturn();
 
     // print response
     MockHttpServletResponse response = result.getResponse();
@@ -144,35 +150,19 @@ class PaymentControllerIT {
 
   @Test
   @WithMockUser(username = "forwarder", roles = { "FORWARDER" })
-  void getPaymentsByUser_thenStatusOk_andReturnPayments() throws JsonProcessingException, Exception {
+  void searchContractDocuments_thenStatusOk_andReturnContractDocuments() throws Exception {
     // given
-    when(paymentService.getPaymentsByUser(Mockito.anyString(), Mockito.any(PaginationRequest.class))).thenReturn(pages);
-
-    // when and then
-    MvcResult result = mockMvc
-        .perform(get("/api/payment/user").contentType(MediaType.APPLICATION_JSON_VALUE).params(requestParams))
-        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.data[0].id").value(1))
-        .andExpect(jsonPath("$.data[0].detail").value("123")).andReturn();
-
-    // print response
-    MockHttpServletResponse response = result.getResponse();
-    logger.info("Reponse: {}", response.getContentAsString());
-  }
-
-  @Test
-  @WithMockUser(username = "forwarder", roles = { "FORWARDER" })
-  void searchPayments_thenStatusOk_andReturnPayments() throws Exception {
-    // given
-    String search = "detail:123";
+    String search = "required:false";
     requestParams.add("search", search);
-    when(paymentService.searchPayments(Mockito.any(PaginationRequest.class), Mockito.anyString())).thenReturn(pages);
+    when(contractDocumentService.searchContractDocuments(Mockito.any(PaginationRequest.class), Mockito.anyString()))
+        .thenReturn(pages);
 
     // when and then
     MvcResult result = mockMvc
-        .perform(get("/api/payment/filter").contentType(MediaType.APPLICATION_JSON).params(requestParams)
+        .perform(get("/api/contract-document/filter").contentType(MediaType.APPLICATION_JSON).params(requestParams)
             .accept(MediaType.APPLICATION_JSON))
         .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.data[0].id").value(1))
-        .andExpect(jsonPath("$.data[0].detail").value("123")).andReturn();
+        .andExpect(jsonPath("$.data[0].status").value("PENDING")).andReturn();
 
     // print response
     MockHttpServletResponse response = result.getResponse();
@@ -181,19 +171,20 @@ class PaymentControllerIT {
 
   @Test
   @WithMockUser(username = "forwarder", roles = { "FORWARDER" })
-  void editPayment_thenStatusOk_andReturnPayment() throws Exception {
+  void editContractDocument_thenStatusOk_andReturnContractDocument() throws Exception {
     // given
-    payment.setDetail("123456");
+    contractDocument.setStatus("ACCEPTED");
     Map<String, Object> updates = new HashMap<String, Object>();
-    updates.put("detail", "123456");
-    when(paymentService.editPayment(Mockito.anyLong(), Mockito.anyString(), Mockito.anyMap())).thenReturn(payment);
+    updates.put("status", "ACCEPTED");
+    when(contractDocumentService.editContractDocument(Mockito.anyLong(), Mockito.anyString(), Mockito.anyMap()))
+        .thenReturn(contractDocument);
 
     // when and then
     MvcResult result = mockMvc
-        .perform(patch("/api/payment/1").contentType(MediaType.APPLICATION_JSON_VALUE)
+        .perform(patch("/api/contract-document/1").contentType(MediaType.APPLICATION_JSON_VALUE)
             .content(objectMapper.writeValueAsString(updates)))
         .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.data.id").value(1))
-        .andExpect(jsonPath("$.data.detail").value("123456")).andReturn();
+        .andExpect(jsonPath("$.data.status").value("ACCEPTED")).andReturn();
 
     // print response
     MockHttpServletResponse response = result.getResponse();
@@ -202,11 +193,11 @@ class PaymentControllerIT {
 
   @Test
   @WithMockUser(username = "forwarder", roles = { "FORWARDER" })
-  void deletePayment_thenStatusOk_AndReturnMessage() throws Exception {
+  void deleteContractDocument_thenStatusOk_AndReturnMessage() throws Exception {
 
     // when and then
-    MvcResult result = mockMvc.perform(delete("/api/payment/1").contentType(MediaType.APPLICATION_JSON_VALUE))
-        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.message").value("Xóa hóa đơn thành công"))
+    MvcResult result = mockMvc.perform(delete("/api/contract-document/1").contentType(MediaType.APPLICATION_JSON_VALUE))
+        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.message").value("Xóa bằng chứng thành công"))
         .andReturn();
 
     // print response

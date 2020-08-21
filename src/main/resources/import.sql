@@ -30,7 +30,7 @@ INSERT INTO crm_db.merchant (user_id) VALUES ('5');
 INSERT INTO crm_db.driver (driver_license,user_id,forwarder_id) VALUES ('292883943','6','4');
 
 # PORT
-INSERT INTO crm_db.port (address,fullname,name_code,created_at,updated_at) VALUES ('Số 1A Minh Khai, Hồng Bàng, Hải Phòng','Port Of Haiphong Joint Stock Company','HAIPHONGPORT',CURDATE(),CURDATE());
+INSERT INTO crm_db.port (address,fullname,name_code,created_at,updated_at) VALUES ('Số 1A Minh Khai, Hồng Bàng, Hải Phòng','Cảng Vụ Hàng hải Hải Phòng','HAIPHONGPORT',CURDATE(),CURDATE());
 
 # CONTAINER TYPE
 INSERT INTO crm_db.container_type(cubic_capacity,description,door_open_height,door_open_width,internal_height,internal_length,internal_width,name,gross_weight,tare_weight,unit_of_measurement,created_at,updated_at) VALUES ('9.95','8ft Container Dimensions','1.95','2.11','2.06','2.29','2.11','8CD','6000','950','KG',CURDATE(),CURDATE());
@@ -47,7 +47,7 @@ INSERT INTO crm_db.container_type(cubic_capacity,description,door_open_height,do
 INSERT INTO crm_db.container_type(cubic_capacity,description,door_open_height,door_open_width,internal_height,internal_length,internal_width,name,gross_weight,tare_weight,unit_of_measurement,created_at,updated_at) VALUES ('37.4','20ft High Cube Dimensions','2.58','2.34','2.69','5.96','2.35','20HCD','30480','2100','KG',CURDATE(),CURDATE());
 
 # TRAILER & TRACTOR
-INSERT INTO crm_db.vehicle(id,created_at,license_plate,number_of_axles,updated_at,user_id) VALUES (1,'2020-07-12 00:48:56','112222',2,'2020-07-12 00:48:56',4),(2,'2020-07-12 00:49:22','1122223',2,'2020-07-12 00:49:22',4);
+INSERT INTO crm_db.vehicle(id,created_at,license_plate,number_of_axles,updated_at,user_id) VALUES (1,'2020-07-12 00:48:56','30Z0779',2,'2020-07-12 00:48:56',4),(2,'2020-07-12 00:49:22','30A555.77',2,'2020-07-12 00:49:22',4);
 INSERT INTO crm_db.container_semi_trailer(type,unit_of_measurement,vehicle_id) VALUES ('T36','FT',2);
 INSERT INTO crm_db.container_tractor(vehicle_id) VALUES (1);
 

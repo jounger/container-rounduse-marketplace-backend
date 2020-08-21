@@ -11,20 +11,20 @@ import org.springframework.stereotype.Service;
 
 import com.crm.common.ErrorMessage;
 import com.crm.enums.EnumNotificationType;
-import com.crm.enums.EnumShippingLineNotification;
+import com.crm.enums.EnumCombinedNotification;
 import com.crm.exception.NotFoundException;
 import com.crm.models.Combined;
-import com.crm.models.ShippingLineNotification;
+import com.crm.models.CombinedNotification;
 import com.crm.models.User;
 import com.crm.payload.request.PaginationRequest;
-import com.crm.payload.request.ShippingLineNotificationRequest;
+import com.crm.payload.request.CombinedNotificationRequest;
 import com.crm.repository.CombinedRepository;
-import com.crm.repository.ShippingLineNotificationRepository;
+import com.crm.repository.CombinedNotificationRepository;
 import com.crm.repository.UserRepository;
-import com.crm.services.ShippingLineNotificationService;
+import com.crm.services.CombinedNotificationService;
 
 @Service
-public class ShippingLineNotificationServiceImpl implements ShippingLineNotificationService {
+public class CombinedNotificationServiceImpl implements CombinedNotificationService {
 
   @Autowired
   private UserRepository userRepositoty;
@@ -33,11 +33,11 @@ public class ShippingLineNotificationServiceImpl implements ShippingLineNotifica
   private CombinedRepository combinedRepository;
 
   @Autowired
-  private ShippingLineNotificationRepository shippingLineNotificationRepository;
+  private CombinedNotificationRepository shippingLineNotificationRepository;
 
   @Override
-  public ShippingLineNotification createShippingLineNotification(ShippingLineNotificationRequest request) {
-    ShippingLineNotification shippingLineNotification = new ShippingLineNotification();
+  public CombinedNotification createShippingLineNotification(CombinedNotificationRequest request) {
+    CombinedNotification shippingLineNotification = new CombinedNotification();
 
     User recipient = userRepositoty.findByUsername(request.getRecipient())
         .orElseThrow(() -> new NotFoundException(ErrorMessage.RECIPIENT_NOT_FOUND));
@@ -52,29 +52,29 @@ public class ShippingLineNotificationServiceImpl implements ShippingLineNotifica
     shippingLineNotification.setRelatedResource(relatedResource);
 
     shippingLineNotification.setMessage(request.getMessage());
-    EnumShippingLineNotification action = EnumShippingLineNotification.findByName(request.getAction());
+    EnumCombinedNotification action = EnumCombinedNotification.findByName(request.getAction());
     shippingLineNotification.setAction(action.name());
     EnumNotificationType type = EnumNotificationType.findByName(request.getType());
     shippingLineNotification.setType(type.name());
 
     shippingLineNotification.setSendDate(LocalDateTime.now());
 
-    ShippingLineNotification _shippingLineNotification = shippingLineNotificationRepository
+    CombinedNotification _shippingLineNotification = shippingLineNotificationRepository
         .save(shippingLineNotification);
     return _shippingLineNotification;
   }
 
   @Override
-  public ShippingLineNotification getShippingLineNotification(Long id) {
-    ShippingLineNotification shippingLineNotification = shippingLineNotificationRepository.findById(id)
+  public CombinedNotification getShippingLineNotification(Long id) {
+    CombinedNotification shippingLineNotification = shippingLineNotificationRepository.findById(id)
         .orElseThrow(() -> new NotFoundException(ErrorMessage.NOTIFICATION_NOT_FOUND));
     return shippingLineNotification;
   }
 
   @Override
-  public Page<ShippingLineNotification> getShippingLineNotifications(PaginationRequest request) {
+  public Page<CombinedNotification> getShippingLineNotifications(PaginationRequest request) {
     String status = request.getStatus();
-    Page<ShippingLineNotification> shippingLineNotification = null;
+    Page<CombinedNotification> shippingLineNotification = null;
     if (status != null && !status.isEmpty()) {
       shippingLineNotification = shippingLineNotificationRepository.findByType(status,
           PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt")));
@@ -86,9 +86,9 @@ public class ShippingLineNotificationServiceImpl implements ShippingLineNotifica
   }
 
   @Override
-  public Page<ShippingLineNotification> getShippingLineNotificationsByUser(Long recipient, PaginationRequest request) {
+  public Page<CombinedNotification> getShippingLineNotificationsByUser(Long recipient, PaginationRequest request) {
     String status = request.getStatus();
-    Page<ShippingLineNotification> shippingLineNotification = null;
+    Page<CombinedNotification> shippingLineNotification = null;
     if (status != null && !status.isEmpty()) {
       shippingLineNotification = shippingLineNotificationRepository.findByUserAndStatus(recipient, status,
           PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt")));
@@ -100,10 +100,10 @@ public class ShippingLineNotificationServiceImpl implements ShippingLineNotifica
   }
 
   @Override
-  public Page<ShippingLineNotification> getShippingLineNotificationsByUsername(String recipient,
+  public Page<CombinedNotification> getShippingLineNotificationsByUsername(String recipient,
       PaginationRequest request) {
     String status = request.getStatus();
-    Page<ShippingLineNotification> shippingLineNotifications = null;
+    Page<CombinedNotification> shippingLineNotifications = null;
     if (status != null && !status.isEmpty()) {
       shippingLineNotifications = shippingLineNotificationRepository.findByUserAndStatus(recipient, status,
           PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt")));
@@ -115,8 +115,8 @@ public class ShippingLineNotificationServiceImpl implements ShippingLineNotifica
   }
 
   @Override
-  public ShippingLineNotification editShippingLineNotification(Long id, Map<String, Object> updates) {
-    ShippingLineNotification shippingLineNotification = shippingLineNotificationRepository.findById(id)
+  public CombinedNotification editShippingLineNotification(Long id, Map<String, Object> updates) {
+    CombinedNotification shippingLineNotification = shippingLineNotificationRepository.findById(id)
         .orElseThrow(() -> new NotFoundException(ErrorMessage.NOTIFICATION_NOT_FOUND));
 
     Boolean isRead = (Boolean) updates.get("isRead");
@@ -129,7 +129,7 @@ public class ShippingLineNotificationServiceImpl implements ShippingLineNotifica
       shippingLineNotification.setIsHide(isHide);
     }
 
-    ShippingLineNotification _shippingLineNotification = shippingLineNotificationRepository
+    CombinedNotification _shippingLineNotification = shippingLineNotificationRepository
         .save(shippingLineNotification);
     return _shippingLineNotification;
   }

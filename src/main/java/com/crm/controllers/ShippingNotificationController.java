@@ -28,42 +28,42 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.crm.common.Constant;
 import com.crm.common.SuccessMessage;
-import com.crm.models.DriverNotification;
-import com.crm.models.dto.DriverNotificationDto;
-import com.crm.models.mapper.DriverNotificationMapper;
+import com.crm.models.ShippingNotification;
+import com.crm.models.dto.ShippingNotificationDto;
+import com.crm.models.mapper.ShippingNotificationMapper;
 import com.crm.payload.request.PaginationRequest;
 import com.crm.payload.response.DefaultResponse;
 import com.crm.payload.response.PaginationResponse;
-import com.crm.services.DriverNotificationService;
+import com.crm.services.ShippingNotificationService;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @PreAuthorize("hasRole('DRIVER')")
 @RestController
 @RequestMapping("/api/driver-notification")
-public class DriverNotificationController {
+public class ShippingNotificationController {
 
-  private static final Logger logger = LoggerFactory.getLogger(DriverNotificationController.class);
+  private static final Logger logger = LoggerFactory.getLogger(ShippingNotificationController.class);
 
   @Autowired
-  DriverNotificationService driverNotificationService;
+  ShippingNotificationService driverNotificationService;
 
   @GetMapping("")
   public ResponseEntity<?> getDriverNotifications(@Valid PaginationRequest request) {
 
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
-    Page<DriverNotification> pages = driverNotificationService.getDriverNotificationsByUsername(username, request);
+    Page<ShippingNotification> pages = driverNotificationService.getDriverNotificationsByUsername(username, request);
 
-    PaginationResponse<DriverNotificationDto> response = new PaginationResponse<>();
+    PaginationResponse<ShippingNotificationDto> response = new PaginationResponse<>();
     response.setPageNumber(request.getPage());
     response.setPageSize(request.getLimit());
     response.setTotalElements(pages.getTotalElements());
     response.setTotalPages(pages.getTotalPages());
 
-    List<DriverNotification> driverNotifications = pages.getContent();
-    List<DriverNotificationDto> driverNotificationsDto = new ArrayList<>();
+    List<ShippingNotification> driverNotifications = pages.getContent();
+    List<ShippingNotificationDto> driverNotificationsDto = new ArrayList<>();
     driverNotifications.forEach(driverNotification -> driverNotificationsDto
-        .add(DriverNotificationMapper.toDriverNotificationDto(driverNotification)));
+        .add(ShippingNotificationMapper.toDriverNotificationDto(driverNotification)));
     response.setContents(driverNotificationsDto);
 
     return ResponseEntity.ok(response);
@@ -71,8 +71,8 @@ public class DriverNotificationController {
 
   @GetMapping("/{id}")
   public ResponseEntity<?> getDriverNotification(@PathVariable Long id) {
-    DriverNotification driverNotification = driverNotificationService.getDriverNotification(id);
-    DriverNotificationDto driverNotificationDto = DriverNotificationMapper.toDriverNotificationDto(driverNotification);
+    ShippingNotification driverNotification = driverNotificationService.getDriverNotification(id);
+    ShippingNotificationDto driverNotificationDto = ShippingNotificationMapper.toDriverNotificationDto(driverNotification);
     return ResponseEntity.ok(driverNotificationDto);
   }
 
@@ -80,11 +80,11 @@ public class DriverNotificationController {
   @RequestMapping(value = "/{id}", method = RequestMethod.PATCH, consumes = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<?> editDriverNotification(@PathVariable("id") Long id,
       @RequestBody Map<String, Object> updates) {
-    DriverNotification driverNotification = driverNotificationService.editDriverNotification(id, updates);
-    DriverNotificationDto driverNotificationDto = DriverNotificationMapper.toDriverNotificationDto(driverNotification);
+    ShippingNotification driverNotification = driverNotificationService.editDriverNotification(id, updates);
+    ShippingNotificationDto driverNotificationDto = ShippingNotificationMapper.toDriverNotificationDto(driverNotification);
 
     // Set default response body
-    DefaultResponse<DriverNotificationDto> defaultResponse = new DefaultResponse<>();
+    DefaultResponse<ShippingNotificationDto> defaultResponse = new DefaultResponse<>();
     defaultResponse.setMessage(Constant.EMPTY_STRING);
     defaultResponse.setData(driverNotificationDto);
 
@@ -98,7 +98,7 @@ public class DriverNotificationController {
     driverNotificationService.removeDriverNotification(id);
 
     // Set default response body
-    DefaultResponse<DriverNotificationDto> defaultResponse = new DefaultResponse<>();
+    DefaultResponse<ShippingNotificationDto> defaultResponse = new DefaultResponse<>();
     defaultResponse.setMessage(SuccessMessage.DELETE_NOTIFICATION_SUCCESSFULLY);
 
     logger.info("deleteDriverNotification from report id {}", id);

@@ -5,21 +5,21 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import com.crm.common.Constant;
-import com.crm.models.ShippingLineNotification;
-import com.crm.models.dto.ShippingLineNotificationDto;
-import com.crm.models.mapper.ShippingLineNotificationMapper;
-import com.crm.websocket.service.ShippingLineWebSocketService;
+import com.crm.models.CombinedNotification;
+import com.crm.models.dto.CombinedNotificationDto;
+import com.crm.models.mapper.CombinedNotificationMapper;
+import com.crm.websocket.service.CombinedWebSocketService;
 
 @Service
-public class ShippingLineWebsocketServiceImpl implements ShippingLineWebSocketService {
+public class CombinedWebsocketServiceImpl implements CombinedWebSocketService {
 
   @Autowired
   SimpMessagingTemplate messagingTemplate;
 
   @Override
-  public void sendCombinedNotifyToShippingLine(ShippingLineNotification notification) {
+  public void sendCombinedNotifyToShippingLine(CombinedNotification notification) {
 
-    ShippingLineNotificationDto shippingLineNotificationDto = ShippingLineNotificationMapper
+    CombinedNotificationDto shippingLineNotificationDto = CombinedNotificationMapper
         .toShippingLineNotificationDto(notification);
     messagingTemplate.convertAndSendToUser(shippingLineNotificationDto.getRecipient().getUsername(),
         Constant.SHIPPING_LINE_NOTIFICATION, shippingLineNotificationDto);

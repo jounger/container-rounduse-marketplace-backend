@@ -1,18 +1,18 @@
 package com.crm.models.mapper;
 
 import com.crm.common.Tool;
-import com.crm.models.DriverNotification;
-import com.crm.models.dto.DriverNotificationDto;
+import com.crm.models.ShippingNotification;
+import com.crm.models.dto.ShippingNotificationDto;
 import com.crm.models.dto.ShippingInfoDto;
 
-public class DriverNotificationMapper {
+public class ShippingNotificationMapper {
 
-  public static DriverNotificationDto toDriverNotificationDto(DriverNotification driverNotification) {
+  public static ShippingNotificationDto toDriverNotificationDto(ShippingNotification driverNotification) {
     if (driverNotification == null) {
       return null;
     }
 
-    DriverNotificationDto driverNotificationDto = new DriverNotificationDto();
+    ShippingNotificationDto driverNotificationDto = new ShippingNotificationDto();
 
     driverNotificationDto.setId(driverNotification.getId());
     driverNotificationDto.setRecipient(UserMapper.toUserDto(driverNotification.getRecipient()));

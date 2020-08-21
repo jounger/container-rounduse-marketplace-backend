@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
@@ -56,7 +57,7 @@ public class Bid {
   @JoinColumn(name = "forwarder_id")
   private Forwarder bidder;
 
-  @ManyToMany
+  @ManyToMany(cascade = {CascadeType.REMOVE, CascadeType.REFRESH, CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST})
   @JoinTable(name = "bid_container", joinColumns = @JoinColumn(name = "bid_id"), inverseJoinColumns = @JoinColumn(name = "container_id"))
   private Collection<Container> containers = new ArrayList<>();
 

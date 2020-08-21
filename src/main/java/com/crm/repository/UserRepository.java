@@ -1,5 +1,6 @@
 package com.crm.repository;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -31,5 +32,8 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
   Boolean existsByPhone(String phone);
 
   Page<User> findByStatus(EnumUserStatus status, Pageable pageable);
+
+  @Query(value = "SELECT COUNT(u) FROM User u WHERE u.createdAt > :startDate AND u.createdAt < :endDate")
+  Integer countUserByOperator(@Param("startDate") Date startDate, @Param("endDate") Date endDate);
 
 }

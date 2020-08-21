@@ -31,6 +31,7 @@ import com.crm.models.Container;
 import com.crm.models.Contract;
 import com.crm.models.Feedback;
 import com.crm.models.Forwarder;
+import com.crm.models.Invoice;
 import com.crm.models.Merchant;
 import com.crm.models.Report;
 import com.crm.models.ReportNotification;
@@ -60,7 +61,7 @@ public class NotificationBroadcast {
   private final Logger logger = LoggerFactory.getLogger(NotificationBroadcast.class);
 
   @Autowired
-  @Qualifier("cachedThreadPool")
+  @Qualifier("fixedThreadPool")
   private ExecutorService executorService;
 
   @Autowired
@@ -574,4 +575,77 @@ public class NotificationBroadcast {
       }
     });
   }
+
+  public void broadcastCreateInvoiceToUser(Invoice invoice) {
+    executorService.submit(new Runnable() {
+      @Override
+      public void run() {
+        Contract contract = invoice.getContract();
+        Combined combined = contract.getCombined();
+        CombinedNotification notification = new CombinedNotification();
+        CombinedNotificationRequest notifyRequest = new CombinedNotificationRequest();
+        notifyRequest.setRecipient(invoice.getRecipient().getUsername());
+        notifyRequest.setRelatedResource(combined.getId());
+        notifyRequest.setMessage(
+            String.format(NotificationMessage.SEND_CREATE_INVOICE_NOTIFICATION, invoice.getSender().getCompanyCode()));
+        notifyRequest.setAction(EnumCombinedNotification.INVOICE_ADD.name());
+        notifyRequest.setType(EnumNotificationType.COMBINED.name());
+
+        notification = combinedNotificationService.createShippingLineNotification(notifyRequest);
+
+        // Send notification to User
+        logger.info("notification : {}", notification.getId());
+        combinedWebSocketService.sendCombinedNotifyToShippingLine(notification);
+      }
+    });
+  }
+
+  public void broadcastSendAcceptInvoiceToUser(Invoice invoice) {
+    executorService.submit(new Runnable() {
+      @Override
+      public void run() {
+        Contract contract = invoice.getContract();
+        Combined combined = contract.getCombined();
+        CombinedNotification notification = new CombinedNotification();
+        CombinedNotificationRequest notifyRequest = new CombinedNotificationRequest();
+        notifyRequest.setRecipient(invoice.getSender().getUsername());
+        notifyRequest.setRelatedResource(combined.getId());
+        notifyRequest.setMessage(String.format(NotificationMessage.SEND_ACCEPT_INVOICE_NOTIFICATION,
+            invoice.getRecipient().getCompanyCode()));
+        notifyRequest.setAction(EnumCombinedNotification.INVOICE_ACCEPTED.name());
+        notifyRequest.setType(EnumNotificationType.COMBINED.name());
+
+        notification = combinedNotificationService.createShippingLineNotification(notifyRequest);
+
+        // Send notification to User
+        logger.info("notification : {}", notification.getId());
+        combinedWebSocketService.sendCombinedNotifyToShippingLine(notification);
+      }
+    });
+  }
+
+  public void broadcastSendRejectInvoiceToUser(Invoice invoice) {
+    executorService.submit(new Runnable() {
+      @Override
+      public void run() {
+        Contract contract = invoice.getContract();
+        Combined combined = contract.getCombined();
+        CombinedNotification notification = new CombinedNotification();
+        CombinedNotificationRequest notifyRequest = new CombinedNotificationRequest();
+        notifyRequest.setRecipient(invoice.getSender().getUsername());
+        notifyRequest.setRelatedResource(combined.getId());
+        notifyRequest.setMessage(String.format(NotificationMessage.SEND_REJECT_INVOICE_NOTIFICATION,
+            invoice.getRecipient().getCompanyCode()));
+        notifyRequest.setAction(EnumCombinedNotification.INVOICE_REJECTED.name());
+        notifyRequest.setType(EnumNotificationType.COMBINED.name());
+
+        notification = combinedNotificationService.createShippingLineNotification(notifyRequest);
+
+        // Send notification to User
+        logger.info("notification : {}", notification.getId());
+        combinedWebSocketService.sendCombinedNotifyToShippingLine(notification);
+      }
+    });
+  }
+
 }

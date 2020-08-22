@@ -42,25 +42,29 @@ public class RatingServiceImpl implements RatingService {
   private ContractRepository contractRepository;
 
   @Override
-  public Rating createRating(String username, RatingRequest request) {
+  public Rating createRating(Long id, String username, RatingRequest request) {
     Rating rating = new Rating();
 
-    Supplier sender = supplierRepository.findByUsername(username)
-        .orElseThrow(() -> new NotFoundException("Sender is not found."));
-    rating.setSender(sender);
-
-    Supplier receiver = supplierRepository.findById(request.getReceiver())
-        .orElseThrow(() -> new NotFoundException(ErrorMessage.RECIPIENT_NOT_FOUND));
-    rating.setReceiver(receiver);
-
-    Contract contract = contractRepository.findById(request.getContract())
+    Contract contract = contractRepository.findById(id)
         .orElseThrow(() -> new NotFoundException(ErrorMessage.SENDER_NOT_FOUND));
     rating.setContract(contract);
-    if (!contractRepository.existsByUserAndContract(request.getContract(), username)) {
+    if (!contractRepository.existsByUserAndContract(id, username)) {
       throw new DuplicateRecordException(ErrorMessage.USER_ACCESS_DENIED);
     }
 
-    if (ratingRepository.existsByUserAndContract(request.getContract(), username)) {
+    Supplier merchant = contract.getSender();
+    Supplier forwarder = contract.getCombined().getBid().getBidder();
+    if (username.equals(merchant.getUsername())) {
+      rating.setSender(merchant);
+      rating.setReceiver(forwarder);
+    } else if (username.equals(forwarder.getUsername())) {
+      rating.setSender(forwarder);
+      rating.setReceiver(merchant);
+    } else {
+      throw new NotFoundException(ErrorMessage.USER_NOT_FOUND);
+    }
+
+    if (ratingRepository.existsByUserAndContract(id, username)) {
       throw new ForbiddenException(ErrorMessage.RATING_ONE_PER_CONTRACT);
     }
     rating.setRatingValue(request.getRatingValue());
@@ -68,10 +72,10 @@ public class RatingServiceImpl implements RatingService {
     Rating _rating = ratingRepository.save(rating);
 
     LocalDateTime rewind = LocalDateTime.now().minusMonths(Constant.REWIND_MONTH);
-    Double ratingValue = ratingRepository.calcAvgRatingValueByReceiver(request.getReceiver(),
+    Double ratingValue = ratingRepository.calcAvgRatingValueByReceiver(rating.getReceiver().getId(),
         Timestamp.valueOf(rewind));
-    receiver.setRatingValue(ratingValue);
-    supplierRepository.save(receiver);
+    rating.getReceiver().setRatingValue(ratingValue);
+    supplierRepository.save(rating.getReceiver());
 
     return _rating;
   }
@@ -141,32 +145,6 @@ public class RatingServiceImpl implements RatingService {
     PageRequest page = PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Direction.DESC, "createdAt"));
     Page<Rating> ratings = ratingRepository.findByUser(username, Timestamp.valueOf(rewind), page);
     return ratings;
-  }
-
-  @Override
-  public Rating updateRating(Long id, String username, RatingRequest request) {
-    Rating rating = ratingRepository.findById(request.getId())
-        .orElseThrow(() -> new NotFoundException(ErrorMessage.RATING_NOT_FOUND));
-
-    Supplier sender = supplierRepository.findById(request.getSender())
-        .orElseThrow(() -> new NotFoundException(ErrorMessage.SENDER_NOT_FOUND));
-    rating.setSender(sender);
-
-    Supplier receiver = supplierRepository.findById(request.getSender())
-        .orElseThrow(() -> new NotFoundException(ErrorMessage.RECIPIENT_NOT_FOUND));
-    rating.setReceiver(receiver);
-
-    rating.setRatingValue(request.getRatingValue());
-    Rating _rating = ratingRepository.save(rating);
-
-    LocalDateTime rewind = LocalDateTime.now().minusMonths(Constant.REWIND_MONTH);
-    Double ratingValue = ratingRepository.calcAvgRatingValueByReceiver(request.getReceiver(),
-        Timestamp.valueOf(rewind));
-    receiver.setRatingValue(ratingValue);
-
-    supplierRepository.save(receiver);
-
-    return _rating;
   }
 
   @Override

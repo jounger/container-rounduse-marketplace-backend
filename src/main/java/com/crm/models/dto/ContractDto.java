@@ -1,5 +1,6 @@
 package com.crm.models.dto;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import lombok.AllArgsConstructor;
@@ -27,6 +28,6 @@ public class ContractDto {
 
   private String creationDate;
 
-  private List<RatingDto> ratings;
+  private List<RatingDto> ratings = new ArrayList<>();
 
 }

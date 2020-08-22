@@ -13,13 +13,15 @@ import lombok.ToString;
 @Setter
 @ToString
 public class RoleRequest {
-  
+
   private Long id;
-  
+
   @NotBlank
-  @Size(min=5, max = 20)
+  @Size(min = 5, max = 20)
   private String name;
-  
+
+  private String description;
+
   private List<String> permissions;
-  
+
 }

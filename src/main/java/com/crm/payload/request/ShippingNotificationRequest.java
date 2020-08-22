@@ -10,7 +10,7 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class ShippingLineNotificationRequest {
+public class ShippingNotificationRequest {
 
   private Long id;
 

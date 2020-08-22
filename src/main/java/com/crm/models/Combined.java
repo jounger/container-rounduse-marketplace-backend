@@ -62,7 +62,7 @@ public class Combined {
   private Date updatedAt;
 
   @OneToMany(mappedBy = "relatedResource")
-  private Collection<ShippingLineNotification> shippingLineNotifications = new ArrayList<>();
+  private Collection<CombinedNotification> shippingLineNotifications = new ArrayList<>();
 
   @OneToOne(mappedBy = "combined", cascade = CascadeType.ALL)
   private Contract contract;

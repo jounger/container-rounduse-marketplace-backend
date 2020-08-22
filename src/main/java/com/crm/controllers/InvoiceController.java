@@ -32,11 +32,12 @@ import com.crm.common.SuccessMessage;
 import com.crm.models.Invoice;
 import com.crm.models.dto.InvoiceDto;
 import com.crm.models.mapper.InvoiceMapper;
-import com.crm.payload.request.PaginationRequest;
 import com.crm.payload.request.InvoiceRequest;
+import com.crm.payload.request.PaginationRequest;
 import com.crm.payload.response.DefaultResponse;
 import com.crm.payload.response.PaginationResponse;
 import com.crm.services.InvoiceService;
+import com.crm.websocket.controller.NotificationBroadcast;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -47,6 +48,9 @@ public class InvoiceController {
 
   @Autowired
   private InvoiceService invoiceService;
+
+  @Autowired
+  private NotificationBroadcast notificationBroadcast;
 
   @Transactional
   @PostMapping("/contract/{id}")
@@ -61,6 +65,8 @@ public class InvoiceController {
     DefaultResponse<InvoiceDto> defaultResponse = new DefaultResponse<>();
     defaultResponse.setMessage(SuccessMessage.CREATE_PAYMENT_SUCCESSFULLY);
     defaultResponse.setData(invoiceDto);
+
+    notificationBroadcast.broadcastCreateInvoiceToUser(invoice);
 
     logger.info("User {} createInvoice with request: {}", username, request.toString());
     return ResponseEntity.status(HttpStatus.CREATED).body(defaultResponse);
@@ -142,6 +148,12 @@ public class InvoiceController {
     DefaultResponse<InvoiceDto> defaultResponse = new DefaultResponse<>();
     defaultResponse.setMessage(SuccessMessage.EDIT_PAYMENT_SUCCESSFULLY);
     defaultResponse.setData(invoiceDto);
+
+    if (invoice.getIsPaid()) {
+      notificationBroadcast.broadcastSendAcceptInvoiceToUser(invoice);
+    } else {
+      notificationBroadcast.broadcastSendRejectInvoiceToUser(invoice);
+    }
 
     logger.info("User {} editInvoice from id {} with request: {}", username, id, updates.toString());
     return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);

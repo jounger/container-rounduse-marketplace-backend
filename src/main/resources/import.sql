@@ -30,7 +30,7 @@ INSERT INTO crm_db.merchant (user_id) VALUES ('5');
 INSERT INTO crm_db.driver (driver_license,user_id,forwarder_id) VALUES ('292883943','6','4');
 
 # PORT
-INSERT INTO crm_db.port (address,fullname,name_code,created_at,updated_at) VALUES ('Số 1A Minh Khai, Hồng Bàng, Hải Phòng','Port Of Haiphong Joint Stock Company','HAIPHONGPORT',CURDATE(),CURDATE());
+INSERT INTO crm_db.port (address,fullname,name_code,created_at,updated_at) VALUES ('Số 1A Minh Khai, Hồng Bàng, Hải Phòng','Cảng Vụ Hàng hải Hải Phòng','HAIPHONGPORT',CURDATE(),CURDATE());
 
 # CONTAINER TYPE
 INSERT INTO crm_db.container_type(cubic_capacity,description,door_open_height,door_open_width,internal_height,internal_length,internal_width,name,gross_weight,tare_weight,unit_of_measurement,created_at,updated_at) VALUES ('9.95','8ft Container Dimensions','1.95','2.11','2.06','2.29','2.11','8CD','6000','950','KG',CURDATE(),CURDATE());
@@ -47,9 +47,15 @@ INSERT INTO crm_db.container_type(cubic_capacity,description,door_open_height,do
 INSERT INTO crm_db.container_type(cubic_capacity,description,door_open_height,door_open_width,internal_height,internal_length,internal_width,name,gross_weight,tare_weight,unit_of_measurement,created_at,updated_at) VALUES ('37.4','20ft High Cube Dimensions','2.58','2.34','2.69','5.96','2.35','20HCD','30480','2100','KG',CURDATE(),CURDATE());
 
 # TRAILER & TRACTOR
-INSERT INTO crm_db.vehicle(id,created_at,license_plate,number_of_axles,updated_at,user_id) VALUES (1,'2020-07-12 00:48:56','112222',2,'2020-07-12 00:48:56',4),(2,'2020-07-12 00:49:22','1122223',2,'2020-07-12 00:49:22',4);
+INSERT INTO crm_db.vehicle(id,created_at,license_plate,number_of_axles,updated_at,user_id) VALUES (1,CURDATE(),'71C-4056',2,CURDATE(),4),(2,CURDATE(),'71C-4092',2,CURDATE(),4),(3,CURDATE(),'71C-2032',2,CURDATE(),4),(4,CURDATE(),'71C-5698',2,CURDATE(),4),(5,CURDATE(),'20A-4092',2,CURDATE(),4),(6,CURDATE(),'20A-6692',2,CURDATE(),4),(7,CURDATE(),'20A-5032',2,CURDATE(),4),(8,CURDATE(),'20A-3214',2,CURDATE(),4);
 INSERT INTO crm_db.container_semi_trailer(type,unit_of_measurement,vehicle_id) VALUES ('T36','FT',2);
+INSERT INTO crm_db.container_semi_trailer(type,unit_of_measurement,vehicle_id) VALUES ('T36','FT',3);
+INSERT INTO crm_db.container_semi_trailer(type,unit_of_measurement,vehicle_id) VALUES ('T36','FT',4);
+INSERT INTO crm_db.container_semi_trailer(type,unit_of_measurement,vehicle_id) VALUES ('T36','FT',5);
 INSERT INTO crm_db.container_tractor(vehicle_id) VALUES (1);
+INSERT INTO crm_db.container_tractor(vehicle_id) VALUES (6);
+INSERT INTO crm_db.container_tractor(vehicle_id) VALUES (7);
+INSERT INTO crm_db.container_tractor(vehicle_id) VALUES (8);
 
 # SHIPPINGLINE :
 INSERT INTO crm_db.user (created_at,email,fullname,password,phone,status,updated_at,username,address) VALUES (CURDATE(),'wanhai@crm.com','Joseph Lin','$2a$10$fKNzue5vXDqZWgzxtuIDWuozd30wiGRXfkzEgnFeUc6MKAIrIyG4i','8211297','ACTIVE',CURDATE(),'wanhai','194 Nguyễn Công Trứ, Quận 1');
@@ -230,13 +236,13 @@ INSERT INTO crm_db.port (address,fullname,name_code,created_at,updated_at) VALUE
 INSERT INTO crm_db.port (address,fullname,name_code,created_at,updated_at) VALUES ('Côn Đảo, Bà Rịa - Vũng Tàu','Cảng biển Côn Đảo','CONDAOPORT',CURDATE(),CURDATE());
 
 # MERCHANT
-INSERT INTO crm_db.user (created_at,email,fullname,password,phone,status,updated_at,username,address) VALUES (CURDATE(),'minhkq@crm.com','Khổng Quang Minh','$2a$10$fKNzue5vXDqZWgzxtuIDWuozd30wiGRXfkzEgnFeUc6MKAIrIyG4i','0962333456','ACTIVE',CURDATE(),'minhkq','khu công nghệ, Thạch Hoà, Thạch Thất, Hà Nội');
+INSERT INTO crm_db.user (created_at,email,fullname,password,phone,status,updated_at,username,address) VALUES (CURDATE(),'minhkq@crm.com','Khổng Quang Minh','$2a$10$fKNzue5vXDqZWgzxtuIDWuozd30wiGRXfkzEgnFeUc6MKAIrIyG4i','0962333456','ACTIVE',CURDATE(),'minhkq','Khu công nghệ, Thạch Hoà, Thạch Thất, Hà Nội');
 INSERT INTO crm_db.user (created_at,email,fullname,password,phone,status,updated_at,username,address) VALUES (CURDATE(),'duongnd@crm.com','Nguyễn Đức Dương','$2a$10$fKNzue5vXDqZWgzxtuIDWuozd30wiGRXfkzEgnFeUc6MKAIrIyG4i','054232478','ACTIVE',CURDATE(),'duongnd','Ba Dinh, Ha Noi, Vietnam');
-INSERT INTO crm_db.user (created_at,email,fullname,password,phone,status,updated_at,username,address) VALUES (CURDATE(),'quyennv@crm.com','Nguyễn Văn Quyền','$2a$10$fKNzue5vXDqZWgzxtuIDWuozd30wiGRXfkzEgnFeUc6MKAIrIyG4i','0732533498','ACTIVE',CURDATE(),'quyennv','khu công nghệ, Thạch Hoà, Thạch Thất, Hà Nội');
+INSERT INTO crm_db.user (created_at,email,fullname,password,phone,status,updated_at,username,address) VALUES (CURDATE(),'quyennv@crm.com','Nguyễn Văn Quyền','$2a$10$fKNzue5vXDqZWgzxtuIDWuozd30wiGRXfkzEgnFeUc6MKAIrIyG4i','0732533498','ACTIVE',CURDATE(),'quyennv','Khu công nghệ, Thạch Hoà, Thạch Thất, Hà Nội');
 
 # FORWARDER
-INSERT INTO crm_db.user (created_at,email,fullname,password,phone,status,updated_at,username,address) VALUES (CURDATE(),'annv@crm.com','Nguyễn Văn An','$2a$10$fKNzue5vXDqZWgzxtuIDWuozd30wiGRXfkzEgnFeUc6MKAIrIyG4i','0912537496','ACTIVE',CURDATE(),'annv','khu công nghệ, Thạch Hoà, Thạch Thất, Hà Nội');
-INSERT INTO crm_db.user (created_at,email,fullname,password,phone,status,updated_at,username,address) VALUES (CURDATE(),'duydl@crm.com','Đào Lương Duy','$2a$10$fKNzue5vXDqZWgzxtuIDWuozd30wiGRXfkzEgnFeUc6MKAIrIyG4i','0914322787','ACTIVE',CURDATE(),'duydl','khu công nghệ, Thạch Hoà, Thạch Thất, Hà Nội');
+INSERT INTO crm_db.user (created_at,email,fullname,password,phone,status,updated_at,username,address) VALUES (CURDATE(),'annv@crm.com','Nguyễn Văn An','$2a$10$fKNzue5vXDqZWgzxtuIDWuozd30wiGRXfkzEgnFeUc6MKAIrIyG4i','0912537496','ACTIVE',CURDATE(),'annv','Khu công nghệ, Thạch Hoà, Thạch Thất, Hà Nội');
+INSERT INTO crm_db.user (created_at,email,fullname,password,phone,status,updated_at,username,address) VALUES (CURDATE(),'duydl@crm.com','Đào Lương Duy','$2a$10$fKNzue5vXDqZWgzxtuIDWuozd30wiGRXfkzEgnFeUc6MKAIrIyG4i','0914322787','ACTIVE',CURDATE(),'duydl','Khu công nghệ, Thạch Hoà, Thạch Thất, Hà Nội');
 INSERT INTO crm_db.user (created_at,email,fullname,password,phone,status,updated_at,username,address) VALUES (CURDATE(),'phuongnm@crm.com','Nguyễn Mai Phương','$2a$10$fKNzue5vXDqZWgzxtuIDWuozd30wiGRXfkzEgnFeUc6MKAIrIyG4i','0912755636','ACTIVE',CURDATE(),'phuongnm','Ba Dinh, Ha Noi, Vietnam');
 
 INSERT INTO crm_db.supplier (company_address,company_code,company_description,company_name,fax,rating_value,tin,website,user_id) VALUES ('khu công nghệ, Thạch Hoà, Thạch Thất, Hà Nội','ADD','Công ty TNHH ADD','ADD Company','2231233','0','3342211','minhkq.com','39');
@@ -260,3 +266,16 @@ INSERT INTO crm_db.merchant (user_id) VALUES ('41');
 INSERT INTO crm_db.forwarder (user_id) VALUES ('42');
 INSERT INTO crm_db.forwarder (user_id) VALUES ('43');
 INSERT INTO crm_db.forwarder (user_id) VALUES ('44');
+
+# DRIVER
+INSERT INTO crm_db.user (created_at,email,fullname,password,phone,status,updated_at,username,address) VALUES (CURDATE(),'duc@crm.com','Nguyen Minh Duc','$2a$10$fKNzue5vXDqZWgzxtuIDWuozd30wiGRXfkzEgnFeUc6MKAIrIyG4i','0933458222','ACTIVE',CURDATE(),'ducmn','Ba Dinh, Ha Noi, Vietnam');
+INSERT INTO crm_db.user (created_at,email,fullname,password,phone,status,updated_at,username,address) VALUES (CURDATE(),'cuong@crm.com','Nguyen Duc Cuong','$2a$10$fKNzue5vXDqZWgzxtuIDWuozd30wiGRXfkzEgnFeUc6MKAIrIyG4i','0912323096','ACTIVE',CURDATE(),'cuongnd','Ba Dinh, Ha Noi, Vietnam');
+INSERT INTO crm_db.user (created_at,email,fullname,password,phone,status,updated_at,username,address) VALUES (CURDATE(),'quy@crm.com','Tran Van Quy','$2a$10$fKNzue5vXDqZWgzxtuIDWuozd30wiGRXfkzEgnFeUc6MKAIrIyG4i','0167322096','ACTIVE',CURDATE(),'quyvt','Ba Dinh, Ha Noi, Vietnam');
+
+INSERT INTO crm_db.user_role (user_id,role_id) VALUES ('45','6');
+INSERT INTO crm_db.user_role (user_id,role_id) VALUES ('46','6');
+INSERT INTO crm_db.user_role (user_id,role_id) VALUES ('47','6');
+
+INSERT INTO crm_db.driver (driver_license,user_id,forwarder_id) VALUES ('20A-5192','45','4');
+INSERT INTO crm_db.driver (driver_license,user_id,forwarder_id) VALUES ('71C-4033','46','4');
+INSERT INTO crm_db.driver (driver_license,user_id,forwarder_id) VALUES ('30D-4251','47','4');

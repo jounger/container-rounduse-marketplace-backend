@@ -74,7 +74,7 @@ public class SuccessMessage {
   // FeedbackController
   public static final String CREATE_FEEDBACK_SUCCESSFULLY = "Thêm mới phản hồi thành công";
   public static final String DELETE_FEEDBACK_SUCCESSFULLY = "Xóa phản hồi thành công";
-  public static final String EDIT_FEEDBACK_SUCCESSFULLY = "Cập phản hồi chứng thành công";
+  public static final String EDIT_FEEDBACK_SUCCESSFULLY = "Cập nhật phản hồi thành công";
 
   // ForwarderController
   public static final String CREATE_FORWARDER_SUCCESSFULLY = "Thêm mới chủ xe thành công";

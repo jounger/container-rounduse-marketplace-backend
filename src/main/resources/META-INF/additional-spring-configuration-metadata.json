@@ -1,0 +1,17 @@
+{"properties": [
+  {
+    "name": "crm.app.jwtSecret",
+    "type": "java.lang.String",
+    "description": "JWT token generator secret key"
+  },
+  {
+    "name": "crm.app.jwtExpirationMs",
+    "type": "java.lang.Long",
+    "description": "Expired time in millisecond for JWT token"
+  },
+  {
+    "name": "file.upload-dir",
+    "type": "java.lang.String",
+    "description": "Root path for upload file direction"
+  }
+]}

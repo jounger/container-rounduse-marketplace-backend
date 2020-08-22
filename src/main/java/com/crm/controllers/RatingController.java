@@ -48,12 +48,12 @@ public class RatingController {
   private RatingService ratingService;
 
   @Transactional
-  @PostMapping("")
+  @PostMapping("/contract/{id}")
   @PreAuthorize("hasRole('MERCHANT') or hasRole('FORWARDER')")
-  public ResponseEntity<?> createRating(@Valid @RequestBody RatingRequest request) {
+  public ResponseEntity<?> createRating(@PathVariable("id") Long id, @Valid @RequestBody RatingRequest request) {
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
-    Rating rating = ratingService.createRating(username, request);
+    Rating rating = ratingService.createRating(id, username, request);
     RatingDto ratingDto = RatingMapper.toRatingDto(rating);
 
     // Set default response body

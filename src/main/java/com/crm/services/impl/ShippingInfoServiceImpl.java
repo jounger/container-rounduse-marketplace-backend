@@ -106,15 +106,15 @@ public class ShippingInfoServiceImpl implements ShippingInfoService {
       contract.getShippingInfos().add(shippingInfo);
     });
 
-    if (contract.getRequired() == false) {
-      // CREATE NOTIFICATION
+    // CREATE NOTIFICATION
+    if (contract.getRequired()) {
+      notificationBroadcast.broadcastCreateContractToForwarderWhenContractRequired(contract);
+    } else {
       notificationBroadcast.broadcastCreateContractToForwarder(contract);
       notificationBroadcast.broadcastCreateContractToDriver(contract);
       notificationBroadcast.broadcastCreateContractToShippingLine(contract);
-      // END NOTIFICATION
-    } else {
-      notificationBroadcast.broadcastCreateContractToForwarderWhenContractRequired(contract);
     }
+    // END NOTIFICATION
   }
 
   @Override

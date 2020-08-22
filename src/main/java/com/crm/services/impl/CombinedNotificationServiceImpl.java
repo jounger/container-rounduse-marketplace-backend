@@ -10,16 +10,16 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.crm.common.ErrorMessage;
-import com.crm.enums.EnumNotificationType;
 import com.crm.enums.EnumCombinedNotification;
+import com.crm.enums.EnumNotificationType;
 import com.crm.exception.NotFoundException;
 import com.crm.models.Combined;
 import com.crm.models.CombinedNotification;
 import com.crm.models.User;
-import com.crm.payload.request.PaginationRequest;
 import com.crm.payload.request.CombinedNotificationRequest;
-import com.crm.repository.CombinedRepository;
+import com.crm.payload.request.PaginationRequest;
 import com.crm.repository.CombinedNotificationRepository;
+import com.crm.repository.CombinedRepository;
 import com.crm.repository.UserRepository;
 import com.crm.services.CombinedNotificationService;
 
@@ -59,8 +59,7 @@ public class CombinedNotificationServiceImpl implements CombinedNotificationServ
 
     shippingLineNotification.setSendDate(LocalDateTime.now());
 
-    CombinedNotification _shippingLineNotification = shippingLineNotificationRepository
-        .save(shippingLineNotification);
+    CombinedNotification _shippingLineNotification = shippingLineNotificationRepository.save(shippingLineNotification);
     return _shippingLineNotification;
   }
 
@@ -129,8 +128,7 @@ public class CombinedNotificationServiceImpl implements CombinedNotificationServ
       shippingLineNotification.setIsHide(isHide);
     }
 
-    CombinedNotification _shippingLineNotification = shippingLineNotificationRepository
-        .save(shippingLineNotification);
+    CombinedNotification _shippingLineNotification = shippingLineNotificationRepository.save(shippingLineNotification);
     return _shippingLineNotification;
   }
 

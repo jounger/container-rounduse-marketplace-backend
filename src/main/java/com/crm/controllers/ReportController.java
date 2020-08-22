@@ -29,6 +29,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.crm.common.SuccessMessage;
+import com.crm.enums.EnumReportStatus;
 import com.crm.models.Report;
 import com.crm.models.dto.ReportDto;
 import com.crm.models.mapper.ReportMapper;
@@ -157,7 +158,11 @@ public class ReportController {
     ReportDto reportDto = ReportMapper.toReportDto(editReport);
 
     // CREATE NOTIFICATION
-    notificationBroadcast.broadcastUpdateReportToModerator(status, editReport);
+    if (status.equals(report.getStatus()) || report.getStatus().equals(EnumReportStatus.RESOLVED.name())) {
+      notificationBroadcast.broadcastUpdateReportToModerator(editReport);
+    } else {
+      notificationBroadcast.broadcastUpdateReportToForwarder(editReport);
+    }
     // END NOTIFICATION
 
     // Set default response body

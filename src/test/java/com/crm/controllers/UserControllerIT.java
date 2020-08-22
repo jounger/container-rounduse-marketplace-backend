@@ -9,9 +9,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -135,12 +133,12 @@ public class UserControllerIT {
 
   @Test
   @WithMockUser(username = "moderator", roles = { "MODERATOR" })
-  void changeStatus() throws Exception {
-    Map<String, Object> updates = new HashMap<>();
-    updates.put("status", "ACCEPTED");
-    user.setStatus("ACCEPTED");
+  void getResetPasswordToken_thenStatusOkAndReturnToken() throws Exception {
+    // given
+    String token = "213-9pd90f0q9jw0q3urjdslzmdoeq0-23-05q3r[pqawk13@#527";
+    when(userService.getResetPasswordToken(Mockito.anyString())).thenReturn("token");
 
-    when(userService.searchUsers(Mockito.any(PaginationRequest.class), Mockito.anyString())).thenReturn(pages);
+    // when and then
     MvcResult mvcResult = mockMvc
         .perform(patch("/api/user/1").contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(updates)).accept(MediaType.APPLICATION_JSON))

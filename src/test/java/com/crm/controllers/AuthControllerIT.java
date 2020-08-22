@@ -89,6 +89,7 @@ public class AuthControllerIT {
     request.setPhone("0967390001");
     request.setEmail("anvannguyen@gmail.com");
     request.setAddress("Ha Noi, Viet Nam");
+    request.setFullname("Nguyen Van A");
     Set<String> roles = new HashSet<>();
     roles.add("FORWARDER");
     request.setRoles(roles);
@@ -106,8 +107,8 @@ public class AuthControllerIT {
     MvcResult mvcResult = mockMvc
         .perform(post("/api/auth/signup").contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(request)).accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isOk()).andExpect(jsonPath("$.id").value(1))
-        .andExpect(jsonPath("$.username").value("anvannguyen")).andReturn();
+        .andExpect(status().isCreated()).andExpect(jsonPath("$.data.id").value(1))
+        .andExpect(jsonPath("$.data.username").value("anvannguyen")).andReturn();
     
     // print response
     MockHttpServletResponse response = mvcResult.getResponse();

@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.slf4j.Logger;
@@ -32,13 +33,15 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.web.multipart.MultipartFile;
 
 import com.crm.models.ContractDocument;
+import com.crm.models.FileUpload;
 import com.crm.models.Merchant;
 import com.crm.payload.request.ContractDocumentRequest;
+import com.crm.payload.request.FileUploadRequest;
 import com.crm.payload.request.PaginationRequest;
 import com.crm.services.ContractDocumentService;
+import com.crm.services.FileUploadService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -54,6 +57,9 @@ class ContractDocumentControllerIT {
 
   @MockBean
   private ContractDocumentService contractDocumentService;
+
+  @MockBean
+  private FileUploadService fileUploadService;
 
   @Autowired
   private ObjectMapper objectMapper;
@@ -88,16 +94,22 @@ class ContractDocumentControllerIT {
     pages = new PageImpl<ContractDocument>(evidences);
   }
 
+  @Disabled
   @Test
   @WithMockUser(username = "forwarder", roles = { "FORWARDER" })
   void createContractDocument_thenStatusOk_andReturnContractDocument() throws JsonProcessingException, Exception {
     // given
     ContractDocumentRequest request = new ContractDocumentRequest();
     request.setSender("merchant");
-    MultipartFile file = new 
+    //MultipartFile file = null;
+    FileUpload fileUpload = new FileUpload();
+    fileUpload.setPath("/2sva/2de2");
+    fileUpload.setName("ads2s");
+    request.setDocumentPath("2sva/2de2/ads2s");
+    when(fileUploadService.createFileUpload(Mockito.anyString(), Mockito.any(FileUploadRequest.class))).thenReturn(fileUpload);
     when(contractDocumentService.createContractDocument(Mockito.anyLong(), Mockito.anyString(),
         Mockito.any(ContractDocumentRequest.class))).thenReturn(contractDocument);
-
+    
     // when and then
     MvcResult result = mockMvc
         .perform(post("/api/contract-document/contract/1").contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -152,7 +164,7 @@ class ContractDocumentControllerIT {
   @WithMockUser(username = "forwarder", roles = { "FORWARDER" })
   void searchContractDocuments_thenStatusOk_andReturnContractDocuments() throws Exception {
     // given
-    String search = "required:false";
+    String search = "status:PENDING";
     requestParams.add("search", search);
     when(contractDocumentService.searchContractDocuments(Mockito.any(PaginationRequest.class), Mockito.anyString()))
         .thenReturn(pages);

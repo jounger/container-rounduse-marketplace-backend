@@ -14,6 +14,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -46,6 +47,7 @@ public class ReportNotificationController {
   ReportNotificationService reportNotificationService;
 
   @GetMapping("")
+  @PreAuthorize("hasRole('MODERATOR') or hasRole('FORWARDER')")
   public ResponseEntity<?> getReportNotifications(@Valid PaginationRequest request) {
 
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -68,6 +70,7 @@ public class ReportNotificationController {
   }
 
   @GetMapping("/{id}")
+  @PreAuthorize("hasRole('MODERATOR') or hasRole('FORWARDER')")
   public ResponseEntity<?> getReportNotification(@PathVariable Long id) {
     ReportNotification reportNotification = reportNotificationService.getReportNotification(id);
     ReportNotificationDto reportNotificationDto = ReportNotificationMapper.toReportNotificationDto(reportNotification);
@@ -75,6 +78,7 @@ public class ReportNotificationController {
   }
 
   @Transactional
+  @PreAuthorize("hasRole('MODERATOR') or hasRole('FORWARDER')")
   @RequestMapping(value = "/{id}", method = RequestMethod.PATCH, consumes = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<?> editReportNotification(@PathVariable("id") Long id,
       @RequestBody Map<String, Object> updates) {
@@ -91,6 +95,7 @@ public class ReportNotificationController {
   }
 
   @Transactional
+  @PreAuthorize("hasRole('MODERATOR') or hasRole('FORWARDER')")
   @DeleteMapping("/{id}")
   public ResponseEntity<?> deleteReportNotification(@PathVariable Long id) {
     reportNotificationService.removeReportNotification(id);

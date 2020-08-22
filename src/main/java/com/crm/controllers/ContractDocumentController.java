@@ -86,8 +86,8 @@ public class ContractDocumentController {
   }
 
   @PreAuthorize("hasRole('MERCHANT') or hasRole('FORWARDER')")
-  @GetMapping("/user")
-  public ResponseEntity<?> getContractDocumentsByUser(@Valid PaginationRequest request) {
+  @GetMapping("")
+  public ResponseEntity<?> getContractDocuments(@Valid PaginationRequest request) {
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
 

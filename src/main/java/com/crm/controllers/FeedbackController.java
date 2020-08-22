@@ -119,8 +119,8 @@ public class FeedbackController {
   }
 
   @PreAuthorize("hasRole('MODERATOR') or hasRole('FORWARDER')")
-  @GetMapping("/user")
-  public ResponseEntity<?> getFeedbacksByUser(@Valid PaginationRequest request) {
+  @GetMapping("")
+  public ResponseEntity<?> getFeedbacks(@Valid PaginationRequest request) {
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
 

@@ -143,8 +143,8 @@ public class BidController {
   }
 
   @PreAuthorize("hasRole('FORWARDER')")
-  @GetMapping("/forwarder")
-  public ResponseEntity<?> getBidsByForwarder(@Valid PaginationRequest request) {
+  @GetMapping("")
+  public ResponseEntity<?> getBids(@Valid PaginationRequest request) {
 
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();

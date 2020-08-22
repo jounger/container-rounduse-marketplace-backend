@@ -26,7 +26,7 @@ import lombok.ToString;
 @Table(name = "driver_notification")
 @Inheritance(strategy = InheritanceType.JOINED)
 @PrimaryKeyJoinColumn(name = "notification_id")
-public class DriverNotification extends Notification {
+public class ShippingNotification extends Notification {
 
   @ManyToOne
   @JoinColumn(name = "shipping_info")

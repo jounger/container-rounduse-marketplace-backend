@@ -1,7 +1,7 @@
 package com.crm.enums;
 
 public enum EnumNotificationType {
-  REPORT, BIDDING, SHPIPPINGLINE, DRIVER;
+  REPORT, BIDDING, SHIPPING, COMBINED;
 
   public static EnumNotificationType findByName(String name) {
     for (EnumNotificationType type : EnumNotificationType.values()) {

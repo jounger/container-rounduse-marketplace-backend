@@ -1,19 +1,19 @@
 package com.crm.models.mapper;
 
 import com.crm.common.Tool;
-import com.crm.models.ShippingLineNotification;
+import com.crm.models.CombinedNotification;
 import com.crm.models.dto.CombinedDto;
-import com.crm.models.dto.ShippingLineNotificationDto;
+import com.crm.models.dto.CombinedNotificationDto;
 
-public class ShippingLineNotificationMapper {
+public class CombinedNotificationMapper {
 
-  public static ShippingLineNotificationDto toShippingLineNotificationDto(
-      ShippingLineNotification shippingLineNotification) {
+  public static CombinedNotificationDto toShippingLineNotificationDto(
+      CombinedNotification shippingLineNotification) {
     if (shippingLineNotification == null) {
       return null;
     }
 
-    ShippingLineNotificationDto shippingLineNotificationDto = new ShippingLineNotificationDto();
+    CombinedNotificationDto shippingLineNotificationDto = new CombinedNotificationDto();
 
     shippingLineNotificationDto.setId(shippingLineNotification.getId());
     shippingLineNotificationDto.setRecipient(UserMapper.toUserDto(shippingLineNotification.getRecipient()));

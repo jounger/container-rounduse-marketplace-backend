@@ -30,8 +30,8 @@ import com.crm.payload.request.ShippingInfoRequest;
 import com.crm.repository.BidRepository;
 import com.crm.repository.CombinedRepository;
 import com.crm.repository.ContainerRepository;
-import com.crm.repository.ContractRepository;
 import com.crm.repository.ContractDocumentRepository;
+import com.crm.repository.ContractRepository;
 import com.crm.repository.OutboundRepository;
 import com.crm.repository.ShippingInfoRepository;
 import com.crm.repository.UserRepository;
@@ -106,13 +106,15 @@ public class ShippingInfoServiceImpl implements ShippingInfoService {
       contract.getShippingInfos().add(shippingInfo);
     });
 
-    notificationBroadcast.broadcastCreateContractToForwarder(contract);
-    if (contract.getRequired() == false) {
-      // CREATE NOTIFICATION
+    // CREATE NOTIFICATION
+    if (contract.getRequired()) {
+      notificationBroadcast.broadcastCreateContractToForwarderWhenContractRequired(contract);
+    } else {
+      notificationBroadcast.broadcastCreateContractToForwarder(contract);
       notificationBroadcast.broadcastCreateContractToDriver(contract);
       notificationBroadcast.broadcastCreateContractToShippingLine(contract);
-      // END NOTIFICATION
     }
+    // END NOTIFICATION
   }
 
   @Override

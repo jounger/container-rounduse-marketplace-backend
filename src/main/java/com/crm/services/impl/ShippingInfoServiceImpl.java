@@ -126,7 +126,7 @@ public class ShippingInfoServiceImpl implements ShippingInfoService {
     Forwarder forwarder = driver.getForwarder();
     Outbound outbound = shippingInfo.getOutbound();
     Merchant merchant = outbound.getMerchant();
-    if (!(driver.getUsername().equals(username) || !merchant.getUsername().equals(username)
+    if (!(driver.getUsername().equals(username) || merchant.getUsername().equals(username)
         || forwarder.getUsername().equals(username))) {
       throw new ForbiddenException(ErrorMessage.USER_ACCESS_DENIED);
     }

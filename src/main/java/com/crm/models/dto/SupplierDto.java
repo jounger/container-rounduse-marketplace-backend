@@ -26,4 +26,6 @@ public class SupplierDto extends UserDto {
   private String fax;
 
   private String brcScanPath;
+
+  private Integer ratingCount;
 }

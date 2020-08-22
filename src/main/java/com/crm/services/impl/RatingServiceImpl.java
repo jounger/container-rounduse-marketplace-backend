@@ -48,7 +48,7 @@ public class RatingServiceImpl implements RatingService {
     Contract contract = contractRepository.findById(id)
         .orElseThrow(() -> new NotFoundException(ErrorMessage.SENDER_NOT_FOUND));
     rating.setContract(contract);
-    if (!contractRepository.existsByUserAndContract(request.getContract(), username)) {
+    if (!contractRepository.existsByUserAndContract(id, username)) {
       throw new DuplicateRecordException(ErrorMessage.USER_ACCESS_DENIED);
     }
 
@@ -64,7 +64,7 @@ public class RatingServiceImpl implements RatingService {
       throw new NotFoundException(ErrorMessage.USER_NOT_FOUND);
     }
 
-    if (ratingRepository.existsByUserAndContract(request.getContract(), username)) {
+    if (ratingRepository.existsByUserAndContract(id, username)) {
       throw new ForbiddenException(ErrorMessage.RATING_ONE_PER_CONTRACT);
     }
     rating.setRatingValue(request.getRatingValue());

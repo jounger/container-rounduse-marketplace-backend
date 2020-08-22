@@ -21,4 +21,6 @@ public class Constant {
   public static final String EMPTY_STRING = "";
 
   public static final long REWIND_MONTH = 1;
+  
+  public static final long QR_CODE_EXPIRED_MINUTES = 5;
 }

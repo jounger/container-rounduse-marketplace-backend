@@ -20,7 +20,7 @@ public class PaginationRequest implements Serializable {
 
   @NotNull
   private Integer limit;
-  
+
   private String status;
-  
+
 }

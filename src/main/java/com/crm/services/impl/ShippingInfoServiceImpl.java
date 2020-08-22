@@ -157,7 +157,12 @@ public class ShippingInfoServiceImpl implements ShippingInfoService {
   @Override
   public Page<ShippingInfo> getShippingInfosByDriver(String username, PaginationRequest request) {
     PageRequest page = PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt"));
-    Page<ShippingInfo> pages = shippingInfoRepository.findByDriver(username, page);
+    Page<ShippingInfo> pages = null;
+    if (request.getStatus() != null) {
+      pages = shippingInfoRepository.findByDriver(username, request.getStatus(), page);
+    } else {
+      pages = shippingInfoRepository.findByDriver(username, page);
+    }
     return pages;
   }
 

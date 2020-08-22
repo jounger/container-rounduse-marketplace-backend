@@ -11,8 +11,6 @@ public class RatingRequest {
 
   private Long id;
 
-  private Long contract;
-
   private Integer ratingValue;
 
   private String comment;

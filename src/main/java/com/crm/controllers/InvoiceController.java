@@ -95,8 +95,8 @@ public class InvoiceController {
   }
 
   @PreAuthorize("hasRole('MERCHANT') or hasRole('FORWARDER')")
-  @GetMapping("/user")
-  public ResponseEntity<?> getInvoicesByUser(@Valid PaginationRequest request) {
+  @GetMapping("")
+  public ResponseEntity<?> getInvoices(@Valid PaginationRequest request) {
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
 

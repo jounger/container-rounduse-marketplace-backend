@@ -25,6 +25,8 @@ public interface ShippingInfoService {
 
   Page<ShippingInfo> getShippingInfosByDriver(String username, PaginationRequest request);
 
+  Page<ShippingInfo> getShippingInfosAreActive(PaginationRequest request);
+
   ShippingInfo editShippingInfo(Long id, String username, ShippingInfoRequest request);
 
   void removeShippingInfo(Long id, String username);

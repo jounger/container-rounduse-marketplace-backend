@@ -99,7 +99,7 @@ public class ShippingInfoController {
   }
 
   @PreAuthorize("hasRole('DRIVER')")
-  @GetMapping("/active")
+  @GetMapping("/driver")
   public ResponseEntity<?> getShippingInfosByDriver(@Valid PaginationRequest request) {
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
@@ -121,7 +121,7 @@ public class ShippingInfoController {
   }
 
   @PreAuthorize("hasRole('DRIVER')")
-  @GetMapping("/driver")
+  @GetMapping("/active")
   public ResponseEntity<?> getShippingInfosAreActive(@Valid PaginationRequest request) {
 
     Page<ShippingInfo> pages = shippingInfoService.getShippingInfosAreActive(request);

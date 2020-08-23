@@ -39,7 +39,7 @@ import com.crm.services.CombinedNotificationService;
 @CrossOrigin(origins = "*", maxAge = 3600)
 @PreAuthorize("hasRole('SHIPPINGLINE')")
 @RestController
-@RequestMapping("/api/shipping-line-notification")
+@RequestMapping("/api/combine-notification")
 public class CombinedNotificationController {
 
   private static final Logger logger = LoggerFactory.getLogger(CombinedNotificationController.class);
@@ -48,12 +48,13 @@ public class CombinedNotificationController {
   CombinedNotificationService shippingLineNotificationService;
 
   @GetMapping("")
+  @PreAuthorize("hasRole('MERCHANT') or hasRole('FORWARDER') or hasRole('SHIPPINGLINE')")
   public ResponseEntity<?> getShippingLineNotifications(@Valid PaginationRequest request) {
 
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
-    Page<CombinedNotification> pages = shippingLineNotificationService
-        .getShippingLineNotificationsByUsername(username, request);
+    Page<CombinedNotification> pages = shippingLineNotificationService.getShippingLineNotificationsByUsername(username,
+        request);
 
     PaginationResponse<CombinedNotificationDto> response = new PaginationResponse<>();
     response.setPageNumber(request.getPage());
@@ -71,6 +72,7 @@ public class CombinedNotificationController {
   }
 
   @GetMapping("/{id}")
+  @PreAuthorize("hasRole('MERCHANT') or hasRole('FORWARDER') or hasRole('SHIPPINGLINE')")
   public ResponseEntity<?> getShippingLineNotification(@PathVariable Long id) {
     CombinedNotification shippingLineNotification = shippingLineNotificationService.getShippingLineNotification(id);
     CombinedNotificationDto shippingLineNotificationDto = CombinedNotificationMapper
@@ -79,6 +81,7 @@ public class CombinedNotificationController {
   }
 
   @Transactional
+  @PreAuthorize("hasRole('MERCHANT') or hasRole('FORWARDER') or hasRole('SHIPPINGLINE')")
   @RequestMapping(value = "/{id}", method = RequestMethod.PATCH, consumes = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<?> editShippingLineNotification(@PathVariable("id") Long id,
       @RequestBody Map<String, Object> updates) {
@@ -97,6 +100,7 @@ public class CombinedNotificationController {
   }
 
   @Transactional
+  @PreAuthorize("hasRole('MERCHANT') or hasRole('FORWARDER') or hasRole('SHIPPINGLINE')")
   @DeleteMapping("/{id}")
   public ResponseEntity<?> deleteShippingLineNotification(@PathVariable Long id) {
     shippingLineNotificationService.removeShippingLineNotification(id);

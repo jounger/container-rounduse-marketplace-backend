@@ -1,5 +1,7 @@
 package com.crm.services.impl;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -223,6 +225,17 @@ public class ShippingInfoServiceImpl implements ShippingInfoService {
     }
     PageRequest page = PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt"));
     Page<ShippingInfo> pages = shippingInfoRepository.findByCombined(combinedId, page);
+    return pages;
+  }
+
+  @Override
+  public Page<ShippingInfo> getShippingInfosAreActive(PaginationRequest request) {
+    PageRequest page = PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt"));
+    LocalDateTime currentDate = LocalDateTime.now();
+    List<String> status = new ArrayList<String>();
+    status.add(EnumShippingStatus.INFO_RECEIVED.name());
+    status.add(EnumShippingStatus.SHIPPING.name());
+    Page<ShippingInfo> pages = shippingInfoRepository.findShippingInfosAreActive(status, currentDate, page);
     return pages;
   }
 

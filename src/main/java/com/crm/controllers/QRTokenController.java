@@ -29,7 +29,6 @@ import com.crm.models.QRToken;
 import com.crm.models.ShippingInfo;
 import com.crm.models.dto.ShippingInfoDto;
 import com.crm.models.dto.TokenDto;
-import com.crm.models.dto.UserDto;
 import com.crm.models.mapper.ShippingInfoMapper;
 import com.crm.models.mapper.TokenMapper;
 import com.crm.payload.request.QRTokenRequest;

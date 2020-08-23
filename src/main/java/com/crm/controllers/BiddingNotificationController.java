@@ -58,6 +58,7 @@ public class BiddingNotificationController {
    */
 
   @GetMapping("")
+  @PreAuthorize("hasRole('MERCHANT') or hasRole('FORWARDER')")
   public ResponseEntity<?> getBiddingNotifications(@Valid PaginationRequest request) {
 
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -80,6 +81,7 @@ public class BiddingNotificationController {
   }
 
   @GetMapping("/{id}")
+  @PreAuthorize("hasRole('MERCHANT') or hasRole('FORWARDER')")
   public ResponseEntity<?> getBiddingNotification(@PathVariable Long id) {
     BiddingNotification biddingNotification = biddingNotificationService.getBiddingNotification(id);
     BiddingNotificationDto biddingNotificationDto = BiddingNotificationMapper
@@ -88,6 +90,7 @@ public class BiddingNotificationController {
   }
 
   @Transactional
+  @PreAuthorize("hasRole('MERCHANT') or hasRole('FORWARDER')")
   @RequestMapping(value = "/{id}", method = RequestMethod.PATCH, consumes = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<?> editBiddingNotification(@PathVariable("id") Long id,
       @RequestBody Map<String, Object> updates) {
@@ -105,6 +108,7 @@ public class BiddingNotificationController {
   }
 
   @Transactional
+  @PreAuthorize("hasRole('MERCHANT') or hasRole('FORWARDER')")
   @DeleteMapping("/{id}")
   public ResponseEntity<?> deleteBiddingNotification(@PathVariable Long id) {
     biddingNotificationService.removeBiddingNotification(id);

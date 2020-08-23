@@ -39,7 +39,7 @@ import com.crm.services.ShippingNotificationService;
 @CrossOrigin(origins = "*", maxAge = 3600)
 @PreAuthorize("hasRole('DRIVER')")
 @RestController
-@RequestMapping("/api/driver-notification")
+@RequestMapping("/api/shipping-notification")
 public class ShippingNotificationController {
 
   private static final Logger logger = LoggerFactory.getLogger(ShippingNotificationController.class);
@@ -48,6 +48,7 @@ public class ShippingNotificationController {
   ShippingNotificationService driverNotificationService;
 
   @GetMapping("")
+  @PreAuthorize("hasRole('MERCHANT') or hasRole('DRIVER')")
   public ResponseEntity<?> getDriverNotifications(@Valid PaginationRequest request) {
 
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -70,18 +71,22 @@ public class ShippingNotificationController {
   }
 
   @GetMapping("/{id}")
+  @PreAuthorize("hasRole('MERCHANT') or hasRole('DRIVER')")
   public ResponseEntity<?> getDriverNotification(@PathVariable Long id) {
     ShippingNotification driverNotification = driverNotificationService.getDriverNotification(id);
-    ShippingNotificationDto driverNotificationDto = ShippingNotificationMapper.toDriverNotificationDto(driverNotification);
+    ShippingNotificationDto driverNotificationDto = ShippingNotificationMapper
+        .toDriverNotificationDto(driverNotification);
     return ResponseEntity.ok(driverNotificationDto);
   }
 
   @Transactional
+  @PreAuthorize("hasRole('MERCHANT') or hasRole('DRIVER')")
   @RequestMapping(value = "/{id}", method = RequestMethod.PATCH, consumes = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<?> editDriverNotification(@PathVariable("id") Long id,
       @RequestBody Map<String, Object> updates) {
     ShippingNotification driverNotification = driverNotificationService.editDriverNotification(id, updates);
-    ShippingNotificationDto driverNotificationDto = ShippingNotificationMapper.toDriverNotificationDto(driverNotification);
+    ShippingNotificationDto driverNotificationDto = ShippingNotificationMapper
+        .toDriverNotificationDto(driverNotification);
 
     // Set default response body
     DefaultResponse<ShippingNotificationDto> defaultResponse = new DefaultResponse<>();
@@ -93,6 +98,7 @@ public class ShippingNotificationController {
   }
 
   @Transactional
+  @PreAuthorize("hasRole('MERCHANT') or hasRole('DRIVER')")
   @DeleteMapping("/{id}")
   public ResponseEntity<?> deleteDriverNotification(@PathVariable Long id) {
     driverNotificationService.removeDriverNotification(id);

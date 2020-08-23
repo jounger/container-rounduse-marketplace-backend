@@ -35,6 +35,7 @@ public class ForwarderMapper {
     forwarderDto.setTin(forwarder.getTin());
     forwarderDto.setFax(forwarder.getFax());
     forwarderDto.setRatingValue(forwarder.getRatingValue());
+    forwarderDto.setRatingCount(forwarder.getReceivedRatings().size());
 
     return forwarderDto;
   }

@@ -140,6 +140,7 @@ public class SuccessMessage {
   public static final String CREATE_SHIPPING_INFO_SUCCESSFULLY = "Tạo mới chi tiết đơn vận chuyển thành công";
   public static final String DELETE_SHIPPING_INFO_SUCCESSFULLY = "Xóa chi tiết đơn vận chuyển thành công";
   public static final String EDIT_SHIPPING_INFO_SUCCESSFULLY = "Cập nhật chi tiết đơn vận chuyển thành công";
+  public static final String EDIT_SHIPPING_INFO_STATUS_SUCCESSFULLY = "Cập nhật trạng thái đơn vận chuyển thành công";
 
   // ShippingLineController
   public static final String CREATE_SHIPPING_LINE_SUCCESSFULLY = "Thêm mới hãng tàu thành công";
@@ -157,5 +158,8 @@ public class SuccessMessage {
   public static final String GENERATE_RESET_PASSWORD_TOKEN_SUCCESSFULLY = "Tạo đường dẫn cài lại mật khẩu thành công. Vui lòng kiểm tra email!";
   public static final String RESET_PASSWORD_SUCCESSFULLY = "Đặt lại mật khẩu thành công";
   public static final String PROFILE_CHANGE_SUCCESSFULLY = "Thay đổi ảnh đại diện thành công";
+  
+  // QRContoller
+  public static final String QR_TOKEN_GENERATE_SUCCESSFULLY = "Tạo QR Code thành công";
 
 }

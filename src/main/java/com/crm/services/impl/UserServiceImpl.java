@@ -6,7 +6,6 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -27,6 +26,7 @@ import org.springframework.stereotype.Service;
 
 import com.crm.common.Constant;
 import com.crm.common.ErrorMessage;
+import com.crm.common.Tool;
 import com.crm.enums.EnumUserStatus;
 import com.crm.exception.DuplicateRecordException;
 import com.crm.exception.NotFoundException;
@@ -197,7 +197,7 @@ public class UserServiceImpl implements UserService {
     passwordResetToken.setUser(user);
     passwordResetToken.setExpiredDate(LocalDateTime.now().plusHours(3));
 
-    String rawToken = randomString();
+    String rawToken = Tool.randomString();
     // encode data using BASE64
     String token = DatatypeConverter.printBase64Binary(rawToken.getBytes());
     passwordResetToken.setToken(token);
@@ -260,20 +260,10 @@ public class UserServiceImpl implements UserService {
     User user = passwordResetToken.getUser();
     String password = passwordEncoder.encode(newPassword);
     user.setPassword(password);
+
+    passwordResetTokenRepository.delete(passwordResetToken);
+
     userRepository.save(user);
   }
 
-  // generate random String with length of 32
-  public String randomString() {
-    int leftLimit = 48; // numeral '0'
-    int rightLimit = 122; // letter 'z'
-    int targetStringLength = 32;
-    Random random = new Random();
-
-    String generatedString = random.ints(leftLimit, rightLimit + 1)
-        .filter(i -> (i <= 57 || i >= 65) && (i <= 90 || i >= 97)).limit(targetStringLength)
-        .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append).toString();
-
-    return generatedString;
-  }
 }

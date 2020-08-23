@@ -175,4 +175,8 @@ public class ErrorMessage {
   public static final String PAYMENT_NOT_FOUND = "Không tìm thấy hóa đơn";
   public static final String PAYMENT_INVALID_AMOUNT = "Sô tiền không hợp lệ";
   public static final String PAYMENT_TYPE_NOT_FOUND = "Không tìm thấy loại hóa đơn";
+  
+  // QRToken
+  public static final String QRTOKEN_NOT_FOUND = "Mã QR không tồn tại";
+  public static final String QRTOKEN_EXPIRED = "Mã QR đã hết hạn";
 }

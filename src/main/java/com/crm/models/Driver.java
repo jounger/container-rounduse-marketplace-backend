@@ -33,7 +33,7 @@ public class Driver extends User {
 
   @Column(name = "driver_license", length = 50)
   @NotBlank
-  @Size(min = 5, max = 50)
+  @Size(min = 12, max = 12)
   private String driverLicense;
 
   @ManyToOne

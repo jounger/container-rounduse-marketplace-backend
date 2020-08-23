@@ -28,8 +28,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.crm.common.ErrorMessage;
 import com.crm.common.SuccessMessage;
 import com.crm.enums.EnumReportStatus;
+import com.crm.exception.ForbiddenException;
 import com.crm.models.Report;
 import com.crm.models.dto.ReportDto;
 import com.crm.models.mapper.ReportMapper;
@@ -86,12 +88,19 @@ public class ReportController {
   }
 
   @PreAuthorize("hasRole('MODERATOR') or hasRole('FORWARDER')")
-  @GetMapping("/user")
-  public ResponseEntity<?> getReportsByUser(@Valid PaginationRequest request) {
+  @GetMapping("")
+  public ResponseEntity<?> getReports(@Valid PaginationRequest request) {
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
-
-    Page<Report> pages = reportService.getReportsByUser(username, request);
+    String role = userDetails.getAuthorities().iterator().next().getAuthority();
+    Page<Report> pages;
+    if (role.equals("ROLE_MODERATOR")) {
+      pages = reportService.getReports(request);
+    } else if (role.equals("ROLE_FORWARDER")) {
+      pages = reportService.getReportsByUser(username, request);
+    } else {
+      throw new ForbiddenException(ErrorMessage.USER_ACCESS_DENIED);
+    }
 
     PaginationResponse<ReportDto> response = new PaginationResponse<>();
     response.setPageNumber(request.getPage());
@@ -112,24 +121,6 @@ public class ReportController {
   public ResponseEntity<?> searchReports(@Valid PaginationRequest request,
       @RequestParam(value = "search") String search) {
     Page<Report> pages = reportService.searchReports(request, search);
-    PaginationResponse<ReportDto> response = new PaginationResponse<>();
-    response.setPageNumber(request.getPage());
-    response.setPageSize(request.getLimit());
-    response.setTotalElements(pages.getTotalElements());
-    response.setTotalPages(pages.getTotalPages());
-
-    List<Report> reports = pages.getContent();
-    List<ReportDto> reportsDto = new ArrayList<>();
-    reports.forEach(report -> reportsDto.add(ReportMapper.toReportDto(report)));
-    response.setContents(reportsDto);
-
-    return ResponseEntity.ok(response);
-  }
-
-  @PreAuthorize("hasRole('MODERATOR')")
-  @GetMapping("")
-  public ResponseEntity<?> getReports(@Valid PaginationRequest request) {
-    Page<Report> pages = reportService.getReports(request);
     PaginationResponse<ReportDto> response = new PaginationResponse<>();
     response.setPageNumber(request.getPage());
     response.setPageSize(request.getLimit());

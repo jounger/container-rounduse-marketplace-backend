@@ -32,6 +32,7 @@ public class ErrorMessage {
   // Contract
   public static final String CONTRACT_NOT_FOUND = "Không tìm thấy hợp đồng";
   public static final String CONTRACT_INVALID_FINES = "Phần trăm phạt hợp đồng không hợp lệ";
+  public static final String CONTRACT_INVALID_EDIT = "Không thể sửa hợp đồng đã khai báo hóa đơn hợp lệ";
 
   // Evidence
   public static final String EVIDENCE_NOT_FOUND = "Không tìm thấy chứng cứ";

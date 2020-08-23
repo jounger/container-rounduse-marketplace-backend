@@ -1,5 +1,7 @@
 package com.crm.services.impl;
 
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -159,6 +161,11 @@ public class InvoiceServiceImpl implements InvoiceService {
     if (invoice.getRecipient().getUsername().equals(username)) {
       Boolean isPaidString = (Boolean) updates.get("isPaid");
       if (updates.get("isPaid") != null && isPaidString != null) {
+        Contract contract = invoice.getContract();
+        Double percent = contract.getPaymentPercentage() + invoice.getAmount() / contract.getPrice() * 100;
+        NumberFormat numberFormat = new DecimalFormat(Constant.CONTRACT_PAID_PERCENTAGE_FORMAT);
+        contract.setPaymentPercentage(Double.valueOf(numberFormat.format(percent)));
+        contractRepository.save(contract);
         invoice.setIsPaid(isPaidString);
       }
     }

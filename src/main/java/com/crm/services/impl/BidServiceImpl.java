@@ -195,7 +195,8 @@ public class BidServiceImpl implements BidService {
     if (!supplierRepository.existsByUsername(username)) {
       throw new NotFoundException(ErrorMessage.USER_NOT_FOUND);
     }
-    PageRequest page = PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Direction.DESC, "createdAt"));
+    PageRequest page = PageRequest.of(request.getPage(), request.getLimit()
+        , Sort.by(Direction.ASC, "bidPrice").and(Sort.by(Direction.DESC, "bidder.ratingValue")));
     String status = request.getStatus();
     if (status != null) {
       return bidRepository.findByBiddingDocument(id, username, status, page);

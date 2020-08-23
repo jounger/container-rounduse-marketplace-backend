@@ -162,9 +162,9 @@ public class InvoiceServiceImpl implements InvoiceService {
       Boolean isPaidString = (Boolean) updates.get("isPaid");
       if (updates.get("isPaid") != null && isPaidString != null) {
         Contract contract = invoice.getContract();
-        Double percent = contract.getPaidPercentage() + invoice.getAmount() / contract.getPrice() * 100;
+        Double percent = contract.getPaymentPercentage() + invoice.getAmount() / contract.getPrice() * 100;
         NumberFormat numberFormat = new DecimalFormat(Constant.CONTRACT_PAID_PERCENTAGE_FORMAT);
-        contract.setPaidPercentage(Double.valueOf(numberFormat.format(percent)));
+        contract.setPaymentPercentage(Double.valueOf(numberFormat.format(percent)));
         contractRepository.save(contract);
         invoice.setIsPaid(isPaidString);
       }

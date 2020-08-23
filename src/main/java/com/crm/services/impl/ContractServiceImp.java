@@ -97,7 +97,7 @@ public class ContractServiceImp implements ContractService {
     contract.setRequired(required);
     contract.setFinesAgainstContractViolations(0D);
     contract.setCreationDate(LocalDateTime.now());
-    contract.setPaidPercentage(0D);
+    contract.setPaymentPercentage(0D);
 
 //    String discountCodeString = request.getDiscountCode();
 //    if (!Tool.isBlank(discountCodeString)) {

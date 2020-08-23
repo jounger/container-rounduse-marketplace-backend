@@ -71,8 +71,8 @@ public class Contract {
   @Column(name = "creation_date")
   private LocalDateTime creationDate;
 
-  @Column(name = "page_percentage")
-  private Double paidPercentage;
+  @Column(name = "payment_percentage")
+  private Double paymentPercentage;
 
   @Column(name = "created_at", nullable = false, updatable = false)
   @Temporal(TemporalType.TIMESTAMP)

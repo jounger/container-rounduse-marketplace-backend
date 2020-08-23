@@ -23,7 +23,7 @@ import lombok.ToString;
 @NoArgsConstructor
 @ToString
 @Entity
-@Table(name = "shipping_line_notification")
+@Table(name = "combined_notification")
 @Inheritance(strategy = InheritanceType.JOINED)
 @PrimaryKeyJoinColumn(name = "notification_id")
 public class CombinedNotification extends Notification {

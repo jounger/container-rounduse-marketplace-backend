@@ -39,7 +39,7 @@ public interface ShippingInfoRepository extends JpaRepository<ShippingInfo, Long
       + " LEFT JOIN b.biddingDocument bd LEFT JOIN bd.outbound ob LEFT JOIN ob.booking b" + " WHERE ob.id = :id")
   Boolean isAllDeliveredByOutbound(@Param("id") Long outboundId);
 
-  @Query(value = "SELECT si FROM ShippingInfo si LEFT JOIN si.outbound o WHERE si.status IN :status AND o.packingTime < :currentTime AND o.booking.cutOffTime > :currentTime")
+  @Query(value = "SELECT si FROM ShippingInfo si LEFT JOIN si.outbound o LEFT JOIN (SELECT b FROM booking b WHERE b.id = o.booking.id AND b.cutOffTime > :currentTime) WHERE si.status IN :status ")
   Page<ShippingInfo> findShippingInfosAreActive(@Param("status") List<String> status,
       @Param("currentTime") LocalDateTime currentTime, Pageable pageable);
 }

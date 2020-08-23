@@ -1,6 +1,5 @@
 package com.crm.models;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
@@ -29,8 +28,5 @@ public class QRToken extends Token {
   @ManyToOne
   @JoinColumn(name = "shipping_info_id")
   private ShippingInfo shippingInfo;
-
-  @Column(name = "status")
-  private String status;
 
 }

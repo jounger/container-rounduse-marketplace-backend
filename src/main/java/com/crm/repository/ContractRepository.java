@@ -33,19 +33,16 @@ public interface ContractRepository extends JpaRepository<Contract, Long>, JpaSp
 
   @Query(value = "SELECT COUNT(DISTINCT c) FROM Contract c"
       + " WHERE c.createdAt > :startDate AND c.createdAt < :endDate")
-  Integer countContractsByOperator(@Param("startDate") Date startDate,
-      @Param("endDate") Date endDate);
+  Integer countContractsByOperator(@Param("startDate") Date startDate, @Param("endDate") Date endDate);
 
   @Query(value = "SELECT COUNT(DISTINCT c) FROM Contract c LEFT JOIN c.invoices i"
       + " WHERE c.createdAt > :startDate AND c.createdAt < :endDate AND i != NULL AND i.isPaid = 1")
-  Integer countPaidContractsByOperator(@Param("startDate") Date startDate,
-      @Param("endDate") Date endDate);
+  Integer countPaidContractsByOperator(@Param("startDate") Date startDate, @Param("endDate") Date endDate);
 
   @Query(value = "SELECT COUNT(DISTINCT c) FROM Contract c LEFT JOIN c.invoices i"
       + " WHERE c.createdAt > :startDate AND c.createdAt < :endDate"
       + " AND (i IS NULL OR (i != NULL AND i.isPaid = 0))")
-  Integer countUnpaidContractsByOperator(@Param("startDate") Date startDate,
-      @Param("endDate") Date endDate);
+  Integer countUnpaidContractsByOperator(@Param("startDate") Date startDate, @Param("endDate") Date endDate);
 
   @Query(value = "SELECT COUNT(DISTINCT c) FROM Contract c WHERE (c.sender.username = :username"
       + " OR c.combined.bid.bidder.username = :username) AND c.createdAt > :startDate AND c.createdAt < :endDate")
@@ -63,4 +60,8 @@ public interface ContractRepository extends JpaRepository<Contract, Long>, JpaSp
       + " AND c.createdAt > :startDate AND c.createdAt < :endDate" + " AND (i IS NULL OR (i != NULL AND i.isPaid = 0))")
   Integer countUnpaidContracts(@Param("username") String username, @Param("startDate") Date startDate,
       @Param("endDate") Date endDate);
+
+  @Query(value = "SELECT CASE WHEN COUNT(c) = 0 THEN TRUE ELSE FALSE END FROM Contract c"
+      + " LEFT JOIN c.invoices i WHERE c.id = :id AND (i IS NULL OR (i != NULL AND i.isPaid = 0))")
+  Boolean isUnpaidContract(@Param("id") Long id);
 }

@@ -87,15 +87,17 @@ public class ContractServiceImp implements ContractService {
     if (containersId == null || containersId.size() == 0) {
       throw new NotFoundException(ErrorMessage.CONTAINER_NOT_FOUND);
     }
-
-    Double price = (bid.getBidPrice() / bid.getContainers().size()) * containersId.size();
-
+    Double price = 0D;
+    if (request.getPrice() == null) {
+      price = (bid.getBidPrice() / bid.getContainers().size()) * containersId.size() * 100;
+    }
     contract.setPrice(price);
 
     Boolean required = request.getRequired();
     contract.setRequired(required);
     contract.setFinesAgainstContractViolations(0D);
     contract.setCreationDate(LocalDateTime.now());
+    contract.setPaymentPercentage(0D);
 
 //    String discountCodeString = request.getDiscountCode();
 //    if (!Tool.isBlank(discountCodeString)) {
@@ -166,6 +168,10 @@ public class ContractServiceImp implements ContractService {
         .orElseThrow(() -> new NotFoundException(ErrorMessage.CONTRACT_NOT_FOUND));
     Combined combined = contract.getCombined();
 
+    if (!contractRepository.isUnpaidContract(id)) {
+      throw new ForbiddenException(ErrorMessage.CONTRACT_INVALID_EDIT);
+    }
+
     Bid bid = combined.getBid();
     BiddingDocument biddingDocument = bid.getBiddingDocument();
     Supplier offeree = biddingDocument.getOfferee();
@@ -177,6 +183,10 @@ public class ContractServiceImp implements ContractService {
       }
     } else {
       throw new ForbiddenException(ErrorMessage.USER_ACCESS_DENIED);
+    }
+    String priceString = String.valueOf(updates.get("price"));
+    if (priceString != null && Tool.isEqual(contract.getPrice(), priceString)) {
+      contract.setPrice(Double.valueOf(priceString));
     }
 
     Contract _contract = contractRepository.save(contract);

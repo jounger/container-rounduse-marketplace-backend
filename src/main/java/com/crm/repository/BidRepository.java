@@ -19,8 +19,8 @@ public interface BidRepository extends JpaRepository<Bid, Long> {
       + "AND (b.bidder.username = :username OR bd.offeree.username = :username)")
   Page<Bid> findByBiddingDocument(@Param("id") Long id, @Param("username") String username, Pageable pageable);
 
-  @Query(value = "SELECT b FROM Bid b LEFT JOIN b.biddingDocument bd WHERE bd.id = :id "
-      + "AND (b.bidder.username = :username OR bd.offeree.username = :username) AND b.status = :status")
+  @Query(value = "SELECT b FROM Bid b LEFT JOIN b.biddingDocument bd LEFT JOIN b.bidder bi WHERE bd.id = :id "
+      + "AND (bi.username = :username OR bd.offeree.username = :username) AND b.status = :status")
   Page<Bid> findByBiddingDocument(@Param("id") Long id, @Param("username") String username,
       @Param("status") String status, Pageable pageable);
 

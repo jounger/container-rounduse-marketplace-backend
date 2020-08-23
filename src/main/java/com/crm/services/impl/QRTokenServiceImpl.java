@@ -44,16 +44,16 @@ public class QRTokenServiceImpl implements QRTokenService {
 
     ShippingLine shippingLine = shippingInfo.getOutbound().getShippingLine();
     qrToken.setShippingInfo(shippingInfo);
-
+    String rawToken = "";
     if (username.equals(merchant.getUsername())) {
-      qrToken.setStatus(EnumShippingStatus.SHIPPING.name());
+      rawToken += EnumShippingStatus.SHIPPING.name();
     } else if (username.equals(shippingLine.getUsername())) {
-      qrToken.setStatus(EnumShippingStatus.DELIVERED.name());
+      rawToken += EnumShippingStatus.DELIVERED.name();
     } else {
       throw new ForbiddenException(ErrorMessage.USER_ACCESS_DENIED);
     }
 
-    String rawToken = Tool.randomString();
+    rawToken += Tool.randomString();
     // encode data using BASE64
     String token = DatatypeConverter.printBase64Binary(rawToken.getBytes());
     qrToken.setToken(token);
@@ -88,9 +88,10 @@ public class QRTokenServiceImpl implements QRTokenService {
     if (qrToken.getExpiredDate().isBefore(LocalDateTime.now())) {
       throw new NotFoundException(ErrorMessage.QRTOKEN_EXPIRED);
     }
-    if (qrToken.getStatus().equals(EnumShippingStatus.SHIPPING.name())) {
+    String rawToken = new String(DatatypeConverter.parseBase64Binary(qrToken.getToken()));
+    if (rawToken.startsWith(EnumShippingStatus.SHIPPING.name())) {
       shippingInfo.setStatus(EnumShippingStatus.SHIPPING.name());
-    } else if (qrToken.getStatus().equals(EnumShippingStatus.DELIVERED.name())) {
+    } else if (rawToken.startsWith(EnumShippingStatus.DELIVERED.name())) {
       shippingInfo.setStatus(EnumShippingStatus.DELIVERED.name());
     } else {
       throw new NotFoundException(ErrorMessage.SHIPPING_INFO_STATUS_NOT_FOUND);

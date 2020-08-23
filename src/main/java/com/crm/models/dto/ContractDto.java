@@ -28,6 +28,8 @@ public class ContractDto {
 
   private String creationDate;
 
+  private Double paidPercentage;
+
   private List<RatingDto> ratings = new ArrayList<>();
 
 }

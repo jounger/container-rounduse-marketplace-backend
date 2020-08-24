@@ -1,8 +1,8 @@
 package com.crm.websocket.service;
 
-import com.crm.models.BiddingNotification;
+import com.crm.models.dto.BiddingNotificationDto;
 
 public interface BiddingWebSocketService {
 
-  void sendBiddingNotifyToUser(BiddingNotification notification);
+  void sendBiddingNotifyToUser(BiddingNotificationDto notification);
 }

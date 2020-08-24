@@ -62,7 +62,7 @@ public class Contract {
   @Column(name = "fines_against_contract_violations")
   private Double finesAgainstContractViolations;
 
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "discount_id")
   private Discount discount;
 

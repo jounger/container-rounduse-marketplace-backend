@@ -17,5 +17,7 @@ public class RoleDto {
 
   private String name;
 
+  private String description;
+
   private List<String> permissions;
 }

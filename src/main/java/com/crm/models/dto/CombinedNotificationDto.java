@@ -5,9 +5,9 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class DriverNotificationDto extends NotificationDto {
+public class CombinedNotificationDto extends NotificationDto {
 
-  private ShippingInfoDto relatedResource;
+  private CombinedDto relatedResource;
 
   private String action;
 }

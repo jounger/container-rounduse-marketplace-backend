@@ -32,6 +32,7 @@ public class ErrorMessage {
   // Contract
   public static final String CONTRACT_NOT_FOUND = "Không tìm thấy hợp đồng";
   public static final String CONTRACT_INVALID_FINES = "Phần trăm phạt hợp đồng không hợp lệ";
+  public static final String CONTRACT_INVALID_EDIT = "Không thể sửa hợp đồng đã khai báo hóa đơn hợp lệ";
 
   // Evidence
   public static final String EVIDENCE_NOT_FOUND = "Không tìm thấy chứng cứ";
@@ -175,4 +176,8 @@ public class ErrorMessage {
   public static final String PAYMENT_NOT_FOUND = "Không tìm thấy hóa đơn";
   public static final String PAYMENT_INVALID_AMOUNT = "Sô tiền không hợp lệ";
   public static final String PAYMENT_TYPE_NOT_FOUND = "Không tìm thấy loại hóa đơn";
+  
+  // QRToken
+  public static final String QRTOKEN_NOT_FOUND = "Mã QR không tồn tại";
+  public static final String QRTOKEN_EXPIRED = "Mã QR đã hết hạn";
 }

@@ -35,6 +35,7 @@ public class MerchantMapper {
     merchantDto.setTin(merchant.getTin());
     merchantDto.setFax(merchant.getFax());
     merchantDto.setRatingValue(merchant.getRatingValue());
+    merchantDto.setRatingCount(merchant.getReceivedRatings().size());
 
     return merchantDto;
   }

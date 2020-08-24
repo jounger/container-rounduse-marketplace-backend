@@ -10,21 +10,21 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.crm.common.ErrorMessage;
-import com.crm.enums.EnumDriverNotification;
 import com.crm.enums.EnumNotificationType;
+import com.crm.enums.EnumShippingNotification;
 import com.crm.exception.NotFoundException;
-import com.crm.models.DriverNotification;
 import com.crm.models.ShippingInfo;
+import com.crm.models.ShippingNotification;
 import com.crm.models.User;
-import com.crm.payload.request.DriverNotificationRequest;
 import com.crm.payload.request.PaginationRequest;
-import com.crm.repository.DriverNotificationRepository;
+import com.crm.payload.request.ShippingNotificationRequest;
 import com.crm.repository.ShippingInfoRepository;
+import com.crm.repository.ShippingNotificationRepository;
 import com.crm.repository.UserRepository;
-import com.crm.services.DriverNotificationService;
+import com.crm.services.ShippingNotificationService;
 
 @Service
-public class DriverNotificationServiceImpl implements DriverNotificationService {
+public class ShippingNotificationServiceImpl implements ShippingNotificationService {
 
   @Autowired
   private UserRepository userRepositoty;
@@ -33,11 +33,11 @@ public class DriverNotificationServiceImpl implements DriverNotificationService 
   private ShippingInfoRepository shippingInfoRepository;
 
   @Autowired
-  private DriverNotificationRepository driverNotificationRepository;
+  private ShippingNotificationRepository driverNotificationRepository;
 
   @Override
-  public DriverNotification createDriverNotification(DriverNotificationRequest request) {
-    DriverNotification driverNotification = new DriverNotification();
+  public ShippingNotification createDriverNotification(ShippingNotificationRequest request) {
+    ShippingNotification driverNotification = new ShippingNotification();
 
     User recipient = userRepositoty.findByUsername(request.getRecipient())
         .orElseThrow(() -> new NotFoundException(ErrorMessage.RECIPIENT_NOT_FOUND));
@@ -52,28 +52,28 @@ public class DriverNotificationServiceImpl implements DriverNotificationService 
     driverNotification.setRelatedResource(relatedResource);
 
     driverNotification.setMessage(request.getMessage());
-    EnumDriverNotification action = EnumDriverNotification.findByName(request.getAction());
+    EnumShippingNotification action = EnumShippingNotification.findByName(request.getAction());
     driverNotification.setAction(action.name());
     EnumNotificationType type = EnumNotificationType.findByName(request.getType());
     driverNotification.setType(type.name());
 
     driverNotification.setSendDate(LocalDateTime.now());
 
-    DriverNotification _driverNotification = driverNotificationRepository.save(driverNotification);
+    ShippingNotification _driverNotification = driverNotificationRepository.save(driverNotification);
     return _driverNotification;
   }
 
   @Override
-  public DriverNotification getDriverNotification(Long id) {
-    DriverNotification driverNotification = driverNotificationRepository.findById(id)
+  public ShippingNotification getDriverNotification(Long id) {
+    ShippingNotification driverNotification = driverNotificationRepository.findById(id)
         .orElseThrow(() -> new NotFoundException(ErrorMessage.NOTIFICATION_NOT_FOUND));
     return driverNotification;
   }
 
   @Override
-  public Page<DriverNotification> getDriverNotifications(PaginationRequest request) {
+  public Page<ShippingNotification> getDriverNotifications(PaginationRequest request) {
     String status = request.getStatus();
-    Page<DriverNotification> driverNotifications = null;
+    Page<ShippingNotification> driverNotifications = null;
     if (status != null && !status.isEmpty()) {
       driverNotifications = driverNotificationRepository.findByType(status,
           PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt")));
@@ -85,9 +85,9 @@ public class DriverNotificationServiceImpl implements DriverNotificationService 
   }
 
   @Override
-  public Page<DriverNotification> getDriverNotificationsByUser(Long recipient, PaginationRequest request) {
+  public Page<ShippingNotification> getDriverNotificationsByUser(Long recipient, PaginationRequest request) {
     String status = request.getStatus();
-    Page<DriverNotification> driverNotifications = null;
+    Page<ShippingNotification> driverNotifications = null;
     if (status != null && !status.isEmpty()) {
       driverNotifications = driverNotificationRepository.findByUserAndStatus(recipient, status,
           PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt")));
@@ -99,9 +99,9 @@ public class DriverNotificationServiceImpl implements DriverNotificationService 
   }
 
   @Override
-  public Page<DriverNotification> getDriverNotificationsByUsername(String recipient, PaginationRequest request) {
+  public Page<ShippingNotification> getDriverNotificationsByUsername(String recipient, PaginationRequest request) {
     String status = request.getStatus();
-    Page<DriverNotification> driverNotifications = null;
+    Page<ShippingNotification> driverNotifications = null;
     if (status != null && !status.isEmpty()) {
       driverNotifications = driverNotificationRepository.findByUserAndStatus(recipient, status,
           PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt")));
@@ -113,8 +113,8 @@ public class DriverNotificationServiceImpl implements DriverNotificationService 
   }
 
   @Override
-  public DriverNotification editDriverNotification(Long id, Map<String, Object> updates) {
-    DriverNotification driverNotification = driverNotificationRepository.findById(id)
+  public ShippingNotification editDriverNotification(Long id, Map<String, Object> updates) {
+    ShippingNotification driverNotification = driverNotificationRepository.findById(id)
         .orElseThrow(() -> new NotFoundException(ErrorMessage.NOTIFICATION_NOT_FOUND));
 
     Boolean isRead = (Boolean) updates.get("isRead");
@@ -127,7 +127,7 @@ public class DriverNotificationServiceImpl implements DriverNotificationService 
       driverNotification.setIsHide(isHide);
     }
 
-    DriverNotification _driverNotification = driverNotificationRepository.save(driverNotification);
+    ShippingNotification _driverNotification = driverNotificationRepository.save(driverNotification);
     return _driverNotification;
   }
 

@@ -28,67 +28,70 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.crm.common.Constant;
 import com.crm.common.SuccessMessage;
-import com.crm.models.ShippingLineNotification;
-import com.crm.models.dto.ShippingLineNotificationDto;
-import com.crm.models.mapper.ShippingLineNotificationMapper;
+import com.crm.models.CombinedNotification;
+import com.crm.models.dto.CombinedNotificationDto;
+import com.crm.models.mapper.CombinedNotificationMapper;
 import com.crm.payload.request.PaginationRequest;
 import com.crm.payload.response.DefaultResponse;
 import com.crm.payload.response.PaginationResponse;
-import com.crm.services.ShippingLineNotificationService;
+import com.crm.services.CombinedNotificationService;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @PreAuthorize("hasRole('SHIPPINGLINE')")
 @RestController
-@RequestMapping("/api/shipping-line-notification")
-public class ShippingLineNotificationController {
+@RequestMapping("/api/combine-notification")
+public class CombinedNotificationController {
 
-  private static final Logger logger = LoggerFactory.getLogger(ShippingLineNotificationController.class);
+  private static final Logger logger = LoggerFactory.getLogger(CombinedNotificationController.class);
 
   @Autowired
-  ShippingLineNotificationService shippingLineNotificationService;
+  CombinedNotificationService shippingLineNotificationService;
 
   @GetMapping("")
+  @PreAuthorize("hasRole('MERCHANT') or hasRole('FORWARDER') or hasRole('SHIPPINGLINE')")
   public ResponseEntity<?> getShippingLineNotifications(@Valid PaginationRequest request) {
 
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
-    Page<ShippingLineNotification> pages = shippingLineNotificationService
-        .getShippingLineNotificationsByUsername(username, request);
+    Page<CombinedNotification> pages = shippingLineNotificationService.getShippingLineNotificationsByUsername(username,
+        request);
 
-    PaginationResponse<ShippingLineNotificationDto> response = new PaginationResponse<>();
+    PaginationResponse<CombinedNotificationDto> response = new PaginationResponse<>();
     response.setPageNumber(request.getPage());
     response.setPageSize(request.getLimit());
     response.setTotalElements(pages.getTotalElements());
     response.setTotalPages(pages.getTotalPages());
 
-    List<ShippingLineNotification> shippingLineNotifications = pages.getContent();
-    List<ShippingLineNotificationDto> shippingLineNotificationsDto = new ArrayList<>();
+    List<CombinedNotification> shippingLineNotifications = pages.getContent();
+    List<CombinedNotificationDto> shippingLineNotificationsDto = new ArrayList<>();
     shippingLineNotifications.forEach(shippingLineNotification -> shippingLineNotificationsDto
-        .add(ShippingLineNotificationMapper.toShippingLineNotificationDto(shippingLineNotification)));
+        .add(CombinedNotificationMapper.toShippingLineNotificationDto(shippingLineNotification)));
     response.setContents(shippingLineNotificationsDto);
 
     return ResponseEntity.ok(response);
   }
 
   @GetMapping("/{id}")
+  @PreAuthorize("hasRole('MERCHANT') or hasRole('FORWARDER') or hasRole('SHIPPINGLINE')")
   public ResponseEntity<?> getShippingLineNotification(@PathVariable Long id) {
-    ShippingLineNotification shippingLineNotification = shippingLineNotificationService.getShippingLineNotification(id);
-    ShippingLineNotificationDto shippingLineNotificationDto = ShippingLineNotificationMapper
+    CombinedNotification shippingLineNotification = shippingLineNotificationService.getShippingLineNotification(id);
+    CombinedNotificationDto shippingLineNotificationDto = CombinedNotificationMapper
         .toShippingLineNotificationDto(shippingLineNotification);
     return ResponseEntity.ok(shippingLineNotificationDto);
   }
 
   @Transactional
+  @PreAuthorize("hasRole('MERCHANT') or hasRole('FORWARDER') or hasRole('SHIPPINGLINE')")
   @RequestMapping(value = "/{id}", method = RequestMethod.PATCH, consumes = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<?> editShippingLineNotification(@PathVariable("id") Long id,
       @RequestBody Map<String, Object> updates) {
-    ShippingLineNotification shippingLineNotification = shippingLineNotificationService.editShippingLineNotification(id,
+    CombinedNotification shippingLineNotification = shippingLineNotificationService.editShippingLineNotification(id,
         updates);
-    ShippingLineNotificationDto shippingLineNotificationDto = ShippingLineNotificationMapper
+    CombinedNotificationDto shippingLineNotificationDto = CombinedNotificationMapper
         .toShippingLineNotificationDto(shippingLineNotification);
 
     // Set default response body
-    DefaultResponse<ShippingLineNotificationDto> defaultResponse = new DefaultResponse<>();
+    DefaultResponse<CombinedNotificationDto> defaultResponse = new DefaultResponse<>();
     defaultResponse.setMessage(Constant.EMPTY_STRING);
     defaultResponse.setData(shippingLineNotificationDto);
 
@@ -97,12 +100,13 @@ public class ShippingLineNotificationController {
   }
 
   @Transactional
+  @PreAuthorize("hasRole('MERCHANT') or hasRole('FORWARDER') or hasRole('SHIPPINGLINE')")
   @DeleteMapping("/{id}")
   public ResponseEntity<?> deleteShippingLineNotification(@PathVariable Long id) {
     shippingLineNotificationService.removeShippingLineNotification(id);
 
     // Set default response body
-    DefaultResponse<ShippingLineNotificationDto> defaultResponse = new DefaultResponse<>();
+    DefaultResponse<CombinedNotificationDto> defaultResponse = new DefaultResponse<>();
     defaultResponse.setMessage(SuccessMessage.DELETE_NOTIFICATION_SUCCESSFULLY);
 
     return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);

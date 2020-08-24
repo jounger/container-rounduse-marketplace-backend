@@ -17,6 +17,7 @@ public class RoleMapper {
     RoleDto roleDto = new RoleDto();
     roleDto.setId(role.getId());
     roleDto.setName(role.getName());
+    roleDto.setDescription(role.getDescription());
     List<String> permissionsDto = new ArrayList<>();
     ArrayList<Permission> permissions = new ArrayList<Permission>(role.getPermissions());
     permissions.forEach(permission -> permissionsDto.add(permission.getName()));

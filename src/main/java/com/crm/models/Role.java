@@ -50,6 +50,9 @@ public class Role {
   @Column(length = 20, unique = true)
   private String name;
 
+  @Column(name = "description")
+  private String description;
+
   @ManyToMany(cascade = { CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REMOVE }, fetch = FetchType.EAGER)
   @JoinTable(name = "role_permission", joinColumns = @JoinColumn(name = "role_id"), inverseJoinColumns = @JoinColumn(name = "permission_id"))
   private Collection<Permission> permissions = new ArrayList<>();

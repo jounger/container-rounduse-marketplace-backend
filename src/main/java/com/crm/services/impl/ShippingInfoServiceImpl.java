@@ -1,5 +1,7 @@
 package com.crm.services.impl;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,8 +32,8 @@ import com.crm.payload.request.ShippingInfoRequest;
 import com.crm.repository.BidRepository;
 import com.crm.repository.CombinedRepository;
 import com.crm.repository.ContainerRepository;
-import com.crm.repository.ContractRepository;
 import com.crm.repository.ContractDocumentRepository;
+import com.crm.repository.ContractRepository;
 import com.crm.repository.OutboundRepository;
 import com.crm.repository.ShippingInfoRepository;
 import com.crm.repository.UserRepository;
@@ -106,13 +108,15 @@ public class ShippingInfoServiceImpl implements ShippingInfoService {
       contract.getShippingInfos().add(shippingInfo);
     });
 
-    notificationBroadcast.broadcastCreateContractToForwarder(contract);
-    if (contract.getRequired() == false) {
-      // CREATE NOTIFICATION
+    // CREATE NOTIFICATION
+    if (contract.getRequired()) {
+      notificationBroadcast.broadcastCreateContractToForwarderWhenContractRequired(contract);
+    } else {
+      notificationBroadcast.broadcastCreateContractToForwarder(contract);
       notificationBroadcast.broadcastCreateContractToDriver(contract);
       notificationBroadcast.broadcastCreateContractToShippingLine(contract);
-      // END NOTIFICATION
     }
+    // END NOTIFICATION
   }
 
   @Override
@@ -124,7 +128,7 @@ public class ShippingInfoServiceImpl implements ShippingInfoService {
     Forwarder forwarder = driver.getForwarder();
     Outbound outbound = shippingInfo.getOutbound();
     Merchant merchant = outbound.getMerchant();
-    if (!(driver.getUsername().equals(username) || !merchant.getUsername().equals(username)
+    if (!(driver.getUsername().equals(username) || merchant.getUsername().equals(username)
         || forwarder.getUsername().equals(username))) {
       throw new ForbiddenException(ErrorMessage.USER_ACCESS_DENIED);
     }
@@ -157,7 +161,12 @@ public class ShippingInfoServiceImpl implements ShippingInfoService {
   @Override
   public Page<ShippingInfo> getShippingInfosByDriver(String username, PaginationRequest request) {
     PageRequest page = PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt"));
-    Page<ShippingInfo> pages = shippingInfoRepository.findByDriver(username, page);
+    Page<ShippingInfo> pages = null;
+    if (request.getStatus() != null) {
+      pages = shippingInfoRepository.findByDriver(username, request.getStatus(), page);
+    } else {
+      pages = shippingInfoRepository.findByDriver(username, page);
+    }
     return pages;
   }
 
@@ -216,6 +225,17 @@ public class ShippingInfoServiceImpl implements ShippingInfoService {
     }
     PageRequest page = PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt"));
     Page<ShippingInfo> pages = shippingInfoRepository.findByCombined(combinedId, page);
+    return pages;
+  }
+
+  @Override
+  public Page<ShippingInfo> getShippingInfosAreActive(PaginationRequest request) {
+    PageRequest page = PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt"));
+    LocalDateTime currentDate = LocalDateTime.now();
+    List<String> status = new ArrayList<String>();
+    status.add(EnumShippingStatus.INFO_RECEIVED.name());
+    status.add(EnumShippingStatus.SHIPPING.name());
+    Page<ShippingInfo> pages = shippingInfoRepository.findShippingInfosAreActive(status, currentDate, page);
     return pages;
   }
 

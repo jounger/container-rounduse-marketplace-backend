@@ -28,8 +28,8 @@ import com.crm.models.Supplier;
 import com.crm.models.User;
 import com.crm.payload.request.ContractDocumentRequest;
 import com.crm.payload.request.PaginationRequest;
-import com.crm.repository.ContractRepository;
 import com.crm.repository.ContractDocumentRepository;
+import com.crm.repository.ContractRepository;
 import com.crm.repository.ShippingInfoRepository;
 import com.crm.repository.SupplierRepository;
 import com.crm.repository.UserRepository;
@@ -163,7 +163,8 @@ public class ContractDocumentServiceImpl implements ContractDocumentService {
 
     ContractDocument _evidence = contractDocumentRepository.save(contractDocument);
 
-    if (contract.getRequired() == true && contractDocumentRepository.existsValidContractDocument(id, EnumContractDocumentStatus.ACCEPTED.name())
+    if (contract.getRequired() == true
+        && contractDocumentRepository.existsValidContractDocument(id, EnumContractDocumentStatus.ACCEPTED.name())
         && contractDocument.getStatus().equals(EnumContractDocumentStatus.ACCEPTED.name())) {
       contract.getShippingInfos().forEach(item -> {
         item.setStatus(EnumShippingStatus.INFO_RECEIVED.name());
@@ -173,7 +174,11 @@ public class ContractDocumentServiceImpl implements ContractDocumentService {
       notificationBroadcast.broadcastCreateContractToDriver(contract);
     }
 
-    notificationBroadcast.broadcastAcceptOrRejectContractDocumentToForwarder(contract, contractDocument.getStatus());
+    if (contractDocument.getStatus().equals(EnumContractDocumentStatus.ACCEPTED.name())) {
+      notificationBroadcast.broadcastAcceptContractDocumentToForwarder(contract);
+    } else if (contractDocument.getStatus().equals(EnumContractDocumentStatus.REJECTED.name())) {
+      notificationBroadcast.broadcastRejectContractDocumentToForwarder(contract);
+    }
 
     return _evidence;
   }

@@ -99,12 +99,32 @@ public class ShippingInfoController {
   }
 
   @PreAuthorize("hasRole('DRIVER')")
-  @GetMapping("/driver")
+  @GetMapping("/active")
   public ResponseEntity<?> getShippingInfosByDriver(@Valid PaginationRequest request) {
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
 
     Page<ShippingInfo> pages = shippingInfoService.getShippingInfosByDriver(username, request);
+
+    PaginationResponse<ShippingInfoDto> response = new PaginationResponse<>();
+    response.setPageNumber(request.getPage());
+    response.setPageSize(request.getLimit());
+    response.setTotalElements(pages.getTotalElements());
+    response.setTotalPages(pages.getTotalPages());
+
+    List<ShippingInfo> shippingInfos = pages.getContent();
+    List<ShippingInfoDto> shippingInfosDto = new ArrayList<>();
+    shippingInfos.forEach(shippingInfo -> shippingInfosDto.add(ShippingInfoMapper.toShippingInfoDto(shippingInfo)));
+    response.setContents(shippingInfosDto);
+
+    return ResponseEntity.ok(response);
+  }
+
+  @PreAuthorize("hasRole('DRIVER')")
+  @GetMapping("/driver")
+  public ResponseEntity<?> getShippingInfosAreActive(@Valid PaginationRequest request) {
+
+    Page<ShippingInfo> pages = shippingInfoService.getShippingInfosAreActive(request);
 
     PaginationResponse<ShippingInfoDto> response = new PaginationResponse<>();
     response.setPageNumber(request.getPage());
@@ -155,7 +175,6 @@ public class ShippingInfoController {
     DefaultResponse<ShippingInfoDto> defaultResponse = new DefaultResponse<>();
     defaultResponse.setMessage(SuccessMessage.EDIT_SHIPPING_INFO_SUCCESSFULLY);
     defaultResponse.setData(shippingInfoDto);
-    
 
     logger.info("User{} does editShippingInfo from id {} with request {}", username, id, request.toString());
     return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
@@ -172,7 +191,7 @@ public class ShippingInfoController {
     // Set default response body
     DefaultResponse<ShippingInfoDto> defaultResponse = new DefaultResponse<>();
     defaultResponse.setMessage(SuccessMessage.DELETE_SHIPPING_INFO_SUCCESSFULLY);
-    
+
     logger.info("{} does editShippingInfo with id: {}", username, id);
     return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }

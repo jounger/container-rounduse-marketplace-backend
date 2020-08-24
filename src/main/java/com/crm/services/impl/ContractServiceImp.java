@@ -88,8 +88,11 @@ public class ContractServiceImp implements ContractService {
       throw new NotFoundException(ErrorMessage.CONTAINER_NOT_FOUND);
     }
     Double price = 0D;
-    if (request.getPrice() == null) {
-      price = (bid.getBidPrice() / bid.getContainers().size()) * containersId.size() * 100;
+
+    if (request.getPrice() == null || request.getPrice() < 0) {
+      price = (bid.getBidPrice() / bid.getContainers().size()) * containersId.size();
+    }else {
+      price = request.getPrice();
     }
     contract.setPrice(price);
 

@@ -22,7 +22,7 @@ public class ContractDocumentWebSocketServiceImpl implements ContractDocumentWeb
 
   @Override
   public void sendContractDocumentNotifyToUser(CombinedNotification notification) {
-    CombinedNotificationDto notificationDto = CombinedNotificationMapper.toShippingLineNotificationDto(notification);
+    CombinedNotificationDto notificationDto = CombinedNotificationMapper.toCombinedNotificationDto(notification);
     logger.info("Send to: {}", notificationDto.getRecipient());
     logger.info("Notification: {}", notificationDto.toString());
     messagingTemplate.convertAndSendToUser(notificationDto.getRecipient().getUsername(), Constant.BIDDING_NOTIFICATION,

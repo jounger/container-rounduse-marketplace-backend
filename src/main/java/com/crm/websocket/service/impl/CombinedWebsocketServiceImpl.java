@@ -20,7 +20,7 @@ public class CombinedWebsocketServiceImpl implements CombinedWebSocketService {
   public void sendCombinedNotifyToShippingLine(CombinedNotification notification) {
 
     CombinedNotificationDto shippingLineNotificationDto = CombinedNotificationMapper
-        .toShippingLineNotificationDto(notification);
+        .toCombinedNotificationDto(notification);
     messagingTemplate.convertAndSendToUser(shippingLineNotificationDto.getRecipient().getUsername(),
         Constant.SHIPPING_LINE_NOTIFICATION, shippingLineNotificationDto);
   }

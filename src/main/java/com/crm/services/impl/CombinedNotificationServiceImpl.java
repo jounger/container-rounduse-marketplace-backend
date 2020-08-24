@@ -33,109 +33,109 @@ public class CombinedNotificationServiceImpl implements CombinedNotificationServ
   private CombinedRepository combinedRepository;
 
   @Autowired
-  private CombinedNotificationRepository shippingLineNotificationRepository;
+  private CombinedNotificationRepository combinedNotificationRepository;
 
   @Override
-  public CombinedNotification createShippingLineNotification(CombinedNotificationRequest request) {
-    CombinedNotification shippingLineNotification = new CombinedNotification();
+  public CombinedNotification createCombinedNotification(CombinedNotificationRequest request) {
+    CombinedNotification combinedNotification = new CombinedNotification();
 
     User recipient = userRepositoty.findByUsername(request.getRecipient())
         .orElseThrow(() -> new NotFoundException(ErrorMessage.RECIPIENT_NOT_FOUND));
-    shippingLineNotification.setRecipient(recipient);
+    combinedNotification.setRecipient(recipient);
 
-    shippingLineNotification.setIsRead(false);
-    shippingLineNotification.setIsHide(false);
-    shippingLineNotification.setTitle(request.getTitle());
+    combinedNotification.setIsRead(false);
+    combinedNotification.setIsHide(false);
+    combinedNotification.setTitle(request.getTitle());
 
     Combined relatedResource = combinedRepository.findById(request.getRelatedResource())
         .orElseThrow(() -> new NotFoundException(ErrorMessage.NOTIFICATION_RELATED_RESOURCE_NOT_FOUND));
-    shippingLineNotification.setRelatedResource(relatedResource);
+    combinedNotification.setRelatedResource(relatedResource);
 
-    shippingLineNotification.setMessage(request.getMessage());
+    combinedNotification.setMessage(request.getMessage());
     EnumCombinedNotification action = EnumCombinedNotification.findByName(request.getAction());
-    shippingLineNotification.setAction(action.name());
+    combinedNotification.setAction(action.name());
     EnumNotificationType type = EnumNotificationType.findByName(request.getType());
-    shippingLineNotification.setType(type.name());
+    combinedNotification.setType(type.name());
 
-    shippingLineNotification.setSendDate(LocalDateTime.now());
+    combinedNotification.setSendDate(LocalDateTime.now());
 
-    CombinedNotification _shippingLineNotification = shippingLineNotificationRepository.save(shippingLineNotification);
-    return _shippingLineNotification;
+    CombinedNotification _combinedNotification = combinedNotificationRepository.save(combinedNotification);
+    return _combinedNotification;
   }
 
   @Override
-  public CombinedNotification getShippingLineNotification(Long id) {
-    CombinedNotification shippingLineNotification = shippingLineNotificationRepository.findById(id)
+  public CombinedNotification getCombinedNotification(Long id) {
+    CombinedNotification combinedNotification = combinedNotificationRepository.findById(id)
         .orElseThrow(() -> new NotFoundException(ErrorMessage.NOTIFICATION_NOT_FOUND));
-    return shippingLineNotification;
+    return combinedNotification;
   }
 
   @Override
-  public Page<CombinedNotification> getShippingLineNotifications(PaginationRequest request) {
+  public Page<CombinedNotification> getCombinedNotifications(PaginationRequest request) {
     String status = request.getStatus();
-    Page<CombinedNotification> shippingLineNotification = null;
+    Page<CombinedNotification> combinedNotification = null;
     if (status != null && !status.isEmpty()) {
-      shippingLineNotification = shippingLineNotificationRepository.findByType(status,
+      combinedNotification = combinedNotificationRepository.findByType(status,
           PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt")));
     } else {
-      shippingLineNotification = shippingLineNotificationRepository
+      combinedNotification = combinedNotificationRepository
           .findAll(PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt")));
     }
-    return shippingLineNotification;
+    return combinedNotification;
   }
 
   @Override
-  public Page<CombinedNotification> getShippingLineNotificationsByUser(Long recipient, PaginationRequest request) {
+  public Page<CombinedNotification> getCombinedNotificationsByUser(Long recipient, PaginationRequest request) {
     String status = request.getStatus();
-    Page<CombinedNotification> shippingLineNotification = null;
+    Page<CombinedNotification> combinedNotification = null;
     if (status != null && !status.isEmpty()) {
-      shippingLineNotification = shippingLineNotificationRepository.findByUserAndStatus(recipient, status,
+      combinedNotification = combinedNotificationRepository.findByUserAndStatus(recipient, status,
           PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt")));
     } else {
-      shippingLineNotification = shippingLineNotificationRepository.findByUser(recipient,
+      combinedNotification = combinedNotificationRepository.findByUser(recipient,
           PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt")));
     }
-    return shippingLineNotification;
+    return combinedNotification;
   }
 
   @Override
-  public Page<CombinedNotification> getShippingLineNotificationsByUsername(String recipient,
+  public Page<CombinedNotification> getCombinedNotificationsByUsername(String recipient,
       PaginationRequest request) {
     String status = request.getStatus();
-    Page<CombinedNotification> shippingLineNotifications = null;
+    Page<CombinedNotification> combinedNotifications = null;
     if (status != null && !status.isEmpty()) {
-      shippingLineNotifications = shippingLineNotificationRepository.findByUserAndStatus(recipient, status,
+      combinedNotifications = combinedNotificationRepository.findByUserAndStatus(recipient, status,
           PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt")));
     } else {
-      shippingLineNotifications = shippingLineNotificationRepository.findByUser(recipient,
+      combinedNotifications = combinedNotificationRepository.findByUser(recipient,
           PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt")));
     }
-    return shippingLineNotifications;
+    return combinedNotifications;
   }
 
   @Override
-  public CombinedNotification editShippingLineNotification(Long id, Map<String, Object> updates) {
-    CombinedNotification shippingLineNotification = shippingLineNotificationRepository.findById(id)
+  public CombinedNotification editCombinedNotification(Long id, Map<String, Object> updates) {
+    CombinedNotification combinedNotification = combinedNotificationRepository.findById(id)
         .orElseThrow(() -> new NotFoundException(ErrorMessage.NOTIFICATION_NOT_FOUND));
 
     Boolean isRead = (Boolean) updates.get("isRead");
     if (updates.get("isRead") != null && isRead != null) {
-      shippingLineNotification.setIsRead(isRead);
+      combinedNotification.setIsRead(isRead);
     }
 
     Boolean isHide = (Boolean) updates.get("isHide");
     if (updates.get("isHide") != null && isHide != null) {
-      shippingLineNotification.setIsHide(isHide);
+      combinedNotification.setIsHide(isHide);
     }
 
-    CombinedNotification _shippingLineNotification = shippingLineNotificationRepository.save(shippingLineNotification);
-    return _shippingLineNotification;
+    CombinedNotification _combinedNotification = combinedNotificationRepository.save(combinedNotification);
+    return _combinedNotification;
   }
 
   @Override
-  public void removeShippingLineNotification(Long id) {
-    if (shippingLineNotificationRepository.existsById(id)) {
-      shippingLineNotificationRepository.deleteById(id);
+  public void removeCombinedNotification(Long id) {
+    if (combinedNotificationRepository.existsById(id)) {
+      combinedNotificationRepository.deleteById(id);
     } else {
       throw new NotFoundException(ErrorMessage.NOTIFICATION_NOT_FOUND);
     }

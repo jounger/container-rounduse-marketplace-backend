@@ -10,17 +10,17 @@ import com.crm.payload.request.PaginationRequest;
 
 public interface ShippingNotificationService {
 
-  ShippingNotification createDriverNotification(ShippingNotificationRequest request);
+  ShippingNotification createShippingNotification(ShippingNotificationRequest request);
 
-  ShippingNotification getDriverNotification(Long id);
+  ShippingNotification getShippingNotification(Long id);
 
-  Page<ShippingNotification> getDriverNotifications(PaginationRequest request);
+  Page<ShippingNotification> getShippingNotifications(PaginationRequest request);
 
-  Page<ShippingNotification> getDriverNotificationsByUser(Long recipient, PaginationRequest request);
+  Page<ShippingNotification> getShippingNotificationsByUser(Long recipient, PaginationRequest request);
 
-  Page<ShippingNotification> getDriverNotificationsByUsername(String recipient, PaginationRequest request);
+  Page<ShippingNotification> getShippingNotificationsByUsername(String recipient, PaginationRequest request);
 
-  ShippingNotification editDriverNotification(Long id, Map<String, Object> updates);
+  ShippingNotification editShippingNotification(Long id, Map<String, Object> updates);
 
-  void removeDriverNotification(Long id);
+  void removeShippingNotification(Long id);
 }

@@ -2,6 +2,7 @@ package com.crm.models;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
@@ -28,7 +29,7 @@ import lombok.ToString;
 @PrimaryKeyJoinColumn(name = "notification_id")
 public class ShippingNotification extends Notification {
 
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "shipping_info")
   private ShippingInfo relatedResource;
 

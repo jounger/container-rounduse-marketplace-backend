@@ -1,6 +1,7 @@
 package com.crm.models;
 
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
@@ -25,7 +26,7 @@ import lombok.ToString;
 @PrimaryKeyJoinColumn(name = "token_id")
 public class QRToken extends Token {
 
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "shipping_info_id")
   private ShippingInfo shippingInfo;
 

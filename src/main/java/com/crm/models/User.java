@@ -120,7 +120,7 @@ public class User {
   @OneToMany(mappedBy = "owner")
   private Collection<FileUpload> fileUploads = new ArrayList<>();
 
-  @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+  @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
   private PasswordResetToken PasswordResetToken = new PasswordResetToken();
   // DO NOT DELETE CODE BELLOW
 

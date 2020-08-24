@@ -99,7 +99,7 @@ public class ShippingInfoController {
   }
 
   @PreAuthorize("hasRole('DRIVER')")
-  @GetMapping("/active")
+  @GetMapping("/driver")
   public ResponseEntity<?> getShippingInfosByDriver(@Valid PaginationRequest request) {
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
@@ -121,23 +121,22 @@ public class ShippingInfoController {
   }
 
   @PreAuthorize("hasRole('DRIVER')")
-  @GetMapping("/driver")
-  public ResponseEntity<?> getShippingInfosAreActive(@Valid PaginationRequest request) {
+  @GetMapping("/active")
+  public ResponseEntity<?> getShippingInfosAreActive() {
+    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    String username = userDetails.getUsername();
+    PaginationRequest request = new PaginationRequest();
+    request.setLimit(1);
+    request.setPage(0);
+    Page<ShippingInfo> pages = shippingInfoService.getShippingInfosAreActive(username, request);
 
-    Page<ShippingInfo> pages = shippingInfoService.getShippingInfosAreActive(request);
-
-    PaginationResponse<ShippingInfoDto> response = new PaginationResponse<>();
-    response.setPageNumber(request.getPage());
-    response.setPageSize(request.getLimit());
-    response.setTotalElements(pages.getTotalElements());
-    response.setTotalPages(pages.getTotalPages());
-
+    if (pages.getContent().isEmpty()) {
+      return ResponseEntity.ok(null);
+    }
     List<ShippingInfo> shippingInfos = pages.getContent();
-    List<ShippingInfoDto> shippingInfosDto = new ArrayList<>();
-    shippingInfos.forEach(shippingInfo -> shippingInfosDto.add(ShippingInfoMapper.toShippingInfoDto(shippingInfo)));
-    response.setContents(shippingInfosDto);
+    ShippingInfoDto shippingInfosDto = ShippingInfoMapper.toShippingInfoDto(shippingInfos.get(0));
 
-    return ResponseEntity.ok(response);
+    return ResponseEntity.ok(shippingInfosDto);
   }
 
   @PreAuthorize("hasRole('MERCHANT')")

@@ -9,6 +9,7 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -49,11 +50,11 @@ public class Bid {
   @Column(name = "id", updatable = false, nullable = false)
   private Long id;
 
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "bidding_document_id")
   private BiddingDocument biddingDocument;
 
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "forwarder_id")
   private Forwarder bidder;
 
@@ -90,6 +91,6 @@ public class Bid {
   @LastModifiedDate
   private Date updatedAt;
   
-  @OneToOne(mappedBy = "bid")
+  @OneToOne(mappedBy = "bid", fetch = FetchType.LAZY)
   private Combined combined;
 }

@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
@@ -27,7 +28,7 @@ import lombok.ToString;
 @PrimaryKeyJoinColumn(name = "supply_id")
 public class Inbound extends Supply {
 
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "forwarder_id")
   private Forwarder forwarder;
 
@@ -40,7 +41,7 @@ public class Inbound extends Supply {
   @Column(name = "return_station")
   private String returnStation;
 
-  @OneToOne(mappedBy = "inbound", cascade = CascadeType.ALL)
+  @OneToOne(mappedBy = "inbound", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
   private BillOfLading billOfLading;
 
 }

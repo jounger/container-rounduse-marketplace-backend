@@ -229,14 +229,15 @@ public class ShippingInfoServiceImpl implements ShippingInfoService {
   }
 
   @Override
-  public Page<ShippingInfo> getShippingInfosAreActive(PaginationRequest request) {
-    PageRequest page = PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt"));
+  public Page<ShippingInfo> getShippingInfosAreActive(String username, PaginationRequest request) {
+    PageRequest page = PageRequest.of(request.getPage(), request.getLimit());
     LocalDateTime currentDate = LocalDateTime.now();
     List<String> status = new ArrayList<String>();
     status.add(EnumShippingStatus.INFO_RECEIVED.name());
     status.add(EnumShippingStatus.SHIPPING.name());
-    Page<ShippingInfo> pages = shippingInfoRepository.findShippingInfosAreActive(status, currentDate, page);
-    return pages;
+    Page<ShippingInfo> shippingInfo = shippingInfoRepository.findShippingInfosActive(username, status, currentDate,
+        page);
+    return shippingInfo;
   }
 
 }

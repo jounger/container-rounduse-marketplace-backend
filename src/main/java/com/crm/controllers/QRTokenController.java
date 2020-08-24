@@ -56,7 +56,7 @@ public class QRTokenController {
     response.setMessage(SuccessMessage.QR_TOKEN_GENERATE_SUCCESSFULLY);
     response.setData(TokenMapper.toTokenDto(qrToken));
     logger.info("{} createQRToken with shipping info id: {} and token: {}", username, id, qrToken.getToken());
-    return ResponseEntity.status(HttpStatus.OK).body(response);
+    return ResponseEntity.status(HttpStatus.CREATED).body(response);
   }
 
   @GetMapping("")

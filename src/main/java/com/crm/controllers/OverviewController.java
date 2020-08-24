@@ -8,7 +8,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -30,7 +29,7 @@ public class OverviewController {
   private OverviewService overviewService;
 
   @GetMapping
-  public ResponseEntity<?> overview(@Valid @RequestBody OverviewRequest request) {
+  public ResponseEntity<?> overview(@Valid OverviewRequest request) {
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
     String role = userDetails.getAuthorities().iterator().next().getAuthority();
@@ -43,10 +42,11 @@ public class OverviewController {
     } else if (role.equals("ROLE_FORWARDER")) {
       ForwarderOverviewResponse forwarderOverviewResponse = overviewService.getOverviewByForwarder(username, request);
       return ResponseEntity.ok(forwarderOverviewResponse);
-    } else if(role.equals("ROLE_SHIPPINGLINE")) {
-      ShippingLineOverviewResponse shippingLineOverviewResponse = overviewService.getOverviewByShippingLine(username, request);
+    } else if (role.equals("ROLE_SHIPPINGLINE")) {
+      ShippingLineOverviewResponse shippingLineOverviewResponse = overviewService.getOverviewByShippingLine(username,
+          request);
       return ResponseEntity.ok(shippingLineOverviewResponse);
-    }else {
+    } else {
       throw new ForbiddenException(ErrorMessage.USER_ACCESS_DENIED);
     }
   }

@@ -28,7 +28,7 @@ public class ContractDto {
 
   private String creationDate;
 
-  private Double paidPercentage;
+  private Double paymentPercentage;
 
   private List<RatingDto> ratings = new ArrayList<>();
 

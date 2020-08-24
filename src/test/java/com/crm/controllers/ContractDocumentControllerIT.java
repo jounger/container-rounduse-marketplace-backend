@@ -3,19 +3,19 @@ package com.crm.controllers;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.slf4j.Logger;
@@ -28,12 +28,14 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.util.LinkedMultiValueMap;
 
+import com.crm.enums.EnumFileType;
 import com.crm.models.ContractDocument;
 import com.crm.models.FileUpload;
 import com.crm.models.Merchant;
@@ -94,28 +96,41 @@ class ContractDocumentControllerIT {
     pages = new PageImpl<ContractDocument>(evidences);
   }
 
-  @Disabled
   @Test
   @WithMockUser(username = "forwarder", roles = { "FORWARDER" })
   void createContractDocument_thenStatusOk_andReturnContractDocument() throws JsonProcessingException, Exception {
     // given
     ContractDocumentRequest request = new ContractDocumentRequest();
     request.setSender("merchant");
-    //MultipartFile file = null;
-    FileUpload fileUpload = new FileUpload();
-    fileUpload.setPath("/2sva/2de2");
-    fileUpload.setName("ads2s");
+    // MultipartFile file = null;
+    MockMultipartFile file = new MockMultipartFile("file", "contract.pdf", MediaType.APPLICATION_PDF_VALUE,
+        "<<pdf data>>".getBytes(StandardCharsets.UTF_8));
+
+    ObjectMapper objectMapper = new ObjectMapper();
+
+    MockMultipartFile metadata = new MockMultipartFile("request", "request", MediaType.APPLICATION_JSON_VALUE,
+        objectMapper.writeValueAsString(request).getBytes(StandardCharsets.UTF_8));
+
+    FileUploadRequest fileUploadRequest = new FileUploadRequest();
+    fileUploadRequest.setFile(file);
+    fileUploadRequest.setType(EnumFileType.DOCUMENT.name());
     request.setDocumentPath("2sva/2de2/ads2s");
-    when(fileUploadService.createFileUpload(Mockito.anyString(), Mockito.any(FileUploadRequest.class))).thenReturn(fileUpload);
+
+    FileUpload fileUpload = new FileUpload();
+    fileUpload.setId(1L);
+    fileUpload.setName("name");
+    fileUpload.setOriginName("originName");
+    fileUpload.setPath("path");
+
+    when(fileUploadService.createFileUpload(Mockito.anyString(), Mockito.any(FileUploadRequest.class)))
+        .thenReturn(fileUpload);
     when(contractDocumentService.createContractDocument(Mockito.anyLong(), Mockito.anyString(),
         Mockito.any(ContractDocumentRequest.class))).thenReturn(contractDocument);
-    
-    // when and then
+
     MvcResult result = mockMvc
-        .perform(post("/api/contract-document/contract/1").contentType(MediaType.APPLICATION_JSON_VALUE)
-            .content(objectMapper.writeValueAsString(request)))
-        .andDo(print()).andExpect(status().isCreated()).andExpect(jsonPath("$.data.id").value(1))
-        .andExpect(jsonPath("$.data.status").value(false)).andReturn();
+        .perform(
+            multipart("/api/contract-document/contract/1").file(file).file(metadata).accept(MediaType.APPLICATION_JSON))
+        .andExpect(status().isCreated()).andExpect(jsonPath("$.message").value("Thêm mới bằng chứng thành công")).andReturn();
 
     // print response
     MockHttpServletResponse response = result.getResponse();

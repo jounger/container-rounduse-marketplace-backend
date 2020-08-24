@@ -1,5 +1,6 @@
 package com.crm.controllers;
 
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -58,6 +59,7 @@ import com.crm.models.ShippingLine;
 import com.crm.payload.request.PaginationRequest;
 import com.crm.payload.request.ReportRequest;
 import com.crm.services.ReportService;
+import com.crm.websocket.controller.NotificationBroadcast;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -73,6 +75,9 @@ class ReportControllerIT {
 
   @MockBean
   private ReportService reportService;
+
+  @Autowired
+  private NotificationBroadcast notificationBroadcast;
 
   @Autowired
   private ObjectMapper objectMapper;
@@ -242,7 +247,7 @@ class ReportControllerIT {
     // given
     ReportRequest request = new ReportRequest();
     request.setTitle("title");
-
+    doNothing().when(notificationBroadcast).broadcastCreateReportToModerator(Mockito.any(Report.class));
     when(reportService.createReport(Mockito.anyString(), Mockito.any(ReportRequest.class))).thenReturn(report);
 
     // when and then
@@ -268,23 +273,6 @@ class ReportControllerIT {
         .perform(get("/api/report/1").contentType(MediaType.APPLICATION_JSON_VALUE).params(requestParams))
         .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.id").value(1))
         .andExpect(jsonPath("$.title").value("title")).andReturn();
-
-    // print response
-    MockHttpServletResponse response = result.getResponse();
-    logger.info("Reponse: {}", response.getContentAsString());
-  }
-
-  @Test
-  @WithMockUser(username = "forwarder", roles = { "FORWARDER" })
-  void getReportsByUser() throws JsonProcessingException, Exception {
-    // given
-    when(reportService.getReportsByUser(Mockito.anyString(), Mockito.any(PaginationRequest.class))).thenReturn(pages);
-
-    // when and then
-    MvcResult result = mockMvc
-        .perform(get("/api/report/user").contentType(MediaType.APPLICATION_JSON_VALUE).params(requestParams))
-        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.data[0].id").value(1))
-        .andExpect(jsonPath("$.data[0].title").value("title")).andReturn();
 
     // print response
     MockHttpServletResponse response = result.getResponse();
@@ -329,13 +317,14 @@ class ReportControllerIT {
 
   @Test
   @WithMockUser(username = "forwarder", roles = { "FORWARDER" })
-  void editContract_thenStatusOk_andReturnContract() throws Exception {
+  void editReport_thenStatusOk_andReturnContract() throws Exception {
     // given
     report.setTitle("1q2w3e");
     Map<String, Object> updates = new HashMap<String, Object>();
     updates.put("title", "1q2w3e");
     when(reportService.getReport(Mockito.anyLong(), Mockito.anyString())).thenReturn(report);
     when(reportService.editReport(Mockito.anyLong(), Mockito.anyString(), Mockito.anyMap())).thenReturn(report);
+    doNothing().when(notificationBroadcast).broadcastCreateReportToModerator(Mockito.any(Report.class));
 
     // when and then
     MvcResult result = mockMvc
@@ -351,7 +340,7 @@ class ReportControllerIT {
 
   @Test
   @WithMockUser(username = "forwarder", roles = { "FORWARDER" })
-  void deleteContract_thenStatusOk_AndReturnMessage() throws Exception {
+  void deleteReport_thenStatusOk_AndReturnMessage() throws Exception {
 
     // when and then
     MvcResult result = mockMvc.perform(delete("/api/report/1").contentType(MediaType.APPLICATION_JSON_VALUE))

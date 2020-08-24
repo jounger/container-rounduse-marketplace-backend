@@ -39,7 +39,7 @@ import com.crm.services.CombinedNotificationService;
 @CrossOrigin(origins = "*", maxAge = 3600)
 @PreAuthorize("hasRole('SHIPPINGLINE')")
 @RestController
-@RequestMapping("/api/combine-notification")
+@RequestMapping("/api/combined-notification")
 public class CombinedNotificationController {
 
   private static final Logger logger = LoggerFactory.getLogger(CombinedNotificationController.class);

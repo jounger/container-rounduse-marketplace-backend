@@ -139,24 +139,6 @@ class ContractDocumentControllerIT {
 
   @Test
   @WithMockUser(username = "forwarder", roles = { "FORWARDER" })
-  void getContractDocumentsByUser_thenStatusOk_andReturnContractDocuments() throws JsonProcessingException, Exception {
-    // given
-    when(contractDocumentService.getContractDocumentsByUser(Mockito.anyString(), Mockito.any(PaginationRequest.class)))
-        .thenReturn(pages);
-
-    // when and then
-    MvcResult result = mockMvc
-        .perform(get("/api/contract-document/user").contentType(MediaType.APPLICATION_JSON_VALUE).params(requestParams))
-        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.data[0].id").value(1))
-        .andExpect(jsonPath("$.data[0].status").value("PENDING")).andReturn();
-
-    // print response
-    MockHttpServletResponse response = result.getResponse();
-    logger.info("Reponse: {}", response.getContentAsString());
-  }
-
-  @Test
-  @WithMockUser(username = "forwarder", roles = { "FORWARDER" })
   void getContractDocumentsByContract_thenStatusOk_andReturnContractDocuments()
       throws JsonProcessingException, Exception {
     // given

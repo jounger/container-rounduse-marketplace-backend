@@ -1,5 +1,6 @@
 package com.crm.controllers;
 
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -283,24 +284,6 @@ class BidControllerIT {
 
   @Test
   @WithMockUser(username = "forwarder", roles = { "FORWARDER" })
-  void getBidsByForwarder_thenStatusOk_andReturnBids() throws JsonProcessingException, Exception {
-    // given
-    when(bidService.getBidsByForwarder(Mockito.anyString(), Mockito.any(PaginationRequest.class))).thenReturn(pages);
-    when(bidService.updateExpiredBidFromList(Mockito.anyList())).thenReturn(listBids);
-
-    // when and then
-    MvcResult result = mockMvc
-        .perform(get("/api/bid/forwarder").contentType(MediaType.APPLICATION_JSON_VALUE).params(requestParams))
-        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.data[0].id").value(1))
-        .andExpect(jsonPath("$.data[0].bidDate").value(Tool.convertLocalDateTimeToString(timeNow))).andReturn();
-
-    // print response
-    MockHttpServletResponse response = result.getResponse();
-    logger.info("Reponse: {}", response.getContentAsString());
-  }
-
-  @Test
-  @WithMockUser(username = "forwarder", roles = { "FORWARDER" })
   void editBid_thenStatusOk_andReturnBid() throws Exception {
     // given
     bid.setBidPrice(2800D);
@@ -327,6 +310,8 @@ class BidControllerIT {
     // given
     // when(bidService.removeBid(Mockito.anyLong(),
     // Mockito.anyString())).thenReturn(bid);
+    when(bidService.getBid(Mockito.anyLong(), Mockito.anyString())).thenReturn(bid);
+    doNothing().when(bidService).removeBid(Mockito.anyLong(), Mockito.anyString());
 
     // when and then
     MvcResult result = mockMvc.perform(delete("/api/bid/1").contentType(MediaType.APPLICATION_JSON_VALUE))

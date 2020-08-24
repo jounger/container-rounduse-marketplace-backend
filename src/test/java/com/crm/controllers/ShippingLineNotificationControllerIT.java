@@ -39,6 +39,7 @@ import com.crm.models.Bid;
 import com.crm.models.BiddingDocument;
 import com.crm.models.Booking;
 import com.crm.models.Combined;
+import com.crm.models.CombinedNotification;
 import com.crm.models.Container;
 import com.crm.models.ContainerSemiTrailer;
 import com.crm.models.ContainerTractor;
@@ -50,9 +51,8 @@ import com.crm.models.Merchant;
 import com.crm.models.Outbound;
 import com.crm.models.Port;
 import com.crm.models.ShippingLine;
-import com.crm.models.ShippingLineNotification;
 import com.crm.payload.request.PaginationRequest;
-import com.crm.services.ShippingLineNotificationService;
+import com.crm.services.CombinedNotificationService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @SpringBootTest
@@ -66,16 +66,16 @@ class ShippingLineNotificationControllerIT {
   protected MockMvc mockMvc;
 
   @MockBean
-  private ShippingLineNotificationService shippingLineNotificationService;
+  private CombinedNotificationService ShippingLineNotificationService;
 
   @Autowired
   private ObjectMapper objectMapper;
 
   PaginationRequest paginationRequest;
 
-  Page<ShippingLineNotification> pages;
+  Page<CombinedNotification> pages;
 
-  ShippingLineNotification shippingLineNotification;
+  CombinedNotification ShippingLineNotification;
 
   ShippingLine shippingLine;
 
@@ -85,9 +85,9 @@ class ShippingLineNotificationControllerIT {
 
   @BeforeEach
   public void setUp() {
-    shippingLineNotification = new ShippingLineNotification();
-    shippingLineNotification.setId(1L);
-    shippingLineNotification.setIsRead(false);
+    ShippingLineNotification = new CombinedNotification();
+    ShippingLineNotification.setId(1L);
+    ShippingLineNotification.setIsRead(false);
 
     BiddingDocument biddingDocument = new BiddingDocument();
     biddingDocument.setId(1L);
@@ -187,13 +187,13 @@ class ShippingLineNotificationControllerIT {
 
     combined.setContract(contract);
 
-    shippingLineNotification.setRecipient(merchant);
-    shippingLineNotification.setRelatedResource(combined);
-    shippingLineNotification.setSendDate(timeNow);
+    ShippingLineNotification.setRecipient(merchant);
+    ShippingLineNotification.setRelatedResource(combined);
+    ShippingLineNotification.setSendDate(timeNow);
 
-    List<ShippingLineNotification> biddingNotifications = new ArrayList<ShippingLineNotification>();
-    biddingNotifications.add(shippingLineNotification);
-    pages = new PageImpl<ShippingLineNotification>(biddingNotifications);
+    List<CombinedNotification> biddingNotifications = new ArrayList<CombinedNotification>();
+    biddingNotifications.add(ShippingLineNotification);
+    pages = new PageImpl<CombinedNotification>(biddingNotifications);
 
     requestParams = new LinkedMultiValueMap<>();
     requestParams.add("page", "0");
@@ -204,13 +204,13 @@ class ShippingLineNotificationControllerIT {
   @WithMockUser(username = "shippingline", roles = { "SHIPPINGLINE" })
   void getShippingLineNotifications_thenStatusOk_andReturnShippingLineNotifications() throws Exception {
     // given
-    when(shippingLineNotificationService.getShippingLineNotificationsByUsername(Mockito.anyString(),
+    when(ShippingLineNotificationService.getShippingLineNotificationsByUsername(Mockito.anyString(),
         Mockito.any(PaginationRequest.class))).thenReturn(pages);
 
     // when and then
     MvcResult result = mockMvc
         .perform(
-            get("/api/shipping-line-notification").contentType(MediaType.APPLICATION_JSON_VALUE).params(requestParams))
+            get("/api/combined-notification").contentType(MediaType.APPLICATION_JSON_VALUE).params(requestParams))
         .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.data[0].id").value(1))
         .andExpect(jsonPath("$.data[0].isRead").value(false)).andReturn();
 
@@ -223,11 +223,11 @@ class ShippingLineNotificationControllerIT {
   @WithMockUser(username = "shippingline", roles = { "SHIPPINGLINE" })
   void getShippingLineNotification_thenStatusOk_andReturnShippingLineNotification() throws Exception {
     // given
-    when(shippingLineNotificationService.getShippingLineNotification(Mockito.anyLong()))
-        .thenReturn(shippingLineNotification);
+    when(ShippingLineNotificationService.getShippingLineNotification(Mockito.anyLong()))
+        .thenReturn(ShippingLineNotification);
     // when and then
     MvcResult result = mockMvc
-        .perform(get("/api/shipping-line-notification/1").contentType(MediaType.APPLICATION_JSON_VALUE)).andDo(print())
+        .perform(get("/api/combined-notification/1").contentType(MediaType.APPLICATION_JSON_VALUE)).andDo(print())
         .andExpect(status().isOk()).andExpect(jsonPath("$.id").value(1)).andExpect(jsonPath("$.isRead").value(false))
         .andReturn();
 
@@ -242,13 +242,13 @@ class ShippingLineNotificationControllerIT {
     // given
     Map<String, String> updates = new HashMap<String, String>();
     updates.put("isRead", "true");
-    shippingLineNotification.setIsRead(true);
-    when(shippingLineNotificationService.editShippingLineNotification(Mockito.anyLong(), Mockito.anyMap()))
-        .thenReturn(shippingLineNotification);
+    ShippingLineNotification.setIsRead(true);
+    when(ShippingLineNotificationService.editShippingLineNotification(Mockito.anyLong(), Mockito.anyMap()))
+        .thenReturn(ShippingLineNotification);
 
     // when and then
     MvcResult result = mockMvc
-        .perform(patch("/api/shipping-line-notification/1").contentType(MediaType.APPLICATION_JSON_VALUE)
+        .perform(patch("/api/combined-notification/1").contentType(MediaType.APPLICATION_JSON_VALUE)
             .content(objectMapper.writeValueAsString(updates)))
         .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.data.id").value(1))
         .andExpect(jsonPath("$.data.isRead").value(true)).andReturn();
@@ -264,7 +264,7 @@ class ShippingLineNotificationControllerIT {
 
     // when and then
     MvcResult result = mockMvc
-        .perform(delete("/api/shipping-line-notification/1").contentType(MediaType.APPLICATION_JSON_VALUE))
+        .perform(delete("/api/combined-notification/1").contentType(MediaType.APPLICATION_JSON_VALUE))
         .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.message").value("Xóa thông báo thành công"))
         .andReturn();
 

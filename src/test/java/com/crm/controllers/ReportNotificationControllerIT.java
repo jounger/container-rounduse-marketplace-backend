@@ -38,6 +38,7 @@ import com.crm.enums.EnumReportStatus;
 import com.crm.models.BiddingDocument;
 import com.crm.models.Booking;
 import com.crm.models.ContainerType;
+import com.crm.models.Forwarder;
 import com.crm.models.Merchant;
 import com.crm.models.Outbound;
 import com.crm.models.Port;
@@ -81,6 +82,10 @@ class ReportNotificationControllerIT {
     reportNotification = new ReportNotification();
     reportNotification.setId(1L);
     reportNotification.setIsRead(false);
+    
+    Merchant merchant = new Merchant();
+    merchant.setId(2L);
+    merchant.setUsername("merchant");
 
     BiddingDocument biddingDocument = new BiddingDocument();
     biddingDocument.setId(1L);
@@ -93,9 +98,9 @@ class ReportNotificationControllerIT {
     biddingDocument.setCurrencyOfPayment("VND");
     biddingDocument.setStatus(EnumBiddingStatus.BIDDING.name());
 
-    Merchant merchant = new Merchant();
-    merchant.setId(1L);
-    merchant.setUsername("merchant");
+    Forwarder forwarder = new Forwarder();
+    forwarder.setId(1L);
+    forwarder.setUsername("forwarder");
 
     biddingDocument.setOfferee(merchant);
     ShippingLine shippingLine = new ShippingLine();
@@ -130,14 +135,14 @@ class ReportNotificationControllerIT {
 
     report = new Report();
     report.setId(1L);
-    report.setSender(merchant);
+    report.setSender(forwarder);
     report.setTitle("title");
     report.setDetail("detail");
     report.setReport(biddingDocument);
     report.setSendDate(timeNow);
     report.setStatus(EnumReportStatus.PENDING.name());
 
-    reportNotification.setRecipient(merchant);
+    reportNotification.setRecipient(shippingLine);
     reportNotification.setRelatedResource(report);
     reportNotification.setSendDate(timeNow);
 
@@ -151,7 +156,7 @@ class ReportNotificationControllerIT {
   }
 
   @Test
-  @WithMockUser(username = "merchant", roles = { "MERCHANT" })
+  @WithMockUser(username = "forwarder", roles = { "FORWARDER" })
   void getReportNotifications_thenStatusOk_andReturnReportNotifications() throws Exception {
     // given
     when(reportNotificationService.getReportNotificationsByUsername(Mockito.anyString(),
@@ -169,7 +174,7 @@ class ReportNotificationControllerIT {
   }
 
   @Test
-  @WithMockUser(username = "merchant", roles = { "MERCHANT" })
+  @WithMockUser(username = "forwarder", roles = { "FORWARDER" })
   void getReportNotification_thenStatusOk_andReturnReportNotification() throws Exception {
     // given
     when(reportNotificationService.getReportNotification(Mockito.anyLong())).thenReturn(reportNotification);
@@ -184,7 +189,7 @@ class ReportNotificationControllerIT {
   }
 
   @Test
-  @WithMockUser(username = "merchant", roles = { "MERCHANT" })
+  @WithMockUser(username = "forwarder", roles = { "FORWARDER" })
   void editReportNotification_thenStatusOk_andReturnReportNotification() throws Exception {
     // given
     Map<String, String> updates = new HashMap<String, String>();
@@ -206,7 +211,7 @@ class ReportNotificationControllerIT {
   }
 
   @Test
-  @WithMockUser(username = "merchant", roles = { "MERCHANT" })
+  @WithMockUser(username = "forwarder", roles = { "FORWARDER" })
   void deleteReportNotification_thenStatusOk_AndReturnMessage() throws Exception {
 
     // when and then

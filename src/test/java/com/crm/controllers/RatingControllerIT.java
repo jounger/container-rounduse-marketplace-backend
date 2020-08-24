@@ -236,16 +236,16 @@ class RatingControllerIT {
 
   @Test
   @WithMockUser(username = "merchant", roles = { "MERCHANT" })
-  void createRating_thenStatusOk_andReturnContract() throws JsonProcessingException, Exception {
+  void createRating_thenStatusOk_andReturnRating() throws JsonProcessingException, Exception {
     // given
     RatingRequest request = new RatingRequest();
     request.setRatingValue(3);
-    ;
-    when(ratingService.createRating(Mockito.anyString(), Mockito.any(RatingRequest.class))).thenReturn(rating);
+
+    when(ratingService.createRating(Mockito.anyLong(), Mockito.anyString(), Mockito.any(RatingRequest.class))).thenReturn(rating);
 
     // when and then
     MvcResult result = mockMvc
-        .perform(post("/api/rating").contentType(MediaType.APPLICATION_JSON_VALUE)
+        .perform(post("/api/rating/contract/1").contentType(MediaType.APPLICATION_JSON_VALUE)
             .content(objectMapper.writeValueAsString(request)))
         .andDo(print()).andExpect(status().isCreated()).andExpect(jsonPath("$.data.id").value(1))
         .andExpect(jsonPath("$.data.comment").value("123 abc")).andReturn();
@@ -257,7 +257,7 @@ class RatingControllerIT {
 
   @Test
   @WithMockUser(username = "merchant", roles = { "MERCHANT" })
-  void getRatingBySender_thenStatusOk_andReturnContract() throws JsonProcessingException, Exception {
+  void getRatingBySender_thenStatusOk_andReturnRating() throws JsonProcessingException, Exception {
     // given
     when(ratingService.getRatingsBySender(Mockito.anyString(), Mockito.any(PaginationRequest.class))).thenReturn(pages);
 
@@ -274,7 +274,7 @@ class RatingControllerIT {
 
   @Test
   @WithMockUser(username = "merchant", roles = { "MERCHANT" })
-  void getRatingByReceiver_thenStatusOk_andReturnContract() throws JsonProcessingException, Exception {
+  void getRatingByReceiver_thenStatusOk_andReturnRating() throws JsonProcessingException, Exception {
     // given
     when(ratingService.getRatingsByReceiver(Mockito.anyString(), Mockito.any(PaginationRequest.class)))
         .thenReturn(pages);
@@ -309,7 +309,7 @@ class RatingControllerIT {
 
   @Test
   @WithMockUser(username = "forwarder", roles = { "FORWARDER" })
-  void getRatingsByContract_thenStatusOk_andReturnContracts() throws Exception {
+  void getRatingsByContract_thenStatusOk_andReturnRatings() throws Exception {
     // given
     when(ratingService.getRatingsByContract(Mockito.anyLong(), Mockito.anyString(),
         Mockito.any(PaginationRequest.class))).thenReturn(pages);
@@ -328,7 +328,7 @@ class RatingControllerIT {
 
   @Test
   @WithMockUser(username = "moderator", roles = { "MODERATOR" })
-  void getRating_thenStatusOk_andReturnContracts() throws JsonProcessingException, Exception {
+  void getRating_thenStatusOk_andReturnRatings() throws JsonProcessingException, Exception {
     // given
     when(ratingService.getRatings(Mockito.any(PaginationRequest.class))).thenReturn(pages);
 
@@ -345,7 +345,7 @@ class RatingControllerIT {
 
   @Test
   @WithMockUser(username = "forwarder", roles = { "FORWARDER" })
-  void editContract_thenStatusOk_andReturnContract() throws Exception {
+  void editRating_thenStatusOk_andReturnRating() throws Exception {
     // given
     rating.setComment("1q2w3e");
     Map<String, Object> updates = new HashMap<String, Object>();
@@ -366,7 +366,7 @@ class RatingControllerIT {
 
   @Test
   @WithMockUser(username = "merchant", roles = { "MERCHANT" })
-  void deleteContract_thenStatusOk_AndReturnMessage() throws Exception {
+  void deleteRating_thenStatusOk_AndReturnMessage() throws Exception {
 
     // when and then
     MvcResult result = mockMvc.perform(delete("/api/rating/1").contentType(MediaType.APPLICATION_JSON_VALUE))

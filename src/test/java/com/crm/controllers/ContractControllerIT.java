@@ -1,5 +1,6 @@
 package com.crm.controllers;
 
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -56,6 +57,7 @@ import com.crm.models.ShippingLine;
 import com.crm.payload.request.ContractRequest;
 import com.crm.payload.request.PaginationRequest;
 import com.crm.services.ContractService;
+import com.crm.websocket.controller.NotificationBroadcast;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -74,6 +76,9 @@ class ContractControllerIT {
 
   @Autowired
   private ObjectMapper objectMapper;
+
+  @Autowired
+  private NotificationBroadcast notificationBroadcast;
 
   PaginationRequest paginationRequest;
 
@@ -231,6 +236,7 @@ class ContractControllerIT {
     request.setRequired(false);
     when(contractService.createContract(Mockito.anyLong(), Mockito.anyString(), Mockito.any(ContractRequest.class)))
         .thenReturn(contract);
+    doNothing().when(notificationBroadcast).broadcastEditContractToForwarder(contract);
 
     // when and then
     MvcResult result = mockMvc
@@ -282,24 +288,6 @@ class ContractControllerIT {
 
   @Test
   @WithMockUser(username = "forwarder", roles = { "FORWARDER" })
-  void getContractsByUser_thenStatusOk_andReturnContracts() throws JsonProcessingException, Exception {
-    // given
-    when(contractService.getContractsByUser(Mockito.anyString(), Mockito.any(PaginationRequest.class)))
-        .thenReturn(pages);
-
-    // when and then
-    MvcResult result = mockMvc
-        .perform(get("/api/contract/user").contentType(MediaType.APPLICATION_JSON_VALUE).params(requestParams))
-        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.data[0].id").value(1))
-        .andExpect(jsonPath("$.data[0].required").value(false)).andReturn();
-
-    // print response
-    MockHttpServletResponse response = result.getResponse();
-    logger.info("Reponse: {}", response.getContentAsString());
-  }
-
-  @Test
-  @WithMockUser(username = "forwarder", roles = { "FORWARDER" })
   void editContract_thenStatusOk_andReturnContract() throws Exception {
     // given
     contract.setRequired(true);
@@ -325,8 +313,8 @@ class ContractControllerIT {
 
     // when and then
     MvcResult result = mockMvc.perform(delete("/api/contract/1").contentType(MediaType.APPLICATION_JSON_VALUE))
-        .andDo(print()).andExpect(status().isOk())
-        .andExpect(jsonPath("$.message").value("Xóa hợp đồng thành công")).andReturn();
+        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.message").value("Xóa hợp đồng thành công"))
+        .andReturn();
 
     // print response
     MockHttpServletResponse response = result.getResponse();

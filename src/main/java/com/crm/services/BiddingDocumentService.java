@@ -1,5 +1,6 @@
 package com.crm.services;
 
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.data.domain.Page;
@@ -24,9 +25,13 @@ public interface BiddingDocumentService {
 
   Page<BiddingDocument> getBiddingDocumentsByInbound(Long id, String username, PaginationRequest request);
 
-  // update part biddingDocument
+  // update part biddingDocumentdingDocument
   BiddingDocument editBiddingDocument(Long id, String username, Map<String, Object> updates);
 
   void removeBiddingDocument(Long id, String username);
+
+  void updateExpiredBiddingDocuments(Long id, String status);
+
+  List<BiddingDocument> updateExpiredBiddingDocumentFromList(List<BiddingDocument> biddingDocuments);
 
 }

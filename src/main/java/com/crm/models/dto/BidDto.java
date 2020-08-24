@@ -21,7 +21,9 @@ public class BidDto {
 
   private String bidDate;
 
-  private String bidValidityPeriod;
+  private String freezeTime;
+
+  private String validityPeriod;
 
   private String dateOfDecision;
 

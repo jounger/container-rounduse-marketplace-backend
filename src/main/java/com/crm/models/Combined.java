@@ -8,6 +8,7 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -44,7 +45,7 @@ public class Combined {
   @Column(name = "id", updatable = false, nullable = false)
   private Long id;
 
-  @OneToOne
+  @OneToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "bid_id")
   private Bid bid;
 
@@ -62,9 +63,9 @@ public class Combined {
   private Date updatedAt;
 
   @OneToMany(mappedBy = "relatedResource")
-  private Collection<ShippingLineNotification> shippingLineNotifications = new ArrayList<>();
+  private Collection<CombinedNotification> shippingLineNotifications = new ArrayList<>();
 
-  @OneToOne(mappedBy = "combined", cascade = CascadeType.ALL)
+  @OneToOne(mappedBy = "combined", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
   private Contract contract;
 
 }

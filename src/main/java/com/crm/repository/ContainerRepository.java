@@ -2,6 +2,7 @@ package com.crm.repository;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -30,22 +31,19 @@ public interface ContainerRepository extends JpaRepository<Container, Long> {
    */
   @Query(value = "FROM Container c" + " WHERE c.billOfLading.inbound.shippingLine.companyCode = :shippingLine"
       + " AND c.billOfLading.inbound.containerType.name = :containerType" + " AND c.status IN :status"
-      + " AND c.billOfLading.inbound.emptyTime < :packingTime" + " AND c.billOfLading.freeTime > :cutOffTime"
-      + " AND c.billOfLading.portOfDelivery.nameCode = :portOfLoading")
+      + " AND c.billOfLading.inbound.emptyTime < :packingTime" + " AND c.billOfLading.freeTime > :cutOffTime")
   List<Container> findByOutbound(@Param("shippingLine") String shippingLine,
       @Param("containerType") String containerType, @Param("status") List<String> status,
-      @Param("packingTime") LocalDateTime packingTime, @Param("cutOffTime") LocalDateTime cutOffTime,
-      @Param("portOfLoading") String portOfLoading);
+      @Param("packingTime") LocalDateTime packingTime, @Param("cutOffTime") LocalDateTime cutOffTime);
 
   @Query(value = "SELECT CASE WHEN COUNT(c) > 0 THEN TRUE ELSE FALSE END FROM Container c"
       + " WHERE c.billOfLading.inbound.shippingLine.companyCode = :shippingLine"
       + " AND c.billOfLading.inbound.containerType.name = :containerType" + " AND c.status IN :status"
       + " AND c.billOfLading.inbound.emptyTime < :packingTime" + " AND c.billOfLading.freeTime > :cutOffTime"
-      + " AND c.billOfLading.portOfDelivery.nameCode = :portOfLoading AND c.id = :id")
+      + " AND c.id = :id")
   Boolean existsByOutbound(@Param("id") Long id, @Param("shippingLine") String shippingLine,
       @Param("containerType") String containerType, @Param("status") List<String> status,
-      @Param("packingTime") LocalDateTime packingTime, @Param("cutOffTime") LocalDateTime cutOffTime,
-      @Param("portOfLoading") String portOfLoading);
+      @Param("packingTime") LocalDateTime packingTime, @Param("cutOffTime") LocalDateTime cutOffTime);
 
   @Query(value = "SELECT c FROM Container c WHERE c.billOfLading.inbound.id = :id")
   Page<Container> findContainersByInbound(@Param("id") Long id, Pageable pageable);
@@ -79,29 +77,25 @@ public interface ContainerRepository extends JpaRepository<Container, Long> {
   /* Check time busy Container */
 
   @Query(value = "SELECT CASE WHEN COUNT(c) = 0 THEN TRUE ELSE FALSE END "
-      + "FROM Container c WHERE c.billOfLading.inbound.forwarder.username = :username "
-      + "AND c.number = :number "
+      + "FROM Container c WHERE c.billOfLading.inbound.forwarder.username = :username " + "AND c.number = :number "
       + "AND ((c.billOfLading.freeTime > :freeTime AND c.billOfLading.inbound.pickupTime < :freeTime) "
       + "OR (c.billOfLading.freeTime > :pickupTime AND c.billOfLading.inbound.pickupTime < :pickupTime) "
       + "OR (c.billOfLading.freeTime < :freeTime AND c.billOfLading.inbound.pickupTime > :pickupTime) "
       + "OR (c.billOfLading.freeTime = :freeTime) " + "OR (c.billOfLading.inbound.pickupTime = :pickupTime) "
       + "OR (c.billOfLading.inbound.pickupTime = :freeTime) " + "OR (c.billOfLading.freeTime = :pickupTime))")
-  boolean findByNumber(@Param("number") String number,
-      @Param("pickupTime") LocalDateTime pickupTime, @Param("freeTime") LocalDateTime freeTime,
-      @Param("username") String username);
+  boolean findByNumber(@Param("number") String number, @Param("pickupTime") LocalDateTime pickupTime,
+      @Param("freeTime") LocalDateTime freeTime, @Param("username") String username);
 
   @Query(value = "SELECT CASE WHEN COUNT(c) = 0 THEN TRUE ELSE FALSE END "
-      + "FROM Container c WHERE c.billOfLading.inbound.forwarder.username = :username "
-      + "AND c.number = :number "
+      + "FROM Container c WHERE c.billOfLading.inbound.forwarder.username = :username " + "AND c.number = :number "
       + "AND ((c.billOfLading.freeTime > :freeTime AND c.billOfLading.inbound.pickupTime < :freeTime) "
       + "OR (c.billOfLading.freeTime > :pickupTime AND c.billOfLading.inbound.pickupTime < :pickupTime) "
       + "OR (c.billOfLading.freeTime < :freeTime AND c.billOfLading.inbound.pickupTime > :pickupTime) "
       + "OR (c.billOfLading.freeTime = :freeTime) " + "OR (c.billOfLading.inbound.pickupTime = :pickupTime) "
       + "OR (c.billOfLading.inbound.pickupTime = :freeTime) " + "OR (c.billOfLading.freeTime = :pickupTime)) "
       + "AND c.billOfLading.id != :id")
-  boolean findByNumber(@Param("id") Long id, @Param("username") String username,
-      @Param("number") String number, @Param("pickupTime") LocalDateTime pickupTime,
-      @Param("freeTime") LocalDateTime freeTime);
+  boolean findByNumber(@Param("id") Long id, @Param("username") String username, @Param("number") String number,
+      @Param("pickupTime") LocalDateTime pickupTime, @Param("freeTime") LocalDateTime freeTime);
 
   /* Check time busy Driver */
 
@@ -182,5 +176,33 @@ public interface ContainerRepository extends JpaRepository<Container, Long> {
   @Query(value = "SELECT CASE WHEN COUNT(c) > 0 THEN TRUE ELSE FALSE END "
       + "FROM Container c LEFT JOIN c.bids b WHERE c.id = :id AND b.id = :bidId")
   boolean isContainedByBid(@Param("id") Long id, @Param("bidId") Long bidId);
+
+  @Query(value = "SELECT COUNT(c) FROM Container c WHERE c.createdAt > :startDate AND c.createdAt < :endDate")
+  Integer countContainersByOperator(@Param("startDate") Date startDate, @Param("endDate") Date endDate);
+
+  @Query(value = "SELECT COUNT(c) FROM Container c WHERE c.status IN :statusList"
+      + " AND c.createdAt > :startDate AND c.createdAt < :endDate")
+  Integer countContainersByOperator(@Param("statusList") List<String> statusList, @Param("startDate") Date startDate,
+      @Param("endDate") Date endDate);
+
+  @Query(value = "SELECT COUNT(c) FROM Container c WHERE c.driver.forwarder.username = :username"
+      + " AND c.createdAt > :startDate AND c.createdAt < :endDate")
+  Integer countContainers(@Param("username") String username, @Param("startDate") Date startDate,
+      @Param("endDate") Date endDate);
+
+  @Query(value = "SELECT COUNT(c) FROM Container c WHERE c.driver.forwarder.username = :username"
+      + " AND c.status IN :statusList AND c.createdAt > :startDate AND c.createdAt < :endDate")
+  Integer countContainers(@Param("username") String username, @Param("statusList") List<String> statusList,
+      @Param("startDate") Date startDate, @Param("endDate") Date endDate);
+
+  @Query(value = "SELECT COUNT(c) FROM Container c WHERE c.billOfLading.inbound.shippingLine.username = :username"
+      + " AND c.createdAt > :startDate AND c.createdAt < :endDate")
+  Integer countContainersByShippingLine(@Param("username") String username, @Param("startDate") Date startDate,
+      @Param("endDate") Date endDate);
+
+  @Query(value = "SELECT COUNT(c) FROM Container c WHERE c.billOfLading.inbound.shippingLine.username = :username"
+      + " AND c.status IN :statusList AND c.createdAt > :startDate AND c.createdAt < :endDate")
+  Integer countContainersByShippingLine(@Param("username") String username,
+      @Param("statusList") List<String> statusList, @Param("startDate") Date startDate, @Param("endDate") Date endDate);
 
 }

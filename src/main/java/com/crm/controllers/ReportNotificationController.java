@@ -14,6 +14,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -40,33 +41,14 @@ import com.crm.services.ReportNotificationService;
 @RequestMapping("/api/report-notification")
 public class ReportNotificationController {
 
-  private static final Logger logger = LoggerFactory.getLogger(SupplierController.class);
+  private static final Logger logger = LoggerFactory.getLogger(ReportNotificationController.class);
 
   @Autowired
   ReportNotificationService reportNotificationService;
 
-  @GetMapping("/user/{id}")
-  public ResponseEntity<?> getReportNotificationsByUser(@PathVariable Long id, @Valid PaginationRequest request) {
-
-    Page<ReportNotification> pages = reportNotificationService.getReportNotificationsByUser(id, request);
-
-    PaginationResponse<ReportNotificationDto> response = new PaginationResponse<>();
-    response.setPageNumber(request.getPage());
-    response.setPageSize(request.getLimit());
-    response.setTotalElements(pages.getTotalElements());
-    response.setTotalPages(pages.getTotalPages());
-
-    List<ReportNotification> reportNotifications = pages.getContent();
-    List<ReportNotificationDto> reportNotificationsDto = new ArrayList<>();
-    reportNotifications.forEach(reportNotification -> reportNotificationsDto
-        .add(ReportNotificationMapper.toReportNotificationDto(reportNotification)));
-    response.setContents(reportNotificationsDto);
-
-    return ResponseEntity.ok(response);
-  }
-
   @GetMapping("")
-  public ResponseEntity<?> getReportNotificationsByUser(@Valid PaginationRequest request) {
+  @PreAuthorize("hasRole('MODERATOR') or hasRole('FORWARDER')")
+  public ResponseEntity<?> getReportNotifications(@Valid PaginationRequest request) {
 
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
@@ -88,6 +70,7 @@ public class ReportNotificationController {
   }
 
   @GetMapping("/{id}")
+  @PreAuthorize("hasRole('MODERATOR') or hasRole('FORWARDER')")
   public ResponseEntity<?> getReportNotification(@PathVariable Long id) {
     ReportNotification reportNotification = reportNotificationService.getReportNotification(id);
     ReportNotificationDto reportNotificationDto = ReportNotificationMapper.toReportNotificationDto(reportNotification);
@@ -95,6 +78,7 @@ public class ReportNotificationController {
   }
 
   @Transactional
+  @PreAuthorize("hasRole('MODERATOR') or hasRole('FORWARDER')")
   @RequestMapping(value = "/{id}", method = RequestMethod.PATCH, consumes = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<?> editReportNotification(@PathVariable("id") Long id,
       @RequestBody Map<String, Object> updates) {
@@ -111,6 +95,7 @@ public class ReportNotificationController {
   }
 
   @Transactional
+  @PreAuthorize("hasRole('MODERATOR') or hasRole('FORWARDER')")
   @DeleteMapping("/{id}")
   public ResponseEntity<?> deleteReportNotification(@PathVariable Long id) {
     reportNotificationService.removeReportNotification(id);

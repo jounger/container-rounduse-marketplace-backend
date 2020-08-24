@@ -35,6 +35,8 @@ public class SupplierMapper {
     supplierDto.setTin(supplier.getTin());
     supplierDto.setFax(supplier.getFax());
     supplierDto.setBrcScanPath(supplier.getProfileImagePath());
+    supplierDto.setRatingCount(supplier.getReceivedRatings().size());
+
     return supplierDto;
   }
 }

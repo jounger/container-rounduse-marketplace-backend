@@ -4,9 +4,11 @@ public class ErrorMessage {
   // Bidding
   public static final String BIDDINGDOCUMENT_NOT_FOUND = "Không tìm thấy hồ sơ mời thầu";
   public static final String BIDDINGDOCUMENT_INVALID_CLOSING_TIME = "Thời gian đóng thầu phải sau thời gian hiện tại và trước thời gian đóng hàng";
+  public static final String BIDDINGDOCUMENT_INVALID_OPENING_TIME = "Thời gian mở thầu phải sau thời gian đóng hàng";
   public static final String BIDDINGDOCUMENT_STATUS_NOT_FOUND = "Không tìm thấy trạng thái của hồ sơ mời thầu";
   public static final String BIDDINGDOCUMENT_IS_IN_TRANSACTION = "Hồ sơ mời thầu đã được ghép hoặc đang được đấu thầu";
   public static final String BIDDINGDOCUMENT_TIME_OUT = "Hồ sơ mời thầu đã hết hạn";
+  public static final String BIDDINGDOCUMENT_ACCEPT_INVALID_BID = "Hồ sơ dự thầu đã hết hạn";
 
   // Bid
   public static final String BID_NOT_FOUND = "Không tìm thấy hồ sơ dự thầu";
@@ -15,7 +17,8 @@ public class ErrorMessage {
   public static final String BID_INVALID_CREATE = "Chỉ được tạo 1 hồ sơ dự thầu cho 1 hồ sơ đấu thầu";
   public static final String BID_INVALID_BID_PRICE = "Giá thầu phải bằng hoặc cao hơn giá sàn";
   public static final String BID_INVALID_PENDING_EDIT = "Hồ sơ dự thầu chỉ được sửa khi ở trạng thái chờ";
-  public static final String BID_EDIT_BEFORE_VALIDITY_TIME = "Vui lòng chỉnh sửa sau thời gian hiệu lực";
+  public static final String BID_EDIT_BEFORE_FREEZE_TIME = "Vui lòng chỉnh sửa sau thời gian đóng băng";
+  public static final String BID_INVALID_VALIDITY_PERIOD = "Thời gian hiệu lực của hồ sơ dự thầu phải sau thời gian hiện tại";
 
   // Combined
   public static final String COMBINED_NOT_FOUND = "Không tìm thấy hàng ghép";
@@ -29,6 +32,7 @@ public class ErrorMessage {
   // Contract
   public static final String CONTRACT_NOT_FOUND = "Không tìm thấy hợp đồng";
   public static final String CONTRACT_INVALID_FINES = "Phần trăm phạt hợp đồng không hợp lệ";
+  public static final String CONTRACT_INVALID_EDIT = "Không thể sửa hợp đồng đã khai báo hóa đơn hợp lệ";
 
   // Evidence
   public static final String EVIDENCE_NOT_FOUND = "Không tìm thấy chứng cứ";
@@ -48,6 +52,7 @@ public class ErrorMessage {
 
   // Rating
   public static final String RATING_NOT_FOUND = "Không tìm thấy đánh giá";
+  public static final String RATING_ONE_PER_CONTRACT = "Bạn chỉ có thể đánh giá hợp đồng này một lần";
 
   // Container
   public static final String CONTAINER_LESS_THAN_NEEDED = "Số lượng container chưa đủ yêu cầu";
@@ -171,4 +176,8 @@ public class ErrorMessage {
   public static final String PAYMENT_NOT_FOUND = "Không tìm thấy hóa đơn";
   public static final String PAYMENT_INVALID_AMOUNT = "Sô tiền không hợp lệ";
   public static final String PAYMENT_TYPE_NOT_FOUND = "Không tìm thấy loại hóa đơn";
+  
+  // QRToken
+  public static final String QRTOKEN_NOT_FOUND = "Mã QR không tồn tại";
+  public static final String QRTOKEN_EXPIRED = "Mã QR đã hết hạn";
 }

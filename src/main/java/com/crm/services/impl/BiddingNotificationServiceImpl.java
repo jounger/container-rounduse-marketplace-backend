@@ -72,8 +72,15 @@ public class BiddingNotificationServiceImpl implements BiddingNotificationServic
 
   @Override
   public Page<BiddingNotification> getBiddingNotifications(PaginationRequest request) {
-    Page<BiddingNotification> biddingNotifications = biddingNotificationRepository
-        .findAll(PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt")));
+    String status = request.getStatus();
+    Page<BiddingNotification> biddingNotifications = null;
+    if (status != null && !status.isEmpty()) {
+      biddingNotifications = biddingNotificationRepository.findByType(status,
+          PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt")));
+    } else {
+      biddingNotifications = biddingNotificationRepository
+          .findAll(PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt")));
+    }
     return biddingNotifications;
   }
 

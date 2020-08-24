@@ -28,7 +28,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.crm.common.ErrorMessage;
 import com.crm.common.SuccessMessage;
+import com.crm.enums.EnumReportStatus;
+import com.crm.exception.ForbiddenException;
 import com.crm.models.Report;
 import com.crm.models.dto.ReportDto;
 import com.crm.models.mapper.ReportMapper;
@@ -44,7 +47,7 @@ import com.crm.websocket.controller.NotificationBroadcast;
 @RequestMapping("/api/report")
 public class ReportController {
 
-  private static final Logger logger = LoggerFactory.getLogger(SupplierController.class);
+  private static final Logger logger = LoggerFactory.getLogger(ReportController.class);
 
   @Autowired
   private ReportService reportService;
@@ -85,12 +88,19 @@ public class ReportController {
   }
 
   @PreAuthorize("hasRole('MODERATOR') or hasRole('FORWARDER')")
-  @GetMapping("/user")
-  public ResponseEntity<?> getReportsByUser(@Valid PaginationRequest request) {
+  @GetMapping("")
+  public ResponseEntity<?> getReports(@Valid PaginationRequest request) {
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
-
-    Page<Report> pages = reportService.getReportsByUser(username, request);
+    String role = userDetails.getAuthorities().iterator().next().getAuthority();
+    Page<Report> pages;
+    if (role.equals("ROLE_MODERATOR")) {
+      pages = reportService.getReports(request);
+    } else if (role.equals("ROLE_FORWARDER")) {
+      pages = reportService.getReportsByUser(username, request);
+    } else {
+      throw new ForbiddenException(ErrorMessage.USER_ACCESS_DENIED);
+    }
 
     PaginationResponse<ReportDto> response = new PaginationResponse<>();
     response.setPageNumber(request.getPage());
@@ -125,24 +135,6 @@ public class ReportController {
     return ResponseEntity.ok(response);
   }
 
-  @PreAuthorize("hasRole('MODERATOR')")
-  @GetMapping("")
-  public ResponseEntity<?> getReports(@Valid PaginationRequest request) {
-    Page<Report> pages = reportService.getReports(request);
-    PaginationResponse<ReportDto> response = new PaginationResponse<>();
-    response.setPageNumber(request.getPage());
-    response.setPageSize(request.getLimit());
-    response.setTotalElements(pages.getTotalElements());
-    response.setTotalPages(pages.getTotalPages());
-
-    List<Report> reports = pages.getContent();
-    List<ReportDto> reportsDto = new ArrayList<>();
-    reports.forEach(report -> reportsDto.add(ReportMapper.toReportDto(report)));
-    response.setContents(reportsDto);
-
-    return ResponseEntity.ok(response);
-  }
-
   @Transactional
   @PreAuthorize("hasRole('MODERATOR') or hasRole('FORWARDER')")
   @RequestMapping(value = "/{id}", method = RequestMethod.PATCH, consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -157,7 +149,11 @@ public class ReportController {
     ReportDto reportDto = ReportMapper.toReportDto(editReport);
 
     // CREATE NOTIFICATION
-    notificationBroadcast.broadcastUpdateReportToModerator(status, editReport);
+    if (status.equals(report.getStatus()) || report.getStatus().equals(EnumReportStatus.RESOLVED.name())) {
+      notificationBroadcast.broadcastUpdateReportToModerator(editReport);
+    } else {
+      notificationBroadcast.broadcastUpdateReportToForwarder(editReport);
+    }
     // END NOTIFICATION
 
     // Set default response body

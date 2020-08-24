@@ -25,6 +25,8 @@ public class RatingMapper {
     ratingDto.setContract(ContractMapper.toContractDto(contract));
 
     ratingDto.setRatingValue(rating.getRatingValue());
+    ratingDto.setComment(rating.getComment());
+
     return ratingDto;
   }
 }

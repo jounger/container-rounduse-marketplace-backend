@@ -1,5 +1,6 @@
 package com.crm.services;
 
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.data.domain.Page;
@@ -23,5 +24,7 @@ public interface OutboundService {
   Outbound editOutbound(Map<String, Object> updates, Long id, String username);
 
   void removeOutbound(Long id, String username);
+
+  List<Outbound> updateExpiredOutboundFromList(List<Outbound> outbounds);
 
 }

@@ -75,16 +75,16 @@ public class Supplier extends User {
   private Collection<Rating> sentRatings = new ArrayList<>();
 
   @OneToMany(mappedBy = "sender")
-  private Collection<Evidence> evidences = new ArrayList<>();
+  private Collection<ContractDocument> contractDocuments = new ArrayList<>();
 
   @OneToMany(mappedBy = "sender")
   private Collection<Report> reports = new ArrayList<>();
 
   @OneToMany(mappedBy = "recipient")
-  private Collection<Payment> receivedPayments = new ArrayList<>();
+  private Collection<Invoice> receivedPayments = new ArrayList<>();
 
   @OneToMany(mappedBy = "sender")
-  private Collection<Payment> sentPayments = new ArrayList<>();
+  private Collection<Invoice> sentPayments = new ArrayList<>();
 
   @OneToMany(mappedBy = "sender")
   private Collection<Contract> contracts = new ArrayList<>();

@@ -44,7 +44,7 @@ import com.crm.websocket.controller.NotificationBroadcast;
 @RequestMapping("/api/contract")
 public class ContractController {
 
-  private static final Logger logger = LoggerFactory.getLogger(SupplierController.class);
+  private static final Logger logger = LoggerFactory.getLogger(ContractController.class);
 
   @Autowired
   private ContractService contractService;
@@ -72,8 +72,7 @@ public class ContractController {
 
   @GetMapping("/combined/{id}")
   @PreAuthorize("hasRole('MERCHANT') or hasRole('FORWARDER')")
-  public ResponseEntity<?> getContractByCombined(@PathVariable("id") Long id,
-      @Valid @RequestBody ContractRequest request) {
+  public ResponseEntity<?> getContractByCombined(@PathVariable("id") Long id) {
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
     Contract contract = contractService.getContractByCombined(id, username);
@@ -82,8 +81,8 @@ public class ContractController {
   }
 
   @PreAuthorize("hasRole('MERCHANT') or hasRole('FORWARDER')")
-  @GetMapping("/user")
-  public ResponseEntity<?> getContractsByUser(@Valid PaginationRequest request) {
+  @GetMapping("")
+  public ResponseEntity<?> getContracts(@Valid PaginationRequest request) {
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
 
@@ -137,6 +136,7 @@ public class ContractController {
     defaultResponse.setData(contractDto);
 
     notificationBroadcast.broadcastEditContractToForwarder(contract);
+    logger.info("User {} editContract from id {} with request: {}", username, id, updates.toString());
     return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 

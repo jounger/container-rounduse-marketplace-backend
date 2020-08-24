@@ -16,9 +16,14 @@ public class Constant {
   public static final String SEARCH_REGEX = "(\\w+?)(:|!|<|>|~)(\\w+?),";
 
   // BID_VALIDITY_PERIOD as bid.bidValidityPeriod
-  public static final long BID_VALIDITY_PERIOD = 1;
+  public static final long FREEZE_TIME = 5;
 
   public static final String EMPTY_STRING = "";
 
   public static final long REWIND_MONTH = 1;
+
+  public static final long QR_CODE_EXPIRED_MINUTES = 5;
+
+  public static final String CONTRACT_PAID_PERCENTAGE_FORMAT = "#0.00";
+
 }

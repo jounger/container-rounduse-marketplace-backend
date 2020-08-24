@@ -10,6 +10,12 @@ public class SuccessMessage {
   public static final String CREATE_BID_SUCCESSFULLY = "Tạo hồ sơ dự thầu thành công";
   public static final String DELETE_BID_SUCCESSFULLY = "Xóa hồ sơ dự thầu thành công";
   public static final String EDIT_BID_SUCCESSFULLY = "Cập nhật hồ sơ dự thầu thành công";
+  public static final String ACCEPT_BID_SUCCESSFULLY = "Đồng ý hồ sơ dự thầu thành công";
+  public static final String REJECT_BID_SUCCESSFULLY = "Từ chối hồ sơ dự thầu thành công";
+  public static final String CANCEL_BID_SUCCESSFULLY = "Hủy hồ sơ dự thầu thành công";
+  public static final String EDIT_ADD_CONTAINER_SUCCESSFULLY = "Thêm container vào hồ sơ dự thầu thành công";
+  public static final String EDIT_REMOVE_CONTAINER_SUCCESSFULLY = "Xóa container khỏi hồ sơ dự thành công";
+  public static final String EDIT_REPLACE_CONTAINER_SUCCESSFULLY = "Thay đổi container trong hồ sơ dự thầu thành công";
 
   // BiddingDocumentController
   public static final String CREATE_BIDDING_DUCUMENT_SUCCESSFULLY = "Tạo hồ sơ đấu thầu thành công";
@@ -58,7 +64,7 @@ public class SuccessMessage {
   // DriverController
   public static final String CREATE_DRIVER_SUCCESSFULLY = "Thêm mới lái xe thành công";
   public static final String DELETE_DRIVER_SUCCESSFULLY = "Xóa lái xe thành công";
-  public static final String EDIT_DRIVER_SUCCESSFULLY = "Cập nhật mã giảm giá thành công";
+  public static final String EDIT_DRIVER_SUCCESSFULLY = "Cập nhật lái xe thành công";
 
   // EvidenceController
   public static final String CREATE_EVIDENCE_SUCCESSFULLY = "Thêm mới bằng chứng thành công";
@@ -68,7 +74,7 @@ public class SuccessMessage {
   // FeedbackController
   public static final String CREATE_FEEDBACK_SUCCESSFULLY = "Thêm mới phản hồi thành công";
   public static final String DELETE_FEEDBACK_SUCCESSFULLY = "Xóa phản hồi thành công";
-  public static final String EDIT_FEEDBACK_SUCCESSFULLY = "Cập phản hồi chứng thành công";
+  public static final String EDIT_FEEDBACK_SUCCESSFULLY = "Cập nhật phản hồi thành công";
 
   // ForwarderController
   public static final String CREATE_FORWARDER_SUCCESSFULLY = "Thêm mới chủ xe thành công";
@@ -134,6 +140,7 @@ public class SuccessMessage {
   public static final String CREATE_SHIPPING_INFO_SUCCESSFULLY = "Tạo mới chi tiết đơn vận chuyển thành công";
   public static final String DELETE_SHIPPING_INFO_SUCCESSFULLY = "Xóa chi tiết đơn vận chuyển thành công";
   public static final String EDIT_SHIPPING_INFO_SUCCESSFULLY = "Cập nhật chi tiết đơn vận chuyển thành công";
+  public static final String EDIT_SHIPPING_INFO_STATUS_SUCCESSFULLY = "Cập nhật trạng thái đơn vận chuyển thành công";
 
   // ShippingLineController
   public static final String CREATE_SHIPPING_LINE_SUCCESSFULLY = "Thêm mới hãng tàu thành công";
@@ -151,5 +158,8 @@ public class SuccessMessage {
   public static final String GENERATE_RESET_PASSWORD_TOKEN_SUCCESSFULLY = "Tạo đường dẫn cài lại mật khẩu thành công. Vui lòng kiểm tra email!";
   public static final String RESET_PASSWORD_SUCCESSFULLY = "Đặt lại mật khẩu thành công";
   public static final String PROFILE_CHANGE_SUCCESSFULLY = "Thay đổi ảnh đại diện thành công";
+  
+  // QRContoller
+  public static final String QR_TOKEN_GENERATE_SUCCESSFULLY = "Tạo QR Code thành công";
 
 }

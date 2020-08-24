@@ -32,6 +32,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.crm.common.SuccessMessage;
+import com.crm.enums.EnumBidStatus;
 import com.crm.models.Bid;
 import com.crm.models.dto.BidDto;
 import com.crm.models.mapper.BidMapper;
@@ -48,7 +49,7 @@ import com.crm.websocket.controller.NotificationBroadcast;
 @RequestMapping("/api/bid")
 public class BidController {
 
-  private static final Logger logger = LoggerFactory.getLogger(SupplierController.class);
+  private static final Logger logger = LoggerFactory.getLogger(Bid.class);
 
   @Autowired
   private BidService bidService;
@@ -90,14 +91,7 @@ public class BidController {
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
     Bid bid = bidService.getBid(id, username);
-
-    // get expired date
-    List<Bid> expiredBids = bidService.getExpiredBids(Arrays.asList(bid));
-    // update and return data but not save into database
-    List<Bid> result = bidService.updatedExpiredBids(Arrays.asList(bid));
-    // update data into database
-    bidExpiredTrigger(expiredBids);
-
+    List<Bid> result = bidService.updateExpiredBidFromList(Arrays.asList(bid));
     BidDto bidDto = BidMapper.toBidDto(result.get(0));
     return ResponseEntity.ok(bidDto);
   }
@@ -118,8 +112,9 @@ public class BidController {
     response.setTotalPages(pages.getTotalPages());
 
     List<Bid> bids = pages.getContent();
+    List<Bid> result = bidService.updateExpiredBidFromList(bids);
     List<BidDto> bidsDto = new ArrayList<>();
-    bids.forEach(bid -> bidsDto.add(BidMapper.toBidDto(bid)));
+    result.forEach(bid -> bidsDto.add(BidMapper.toBidDto(bid)));
     response.setContents(bidsDto);
 
     return ResponseEntity.ok(response);
@@ -139,16 +134,17 @@ public class BidController {
     response.setTotalPages(pages.getTotalPages());
 
     List<Bid> bids = pages.getContent();
+    List<Bid> result = bidService.updateExpiredBidFromList(bids);
     List<BidDto> bidsDto = new ArrayList<>();
-    bids.forEach(bid -> bidsDto.add(BidMapper.toBidDto(bid)));
+    result.forEach(bid -> bidsDto.add(BidMapper.toBidDto(bid)));
     response.setContents(bidsDto);
 
     return ResponseEntity.ok(response);
   }
 
   @PreAuthorize("hasRole('FORWARDER')")
-  @GetMapping("/forwarder")
-  public ResponseEntity<?> getBidsByForwarder(@Valid PaginationRequest request) {
+  @GetMapping("")
+  public ResponseEntity<?> getBids(@Valid PaginationRequest request) {
 
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
@@ -161,8 +157,9 @@ public class BidController {
     response.setTotalPages(pages.getTotalPages());
 
     List<Bid> bids = pages.getContent();
+    List<Bid> result = bidService.updateExpiredBidFromList(bids);
     List<BidDto> bidsDto = new ArrayList<>();
-    bids.forEach(bid -> bidsDto.add(BidMapper.toBidDto(bid)));
+    result.forEach(bid -> bidsDto.add(BidMapper.toBidDto(bid)));
     response.setContents(bidsDto);
 
     return ResponseEntity.ok(response);
@@ -185,7 +182,17 @@ public class BidController {
 
     // Set default response body
     DefaultResponse<BidDto> defaultResponse = new DefaultResponse<>();
-    defaultResponse.setMessage(SuccessMessage.EDIT_BID_SUCCESSFULLY);
+    String successMessage = "";
+    if (status == EnumBidStatus.ACCEPTED.name()) {
+      successMessage = SuccessMessage.ACCEPT_BID_SUCCESSFULLY;
+    } else if (status == EnumBidStatus.REJECTED.name()) {
+      successMessage = SuccessMessage.REJECT_BID_SUCCESSFULLY;
+    } else if (status == EnumBidStatus.CANCELED.name()) {
+      successMessage = SuccessMessage.CANCEL_BID_SUCCESSFULLY;
+    } else {
+      successMessage = SuccessMessage.EDIT_BID_SUCCESSFULLY;
+    }
+    defaultResponse.setMessage(successMessage);
     defaultResponse.setData(bidDto);
 
     logger.info("User {} editBid from id {} with request: {}", username, id, updates.toString());
@@ -194,19 +201,19 @@ public class BidController {
 
   @Transactional
   @PreAuthorize("hasRole('FORWARDER')")
-  @PostMapping(value = "/{id}/container/{contId}")
-  public ResponseEntity<?> addContainer(@PathVariable("id") Long id, @PathVariable("contId") Long containerId) {
+  @PostMapping(value = "/{id}/container")
+  public ResponseEntity<?> addContainers(@PathVariable("id") Long id, @Valid @RequestBody BidRequest request) {
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
-    Bid bid = bidService.addContainer(id, username, containerId);
+    Bid bid = bidService.addContainer(id, username, request);
     BidDto bidDto = BidMapper.toBidDto(bid);
 
     // Set default response body
     DefaultResponse<BidDto> defaultResponse = new DefaultResponse<>();
-    defaultResponse.setMessage(SuccessMessage.EDIT_BID_SUCCESSFULLY);
+    defaultResponse.setMessage(SuccessMessage.EDIT_ADD_CONTAINER_SUCCESSFULLY);
     defaultResponse.setData(bidDto);
 
-    logger.info("User {} addContainer into bid id {} with container id: {}", username, id, containerId);
+    logger.info("User {} addContainer into bid id {} with request: {}", username, id, request.toString());
     return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 
@@ -221,7 +228,7 @@ public class BidController {
 
     // Set default response body
     DefaultResponse<BidDto> defaultResponse = new DefaultResponse<>();
-    defaultResponse.setMessage(SuccessMessage.EDIT_BID_SUCCESSFULLY);
+    defaultResponse.setMessage(SuccessMessage.EDIT_REMOVE_CONTAINER_SUCCESSFULLY);
     defaultResponse.setData(bidDto);
 
     logger.info("User {} removeContainer from bid id {} with container id: {}", username, id, containerId);
@@ -237,8 +244,13 @@ public class BidController {
     Bid bid = bidService.replaceContainer(id, username, request);
     BidDto bidDto = BidMapper.toBidDto(bid);
 
+    // Set default response body
+    DefaultResponse<BidDto> defaultResponse = new DefaultResponse<>();
+    defaultResponse.setMessage(SuccessMessage.EDIT_REPLACE_CONTAINER_SUCCESSFULLY);
+    defaultResponse.setData(bidDto);
+
     logger.info("User {} replaceContainer from bid id {} with request {}", username, id, request.toString());
-    return ResponseEntity.ok(bidDto);
+    return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 
   @Transactional
@@ -260,15 +272,6 @@ public class BidController {
 
     logger.info("User {} deleteBid with id {}", username, id);
     return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
-  }
-
-  public void bidExpiredTrigger(List<Bid> bids) {
-    executorService.submit(new Runnable() {
-      @Override
-      public void run() {
-        bidService.editExpiredBids(bids);
-      }
-    });
   }
 
 }

@@ -24,13 +24,11 @@ import com.crm.models.BiddingDocument;
 import com.crm.models.Combined;
 import com.crm.models.Container;
 import com.crm.models.Contract;
-import com.crm.models.Discount;
 import com.crm.models.Supplier;
 import com.crm.payload.request.ContractRequest;
 import com.crm.payload.request.PaginationRequest;
 import com.crm.repository.CombinedRepository;
 import com.crm.repository.ContractRepository;
-import com.crm.repository.DiscountRepository;
 import com.crm.repository.SupplierRepository;
 import com.crm.services.BidService;
 import com.crm.services.ContractService;
@@ -45,9 +43,6 @@ public class ContractServiceImp implements ContractService {
 
   @Autowired
   private CombinedRepository combinedRepository;
-
-  @Autowired
-  private DiscountRepository discountRepository;
 
   @Autowired
   private BidService bidService;
@@ -70,7 +65,7 @@ public class ContractServiceImp implements ContractService {
     BiddingDocument biddingDocument = bid.getBiddingDocument();
 
     Supplier offeree = biddingDocument.getOfferee();
-    if (username.equals(offeree.getUsername())) {
+    if (!username.equals(offeree.getUsername())) {
       throw new ForbiddenException(ErrorMessage.USER_ACCESS_DENIED);
     }
 
@@ -92,22 +87,27 @@ public class ContractServiceImp implements ContractService {
     if (containersId == null || containersId.size() == 0) {
       throw new NotFoundException(ErrorMessage.CONTAINER_NOT_FOUND);
     }
+    Double price = 0D;
 
-    Double price = (bid.getBidPrice() / bid.getContainers().size()) * containersId.size();
-
+    if (request.getPrice() == null || request.getPrice() < 0) {
+      price = (bid.getBidPrice() / bid.getContainers().size()) * containersId.size();
+    }else {
+      price = request.getPrice();
+    }
     contract.setPrice(price);
 
     Boolean required = request.getRequired();
     contract.setRequired(required);
     contract.setFinesAgainstContractViolations(0D);
     contract.setCreationDate(LocalDateTime.now());
+    contract.setPaymentPercentage(0D);
 
-    String discountCodeString = request.getDiscountCode();
-    if (!Tool.isBlank(discountCodeString)) {
-      Discount discount = discountRepository.findByCode(discountCodeString)
-          .orElseThrow(() -> new NotFoundException(ErrorMessage.DISCOUNT_NOT_FOUND));
-      contract.setDiscount(discount);
-    }
+//    String discountCodeString = request.getDiscountCode();
+//    if (!Tool.isBlank(discountCodeString)) {
+//      Discount discount = discountRepository.findByCode(discountCodeString)
+//          .orElseThrow(() -> new NotFoundException(ErrorMessage.DISCOUNT_NOT_FOUND));
+//      contract.setDiscount(discount);
+//    }
 
     Double fines = 0D;
     if (required == true) {
@@ -171,6 +171,10 @@ public class ContractServiceImp implements ContractService {
         .orElseThrow(() -> new NotFoundException(ErrorMessage.CONTRACT_NOT_FOUND));
     Combined combined = contract.getCombined();
 
+    if (!contractRepository.isUnpaidContract(id)) {
+      throw new ForbiddenException(ErrorMessage.CONTRACT_INVALID_EDIT);
+    }
+
     Bid bid = combined.getBid();
     BiddingDocument biddingDocument = bid.getBiddingDocument();
     Supplier offeree = biddingDocument.getOfferee();
@@ -182,6 +186,10 @@ public class ContractServiceImp implements ContractService {
       }
     } else {
       throw new ForbiddenException(ErrorMessage.USER_ACCESS_DENIED);
+    }
+    String priceString = String.valueOf(updates.get("price"));
+    if (priceString != null && Tool.isEqual(contract.getPrice(), priceString)) {
+      contract.setPrice(Double.valueOf(priceString));
     }
 
     Contract _contract = contractRepository.save(contract);

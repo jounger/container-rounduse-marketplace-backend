@@ -14,6 +14,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -23,7 +25,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.crm.common.SuccessMessage;
@@ -41,7 +42,7 @@ import com.crm.services.OperatorService;
 @RequestMapping("/api/operator")
 public class OperatorController {
 
-  private static final Logger logger = LoggerFactory.getLogger(SupplierController.class);
+  private static final Logger logger = LoggerFactory.getLogger(OperatorController.class);
 
   @Autowired
   private OperatorService operatorService;
@@ -70,14 +71,6 @@ public class OperatorController {
     return ResponseEntity.ok(operatorDto);
   }
 
-  @GetMapping("/username")
-  public ResponseEntity<?> getOperatorByUsername(@RequestParam("username") String username) {
-    Operator operator = operatorService.getOperatorByUsername(username);
-    OperatorDto operatorDto = new OperatorDto();
-    operatorDto = OperatorMapper.toOperatorDto(operator);
-    return ResponseEntity.ok(operatorDto);
-  }
-
   @GetMapping("")
   @PreAuthorize("hasRole('ADMIN') or hasRole('MODERATOR')")
   public ResponseEntity<?> getOperators(@Valid PaginationRequest request) {
@@ -101,7 +94,9 @@ public class OperatorController {
   @PreAuthorize("hasRole('ADMIN') or hasRole('MODERATOR')")
   @RequestMapping(value = "/{id}", method = RequestMethod.PATCH, consumes = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<?> editOperator(@PathVariable("id") Long id, @RequestBody Map<String, Object> updates) {
-    Operator operator = operatorService.editOperator(id, updates);
+    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    String username = userDetails.getUsername();
+    Operator operator = operatorService.editOperator(id, username, updates);
     OperatorDto operatorDto = OperatorMapper.toOperatorDto(operator);
 
     // Set default response body
@@ -117,13 +112,15 @@ public class OperatorController {
   @DeleteMapping("/{id}")
   @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<?> removeOperator(@PathVariable Long id) {
-    operatorService.removeOperator(id);
+    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    String username = userDetails.getUsername();
+    operatorService.removeOperator(id, username);
 
     // Set default response body
     DefaultResponse<OperatorDto> defaultResponse = new DefaultResponse<>();
     defaultResponse.setMessage(SuccessMessage.DELETE_OPERATOR_SUCCESSFULLY);
 
-    logger.info("deleteOperator with id: {}", id);
+    logger.info("{} deleteOperator with id: {}", username, id);
     return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 }

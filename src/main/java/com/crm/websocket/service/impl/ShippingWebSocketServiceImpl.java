@@ -18,7 +18,7 @@ public class ShippingWebSocketServiceImpl implements ShippingWebSocketService {
 
   @Override
   public void sendBiddingNotifyToDriver(ShippingNotification notification) {
-    ShippingNotificationDto driverNotificationDto = ShippingNotificationMapper.toDriverNotificationDto(notification);
+    ShippingNotificationDto driverNotificationDto = ShippingNotificationMapper.toShippingNotificationDto(notification);
     messagingTemplate.convertAndSendToUser(driverNotificationDto.getRecipient().getUsername(),
         Constant.DRIVER_NOTIFICATION, driverNotificationDto);
   }

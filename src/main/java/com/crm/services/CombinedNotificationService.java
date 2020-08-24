@@ -10,17 +10,17 @@ import com.crm.payload.request.CombinedNotificationRequest;
 
 public interface CombinedNotificationService {
 
-  CombinedNotification createShippingLineNotification(CombinedNotificationRequest request);
+  CombinedNotification createCombinedNotification(CombinedNotificationRequest request);
 
-  CombinedNotification getShippingLineNotification(Long id);
+  CombinedNotification getCombinedNotification(Long id);
 
-  Page<CombinedNotification> getShippingLineNotifications(PaginationRequest request);
+  Page<CombinedNotification> getCombinedNotifications(PaginationRequest request);
 
-  Page<CombinedNotification> getShippingLineNotificationsByUser(Long recipient, PaginationRequest request);
+  Page<CombinedNotification> getCombinedNotificationsByUser(Long recipient, PaginationRequest request);
 
-  Page<CombinedNotification> getShippingLineNotificationsByUsername(String recipient, PaginationRequest request);
+  Page<CombinedNotification> getCombinedNotificationsByUsername(String recipient, PaginationRequest request);
 
-  CombinedNotification editShippingLineNotification(Long id, Map<String, Object> updates);
+  CombinedNotification editCombinedNotification(Long id, Map<String, Object> updates);
 
-  void removeShippingLineNotification(Long id);
+  void removeCombinedNotification(Long id);
 }

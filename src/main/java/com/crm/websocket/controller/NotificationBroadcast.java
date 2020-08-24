@@ -223,27 +223,27 @@ public class NotificationBroadcast {
     Collection<ShippingInfo> shippingInfos = contract.getShippingInfos();
 
     if (listContainerBid.size() > 0) {
-      List<ShippingNotification> driverNotifications = new ArrayList<>();
+      List<ShippingNotification> shippingNotifications = new ArrayList<>();
       shippingInfos.forEach(shippingInfo -> {
-        ShippingNotification driverNotification = new ShippingNotification();
-        ShippingNotificationRequest driverNotifyRequest = new ShippingNotificationRequest();
-        String driverUserName = shippingInfo.getContainer().getDriver().getUsername();
-        driverNotifyRequest.setRecipient(driverUserName);
-        driverNotifyRequest.setRelatedResource(shippingInfo.getId());
-        driverNotifyRequest.setMessage(String.format(NotificationMessage.SEND_TASK_NOTIFICATION_TO_DRIVER,
+        ShippingNotification shippingNotification = new ShippingNotification();
+        ShippingNotificationRequest shippingNotifyRequest = new ShippingNotificationRequest();
+        String shippingUserName = shippingInfo.getContainer().getDriver().getUsername();
+        shippingNotifyRequest.setRecipient(shippingUserName);
+        shippingNotifyRequest.setRelatedResource(shippingInfo.getId());
+        shippingNotifyRequest.setMessage(String.format(NotificationMessage.SEND_TASK_NOTIFICATION_TO_DRIVER,
             offeree.getCompanyName(), bidNew.getBidder().getCompanyName(), shippingInfo.getContainer().getNumber()));
-        driverNotifyRequest.setType(EnumNotificationType.SHIPPING.name());
-        driverNotifyRequest.setAction(EnumShippingNotification.TASK.name());
-        driverNotification = shippingNotificationService.createDriverNotification(driverNotifyRequest);
-        driverNotifications.add(driverNotification);
+        shippingNotifyRequest.setType(EnumNotificationType.SHIPPING.name());
+        shippingNotifyRequest.setAction(EnumShippingNotification.TASK.name());
+        shippingNotification = shippingNotificationService.createShippingNotification(shippingNotifyRequest);
+        shippingNotifications.add(shippingNotification);
       });
 
       // Asynchronous send notification to Driver
       executorService.submit(new Runnable() {
         @Override
         public void run() {
-          driverNotifications.parallelStream().forEach(driverNotification -> {
-            shippingWebSocketService.sendBiddingNotifyToDriver(driverNotification);
+          shippingNotifications.parallelStream().forEach(shippingNotification -> {
+            shippingWebSocketService.sendBiddingNotifyToDriver(shippingNotification);
           });
         }
       });
@@ -264,7 +264,7 @@ public class NotificationBroadcast {
     notifyRequest.setAction(EnumCombinedNotification.CONTRACT_ADD.name());
     notifyRequest.setType(EnumNotificationType.COMBINED.name());
 
-    CombinedNotification notification = combinedNotificationService.createShippingLineNotification(notifyRequest);
+    CombinedNotification notification = combinedNotificationService.createCombinedNotification(notifyRequest);
 
     // Send notification to Forwarder
     executorService.submit(new Runnable() {
@@ -310,24 +310,24 @@ public class NotificationBroadcast {
     Collection<Container> listContainerBid = bidNew.getContainers().stream()
         .filter(ex -> ex.getStatus().equals(EnumSupplyStatus.COMBINED.name())).collect(Collectors.toList());
 
-    CombinedNotificationRequest shippingLineNotificationRequest = new CombinedNotificationRequest();
+    CombinedNotificationRequest combinedNotificationRequest = new CombinedNotificationRequest();
     String numberOfContainer = String.valueOf(listContainerBid.size());
     String shippingLine = bidNew.getBiddingDocument().getOutbound().getShippingLine().getUsername();
-    shippingLineNotificationRequest.setRecipient(shippingLine);
-    shippingLineNotificationRequest.setRelatedResource(combined.getId());
-    shippingLineNotificationRequest
+    combinedNotificationRequest.setRecipient(shippingLine);
+    combinedNotificationRequest.setRelatedResource(combined.getId());
+    combinedNotificationRequest
         .setMessage(String.format(NotificationMessage.SEND_REQUEST_BORROW_NOTIFICATION_TO_SHIPPING_LINE,
             offeree.getCompanyName(), bidNew.getBidder().getCompanyName(), numberOfContainer));
-    shippingLineNotificationRequest.setAction(EnumCombinedNotification.REQUEST.name());
-    shippingLineNotificationRequest.setType(EnumNotificationType.COMBINED.name());
-    CombinedNotification shippingLineNotification = combinedNotificationService
-        .createShippingLineNotification(shippingLineNotificationRequest);
+    combinedNotificationRequest.setAction(EnumCombinedNotification.REQUEST.name());
+    combinedNotificationRequest.setType(EnumNotificationType.COMBINED.name());
+    CombinedNotification combinedNotification = combinedNotificationService
+        .createCombinedNotification(combinedNotificationRequest);
 
     // Send notification to ShippingLine
     executorService.submit(new Runnable() {
       @Override
       public void run() {
-        combinedWebSocketService.sendCombinedNotifyToShippingLine(shippingLineNotification);
+        combinedWebSocketService.sendCombinedNotifyToShippingLine(combinedNotification);
       }
     });
   }
@@ -346,7 +346,7 @@ public class NotificationBroadcast {
         String.format(NotificationMessage.SEND_CREATE_EVIDENCE_NOTIFICATION, bidNew.getBidder().getCompanyName()));
     notifyRequest.setAction(EnumCombinedNotification.CONTRACT_ADD.name());
     notifyRequest.setType(EnumNotificationType.COMBINED.name());
-    CombinedNotification notification = combinedNotificationService.createShippingLineNotification(notifyRequest);
+    CombinedNotification notification = combinedNotificationService.createCombinedNotification(notifyRequest);
 
     // Send notification to Merchant
     executorService.submit(new Runnable() {
@@ -398,7 +398,7 @@ public class NotificationBroadcast {
         .setMessage(String.format(NotificationMessage.SEND_REJECT_EVIDENCE_NOTIFICATION, offeree.getCompanyName()));
     notifyRequest.setAction(EnumCombinedNotification.CONTRACT_REJECTED.name());
     notifyRequest.setType(EnumNotificationType.COMBINED.name());
-    CombinedNotification notification = combinedNotificationService.createShippingLineNotification(notifyRequest);
+    CombinedNotification notification = combinedNotificationService.createCombinedNotification(notifyRequest);
 
     // Send notification to Forwarder
     executorService.submit(new Runnable() {
@@ -423,7 +423,7 @@ public class NotificationBroadcast {
         .setMessage(String.format(NotificationMessage.SEND_EDIT_CONTRACT_NOTIFICATION, offeree.getCompanyName()));
     notifyRequest.setAction(EnumCombinedNotification.CONTRACT_EDITED.name());
     notifyRequest.setType(EnumNotificationType.COMBINED.name());
-    CombinedNotification notification = combinedNotificationService.createShippingLineNotification(notifyRequest);
+    CombinedNotification notification = combinedNotificationService.createCombinedNotification(notifyRequest);
 
     // Send notification to Forwarder
     executorService.submit(new Runnable() {
@@ -588,7 +588,7 @@ public class NotificationBroadcast {
     notifyRequest.setAction(EnumCombinedNotification.INVOICE_ADD.name());
     notifyRequest.setType(EnumNotificationType.COMBINED.name());
 
-    CombinedNotification notification = combinedNotificationService.createShippingLineNotification(notifyRequest);
+    CombinedNotification notification = combinedNotificationService.createCombinedNotification(notifyRequest);
 
     // Send notification to User
     executorService.submit(new Runnable() {
@@ -611,7 +611,7 @@ public class NotificationBroadcast {
     notifyRequest.setAction(EnumCombinedNotification.INVOICE_ACCEPTED.name());
     notifyRequest.setType(EnumNotificationType.COMBINED.name());
 
-    CombinedNotification notification = combinedNotificationService.createShippingLineNotification(notifyRequest);
+    CombinedNotification notification = combinedNotificationService.createCombinedNotification(notifyRequest);
 
     // Send notification to User
     executorService.submit(new Runnable() {
@@ -634,7 +634,7 @@ public class NotificationBroadcast {
     notifyRequest.setAction(EnumCombinedNotification.INVOICE_REJECTED.name());
     notifyRequest.setType(EnumNotificationType.COMBINED.name());
 
-    CombinedNotification notification = combinedNotificationService.createShippingLineNotification(notifyRequest);
+    CombinedNotification notification = combinedNotificationService.createCombinedNotification(notifyRequest);
 
     // Send notification to User
     executorService.submit(new Runnable() {

@@ -45,15 +45,15 @@ public class ShippingNotificationController {
   private static final Logger logger = LoggerFactory.getLogger(ShippingNotificationController.class);
 
   @Autowired
-  ShippingNotificationService driverNotificationService;
+  ShippingNotificationService shippingNotificationService;
 
   @GetMapping("")
   @PreAuthorize("hasRole('MERCHANT') or hasRole('DRIVER')")
-  public ResponseEntity<?> getDriverNotifications(@Valid PaginationRequest request) {
+  public ResponseEntity<?> getShippingNotifications(@Valid PaginationRequest request) {
 
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
-    Page<ShippingNotification> pages = driverNotificationService.getDriverNotificationsByUsername(username, request);
+    Page<ShippingNotification> pages = shippingNotificationService.getShippingNotificationsByUsername(username, request);
 
     PaginationResponse<ShippingNotificationDto> response = new PaginationResponse<>();
     response.setPageNumber(request.getPage());
@@ -61,53 +61,53 @@ public class ShippingNotificationController {
     response.setTotalElements(pages.getTotalElements());
     response.setTotalPages(pages.getTotalPages());
 
-    List<ShippingNotification> driverNotifications = pages.getContent();
-    List<ShippingNotificationDto> driverNotificationsDto = new ArrayList<>();
-    driverNotifications.forEach(driverNotification -> driverNotificationsDto
-        .add(ShippingNotificationMapper.toDriverNotificationDto(driverNotification)));
-    response.setContents(driverNotificationsDto);
+    List<ShippingNotification> shippingNotifications = pages.getContent();
+    List<ShippingNotificationDto> shippingNotificationsDto = new ArrayList<>();
+    shippingNotifications.forEach(shippingNotification -> shippingNotificationsDto
+        .add(ShippingNotificationMapper.toShippingNotificationDto(shippingNotification)));
+    response.setContents(shippingNotificationsDto);
 
     return ResponseEntity.ok(response);
   }
 
   @GetMapping("/{id}")
   @PreAuthorize("hasRole('MERCHANT') or hasRole('DRIVER')")
-  public ResponseEntity<?> getDriverNotification(@PathVariable Long id) {
-    ShippingNotification driverNotification = driverNotificationService.getDriverNotification(id);
-    ShippingNotificationDto driverNotificationDto = ShippingNotificationMapper
-        .toDriverNotificationDto(driverNotification);
-    return ResponseEntity.ok(driverNotificationDto);
+  public ResponseEntity<?> getShippingNotification(@PathVariable Long id) {
+    ShippingNotification shippingNotification = shippingNotificationService.getShippingNotification(id);
+    ShippingNotificationDto shippingNotificationDto = ShippingNotificationMapper
+        .toShippingNotificationDto(shippingNotification);
+    return ResponseEntity.ok(shippingNotificationDto);
   }
 
   @Transactional
   @PreAuthorize("hasRole('MERCHANT') or hasRole('DRIVER')")
   @RequestMapping(value = "/{id}", method = RequestMethod.PATCH, consumes = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<?> editDriverNotification(@PathVariable("id") Long id,
+  public ResponseEntity<?> editShippingNotification(@PathVariable("id") Long id,
       @RequestBody Map<String, Object> updates) {
-    ShippingNotification driverNotification = driverNotificationService.editDriverNotification(id, updates);
-    ShippingNotificationDto driverNotificationDto = ShippingNotificationMapper
-        .toDriverNotificationDto(driverNotification);
+    ShippingNotification shippingNotification = shippingNotificationService.editShippingNotification(id, updates);
+    ShippingNotificationDto shippingNotificationDto = ShippingNotificationMapper
+        .toShippingNotificationDto(shippingNotification);
 
     // Set default response body
     DefaultResponse<ShippingNotificationDto> defaultResponse = new DefaultResponse<>();
     defaultResponse.setMessage(Constant.EMPTY_STRING);
-    defaultResponse.setData(driverNotificationDto);
+    defaultResponse.setData(shippingNotificationDto);
 
-    logger.info("editDriverNotification from id {} with request: {}", id, updates.toString());
+    logger.info("editShippingNotification from id {} with request: {}", id, updates.toString());
     return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 
   @Transactional
   @PreAuthorize("hasRole('MERCHANT') or hasRole('DRIVER')")
   @DeleteMapping("/{id}")
-  public ResponseEntity<?> deleteDriverNotification(@PathVariable Long id) {
-    driverNotificationService.removeDriverNotification(id);
+  public ResponseEntity<?> deleteShippingNotification(@PathVariable Long id) {
+    shippingNotificationService.removeShippingNotification(id);
 
     // Set default response body
     DefaultResponse<ShippingNotificationDto> defaultResponse = new DefaultResponse<>();
     defaultResponse.setMessage(SuccessMessage.DELETE_NOTIFICATION_SUCCESSFULLY);
 
-    logger.info("deleteDriverNotification from report id {}", id);
+    logger.info("deleteShippingNotification from report id {}", id);
     return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 }

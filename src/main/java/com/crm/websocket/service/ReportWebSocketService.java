@@ -1,8 +1,8 @@
 package com.crm.websocket.service;
 
-import com.crm.models.ReportNotification;
+import com.crm.models.dto.ReportNotificationDto;
 
 public interface ReportWebSocketService {
 
-  void sendReportNotifyToModeratorOrUser(ReportNotification notification);
+  void sendReportNotifyToModeratorOrUser(ReportNotificationDto notification);
 }

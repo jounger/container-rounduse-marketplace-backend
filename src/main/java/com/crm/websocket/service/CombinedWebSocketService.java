@@ -1,8 +1,8 @@
 package com.crm.websocket.service;
 
-import com.crm.models.CombinedNotification;
+import com.crm.models.dto.CombinedNotificationDto;
 
 public interface CombinedWebSocketService {
 
-  void sendCombinedNotifyToShippingLine(CombinedNotification notification);
+  void sendCombinedNotifyToShippingLine(CombinedNotificationDto notification);
 }

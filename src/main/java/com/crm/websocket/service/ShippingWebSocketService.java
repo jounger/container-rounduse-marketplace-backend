@@ -1,8 +1,8 @@
 package com.crm.websocket.service;
 
-import com.crm.models.ShippingNotification;
+import com.crm.models.dto.ShippingNotificationDto;
 
 public interface ShippingWebSocketService {
 
-  void sendBiddingNotifyToDriver(ShippingNotification notification);
+  void sendBiddingNotifyToDriver(ShippingNotificationDto notification);
 }

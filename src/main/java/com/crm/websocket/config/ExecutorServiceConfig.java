@@ -11,7 +11,7 @@ public class ExecutorServiceConfig {
 
   @Bean("fixedThreadPool")
   public ExecutorService fixedThreadPool() {
-    return Executors.newFixedThreadPool(1);
+    return Executors.newFixedThreadPool(3);
   }
 
   @Bean("singleThreaded")

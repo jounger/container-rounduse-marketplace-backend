@@ -781,6 +781,7 @@ public class BiddingDocumentServiceImplTest {
     biddingDocument.setBidPackagePrice(1000D);
     biddingDocument.setBidFloorPrice(100D);
     biddingDocument.setStatus(EnumBiddingStatus.CANCELED.name());
+    biddingDocument.setOfferee(offeree);
 
     Map<String, Object> updates = new HashMap<>();
     updates.put("bidClosing", Tool.convertLocalDateTimeToString(LocalDateTime.now().plusDays(1)));
@@ -794,7 +795,8 @@ public class BiddingDocumentServiceImplTest {
     when(biddingDocumentRepository.save(Mockito.any(BiddingDocument.class))).thenReturn(biddingDocument);
 
     // then
-    BiddingDocument actualResult = biddingDocumentServiceImpl.editBiddingDocument(biddingDocument.getId(), updates);
+    BiddingDocument actualResult = biddingDocumentServiceImpl.editBiddingDocument(biddingDocument.getId(),
+        offeree.getUsername(), updates);
     assertThat(actualResult).isNotNull();
     assertThat(actualResult.getId()).isEqualTo(biddingDocument.getId());
     assertThat(actualResult.getCurrencyOfPayment()).isEqualTo(biddingDocument.getCurrencyOfPayment());
@@ -826,6 +828,7 @@ public class BiddingDocumentServiceImplTest {
     biddingDocument.setBidPackagePrice(1000D);
     biddingDocument.setBidFloorPrice(100D);
     biddingDocument.setStatus(EnumBiddingStatus.CANCELED.name());
+    biddingDocument.setOfferee(offeree);
 
     Map<String, Object> updates = new HashMap<>();
     updates.put("bidClosing", Tool.convertLocalDateTimeToString(LocalDateTime.now().plusDays(1)));
@@ -839,7 +842,7 @@ public class BiddingDocumentServiceImplTest {
 
     // then
     Assertions.assertThrows(NotFoundException.class, () -> {
-      biddingDocumentServiceImpl.editBiddingDocument(biddingDocument.getId(), updates);
+      biddingDocumentServiceImpl.editBiddingDocument(biddingDocument.getId(), offeree.getUsername(), updates);
     });
   }
 
@@ -866,6 +869,7 @@ public class BiddingDocumentServiceImplTest {
     biddingDocument.setBidPackagePrice(1000D);
     biddingDocument.setBidFloorPrice(100D);
     biddingDocument.setStatus(EnumBiddingStatus.COMBINED.name());
+    biddingDocument.setOfferee(offeree);
 
     Map<String, Object> updates = new HashMap<>();
     updates.put("bidClosing", Tool.convertLocalDateTimeToString(LocalDateTime.now().plusDays(1)));
@@ -879,7 +883,7 @@ public class BiddingDocumentServiceImplTest {
 
     // then
     Assertions.assertThrows(InternalException.class, () -> {
-      biddingDocumentServiceImpl.editBiddingDocument(biddingDocument.getId(), updates);
+      biddingDocumentServiceImpl.editBiddingDocument(biddingDocument.getId(), offeree.getUsername(), updates);
     });
   }
 
@@ -906,6 +910,7 @@ public class BiddingDocumentServiceImplTest {
     biddingDocument.setBidPackagePrice(1000D);
     biddingDocument.setBidFloorPrice(100D);
     biddingDocument.setStatus(EnumBiddingStatus.CANCELED.name());
+    biddingDocument.setOfferee(offeree);
 
     Map<String, Object> updates = new HashMap<>();
     updates.put("bidClosing", Tool.convertLocalDateTimeToString(LocalDateTime.now().minusDays(1)));
@@ -919,7 +924,7 @@ public class BiddingDocumentServiceImplTest {
 
     // then
     Assertions.assertThrows(InternalException.class, () -> {
-      biddingDocumentServiceImpl.editBiddingDocument(biddingDocument.getId(), updates);
+      biddingDocumentServiceImpl.editBiddingDocument(biddingDocument.getId(), offeree.getUsername(), updates);
     });
   }
 
@@ -946,6 +951,7 @@ public class BiddingDocumentServiceImplTest {
     biddingDocument.setBidPackagePrice(1000D);
     biddingDocument.setBidFloorPrice(100D);
     biddingDocument.setStatus(EnumBiddingStatus.CANCELED.name());
+    biddingDocument.setOfferee(offeree);
 
     Map<String, Object> updates = new HashMap<>();
     updates.put("bidClosing", Tool.convertLocalDateTimeToString(LocalDateTime.now().plusDays(3)));
@@ -959,7 +965,7 @@ public class BiddingDocumentServiceImplTest {
 
     // then
     Assertions.assertThrows(InternalException.class, () -> {
-      biddingDocumentServiceImpl.editBiddingDocument(biddingDocument.getId(), updates);
+      biddingDocumentServiceImpl.editBiddingDocument(biddingDocument.getId(), offeree.getUsername(), updates);
     });
   }
 

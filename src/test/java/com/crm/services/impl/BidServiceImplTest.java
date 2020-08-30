@@ -159,7 +159,7 @@ public class BidServiceImplTest {
     when(forwarderRepository.findByUsername(Mockito.anyString())).thenReturn(Optional.of(bidder));
     when(containerRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(container));
     when(containerRepository.existsByOutbound(Mockito.anyLong(), Mockito.anyString(), Mockito.anyString(),
-        Mockito.anyList(), Mockito.any(LocalDateTime.class), Mockito.any(LocalDateTime.class), Mockito.anyString()))
+        Mockito.anyList(), Mockito.any(LocalDateTime.class), Mockito.any(LocalDateTime.class)))
             .thenReturn(true);
     when(bidRepository.save(Mockito.any(Bid.class))).thenReturn(bid);
     when(biddingDocumentRepository.save(Mockito.any(BiddingDocument.class))).thenReturn(null);
@@ -443,7 +443,7 @@ public class BidServiceImplTest {
     bid.setId(1L);
     bid.setBidPrice(1000D);
     bid.setStatus(EnumBidStatus.PENDING.name());
-    bid.setBidValidityPeriod(LocalDateTime.now().minusMinutes(30));
+    bid.setValidityPeriod(LocalDateTime.now().minusMinutes(30));
 
     Collection<Role> roles = new ArrayList<Role>();
     Role role = new Role();

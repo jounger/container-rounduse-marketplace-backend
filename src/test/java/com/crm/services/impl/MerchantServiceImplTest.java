@@ -579,8 +579,8 @@ public class MerchantServiceImplTest {
     when(merchantRepository.save(Mockito.any(Merchant.class))).thenReturn(merchant);
 
     // then
-    Merchant actualResult = merchantServiceImpl.editMerchant(merchant.getId(), updates);
-    assertThat(actualResult).isNotNull();
-    assertThat(actualResult.getId()).isEqualTo(merchant.getId());
+    Assertions.assertThrows(NotFoundException.class, () -> {
+      merchantServiceImpl.editMerchant(merchant.getId(), updates);
+    });
   }
 }

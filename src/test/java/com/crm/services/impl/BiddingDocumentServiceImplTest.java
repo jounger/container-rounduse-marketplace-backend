@@ -970,27 +970,6 @@ public class BiddingDocumentServiceImplTest {
   }
 
   @Test
-  @DisplayName("Remove BiddingDocument when merchant notFound")
-  public void whenRemoveBiddingDocument_thenReturnNotFoundException_Merchant() {
-    // given
-    Merchant offeree = new Merchant();
-    offeree.setId(1L);
-    offeree.setUsername("merchant");
-
-    BiddingDocument biddingDocument = new BiddingDocument();
-    biddingDocument.setId(1L);
-    biddingDocument.setOfferee(offeree);
-
-    // when
-    when(merchantRepository.findByUsername(Mockito.anyString())).thenReturn(Optional.empty());
-
-    // then
-    Assertions.assertThrows(NotFoundException.class, () -> {
-      biddingDocumentServiceImpl.removeBiddingDocument(biddingDocument.getId(), offeree.getUsername());
-    });
-  }
-
-  @Test
   @DisplayName("Remove BiddingDocument when BiddingDocument notFound")
   public void whenRemoveBiddingDocument_thenReturnNotFoundException_BiddingDocument() {
     // given
@@ -1003,7 +982,6 @@ public class BiddingDocumentServiceImplTest {
     biddingDocument.setOfferee(offeree);
 
     // when
-    when(merchantRepository.findByUsername(Mockito.anyString())).thenReturn(Optional.of(offeree));
     when(biddingDocumentRepository.findById(Mockito.anyLong())).thenReturn(Optional.empty());
 
     // then
@@ -1019,17 +997,16 @@ public class BiddingDocumentServiceImplTest {
     offeree.setId(1L);
     offeree.setUsername("merchant");
 
-    Merchant Merchant = new Merchant();
-    offeree.setId(1L);
-    offeree.setUsername("merchant1");
+    Merchant merchant = new Merchant();
+    merchant.setId(2L);
+    merchant.setUsername("merchant1");
 
     BiddingDocument biddingDocument = new BiddingDocument();
     biddingDocument.setId(1L);
-    biddingDocument.setOfferee(offeree);
+    biddingDocument.setOfferee(merchant);
     biddingDocument.setStatus(EnumBiddingStatus.CANCELED.name());
 
     // when
-    when(merchantRepository.findByUsername(Mockito.anyString())).thenReturn(Optional.of(Merchant));
     when(biddingDocumentRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(biddingDocument));
 
     // then
@@ -1039,6 +1016,7 @@ public class BiddingDocumentServiceImplTest {
   }
 
   @Test
+  @DisplayName("Remove BiddingDocument when BiddingDocument is in Transaction")
   public void whenRemoveBiddingDocument_thenReturn500_BiddingDocumentIsInTransaction() {
     // given
     Merchant offeree = new Merchant();

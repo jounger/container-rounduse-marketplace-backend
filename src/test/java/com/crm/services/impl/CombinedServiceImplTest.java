@@ -3,6 +3,7 @@ package com.crm.services.impl;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -22,6 +23,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 
+import com.crm.enums.EnumBidStatus;
 import com.crm.exception.DuplicateRecordException;
 import com.crm.exception.InternalException;
 import com.crm.exception.NotFoundException;
@@ -29,6 +31,7 @@ import com.crm.models.Bid;
 import com.crm.models.BiddingDocument;
 import com.crm.models.Combined;
 import com.crm.models.Container;
+import com.crm.models.Contract;
 import com.crm.models.Merchant;
 import com.crm.models.Outbound;
 import com.crm.models.Role;
@@ -36,13 +39,12 @@ import com.crm.models.ShippingInfo;
 import com.crm.payload.request.CombinedRequest;
 import com.crm.payload.request.ContractRequest;
 import com.crm.payload.request.PaginationRequest;
-import com.crm.payload.request.ShippingInfoRequest;
 import com.crm.repository.BidRepository;
 import com.crm.repository.CombinedRepository;
 import com.crm.repository.ContainerRepository;
 import com.crm.repository.UserRepository;
 import com.crm.services.BidService;
-import com.crm.services.ShippingInfoService;
+import com.crm.services.ContractService;
 
 public class CombinedServiceImplTest {
 
@@ -67,7 +69,7 @@ public class CombinedServiceImplTest {
   private ContainerRepository containerRepository;
 
   @Mock
-  private ShippingInfoService shippingInfoService;
+  private ContractService contractService;
 
   PaginationRequest paginationRequest;
 
@@ -99,12 +101,14 @@ public class CombinedServiceImplTest {
     biddingDocument.setOutbound(outbound);
     biddingDocument.setOfferee(merchant);
     biddingDocument.setIsMultipleAward(false);
+    biddingDocument.setBidClosing(LocalDateTime.now().plusDays(1));
     ;
 
     Bid bid = new Bid();
     bid.setId(1L);
     bid.setBidPrice(1000D);
     bid.setBiddingDocument(biddingDocument);
+    bid.setStatus(EnumBidStatus.PENDING.name());
 
     Container container = new Container();
     container.setId(1L);
@@ -115,23 +119,26 @@ public class CombinedServiceImplTest {
     List<Long> containersId = new ArrayList<>();
     containersId.add(1L);
 
-    ContractRequest contract = new ContractRequest();
-    contract.setRequired(true);
-    contract.setFinesAgainstContractViolations(2D);
-    contract.setContainers(containersId);
+    ContractRequest contractRequest = new ContractRequest();
+    contractRequest.setRequired(true);
+    contractRequest.setFinesAgainstContractViolations(2D);
+    contractRequest.setContainers(containersId);
 
     CombinedRequest request = new CombinedRequest();
-    request.setContract(contract);
+    request.setContract(contractRequest);
 
     Combined combined = new Combined();
     combined.setId(1L);
 
+    Contract contract = new Contract();
+    contract.setId(1L);
+    contract.setCombined(combined);
+
     // when
     when(bidRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(bid));
-    when(bidService.editBid(Mockito.anyLong(), Mockito.anyString(), Mockito.anyMap())).thenReturn(bid);
     when(combinedRepository.save(Mockito.any(Combined.class))).thenReturn(combined);
-    when(containerRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(container));
-    when(shippingInfoService.createShippingInfo(Mockito.any(ShippingInfoRequest.class))).thenReturn(shippingInfo);
+    when(contractService.createContract(Mockito.anyLong(), Mockito.anyString(), Mockito.any(ContractRequest.class)))
+        .thenReturn(contract);
 
     // then
     Combined actualResult = combinedServiceImpl.createCombined(bid.getId(), merchant.getUsername(), request);
@@ -185,6 +192,7 @@ public class CombinedServiceImplTest {
     bid.setId(1L);
     bid.setBidPrice(1000D);
     bid.setBiddingDocument(biddingDocument);
+    bid.setStatus(EnumBidStatus.EXPIRED.name());
 
     Container container = new Container();
     container.setId(1L);
@@ -202,7 +210,6 @@ public class CombinedServiceImplTest {
 
     // when
     when(bidRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(bid));
-    when(bidService.editBid(Mockito.anyLong(), Mockito.anyString(), Mockito.anyMap())).thenReturn(bid);
 
     // then
     Assertions.assertThrows(InternalException.class, () -> {

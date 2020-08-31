@@ -195,8 +195,8 @@ public class BidServiceImpl implements BidService {
     if (!supplierRepository.existsByUsername(username)) {
       throw new NotFoundException(ErrorMessage.USER_NOT_FOUND);
     }
-    PageRequest page = PageRequest.of(request.getPage(), request.getLimit()
-        , Sort.by(Direction.ASC, "bidPrice").and(Sort.by(Direction.DESC, "bidder.ratingValue")));
+    PageRequest page = PageRequest.of(request.getPage(), request.getLimit(),
+        Sort.by(Direction.ASC, "bidPrice").and(Sort.by(Direction.DESC, "bidder.ratingValue")));
     String status = request.getStatus();
     if (status != null) {
       return bidRepository.findByBiddingDocument(id, username, status, page);
@@ -275,13 +275,12 @@ public class BidServiceImpl implements BidService {
       bid.setStatus(EnumBidStatus.PENDING.name());
       bid.setFreezeTime(LocalDateTime.now().plusMinutes(Constant.FREEZE_TIME));
     }
-    LocalDateTime freezeTime = bid.getFreezeTime();
-    if (freezeTime.isAfter(LocalDateTime.now())) {
-      throw new InternalException(ErrorMessage.BID_EDIT_BEFORE_FREEZE_TIME);
-    }
 
     String bidPriceString = String.valueOf(updates.get("bidPrice"));
     if (updates.get("bidPrice") != null && !Tool.isEqual(bid.getBidPrice(), bidPriceString)) {
+      if (isBeforeFreezeTime(bid)) {
+        throw new InternalException(ErrorMessage.BID_EDIT_BEFORE_FREEZE_TIME);
+      }
       bid.setBidPrice(Double.parseDouble(bidPriceString));
       bid.setFreezeTime(LocalDateTime.now().plusMinutes(Constant.FREEZE_TIME));
     }
@@ -301,6 +300,9 @@ public class BidServiceImpl implements BidService {
 
       if (bid.getStatus().equalsIgnoreCase(EnumBidStatus.CANCELED.name())
           || bid.getStatus().equalsIgnoreCase(EnumBidStatus.EXPIRED.name())) {
+        if (isBeforeFreezeTime(bid)) {
+          throw new InternalException(ErrorMessage.BID_EDIT_BEFORE_FREEZE_TIME);
+        }
         containers.forEach(container -> {
           container.setStatus(EnumSupplyStatus.CREATED.name());
           containerRepository.save(container);
@@ -377,6 +379,11 @@ public class BidServiceImpl implements BidService {
     if (bid.getBidder().getUsername() != username) {
       throw new NotFoundException("Access denied.");
     }
+
+    if (isBeforeFreezeTime(bid)) {
+      throw new InternalException(ErrorMessage.BID_EDIT_BEFORE_FREEZE_TIME);
+    }
+
     if (!bid.getStatus().equalsIgnoreCase(EnumBidStatus.ACCEPTED.name())) {
       List<Container> containers = new ArrayList<>(bid.getContainers());
       containers.forEach(container -> {
@@ -396,6 +403,11 @@ public class BidServiceImpl implements BidService {
     if (!bid.getBidder().getUsername().equals(username)) {
       throw new ForbiddenException(ErrorMessage.USER_ACCESS_DENIED);
     }
+
+    if (isBeforeFreezeTime(bid)) {
+      throw new InternalException(ErrorMessage.BID_EDIT_BEFORE_FREEZE_TIME);
+    }
+
     BiddingDocument biddingDocument = bid.getBiddingDocument();
     Outbound outbound = biddingDocument.getOutbound();
     Booking booking = outbound.getBooking();
@@ -472,6 +484,10 @@ public class BidServiceImpl implements BidService {
     Bid bid = bidRepository.findById(id).orElseThrow(() -> new NotFoundException(ErrorMessage.BID_NOT_FOUND));
     if (!bid.getBidder().getUsername().equals(username)) {
       throw new ForbiddenException(ErrorMessage.USER_ACCESS_DENIED);
+    }
+
+    if (isBeforeFreezeTime(bid)) {
+      throw new InternalException(ErrorMessage.BID_EDIT_BEFORE_FREEZE_TIME);
     }
 
     if (!bid.getStatus().equalsIgnoreCase(EnumBidStatus.PENDING.name())) {
@@ -554,6 +570,14 @@ public class BidServiceImpl implements BidService {
       result.add(bid);
     }
     return result;
+  }
+
+  public boolean isBeforeFreezeTime(Bid bid) {
+    LocalDateTime freezeTime = bid.getFreezeTime();
+    if (freezeTime.isBefore(LocalDateTime.now())) {
+      return true;
+    }
+    return false;
   }
 
 }

@@ -574,7 +574,7 @@ public class BidServiceImpl implements BidService {
 
   public boolean isBeforeFreezeTime(Bid bid) {
     LocalDateTime freezeTime = bid.getFreezeTime();
-    if (freezeTime.isBefore(LocalDateTime.now())) {
+    if ((LocalDateTime.now()).isBefore(freezeTime)) {
       return true;
     }
     return false;

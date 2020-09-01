@@ -62,7 +62,7 @@ public class MerchantController {
 
   @PreAuthorize("hasRole('MODERATOR')")
   @GetMapping("")
-  public ResponseEntity<?> getMerchants(@PathVariable Long id, @Valid PaginationRequest request) {
+  public ResponseEntity<?> getMerchants(@Valid PaginationRequest request) {
 
     Page<Merchant> pages = merchantService.getMerchants(request);
 

@@ -143,7 +143,7 @@ public class ContainerTypeController {
 
     // Set default response body
     DefaultResponse<ContainerTractorDto> defaultResponse = new DefaultResponse<>();
-    defaultResponse.setMessage(SuccessMessage.EDIT_CONTAINER_TYPE_SUCCESSFULLY);
+    defaultResponse.setMessage(SuccessMessage.DELETE_CONTAINER_TYPE_SUCCESSFULLY);
 
     return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }

@@ -77,7 +77,7 @@ class ContractControllerIT {
   @Autowired
   private ObjectMapper objectMapper;
 
-  @Autowired
+  @MockBean
   private NotificationBroadcast notificationBroadcast;
 
   PaginationRequest paginationRequest;

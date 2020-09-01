@@ -89,14 +89,14 @@ class NotificationControllerIT {
 
   @Test
   @WithMockUser(username = "merchant", roles = { "MERCHANT" })
-  void getNotificationsByUser_thenStatusOk_andReturnNotifications() throws Exception {
+  void getNotifications_thenStatusOk_andReturnNotifications() throws Exception {
     // given
     when(notificationService.getNotificationsByUser(Mockito.anyString(), Mockito.any(PaginationRequest.class)))
         .thenReturn(pages);
 
     // when and then
     MvcResult result = mockMvc
-        .perform(get("/api/notification/user").contentType(MediaType.APPLICATION_JSON_VALUE).params(requestParams))
+        .perform(get("/api/notification").contentType(MediaType.APPLICATION_JSON_VALUE).params(requestParams))
         .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.data[0].id").value(1))
         .andExpect(jsonPath("$.data[0].isRead").value(false)).andReturn();
 

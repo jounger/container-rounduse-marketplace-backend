@@ -76,7 +76,7 @@ class ReportControllerIT {
   @MockBean
   private ReportService reportService;
 
-  @Autowired
+  @MockBean
   private NotificationBroadcast notificationBroadcast;
 
   @Autowired

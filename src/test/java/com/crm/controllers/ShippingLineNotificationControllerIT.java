@@ -58,15 +58,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @SpringBootTest
 @AutoConfigureMockMvc
 @ContextConfiguration
-class ShippingLineNotificationControllerIT {
+class CombinedNotificationControllerIT {
 
-  private static final Logger logger = LoggerFactory.getLogger(ShippingLineNotificationControllerIT.class);
+  private static final Logger logger = LoggerFactory.getLogger(CombinedNotificationControllerIT.class);
 
   @Autowired
   protected MockMvc mockMvc;
 
   @MockBean
-  private CombinedNotificationService ShippingLineNotificationService;
+  private CombinedNotificationService combinedNotificationService;
 
   @Autowired
   private ObjectMapper objectMapper;
@@ -75,7 +75,7 @@ class ShippingLineNotificationControllerIT {
 
   Page<CombinedNotification> pages;
 
-  CombinedNotification ShippingLineNotification;
+  CombinedNotification CombinedNotification;
 
   ShippingLine shippingLine;
 
@@ -85,9 +85,9 @@ class ShippingLineNotificationControllerIT {
 
   @BeforeEach
   public void setUp() {
-    ShippingLineNotification = new CombinedNotification();
-    ShippingLineNotification.setId(1L);
-    ShippingLineNotification.setIsRead(false);
+    CombinedNotification = new CombinedNotification();
+    CombinedNotification.setId(1L);
+    CombinedNotification.setIsRead(false);
 
     BiddingDocument biddingDocument = new BiddingDocument();
     biddingDocument.setId(1L);
@@ -187,12 +187,12 @@ class ShippingLineNotificationControllerIT {
 
     combined.setContract(contract);
 
-    ShippingLineNotification.setRecipient(merchant);
-    ShippingLineNotification.setRelatedResource(combined);
-    ShippingLineNotification.setSendDate(timeNow);
+    CombinedNotification.setRecipient(merchant);
+    CombinedNotification.setRelatedResource(combined);
+    CombinedNotification.setSendDate(timeNow);
 
     List<CombinedNotification> biddingNotifications = new ArrayList<CombinedNotification>();
-    biddingNotifications.add(ShippingLineNotification);
+    biddingNotifications.add(CombinedNotification);
     pages = new PageImpl<CombinedNotification>(biddingNotifications);
 
     requestParams = new LinkedMultiValueMap<>();
@@ -202,9 +202,9 @@ class ShippingLineNotificationControllerIT {
 
   @Test
   @WithMockUser(username = "shippingline", roles = { "SHIPPINGLINE" })
-  void getShippingLineNotifications_thenStatusOk_andReturnShippingLineNotifications() throws Exception {
+  void getCombinedNotifications_thenStatusOk_andReturnCombinedNotifications() throws Exception {
     // given
-    when(ShippingLineNotificationService.getShippingLineNotificationsByUsername(Mockito.anyString(),
+    when(combinedNotificationService.getCombinedNotificationsByUsername(Mockito.anyString(),
         Mockito.any(PaginationRequest.class))).thenReturn(pages);
 
     // when and then
@@ -221,10 +221,10 @@ class ShippingLineNotificationControllerIT {
 
   @Test
   @WithMockUser(username = "shippingline", roles = { "SHIPPINGLINE" })
-  void getShippingLineNotification_thenStatusOk_andReturnShippingLineNotification() throws Exception {
+  void getCombinedNotification_thenStatusOk_andReturnCombinedNotification() throws Exception {
     // given
-    when(ShippingLineNotificationService.getShippingLineNotification(Mockito.anyLong()))
-        .thenReturn(ShippingLineNotification);
+    when(combinedNotificationService.getCombinedNotification(Mockito.anyLong()))
+        .thenReturn(CombinedNotification);
     // when and then
     MvcResult result = mockMvc
         .perform(get("/api/combined-notification/1").contentType(MediaType.APPLICATION_JSON_VALUE)).andDo(print())
@@ -238,13 +238,13 @@ class ShippingLineNotificationControllerIT {
 
   @Test
   @WithMockUser(username = "shippingline", roles = { "SHIPPINGLINE" })
-  void editShippingLineNotification_thenStatusOk_andReturnShippingLineNotification() throws Exception {
+  void editCombinedNotification_thenStatusOk_andReturnCombinedNotification() throws Exception {
     // given
     Map<String, String> updates = new HashMap<String, String>();
     updates.put("isRead", "true");
-    ShippingLineNotification.setIsRead(true);
-    when(ShippingLineNotificationService.editShippingLineNotification(Mockito.anyLong(), Mockito.anyMap()))
-        .thenReturn(ShippingLineNotification);
+    CombinedNotification.setIsRead(true);
+    when(combinedNotificationService.editCombinedNotification(Mockito.anyLong(), Mockito.anyMap()))
+        .thenReturn(CombinedNotification);
 
     // when and then
     MvcResult result = mockMvc
@@ -260,7 +260,7 @@ class ShippingLineNotificationControllerIT {
 
   @Test
   @WithMockUser(username = "shippingline", roles = { "SHIPPINGLINE" })
-  void deleteShippingLineNotification_thenStatusOk_AndReturnMessage() throws Exception {
+  void deleteCombinedNotification_thenStatusOk_AndReturnMessage() throws Exception {
 
     // when and then
     MvcResult result = mockMvc

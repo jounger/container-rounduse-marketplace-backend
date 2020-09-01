@@ -1,5 +1,6 @@
 package com.crm.controllers;
 
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -41,6 +42,7 @@ import com.crm.models.Report;
 import com.crm.payload.request.FeedbackRequest;
 import com.crm.payload.request.PaginationRequest;
 import com.crm.services.FeedbackService;
+import com.crm.websocket.controller.NotificationBroadcast;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -56,6 +58,9 @@ class FeedbackControllerIT {
 
   @MockBean
   private FeedbackService feedbackService;
+
+  @MockBean
+  private NotificationBroadcast notificationBroadcast;
 
   @Autowired
   private ObjectMapper objectMapper;
@@ -76,7 +81,7 @@ class FeedbackControllerIT {
     operator.setUsername("operator");
     Forwarder forwarder = new Forwarder();
     forwarder.setUsername("forwarder");
-    
+
     Report report = new Report();
     report.setId(1L);
 
@@ -106,6 +111,7 @@ class FeedbackControllerIT {
     request.setMessage("abc");
     when(feedbackService.createFeedback(Mockito.anyLong(), Mockito.anyString(), Mockito.any(FeedbackRequest.class)))
         .thenReturn(feedback);
+    doNothing().when(notificationBroadcast).broadcastCreateFeedbackToUser(Mockito.any(Feedback.class));
 
     // when and then
     MvcResult result = mockMvc
@@ -130,6 +136,8 @@ class FeedbackControllerIT {
 
     when(feedbackService.createFeedback(Mockito.anyLong(), Mockito.anyString(), Mockito.any(FeedbackRequest.class)))
         .thenReturn(feedback);
+    doNothing().when(notificationBroadcast).broadcastCreateFeedbackToModerator(Mockito.anyString(),
+        Mockito.any(Feedback.class));
 
     // when and then
     MvcResult result = mockMvc
@@ -163,14 +171,14 @@ class FeedbackControllerIT {
 
   @Test
   @WithMockUser(username = "forwarder", roles = { "FORWARDER" })
-  void getFeedbacksByUser_thenStatusOk_andReturnFeedbacks() throws JsonProcessingException, Exception {
+  void getFeedbacks_thenStatusOk_andReturnFeedbacks() throws JsonProcessingException, Exception {
     // given
     when(feedbackService.getFeedbacksByUser(Mockito.anyString(), Mockito.any(PaginationRequest.class)))
         .thenReturn(pages);
 
     // when and then
     MvcResult result = mockMvc
-        .perform(get("/api/feedback/user").contentType(MediaType.APPLICATION_JSON_VALUE).params(requestParams))
+        .perform(get("/api/feedback").contentType(MediaType.APPLICATION_JSON_VALUE).params(requestParams))
         .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.data[0].id").value(1))
         .andExpect(jsonPath("$.data[0].sender.username").value("operator")).andReturn();
 

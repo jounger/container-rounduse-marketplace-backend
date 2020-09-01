@@ -140,25 +140,6 @@ class OperatorControllerIT {
 
   @Test
   @WithMockUser(username = "moderator", roles = { "MODERATOR" })
-  void getOperatorByUsername_thenStatusOk_andReturnOperator() throws JsonProcessingException, Exception {
-    // given
-    requestParams = new LinkedMultiValueMap<String, String>();
-    requestParams.add("username", "moderator");
-    when(operatorService.getOperatorByUsername(Mockito.anyString())).thenReturn(operator);
-
-    // when and then
-    MvcResult result = mockMvc
-        .perform(get("/api/operator/username").contentType(MediaType.APPLICATION_JSON_VALUE).params(requestParams))
-        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.id").value(1))
-        .andExpect(jsonPath("$.username").value("operator")).andReturn();
-
-    // print response
-    MockHttpServletResponse response = result.getResponse();
-    logger.info("Reponse: {}", response.getContentAsString());
-  }
-
-  @Test
-  @WithMockUser(username = "moderator", roles = { "MODERATOR" })
   void getOperators_thenStatusOk_andReturnOperators() throws Exception {
     when(operatorService.getOperators(Mockito.any(PaginationRequest.class))).thenReturn(pages);
 

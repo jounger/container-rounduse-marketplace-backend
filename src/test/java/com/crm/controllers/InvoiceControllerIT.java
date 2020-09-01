@@ -1,5 +1,6 @@
 package com.crm.controllers;
 
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -41,6 +42,7 @@ import com.crm.models.Merchant;
 import com.crm.payload.request.InvoiceRequest;
 import com.crm.payload.request.PaginationRequest;
 import com.crm.services.InvoiceService;
+import com.crm.websocket.controller.NotificationBroadcast;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -56,6 +58,9 @@ class InvoiceControllerIT {
 
   @MockBean
   private InvoiceService invoiceService;
+
+  @MockBean
+  private NotificationBroadcast notificationBroadcast;
 
   @Autowired
   private ObjectMapper objectMapper;
@@ -77,6 +82,7 @@ class InvoiceControllerIT {
     invoice.setId(1L);
     invoice.setDetail("123");
     invoice.setPaymentDate(LocalDateTime.now());
+    invoice.setIsPaid(true);
 
     Contract contract = new Contract();
     contract.setId(1L);
@@ -90,7 +96,7 @@ class InvoiceControllerIT {
     merchant.setUsername("merchant");
     Forwarder forwarder = new Forwarder();
     forwarder.setUsername("forwarder");
-    
+
     invoice.setSender(merchant);
     invoice.setRecipient(forwarder);
 
@@ -110,6 +116,7 @@ class InvoiceControllerIT {
     InvoiceRequest request = new InvoiceRequest();
     request.setDetail("123");
 
+    doNothing().when(notificationBroadcast).broadcastCreateInvoiceToUser(Mockito.any(Invoice.class));
     when(invoiceService.createInvoice(Mockito.anyLong(), Mockito.anyString(), Mockito.any(InvoiceRequest.class)))
         .thenReturn(invoice);
 
@@ -145,14 +152,14 @@ class InvoiceControllerIT {
 
   @Test
   @WithMockUser(username = "forwarder", roles = { "FORWARDER" })
-  void getInvoicesByUser_thenStatusOk_andReturnInvoices() throws JsonProcessingException, Exception {
+  void getInvoices_thenStatusOk_andReturnInvoices() throws JsonProcessingException, Exception {
     // given
     when(invoiceService.getInvoicesByUser(Mockito.anyString(), Mockito.any(PaginationRequest.class))).thenReturn(pages);
 
     // when and then
     MvcResult result = mockMvc
-        .perform(get("/api/invoice/user").contentType(MediaType.APPLICATION_JSON_VALUE).params(requestParams))
-        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.data[0].id").value(1))
+        .perform(get("/api/invoice").contentType(MediaType.APPLICATION_JSON_VALUE).params(requestParams)).andDo(print())
+        .andExpect(status().isOk()).andExpect(jsonPath("$.data[0].id").value(1))
         .andExpect(jsonPath("$.data[0].detail").value("123")).andReturn();
 
     // print response
@@ -188,6 +195,8 @@ class InvoiceControllerIT {
     Map<String, Object> updates = new HashMap<String, Object>();
     updates.put("detail", "123456");
     when(invoiceService.editInvoice(Mockito.anyLong(), Mockito.anyString(), Mockito.anyMap())).thenReturn(invoice);
+    doNothing().when(notificationBroadcast).broadcastSendAcceptInvoiceToUser(Mockito.any(Invoice.class));
+    doNothing().when(notificationBroadcast).broadcastSendRejectInvoiceToUser(Mockito.any(Invoice.class));
 
     // when and then
     MvcResult result = mockMvc

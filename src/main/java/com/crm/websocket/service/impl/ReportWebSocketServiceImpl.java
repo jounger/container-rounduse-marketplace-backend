@@ -5,9 +5,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import com.crm.common.Constant;
-import com.crm.models.ReportNotification;
 import com.crm.models.dto.ReportNotificationDto;
-import com.crm.models.mapper.ReportNotificationMapper;
 import com.crm.websocket.service.ReportWebSocketService;
 
 @Service
@@ -17,8 +15,7 @@ public class ReportWebSocketServiceImpl implements ReportWebSocketService {
   SimpMessagingTemplate messagingTemplate;
 
   @Override
-  public void sendReportNotifyToModeratorOrUser(ReportNotification notification) {
-    ReportNotificationDto notificationDto = ReportNotificationMapper.toReportNotificationDto(notification);
+  public void sendReportNotifyToModeratorOrUser(ReportNotificationDto notificationDto) {
     messagingTemplate.convertAndSendToUser(notificationDto.getRecipient().getUsername(), Constant.REPORT_NOTIFICATION,
         notificationDto);
   }

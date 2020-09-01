@@ -39,21 +39,21 @@ import com.crm.services.CombinedNotificationService;
 @CrossOrigin(origins = "*", maxAge = 3600)
 @PreAuthorize("hasRole('SHIPPINGLINE')")
 @RestController
-@RequestMapping("/api/combine-notification")
+@RequestMapping("/api/combined-notification")
 public class CombinedNotificationController {
 
   private static final Logger logger = LoggerFactory.getLogger(CombinedNotificationController.class);
 
   @Autowired
-  CombinedNotificationService shippingLineNotificationService;
+  CombinedNotificationService combinedNotificationService;
 
   @GetMapping("")
   @PreAuthorize("hasRole('MERCHANT') or hasRole('FORWARDER') or hasRole('SHIPPINGLINE')")
-  public ResponseEntity<?> getShippingLineNotifications(@Valid PaginationRequest request) {
+  public ResponseEntity<?> getCombinedNotifications(@Valid PaginationRequest request) {
 
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
-    Page<CombinedNotification> pages = shippingLineNotificationService.getShippingLineNotificationsByUsername(username,
+    Page<CombinedNotification> pages = combinedNotificationService.getCombinedNotificationsByUsername(username,
         request);
 
     PaginationResponse<CombinedNotificationDto> response = new PaginationResponse<>();
@@ -62,48 +62,48 @@ public class CombinedNotificationController {
     response.setTotalElements(pages.getTotalElements());
     response.setTotalPages(pages.getTotalPages());
 
-    List<CombinedNotification> shippingLineNotifications = pages.getContent();
-    List<CombinedNotificationDto> shippingLineNotificationsDto = new ArrayList<>();
-    shippingLineNotifications.forEach(shippingLineNotification -> shippingLineNotificationsDto
-        .add(CombinedNotificationMapper.toShippingLineNotificationDto(shippingLineNotification)));
-    response.setContents(shippingLineNotificationsDto);
+    List<CombinedNotification> combinedNotifications = pages.getContent();
+    List<CombinedNotificationDto> combinedNotificationsDto = new ArrayList<>();
+    combinedNotifications.forEach(combinedNotification -> combinedNotificationsDto
+        .add(CombinedNotificationMapper.toCombinedNotificationDto(combinedNotification)));
+    response.setContents(combinedNotificationsDto);
 
     return ResponseEntity.ok(response);
   }
 
   @GetMapping("/{id}")
   @PreAuthorize("hasRole('MERCHANT') or hasRole('FORWARDER') or hasRole('SHIPPINGLINE')")
-  public ResponseEntity<?> getShippingLineNotification(@PathVariable Long id) {
-    CombinedNotification shippingLineNotification = shippingLineNotificationService.getShippingLineNotification(id);
-    CombinedNotificationDto shippingLineNotificationDto = CombinedNotificationMapper
-        .toShippingLineNotificationDto(shippingLineNotification);
-    return ResponseEntity.ok(shippingLineNotificationDto);
+  public ResponseEntity<?> getCombinedNotification(@PathVariable Long id) {
+    CombinedNotification combinedNotification = combinedNotificationService.getCombinedNotification(id);
+    CombinedNotificationDto combinedNotificationDto = CombinedNotificationMapper
+        .toCombinedNotificationDto(combinedNotification);
+    return ResponseEntity.ok(combinedNotificationDto);
   }
 
   @Transactional
   @PreAuthorize("hasRole('MERCHANT') or hasRole('FORWARDER') or hasRole('SHIPPINGLINE')")
   @RequestMapping(value = "/{id}", method = RequestMethod.PATCH, consumes = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<?> editShippingLineNotification(@PathVariable("id") Long id,
+  public ResponseEntity<?> editCombinedNotification(@PathVariable("id") Long id,
       @RequestBody Map<String, Object> updates) {
-    CombinedNotification shippingLineNotification = shippingLineNotificationService.editShippingLineNotification(id,
+    CombinedNotification combinedNotification = combinedNotificationService.editCombinedNotification(id,
         updates);
-    CombinedNotificationDto shippingLineNotificationDto = CombinedNotificationMapper
-        .toShippingLineNotificationDto(shippingLineNotification);
+    CombinedNotificationDto combinedNotificationDto = CombinedNotificationMapper
+        .toCombinedNotificationDto(combinedNotification);
 
     // Set default response body
     DefaultResponse<CombinedNotificationDto> defaultResponse = new DefaultResponse<>();
     defaultResponse.setMessage(Constant.EMPTY_STRING);
-    defaultResponse.setData(shippingLineNotificationDto);
+    defaultResponse.setData(combinedNotificationDto);
 
-    logger.info("editShippingLineNotification from id {} with request {}", id, updates.toString());
+    logger.info("editCombinedNotification from id {} with request {}", id, updates.toString());
     return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 
   @Transactional
   @PreAuthorize("hasRole('MERCHANT') or hasRole('FORWARDER') or hasRole('SHIPPINGLINE')")
   @DeleteMapping("/{id}")
-  public ResponseEntity<?> deleteShippingLineNotification(@PathVariable Long id) {
-    shippingLineNotificationService.removeShippingLineNotification(id);
+  public ResponseEntity<?> deleteCombinedNotification(@PathVariable Long id) {
+    combinedNotificationService.removeCombinedNotification(id);
 
     // Set default response body
     DefaultResponse<CombinedNotificationDto> defaultResponse = new DefaultResponse<>();

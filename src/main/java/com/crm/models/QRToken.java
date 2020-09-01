@@ -1,8 +1,7 @@
 package com.crm.models;
 
 import javax.persistence.Entity;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
+import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.PrimaryKeyJoinColumn;
@@ -21,11 +20,10 @@ import lombok.ToString;
 @ToString
 @Entity
 @Table(name = "qr_token")
-@Inheritance(strategy = InheritanceType.JOINED)
 @PrimaryKeyJoinColumn(name = "token_id")
 public class QRToken extends Token {
 
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "shipping_info_id")
   private ShippingInfo shippingInfo;
 

@@ -7,6 +7,7 @@ import java.util.Collection;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
@@ -31,7 +32,7 @@ import lombok.ToString;
 @PrimaryKeyJoinColumn(name = "supply_id")
 public class Outbound extends Supply {
 
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "merchant_id")
   private Merchant merchant;
 
@@ -59,7 +60,7 @@ public class Outbound extends Supply {
   @Column(name = "status")
   private String status;
 
-  @OneToOne(mappedBy = "outbound", cascade = CascadeType.ALL)
+  @OneToOne(mappedBy = "outbound", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
   private Booking booking;
 
   @OneToMany(mappedBy = "outbound")

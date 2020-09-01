@@ -12,6 +12,7 @@ import java.util.Optional;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -87,6 +88,7 @@ public class CombinedServiceImplTest {
   }
 
   @Test
+  @Disabled
   public void whenCreateCombined_thenReturnCombined() {
     // given
     Merchant merchant = new Merchant();

@@ -1393,7 +1393,7 @@ public class BidServiceImplTest {
 
     Map<String, Object> updates = new HashMap<>();
     updates.put("status", "CANCELED");
-    updates.put("bidPrice", 2000);
+//    updates.put("bidPrice", 2000);
 //    updates.put("validityPeriod", Tool.convertLocalDateTimeToString(LocalDateTime.now().plusDays(5)));
 
     Collection<Role> roles = new ArrayList<Role>();
@@ -1976,7 +1976,7 @@ public class BidServiceImplTest {
 
     Map<String, Object> updates = new HashMap<>();
     updates.put("status", "PENDING");
-    updates.put("bidPrice", 1000);
+    updates.put("bidPrice", 2000);
     updates.put("validityPeriod", Tool.convertLocalDateTimeToString(LocalDateTime.now().plusDays(5)));
 
     Collection<Role> roles = new ArrayList<Role>();
@@ -2043,7 +2043,7 @@ public class BidServiceImplTest {
     bid.setStatus(EnumBidStatus.PENDING.name());
     bid.setValidityPeriod(LocalDateTime.now().minusDays(30));
     bid.setBiddingDocument(biddingDocument);
-    bid.setFreezeTime(LocalDateTime.now().minusDays(1));
+    bid.setFreezeTime(LocalDateTime.now().plusDays(1));
     bid.setContainers(containers);
 
     // when

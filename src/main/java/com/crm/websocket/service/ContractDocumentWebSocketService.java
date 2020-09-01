@@ -1,8 +1,8 @@
 package com.crm.websocket.service;
 
-import com.crm.models.CombinedNotification;
+import com.crm.models.dto.CombinedNotificationDto;
 
 public interface ContractDocumentWebSocketService {
 
-  void sendContractDocumentNotifyToUser(CombinedNotification notification);
+  void sendContractDocumentNotifyToUser(CombinedNotificationDto notification);
 }

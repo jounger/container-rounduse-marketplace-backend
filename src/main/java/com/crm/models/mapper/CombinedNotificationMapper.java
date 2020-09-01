@@ -7,28 +7,28 @@ import com.crm.models.dto.CombinedNotificationDto;
 
 public class CombinedNotificationMapper {
 
-  public static CombinedNotificationDto toShippingLineNotificationDto(
-      CombinedNotification shippingLineNotification) {
-    if (shippingLineNotification == null) {
+  public static CombinedNotificationDto toCombinedNotificationDto(
+      CombinedNotification combinedNotification) {
+    if (combinedNotification == null) {
       return null;
     }
 
-    CombinedNotificationDto shippingLineNotificationDto = new CombinedNotificationDto();
+    CombinedNotificationDto combinedNotificationDto = new CombinedNotificationDto();
 
-    shippingLineNotificationDto.setId(shippingLineNotification.getId());
-    shippingLineNotificationDto.setRecipient(UserMapper.toUserDto(shippingLineNotification.getRecipient()));
-    shippingLineNotificationDto.setIsRead(shippingLineNotification.getIsRead());
-    shippingLineNotificationDto.setIsHide(shippingLineNotificationDto.getIsHide());
+    combinedNotificationDto.setId(combinedNotification.getId());
+    combinedNotificationDto.setRecipient(UserMapper.toUserDto(combinedNotification.getRecipient()));
+    combinedNotificationDto.setIsRead(combinedNotification.getIsRead());
+    combinedNotificationDto.setIsHide(combinedNotificationDto.getIsHide());
 
-    CombinedDto relatedResource = CombinedMapper.toCombinedDto(shippingLineNotification.getRelatedResource());
-    shippingLineNotificationDto.setRelatedResource(relatedResource);
+    CombinedDto relatedResource = CombinedMapper.toCombinedDto(combinedNotification.getRelatedResource());
+    combinedNotificationDto.setRelatedResource(relatedResource);
 
-    shippingLineNotificationDto.setMessage(shippingLineNotification.getMessage());
-    shippingLineNotificationDto.setAction(shippingLineNotification.getAction());
-    shippingLineNotificationDto.setType(shippingLineNotification.getType());
+    combinedNotificationDto.setMessage(combinedNotification.getMessage());
+    combinedNotificationDto.setAction(combinedNotification.getAction());
+    combinedNotificationDto.setType(combinedNotification.getType());
 
-    shippingLineNotificationDto.setSendDate(Tool.convertLocalDateTimeToString(shippingLineNotification.getSendDate()));
+    combinedNotificationDto.setSendDate(Tool.convertLocalDateTimeToString(combinedNotification.getSendDate()));
 
-    return shippingLineNotificationDto;
+    return combinedNotificationDto;
   }
 }

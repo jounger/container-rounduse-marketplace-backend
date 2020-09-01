@@ -2,32 +2,32 @@ package com.crm.models.mapper;
 
 import com.crm.common.Tool;
 import com.crm.models.ShippingNotification;
-import com.crm.models.dto.ShippingNotificationDto;
 import com.crm.models.dto.ShippingInfoDto;
+import com.crm.models.dto.ShippingNotificationDto;
 
 public class ShippingNotificationMapper {
 
-  public static ShippingNotificationDto toDriverNotificationDto(ShippingNotification driverNotification) {
-    if (driverNotification == null) {
+  public static ShippingNotificationDto toShippingNotificationDto(ShippingNotification shippingNotification) {
+    if (shippingNotification == null) {
       return null;
     }
 
-    ShippingNotificationDto driverNotificationDto = new ShippingNotificationDto();
+    ShippingNotificationDto shippingNotificationDto = new ShippingNotificationDto();
 
-    driverNotificationDto.setId(driverNotification.getId());
-    driverNotificationDto.setRecipient(UserMapper.toUserDto(driverNotification.getRecipient()));
-    driverNotificationDto.setIsRead(driverNotification.getIsRead());
-    driverNotificationDto.setIsHide(driverNotificationDto.getIsHide());
+    shippingNotificationDto.setId(shippingNotification.getId());
+    shippingNotificationDto.setRecipient(UserMapper.toUserDto(shippingNotification.getRecipient()));
+    shippingNotificationDto.setIsRead(shippingNotification.getIsRead());
+    shippingNotificationDto.setIsHide(shippingNotificationDto.getIsHide());
 
-    ShippingInfoDto relatedResource = ShippingInfoMapper.toShippingInfoDto(driverNotification.getRelatedResource());
-    driverNotificationDto.setRelatedResource(relatedResource);
+    ShippingInfoDto relatedResource = ShippingInfoMapper.toShippingInfoDto(shippingNotification.getRelatedResource());
+    shippingNotificationDto.setRelatedResource(relatedResource);
 
-    driverNotificationDto.setMessage(driverNotification.getMessage());
-    driverNotificationDto.setAction(driverNotification.getAction());
-    driverNotificationDto.setType(driverNotification.getType());
+    shippingNotificationDto.setMessage(shippingNotification.getMessage());
+    shippingNotificationDto.setAction(shippingNotification.getAction());
+    shippingNotificationDto.setType(shippingNotification.getType());
 
-    driverNotificationDto.setSendDate(Tool.convertLocalDateTimeToString(driverNotification.getSendDate()));
+    shippingNotificationDto.setSendDate(Tool.convertLocalDateTimeToString(shippingNotification.getSendDate()));
 
-    return driverNotificationDto;
+    return shippingNotificationDto;
   }
 }

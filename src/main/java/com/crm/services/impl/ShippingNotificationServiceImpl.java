@@ -33,10 +33,10 @@ public class ShippingNotificationServiceImpl implements ShippingNotificationServ
   private ShippingInfoRepository shippingInfoRepository;
 
   @Autowired
-  private ShippingNotificationRepository driverNotificationRepository;
+  private ShippingNotificationRepository shippingNotificationRepository;
 
   @Override
-  public ShippingNotification createDriverNotification(ShippingNotificationRequest request) {
+  public ShippingNotification createShippingNotification(ShippingNotificationRequest request) {
     ShippingNotification driverNotification = new ShippingNotification();
 
     User recipient = userRepositoty.findByUsername(request.getRecipient())
@@ -59,62 +59,62 @@ public class ShippingNotificationServiceImpl implements ShippingNotificationServ
 
     driverNotification.setSendDate(LocalDateTime.now());
 
-    ShippingNotification _driverNotification = driverNotificationRepository.save(driverNotification);
+    ShippingNotification _driverNotification = shippingNotificationRepository.save(driverNotification);
     return _driverNotification;
   }
 
   @Override
-  public ShippingNotification getDriverNotification(Long id) {
-    ShippingNotification driverNotification = driverNotificationRepository.findById(id)
+  public ShippingNotification getShippingNotification(Long id) {
+    ShippingNotification driverNotification = shippingNotificationRepository.findById(id)
         .orElseThrow(() -> new NotFoundException(ErrorMessage.NOTIFICATION_NOT_FOUND));
     return driverNotification;
   }
 
   @Override
-  public Page<ShippingNotification> getDriverNotifications(PaginationRequest request) {
+  public Page<ShippingNotification> getShippingNotifications(PaginationRequest request) {
     String status = request.getStatus();
     Page<ShippingNotification> driverNotifications = null;
     if (status != null && !status.isEmpty()) {
-      driverNotifications = driverNotificationRepository.findByType(status,
+      driverNotifications = shippingNotificationRepository.findByType(status,
           PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt")));
     } else {
-      driverNotifications = driverNotificationRepository
+      driverNotifications = shippingNotificationRepository
           .findAll(PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt")));
     }
     return driverNotifications;
   }
 
   @Override
-  public Page<ShippingNotification> getDriverNotificationsByUser(Long recipient, PaginationRequest request) {
+  public Page<ShippingNotification> getShippingNotificationsByUser(Long recipient, PaginationRequest request) {
     String status = request.getStatus();
     Page<ShippingNotification> driverNotifications = null;
     if (status != null && !status.isEmpty()) {
-      driverNotifications = driverNotificationRepository.findByUserAndStatus(recipient, status,
+      driverNotifications = shippingNotificationRepository.findByUserAndStatus(recipient, status,
           PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt")));
     } else {
-      driverNotifications = driverNotificationRepository.findByUser(recipient,
+      driverNotifications = shippingNotificationRepository.findByUser(recipient,
           PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt")));
     }
     return driverNotifications;
   }
 
   @Override
-  public Page<ShippingNotification> getDriverNotificationsByUsername(String recipient, PaginationRequest request) {
+  public Page<ShippingNotification> getShippingNotificationsByUsername(String recipient, PaginationRequest request) {
     String status = request.getStatus();
     Page<ShippingNotification> driverNotifications = null;
     if (status != null && !status.isEmpty()) {
-      driverNotifications = driverNotificationRepository.findByUserAndStatus(recipient, status,
+      driverNotifications = shippingNotificationRepository.findByUserAndStatus(recipient, status,
           PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt")));
     } else {
-      driverNotifications = driverNotificationRepository.findByUser(recipient,
+      driverNotifications = shippingNotificationRepository.findByUser(recipient,
           PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt")));
     }
     return driverNotifications;
   }
 
   @Override
-  public ShippingNotification editDriverNotification(Long id, Map<String, Object> updates) {
-    ShippingNotification driverNotification = driverNotificationRepository.findById(id)
+  public ShippingNotification editShippingNotification(Long id, Map<String, Object> updates) {
+    ShippingNotification driverNotification = shippingNotificationRepository.findById(id)
         .orElseThrow(() -> new NotFoundException(ErrorMessage.NOTIFICATION_NOT_FOUND));
 
     Boolean isRead = (Boolean) updates.get("isRead");
@@ -127,14 +127,14 @@ public class ShippingNotificationServiceImpl implements ShippingNotificationServ
       driverNotification.setIsHide(isHide);
     }
 
-    ShippingNotification _driverNotification = driverNotificationRepository.save(driverNotification);
+    ShippingNotification _driverNotification = shippingNotificationRepository.save(driverNotification);
     return _driverNotification;
   }
 
   @Override
-  public void removeDriverNotification(Long id) {
-    if (driverNotificationRepository.existsById(id)) {
-      driverNotificationRepository.deleteById(id);
+  public void removeShippingNotification(Long id) {
+    if (shippingNotificationRepository.existsById(id)) {
+      shippingNotificationRepository.deleteById(id);
     } else {
       throw new NotFoundException(ErrorMessage.NOTIFICATION_NOT_FOUND);
     }

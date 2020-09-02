@@ -55,6 +55,7 @@ import com.crm.models.Port;
 import com.crm.models.ShippingLine;
 import com.crm.payload.request.BidRequest;
 import com.crm.payload.request.PaginationRequest;
+import com.crm.payload.request.ReplaceContainerRequest;
 import com.crm.services.BidService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -101,6 +102,14 @@ class BidControllerIT {
 
   ShippingLine shippingLine;
 
+  Forwarder forwarder;
+
+  ContainerTractor tractor;
+
+  ContainerSemiTrailer trailer;
+
+  List<Container> containers;
+
   @BeforeEach
   public void setUp() {
     biddingDocument = new BiddingDocument();
@@ -119,7 +128,7 @@ class BidControllerIT {
     merchant.setUsername("merchant");
     biddingDocument.setOfferee(merchant);
 
-    Forwarder forwarder = new Forwarder();
+    forwarder = new Forwarder();
     forwarder.setId(2L);
     forwarder.setUsername("forwarder");
 
@@ -158,13 +167,13 @@ class BidControllerIT {
 
     biddingDocument.setOutbound(outbound);
 
-    ContainerTractor tractor = new ContainerTractor();
+    tractor = new ContainerTractor();
     tractor.setId(1L);
 
-    ContainerSemiTrailer trailer = new ContainerSemiTrailer();
+    trailer = new ContainerSemiTrailer();
     trailer.setId(2L);
 
-    List<Container> containers = new ArrayList<>();
+    containers = new ArrayList<>();
     Container container = new Container();
     container.setId(1L);
     container.setDriver(driver);
@@ -254,7 +263,8 @@ class BidControllerIT {
 
     // when and then
     MvcResult result = mockMvc
-        .perform(get("/api/bid/combined/bidding-document/1").contentType(MediaType.APPLICATION_JSON_VALUE).params(requestParams))
+        .perform(get("/api/bid/combined/bidding-document/1").contentType(MediaType.APPLICATION_JSON_VALUE)
+            .params(requestParams))
         .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.data[0].id").value(1))
         .andExpect(jsonPath("$.data[0].bidDate").value(Tool.convertLocalDateTimeToString(timeNow))).andReturn();
 
@@ -298,6 +308,119 @@ class BidControllerIT {
             .content(objectMapper.writeValueAsString(updates)))
         .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.data.id").value(1))
         .andExpect(jsonPath("$.data.bidPrice").value(2800D)).andReturn();
+
+    // print response
+    MockHttpServletResponse response = result.getResponse();
+    logger.info("Reponse: {}", response.getContentAsString());
+  }
+
+  @Test
+  @WithMockUser(username = "forwarder", roles = { "FORWARDER" })
+  void addContainers_thenStatusOk_andReturnBid() throws Exception {
+    // given
+    Driver driver2 = new Driver();
+    driver2.setId(4L);
+    driver2.setUsername("driver");
+    driver2.setForwarder(forwarder);
+    tractor = new ContainerTractor();
+    tractor.setId(3L);
+    tractor.setLicensePlate("123sa");
+    trailer = new ContainerSemiTrailer();
+    trailer.setId(4L);
+    trailer.setLicensePlate("123ss");
+    Container container2 = new Container();
+    container2.setId(5L);
+    container2.setDriver(driver2);
+    container2.setTractor(tractor);
+    container2.setTrailer(trailer);
+    container2.setNumber("312c3");
+    BidRequest request = new BidRequest();
+    request.getContainers().add(5L);
+    when(bidService.addContainer(Mockito.anyLong(), Mockito.anyString(), Mockito.any(BidRequest.class)))
+        .thenReturn(bid);
+
+    // when and then
+    MvcResult result = mockMvc
+        .perform(post("/api/bid/1/container").contentType(MediaType.APPLICATION_JSON_VALUE)
+            .content(objectMapper.writeValueAsString(request)))
+        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.data.id").value(1))
+        .andExpect(jsonPath("$.data.bidPrice").value(2300D)).andReturn();
+
+    // print response
+    MockHttpServletResponse response = result.getResponse();
+    logger.info("Reponse: {}", response.getContentAsString());
+  }
+
+  @Test
+  @WithMockUser(username = "forwarder", roles = { "FORWARDER" })
+  void removeContainer_thenStatusOk_andReturnBid() throws Exception {
+    // given
+    Driver driver2 = new Driver();
+    driver2.setId(4L);
+    driver2.setUsername("driver");
+    driver2.setForwarder(forwarder);
+    tractor = new ContainerTractor();
+    tractor.setId(3L);
+    tractor.setLicensePlate("123sa");
+    trailer = new ContainerSemiTrailer();
+    trailer.setId(4L);
+    trailer.setLicensePlate("123ss");
+    Container container2 = new Container();
+    container2.setId(5L);
+    container2.setDriver(driver2);
+    container2.setTractor(tractor);
+    container2.setTrailer(trailer);
+    container2.setNumber("312c3");
+    BidRequest request = new BidRequest();
+    request.getContainers().add(5L);
+    when(bidService.removeContainer(Mockito.anyLong(), Mockito.anyString(), Mockito.anyLong())).thenReturn(bid);
+
+    // when and then
+    MvcResult result = mockMvc
+        .perform(delete("/api/bid/1/container/1").contentType(MediaType.APPLICATION_JSON_VALUE)
+            .content(objectMapper.writeValueAsString(request)))
+        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.data.id").value(1))
+        .andExpect(jsonPath("$.data.bidPrice").value(2300D)).andReturn();
+
+    // print response
+    MockHttpServletResponse response = result.getResponse();
+    logger.info("Reponse: {}", response.getContentAsString());
+  }
+
+  @Test
+  @WithMockUser(username = "forwarder", roles = { "FORWARDER" })
+  void replaceContainer_thenStatusOk_andReturnBid() throws Exception {
+    // given
+    Driver driver2 = new Driver();
+    driver2.setId(4L);
+    driver2.setUsername("driver");
+    driver2.setForwarder(forwarder);
+    tractor = new ContainerTractor();
+    tractor.setId(3L);
+    tractor.setLicensePlate("123sa");
+    trailer = new ContainerSemiTrailer();
+    trailer.setId(4L);
+    trailer.setLicensePlate("123ss");
+    Container container2 = new Container();
+    container2.setId(5L);
+    container2.setDriver(driver2);
+    container2.setTractor(tractor);
+    container2.setTrailer(trailer);
+    container2.setNumber("312c3");
+    bid.getContainers().add(container2);
+    ReplaceContainerRequest request = new ReplaceContainerRequest();
+    request.setOldContainerId(1L);
+    request.setOldContainerId(5L);
+    when(
+        bidService.replaceContainer(Mockito.anyLong(), Mockito.anyString(), Mockito.any(ReplaceContainerRequest.class)))
+            .thenReturn(bid);
+
+    // when and then
+    MvcResult result = mockMvc
+        .perform(patch("/api/bid/1/container").contentType(MediaType.APPLICATION_JSON_VALUE)
+            .content(objectMapper.writeValueAsString(request)))
+        .andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.data.id").value(1))
+        .andExpect(jsonPath("$.data.bidPrice").value(2300D)).andReturn();
 
     // print response
     MockHttpServletResponse response = result.getResponse();

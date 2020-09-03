@@ -48,6 +48,7 @@ import com.crm.models.Role;
 import com.crm.models.ShippingLine;
 import com.crm.payload.request.BidRequest;
 import com.crm.payload.request.PaginationRequest;
+import com.crm.payload.request.ReplaceContainerRequest;
 import com.crm.repository.BidRepository;
 import com.crm.repository.BiddingDocumentRepository;
 import com.crm.repository.BiddingNotificationRepository;
@@ -56,6 +57,7 @@ import com.crm.repository.ForwarderRepository;
 import com.crm.repository.OutboundRepository;
 import com.crm.repository.SupplierRepository;
 import com.crm.repository.UserRepository;
+import com.crm.services.BiddingDocumentService;
 
 public class BidServiceImplTest {
 
@@ -87,6 +89,9 @@ public class BidServiceImplTest {
 
   @Mock
   private BiddingNotificationRepository biddingNotificationRepository;
+
+  @Mock
+  BiddingDocumentService biddingDocumentService;
 
   PaginationRequest paginationRequest;
 
@@ -2895,7 +2900,95 @@ public class BidServiceImplTest {
       bidServiceImpl.removeBid(bid.getId(), merchant.getUsername());
     });
   }
-  
+
+  @Test
+  @DisplayName("Remove bid when freeTime after now")
+  public void whenRemoveBid_ReturnBidEditFreetimeException() {
+    // given
+
+    List<Long> containerId = new ArrayList<>();
+    containerId.add(1L);
+
+    Collection<Role> roles = new ArrayList<Role>();
+    Role role = new Role();
+    role.setId(1L);
+    role.setName("ROLE_MERCHANT");
+    roles.add(role);
+
+    Forwarder bidder = new Forwarder();
+    bidder.setId(1L);
+    bidder.setUsername("forwarder");
+
+    Merchant merchant = new Merchant();
+    merchant.setId(1L);
+    merchant.setUsername("merchant");
+    merchant.setRoles(roles);
+
+    Port port = new Port();
+    port.setId(1L);
+    port.setNameCode("HHP");
+
+    Booking booking = new Booking();
+    booking.setId(1L);
+    booking.setNumber("BL00001");
+    booking.setUnit(2);
+    booking.setCutOffTime(LocalDateTime.now().plusDays(5));
+    booking.setPortOfLoading(port);
+
+    ShippingLine shippingLine = new ShippingLine();
+    shippingLine.setId(1L);
+    shippingLine.setCompanyCode("APL");
+
+    ContainerType containerType = new ContainerType();
+    containerType.setId(1L);
+    containerType.setName("40HC");
+
+    Outbound outbound = new Outbound();
+    outbound.setId(1L);
+    outbound.setBooking(booking);
+    outbound.setShippingLine(shippingLine);
+    outbound.setContainerType(containerType);
+    outbound.setPackingTime(LocalDateTime.now().minusDays(1));
+
+    Container container = new Container();
+    container.setId(1L);
+
+    Container container1 = new Container();
+    container1.setId(2L);
+
+    BiddingDocument biddingDocument = new BiddingDocument();
+    biddingDocument.setId(1L);
+    biddingDocument.setOfferee(merchant);
+    biddingDocument.setOutbound(outbound);
+    biddingDocument.setStatus("BIDDING");
+    biddingDocument.setIsMultipleAward(false);
+    biddingDocument.setBidFloorPrice(100D);
+    biddingDocument.setPriceLeadership(105D);
+    biddingDocument.setBidClosing(LocalDateTime.now().plusDays(10));
+
+    List<Container> containers = new ArrayList<Container>();
+    containers.add(container);
+    containers.add(container1);
+    Bid bid = new Bid();
+    bid.setId(1L);
+    bid.setBidPrice(1000D);
+    bid.setStatus(EnumBidStatus.PENDING.name());
+    bid.setValidityPeriod(LocalDateTime.now().minusDays(30));
+    bid.setBiddingDocument(biddingDocument);
+    bid.setFreezeTime(LocalDateTime.now().plusDays(1));
+    bid.setContainers(containers);
+    bid.setBidder(bidder);
+
+    // when
+    when(bidRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(bid));
+    when(containerRepository.save(Mockito.any(Container.class))).thenReturn(null);
+
+    // then
+    Assertions.assertThrows(InternalException.class, () -> {
+      bidServiceImpl.removeBid(bid.getId(), bidder.getUsername());
+    });
+  }
+
   @Test
   @DisplayName("Remove bid when bid Accepted")
   public void whenRemoveBid_ReturnBidAcceptedException() {
@@ -2981,6 +3074,2191 @@ public class BidServiceImplTest {
     // then
     Assertions.assertThrows(NotFoundException.class, () -> {
       bidServiceImpl.removeBid(bid.getId(), bidder.getUsername());
+    });
+  }
+
+  @Test
+  @DisplayName("Replace Container success")
+  public void whenReplaceContainer_thenReturnBid() {
+    // given
+    ReplaceContainerRequest request = new ReplaceContainerRequest();
+    request.setOldContainerId(1L);
+    request.setNewContainerId(2L);
+
+    List<Long> containerId = new ArrayList<>();
+    containerId.add(1L);
+
+    Collection<Role> roles = new ArrayList<Role>();
+    Role role = new Role();
+    role.setId(1L);
+    role.setName("ROLE_MERCHANT");
+    roles.add(role);
+
+    Forwarder bidder = new Forwarder();
+    bidder.setId(1L);
+    bidder.setUsername("forwarder");
+
+    Merchant merchant = new Merchant();
+    merchant.setId(1L);
+    merchant.setUsername("merchant");
+    merchant.setRoles(roles);
+
+    Port port = new Port();
+    port.setId(1L);
+    port.setNameCode("HHP");
+
+    Booking booking = new Booking();
+    booking.setId(1L);
+    booking.setNumber("BL00001");
+    booking.setUnit(2);
+    booking.setCutOffTime(LocalDateTime.now().plusDays(5));
+    booking.setPortOfLoading(port);
+
+    ShippingLine shippingLine = new ShippingLine();
+    shippingLine.setId(1L);
+    shippingLine.setCompanyCode("APL");
+
+    ContainerType containerType = new ContainerType();
+    containerType.setId(1L);
+    containerType.setName("40HC");
+
+    Outbound outbound = new Outbound();
+    outbound.setId(1L);
+    outbound.setBooking(booking);
+    outbound.setShippingLine(shippingLine);
+    outbound.setContainerType(containerType);
+    outbound.setPackingTime(LocalDateTime.now().minusDays(1));
+
+    Container container = new Container();
+    container.setId(1L);
+
+    Container container1 = new Container();
+    container1.setId(2L);
+
+    BiddingDocument biddingDocument = new BiddingDocument();
+    biddingDocument.setId(1L);
+    biddingDocument.setOfferee(merchant);
+    biddingDocument.setOutbound(outbound);
+    biddingDocument.setStatus("BIDDING");
+    biddingDocument.setIsMultipleAward(false);
+    biddingDocument.setBidFloorPrice(100D);
+    biddingDocument.setPriceLeadership(105D);
+    biddingDocument.setBidClosing(LocalDateTime.now().plusDays(10));
+
+    List<Container> containers = new ArrayList<Container>();
+    containers.add(container);
+    Bid bid = new Bid();
+    bid.setId(1L);
+    bid.setBidPrice(1000D);
+    bid.setStatus(EnumBidStatus.PENDING.name());
+    bid.setValidityPeriod(LocalDateTime.now().minusDays(30));
+    bid.setBiddingDocument(biddingDocument);
+    bid.setFreezeTime(LocalDateTime.now().minusDays(1));
+    bid.setContainers(containers);
+    bid.setBidder(bidder);
+
+    // when
+    when(bidRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(bid));
+    when(containerRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(container));
+    when(containerRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(container1));
+    when(containerRepository.save(Mockito.any(Container.class))).thenReturn(null);
+    when(containerRepository.existsByOutbound(Mockito.anyLong(), Mockito.anyString(), Mockito.anyString(),
+        Mockito.anyList(), Mockito.any(LocalDateTime.class), Mockito.any(LocalDateTime.class))).thenReturn(true);
+    when(bidRepository.save(Mockito.any(Bid.class))).thenReturn(bid);
+
+    // then
+    Bid actualResult = bidServiceImpl.replaceContainer(biddingDocument.getId(), bidder.getUsername(), request);
+    assertThat(actualResult).isNotNull();
+    assertThat(actualResult.getId()).isEqualTo(bid.getId());
+    assertThat(actualResult.getBidPrice()).isEqualTo(bid.getBidPrice());
+    logger.info("Response: {}", actualResult.getBidPrice());
+  }
+
+  @Test
+  @DisplayName("Replace Container when bid notfound")
+  public void whenReplaceContainer_then404_Bid() {
+    // given
+    ReplaceContainerRequest request = new ReplaceContainerRequest();
+    request.setOldContainerId(1L);
+    request.setNewContainerId(2L);
+
+    List<Long> containerId = new ArrayList<>();
+    containerId.add(1L);
+
+    Collection<Role> roles = new ArrayList<Role>();
+    Role role = new Role();
+    role.setId(1L);
+    role.setName("ROLE_MERCHANT");
+    roles.add(role);
+
+    Forwarder bidder = new Forwarder();
+    bidder.setId(1L);
+    bidder.setUsername("forwarder");
+
+    Merchant merchant = new Merchant();
+    merchant.setId(1L);
+    merchant.setUsername("merchant");
+    merchant.setRoles(roles);
+
+    Port port = new Port();
+    port.setId(1L);
+    port.setNameCode("HHP");
+
+    Booking booking = new Booking();
+    booking.setId(1L);
+    booking.setNumber("BL00001");
+    booking.setUnit(2);
+    booking.setCutOffTime(LocalDateTime.now().plusDays(5));
+    booking.setPortOfLoading(port);
+
+    ShippingLine shippingLine = new ShippingLine();
+    shippingLine.setId(1L);
+    shippingLine.setCompanyCode("APL");
+
+    ContainerType containerType = new ContainerType();
+    containerType.setId(1L);
+    containerType.setName("40HC");
+
+    Outbound outbound = new Outbound();
+    outbound.setId(1L);
+    outbound.setBooking(booking);
+    outbound.setShippingLine(shippingLine);
+    outbound.setContainerType(containerType);
+    outbound.setPackingTime(LocalDateTime.now().minusDays(1));
+
+    Container container = new Container();
+    container.setId(1L);
+
+    Container container1 = new Container();
+    container1.setId(2L);
+
+    BiddingDocument biddingDocument = new BiddingDocument();
+    biddingDocument.setId(1L);
+    biddingDocument.setOfferee(merchant);
+    biddingDocument.setOutbound(outbound);
+    biddingDocument.setStatus("BIDDING");
+    biddingDocument.setIsMultipleAward(false);
+    biddingDocument.setBidFloorPrice(100D);
+    biddingDocument.setPriceLeadership(105D);
+    biddingDocument.setBidClosing(LocalDateTime.now().plusDays(10));
+
+    List<Container> containers = new ArrayList<Container>();
+    containers.add(container);
+    Bid bid = new Bid();
+    bid.setId(1L);
+    bid.setBidPrice(1000D);
+    bid.setStatus(EnumBidStatus.PENDING.name());
+    bid.setValidityPeriod(LocalDateTime.now().minusDays(30));
+    bid.setBiddingDocument(biddingDocument);
+    bid.setFreezeTime(LocalDateTime.now().minusDays(1));
+    bid.setContainers(containers);
+    bid.setBidder(bidder);
+
+    // when
+    when(bidRepository.findById(Mockito.anyLong())).thenReturn(Optional.empty());
+
+    // then
+    Assertions.assertThrows(NotFoundException.class, () -> {
+      bidServiceImpl.replaceContainer(biddingDocument.getId(), bidder.getUsername(), request);
+    });
+  }
+
+  @Test
+  @DisplayName("Replace Container when Access Denied")
+  public void whenReplaceContainer_thenReturnAccessDeniedException() {
+    // given
+    ReplaceContainerRequest request = new ReplaceContainerRequest();
+    request.setOldContainerId(1L);
+    request.setNewContainerId(2L);
+
+    List<Long> containerId = new ArrayList<>();
+    containerId.add(1L);
+
+    Collection<Role> roles = new ArrayList<Role>();
+    Role role = new Role();
+    role.setId(1L);
+    role.setName("ROLE_MERCHANT");
+    roles.add(role);
+
+    Forwarder bidder = new Forwarder();
+    bidder.setId(1L);
+    bidder.setUsername("forwarder");
+
+    Merchant merchant = new Merchant();
+    merchant.setId(1L);
+    merchant.setUsername("merchant");
+    merchant.setRoles(roles);
+
+    Port port = new Port();
+    port.setId(1L);
+    port.setNameCode("HHP");
+
+    Booking booking = new Booking();
+    booking.setId(1L);
+    booking.setNumber("BL00001");
+    booking.setUnit(2);
+    booking.setCutOffTime(LocalDateTime.now().plusDays(5));
+    booking.setPortOfLoading(port);
+
+    ShippingLine shippingLine = new ShippingLine();
+    shippingLine.setId(1L);
+    shippingLine.setCompanyCode("APL");
+
+    ContainerType containerType = new ContainerType();
+    containerType.setId(1L);
+    containerType.setName("40HC");
+
+    Outbound outbound = new Outbound();
+    outbound.setId(1L);
+    outbound.setBooking(booking);
+    outbound.setShippingLine(shippingLine);
+    outbound.setContainerType(containerType);
+    outbound.setPackingTime(LocalDateTime.now().minusDays(1));
+
+    Container container = new Container();
+    container.setId(1L);
+
+    Container container1 = new Container();
+    container1.setId(2L);
+
+    BiddingDocument biddingDocument = new BiddingDocument();
+    biddingDocument.setId(1L);
+    biddingDocument.setOfferee(merchant);
+    biddingDocument.setOutbound(outbound);
+    biddingDocument.setStatus("BIDDING");
+    biddingDocument.setIsMultipleAward(false);
+    biddingDocument.setBidFloorPrice(100D);
+    biddingDocument.setPriceLeadership(105D);
+    biddingDocument.setBidClosing(LocalDateTime.now().plusDays(10));
+
+    List<Container> containers = new ArrayList<Container>();
+    containers.add(container);
+    Bid bid = new Bid();
+    bid.setId(1L);
+    bid.setBidPrice(1000D);
+    bid.setStatus(EnumBidStatus.PENDING.name());
+    bid.setValidityPeriod(LocalDateTime.now().minusDays(30));
+    bid.setBiddingDocument(biddingDocument);
+    bid.setFreezeTime(LocalDateTime.now().minusDays(1));
+    bid.setContainers(containers);
+    bid.setBidder(bidder);
+
+    // when
+    when(bidRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(bid));
+    when(containerRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(container));
+    when(containerRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(container1));
+    when(containerRepository.save(Mockito.any(Container.class))).thenReturn(null);
+    when(containerRepository.existsByOutbound(Mockito.anyLong(), Mockito.anyString(), Mockito.anyString(),
+        Mockito.anyList(), Mockito.any(LocalDateTime.class), Mockito.any(LocalDateTime.class))).thenReturn(true);
+    when(bidRepository.save(Mockito.any(Bid.class))).thenReturn(bid);
+
+    // then
+    Assertions.assertThrows(ForbiddenException.class, () -> {
+      bidServiceImpl.replaceContainer(biddingDocument.getId(), merchant.getUsername(), request);
+    });
+  }
+
+  @Test
+  @DisplayName("Replace Container when FreeTime After now")
+  public void whenReplaceContainer_thenReturnVidEditBeforeFreeTimeException() {
+    // given
+    ReplaceContainerRequest request = new ReplaceContainerRequest();
+    request.setOldContainerId(1L);
+    request.setNewContainerId(2L);
+
+    List<Long> containerId = new ArrayList<>();
+    containerId.add(1L);
+
+    Collection<Role> roles = new ArrayList<Role>();
+    Role role = new Role();
+    role.setId(1L);
+    role.setName("ROLE_MERCHANT");
+    roles.add(role);
+
+    Forwarder bidder = new Forwarder();
+    bidder.setId(1L);
+    bidder.setUsername("forwarder");
+
+    Merchant merchant = new Merchant();
+    merchant.setId(1L);
+    merchant.setUsername("merchant");
+    merchant.setRoles(roles);
+
+    Port port = new Port();
+    port.setId(1L);
+    port.setNameCode("HHP");
+
+    Booking booking = new Booking();
+    booking.setId(1L);
+    booking.setNumber("BL00001");
+    booking.setUnit(2);
+    booking.setCutOffTime(LocalDateTime.now().plusDays(5));
+    booking.setPortOfLoading(port);
+
+    ShippingLine shippingLine = new ShippingLine();
+    shippingLine.setId(1L);
+    shippingLine.setCompanyCode("APL");
+
+    ContainerType containerType = new ContainerType();
+    containerType.setId(1L);
+    containerType.setName("40HC");
+
+    Outbound outbound = new Outbound();
+    outbound.setId(1L);
+    outbound.setBooking(booking);
+    outbound.setShippingLine(shippingLine);
+    outbound.setContainerType(containerType);
+    outbound.setPackingTime(LocalDateTime.now().minusDays(1));
+
+    Container container = new Container();
+    container.setId(1L);
+
+    Container container1 = new Container();
+    container1.setId(2L);
+
+    BiddingDocument biddingDocument = new BiddingDocument();
+    biddingDocument.setId(1L);
+    biddingDocument.setOfferee(merchant);
+    biddingDocument.setOutbound(outbound);
+    biddingDocument.setStatus("BIDDING");
+    biddingDocument.setIsMultipleAward(false);
+    biddingDocument.setBidFloorPrice(100D);
+    biddingDocument.setPriceLeadership(105D);
+    biddingDocument.setBidClosing(LocalDateTime.now().plusDays(10));
+
+    List<Container> containers = new ArrayList<Container>();
+    containers.add(container);
+    Bid bid = new Bid();
+    bid.setId(1L);
+    bid.setBidPrice(1000D);
+    bid.setStatus(EnumBidStatus.PENDING.name());
+    bid.setValidityPeriod(LocalDateTime.now().minusDays(30));
+    bid.setBiddingDocument(biddingDocument);
+    bid.setFreezeTime(LocalDateTime.now().plusDays(1));
+    bid.setContainers(containers);
+    bid.setBidder(bidder);
+
+    // when
+    when(bidRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(bid));
+    when(containerRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(container));
+    when(containerRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(container1));
+    when(containerRepository.save(Mockito.any(Container.class))).thenReturn(null);
+    when(containerRepository.existsByOutbound(Mockito.anyLong(), Mockito.anyString(), Mockito.anyString(),
+        Mockito.anyList(), Mockito.any(LocalDateTime.class), Mockito.any(LocalDateTime.class))).thenReturn(true);
+    when(bidRepository.save(Mockito.any(Bid.class))).thenReturn(bid);
+
+    // then
+    Assertions.assertThrows(InternalException.class, () -> {
+      bidServiceImpl.replaceContainer(biddingDocument.getId(), bidder.getUsername(), request);
+    });
+  }
+
+  @Test
+  @DisplayName("Replace Container when old container notfound")
+  public void whenReplaceContainer_thenReturn404_OldContainer() {
+    // given
+    ReplaceContainerRequest request = new ReplaceContainerRequest();
+    request.setOldContainerId(1L);
+    request.setNewContainerId(2L);
+
+    List<Long> containerId = new ArrayList<>();
+    containerId.add(1L);
+
+    Collection<Role> roles = new ArrayList<Role>();
+    Role role = new Role();
+    role.setId(1L);
+    role.setName("ROLE_MERCHANT");
+    roles.add(role);
+
+    Forwarder bidder = new Forwarder();
+    bidder.setId(1L);
+    bidder.setUsername("forwarder");
+
+    Merchant merchant = new Merchant();
+    merchant.setId(1L);
+    merchant.setUsername("merchant");
+    merchant.setRoles(roles);
+
+    Port port = new Port();
+    port.setId(1L);
+    port.setNameCode("HHP");
+
+    Booking booking = new Booking();
+    booking.setId(1L);
+    booking.setNumber("BL00001");
+    booking.setUnit(2);
+    booking.setCutOffTime(LocalDateTime.now().plusDays(5));
+    booking.setPortOfLoading(port);
+
+    ShippingLine shippingLine = new ShippingLine();
+    shippingLine.setId(1L);
+    shippingLine.setCompanyCode("APL");
+
+    ContainerType containerType = new ContainerType();
+    containerType.setId(1L);
+    containerType.setName("40HC");
+
+    Outbound outbound = new Outbound();
+    outbound.setId(1L);
+    outbound.setBooking(booking);
+    outbound.setShippingLine(shippingLine);
+    outbound.setContainerType(containerType);
+    outbound.setPackingTime(LocalDateTime.now().minusDays(1));
+
+    Container container = new Container();
+    container.setId(1L);
+
+    Container container1 = new Container();
+    container1.setId(2L);
+
+    BiddingDocument biddingDocument = new BiddingDocument();
+    biddingDocument.setId(1L);
+    biddingDocument.setOfferee(merchant);
+    biddingDocument.setOutbound(outbound);
+    biddingDocument.setStatus("BIDDING");
+    biddingDocument.setIsMultipleAward(false);
+    biddingDocument.setBidFloorPrice(100D);
+    biddingDocument.setPriceLeadership(105D);
+    biddingDocument.setBidClosing(LocalDateTime.now().plusDays(10));
+
+    List<Container> containers = new ArrayList<Container>();
+    containers.add(container);
+    Bid bid = new Bid();
+    bid.setId(1L);
+    bid.setBidPrice(1000D);
+    bid.setStatus(EnumBidStatus.PENDING.name());
+    bid.setValidityPeriod(LocalDateTime.now().minusDays(30));
+    bid.setBiddingDocument(biddingDocument);
+    bid.setFreezeTime(LocalDateTime.now().minusDays(1));
+    bid.setContainers(containers);
+    bid.setBidder(bidder);
+
+    // when
+    when(bidRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(bid));
+    when(containerRepository.findById(Mockito.anyLong())).thenReturn(Optional.empty());
+
+    // then
+    Assertions.assertThrows(NotFoundException.class, () -> {
+      bidServiceImpl.replaceContainer(biddingDocument.getId(), bidder.getUsername(), request);
+    });
+  }
+
+  @Test
+  @DisplayName("Replace Container when new container notfound")
+  public void whenReplaceContainer_thenReturn404_NewContainer() {
+    // given
+    ReplaceContainerRequest request = new ReplaceContainerRequest();
+    request.setOldContainerId(1L);
+    request.setNewContainerId(2L);
+
+    List<Long> containerId = new ArrayList<>();
+    containerId.add(1L);
+
+    Collection<Role> roles = new ArrayList<Role>();
+    Role role = new Role();
+    role.setId(1L);
+    role.setName("ROLE_MERCHANT");
+    roles.add(role);
+
+    Forwarder bidder = new Forwarder();
+    bidder.setId(1L);
+    bidder.setUsername("forwarder");
+
+    Merchant merchant = new Merchant();
+    merchant.setId(1L);
+    merchant.setUsername("merchant");
+    merchant.setRoles(roles);
+
+    Port port = new Port();
+    port.setId(1L);
+    port.setNameCode("HHP");
+
+    Booking booking = new Booking();
+    booking.setId(1L);
+    booking.setNumber("BL00001");
+    booking.setUnit(2);
+    booking.setCutOffTime(LocalDateTime.now().plusDays(5));
+    booking.setPortOfLoading(port);
+
+    ShippingLine shippingLine = new ShippingLine();
+    shippingLine.setId(1L);
+    shippingLine.setCompanyCode("APL");
+
+    ContainerType containerType = new ContainerType();
+    containerType.setId(1L);
+    containerType.setName("40HC");
+
+    Outbound outbound = new Outbound();
+    outbound.setId(1L);
+    outbound.setBooking(booking);
+    outbound.setShippingLine(shippingLine);
+    outbound.setContainerType(containerType);
+    outbound.setPackingTime(LocalDateTime.now().minusDays(1));
+
+    Container container = new Container();
+    container.setId(1L);
+
+    Container container1 = new Container();
+    container1.setId(2L);
+
+    BiddingDocument biddingDocument = new BiddingDocument();
+    biddingDocument.setId(1L);
+    biddingDocument.setOfferee(merchant);
+    biddingDocument.setOutbound(outbound);
+    biddingDocument.setStatus("BIDDING");
+    biddingDocument.setIsMultipleAward(false);
+    biddingDocument.setBidFloorPrice(100D);
+    biddingDocument.setPriceLeadership(105D);
+    biddingDocument.setBidClosing(LocalDateTime.now().plusDays(10));
+
+    List<Container> containers = new ArrayList<Container>();
+    containers.add(container);
+    Bid bid = new Bid();
+    bid.setId(1L);
+    bid.setBidPrice(1000D);
+    bid.setStatus(EnumBidStatus.PENDING.name());
+    bid.setValidityPeriod(LocalDateTime.now().minusDays(30));
+    bid.setBiddingDocument(biddingDocument);
+    bid.setFreezeTime(LocalDateTime.now().minusDays(1));
+    bid.setContainers(containers);
+    bid.setBidder(bidder);
+
+    // when
+    when(bidRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(bid));
+    when(containerRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(container));
+    when(containerRepository.findById(Mockito.anyLong())).thenReturn(Optional.empty());
+
+    // then
+    Assertions.assertThrows(NotFoundException.class, () -> {
+      bidServiceImpl.replaceContainer(biddingDocument.getId(), bidder.getUsername(), request);
+    });
+  }
+
+  @Test
+  @DisplayName("Replace Container when container not suitable")
+  public void whenReplaceContainer_thenReturnContainerNotSuitable_Exception() {
+    // given
+    ReplaceContainerRequest request = new ReplaceContainerRequest();
+    request.setOldContainerId(1L);
+    request.setNewContainerId(2L);
+
+    List<Long> containerId = new ArrayList<>();
+    containerId.add(1L);
+
+    Collection<Role> roles = new ArrayList<Role>();
+    Role role = new Role();
+    role.setId(1L);
+    role.setName("ROLE_MERCHANT");
+    roles.add(role);
+
+    Forwarder bidder = new Forwarder();
+    bidder.setId(1L);
+    bidder.setUsername("forwarder");
+
+    Merchant merchant = new Merchant();
+    merchant.setId(1L);
+    merchant.setUsername("merchant");
+    merchant.setRoles(roles);
+
+    Port port = new Port();
+    port.setId(1L);
+    port.setNameCode("HHP");
+
+    Booking booking = new Booking();
+    booking.setId(1L);
+    booking.setNumber("BL00001");
+    booking.setUnit(2);
+    booking.setCutOffTime(LocalDateTime.now().plusDays(5));
+    booking.setPortOfLoading(port);
+
+    ShippingLine shippingLine = new ShippingLine();
+    shippingLine.setId(1L);
+    shippingLine.setCompanyCode("APL");
+
+    ContainerType containerType = new ContainerType();
+    containerType.setId(1L);
+    containerType.setName("40HC");
+
+    Outbound outbound = new Outbound();
+    outbound.setId(1L);
+    outbound.setBooking(booking);
+    outbound.setShippingLine(shippingLine);
+    outbound.setContainerType(containerType);
+    outbound.setPackingTime(LocalDateTime.now().minusDays(1));
+
+    Container container = new Container();
+    container.setId(1L);
+
+    Container container1 = new Container();
+    container1.setId(2L);
+
+    BiddingDocument biddingDocument = new BiddingDocument();
+    biddingDocument.setId(1L);
+    biddingDocument.setOfferee(merchant);
+    biddingDocument.setOutbound(outbound);
+    biddingDocument.setStatus("BIDDING");
+    biddingDocument.setIsMultipleAward(false);
+    biddingDocument.setBidFloorPrice(100D);
+    biddingDocument.setPriceLeadership(105D);
+    biddingDocument.setBidClosing(LocalDateTime.now().plusDays(10));
+
+    List<Container> containers = new ArrayList<Container>();
+    containers.add(container);
+    Bid bid = new Bid();
+    bid.setId(1L);
+    bid.setBidPrice(1000D);
+    bid.setStatus(EnumBidStatus.PENDING.name());
+    bid.setValidityPeriod(LocalDateTime.now().minusDays(30));
+    bid.setBiddingDocument(biddingDocument);
+    bid.setFreezeTime(LocalDateTime.now().minusDays(1));
+    bid.setContainers(containers);
+    bid.setBidder(bidder);
+
+    // when
+    when(bidRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(bid));
+    when(containerRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(container));
+    when(containerRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(container1));
+    when(containerRepository.save(Mockito.any(Container.class))).thenReturn(null);
+    when(containerRepository.existsByOutbound(Mockito.anyLong(), Mockito.anyString(), Mockito.anyString(),
+        Mockito.anyList(), Mockito.any(LocalDateTime.class), Mockito.any(LocalDateTime.class))).thenReturn(false);
+
+    // then
+    Assertions.assertThrows(NotFoundException.class, () -> {
+      bidServiceImpl.replaceContainer(biddingDocument.getId(), bidder.getUsername(), request);
+    });
+  }
+
+  @Test
+  @DisplayName("Add Container success")
+  public void whenAddContainer_thenReturnBid() {
+    // given
+    List<Long> containersId = new ArrayList<>();
+    containersId.add(2L);
+
+    BidRequest request = new BidRequest();
+    request.setContainers(containersId);
+
+    List<Long> containerId = new ArrayList<>();
+    containerId.add(1L);
+
+    Collection<Role> roles = new ArrayList<Role>();
+    Role role = new Role();
+    role.setId(1L);
+    role.setName("ROLE_MERCHANT");
+    roles.add(role);
+
+    Forwarder bidder = new Forwarder();
+    bidder.setId(1L);
+    bidder.setUsername("forwarder");
+
+    Merchant merchant = new Merchant();
+    merchant.setId(1L);
+    merchant.setUsername("merchant");
+    merchant.setRoles(roles);
+
+    Port port = new Port();
+    port.setId(1L);
+    port.setNameCode("HHP");
+
+    Booking booking = new Booking();
+    booking.setId(1L);
+    booking.setNumber("BL00001");
+    booking.setUnit(2);
+    booking.setCutOffTime(LocalDateTime.now().plusDays(5));
+    booking.setPortOfLoading(port);
+
+    ShippingLine shippingLine = new ShippingLine();
+    shippingLine.setId(1L);
+    shippingLine.setCompanyCode("APL");
+
+    ContainerType containerType = new ContainerType();
+    containerType.setId(1L);
+    containerType.setName("40HC");
+
+    Outbound outbound = new Outbound();
+    outbound.setId(1L);
+    outbound.setBooking(booking);
+    outbound.setShippingLine(shippingLine);
+    outbound.setContainerType(containerType);
+    outbound.setPackingTime(LocalDateTime.now().minusDays(1));
+
+    Container container = new Container();
+    container.setId(1L);
+
+    Container container1 = new Container();
+    container1.setId(2L);
+
+    BiddingDocument biddingDocument = new BiddingDocument();
+    biddingDocument.setId(1L);
+    biddingDocument.setOfferee(merchant);
+    biddingDocument.setOutbound(outbound);
+    biddingDocument.setStatus("BIDDING");
+    biddingDocument.setIsMultipleAward(true);
+    biddingDocument.setBidFloorPrice(100D);
+    biddingDocument.setPriceLeadership(105D);
+    biddingDocument.setBidClosing(LocalDateTime.now().plusDays(10));
+
+    List<Container> containers = new ArrayList<Container>();
+    containers.add(container);
+    Bid bid = new Bid();
+    bid.setId(1L);
+    bid.setBidPrice(1000D);
+    bid.setStatus(EnumBidStatus.PENDING.name());
+    bid.setValidityPeriod(LocalDateTime.now().minusDays(30));
+    bid.setBiddingDocument(biddingDocument);
+    bid.setFreezeTime(LocalDateTime.now().minusDays(1));
+    bid.setContainers(containers);
+    bid.setBidder(bidder);
+
+    // when
+    when(bidRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(bid));
+    when(containerRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(container));
+    when(containerRepository.existsByOutbound(Mockito.anyLong(), Mockito.anyString(), Mockito.anyString(),
+        Mockito.anyList(), Mockito.any(LocalDateTime.class), Mockito.any(LocalDateTime.class))).thenReturn(true);
+    when(containerRepository.save(Mockito.any(Container.class))).thenReturn(null);
+    when(bidRepository.save(Mockito.any(Bid.class))).thenReturn(bid);
+
+    // then
+    Bid actualResult = bidServiceImpl.addContainer(biddingDocument.getId(), bidder.getUsername(), request);
+    assertThat(actualResult).isNotNull();
+    assertThat(actualResult.getId()).isEqualTo(bid.getId());
+    assertThat(actualResult.getBidPrice()).isEqualTo(bid.getBidPrice());
+    logger.info("Response: {}", actualResult.getBidPrice());
+  }
+
+  @Test
+  @DisplayName("Add Container when bid notfound")
+  public void whenAddContainer_thenReturn404_Bid() {
+    // given
+    List<Long> containersId = new ArrayList<>();
+    containersId.add(2L);
+
+    BidRequest request = new BidRequest();
+    request.setContainers(containersId);
+
+    List<Long> containerId = new ArrayList<>();
+    containerId.add(1L);
+
+    Collection<Role> roles = new ArrayList<Role>();
+    Role role = new Role();
+    role.setId(1L);
+    role.setName("ROLE_MERCHANT");
+    roles.add(role);
+
+    Forwarder bidder = new Forwarder();
+    bidder.setId(1L);
+    bidder.setUsername("forwarder");
+
+    Merchant merchant = new Merchant();
+    merchant.setId(1L);
+    merchant.setUsername("merchant");
+    merchant.setRoles(roles);
+
+    Port port = new Port();
+    port.setId(1L);
+    port.setNameCode("HHP");
+
+    Booking booking = new Booking();
+    booking.setId(1L);
+    booking.setNumber("BL00001");
+    booking.setUnit(2);
+    booking.setCutOffTime(LocalDateTime.now().plusDays(5));
+    booking.setPortOfLoading(port);
+
+    ShippingLine shippingLine = new ShippingLine();
+    shippingLine.setId(1L);
+    shippingLine.setCompanyCode("APL");
+
+    ContainerType containerType = new ContainerType();
+    containerType.setId(1L);
+    containerType.setName("40HC");
+
+    Outbound outbound = new Outbound();
+    outbound.setId(1L);
+    outbound.setBooking(booking);
+    outbound.setShippingLine(shippingLine);
+    outbound.setContainerType(containerType);
+    outbound.setPackingTime(LocalDateTime.now().minusDays(1));
+
+    Container container = new Container();
+    container.setId(1L);
+
+    Container container1 = new Container();
+    container1.setId(2L);
+
+    BiddingDocument biddingDocument = new BiddingDocument();
+    biddingDocument.setId(1L);
+    biddingDocument.setOfferee(merchant);
+    biddingDocument.setOutbound(outbound);
+    biddingDocument.setStatus("BIDDING");
+    biddingDocument.setIsMultipleAward(true);
+    biddingDocument.setBidFloorPrice(100D);
+    biddingDocument.setPriceLeadership(105D);
+    biddingDocument.setBidClosing(LocalDateTime.now().plusDays(10));
+
+    List<Container> containers = new ArrayList<Container>();
+    containers.add(container);
+    Bid bid = new Bid();
+    bid.setId(1L);
+    bid.setBidPrice(1000D);
+    bid.setStatus(EnumBidStatus.PENDING.name());
+    bid.setValidityPeriod(LocalDateTime.now().minusDays(30));
+    bid.setBiddingDocument(biddingDocument);
+    bid.setFreezeTime(LocalDateTime.now().minusDays(1));
+    bid.setContainers(containers);
+    bid.setBidder(bidder);
+
+    // when
+    when(bidRepository.findById(Mockito.anyLong())).thenReturn(Optional.empty());
+
+    // then
+    Assertions.assertThrows(NotFoundException.class, () -> {
+      bidServiceImpl.addContainer(biddingDocument.getId(), bidder.getUsername(), request);
+    });
+  }
+
+  @Test
+  @DisplayName("Add Container when Access Denied")
+  public void whenAddContainer_thenReturnAccessDenied_Exception() {
+    // given
+    List<Long> containersId = new ArrayList<>();
+    containersId.add(2L);
+
+    BidRequest request = new BidRequest();
+    request.setContainers(containersId);
+
+    List<Long> containerId = new ArrayList<>();
+    containerId.add(1L);
+
+    Collection<Role> roles = new ArrayList<Role>();
+    Role role = new Role();
+    role.setId(1L);
+    role.setName("ROLE_MERCHANT");
+    roles.add(role);
+
+    Forwarder bidder = new Forwarder();
+    bidder.setId(1L);
+    bidder.setUsername("forwarder");
+
+    Merchant merchant = new Merchant();
+    merchant.setId(1L);
+    merchant.setUsername("merchant");
+    merchant.setRoles(roles);
+
+    Port port = new Port();
+    port.setId(1L);
+    port.setNameCode("HHP");
+
+    Booking booking = new Booking();
+    booking.setId(1L);
+    booking.setNumber("BL00001");
+    booking.setUnit(2);
+    booking.setCutOffTime(LocalDateTime.now().plusDays(5));
+    booking.setPortOfLoading(port);
+
+    ShippingLine shippingLine = new ShippingLine();
+    shippingLine.setId(1L);
+    shippingLine.setCompanyCode("APL");
+
+    ContainerType containerType = new ContainerType();
+    containerType.setId(1L);
+    containerType.setName("40HC");
+
+    Outbound outbound = new Outbound();
+    outbound.setId(1L);
+    outbound.setBooking(booking);
+    outbound.setShippingLine(shippingLine);
+    outbound.setContainerType(containerType);
+    outbound.setPackingTime(LocalDateTime.now().minusDays(1));
+
+    Container container = new Container();
+    container.setId(1L);
+
+    Container container1 = new Container();
+    container1.setId(2L);
+
+    BiddingDocument biddingDocument = new BiddingDocument();
+    biddingDocument.setId(1L);
+    biddingDocument.setOfferee(merchant);
+    biddingDocument.setOutbound(outbound);
+    biddingDocument.setStatus("BIDDING");
+    biddingDocument.setIsMultipleAward(true);
+    biddingDocument.setBidFloorPrice(100D);
+    biddingDocument.setPriceLeadership(105D);
+    biddingDocument.setBidClosing(LocalDateTime.now().plusDays(10));
+
+    List<Container> containers = new ArrayList<Container>();
+    containers.add(container);
+    Bid bid = new Bid();
+    bid.setId(1L);
+    bid.setBidPrice(1000D);
+    bid.setStatus(EnumBidStatus.PENDING.name());
+    bid.setValidityPeriod(LocalDateTime.now().minusDays(30));
+    bid.setBiddingDocument(biddingDocument);
+    bid.setFreezeTime(LocalDateTime.now().minusDays(1));
+    bid.setContainers(containers);
+    bid.setBidder(bidder);
+
+    // when
+    when(bidRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(bid));
+
+    // then
+    Assertions.assertThrows(ForbiddenException.class, () -> {
+      bidServiceImpl.addContainer(biddingDocument.getId(), merchant.getUsername(), request);
+    });
+  }
+
+  @Test
+  @DisplayName("Add Container when Bid Invalid Edit")
+  public void whenAddContainer_thenReturnBidInvalidEdit_Exception() {
+    // given
+    List<Long> containersId = new ArrayList<>();
+    containersId.add(2L);
+
+    BidRequest request = new BidRequest();
+    request.setContainers(containersId);
+
+    List<Long> containerId = new ArrayList<>();
+    containerId.add(1L);
+
+    Collection<Role> roles = new ArrayList<Role>();
+    Role role = new Role();
+    role.setId(1L);
+    role.setName("ROLE_MERCHANT");
+    roles.add(role);
+
+    Forwarder bidder = new Forwarder();
+    bidder.setId(1L);
+    bidder.setUsername("forwarder");
+
+    Merchant merchant = new Merchant();
+    merchant.setId(1L);
+    merchant.setUsername("merchant");
+    merchant.setRoles(roles);
+
+    Port port = new Port();
+    port.setId(1L);
+    port.setNameCode("HHP");
+
+    Booking booking = new Booking();
+    booking.setId(1L);
+    booking.setNumber("BL00001");
+    booking.setUnit(2);
+    booking.setCutOffTime(LocalDateTime.now().plusDays(5));
+    booking.setPortOfLoading(port);
+
+    ShippingLine shippingLine = new ShippingLine();
+    shippingLine.setId(1L);
+    shippingLine.setCompanyCode("APL");
+
+    ContainerType containerType = new ContainerType();
+    containerType.setId(1L);
+    containerType.setName("40HC");
+
+    Outbound outbound = new Outbound();
+    outbound.setId(1L);
+    outbound.setBooking(booking);
+    outbound.setShippingLine(shippingLine);
+    outbound.setContainerType(containerType);
+    outbound.setPackingTime(LocalDateTime.now().minusDays(1));
+
+    Container container = new Container();
+    container.setId(1L);
+
+    Container container1 = new Container();
+    container1.setId(2L);
+
+    BiddingDocument biddingDocument = new BiddingDocument();
+    biddingDocument.setId(1L);
+    biddingDocument.setOfferee(merchant);
+    biddingDocument.setOutbound(outbound);
+    biddingDocument.setStatus("BIDDING");
+    biddingDocument.setIsMultipleAward(true);
+    biddingDocument.setBidFloorPrice(100D);
+    biddingDocument.setPriceLeadership(105D);
+    biddingDocument.setBidClosing(LocalDateTime.now().plusDays(10));
+
+    List<Container> containers = new ArrayList<Container>();
+    containers.add(container);
+    Bid bid = new Bid();
+    bid.setId(1L);
+    bid.setBidPrice(1000D);
+    bid.setStatus(EnumBidStatus.ACCEPTED.name());
+    bid.setValidityPeriod(LocalDateTime.now().minusDays(30));
+    bid.setBiddingDocument(biddingDocument);
+    bid.setFreezeTime(LocalDateTime.now().minusDays(1));
+    bid.setContainers(containers);
+    bid.setBidder(bidder);
+
+    // when
+    when(bidRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(bid));
+
+    // then
+    Assertions.assertThrows(InternalException.class, () -> {
+      bidServiceImpl.addContainer(biddingDocument.getId(), bidder.getUsername(), request);
+    });
+  }
+
+  @Test
+  @DisplayName("Add Container when Container cannot Add")
+  public void whenAddContainer_thenReturnContainerCannotAdd_Exception() {
+    // given
+    List<Long> containersId = new ArrayList<>();
+    containersId.add(2L);
+
+    BidRequest request = new BidRequest();
+    request.setContainers(containersId);
+
+    List<Long> containerId = new ArrayList<>();
+    containerId.add(1L);
+
+    Collection<Role> roles = new ArrayList<Role>();
+    Role role = new Role();
+    role.setId(1L);
+    role.setName("ROLE_MERCHANT");
+    roles.add(role);
+
+    Forwarder bidder = new Forwarder();
+    bidder.setId(1L);
+    bidder.setUsername("forwarder");
+
+    Merchant merchant = new Merchant();
+    merchant.setId(1L);
+    merchant.setUsername("merchant");
+    merchant.setRoles(roles);
+
+    Port port = new Port();
+    port.setId(1L);
+    port.setNameCode("HHP");
+
+    Booking booking = new Booking();
+    booking.setId(1L);
+    booking.setNumber("BL00001");
+    booking.setUnit(2);
+    booking.setCutOffTime(LocalDateTime.now().plusDays(5));
+    booking.setPortOfLoading(port);
+
+    ShippingLine shippingLine = new ShippingLine();
+    shippingLine.setId(1L);
+    shippingLine.setCompanyCode("APL");
+
+    ContainerType containerType = new ContainerType();
+    containerType.setId(1L);
+    containerType.setName("40HC");
+
+    Outbound outbound = new Outbound();
+    outbound.setId(1L);
+    outbound.setBooking(booking);
+    outbound.setShippingLine(shippingLine);
+    outbound.setContainerType(containerType);
+    outbound.setPackingTime(LocalDateTime.now().minusDays(1));
+
+    Container container = new Container();
+    container.setId(1L);
+
+    Container container1 = new Container();
+    container1.setId(2L);
+
+    BiddingDocument biddingDocument = new BiddingDocument();
+    biddingDocument.setId(1L);
+    biddingDocument.setOfferee(merchant);
+    biddingDocument.setOutbound(outbound);
+    biddingDocument.setStatus("BIDDING");
+    biddingDocument.setIsMultipleAward(false);
+    biddingDocument.setBidFloorPrice(100D);
+    biddingDocument.setPriceLeadership(105D);
+    biddingDocument.setBidClosing(LocalDateTime.now().plusDays(10));
+
+    List<Container> containers = new ArrayList<Container>();
+    containers.add(container);
+    Bid bid = new Bid();
+    bid.setId(1L);
+    bid.setBidPrice(1000D);
+    bid.setStatus(EnumBidStatus.PENDING.name());
+    bid.setValidityPeriod(LocalDateTime.now().minusDays(30));
+    bid.setBiddingDocument(biddingDocument);
+    bid.setFreezeTime(LocalDateTime.now().minusDays(1));
+    bid.setContainers(containers);
+    bid.setBidder(bidder);
+
+    // when
+    when(bidRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(bid));
+
+    // then
+    Assertions.assertThrows(InternalException.class, () -> {
+      bidServiceImpl.addContainer(biddingDocument.getId(), bidder.getUsername(), request);
+    });
+  }
+
+  @Test
+  @DisplayName("Add Container when Container more than need")
+  public void whenAddContainer_thenReturnContainerMoreThanNeed_Exception() {
+    // given
+    List<Long> containersId = new ArrayList<>();
+    containersId.add(3L);
+
+    BidRequest request = new BidRequest();
+    request.setContainers(containersId);
+
+    List<Long> containerId = new ArrayList<>();
+    containerId.add(1L);
+
+    Collection<Role> roles = new ArrayList<Role>();
+    Role role = new Role();
+    role.setId(1L);
+    role.setName("ROLE_MERCHANT");
+    roles.add(role);
+
+    Forwarder bidder = new Forwarder();
+    bidder.setId(1L);
+    bidder.setUsername("forwarder");
+
+    Merchant merchant = new Merchant();
+    merchant.setId(1L);
+    merchant.setUsername("merchant");
+    merchant.setRoles(roles);
+
+    Port port = new Port();
+    port.setId(1L);
+    port.setNameCode("HHP");
+
+    Booking booking = new Booking();
+    booking.setId(1L);
+    booking.setNumber("BL00001");
+    booking.setUnit(1);
+    booking.setCutOffTime(LocalDateTime.now().plusDays(5));
+    booking.setPortOfLoading(port);
+
+    ShippingLine shippingLine = new ShippingLine();
+    shippingLine.setId(1L);
+    shippingLine.setCompanyCode("APL");
+
+    ContainerType containerType = new ContainerType();
+    containerType.setId(1L);
+    containerType.setName("40HC");
+
+    Outbound outbound = new Outbound();
+    outbound.setId(1L);
+    outbound.setBooking(booking);
+    outbound.setShippingLine(shippingLine);
+    outbound.setContainerType(containerType);
+    outbound.setPackingTime(LocalDateTime.now().minusDays(1));
+
+    Container container = new Container();
+    container.setId(1L);
+
+    Container container1 = new Container();
+    container1.setId(2L);
+
+    BiddingDocument biddingDocument = new BiddingDocument();
+    biddingDocument.setId(1L);
+    biddingDocument.setOfferee(merchant);
+    biddingDocument.setOutbound(outbound);
+    biddingDocument.setStatus("BIDDING");
+    biddingDocument.setIsMultipleAward(true);
+    biddingDocument.setBidFloorPrice(100D);
+    biddingDocument.setPriceLeadership(105D);
+    biddingDocument.setBidClosing(LocalDateTime.now().plusDays(10));
+
+    List<Container> containers = new ArrayList<Container>();
+    containers.add(container);
+    containers.add(container1);
+    Bid bid = new Bid();
+    bid.setId(1L);
+    bid.setBidPrice(1000D);
+    bid.setStatus(EnumBidStatus.PENDING.name());
+    bid.setValidityPeriod(LocalDateTime.now().minusDays(30));
+    bid.setBiddingDocument(biddingDocument);
+    bid.setFreezeTime(LocalDateTime.now().minusDays(1));
+    bid.setContainers(containers);
+    bid.setBidder(bidder);
+
+    // when
+    when(bidRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(bid));
+
+    // then
+    Assertions.assertThrows(InternalException.class, () -> {
+      bidServiceImpl.addContainer(biddingDocument.getId(), bidder.getUsername(), request);
+    });
+  }
+
+  @Test
+  @DisplayName("Add Container when Container notfound")
+  public void whenAddContainer_thenReturn404_Container() {
+    // given
+    List<Long> containersId = new ArrayList<>();
+    containersId.add(2L);
+
+    BidRequest request = new BidRequest();
+    request.setContainers(containersId);
+
+    List<Long> containerId = new ArrayList<>();
+    containerId.add(1L);
+
+    Collection<Role> roles = new ArrayList<Role>();
+    Role role = new Role();
+    role.setId(1L);
+    role.setName("ROLE_MERCHANT");
+    roles.add(role);
+
+    Forwarder bidder = new Forwarder();
+    bidder.setId(1L);
+    bidder.setUsername("forwarder");
+
+    Merchant merchant = new Merchant();
+    merchant.setId(1L);
+    merchant.setUsername("merchant");
+    merchant.setRoles(roles);
+
+    Port port = new Port();
+    port.setId(1L);
+    port.setNameCode("HHP");
+
+    Booking booking = new Booking();
+    booking.setId(1L);
+    booking.setNumber("BL00001");
+    booking.setUnit(2);
+    booking.setCutOffTime(LocalDateTime.now().plusDays(5));
+    booking.setPortOfLoading(port);
+
+    ShippingLine shippingLine = new ShippingLine();
+    shippingLine.setId(1L);
+    shippingLine.setCompanyCode("APL");
+
+    ContainerType containerType = new ContainerType();
+    containerType.setId(1L);
+    containerType.setName("40HC");
+
+    Outbound outbound = new Outbound();
+    outbound.setId(1L);
+    outbound.setBooking(booking);
+    outbound.setShippingLine(shippingLine);
+    outbound.setContainerType(containerType);
+    outbound.setPackingTime(LocalDateTime.now().minusDays(1));
+
+    Container container = new Container();
+    container.setId(1L);
+
+    Container container1 = new Container();
+    container1.setId(2L);
+
+    BiddingDocument biddingDocument = new BiddingDocument();
+    biddingDocument.setId(1L);
+    biddingDocument.setOfferee(merchant);
+    biddingDocument.setOutbound(outbound);
+    biddingDocument.setStatus("BIDDING");
+    biddingDocument.setIsMultipleAward(true);
+    biddingDocument.setBidFloorPrice(100D);
+    biddingDocument.setPriceLeadership(105D);
+    biddingDocument.setBidClosing(LocalDateTime.now().plusDays(10));
+
+    List<Container> containers = new ArrayList<Container>();
+    containers.add(container);
+    Bid bid = new Bid();
+    bid.setId(1L);
+    bid.setBidPrice(1000D);
+    bid.setStatus(EnumBidStatus.PENDING.name());
+    bid.setValidityPeriod(LocalDateTime.now().minusDays(30));
+    bid.setBiddingDocument(biddingDocument);
+    bid.setFreezeTime(LocalDateTime.now().minusDays(1));
+    bid.setContainers(containers);
+    bid.setBidder(bidder);
+
+    // when
+    when(bidRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(bid));
+    when(containerRepository.findById(Mockito.anyLong())).thenReturn(Optional.empty());
+
+    // then
+    Assertions.assertThrows(NotFoundException.class, () -> {
+      bidServiceImpl.addContainer(biddingDocument.getId(), bidder.getUsername(), request);
+    });
+  }
+
+  @Test
+  @DisplayName("Add Container when Container not suitable")
+  public void whenAddContainer_thenReturnContainerNotSuitable_Exception() {
+    // given
+    List<Long> containersId = new ArrayList<>();
+    containersId.add(2L);
+
+    BidRequest request = new BidRequest();
+    request.setContainers(containersId);
+
+    List<Long> containerId = new ArrayList<>();
+    containerId.add(1L);
+
+    Collection<Role> roles = new ArrayList<Role>();
+    Role role = new Role();
+    role.setId(1L);
+    role.setName("ROLE_MERCHANT");
+    roles.add(role);
+
+    Forwarder bidder = new Forwarder();
+    bidder.setId(1L);
+    bidder.setUsername("forwarder");
+
+    Merchant merchant = new Merchant();
+    merchant.setId(1L);
+    merchant.setUsername("merchant");
+    merchant.setRoles(roles);
+
+    Port port = new Port();
+    port.setId(1L);
+    port.setNameCode("HHP");
+
+    Booking booking = new Booking();
+    booking.setId(1L);
+    booking.setNumber("BL00001");
+    booking.setUnit(2);
+    booking.setCutOffTime(LocalDateTime.now().plusDays(5));
+    booking.setPortOfLoading(port);
+
+    ShippingLine shippingLine = new ShippingLine();
+    shippingLine.setId(1L);
+    shippingLine.setCompanyCode("APL");
+
+    ContainerType containerType = new ContainerType();
+    containerType.setId(1L);
+    containerType.setName("40HC");
+
+    Outbound outbound = new Outbound();
+    outbound.setId(1L);
+    outbound.setBooking(booking);
+    outbound.setShippingLine(shippingLine);
+    outbound.setContainerType(containerType);
+    outbound.setPackingTime(LocalDateTime.now().minusDays(1));
+
+    Container container = new Container();
+    container.setId(1L);
+
+    Container container1 = new Container();
+    container1.setId(2L);
+
+    BiddingDocument biddingDocument = new BiddingDocument();
+    biddingDocument.setId(1L);
+    biddingDocument.setOfferee(merchant);
+    biddingDocument.setOutbound(outbound);
+    biddingDocument.setStatus("BIDDING");
+    biddingDocument.setIsMultipleAward(true);
+    biddingDocument.setBidFloorPrice(100D);
+    biddingDocument.setPriceLeadership(105D);
+    biddingDocument.setBidClosing(LocalDateTime.now().plusDays(10));
+
+    List<Container> containers = new ArrayList<Container>();
+    containers.add(container);
+    Bid bid = new Bid();
+    bid.setId(1L);
+    bid.setBidPrice(1000D);
+    bid.setStatus(EnumBidStatus.PENDING.name());
+    bid.setValidityPeriod(LocalDateTime.now().minusDays(30));
+    bid.setBiddingDocument(biddingDocument);
+    bid.setFreezeTime(LocalDateTime.now().minusDays(1));
+    bid.setContainers(containers);
+    bid.setBidder(bidder);
+
+    // when
+    when(bidRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(bid));
+    when(containerRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(container));
+    when(containerRepository.existsByOutbound(Mockito.anyLong(), Mockito.anyString(), Mockito.anyString(),
+        Mockito.anyList(), Mockito.any(LocalDateTime.class), Mockito.any(LocalDateTime.class))).thenReturn(false);
+
+    // then
+    Assertions.assertThrows(NotFoundException.class, () -> {
+      bidServiceImpl.addContainer(biddingDocument.getId(), bidder.getUsername(), request);
+    });
+  }
+
+  @Test
+  @DisplayName("Remove Container success")
+  public void whenRemoveContainer_thenReturnBid() {
+    // given
+
+    List<Long> containerId = new ArrayList<>();
+    containerId.add(1L);
+
+    Collection<Role> roles = new ArrayList<Role>();
+    Role role = new Role();
+    role.setId(1L);
+    role.setName("ROLE_MERCHANT");
+    roles.add(role);
+
+    Forwarder bidder = new Forwarder();
+    bidder.setId(1L);
+    bidder.setUsername("forwarder");
+
+    Merchant merchant = new Merchant();
+    merchant.setId(1L);
+    merchant.setUsername("merchant");
+    merchant.setRoles(roles);
+
+    Port port = new Port();
+    port.setId(1L);
+    port.setNameCode("HHP");
+
+    Booking booking = new Booking();
+    booking.setId(1L);
+    booking.setNumber("BL00001");
+    booking.setUnit(2);
+    booking.setCutOffTime(LocalDateTime.now().plusDays(5));
+    booking.setPortOfLoading(port);
+
+    ShippingLine shippingLine = new ShippingLine();
+    shippingLine.setId(1L);
+    shippingLine.setCompanyCode("APL");
+
+    ContainerType containerType = new ContainerType();
+    containerType.setId(1L);
+    containerType.setName("40HC");
+
+    Outbound outbound = new Outbound();
+    outbound.setId(1L);
+    outbound.setBooking(booking);
+    outbound.setShippingLine(shippingLine);
+    outbound.setContainerType(containerType);
+    outbound.setPackingTime(LocalDateTime.now().minusDays(1));
+
+    Container container = new Container();
+    container.setId(1L);
+
+    Container container1 = new Container();
+    container1.setId(2L);
+
+    BiddingDocument biddingDocument = new BiddingDocument();
+    biddingDocument.setId(1L);
+    biddingDocument.setOfferee(merchant);
+    biddingDocument.setOutbound(outbound);
+    biddingDocument.setStatus("BIDDING");
+    biddingDocument.setIsMultipleAward(true);
+    biddingDocument.setBidFloorPrice(100D);
+    biddingDocument.setPriceLeadership(105D);
+    biddingDocument.setBidClosing(LocalDateTime.now().plusDays(10));
+
+    List<Container> containers = new ArrayList<Container>();
+    containers.add(container);
+    containers.add(container1);
+    Bid bid = new Bid();
+    bid.setId(1L);
+    bid.setBidPrice(1000D);
+    bid.setStatus(EnumBidStatus.PENDING.name());
+    bid.setValidityPeriod(LocalDateTime.now().minusDays(30));
+    bid.setBiddingDocument(biddingDocument);
+    bid.setFreezeTime(LocalDateTime.now().minusDays(1));
+    bid.setContainers(containers);
+    bid.setBidder(bidder);
+
+    // when
+    when(bidRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(bid));
+    when(containerRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(container));
+    when(containerRepository.save(Mockito.any(Container.class))).thenReturn(null);
+    when(bidRepository.save(Mockito.any(Bid.class))).thenReturn(bid);
+
+    // then
+    Bid actualResult = bidServiceImpl.removeContainer(biddingDocument.getId(), bidder.getUsername(),
+        container1.getId());
+    assertThat(actualResult).isNotNull();
+    assertThat(actualResult.getId()).isEqualTo(bid.getId());
+    assertThat(actualResult.getBidPrice()).isEqualTo(bid.getBidPrice());
+    logger.info("Response: {}", actualResult.getBidPrice());
+  }
+
+  @Test
+  @DisplayName("Remove Container when bid Notfound")
+  public void whenRemoveContainer_thenReturn404_Bid() {
+    // given
+
+    List<Long> containerId = new ArrayList<>();
+    containerId.add(1L);
+
+    Collection<Role> roles = new ArrayList<Role>();
+    Role role = new Role();
+    role.setId(1L);
+    role.setName("ROLE_MERCHANT");
+    roles.add(role);
+
+    Forwarder bidder = new Forwarder();
+    bidder.setId(1L);
+    bidder.setUsername("forwarder");
+
+    Merchant merchant = new Merchant();
+    merchant.setId(1L);
+    merchant.setUsername("merchant");
+    merchant.setRoles(roles);
+
+    Port port = new Port();
+    port.setId(1L);
+    port.setNameCode("HHP");
+
+    Booking booking = new Booking();
+    booking.setId(1L);
+    booking.setNumber("BL00001");
+    booking.setUnit(2);
+    booking.setCutOffTime(LocalDateTime.now().plusDays(5));
+    booking.setPortOfLoading(port);
+
+    ShippingLine shippingLine = new ShippingLine();
+    shippingLine.setId(1L);
+    shippingLine.setCompanyCode("APL");
+
+    ContainerType containerType = new ContainerType();
+    containerType.setId(1L);
+    containerType.setName("40HC");
+
+    Outbound outbound = new Outbound();
+    outbound.setId(1L);
+    outbound.setBooking(booking);
+    outbound.setShippingLine(shippingLine);
+    outbound.setContainerType(containerType);
+    outbound.setPackingTime(LocalDateTime.now().minusDays(1));
+
+    Container container = new Container();
+    container.setId(1L);
+
+    Container container1 = new Container();
+    container1.setId(2L);
+
+    BiddingDocument biddingDocument = new BiddingDocument();
+    biddingDocument.setId(1L);
+    biddingDocument.setOfferee(merchant);
+    biddingDocument.setOutbound(outbound);
+    biddingDocument.setStatus("BIDDING");
+    biddingDocument.setIsMultipleAward(true);
+    biddingDocument.setBidFloorPrice(100D);
+    biddingDocument.setPriceLeadership(105D);
+    biddingDocument.setBidClosing(LocalDateTime.now().plusDays(10));
+
+    List<Container> containers = new ArrayList<Container>();
+    containers.add(container);
+    containers.add(container1);
+    Bid bid = new Bid();
+    bid.setId(1L);
+    bid.setBidPrice(1000D);
+    bid.setStatus(EnumBidStatus.PENDING.name());
+    bid.setValidityPeriod(LocalDateTime.now().minusDays(30));
+    bid.setBiddingDocument(biddingDocument);
+    bid.setFreezeTime(LocalDateTime.now().minusDays(1));
+    bid.setContainers(containers);
+    bid.setBidder(bidder);
+
+    // when
+    when(bidRepository.findById(Mockito.anyLong())).thenReturn(Optional.empty());
+
+    // then
+    Assertions.assertThrows(NotFoundException.class, () -> {
+      bidServiceImpl.removeContainer(biddingDocument.getId(), bidder.getUsername(), container1.getId());
+    });
+  }
+
+  @Test
+  @DisplayName("Remove Container when Access Denied")
+  public void whenRemoveContainer_thenReturnAccessDeniedException() {
+    // given
+
+    List<Long> containerId = new ArrayList<>();
+    containerId.add(1L);
+
+    Collection<Role> roles = new ArrayList<Role>();
+    Role role = new Role();
+    role.setId(1L);
+    role.setName("ROLE_MERCHANT");
+    roles.add(role);
+
+    Forwarder bidder = new Forwarder();
+    bidder.setId(1L);
+    bidder.setUsername("forwarder");
+
+    Merchant merchant = new Merchant();
+    merchant.setId(1L);
+    merchant.setUsername("merchant");
+    merchant.setRoles(roles);
+
+    Port port = new Port();
+    port.setId(1L);
+    port.setNameCode("HHP");
+
+    Booking booking = new Booking();
+    booking.setId(1L);
+    booking.setNumber("BL00001");
+    booking.setUnit(2);
+    booking.setCutOffTime(LocalDateTime.now().plusDays(5));
+    booking.setPortOfLoading(port);
+
+    ShippingLine shippingLine = new ShippingLine();
+    shippingLine.setId(1L);
+    shippingLine.setCompanyCode("APL");
+
+    ContainerType containerType = new ContainerType();
+    containerType.setId(1L);
+    containerType.setName("40HC");
+
+    Outbound outbound = new Outbound();
+    outbound.setId(1L);
+    outbound.setBooking(booking);
+    outbound.setShippingLine(shippingLine);
+    outbound.setContainerType(containerType);
+    outbound.setPackingTime(LocalDateTime.now().minusDays(1));
+
+    Container container = new Container();
+    container.setId(1L);
+
+    Container container1 = new Container();
+    container1.setId(2L);
+
+    BiddingDocument biddingDocument = new BiddingDocument();
+    biddingDocument.setId(1L);
+    biddingDocument.setOfferee(merchant);
+    biddingDocument.setOutbound(outbound);
+    biddingDocument.setStatus("BIDDING");
+    biddingDocument.setIsMultipleAward(true);
+    biddingDocument.setBidFloorPrice(100D);
+    biddingDocument.setPriceLeadership(105D);
+    biddingDocument.setBidClosing(LocalDateTime.now().plusDays(10));
+
+    List<Container> containers = new ArrayList<Container>();
+    containers.add(container);
+    containers.add(container1);
+    Bid bid = new Bid();
+    bid.setId(1L);
+    bid.setBidPrice(1000D);
+    bid.setStatus(EnumBidStatus.PENDING.name());
+    bid.setValidityPeriod(LocalDateTime.now().minusDays(30));
+    bid.setBiddingDocument(biddingDocument);
+    bid.setFreezeTime(LocalDateTime.now().minusDays(1));
+    bid.setContainers(containers);
+    bid.setBidder(bidder);
+
+    // when
+    when(bidRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(bid));
+
+    // then
+    Assertions.assertThrows(ForbiddenException.class, () -> {
+      bidServiceImpl.removeContainer(biddingDocument.getId(), merchant.getUsername(), container1.getId());
+    });
+  }
+
+  @Test
+  @DisplayName("Remove Container when bid edit before freeze time")
+  public void whenRemoveContainer_thenReturnBidEditBeforeFreezetimeException() {
+    // given
+
+    List<Long> containerId = new ArrayList<>();
+    containerId.add(1L);
+
+    Collection<Role> roles = new ArrayList<Role>();
+    Role role = new Role();
+    role.setId(1L);
+    role.setName("ROLE_MERCHANT");
+    roles.add(role);
+
+    Forwarder bidder = new Forwarder();
+    bidder.setId(1L);
+    bidder.setUsername("forwarder");
+
+    Merchant merchant = new Merchant();
+    merchant.setId(1L);
+    merchant.setUsername("merchant");
+    merchant.setRoles(roles);
+
+    Port port = new Port();
+    port.setId(1L);
+    port.setNameCode("HHP");
+
+    Booking booking = new Booking();
+    booking.setId(1L);
+    booking.setNumber("BL00001");
+    booking.setUnit(2);
+    booking.setCutOffTime(LocalDateTime.now().plusDays(5));
+    booking.setPortOfLoading(port);
+
+    ShippingLine shippingLine = new ShippingLine();
+    shippingLine.setId(1L);
+    shippingLine.setCompanyCode("APL");
+
+    ContainerType containerType = new ContainerType();
+    containerType.setId(1L);
+    containerType.setName("40HC");
+
+    Outbound outbound = new Outbound();
+    outbound.setId(1L);
+    outbound.setBooking(booking);
+    outbound.setShippingLine(shippingLine);
+    outbound.setContainerType(containerType);
+    outbound.setPackingTime(LocalDateTime.now().minusDays(1));
+
+    Container container = new Container();
+    container.setId(1L);
+
+    Container container1 = new Container();
+    container1.setId(2L);
+
+    BiddingDocument biddingDocument = new BiddingDocument();
+    biddingDocument.setId(1L);
+    biddingDocument.setOfferee(merchant);
+    biddingDocument.setOutbound(outbound);
+    biddingDocument.setStatus("BIDDING");
+    biddingDocument.setIsMultipleAward(true);
+    biddingDocument.setBidFloorPrice(100D);
+    biddingDocument.setPriceLeadership(105D);
+    biddingDocument.setBidClosing(LocalDateTime.now().plusDays(10));
+
+    List<Container> containers = new ArrayList<Container>();
+    containers.add(container);
+    containers.add(container1);
+    Bid bid = new Bid();
+    bid.setId(1L);
+    bid.setBidPrice(1000D);
+    bid.setStatus(EnumBidStatus.PENDING.name());
+    bid.setValidityPeriod(LocalDateTime.now().minusDays(30));
+    bid.setBiddingDocument(biddingDocument);
+    bid.setFreezeTime(LocalDateTime.now().plusDays(1));
+    bid.setContainers(containers);
+    bid.setBidder(bidder);
+
+    // when
+    when(bidRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(bid));
+
+    // then
+    Assertions.assertThrows(InternalException.class, () -> {
+      bidServiceImpl.removeContainer(biddingDocument.getId(), bidder.getUsername(), container1.getId());
+    });
+  }
+
+  @Test
+  @DisplayName("Remove Container when bid invalid edit")
+  public void whenRemoveContainer_thenReturnBidInvalidEditException() {
+    // given
+
+    List<Long> containerId = new ArrayList<>();
+    containerId.add(1L);
+
+    Collection<Role> roles = new ArrayList<Role>();
+    Role role = new Role();
+    role.setId(1L);
+    role.setName("ROLE_MERCHANT");
+    roles.add(role);
+
+    Forwarder bidder = new Forwarder();
+    bidder.setId(1L);
+    bidder.setUsername("forwarder");
+
+    Merchant merchant = new Merchant();
+    merchant.setId(1L);
+    merchant.setUsername("merchant");
+    merchant.setRoles(roles);
+
+    Port port = new Port();
+    port.setId(1L);
+    port.setNameCode("HHP");
+
+    Booking booking = new Booking();
+    booking.setId(1L);
+    booking.setNumber("BL00001");
+    booking.setUnit(2);
+    booking.setCutOffTime(LocalDateTime.now().plusDays(5));
+    booking.setPortOfLoading(port);
+
+    ShippingLine shippingLine = new ShippingLine();
+    shippingLine.setId(1L);
+    shippingLine.setCompanyCode("APL");
+
+    ContainerType containerType = new ContainerType();
+    containerType.setId(1L);
+    containerType.setName("40HC");
+
+    Outbound outbound = new Outbound();
+    outbound.setId(1L);
+    outbound.setBooking(booking);
+    outbound.setShippingLine(shippingLine);
+    outbound.setContainerType(containerType);
+    outbound.setPackingTime(LocalDateTime.now().minusDays(1));
+
+    Container container = new Container();
+    container.setId(1L);
+
+    Container container1 = new Container();
+    container1.setId(2L);
+
+    BiddingDocument biddingDocument = new BiddingDocument();
+    biddingDocument.setId(1L);
+    biddingDocument.setOfferee(merchant);
+    biddingDocument.setOutbound(outbound);
+    biddingDocument.setStatus("BIDDING");
+    biddingDocument.setIsMultipleAward(true);
+    biddingDocument.setBidFloorPrice(100D);
+    biddingDocument.setPriceLeadership(105D);
+    biddingDocument.setBidClosing(LocalDateTime.now().plusDays(10));
+
+    List<Container> containers = new ArrayList<Container>();
+    containers.add(container);
+    containers.add(container1);
+    Bid bid = new Bid();
+    bid.setId(1L);
+    bid.setBidPrice(1000D);
+    bid.setStatus(EnumBidStatus.ACCEPTED.name());
+    bid.setValidityPeriod(LocalDateTime.now().minusDays(30));
+    bid.setBiddingDocument(biddingDocument);
+    bid.setFreezeTime(LocalDateTime.now().minusDays(1));
+    bid.setContainers(containers);
+    bid.setBidder(bidder);
+
+    // when
+    when(bidRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(bid));
+
+    // then
+    Assertions.assertThrows(InternalException.class, () -> {
+      bidServiceImpl.removeContainer(biddingDocument.getId(), bidder.getUsername(), container1.getId());
+    });
+  }
+
+  @Test
+  @DisplayName("Remove Container when cannot add or remove")
+  public void whenRemoveContainer_thenReturnCannotAddOrRemoveException() {
+    // given
+
+    List<Long> containerId = new ArrayList<>();
+    containerId.add(1L);
+
+    Collection<Role> roles = new ArrayList<Role>();
+    Role role = new Role();
+    role.setId(1L);
+    role.setName("ROLE_MERCHANT");
+    roles.add(role);
+
+    Forwarder bidder = new Forwarder();
+    bidder.setId(1L);
+    bidder.setUsername("forwarder");
+
+    Merchant merchant = new Merchant();
+    merchant.setId(1L);
+    merchant.setUsername("merchant");
+    merchant.setRoles(roles);
+
+    Port port = new Port();
+    port.setId(1L);
+    port.setNameCode("HHP");
+
+    Booking booking = new Booking();
+    booking.setId(1L);
+    booking.setNumber("BL00001");
+    booking.setUnit(2);
+    booking.setCutOffTime(LocalDateTime.now().plusDays(5));
+    booking.setPortOfLoading(port);
+
+    ShippingLine shippingLine = new ShippingLine();
+    shippingLine.setId(1L);
+    shippingLine.setCompanyCode("APL");
+
+    ContainerType containerType = new ContainerType();
+    containerType.setId(1L);
+    containerType.setName("40HC");
+
+    Outbound outbound = new Outbound();
+    outbound.setId(1L);
+    outbound.setBooking(booking);
+    outbound.setShippingLine(shippingLine);
+    outbound.setContainerType(containerType);
+    outbound.setPackingTime(LocalDateTime.now().minusDays(1));
+
+    Container container = new Container();
+    container.setId(1L);
+
+    Container container1 = new Container();
+    container1.setId(2L);
+
+    BiddingDocument biddingDocument = new BiddingDocument();
+    biddingDocument.setId(1L);
+    biddingDocument.setOfferee(merchant);
+    biddingDocument.setOutbound(outbound);
+    biddingDocument.setStatus("BIDDING");
+    biddingDocument.setIsMultipleAward(false);
+    biddingDocument.setBidFloorPrice(100D);
+    biddingDocument.setPriceLeadership(105D);
+    biddingDocument.setBidClosing(LocalDateTime.now().plusDays(10));
+
+    List<Container> containers = new ArrayList<Container>();
+    containers.add(container);
+    containers.add(container1);
+    Bid bid = new Bid();
+    bid.setId(1L);
+    bid.setBidPrice(1000D);
+    bid.setStatus(EnumBidStatus.PENDING.name());
+    bid.setValidityPeriod(LocalDateTime.now().minusDays(30));
+    bid.setBiddingDocument(biddingDocument);
+    bid.setFreezeTime(LocalDateTime.now().minusDays(1));
+    bid.setContainers(containers);
+    bid.setBidder(bidder);
+
+    // when
+    when(bidRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(bid));
+
+    // then
+    Assertions.assertThrows(InternalException.class, () -> {
+      bidServiceImpl.removeContainer(biddingDocument.getId(), bidder.getUsername(), container1.getId());
+    });
+  }
+
+  @Test
+  @DisplayName("Remove Container when Container notfound")
+  public void whenRemoveContainer_thenReturn404_Container() {
+    // given
+
+    List<Long> containerId = new ArrayList<>();
+    containerId.add(1L);
+
+    Collection<Role> roles = new ArrayList<Role>();
+    Role role = new Role();
+    role.setId(1L);
+    role.setName("ROLE_MERCHANT");
+    roles.add(role);
+
+    Forwarder bidder = new Forwarder();
+    bidder.setId(1L);
+    bidder.setUsername("forwarder");
+
+    Merchant merchant = new Merchant();
+    merchant.setId(1L);
+    merchant.setUsername("merchant");
+    merchant.setRoles(roles);
+
+    Port port = new Port();
+    port.setId(1L);
+    port.setNameCode("HHP");
+
+    Booking booking = new Booking();
+    booking.setId(1L);
+    booking.setNumber("BL00001");
+    booking.setUnit(2);
+    booking.setCutOffTime(LocalDateTime.now().plusDays(5));
+    booking.setPortOfLoading(port);
+
+    ShippingLine shippingLine = new ShippingLine();
+    shippingLine.setId(1L);
+    shippingLine.setCompanyCode("APL");
+
+    ContainerType containerType = new ContainerType();
+    containerType.setId(1L);
+    containerType.setName("40HC");
+
+    Outbound outbound = new Outbound();
+    outbound.setId(1L);
+    outbound.setBooking(booking);
+    outbound.setShippingLine(shippingLine);
+    outbound.setContainerType(containerType);
+    outbound.setPackingTime(LocalDateTime.now().minusDays(1));
+
+    Container container = new Container();
+    container.setId(1L);
+
+    Container container1 = new Container();
+    container1.setId(2L);
+
+    BiddingDocument biddingDocument = new BiddingDocument();
+    biddingDocument.setId(1L);
+    biddingDocument.setOfferee(merchant);
+    biddingDocument.setOutbound(outbound);
+    biddingDocument.setStatus("BIDDING");
+    biddingDocument.setIsMultipleAward(true);
+    biddingDocument.setBidFloorPrice(100D);
+    biddingDocument.setPriceLeadership(105D);
+    biddingDocument.setBidClosing(LocalDateTime.now().plusDays(10));
+
+    List<Container> containers = new ArrayList<Container>();
+    containers.add(container);
+    containers.add(container1);
+    Bid bid = new Bid();
+    bid.setId(1L);
+    bid.setBidPrice(1000D);
+    bid.setStatus(EnumBidStatus.PENDING.name());
+    bid.setValidityPeriod(LocalDateTime.now().minusDays(30));
+    bid.setBiddingDocument(biddingDocument);
+    bid.setFreezeTime(LocalDateTime.now().minusDays(1));
+    bid.setContainers(containers);
+    bid.setBidder(bidder);
+
+    // when
+    when(bidRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(bid));
+    when(containerRepository.findById(Mockito.anyLong())).thenReturn(Optional.empty());
+
+    // then
+    Assertions.assertThrows(NotFoundException.class, () -> {
+      bidServiceImpl.removeContainer(biddingDocument.getId(), bidder.getUsername(), container1.getId());
+    });
+  }
+
+  @Test
+  @DisplayName("Remove Container when Container cannot be zero")
+  public void whenRemoveContainer_thenContainerCannotBeZero() {
+    // given
+
+    List<Long> containerId = new ArrayList<>();
+    containerId.add(1L);
+
+    Collection<Role> roles = new ArrayList<Role>();
+    Role role = new Role();
+    role.setId(1L);
+    role.setName("ROLE_MERCHANT");
+    roles.add(role);
+
+    Forwarder bidder = new Forwarder();
+    bidder.setId(1L);
+    bidder.setUsername("forwarder");
+
+    Merchant merchant = new Merchant();
+    merchant.setId(1L);
+    merchant.setUsername("merchant");
+    merchant.setRoles(roles);
+
+    Port port = new Port();
+    port.setId(1L);
+    port.setNameCode("HHP");
+
+    Booking booking = new Booking();
+    booking.setId(1L);
+    booking.setNumber("BL00001");
+    booking.setUnit(2);
+    booking.setCutOffTime(LocalDateTime.now().plusDays(5));
+    booking.setPortOfLoading(port);
+
+    ShippingLine shippingLine = new ShippingLine();
+    shippingLine.setId(1L);
+    shippingLine.setCompanyCode("APL");
+
+    ContainerType containerType = new ContainerType();
+    containerType.setId(1L);
+    containerType.setName("40HC");
+
+    Outbound outbound = new Outbound();
+    outbound.setId(1L);
+    outbound.setBooking(booking);
+    outbound.setShippingLine(shippingLine);
+    outbound.setContainerType(containerType);
+    outbound.setPackingTime(LocalDateTime.now().minusDays(1));
+
+    Container container = new Container();
+    container.setId(1L);
+
+    Container container1 = new Container();
+    container1.setId(2L);
+
+    BiddingDocument biddingDocument = new BiddingDocument();
+    biddingDocument.setId(1L);
+    biddingDocument.setOfferee(merchant);
+    biddingDocument.setOutbound(outbound);
+    biddingDocument.setStatus("BIDDING");
+    biddingDocument.setIsMultipleAward(true);
+    biddingDocument.setBidFloorPrice(100D);
+    biddingDocument.setPriceLeadership(105D);
+    biddingDocument.setBidClosing(LocalDateTime.now().plusDays(10));
+
+    List<Container> containers = new ArrayList<Container>();
+    containers.add(container);
+    Bid bid = new Bid();
+    bid.setId(1L);
+    bid.setBidPrice(1000D);
+    bid.setStatus(EnumBidStatus.PENDING.name());
+    bid.setValidityPeriod(LocalDateTime.now().minusDays(30));
+    bid.setBiddingDocument(biddingDocument);
+    bid.setFreezeTime(LocalDateTime.now().minusDays(1));
+    bid.setContainers(containers);
+    bid.setBidder(bidder);
+
+    // when
+    when(bidRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(bid));
+    when(containerRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(container));
+
+    // then
+    Assertions.assertThrows(InternalException.class, () -> {
+      bidServiceImpl.removeContainer(biddingDocument.getId(), bidder.getUsername(), container1.getId());
+    });
+  }
+
+  @Test
+  @DisplayName("Remove Container when Container not contain")
+  public void whenRemoveContainer_thenContainerNotContain() {
+    // given
+
+    List<Long> containerId = new ArrayList<>();
+    containerId.add(1L);
+
+    Collection<Role> roles = new ArrayList<Role>();
+    Role role = new Role();
+    role.setId(1L);
+    role.setName("ROLE_MERCHANT");
+    roles.add(role);
+
+    Forwarder bidder = new Forwarder();
+    bidder.setId(1L);
+    bidder.setUsername("forwarder");
+
+    Merchant merchant = new Merchant();
+    merchant.setId(1L);
+    merchant.setUsername("merchant");
+    merchant.setRoles(roles);
+
+    Port port = new Port();
+    port.setId(1L);
+    port.setNameCode("HHP");
+
+    Booking booking = new Booking();
+    booking.setId(1L);
+    booking.setNumber("BL00001");
+    booking.setUnit(2);
+    booking.setCutOffTime(LocalDateTime.now().plusDays(5));
+    booking.setPortOfLoading(port);
+
+    ShippingLine shippingLine = new ShippingLine();
+    shippingLine.setId(1L);
+    shippingLine.setCompanyCode("APL");
+
+    ContainerType containerType = new ContainerType();
+    containerType.setId(1L);
+    containerType.setName("40HC");
+
+    Outbound outbound = new Outbound();
+    outbound.setId(1L);
+    outbound.setBooking(booking);
+    outbound.setShippingLine(shippingLine);
+    outbound.setContainerType(containerType);
+    outbound.setPackingTime(LocalDateTime.now().minusDays(1));
+
+    Container container = new Container();
+    container.setId(1L);
+
+    Container container1 = new Container();
+    container1.setId(2L);
+
+    Container container2 = new Container();
+    container2.setId(3L);
+
+    BiddingDocument biddingDocument = new BiddingDocument();
+    biddingDocument.setId(1L);
+    biddingDocument.setOfferee(merchant);
+    biddingDocument.setOutbound(outbound);
+    biddingDocument.setStatus("BIDDING");
+    biddingDocument.setIsMultipleAward(true);
+    biddingDocument.setBidFloorPrice(100D);
+    biddingDocument.setPriceLeadership(105D);
+    biddingDocument.setBidClosing(LocalDateTime.now().plusDays(10));
+
+    List<Container> containers = new ArrayList<Container>();
+    containers.add(container);
+    containers.add(container1);
+    Bid bid = new Bid();
+    bid.setId(1L);
+    bid.setBidPrice(1000D);
+    bid.setStatus(EnumBidStatus.PENDING.name());
+    bid.setValidityPeriod(LocalDateTime.now().minusDays(30));
+    bid.setBiddingDocument(biddingDocument);
+    bid.setFreezeTime(LocalDateTime.now().minusDays(1));
+    bid.setContainers(containers);
+    bid.setBidder(bidder);
+
+    // when
+    when(bidRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(bid));
+    when(containerRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(container2));
+
+    // then
+    Assertions.assertThrows(NotFoundException.class, () -> {
+      bidServiceImpl.removeContainer(biddingDocument.getId(), bidder.getUsername(), container1.getId());
     });
   }
 }

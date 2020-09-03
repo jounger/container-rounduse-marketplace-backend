@@ -12,7 +12,7 @@ import java.util.Optional;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -32,11 +32,9 @@ import com.crm.models.Bid;
 import com.crm.models.BiddingDocument;
 import com.crm.models.Combined;
 import com.crm.models.Container;
-import com.crm.models.Contract;
 import com.crm.models.Merchant;
 import com.crm.models.Outbound;
 import com.crm.models.Role;
-import com.crm.models.ShippingInfo;
 import com.crm.payload.request.CombinedRequest;
 import com.crm.payload.request.ContractRequest;
 import com.crm.payload.request.PaginationRequest;
@@ -88,68 +86,34 @@ public class CombinedServiceImplTest {
   }
 
   @Test
-  @Disabled
-  public void whenCreateCombined_thenReturnCombined() {
+  @DisplayName("Create Combined when bid notfound")
+  public void whenCreateCombined_thenReturn404_bid() {
     // given
     Merchant merchant = new Merchant();
     merchant.setId(1L);
     merchant.setUsername("merchant");
 
-    Outbound outbound = new Outbound();
-    outbound.setId(1L);
-
-    BiddingDocument biddingDocument = new BiddingDocument();
-    biddingDocument.setId(1L);
-    biddingDocument.setOutbound(outbound);
-    biddingDocument.setOfferee(merchant);
-    biddingDocument.setIsMultipleAward(false);
-    biddingDocument.setBidClosing(LocalDateTime.now().plusDays(1));
-    ;
+    Combined combined = new Combined();
+    combined.setId(1L);
 
     Bid bid = new Bid();
     bid.setId(1L);
     bid.setBidPrice(1000D);
-    bid.setBiddingDocument(biddingDocument);
-    bid.setStatus(EnumBidStatus.PENDING.name());
-
-    Container container = new Container();
-    container.setId(1L);
-
-    ShippingInfo shippingInfo = new ShippingInfo();
-    shippingInfo.setId(1L);
-
-    List<Long> containersId = new ArrayList<>();
-    containersId.add(1L);
-
-    ContractRequest contractRequest = new ContractRequest();
-    contractRequest.setRequired(true);
-    contractRequest.setFinesAgainstContractViolations(2D);
-    contractRequest.setContainers(containersId);
+    bid.setCombined(combined);
 
     CombinedRequest request = new CombinedRequest();
-    request.setContract(contractRequest);
-
-    Combined combined = new Combined();
-    combined.setId(1L);
-
-    Contract contract = new Contract();
-    contract.setId(1L);
-    contract.setCombined(combined);
 
     // when
-    when(bidRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(bid));
-    when(combinedRepository.save(Mockito.any(Combined.class))).thenReturn(combined);
-    when(contractService.createContract(Mockito.anyLong(), Mockito.anyString(), Mockito.any(ContractRequest.class)))
-        .thenReturn(contract);
+    when(bidRepository.findById(Mockito.anyLong())).thenReturn(Optional.empty());
 
     // then
-    Combined actualResult = combinedServiceImpl.createCombined(bid.getId(), merchant.getUsername(), request);
-    assertThat(actualResult).isNotNull();
-    assertThat(actualResult.getId()).isEqualTo(combined.getId());
-    logger.info("Response: {}", actualResult.getId());
+    Assertions.assertThrows(NotFoundException.class, () -> {
+      combinedServiceImpl.createCombined(bid.getId(), merchant.getUsername(), request);
+    });
   }
 
   @Test
+  @DisplayName("Create Combined when dupplicate combined")
   public void whenCreateCombined_thenReturn400() {
     // given
     Merchant merchant = new Merchant();
@@ -176,6 +140,7 @@ public class CombinedServiceImplTest {
   }
 
   @Test
+  @DisplayName("Create Combined when bid expired")
   public void whenCreateCombined_thenReturn500() {
     // given
     Merchant merchant = new Merchant();
@@ -215,6 +180,52 @@ public class CombinedServiceImplTest {
 
     // then
     Assertions.assertThrows(InternalException.class, () -> {
+      combinedServiceImpl.createCombined(bid.getId(), merchant.getUsername(), request);
+    });
+  }
+
+  @Test
+  @DisplayName("Create Combined when bidding document timeout")
+  public void whenCreateCombined_thenReturnBiddingDocumentTimeoutException() {
+    // given
+    Merchant merchant = new Merchant();
+    merchant.setId(1L);
+    merchant.setUsername("merchant");
+
+    Outbound outbound = new Outbound();
+    outbound.setId(1L);
+
+    BiddingDocument biddingDocument = new BiddingDocument();
+    biddingDocument.setId(1L);
+    biddingDocument.setOutbound(outbound);
+    biddingDocument.setOfferee(merchant);
+    biddingDocument.setBidClosing(LocalDateTime.now().minusDays(1));
+
+    Bid bid = new Bid();
+    bid.setId(1L);
+    bid.setBidPrice(1000D);
+    bid.setBiddingDocument(biddingDocument);
+    bid.setStatus(EnumBidStatus.ACCEPTED.name());
+
+    Container container = new Container();
+    container.setId(1L);
+
+    List<Long> containersId = new ArrayList<>();
+    containersId.add(1L);
+
+    ContractRequest contract = new ContractRequest();
+    contract.setRequired(true);
+    contract.setFinesAgainstContractViolations(-2D);
+    contract.setContainers(containersId);
+
+    CombinedRequest request = new CombinedRequest();
+    request.setContract(contract);
+
+    // when
+    when(bidRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(bid));
+
+    // then
+    Assertions.assertThrows(NotFoundException.class, () -> {
       combinedServiceImpl.createCombined(bid.getId(), merchant.getUsername(), request);
     });
   }

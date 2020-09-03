@@ -26,6 +26,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 
 import com.crm.common.Tool;
+import com.crm.enums.EnumBidStatus;
 import com.crm.enums.EnumBiddingStatus;
 import com.crm.enums.EnumCurrency;
 import com.crm.enums.EnumSupplyStatus;
@@ -34,11 +35,16 @@ import com.crm.exception.InternalException;
 import com.crm.exception.NotFoundException;
 import com.crm.models.Bid;
 import com.crm.models.BiddingDocument;
+import com.crm.models.BillOfLading;
 import com.crm.models.Combined;
+import com.crm.models.Container;
+import com.crm.models.ContainerType;
 import com.crm.models.Forwarder;
+import com.crm.models.Inbound;
 import com.crm.models.Merchant;
 import com.crm.models.Outbound;
 import com.crm.models.Role;
+import com.crm.models.ShippingLine;
 import com.crm.models.User;
 import com.crm.payload.request.BiddingDocumentRequest;
 import com.crm.payload.request.PaginationRequest;
@@ -46,6 +52,7 @@ import com.crm.repository.BidRepository;
 import com.crm.repository.BiddingDocumentRepository;
 import com.crm.repository.CombinedRepository;
 import com.crm.repository.ContainerRepository;
+import com.crm.repository.InboundRepository;
 import com.crm.repository.MerchantRepository;
 import com.crm.repository.OutboundRepository;
 import com.crm.repository.UserRepository;
@@ -77,6 +84,9 @@ public class BiddingDocumentServiceImplTest {
 
   @Mock
   private CombinedRepository combinedRepository;
+
+  @Mock
+  private InboundRepository inboundRepository;
 
   PaginationRequest paginationRequest;
 
@@ -266,6 +276,38 @@ public class BiddingDocumentServiceImplTest {
 
     BiddingDocumentRequest request = new BiddingDocumentRequest();
     request.setOutbound(outbound.getId());
+
+    // when
+    when(merchantRepository.findByUsername(Mockito.anyString())).thenReturn(Optional.of(offeree));
+    when(outboundRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(outbound));
+
+    // then
+    Assertions.assertThrows(InternalException.class, () -> {
+      biddingDocumentServiceImpl.createBiddingDocument(offeree.getUsername(), request);
+    });
+  }
+
+  @Test
+  @DisplayName("Create BiddingDocument when parkingTime before now")
+  public void whenCreateBiddingDocument_thenReturnParkingTimeBeforeNowException() {
+    // given
+    Outbound outbound = new Outbound();
+    outbound.setId(1L);
+    outbound.setStatus(EnumSupplyStatus.CREATED.name());
+    outbound.setPackingTime(LocalDateTime.now().minusDays(2));
+
+    Merchant offeree = new Merchant();
+    offeree.setId(1L);
+    offeree.setUsername("merchant");
+    offeree.getOutbounds().add(outbound);
+
+    BiddingDocumentRequest request = new BiddingDocumentRequest();
+    request.setOutbound(outbound.getId());
+    request.setIsMultipleAward(true);
+    request.setBidClosing(Tool.convertLocalDateTimeToString(LocalDateTime.now().minusDays(1)));
+    request.setCurrencyOfPayment(EnumCurrency.VND.name());
+    request.setBidPackagePrice(1000D);
+    request.setBidFloorPrice(100D);
 
     // when
     when(merchantRepository.findByUsername(Mockito.anyString())).thenReturn(Optional.of(offeree));
@@ -772,6 +814,19 @@ public class BiddingDocumentServiceImplTest {
     offeree.setUsername("merchant");
     offeree.getOutbounds().add(outbound);
 
+    Container container = new Container();
+    container.setId(1L);
+
+    Collection<Container> containers = new ArrayList<>();
+    containers.add(container);
+
+    Bid bid = new Bid();
+    bid.setId(1L);
+    bid.setContainers(containers);
+
+    Collection<Bid> bids = new ArrayList<>();
+    bids.add(bid);
+
     BiddingDocument biddingDocument = new BiddingDocument();
     biddingDocument.setId(1L);
     biddingDocument.setOutbound(outbound);
@@ -782,16 +837,83 @@ public class BiddingDocumentServiceImplTest {
     biddingDocument.setBidFloorPrice(100D);
     biddingDocument.setStatus(EnumBiddingStatus.CANCELED.name());
     biddingDocument.setOfferee(offeree);
+    biddingDocument.setBids(bids);
 
     Map<String, Object> updates = new HashMap<>();
     updates.put("bidClosing", Tool.convertLocalDateTimeToString(LocalDateTime.now().plusDays(1)));
-    updates.put("currentOfPayment", EnumCurrency.VND.name());
-    updates.put("bidPackagePrice", 1000);
-    updates.put("bidFloorPrice", 100);
+    updates.put("currentOfPayment", EnumCurrency.USD.name());
+    updates.put("bidPackagePrice", 1500);
+    updates.put("bidFloorPrice", 500);
     updates.put("status", EnumBiddingStatus.CANCELED.name());
 
     // when
     when(biddingDocumentRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(biddingDocument));
+    when(containerRepository.save(Mockito.any(Container.class))).thenReturn(null);
+    when(bidRepository.save(Mockito.any(Bid.class))).thenReturn(null);
+    when(biddingDocumentRepository.save(Mockito.any(BiddingDocument.class))).thenReturn(biddingDocument);
+
+    // then
+    BiddingDocument actualResult = biddingDocumentServiceImpl.editBiddingDocument(biddingDocument.getId(),
+        offeree.getUsername(), updates);
+    assertThat(actualResult).isNotNull();
+    assertThat(actualResult.getId()).isEqualTo(biddingDocument.getId());
+    assertThat(actualResult.getCurrencyOfPayment()).isEqualTo(biddingDocument.getCurrencyOfPayment());
+    assertThat(actualResult.getBidPackagePrice()).isEqualTo(biddingDocument.getBidPackagePrice());
+    assertThat(actualResult.getBidFloorPrice()).isEqualTo(biddingDocument.getBidFloorPrice());
+    assertThat(actualResult.getStatus()).isEqualTo(biddingDocument.getStatus());
+  }
+
+  @Test
+  @DisplayName("Edit BiddingDocument Success when Expired")
+  public void whenEditBiddingDocumentWhenExpired_thenReturnBiddingDocument() {
+    // given
+    Outbound outbound = new Outbound();
+    outbound.setId(1L);
+    outbound.setStatus(EnumSupplyStatus.CREATED.name());
+    outbound.setPackingTime(LocalDateTime.now().plusDays(2));
+
+    Merchant offeree = new Merchant();
+    offeree.setId(1L);
+    offeree.setUsername("merchant");
+    offeree.getOutbounds().add(outbound);
+
+    Container container = new Container();
+    container.setId(1L);
+
+    Collection<Container> containers = new ArrayList<>();
+    containers.add(container);
+
+    Bid bid = new Bid();
+    bid.setId(1L);
+    bid.setContainers(containers);
+    bid.setStatus(EnumBidStatus.ACCEPTED.name());
+
+    Collection<Bid> bids = new ArrayList<>();
+    bids.add(bid);
+
+    BiddingDocument biddingDocument = new BiddingDocument();
+    biddingDocument.setId(1L);
+    biddingDocument.setOutbound(outbound);
+    biddingDocument.setIsMultipleAward(true);
+    biddingDocument.setBidClosing(LocalDateTime.now().plusDays(1));
+    biddingDocument.setCurrencyOfPayment(EnumCurrency.VND.name());
+    biddingDocument.setBidPackagePrice(1000D);
+    biddingDocument.setBidFloorPrice(100D);
+    biddingDocument.setStatus(EnumBiddingStatus.CANCELED.name());
+    biddingDocument.setOfferee(offeree);
+    biddingDocument.setBids(bids);
+
+    Map<String, Object> updates = new HashMap<>();
+    updates.put("bidClosing", Tool.convertLocalDateTimeToString(LocalDateTime.now().plusDays(1)));
+    updates.put("currentOfPayment", EnumCurrency.USD.name());
+    updates.put("bidPackagePrice", 1500);
+    updates.put("bidFloorPrice", 500);
+    updates.put("status", EnumBiddingStatus.EXPIRED.name());
+
+    // when
+    when(biddingDocumentRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(biddingDocument));
+    when(containerRepository.save(Mockito.any(Container.class))).thenReturn(null);
+    when(bidRepository.save(Mockito.any(Bid.class))).thenReturn(null);
     when(biddingDocumentRepository.save(Mockito.any(BiddingDocument.class))).thenReturn(biddingDocument);
 
     // then
@@ -843,6 +965,47 @@ public class BiddingDocumentServiceImplTest {
     // then
     Assertions.assertThrows(NotFoundException.class, () -> {
       biddingDocumentServiceImpl.editBiddingDocument(biddingDocument.getId(), offeree.getUsername(), updates);
+    });
+  }
+
+  @Test
+  @DisplayName("Edit BiddingDocument when AccessDenied")
+  public void whenEditBiddingDocument_thenReturnAccessDeniedException() {
+    // given
+    Outbound outbound = new Outbound();
+    outbound.setId(1L);
+    outbound.setStatus(EnumSupplyStatus.CREATED.name());
+    outbound.setPackingTime(LocalDateTime.now().plusDays(2));
+
+    Merchant offeree = new Merchant();
+    offeree.setId(1L);
+    offeree.setUsername("merchant");
+    offeree.getOutbounds().add(outbound);
+
+    BiddingDocument biddingDocument = new BiddingDocument();
+    biddingDocument.setId(1L);
+    biddingDocument.setOutbound(outbound);
+    biddingDocument.setIsMultipleAward(true);
+    biddingDocument.setBidClosing(LocalDateTime.now().plusDays(1));
+    biddingDocument.setCurrencyOfPayment(EnumCurrency.VND.name());
+    biddingDocument.setBidPackagePrice(1000D);
+    biddingDocument.setBidFloorPrice(100D);
+    biddingDocument.setStatus(EnumBiddingStatus.COMBINED.name());
+    biddingDocument.setOfferee(offeree);
+
+    Map<String, Object> updates = new HashMap<>();
+    updates.put("bidClosing", Tool.convertLocalDateTimeToString(LocalDateTime.now().plusDays(1)));
+    updates.put("currentOfPayment", EnumCurrency.VND.name());
+    updates.put("bidPackagePrice", 1000);
+    updates.put("bidFloorPrice", 100);
+    updates.put("status", EnumBiddingStatus.CANCELED.name());
+
+    // when
+    when(biddingDocumentRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(biddingDocument));
+
+    // then
+    Assertions.assertThrows(ForbiddenException.class, () -> {
+      biddingDocumentServiceImpl.editBiddingDocument(biddingDocument.getId(), "XXXX", updates);
     });
   }
 
@@ -1036,5 +1199,241 @@ public class BiddingDocumentServiceImplTest {
     Assertions.assertThrows(InternalException.class, () -> {
       biddingDocumentServiceImpl.removeBiddingDocument(biddingDocument.getId(), offeree.getUsername());
     });
+  }
+
+  @Test
+  @DisplayName("Get BiddingDocumentsByInbound Success")
+  public void whenGetBiddingDocumentByInbound_thenReturnBiddingDocuments() {
+    // given
+    Forwarder bidder = new Forwarder();
+    bidder.setId(1L);
+    bidder.setUsername("forwarder");
+
+    Bid bid = new Bid();
+    bid.setId(1L);
+    bid.setBidder(bidder);
+
+    BiddingDocument biddingDocument = new BiddingDocument();
+    biddingDocument.setId(1L);
+    biddingDocument.setStatus(EnumBiddingStatus.BIDDING.name());
+
+    BillOfLading billOfLading = new BillOfLading();
+    billOfLading.setId(1L);
+
+    ShippingLine shippingLine = new ShippingLine();
+    shippingLine.setId(1L);
+    shippingLine.setCompanyCode("AL0001");
+
+    ContainerType containerType = new ContainerType();
+    containerType.setId(1L);
+    containerType.setName("GX11");
+
+    Outbound outbound = new Outbound();
+    outbound.setId(1L);
+    outbound.setShippingLine(shippingLine);
+    outbound.setContainerType(containerType);
+
+    Inbound inbound = new Inbound();
+    inbound.setId(1L);
+    inbound.setForwarder(bidder);
+    inbound.setBillOfLading(billOfLading);
+    inbound.setShippingLine(shippingLine);
+    inbound.setContainerType(containerType);
+
+    biddingDocuments.add(biddingDocument);
+    pages = new PageImpl<>(biddingDocuments);
+
+    // when
+    when(inboundRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(inbound));
+    when(biddingDocumentRepository.findByInbound(Mockito.anyString(), Mockito.anyString(), Mockito.anyList(),
+        Mockito.any(LocalDateTime.class), Mockito.any(LocalDateTime.class), Mockito.any(PageRequest.class)))
+            .thenReturn(pages);
+
+    // then
+    Page<BiddingDocument> actualPages = biddingDocumentServiceImpl.getBiddingDocumentsByInbound(inbound.getId(),
+        bidder.getUsername(), paginationRequest);
+    logger.info("actualPages: {}", actualPages);
+  }
+
+  @Test
+  @DisplayName("Update ExpiredBiddingDocuments EXPIRED Success")
+  public void UpdateExpiredBiddingDocumentsEXPIRED_Success() {
+    // given
+    Forwarder bidder = new Forwarder();
+    bidder.setId(1L);
+    bidder.setUsername("forwarder");
+
+    Container container = new Container();
+
+    Collection<Container> containers = new ArrayList<>();
+    containers.add(container);
+
+    Bid bid = new Bid();
+    bid.setId(1L);
+    bid.setBidder(bidder);
+    bid.setStatus(EnumBidStatus.PENDING.name());
+    bid.setContainers(containers);
+
+    Collection<Bid> bids = new ArrayList<>();
+    bids.add(bid);
+
+    ShippingLine shippingLine = new ShippingLine();
+    shippingLine.setId(1L);
+    shippingLine.setCompanyCode("AL0001");
+
+    ContainerType containerType = new ContainerType();
+    containerType.setId(1L);
+    containerType.setName("GX11");
+
+    Outbound outbound = new Outbound();
+    outbound.setId(1L);
+    outbound.setShippingLine(shippingLine);
+    outbound.setContainerType(containerType);
+
+    BiddingDocument biddingDocument = new BiddingDocument();
+    biddingDocument.setId(1L);
+    biddingDocument.setStatus(EnumBiddingStatus.BIDDING.name());
+    biddingDocument.setOutbound(outbound);
+
+    BillOfLading billOfLading = new BillOfLading();
+    billOfLading.setId(1L);
+
+    Inbound inbound = new Inbound();
+    inbound.setId(1L);
+    inbound.setForwarder(bidder);
+    inbound.setBillOfLading(billOfLading);
+    inbound.setShippingLine(shippingLine);
+    inbound.setContainerType(containerType);
+
+    // when
+    when(biddingDocumentRepository.getOne(Mockito.anyLong())).thenReturn(biddingDocument);
+    when(outboundRepository.save(Mockito.any(Outbound.class))).thenReturn(null);
+    when(biddingDocumentRepository.save(Mockito.any(BiddingDocument.class))).thenReturn(null);
+
+    // then
+    biddingDocumentServiceImpl.updateExpiredBiddingDocuments(biddingDocument.getId(), EnumBiddingStatus.EXPIRED.name());
+  }
+
+  @Test
+  @DisplayName("Update ExpiredBiddingDocuments COMBINED Success")
+  public void UpdateExpiredBiddingDocumentsCOMBINED_Success() {
+    // given
+    Forwarder bidder = new Forwarder();
+    bidder.setId(1L);
+    bidder.setUsername("forwarder");
+
+    Container container = new Container();
+
+    Collection<Container> containers = new ArrayList<>();
+    containers.add(container);
+
+    Bid bid = new Bid();
+    bid.setId(1L);
+    bid.setBidder(bidder);
+    bid.setStatus(EnumBidStatus.PENDING.name());
+    bid.setContainers(containers);
+
+    Collection<Bid> bids = new ArrayList<>();
+    bids.add(bid);
+
+    ShippingLine shippingLine = new ShippingLine();
+    shippingLine.setId(1L);
+    shippingLine.setCompanyCode("AL0001");
+
+    ContainerType containerType = new ContainerType();
+    containerType.setId(1L);
+    containerType.setName("GX11");
+
+    Outbound outbound = new Outbound();
+    outbound.setId(1L);
+    outbound.setShippingLine(shippingLine);
+    outbound.setContainerType(containerType);
+
+    BiddingDocument biddingDocument = new BiddingDocument();
+    biddingDocument.setId(1L);
+    biddingDocument.setStatus(EnumBiddingStatus.BIDDING.name());
+    biddingDocument.setOutbound(outbound);
+
+    BillOfLading billOfLading = new BillOfLading();
+    billOfLading.setId(1L);
+
+    Inbound inbound = new Inbound();
+    inbound.setId(1L);
+    inbound.setForwarder(bidder);
+    inbound.setBillOfLading(billOfLading);
+    inbound.setShippingLine(shippingLine);
+    inbound.setContainerType(containerType);
+
+    // when
+    when(biddingDocumentRepository.getOne(Mockito.anyLong())).thenReturn(biddingDocument);
+    when(outboundRepository.save(Mockito.any(Outbound.class))).thenReturn(null);
+    when(biddingDocumentRepository.save(Mockito.any(BiddingDocument.class))).thenReturn(null);
+
+    // then
+    biddingDocumentServiceImpl.updateExpiredBiddingDocuments(biddingDocument.getId(),
+        EnumBiddingStatus.COMBINED.name());
+  }
+
+  @Test
+  @DisplayName("Update ExpiredBiddingDocumentFromList COMBINED Success")
+  public void UpdateExpiredBiddingDocumentFromListCOMBINED_Success() {
+    // given
+    Forwarder bidder = new Forwarder();
+    bidder.setId(1L);
+    bidder.setUsername("forwarder");
+
+    Container container = new Container();
+
+    Collection<Container> containers = new ArrayList<>();
+    containers.add(container);
+
+    Bid bid = new Bid();
+    bid.setId(1L);
+    bid.setBidder(bidder);
+    bid.setStatus(EnumBidStatus.PENDING.name());
+    bid.setContainers(containers);
+
+    Collection<Bid> bids = new ArrayList<>();
+
+    ShippingLine shippingLine = new ShippingLine();
+    shippingLine.setId(1L);
+    shippingLine.setCompanyCode("AL0001");
+
+    ContainerType containerType = new ContainerType();
+    containerType.setId(1L);
+    containerType.setName("GX11");
+
+    Outbound outbound = new Outbound();
+    outbound.setId(1L);
+    outbound.setShippingLine(shippingLine);
+    outbound.setContainerType(containerType);
+
+    BiddingDocument biddingDocument = new BiddingDocument();
+    biddingDocument.setId(1L);
+    biddingDocument.setStatus(EnumBiddingStatus.BIDDING.name());
+    biddingDocument.setOutbound(outbound);
+    biddingDocument.setBidClosing(LocalDateTime.now().minusDays(1));
+    biddingDocument.setBids(bids);
+
+    BillOfLading billOfLading = new BillOfLading();
+    billOfLading.setId(1L);
+
+    Inbound inbound = new Inbound();
+    inbound.setId(1L);
+    inbound.setForwarder(bidder);
+    inbound.setBillOfLading(billOfLading);
+    inbound.setShippingLine(shippingLine);
+    inbound.setContainerType(containerType);
+
+    biddingDocuments.add(biddingDocument);
+
+    // when
+    when(biddingDocumentRepository.existsCombinedBid(Mockito.anyLong())).thenReturn(true);
+    when(biddingDocumentRepository.getOne(Mockito.anyLong())).thenReturn(biddingDocument);
+
+    // then
+    List<BiddingDocument> biddingDocumentResult = biddingDocumentServiceImpl
+        .updateExpiredBiddingDocumentFromList(biddingDocuments);
+    assertThat(biddingDocumentResult).isNotNull();
   }
 }

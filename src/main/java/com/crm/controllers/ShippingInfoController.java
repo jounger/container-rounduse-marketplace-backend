@@ -120,6 +120,25 @@ public class ShippingInfoController {
     return ResponseEntity.ok(response);
   }
 
+  @PreAuthorize("hasRole('DRIVER')")
+  @GetMapping("/active")
+  public ResponseEntity<?> getShippingInfosAreActive() {
+    UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    String username = userDetails.getUsername();
+    PaginationRequest request = new PaginationRequest();
+    request.setLimit(1);
+    request.setPage(0);
+    Page<ShippingInfo> pages = shippingInfoService.getShippingInfosAreActive(username, request);
+
+    if (pages.getContent().isEmpty()) {
+      return ResponseEntity.ok(null);
+    }
+    List<ShippingInfo> shippingInfos = pages.getContent();
+    ShippingInfoDto shippingInfosDto = ShippingInfoMapper.toShippingInfoDto(shippingInfos.get(0));
+
+    return ResponseEntity.ok(shippingInfosDto);
+  }
+
   @PreAuthorize("hasRole('MERCHANT')")
   @GetMapping("/outbound/{id}")
   public ResponseEntity<?> getShippingInfosByOutbound(@PathVariable("id") Long id, @Valid PaginationRequest request) {
@@ -155,7 +174,6 @@ public class ShippingInfoController {
     DefaultResponse<ShippingInfoDto> defaultResponse = new DefaultResponse<>();
     defaultResponse.setMessage(SuccessMessage.EDIT_SHIPPING_INFO_SUCCESSFULLY);
     defaultResponse.setData(shippingInfoDto);
-    
 
     logger.info("User{} does editShippingInfo from id {} with request {}", username, id, request.toString());
     return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
@@ -172,7 +190,7 @@ public class ShippingInfoController {
     // Set default response body
     DefaultResponse<ShippingInfoDto> defaultResponse = new DefaultResponse<>();
     defaultResponse.setMessage(SuccessMessage.DELETE_SHIPPING_INFO_SUCCESSFULLY);
-    
+
     logger.info("{} does editShippingInfo with id: {}", username, id);
     return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }

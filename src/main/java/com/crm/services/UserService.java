@@ -32,7 +32,7 @@ public interface UserService {
 
   void getResetPasswordToken(String email) throws MessagingException, IOException;
 
-  Boolean isValidResetPasswrodTolken(String token);
+  Boolean isValidResetPasswordTolken(String token);
 
   void resetPasswordByToken(String token, String newPassword);
 

@@ -25,7 +25,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.crm.common.SuccessMessage;
@@ -67,14 +66,6 @@ public class OperatorController {
   @PreAuthorize("hasRole('ADMIN') or hasRole('MODERATOR')")
   public ResponseEntity<?> getOperator(@PathVariable Long id) {
     Operator operator = operatorService.getOperatorById(id);
-    OperatorDto operatorDto = new OperatorDto();
-    operatorDto = OperatorMapper.toOperatorDto(operator);
-    return ResponseEntity.ok(operatorDto);
-  }
-
-  @GetMapping("/username")
-  public ResponseEntity<?> getOperatorByUsername(@RequestParam("username") String username) {
-    Operator operator = operatorService.getOperatorByUsername(username);
     OperatorDto operatorDto = new OperatorDto();
     operatorDto = OperatorMapper.toOperatorDto(operator);
     return ResponseEntity.ok(operatorDto);

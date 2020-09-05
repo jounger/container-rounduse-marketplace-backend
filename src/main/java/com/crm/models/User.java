@@ -119,6 +119,8 @@ public class User {
   @OneToMany(mappedBy = "owner")
   private Collection<FileUpload> fileUploads = new ArrayList<>();
 
+  @OneToMany(mappedBy = "user")
+  private Collection<PasswordResetToken> passwordResetTokens = new ArrayList<>();
   // DO NOT DELETE CODE BELLOW
 
   @Override

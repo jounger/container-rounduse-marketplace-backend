@@ -5,9 +5,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -48,15 +50,15 @@ public class Bid {
   @Column(name = "id", updatable = false, nullable = false)
   private Long id;
 
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "bidding_document_id")
   private BiddingDocument biddingDocument;
 
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "forwarder_id")
   private Forwarder bidder;
 
-  @ManyToMany
+  @ManyToMany(cascade = {CascadeType.REMOVE, CascadeType.REFRESH, CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST})
   @JoinTable(name = "bid_container", joinColumns = @JoinColumn(name = "bid_id"), inverseJoinColumns = @JoinColumn(name = "container_id"))
   private Collection<Container> containers = new ArrayList<>();
 
@@ -66,8 +68,11 @@ public class Bid {
   @Column(name = "bid_date")
   private LocalDateTime bidDate;
 
-  @Column(name = "bid_validity_period")
-  private LocalDateTime bidValidityPeriod;
+  @Column(name = "freeze_time")
+  private LocalDateTime freezeTime;
+  
+  @Column(name = "validity_period")
+  private LocalDateTime validityPeriod;
 
   @Column(name = "date_of_decision")
   private LocalDateTime dateOfDecision;
@@ -86,6 +91,6 @@ public class Bid {
   @LastModifiedDate
   private Date updatedAt;
   
-  @OneToOne(mappedBy = "bid")
+  @OneToOne(mappedBy = "bid", fetch = FetchType.LAZY)
   private Combined combined;
 }

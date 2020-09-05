@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import com.crm.common.Constant;
 import com.crm.common.ErrorMessage;
 import com.crm.common.Tool;
+import com.crm.exception.DuplicateRecordException;
 import com.crm.exception.ForbiddenException;
 import com.crm.exception.NotFoundException;
 import com.crm.models.Bid;
@@ -41,35 +42,40 @@ public class RatingServiceImpl implements RatingService {
   private ContractRepository contractRepository;
 
   @Override
-  public Rating createRating(String username, RatingRequest request) {
+  public Rating createRating(Long id, String username, RatingRequest request) {
     Rating rating = new Rating();
 
-    Supplier sender = supplierRepository.findByUsername(username)
-        .orElseThrow(() -> new NotFoundException("Sender is not found."));
-    rating.setSender(sender);
-
-    Supplier receiver = supplierRepository.findById(request.getReceiver())
-        .orElseThrow(() -> new NotFoundException(ErrorMessage.RECIPIENT_NOT_FOUND));
-    rating.setReceiver(receiver);
-
-    Contract contract = contractRepository.findById(request.getContract())
+    Contract contract = contractRepository.findById(id)
         .orElseThrow(() -> new NotFoundException(ErrorMessage.SENDER_NOT_FOUND));
     rating.setContract(contract);
-    if (!contractRepository.existsByUserAndContract(request.getContract(), username)) {
-      throw new ForbiddenException(ErrorMessage.USER_ACCESS_DENIED);
+    if (!contractRepository.existsByUserAndContract(id, username)) {
+      throw new DuplicateRecordException(ErrorMessage.USER_ACCESS_DENIED);
     }
 
-    if (ratingRepository.existsByUserAndContract(request.getContract(), username)) {
-      throw new ForbiddenException(ErrorMessage.USER_ACCESS_DENIED);
+    Supplier merchant = contract.getSender();
+    Supplier forwarder = contract.getCombined().getBid().getBidder();
+    if (username.equals(merchant.getUsername())) {
+      rating.setSender(merchant);
+      rating.setReceiver(forwarder);
+    } else if (username.equals(forwarder.getUsername())) {
+      rating.setSender(forwarder);
+      rating.setReceiver(merchant);
+    } else {
+      throw new NotFoundException(ErrorMessage.USER_NOT_FOUND);
+    }
+
+    if (ratingRepository.existsByUserAndContract(id, username)) {
+      throw new ForbiddenException(ErrorMessage.RATING_ONE_PER_CONTRACT);
     }
     rating.setRatingValue(request.getRatingValue());
+    rating.setComment(request.getComment());
     Rating _rating = ratingRepository.save(rating);
 
     LocalDateTime rewind = LocalDateTime.now().minusMonths(Constant.REWIND_MONTH);
-    Double ratingValue = ratingRepository.calcAvgRatingValueByReceiver(request.getReceiver(),
+    Double ratingValue = ratingRepository.calcAvgRatingValueByReceiver(rating.getReceiver().getId(),
         Timestamp.valueOf(rewind));
-    receiver.setRatingValue(ratingValue);
-    supplierRepository.save(receiver);
+    rating.getReceiver().setRatingValue(ratingValue);
+    supplierRepository.save(rating.getReceiver());
 
     return _rating;
   }
@@ -142,32 +148,6 @@ public class RatingServiceImpl implements RatingService {
   }
 
   @Override
-  public Rating updateRating(Long id, String username, RatingRequest request) {
-    Rating rating = ratingRepository.findById(request.getId())
-        .orElseThrow(() -> new NotFoundException(ErrorMessage.RATING_NOT_FOUND));
-
-    Supplier sender = supplierRepository.findById(request.getSender())
-        .orElseThrow(() -> new NotFoundException(ErrorMessage.SENDER_NOT_FOUND));
-    rating.setSender(sender);
-
-    Supplier receiver = supplierRepository.findById(request.getSender())
-        .orElseThrow(() -> new NotFoundException(ErrorMessage.RECIPIENT_NOT_FOUND));
-    rating.setReceiver(receiver);
-
-    rating.setRatingValue(request.getRatingValue());
-    Rating _rating = ratingRepository.save(rating);
-
-    LocalDateTime rewind = LocalDateTime.now().minusMonths(Constant.REWIND_MONTH);
-    Double ratingValue = ratingRepository.calcAvgRatingValueByReceiver(request.getReceiver(),
-        Timestamp.valueOf(rewind));
-    receiver.setRatingValue(ratingValue);
-
-    supplierRepository.save(receiver);
-
-    return _rating;
-  }
-
-  @Override
   public Rating editRating(Long id, String username, Map<String, Object> updates) {
     Rating rating = ratingRepository.findById(id)
         .orElseThrow(() -> new NotFoundException(ErrorMessage.RATING_NOT_FOUND));
@@ -179,6 +159,10 @@ public class RatingServiceImpl implements RatingService {
     String ratingValue = String.valueOf(updates.get("ratingValue"));
     if (updates.get("ratingValue") != null && !Tool.isEqual(rating.getRatingValue(), ratingValue)) {
       rating.setRatingValue(Integer.valueOf(ratingValue));
+    }
+    String comment = String.valueOf(updates.get("comment"));
+    if (updates.get("comment") != null && !Tool.isEqual(rating.getComment(), comment)) {
+      rating.setComment(comment);
     }
     Rating _rating = ratingRepository.save(rating);
 

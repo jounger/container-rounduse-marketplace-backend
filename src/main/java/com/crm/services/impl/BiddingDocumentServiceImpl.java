@@ -323,19 +323,22 @@ public class BiddingDocumentServiceImpl implements BiddingDocumentService {
     biddingDocument.setStatus(status);
     Outbound outbound = biddingDocument.getOutbound();
     String bidStatus = EnumBidStatus.EXPIRED.name();
+    // if status equal EXPIRED set outbound's status to CREATED
     if (status.equalsIgnoreCase(EnumBiddingStatus.EXPIRED.name())) {
       outbound.setStatus(EnumSupplyStatus.CREATED.name());
       outboundRepository.save(outbound);
     }
+    // if status equal COMBINED set outbound's status to COMBINED
     if (status.equalsIgnoreCase(EnumBiddingStatus.COMBINED.name())) {
       outbound = biddingDocument.getOutbound();
       outbound.setStatus(EnumSupplyStatus.COMBINED.name());
       outboundRepository.save(outbound);
-      bidStatus = EnumBidStatus.ACCEPTED.name();
     }
     if (!bids.isEmpty()) {
       for (Bid bid : bids) {
-        bidService.editExpiredBids(bid, bidStatus);
+        if (bid.getStatus().equals(EnumBidStatus.PENDING.name())) {
+          bidService.editExpiredBids(bid, bidStatus);
+        }
       }
     }
     biddingDocumentRepository.save(biddingDocument);
@@ -350,8 +353,9 @@ public class BiddingDocumentServiceImpl implements BiddingDocumentService {
       boolean existsCombinedBid = biddingDocumentRepository.existsCombinedBid(biddingDocument.getId());
       if (biddingDocument.getBidClosing().isBefore(LocalDateTime.now())
           && biddingDocument.getStatus().equals(EnumBiddingStatus.BIDDING.name())) {
-        status = EnumBiddingStatus.EXPIRED.name();
-        if (existsCombinedBid) {
+        if (!existsCombinedBid) {
+          status = EnumBiddingStatus.EXPIRED.name();
+        } else if (existsCombinedBid) {
           status = EnumBiddingStatus.COMBINED.name();
         }
         updateExpiredBiddingDocuments(biddingDocument.getId(), status);

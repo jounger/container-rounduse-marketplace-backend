@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import com.crm.common.ErrorMessage;
 import com.crm.common.Tool;
+import com.crm.enums.EnumBidStatus;
 import com.crm.enums.EnumBiddingStatus;
 import com.crm.enums.EnumSupplyStatus;
 import com.crm.exception.DuplicateRecordException;
@@ -437,16 +438,20 @@ public class ContainerServiceImpl implements ContainerService {
       if (!container.getBids().isEmpty()) {
         Bid bid = (Bid) container.getBids().toArray()[container.getBids().size() - 1];
         BiddingDocument biddingDocument = bid.getBiddingDocument();
+        String status = biddingDocument.getStatus();
         boolean existsCombinedContainer = biddingDocumentRepository.existsCombinedBid(biddingDocument.getId());
-        if (biddingDocument.getBidClosing().isBefore(LocalDateTime.now()) && existsCombinedContainer
+        if (biddingDocument.getBidClosing().isBefore(LocalDateTime.now())
             && biddingDocument.getStatus().equals(EnumBiddingStatus.BIDDING.name())) {
-          String status = EnumBiddingStatus.EXPIRED.name();
-          biddingDocumentService.updateExpiredBiddingDocuments(biddingDocument.getId(), status);
-          if (existsCombinedContainer) {
-            container.setStatus(EnumSupplyStatus.COMBINED.name());
-          } else {
+          if (!existsCombinedContainer) {
             container.setStatus(EnumSupplyStatus.CREATED.name());
+            status = EnumBiddingStatus.EXPIRED.name();
+          } else if (existsCombinedContainer) {
+            status = EnumBiddingStatus.COMBINED.name();
+            if (bid.getStatus().equals(EnumBidStatus.PENDING.name())) {
+              container.setStatus(EnumSupplyStatus.COMBINED.name());
+            }
           }
+          biddingDocumentService.updateExpiredBiddingDocuments(biddingDocument.getId(), status);
         }
       }
       result.add(container);

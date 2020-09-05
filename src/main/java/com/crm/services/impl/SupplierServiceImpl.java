@@ -1,5 +1,7 @@
 package com.crm.services.impl;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -94,8 +96,9 @@ public class SupplierServiceImpl implements SupplierService {
 
   @Override
   public Page<Supplier> getSuppliersByRole(PaginationRequest request) {
-    Page<Supplier> pages = supplierRepository
-        .findByRole(PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt")));
+    List<String> roles = Arrays.asList("ROLE_MERCHANT", "ROLE_FORWARDER");
+    PageRequest page = PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Sort.Direction.DESC, "createdAt"));
+    Page<Supplier> pages = supplierRepository.findByRole(roles, page);
     return pages;
   }
 

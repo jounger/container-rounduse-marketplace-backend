@@ -1,5 +1,8 @@
 package com.crm.models.dto;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -24,5 +27,9 @@ public class ContractDto {
   private Boolean required;
 
   private String creationDate;
+
+  private Double paymentPercentage;
+
+  private List<RatingDto> ratings = new ArrayList<>();
 
 }

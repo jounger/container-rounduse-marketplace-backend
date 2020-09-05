@@ -125,15 +125,13 @@ public class BidServiceImpl implements BidService {
       }
       if (containerRepository.existsByOutbound(containerId, outbound.getShippingLine().getCompanyCode(),
           outbound.getContainerType().getName(), Arrays.asList(EnumSupplyStatus.CREATED.name()),
-          outbound.getPackingTime(), booking.getCutOffTime(), booking.getPortOfLoading().getNameCode())) {
-        container.setStatus(EnumSupplyStatus.BIDDING.name());
+          outbound.getPackingTime(), booking.getCutOffTime())) {
         bid.getContainers().add(container);
         container.setStatus(EnumSupplyStatus.BIDDING.name());
         containerRepository.save(container);
       } else {
         throw new NotFoundException(ErrorMessage.CONTAINER_NOT_SUITABLE);
       }
-      bid.setBidValidityPeriod(LocalDateTime.now().plusHours(Constant.BID_VALIDITY_PERIOD));
     });
 
     Double bidPrice = request.getBidPrice();
@@ -145,7 +143,15 @@ public class BidServiceImpl implements BidService {
     LocalDateTime bidDate = LocalDateTime.now();
     bid.setBidDate(bidDate);
 
-    bid.setBidValidityPeriod(LocalDateTime.now().plusHours(Constant.BID_VALIDITY_PERIOD));
+    bid.setFreezeTime(LocalDateTime.now().plusMinutes(Constant.FREEZE_TIME));
+    LocalDateTime validityPeriod = Tool.convertToLocalDateTime(request.getValidityPeriod());
+    if (validityPeriod.isBefore(LocalDateTime.now())) {
+      throw new InternalException(ErrorMessage.BID_INVALID_VALIDITY_PERIOD);
+    } else if (validityPeriod.isAfter(biddingDocument.getBidClosing())) {
+      bid.setValidityPeriod(biddingDocument.getBidClosing());
+    } else {
+      bid.setValidityPeriod(validityPeriod);
+    }
     bid.setStatus(EnumBidStatus.PENDING.name());
 
     Bid _bid = bidRepository.save(bid);
@@ -157,10 +163,11 @@ public class BidServiceImpl implements BidService {
     biddingDocumentRepository.save(biddingDocument);
 
     BiddingNotification biddingNotification = biddingNotificationRepository
-        .findByUserAndBiddingDocument(username, bidDocId)
-        .orElseThrow(() -> new NotFoundException(ErrorMessage.BIDDINGDOCUMENT_NOT_FOUND));
-    biddingNotification.setIsHide(true);
-    biddingNotificationRepository.save(biddingNotification);
+        .findByUserAndBiddingDocument(username, bidDocId).orElse(null);
+    if (biddingNotification != null) {
+      biddingNotification.setIsHide(true);
+      biddingNotificationRepository.save(biddingNotification);
+    }
 
     return _bid;
   }
@@ -188,7 +195,8 @@ public class BidServiceImpl implements BidService {
     if (!supplierRepository.existsByUsername(username)) {
       throw new NotFoundException(ErrorMessage.USER_NOT_FOUND);
     }
-    PageRequest page = PageRequest.of(request.getPage(), request.getLimit(), Sort.by(Direction.DESC, "createdAt"));
+    PageRequest page = PageRequest.of(request.getPage(), request.getLimit(),
+        Sort.by(Direction.ASC, "bidPrice").and(Sort.by(Direction.DESC, "bidder.ratingValue")));
     String status = request.getStatus();
     if (status != null) {
       return bidRepository.findByBiddingDocument(id, username, status, page);
@@ -232,18 +240,11 @@ public class BidServiceImpl implements BidService {
         .orElseThrow(() -> new NotFoundException(ErrorMessage.USER_NOT_FOUND));
     Role role = user.getRoles().iterator().next();
 
-    if (role.getName().equalsIgnoreCase("ROLE_FORWARDER")) {
-      String bidStatus = bid.getStatus();
-      if (!bidStatus.equalsIgnoreCase(EnumBidStatus.PENDING.name())) {
-        throw new InternalException(ErrorMessage.BID_INVALID_EDIT);
-      }
-
-      LocalDateTime bidValidityPeriod = bid.getBidValidityPeriod();
-      if (bidValidityPeriod.isAfter(LocalDateTime.now())) {
-        throw new InternalException(ErrorMessage.BID_EDIT_BEFORE_VALIDITY_TIME);
-      }
+    String bidStatus = bid.getStatus();
+    if (role.getName().equalsIgnoreCase("ROLE_FORWARDER") && !(bidStatus.equalsIgnoreCase(EnumBidStatus.PENDING.name())
+        || bidStatus.equalsIgnoreCase(EnumBidStatus.EXPIRED.name()))) {
+      throw new InternalException(ErrorMessage.BID_INVALID_EDIT);
     }
-
     List<Container> containers = new ArrayList<>(bid.getContainers());
 
     BiddingDocument biddingDocument = bid.getBiddingDocument();
@@ -254,10 +255,34 @@ public class BidServiceImpl implements BidService {
       throw new InternalException(ErrorMessage.BIDDINGDOCUMENT_TIME_OUT);
     }
 
+    String bidValidityPeriod = String.valueOf(updates.get("validityPeriod"));
+    if (updates.get("validityPeriod") != null && !Tool.isBlank(bidValidityPeriod)) {
+      LocalDateTime validityPeriod = Tool.convertToLocalDateTime(bidValidityPeriod);
+      if (validityPeriod.isBefore(LocalDateTime.now())) {
+        throw new InternalException(ErrorMessage.BID_INVALID_VALIDITY_PERIOD);
+      } else if (validityPeriod.isAfter(biddingDocument.getBidClosing())) {
+        bid.setValidityPeriod(biddingDocument.getBidClosing());
+      } else {
+        bid.setValidityPeriod(validityPeriod);
+      }
+      bid.getContainers().forEach(container -> {
+        if (!container.getStatus().equals(EnumSupplyStatus.CREATED.name())) {
+          throw new InternalException(ErrorMessage.CONTAINER_BUSY);
+        }
+        container.setStatus(EnumSupplyStatus.BIDDING.name());
+        containerRepository.save(container);
+      });
+      bid.setStatus(EnumBidStatus.PENDING.name());
+      bid.setFreezeTime(LocalDateTime.now().plusMinutes(Constant.FREEZE_TIME));
+    }
+
     String bidPriceString = String.valueOf(updates.get("bidPrice"));
     if (updates.get("bidPrice") != null && !Tool.isEqual(bid.getBidPrice(), bidPriceString)) {
+      if (isBeforeFreezeTime(bid)) {
+        throw new InternalException(ErrorMessage.BID_EDIT_BEFORE_FREEZE_TIME);
+      }
       bid.setBidPrice(Double.parseDouble(bidPriceString));
-      bid.setBidValidityPeriod(LocalDateTime.now().plusHours(Constant.BID_VALIDITY_PERIOD));
+      bid.setFreezeTime(LocalDateTime.now().plusMinutes(Constant.FREEZE_TIME));
     }
 
     String statusString = String.valueOf(updates.get("status"));
@@ -275,6 +300,9 @@ public class BidServiceImpl implements BidService {
 
       if (bid.getStatus().equalsIgnoreCase(EnumBidStatus.CANCELED.name())
           || bid.getStatus().equalsIgnoreCase(EnumBidStatus.EXPIRED.name())) {
+        if (isBeforeFreezeTime(bid)) {
+          throw new InternalException(ErrorMessage.BID_EDIT_BEFORE_FREEZE_TIME);
+        }
         containers.forEach(container -> {
           container.setStatus(EnumSupplyStatus.CREATED.name());
           containerRepository.save(container);
@@ -316,15 +344,29 @@ public class BidServiceImpl implements BidService {
       biddingDocumentRepository.save(biddingDocument);
       outbound.setStatus(EnumSupplyStatus.COMBINED.name());
       outboundRepository.save(outbound);
+      biddingDocument.getBids().forEach(item -> {
+        if (!item.getStatus().equals(EnumBidStatus.ACCEPTED.name()) && item.getId() != bid.getId()) {
+          editExpiredBids(bid, EnumBidStatus.REJECTED.name());
+        }
+      });
     }
-    containersId.forEach(containerId -> {
-      if (containerRepository.isContainedByBid(containerId, id)) {
-        Container container = containerRepository.findById(containerId)
-            .orElseThrow(() -> new NotFoundException(ErrorMessage.CONTAINER_NOT_FOUND));
+
+//    containersId.forEach(containerId -> {
+//      if (containerRepository.isContainedByBid(containerId, id)) {
+//        Container container = containerRepository.findById(containerId)
+//            .orElseThrow(() -> new NotFoundException(ErrorMessage.CONTAINER_NOT_FOUND));
+//        container.setStatus(EnumSupplyStatus.COMBINED.name());
+//        containerRepository.save(container);
+//      }
+//    });
+    for (Container container : bid.getContainers()) {
+      if (containersId.contains(container.getId())) {
         container.setStatus(EnumSupplyStatus.COMBINED.name());
-        containerRepository.save(container);
+      } else {
+        container.setStatus(EnumSupplyStatus.CREATED.name());
       }
-    });
+      containerRepository.save(container);
+    }
 
     Bid _bid = bidRepository.save(bid);
 
@@ -337,6 +379,11 @@ public class BidServiceImpl implements BidService {
     if (bid.getBidder().getUsername() != username) {
       throw new NotFoundException("Access denied.");
     }
+
+    if (isBeforeFreezeTime(bid)) {
+      throw new InternalException(ErrorMessage.BID_EDIT_BEFORE_FREEZE_TIME);
+    }
+
     if (!bid.getStatus().equalsIgnoreCase(EnumBidStatus.ACCEPTED.name())) {
       List<Container> containers = new ArrayList<>(bid.getContainers());
       containers.forEach(container -> {
@@ -356,6 +403,11 @@ public class BidServiceImpl implements BidService {
     if (!bid.getBidder().getUsername().equals(username)) {
       throw new ForbiddenException(ErrorMessage.USER_ACCESS_DENIED);
     }
+
+    if (isBeforeFreezeTime(bid)) {
+      throw new InternalException(ErrorMessage.BID_EDIT_BEFORE_FREEZE_TIME);
+    }
+
     BiddingDocument biddingDocument = bid.getBiddingDocument();
     Outbound outbound = biddingDocument.getOutbound();
     Booking booking = outbound.getBooking();
@@ -365,14 +417,16 @@ public class BidServiceImpl implements BidService {
         .orElseThrow(() -> new NotFoundException(ErrorMessage.CONTAINER_NOT_FOUND));
     Container newContainer = containerRepository.findById(newContId)
         .orElseThrow(() -> new NotFoundException(ErrorMessage.CONTAINER_NOT_FOUND));
-
-    bid.getContainers().remove(oldContainer);
+    while (bid.getContainers().contains(oldContainer)) {
+      bid.getContainers().remove(oldContainer);
+    }
+    oldContainer.getBids().remove(bid);
     oldContainer.setStatus(EnumSupplyStatus.CREATED.name());
     containerRepository.save(oldContainer);
 
     if (containerRepository.existsByOutbound(newContId, outbound.getShippingLine().getCompanyCode(),
         outbound.getContainerType().getName(), Arrays.asList(EnumSupplyStatus.CREATED.name()),
-        outbound.getPackingTime(), booking.getCutOffTime(), booking.getPortOfLoading().getNameCode())) {
+        outbound.getPackingTime(), booking.getCutOffTime())) {
       bid.getContainers().add(newContainer);
       newContainer.setStatus(EnumSupplyStatus.BIDDING.name());
       containerRepository.save(newContainer);
@@ -380,7 +434,7 @@ public class BidServiceImpl implements BidService {
       throw new NotFoundException(ErrorMessage.CONTAINER_NOT_SUITABLE);
     }
 
-    bid.setBidValidityPeriod(LocalDateTime.now().plusHours(Constant.BID_VALIDITY_PERIOD));
+    bid.setFreezeTime(LocalDateTime.now().plusMinutes(Constant.FREEZE_TIME));
     Bid _bid = bidRepository.save(bid);
     return _bid;
   }
@@ -403,15 +457,15 @@ public class BidServiceImpl implements BidService {
     Outbound outbound = biddingDocument.getOutbound();
     Booking booking = outbound.getBooking();
     List<Long> containers = request.getContainers();
+    if (bid.getContainers().size() >= booking.getUnit()) {
+      throw new InternalException(ErrorMessage.CONTAINER_MORE_THAN_NEEDED);
+    }
     containers.forEach(containerId -> {
       Container container = containerRepository.findById(containerId)
           .orElseThrow(() -> new NotFoundException(ErrorMessage.CONTAINER_NOT_FOUND));
-      if (bid.getContainers().size() >= booking.getUnit()) {
-        throw new InternalException(ErrorMessage.CONTAINER_MORE_THAN_NEEDED);
-      }
       if (containerRepository.existsByOutbound(containerId, outbound.getShippingLine().getCompanyCode(),
           outbound.getContainerType().getName(), Arrays.asList(EnumSupplyStatus.CREATED.name()),
-          outbound.getPackingTime(), booking.getCutOffTime(), booking.getPortOfLoading().getNameCode())) {
+          outbound.getPackingTime(), booking.getCutOffTime())) {
         container.setStatus(EnumSupplyStatus.BIDDING.name());
         bid.getContainers().add(container);
         containerRepository.save(container);
@@ -420,7 +474,7 @@ public class BidServiceImpl implements BidService {
       }
     });
 
-    bid.setBidValidityPeriod(LocalDateTime.now().plusHours(Constant.BID_VALIDITY_PERIOD));
+    bid.setFreezeTime(LocalDateTime.now().plusMinutes(Constant.FREEZE_TIME));
     Bid _bid = bidRepository.save(bid);
     return _bid;
   }
@@ -430,6 +484,10 @@ public class BidServiceImpl implements BidService {
     Bid bid = bidRepository.findById(id).orElseThrow(() -> new NotFoundException(ErrorMessage.BID_NOT_FOUND));
     if (!bid.getBidder().getUsername().equals(username)) {
       throw new ForbiddenException(ErrorMessage.USER_ACCESS_DENIED);
+    }
+
+    if (isBeforeFreezeTime(bid)) {
+      throw new InternalException(ErrorMessage.BID_EDIT_BEFORE_FREEZE_TIME);
     }
 
     if (!bid.getStatus().equalsIgnoreCase(EnumBidStatus.PENDING.name())) {
@@ -449,10 +507,13 @@ public class BidServiceImpl implements BidService {
       throw new NotFoundException(ErrorMessage.CONTAINER_NOT_FOUND);
     }
     container.setStatus(EnumSupplyStatus.CREATED.name());
+    container.getBids().remove(bid);
     containerRepository.save(container);
 
-    bid.getContainers().remove(container);
-    bid.setBidValidityPeriod(LocalDateTime.now().plusHours(Constant.BID_VALIDITY_PERIOD));
+    while (bid.getContainers().contains(container)) {
+      bid.getContainers().remove(container);
+    }
+    bid.setFreezeTime(LocalDateTime.now().plusMinutes(Constant.FREEZE_TIME));
     Bid _bid = bidRepository.save(bid);
     return _bid;
   }
@@ -483,23 +544,40 @@ public class BidServiceImpl implements BidService {
 
   @Override
   public List<Bid> updateExpiredBidFromList(List<Bid> bids) {
-    List<Bid> result = new ArrayList<Bid>();
+    List<Bid> result = new ArrayList<>();
     for (Bid bid : bids) {
       BiddingDocument biddingDocument = bid.getBiddingDocument();
-      String status = bid.getStatus();
+      String status = biddingDocument.getStatus();
       boolean existsCombinedBid = biddingDocumentRepository.existsCombinedBid(biddingDocument.getId());
-      if (biddingDocument.getBidClosing().isBefore(LocalDateTime.now()) && existsCombinedBid
+      if (biddingDocument.getBidClosing().isBefore(LocalDateTime.now())
           && biddingDocument.getStatus().equals(EnumBiddingStatus.BIDDING.name())) {
-        status = EnumBiddingStatus.EXPIRED.name();
-        if (existsCombinedBid) {
-          status = EnumSupplyStatus.COMBINED.name();
+        if (!existsCombinedBid) {
+          status = EnumBiddingStatus.EXPIRED.name();
+          bid.setStatus(EnumBidStatus.EXPIRED.name());
+        } else if (existsCombinedBid) {
+          status = EnumBiddingStatus.COMBINED.name();
+          if (bid.getStatus().equals(EnumBidStatus.PENDING.name())) {
+            bid.setStatus(EnumBidStatus.EXPIRED.name());
+          }
         }
         biddingDocumentService.updateExpiredBiddingDocuments(biddingDocument.getId(), status);
-        bid.setStatus(status);
+      }
+      if (bid.getValidityPeriod().isBefore(LocalDateTime.now())
+          && bid.getStatus().equals(EnumBidStatus.PENDING.name())) {
+        bid.setStatus(EnumBidStatus.EXPIRED.name());
+        editExpiredBids(bid, EnumBidStatus.EXPIRED.name());
       }
       result.add(bid);
     }
     return result;
+  }
+
+  public boolean isBeforeFreezeTime(Bid bid) {
+    LocalDateTime freezeTime = bid.getFreezeTime();
+    if ((LocalDateTime.now()).isBefore(freezeTime)) {
+      return true;
+    }
+    return false;
   }
 
 }

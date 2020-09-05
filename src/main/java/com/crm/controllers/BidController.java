@@ -32,6 +32,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.crm.common.SuccessMessage;
+import com.crm.enums.EnumBidStatus;
 import com.crm.models.Bid;
 import com.crm.models.dto.BidDto;
 import com.crm.models.mapper.BidMapper;
@@ -142,8 +143,8 @@ public class BidController {
   }
 
   @PreAuthorize("hasRole('FORWARDER')")
-  @GetMapping("/forwarder")
-  public ResponseEntity<?> getBidsByForwarder(@Valid PaginationRequest request) {
+  @GetMapping("")
+  public ResponseEntity<?> getBids(@Valid PaginationRequest request) {
 
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
@@ -181,7 +182,17 @@ public class BidController {
 
     // Set default response body
     DefaultResponse<BidDto> defaultResponse = new DefaultResponse<>();
-    defaultResponse.setMessage(SuccessMessage.EDIT_BID_SUCCESSFULLY);
+    String successMessage = "";
+    if (status == EnumBidStatus.ACCEPTED.name()) {
+      successMessage = SuccessMessage.ACCEPT_BID_SUCCESSFULLY;
+    } else if (status == EnumBidStatus.REJECTED.name()) {
+      successMessage = SuccessMessage.REJECT_BID_SUCCESSFULLY;
+    } else if (status == EnumBidStatus.CANCELED.name()) {
+      successMessage = SuccessMessage.CANCEL_BID_SUCCESSFULLY;
+    } else {
+      successMessage = SuccessMessage.EDIT_BID_SUCCESSFULLY;
+    }
+    defaultResponse.setMessage(successMessage);
     defaultResponse.setData(bidDto);
 
     logger.info("User {} editBid from id {} with request: {}", username, id, updates.toString());
@@ -190,8 +201,8 @@ public class BidController {
 
   @Transactional
   @PreAuthorize("hasRole('FORWARDER')")
-  @PostMapping(value = "/{id}/container/{contId}")
-  public ResponseEntity<?> addContainers(@PathVariable("id") Long id,@Valid @RequestBody BidRequest request) {
+  @PostMapping(value = "/{id}/container")
+  public ResponseEntity<?> addContainers(@PathVariable("id") Long id, @Valid @RequestBody BidRequest request) {
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
     Bid bid = bidService.addContainer(id, username, request);
@@ -199,7 +210,7 @@ public class BidController {
 
     // Set default response body
     DefaultResponse<BidDto> defaultResponse = new DefaultResponse<>();
-    defaultResponse.setMessage(SuccessMessage.EDIT_BID_SUCCESSFULLY);
+    defaultResponse.setMessage(SuccessMessage.EDIT_ADD_CONTAINER_SUCCESSFULLY);
     defaultResponse.setData(bidDto);
 
     logger.info("User {} addContainer into bid id {} with request: {}", username, id, request.toString());
@@ -217,7 +228,7 @@ public class BidController {
 
     // Set default response body
     DefaultResponse<BidDto> defaultResponse = new DefaultResponse<>();
-    defaultResponse.setMessage(SuccessMessage.EDIT_BID_SUCCESSFULLY);
+    defaultResponse.setMessage(SuccessMessage.EDIT_REMOVE_CONTAINER_SUCCESSFULLY);
     defaultResponse.setData(bidDto);
 
     logger.info("User {} removeContainer from bid id {} with container id: {}", username, id, containerId);
@@ -233,8 +244,13 @@ public class BidController {
     Bid bid = bidService.replaceContainer(id, username, request);
     BidDto bidDto = BidMapper.toBidDto(bid);
 
+    // Set default response body
+    DefaultResponse<BidDto> defaultResponse = new DefaultResponse<>();
+    defaultResponse.setMessage(SuccessMessage.EDIT_REPLACE_CONTAINER_SUCCESSFULLY);
+    defaultResponse.setData(bidDto);
+
     logger.info("User {} replaceContainer from bid id {} with request {}", username, id, request.toString());
-    return ResponseEntity.ok(bidDto);
+    return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }
 
   @Transactional

@@ -10,7 +10,7 @@ import com.crm.payload.request.RatingRequest;
 
 public interface RatingService {
 
-  Rating createRating(String username, RatingRequest request);
+  Rating createRating(Long id, String username, RatingRequest request);
 
   Rating getRating(Long id, String username);
 
@@ -23,8 +23,6 @@ public interface RatingService {
   Page<Rating> getRatingsByReceiver(String username, PaginationRequest request);
 
   Page<Rating> getRatingsByUser(String username, PaginationRequest request);
-
-  Rating updateRating(Long id, String username, RatingRequest request);
 
   Rating editRating(Long id, String username, Map<String, Object> updates);
 

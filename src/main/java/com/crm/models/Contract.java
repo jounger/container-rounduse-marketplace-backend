@@ -8,6 +8,7 @@ import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -47,11 +48,11 @@ public class Contract {
   @Column(name = "id", updatable = false, nullable = false)
   private Long id;
 
-  @OneToOne
+  @OneToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "combined_id")
   private Combined combined;
 
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "suppier_id")
   private Supplier sender;
 
@@ -61,7 +62,7 @@ public class Contract {
   @Column(name = "fines_against_contract_violations")
   private Double finesAgainstContractViolations;
 
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "discount_id")
   private Discount discount;
 
@@ -70,6 +71,9 @@ public class Contract {
 
   @Column(name = "creation_date")
   private LocalDateTime creationDate;
+
+  @Column(name = "payment_percentage")
+  private Double paymentPercentage;
 
   @Column(name = "created_at", nullable = false, updatable = false)
   @Temporal(TemporalType.TIMESTAMP)
@@ -82,10 +86,10 @@ public class Contract {
   private Date updatedAt;
 
   @OneToMany(mappedBy = "contract")
-  private Collection<Payment> payments = new ArrayList<>();
+  private Collection<Invoice> invoices = new ArrayList<>();
 
   @OneToMany(mappedBy = "contract")
-  private Collection<Evidence> evidences = new ArrayList<>();
+  private Collection<ContractDocument> contractDocuments = new ArrayList<>();
 
   @OneToMany(mappedBy = "contract")
   private Collection<Rating> ratings = new ArrayList<>();

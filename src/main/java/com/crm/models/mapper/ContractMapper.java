@@ -28,6 +28,7 @@ public class ContractMapper {
 
     contractDto.setRequired(contract.getRequired());
     contractDto.setCreationDate(Tool.convertLocalDateTimeToString(contract.getCreationDate()));
+    contractDto.setPaymentPercentage(contract.getPaymentPercentage());
 
     return contractDto;
   }

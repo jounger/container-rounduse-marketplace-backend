@@ -13,8 +13,6 @@ public class FeedbackDto {
 
   private Long id;
 
-  private ReportDto report;
-
   private UserDto sender;
 
   private UserDto recipient;

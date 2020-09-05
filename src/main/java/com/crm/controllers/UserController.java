@@ -181,7 +181,7 @@ public class UserController {
 
   @GetMapping("/reset-password")
   public ResponseEntity<?> isValidResetPasswordToken(@Valid @RequestBody ResetPasswordRequest request) {
-    Boolean isValidResetPasswordToken = userService.isValidResetPasswrodTolken(request.getToken());
+    Boolean isValidResetPasswordToken = userService.isValidResetPasswordTolken(request.getToken());
     DefaultResponse<Boolean> response = new DefaultResponse<Boolean>();
     response.setData(isValidResetPasswordToken);
     logger.info("Reset Password Token: {}", request.getToken());

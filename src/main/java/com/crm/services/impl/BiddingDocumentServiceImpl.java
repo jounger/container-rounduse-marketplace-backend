@@ -6,10 +6,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -39,6 +37,7 @@ import com.crm.repository.BiddingDocumentRepository;
 import com.crm.repository.CombinedRepository;
 import com.crm.repository.ContainerRepository;
 import com.crm.repository.InboundRepository;
+import com.crm.repository.InvoiceRepository;
 import com.crm.repository.MerchantRepository;
 import com.crm.repository.OutboundRepository;
 import com.crm.repository.UserRepository;
@@ -73,8 +72,7 @@ public class BiddingDocumentServiceImpl implements BiddingDocumentService {
   private InboundRepository inboundRepository;
 
   @Autowired
-  @Qualifier("cachedThreadPool")
-  private ExecutorService executorService;
+  private InvoiceRepository invoiceRepository;
 
   @Autowired
   private BidService bidService;
@@ -82,6 +80,12 @@ public class BiddingDocumentServiceImpl implements BiddingDocumentService {
   @Override
   public BiddingDocument createBiddingDocument(String username, BiddingDocumentRequest request) {
     BiddingDocument biddingDocument = new BiddingDocument();
+
+    LocalDateTime paymentTerm = LocalDateTime.now().minusDays(45);
+    Boolean invoices = invoiceRepository.checkInvoicePaymentDateAndIsPaid(username, paymentTerm);
+    if (!invoices) {
+      throw new InternalException(ErrorMessage.BIDDINGDOCUMENT_CANNOT_CREATE_INVOICE);
+    }
 
     Merchant merchant = merchantRepository.findByUsername(username)
         .orElseThrow(() -> new NotFoundException(ErrorMessage.BIDDINGDOCUMENT_NOT_FOUND));
@@ -206,40 +210,7 @@ public class BiddingDocumentServiceImpl implements BiddingDocumentService {
       throw new ForbiddenException(ErrorMessage.USER_ACCESS_DENIED);
     }
 
-    if (biddingDocument.getStatus().equalsIgnoreCase(EnumBiddingStatus.COMBINED.name())) {
-      throw new InternalException(ErrorMessage.BIDDINGDOCUMENT_IS_IN_TRANSACTION);
-    }
     Outbound outbound = biddingDocument.getOutbound();
-    LocalDateTime packingTime = outbound.getPackingTime();
-
-    String bidClosing = String.valueOf(updates.get("bidClosing"));
-    if (updates.get("bidClosing") != null && !Tool.isBlank(bidClosing)) {
-      LocalDateTime bidClosingTime = Tool.convertToLocalDateTime(bidClosing);
-      if (bidClosingTime.isBefore(LocalDateTime.now()) || bidClosingTime.isAfter(packingTime)) {
-        throw new InternalException(ErrorMessage.BIDDINGDOCUMENT_INVALID_CLOSING_TIME);
-      }
-      biddingDocument.setBidClosing(bidClosingTime);
-    }
-
-    String currency = String.valueOf(updates.get("currentOfPayment"));
-    if (updates.get("currentOfPayment") != null && !Tool.isEqual(biddingDocument.getCurrencyOfPayment(), currency)) {
-      EnumCurrency currencyOfPayment = EnumCurrency.findByName(currency);
-      if (currencyOfPayment == null) {
-        currencyOfPayment = EnumCurrency.VND;
-      }
-      biddingDocument.setCurrencyOfPayment(currencyOfPayment.name());
-    }
-
-    String packagePriceString = String.valueOf(updates.get("bidPackagePrice"));
-    if (updates.get("bidPackagePrice") != null
-        && !Tool.isEqual(biddingDocument.getBidPackagePrice(), packagePriceString)) {
-      biddingDocument.setBidPackagePrice(Double.parseDouble(packagePriceString));
-    }
-
-    String floorPriceString = String.valueOf(updates.get("bidFloorPrice"));
-    if (updates.get("bidFloorPrice") != null && !Tool.isEqual(biddingDocument.getBidFloorPrice(), floorPriceString)) {
-      biddingDocument.setBidFloorPrice(Double.parseDouble(floorPriceString));
-    }
 
     String status = String.valueOf(updates.get("status"));
     EnumBiddingStatus eStatus = null;
@@ -278,6 +249,41 @@ public class BiddingDocumentServiceImpl implements BiddingDocumentService {
           }
         });
       }
+    }
+
+    if (biddingDocument.getStatus().equalsIgnoreCase(EnumBiddingStatus.COMBINED.name())) {
+      throw new InternalException(ErrorMessage.BIDDINGDOCUMENT_IS_IN_TRANSACTION);
+    }
+
+    LocalDateTime packingTime = outbound.getPackingTime();
+
+    String bidClosing = String.valueOf(updates.get("bidClosing"));
+    if (updates.get("bidClosing") != null && !Tool.isBlank(bidClosing)) {
+      LocalDateTime bidClosingTime = Tool.convertToLocalDateTime(bidClosing);
+      if (bidClosingTime.isBefore(LocalDateTime.now()) || bidClosingTime.isAfter(packingTime)) {
+        throw new InternalException(ErrorMessage.BIDDINGDOCUMENT_INVALID_CLOSING_TIME);
+      }
+      biddingDocument.setBidClosing(bidClosingTime);
+    }
+
+    String currency = String.valueOf(updates.get("currentOfPayment"));
+    if (updates.get("currentOfPayment") != null && !Tool.isEqual(biddingDocument.getCurrencyOfPayment(), currency)) {
+      EnumCurrency currencyOfPayment = EnumCurrency.findByName(currency);
+      if (currencyOfPayment == null) {
+        currencyOfPayment = EnumCurrency.VND;
+      }
+      biddingDocument.setCurrencyOfPayment(currencyOfPayment.name());
+    }
+
+    String packagePriceString = String.valueOf(updates.get("bidPackagePrice"));
+    if (updates.get("bidPackagePrice") != null
+        && !Tool.isEqual(biddingDocument.getBidPackagePrice(), packagePriceString)) {
+      biddingDocument.setBidPackagePrice(Double.parseDouble(packagePriceString));
+    }
+
+    String floorPriceString = String.valueOf(updates.get("bidFloorPrice"));
+    if (updates.get("bidFloorPrice") != null && !Tool.isEqual(biddingDocument.getBidFloorPrice(), floorPriceString)) {
+      biddingDocument.setBidFloorPrice(Double.parseDouble(floorPriceString));
     }
 
     BiddingDocument _biddingDocument = biddingDocumentRepository.save(biddingDocument);

@@ -5,9 +5,9 @@ public class Constant {
 
   public static final String BIDDING_NOTIFICATION = "/queue/bidding-notification";
 
-  public static final String DRIVER_NOTIFICATION = "/queue/driver-notification";
+  public static final String DRIVER_NOTIFICATION = "/queue/shipping-notification";
 
-  public static final String SHIPPING_LINE_NOTIFICATION = "/queue/shipping-line-notification";
+  public static final String SHIPPING_LINE_NOTIFICATION = "/queue/combined-notification";
 
   public static final String REPORT_NOTIFICATION = "/queue/report-notification";
 

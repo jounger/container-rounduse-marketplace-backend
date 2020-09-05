@@ -29,6 +29,9 @@ INSERT INTO crum_db.forwarder (user_id) VALUES ('4');
 INSERT INTO crum_db.merchant (user_id) VALUES ('5');
 INSERT INTO crum_db.driver (driver_license,user_id,forwarder_id) VALUES ('292883943002','6','4');
 
+#GEOLOCATION
+INSERT INTO crum_db.geolocation(id,created_at,latitude,longitude,updated_at,user_id) VALUES (1,CURDATE(),'','',CURDATE(),6)
+
 # PORT
 INSERT INTO crum_db.port (address,fullname,name_code,created_at,updated_at) VALUES ('Số 1A Minh Khai, Hồng Bàng, Hải Phòng','Cảng Vụ Hàng hải Hải Phòng','HAIPHONGPORT',CURDATE(),CURDATE());
 
@@ -279,6 +282,20 @@ INSERT INTO crum_db.user_role (user_id,role_id) VALUES ('47','6');
 INSERT INTO crum_db.driver (driver_license,user_id,forwarder_id) VALUES ('801170018870','45','4');
 INSERT INTO crum_db.driver (driver_license,user_id,forwarder_id) VALUES ('791170009970','46','4');
 INSERT INTO crum_db.driver (driver_license,user_id,forwarder_id) VALUES ('493270009986','47','4');
+
+# TRAILER & TRACTOR
+INSERT INTO crum_db.vehicle(id,created_at,license_plate,number_of_axles,updated_at,user_id) VALUES (9,CURDATE(),'20A-4556',2,CURDATE(),4),(10,CURDATE(),'20C-4092',2,CURDATE(),4),(11,CURDATE(),'20C-2032',2,CURDATE(),4),(12,CURDATE(),'20C-5698',2,CURDATE(),4),(13,CURDATE(),'20A-5192',2,CURDATE(),4),(14,CURDATE(),'20A-6092',2,CURDATE(),4);
+INSERT INTO crum_db.container_semi_trailer(type,unit_of_measurement,vehicle_id) VALUES ('T36','FT',9);
+INSERT INTO crum_db.container_semi_trailer(type,unit_of_measurement,vehicle_id) VALUES ('T36','FT',11);
+INSERT INTO crum_db.container_semi_trailer(type,unit_of_measurement,vehicle_id) VALUES ('T36','FT',13);
+INSERT INTO crum_db.container_tractor(vehicle_id) VALUES (10);
+INSERT INTO crum_db.container_tractor(vehicle_id) VALUES (12);
+INSERT INTO crum_db.container_tractor(vehicle_id) VALUES (14);
+
+#GEOLOCATION
+INSERT INTO crum_db.geolocation(id,created_at,latitude,longitude,updated_at,user_id) VALUES (2,CURDATE(),'','',CURDATE(),45)
+INSERT INTO crum_db.geolocation(id,created_at,latitude,longitude,updated_at,user_id) VALUES (3,CURDATE(),'','',CURDATE(),46)
+INSERT INTO crum_db.geolocation(id,created_at,latitude,longitude,updated_at,user_id) VALUES (4,CURDATE(),'','',CURDATE(),47)
 
 # SHIPPINGLINE :
 INSERT INTO crum_db.user (created_at,email,fullname,password,phone,status,updated_at,username,address) VALUES (CURDATE(),'sonlh@360logistics.vn','Mr Sơn','$2a$10$fKNzue5vXDqZWgzxtuIDWuozd30wiGRXfkzEgnFeUc6MKAIrIyG4i','0982754075','ACTIVE',CURDATE(),'360logs','Số 2-2/17 Phố Định Công Thượng, P Định Công, Q Hoàng Mai, Tp HN');

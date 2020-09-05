@@ -17,23 +17,29 @@ import org.springframework.stereotype.Service;
 
 import com.crm.common.Constant;
 import com.crm.common.ErrorMessage;
+import com.crm.common.NotificationMessage;
 import com.crm.common.Tool;
+import com.crm.enums.EnumCombinedNotification;
 import com.crm.enums.EnumInvoiceType;
+import com.crm.enums.EnumNotificationType;
 import com.crm.exception.ForbiddenException;
 import com.crm.exception.InternalException;
 import com.crm.exception.NotFoundException;
+import com.crm.models.Combined;
 import com.crm.models.Contract;
 import com.crm.models.Invoice;
 import com.crm.models.Supplier;
 import com.crm.models.User;
-import com.crm.payload.request.PaginationRequest;
+import com.crm.payload.request.CombinedNotificationRequest;
 import com.crm.payload.request.InvoiceRequest;
+import com.crm.payload.request.PaginationRequest;
 import com.crm.repository.ContractRepository;
 import com.crm.repository.InvoiceRepository;
 import com.crm.repository.SupplierRepository;
 import com.crm.repository.UserRepository;
 import com.crm.services.InvoiceService;
 import com.crm.specification.builder.InvoiceSpecificationsBuilder;
+import com.crm.websocket.controller.NotificationBroadcast;
 
 @Service
 public class InvoiceServiceImpl implements InvoiceService {
@@ -49,6 +55,9 @@ public class InvoiceServiceImpl implements InvoiceService {
 
   @Autowired
   private UserRepository userRepository;
+
+  @Autowired
+  private NotificationBroadcast notificationBroadcast;
 
   @Override
   public Invoice createInvoice(Long id, String username, InvoiceRequest request) {
@@ -72,6 +81,10 @@ public class InvoiceServiceImpl implements InvoiceService {
 
     invoice.setDetail(request.getDetail());
     if (request.getAmount() > 0) {
+      Double percent = contract.getPaymentPercentage() + request.getAmount() / contract.getPrice() * 100;
+      if (percent > 100) {
+        throw new InternalException(ErrorMessage.PAYMENT_INVALID_AMOUNT);
+      }
       invoice.setAmount(request.getAmount());
     } else {
       throw new InternalException(ErrorMessage.PAYMENT_INVALID_AMOUNT);
@@ -93,6 +106,17 @@ public class InvoiceServiceImpl implements InvoiceService {
     }
 
     Invoice _payment = invoiceRepository.save(invoice);
+
+    Combined combined = contract.getCombined();
+    CombinedNotificationRequest notifyRequest = new CombinedNotificationRequest();
+    notifyRequest.setRecipient(invoice.getRecipient().getUsername());
+    notifyRequest.setRelatedResource(combined.getId());
+    notifyRequest.setMessage(
+        String.format(NotificationMessage.SEND_CREATE_INVOICE_NOTIFICATION, invoice.getSender().getCompanyCode()));
+    notifyRequest.setAction(EnumCombinedNotification.INVOICE_ADD.name());
+    notifyRequest.setType(EnumNotificationType.COMBINED.name());
+    notificationBroadcast.broadcastSendCombinedNotificationToUser(notifyRequest);
+
     return _payment;
 
   }
@@ -162,9 +186,16 @@ public class InvoiceServiceImpl implements InvoiceService {
       Boolean isPaidString = (Boolean) updates.get("isPaid");
       if (updates.get("isPaid") != null && isPaidString != null) {
         Contract contract = invoice.getContract();
-        Double percent = contract.getPaymentPercentage() + invoice.getAmount() / contract.getPrice() * 100;
-        NumberFormat numberFormat = new DecimalFormat(Constant.CONTRACT_PAID_PERCENTAGE_FORMAT);
-        contract.setPaymentPercentage(Double.valueOf(numberFormat.format(percent)));
+        Combined combined = contract.getCombined();
+        if (combined.getIsCanceled()) {
+          Double percent = 100D;
+          NumberFormat numberFormat = new DecimalFormat(Constant.CONTRACT_PAID_PERCENTAGE_FORMAT);
+          contract.setPaymentPercentage(Double.valueOf(numberFormat.format(percent)));
+        } else {
+          Double percent = contract.getPaymentPercentage() + invoice.getAmount() / contract.getPrice() * 100;
+          NumberFormat numberFormat = new DecimalFormat(Constant.CONTRACT_PAID_PERCENTAGE_FORMAT);
+          contract.setPaymentPercentage(Double.valueOf(numberFormat.format(percent)));
+        }
         contractRepository.save(contract);
         invoice.setIsPaid(isPaidString);
       }
@@ -180,7 +211,7 @@ public class InvoiceServiceImpl implements InvoiceService {
         .orElseThrow(() -> new NotFoundException(ErrorMessage.PAYMENT_NOT_FOUND));
     Supplier sender = supplierRepository.findByUsername(paymentname)
         .orElseThrow(() -> new NotFoundException(ErrorMessage.USER_NOT_FOUND));
-    if (invoice.getSender().equals(sender)) {
+    if (invoice.getSender().getUsername().equals(sender.getUsername())) {
       invoiceRepository.deleteById(id);
     } else {
       throw new ForbiddenException(ErrorMessage.USER_ACCESS_DENIED);

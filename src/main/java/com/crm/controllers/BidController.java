@@ -31,12 +31,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.crm.common.NotificationMessage;
 import com.crm.common.SuccessMessage;
 import com.crm.enums.EnumBidStatus;
+import com.crm.enums.EnumBiddingNotification;
+import com.crm.enums.EnumNotificationType;
 import com.crm.models.Bid;
+import com.crm.models.Merchant;
 import com.crm.models.dto.BidDto;
 import com.crm.models.mapper.BidMapper;
 import com.crm.payload.request.BidRequest;
+import com.crm.payload.request.BiddingNotificationRequest;
 import com.crm.payload.request.PaginationRequest;
 import com.crm.payload.request.ReplaceContainerRequest;
 import com.crm.payload.response.DefaultResponse;
@@ -73,7 +78,16 @@ public class BidController {
     BidDto bidDto = BidMapper.toBidDto(bid);
 
     // CREATE NOTIFICATION
-    notificationBroadcast.broadcastCreateBidToMerchant(bid);
+    BiddingNotificationRequest notifyRequest = new BiddingNotificationRequest();
+    Merchant offeree = bid.getBiddingDocument().getOfferee();
+
+    // Create new message notifications and save to Database
+    notifyRequest.setRecipient(offeree.getUsername());
+    notifyRequest.setRelatedResource(bid.getBiddingDocument().getId());
+    notifyRequest.setMessage(String.format(NotificationMessage.SEND_BID_TO_MERCHANT, bid.getBidder().getCompanyName()));
+    notifyRequest.setAction(EnumBiddingNotification.BID_ADDED.name());
+    notifyRequest.setType(EnumNotificationType.BIDDING.name());
+    notificationBroadcast.broadcastSendBiddingNotificationToUser(notifyRequest);
     // END NOTIFICATION
 
     // Set default response body
@@ -263,7 +277,17 @@ public class BidController {
     bidService.removeBid(id, username);
 
     // CREATE NOTIFICATION
-    notificationBroadcast.broadcastRemoveBidToMerchant(bid);
+    BiddingNotificationRequest notifyRequest = new BiddingNotificationRequest();
+    Merchant offeree = bid.getBiddingDocument().getOfferee();
+
+    // Create new message notifications and save to Database
+    notifyRequest.setRecipient(offeree.getUsername());
+    notifyRequest.setRelatedResource(bid.getBiddingDocument().getId());
+    notifyRequest.setMessage(
+        String.format(NotificationMessage.SEND_BID_REMOVE_NOTIFICATION_TO_MERCHANT, bid.getBidder().getCompanyName()));
+    notifyRequest.setAction(EnumBiddingNotification.BID_EDITED.name());
+    notifyRequest.setType(EnumNotificationType.BIDDING.name());
+    notificationBroadcast.broadcastSendBiddingNotificationToUser(notifyRequest);
     // END NOTIFICATION
 
     // Set default response body

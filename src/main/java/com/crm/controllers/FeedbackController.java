@@ -28,12 +28,16 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.crm.common.NotificationMessage;
 import com.crm.common.SuccessMessage;
+import com.crm.enums.EnumNotificationType;
+import com.crm.enums.EnumReportNotification;
 import com.crm.models.Feedback;
 import com.crm.models.dto.FeedbackDto;
 import com.crm.models.mapper.FeedbackMapper;
 import com.crm.payload.request.FeedbackRequest;
 import com.crm.payload.request.PaginationRequest;
+import com.crm.payload.request.ReportNotificationRequest;
 import com.crm.payload.response.DefaultResponse;
 import com.crm.payload.response.PaginationResponse;
 import com.crm.services.FeedbackService;
@@ -62,7 +66,17 @@ public class FeedbackController {
     FeedbackDto feedbackDto = FeedbackMapper.toFeedbackDto(payment);
 
     // CREATE NOTIFICATION
-    notificationBroadcast.broadcastCreateFeedbackToUser(payment);
+    ReportNotificationRequest notifyRequest = new ReportNotificationRequest();
+
+    // Create new message notifications and save to Database
+    notifyRequest.setRecipient(payment.getReport().getSender().getUsername());
+    notifyRequest.setTitle(payment.getReport().getTitle());
+    notifyRequest.setRelatedResource(payment.getReport().getId());
+    notifyRequest
+        .setMessage(String.format(NotificationMessage.SEND_FEEDBACK_NOTIFICATION, payment.getSender().getUsername()));
+    notifyRequest.setAction(EnumReportNotification.FEEDBACK.name());
+    notifyRequest.setType(EnumNotificationType.REPORT.name());
+    notificationBroadcast.broadcastCreateReportNotificationToUser(notifyRequest);
     // END NOTIFICATION
 
     // Set default response body
@@ -85,7 +99,17 @@ public class FeedbackController {
     FeedbackDto feedbackDto = FeedbackMapper.toFeedbackDto(feedback);
 
     // CREATE NOTIFICATION
-    notificationBroadcast.broadcastCreateFeedbackToModerator(name, feedback);
+    ReportNotificationRequest notifyRequest = new ReportNotificationRequest();
+
+    // Create new message notifications and save to Database
+    notifyRequest.setRecipient(name);
+    notifyRequest.setTitle(feedback.getReport().getTitle());
+    notifyRequest.setRelatedResource(feedback.getReport().getId());
+    notifyRequest
+        .setMessage(String.format(NotificationMessage.SEND_FEEDBACK_NOTIFICATION, feedback.getSender().getUsername()));
+    notifyRequest.setAction(EnumReportNotification.FEEDBACK.name());
+    notifyRequest.setType(EnumNotificationType.REPORT.name());
+    notificationBroadcast.broadcastCreateReportNotificationToUser(notifyRequest);
     // END NOTIFICATION
 
     // Set default response body

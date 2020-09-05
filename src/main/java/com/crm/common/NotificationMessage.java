@@ -37,11 +37,13 @@ public class NotificationMessage {
   public static final String SEND_EDIT_CONTRACT_NOTIFICATION = "Hợp đồng đã được chỉnh sửa bởi %s";
 
   public static final String SEND_CONTRACT_REQUIREMENT_NOTIFICATION = "Bạn được yêu cầu hợp đồng bởi %s";
-  
+
   public static final String SEND_CREATE_INVOICE_NOTIFICATION = "Bạn nhận được hóa đơn từ %s";
-  
+
   public static final String SEND_ACCEPT_INVOICE_NOTIFICATION = "Hóa đơn của bạn đã được xác nhận bởi %s";
-  
+
   public static final String SEND_REJECT_INVOICE_NOTIFICATION = "Hóa đơn của bạn đã bị từ chối bởi %s";
+
+  public static final String SEND_CANCEL_COMBINED_NOTIFICATION = "Hàng ghép đã bị hủy bởi %s";
 
 }

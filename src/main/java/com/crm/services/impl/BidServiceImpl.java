@@ -43,6 +43,7 @@ import com.crm.repository.BiddingDocumentRepository;
 import com.crm.repository.BiddingNotificationRepository;
 import com.crm.repository.ContainerRepository;
 import com.crm.repository.ForwarderRepository;
+import com.crm.repository.InvoiceRepository;
 import com.crm.repository.OutboundRepository;
 import com.crm.repository.SupplierRepository;
 import com.crm.repository.UserRepository;
@@ -76,6 +77,9 @@ public class BidServiceImpl implements BidService {
   private SupplierRepository supplierRepository;
 
   @Autowired
+  private InvoiceRepository invoiceRepository;
+
+  @Autowired
   private BiddingNotificationRepository biddingNotificationRepository;
 
   @Autowired
@@ -84,6 +88,12 @@ public class BidServiceImpl implements BidService {
   @Override
   public Bid createBid(Long bidDocId, String username, BidRequest request) {
     Bid bid = new Bid();
+
+    LocalDateTime paymentTerm = LocalDateTime.now().minusDays(45);
+    Boolean invoices = invoiceRepository.checkInvoicePaymentDateAndIsPaid(username, paymentTerm);
+    if (!invoices) {
+      throw new InternalException(ErrorMessage.BID_CANNOT_CREATE_INVOICE);
+    }
 
     BiddingDocument biddingDocument = biddingDocumentRepository.findById(bidDocId)
         .orElseThrow(() -> new NotFoundException(ErrorMessage.BIDDINGDOCUMENT_NOT_FOUND));
@@ -242,7 +252,8 @@ public class BidServiceImpl implements BidService {
 
     String bidStatus = bid.getStatus();
     if (role.getName().equalsIgnoreCase("ROLE_FORWARDER") && !(bidStatus.equalsIgnoreCase(EnumBidStatus.PENDING.name())
-        || bidStatus.equalsIgnoreCase(EnumBidStatus.EXPIRED.name()))) {
+        || bidStatus.equalsIgnoreCase(EnumBidStatus.EXPIRED.name())
+        || bidStatus.equalsIgnoreCase(EnumBidStatus.ACCEPTED.name()))) {
       throw new InternalException(ErrorMessage.BID_INVALID_EDIT);
     }
     List<Container> containers = new ArrayList<>(bid.getContainers());

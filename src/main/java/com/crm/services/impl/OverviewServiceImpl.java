@@ -13,7 +13,9 @@ import com.crm.common.ErrorMessage;
 import com.crm.common.Tool;
 import com.crm.enums.EnumBidStatus;
 import com.crm.enums.EnumBiddingStatus;
+import com.crm.enums.EnumReportStatus;
 import com.crm.enums.EnumSupplyStatus;
+import com.crm.enums.EnumUserStatus;
 import com.crm.exception.NotFoundException;
 import com.crm.payload.request.OverviewRequest;
 import com.crm.payload.response.ForwarderOverviewResponse;
@@ -83,18 +85,17 @@ public class OverviewServiceImpl implements OverviewService {
     int outboundQty = outboundRepository.countOutbounds(username, startDate, endDate);
     response.setOutboundQty(outboundQty);
 
-    List<String> statusList = Arrays.asList(EnumSupplyStatus.BIDDING.name(), EnumSupplyStatus.COMBINED.name(),
-        EnumSupplyStatus.DELIVERED.name());
-    int biddedOutboundQty = outboundRepository.countOutbounds(username, statusList, startDate, endDate);
-    response.setBiddedOutboundQty(biddedOutboundQty);
+    List<String> statusList = Arrays.asList(EnumSupplyStatus.BIDDING.name());
+    int biddingOutboundQty = outboundRepository.countOutbounds(username, statusList, startDate, endDate);
+    response.setBiddingOutboundQty(biddingOutboundQty);
 
-    statusList = Arrays.asList(EnumSupplyStatus.BIDDING.name());
-    int waitingOutboundQty = outboundRepository.countOutbounds(username, statusList, startDate, endDate);
-    response.setPendingOutboundQty(waitingOutboundQty);
+    statusList = Arrays.asList(EnumSupplyStatus.COMBINED.name());
+    int combinedOutboundQty = outboundRepository.countOutbounds(username, statusList, startDate, endDate);
+    response.setCombinedOutboundQty(combinedOutboundQty);
 
-    statusList = Arrays.asList(EnumSupplyStatus.COMBINED.name(), EnumSupplyStatus.DELIVERED.name());
-    int combinedOutbountQty = outboundRepository.countOutbounds(username, statusList, startDate, endDate);
-    response.setCombinedOutbountQty(combinedOutbountQty);
+    statusList = Arrays.asList(EnumSupplyStatus.DELIVERED.name());
+    int deliveredOutbountQty = outboundRepository.countOutbounds(username, statusList, startDate, endDate);
+    response.setDeliveredOutbountQty(deliveredOutbountQty);
 
     int contractQty = contractRepository.countContracts(username, startDate, endDate);
     response.setContractQty(contractQty);
@@ -126,18 +127,17 @@ public class OverviewServiceImpl implements OverviewService {
     int containerQty = containerRepository.countContainers(username, startDate, endDate);
     response.setContainerQty(containerQty);
 
-    List<String> statusList = Arrays.asList(EnumSupplyStatus.BIDDING.name(), EnumSupplyStatus.COMBINED.name(),
-        EnumSupplyStatus.DELIVERED.name());
-    int biddedContainerQty = containerRepository.countContainers(username, statusList, startDate, endDate);
-    response.setBiddedContainerQty(biddedContainerQty);
+    List<String> statusList = Arrays.asList(EnumSupplyStatus.BIDDING.name());
+    int biddingContainerQty = containerRepository.countContainers(username, statusList, startDate, endDate);
+    response.setBiddingContainerQty(biddingContainerQty);
 
-    statusList = Arrays.asList(EnumSupplyStatus.BIDDING.name());
-    int waitingContainerQty = containerRepository.countContainers(username, statusList, startDate, endDate);
-    response.setPendingContainerQty(waitingContainerQty);
-
-    statusList = Arrays.asList(EnumSupplyStatus.COMBINED.name(), EnumSupplyStatus.DELIVERED.name());
+    statusList = Arrays.asList(EnumSupplyStatus.COMBINED.name());
     int combinedContainerQty = containerRepository.countContainers(username, statusList, startDate, endDate);
     response.setCombinedContainerQty(combinedContainerQty);
+
+    statusList = Arrays.asList(EnumSupplyStatus.DELIVERED.name());
+    int deliveredContainerQty = containerRepository.countContainers(username, statusList, startDate, endDate);
+    response.setDeliveredContainerQty(deliveredContainerQty);
 
     int receivedContractQty = contractRepository.countContracts(username, startDate, endDate);
     response.setReceivedContractQty(receivedContractQty);
@@ -163,19 +163,28 @@ public class OverviewServiceImpl implements OverviewService {
     int outboundQty = outboundRepository.countOutbounds(startDate, endDate);
     response.setOutboundQty(outboundQty);
 
+    List<String> statusList = Arrays.asList(EnumSupplyStatus.BIDDING.name());
+    int biddingOutboundQty = outboundRepository.countOutbounds(startDate, endDate);
+    response.setBiddingOutboundQty(biddingOutboundQty);
+
+    statusList = Arrays.asList(EnumSupplyStatus.COMBINED.name());
+    int combinedOutboundQty = outboundRepository.countOutbounds(startDate, endDate);
+    response.setCombinedOutboundQty(combinedOutboundQty);
+
+    statusList = Arrays.asList(EnumSupplyStatus.DELIVERED.name());
+    int deliveredOutboundQty = outboundRepository.countOutbounds(startDate, endDate);
+    response.setDeliveredOutboundQty(deliveredOutboundQty);
+
     int inboundQty = inboundRepository.countInbounds(startDate, endDate);
     response.setInboundQty(inboundQty);
-
-    int containerQty = containerRepository.countContainersByOperator(startDate, endDate);
-    response.setContainerQty(containerQty);
 
     int biddingDocumentQty = biddingDocumentRepository.countBiddingDocumentsByOperator(startDate, endDate);
     response.setBiddingDocumentQty(biddingDocumentQty);
 
-    List<String> statusList = Arrays.asList(EnumBiddingStatus.BIDDING.name());
-    int waitingBiddingDocumentQty = biddingDocumentRepository.countBiddingDocumentsByOperator(statusList, startDate,
+    statusList = Arrays.asList(EnumBiddingStatus.BIDDING.name());
+    int biddingBiddingDocumentQty = biddingDocumentRepository.countBiddingDocumentsByOperator(statusList, startDate,
         endDate);
-    response.setPendingBiddingDocumentQty(waitingBiddingDocumentQty);
+    response.setBiddingBiddingDocumentQty(biddingBiddingDocumentQty);
 
     statusList = Arrays.asList(EnumBiddingStatus.COMBINED.name());
     int combinedBiddingDocumentQty = biddingDocumentRepository.countBiddingDocumentsByOperator(statusList, startDate,
@@ -186,13 +195,15 @@ public class OverviewServiceImpl implements OverviewService {
     response.setBidQty(bidQty);
 
     statusList = Arrays.asList(EnumBidStatus.PENDING.name());
-    int waitingBidQty = bidRepository.countBidsByOperator(statusList, startDate, endDate);
-
-    response.setPendingBidQty(waitingBidQty);
+    int pendingBidQty = bidRepository.countBidsByOperator(statusList, startDate, endDate);
+    response.setPendingBidQty(pendingBidQty);
 
     statusList = Arrays.asList(EnumBidStatus.ACCEPTED.name());
-    int combinedBidQty = bidRepository.countBidsByOperator(statusList, startDate, endDate);
-    response.setCombinedBidQty(combinedBidQty);
+    int acceptedBidQty = bidRepository.countBidsByOperator(statusList, startDate, endDate);
+    response.setAcceptedBidQty(acceptedBidQty);
+
+    int containerQty = containerRepository.countContainersByOperator(startDate, endDate);
+    response.setContainerQty(containerQty);
 
     statusList = Arrays.asList(EnumSupplyStatus.BIDDING.name(), EnumSupplyStatus.COMBINED.name(),
         EnumSupplyStatus.DELIVERED.name());
@@ -200,12 +211,16 @@ public class OverviewServiceImpl implements OverviewService {
     response.setContainerBidQty(containerBidQty);
 
     statusList = Arrays.asList(EnumSupplyStatus.BIDDING.name());
-    int waitingContainerQty = containerRepository.countContainersByOperator(statusList, startDate, endDate);
-    response.setPendingContainerQty(waitingContainerQty);
+    int biddingContainerQty = containerRepository.countContainersByOperator(statusList, startDate, endDate);
+    response.setBiddingContainerQty(biddingContainerQty);
 
-    statusList = Arrays.asList(EnumSupplyStatus.COMBINED.name(), EnumSupplyStatus.DELIVERED.name());
+    statusList = Arrays.asList(EnumSupplyStatus.COMBINED.name());
     int combinedContainerQty = containerRepository.countContainersByOperator(statusList, startDate, endDate);
     response.setCombinedContainerQty(combinedContainerQty);
+
+    statusList = Arrays.asList(EnumSupplyStatus.DELIVERED.name());
+    int deliveredContainerQty = containerRepository.countContainersByOperator(statusList, startDate, endDate);
+    response.setDeliveredContainerQty(deliveredContainerQty);
 
     int contractQty = contractRepository.countContractsByOperator(startDate, endDate);
     response.setContractQty(contractQty);
@@ -216,11 +231,20 @@ public class OverviewServiceImpl implements OverviewService {
     int unpaidContractQty = contractRepository.countUnpaidContractsByOperator(startDate, endDate);
     response.setUnpaidContractQty(unpaidContractQty);
 
-    int reportQty = reportRepository.countReportByOperator(startDate, endDate);
-    response.setReportQty(reportQty);
+    statusList = Arrays.asList(EnumReportStatus.PENDING.name(), EnumReportStatus.UPDATED.name());
+    int pendingReportQty = reportRepository.countReportByOperator(startDate, endDate);
+    response.setPendingReportQty(pendingReportQty);
+
+    statusList = Arrays.asList(EnumReportStatus.RESOLVED.name());
+    int resolvedReportQty = reportRepository.countReportByOperator(startDate, endDate);
+    response.setResolvedReportQty(resolvedReportQty);
 
     int newMemberQty = userRepository.countUserByOperator(startDate, endDate);
     response.setNewMemberQty(newMemberQty);
+
+    statusList = Arrays.asList(EnumUserStatus.PENDING.name());
+    int unapprovedRegistration = userRepository.countUserByOperator(startDate, endDate, statusList);
+    response.setUnapprovedRegistration(unapprovedRegistration);
 
     return response;
   }
@@ -232,14 +256,25 @@ public class OverviewServiceImpl implements OverviewService {
     Date startDate = Date.from(startDateRequest.atZone(ZoneId.systemDefault()).toInstant());
     LocalDateTime endDateRequest = Tool.convertToLocalDateTime(request.getEndDate());
     Date endDate = Date.from(endDateRequest.atZone(ZoneId.systemDefault()).toInstant());
-    
-    int biddingContainerQty = containerRepository.countContainersByShippingLine(username, startDate, endDate);
+
+    int containerQty = containerRepository.countContainersByShippingLine(username, startDate, endDate);
+    response.setContainerQty(containerQty);
+
+    List<String> statusList = Arrays.asList(EnumSupplyStatus.BIDDING.name());
+    int biddingContainerQty = containerRepository.countContainersByShippingLine(username, statusList, startDate,
+        endDate);
     response.setBiddingContainerQty(biddingContainerQty);
 
-    List<String> statusList = Arrays.asList(EnumSupplyStatus.COMBINED.name(), EnumSupplyStatus.DELIVERED.name());
-    int combinedContainerQty = containerRepository.countContainersByShippingLine(username, statusList, startDate, endDate);
+    statusList = Arrays.asList(EnumSupplyStatus.COMBINED.name());
+    int combinedContainerQty = containerRepository.countContainersByShippingLine(username, statusList, startDate,
+        endDate);
     response.setCombinedContainerQty(combinedContainerQty);
-    
+
+    statusList = Arrays.asList(EnumSupplyStatus.DELIVERED.name());
+    int deliveredContainerQty = containerRepository.countContainersByShippingLine(username, statusList, startDate,
+        endDate);
+    response.setDeliveredContainerQty(deliveredContainerQty);
+
     return response;
   }
 

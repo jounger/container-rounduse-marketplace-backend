@@ -17,13 +17,17 @@ public class OperatorOverviewResponse implements Serializable {
 
   private int outboundQty;
 
-  private int inboundQty;
+  private int biddingOutboundQty;
 
-  private int containerQty;
+  private int combinedOutboundQty;
+
+  private int deliveredOutboundQty;
+
+  private int inboundQty;
 
   private int biddingDocumentQty;
 
-  private int pendingBiddingDocumentQty;
+  private int biddingBiddingDocumentQty;
 
   private int combinedBiddingDocumentQty;
 
@@ -31,13 +35,17 @@ public class OperatorOverviewResponse implements Serializable {
 
   private int pendingBidQty;
 
-  private int combinedBidQty;
+  private int acceptedBidQty;
+
+  private int containerQty;
 
   private int containerBidQty;
 
-  private int pendingContainerQty;
+  private int biddingContainerQty;
 
   private int combinedContainerQty;
+
+  private int deliveredContainerQty;
 
   private int contractQty;
 
@@ -47,5 +55,11 @@ public class OperatorOverviewResponse implements Serializable {
 
   private int reportQty;
 
+  private int resolvedReportQty;
+
+  private int pendingReportQty;
+
   private int newMemberQty;
+
+  private int unapprovedRegistration;
 }

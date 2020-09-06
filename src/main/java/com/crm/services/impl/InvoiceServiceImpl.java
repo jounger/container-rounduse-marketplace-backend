@@ -187,7 +187,11 @@ public class InvoiceServiceImpl implements InvoiceService {
       if (updates.get("isPaid") != null && isPaidString != null) {
         Contract contract = invoice.getContract();
         Combined combined = contract.getCombined();
-        if (!combined.getIsCanceled()) {
+        if (combined.getIsCanceled()) {
+          Double percent = 100D;
+          NumberFormat numberFormat = new DecimalFormat(Constant.CONTRACT_PAID_PERCENTAGE_FORMAT);
+          contract.setPaymentPercentage(Double.valueOf(numberFormat.format(percent)));
+        } else {
           Double percent = contract.getPaymentPercentage() + invoice.getAmount() / contract.getPrice() * 100;
           NumberFormat numberFormat = new DecimalFormat(Constant.CONTRACT_PAID_PERCENTAGE_FORMAT);
           contract.setPaymentPercentage(Double.valueOf(numberFormat.format(percent)));

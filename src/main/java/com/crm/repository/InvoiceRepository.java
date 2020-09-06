@@ -1,5 +1,7 @@
 package com.crm.repository;
 
+import java.time.LocalDateTime;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -21,5 +23,9 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long>, JpaSpec
 
   @Query(value = "FROM Invoice p WHERE p.contract.id = :id AND (p.sender.username = :username OR p.recipient.username = :username)")
   Page<Invoice> findByContract(@Param("id") Long id, @Param("username") String username, Pageable pageable);
+
+  @Query(value = "SELECT CASE WHEN COUNT(i) = 0 THEN TRUE ELSE FALSE END FROM Invoice i WHERE i.sender.username = :username AND i.paymentDate <= :paymentTerm AND i.isPaid  = false")
+  boolean checkInvoicePaymentDateAndIsPaid(@Param("username") String username,
+      @Param("paymentTerm") LocalDateTime paymentTerm);
 
 }

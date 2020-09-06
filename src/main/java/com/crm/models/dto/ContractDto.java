@@ -22,7 +22,7 @@ public class ContractDto {
 
   private DiscountDto discountCode;
 
-  private Double finesAgainstContractViolation;
+  private Double finesAgainstContractViolations;
 
   private Boolean required;
 

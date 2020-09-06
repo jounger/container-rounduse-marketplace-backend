@@ -6,10 +6,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -39,6 +37,7 @@ import com.crm.repository.BiddingDocumentRepository;
 import com.crm.repository.CombinedRepository;
 import com.crm.repository.ContainerRepository;
 import com.crm.repository.InboundRepository;
+import com.crm.repository.InvoiceRepository;
 import com.crm.repository.MerchantRepository;
 import com.crm.repository.OutboundRepository;
 import com.crm.repository.UserRepository;
@@ -73,8 +72,7 @@ public class BiddingDocumentServiceImpl implements BiddingDocumentService {
   private InboundRepository inboundRepository;
 
   @Autowired
-  @Qualifier("cachedThreadPool")
-  private ExecutorService executorService;
+  private InvoiceRepository invoiceRepository;
 
   @Autowired
   private BidService bidService;
@@ -82,6 +80,12 @@ public class BiddingDocumentServiceImpl implements BiddingDocumentService {
   @Override
   public BiddingDocument createBiddingDocument(String username, BiddingDocumentRequest request) {
     BiddingDocument biddingDocument = new BiddingDocument();
+
+    LocalDateTime paymentTerm = LocalDateTime.now().minusDays(45);
+    Boolean invoices = invoiceRepository.checkInvoicePaymentDateAndIsPaid(username, paymentTerm);
+    if (!invoices) {
+      throw new InternalException(ErrorMessage.BIDDINGDOCUMENT_CANNOT_CREATE_INVOICE);
+    }
 
     Merchant merchant = merchantRepository.findByUsername(username)
         .orElseThrow(() -> new NotFoundException(ErrorMessage.BIDDINGDOCUMENT_NOT_FOUND));

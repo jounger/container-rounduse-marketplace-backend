@@ -9,6 +9,7 @@ public class ErrorMessage {
   public static final String BIDDINGDOCUMENT_IS_IN_TRANSACTION = "Hồ sơ mời thầu đã được ghép hoặc đang được đấu thầu";
   public static final String BIDDINGDOCUMENT_TIME_OUT = "Hồ sơ mời thầu đã hết hạn";
   public static final String BIDDINGDOCUMENT_ACCEPT_INVALID_BID = "Hồ sơ dự thầu đã hết hạn";
+  public static final String BIDDINGDOCUMENT_CANNOT_CREATE_INVOICE = "Bạn không thể tạo hồ sơ mời thầu bởi bạn có hóa đơn chưa thanh toán";
 
   // Bid
   public static final String BID_NOT_FOUND = "Không tìm thấy hồ sơ dự thầu";
@@ -19,6 +20,7 @@ public class ErrorMessage {
   public static final String BID_INVALID_PENDING_EDIT = "Hồ sơ dự thầu chỉ được sửa khi ở trạng thái chờ";
   public static final String BID_EDIT_BEFORE_FREEZE_TIME = "Vui lòng chỉnh sửa sau thời gian đóng băng";
   public static final String BID_INVALID_VALIDITY_PERIOD = "Thời gian hiệu lực của hồ sơ dự thầu phải sau thời gian hiện tại";
+  public static final String BID_CANNOT_CREATE_INVOICE = "Bạn không thể tạo hồ sơ dự thầu bởi bạn có hóa đơn chưa thanh toán";
 
   // Combined
   public static final String COMBINED_NOT_FOUND = "Không tìm thấy hàng ghép";
@@ -67,8 +69,8 @@ public class ErrorMessage {
 
   // Supply
   public static final String SUPPLY_CODE_DUPLICATE = "Mã hàng đã tồn tại";
-  
-  //Supplier
+
+  // Supplier
   public static final String TIN_DUPLICATE = "Mã số thuế đã được sử dụng";
   public static final String FAX_DUPLICATE = "Địa chỉ thư điện tử đã được sử dụng";
 
@@ -176,8 +178,12 @@ public class ErrorMessage {
   public static final String PAYMENT_NOT_FOUND = "Không tìm thấy hóa đơn";
   public static final String PAYMENT_INVALID_AMOUNT = "Sô tiền không hợp lệ";
   public static final String PAYMENT_TYPE_NOT_FOUND = "Không tìm thấy loại hóa đơn";
-  
+
   // QRToken
   public static final String QRTOKEN_NOT_FOUND = "Mã QR không tồn tại";
   public static final String QRTOKEN_EXPIRED = "Mã QR đã hết hạn";
+
+  // Combined
+  public static final String COMBINED_INVALID_CANCEL = "Không thể hủy hàng ghép lúc này";
+
 }

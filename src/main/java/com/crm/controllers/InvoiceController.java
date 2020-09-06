@@ -28,10 +28,16 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.crm.common.NotificationMessage;
 import com.crm.common.SuccessMessage;
+import com.crm.enums.EnumCombinedNotification;
+import com.crm.enums.EnumNotificationType;
+import com.crm.models.Combined;
+import com.crm.models.Contract;
 import com.crm.models.Invoice;
 import com.crm.models.dto.InvoiceDto;
 import com.crm.models.mapper.InvoiceMapper;
+import com.crm.payload.request.CombinedNotificationRequest;
 import com.crm.payload.request.InvoiceRequest;
 import com.crm.payload.request.PaginationRequest;
 import com.crm.payload.response.DefaultResponse;
@@ -65,8 +71,6 @@ public class InvoiceController {
     DefaultResponse<InvoiceDto> defaultResponse = new DefaultResponse<>();
     defaultResponse.setMessage(SuccessMessage.CREATE_PAYMENT_SUCCESSFULLY);
     defaultResponse.setData(invoiceDto);
-
-    notificationBroadcast.broadcastCreateInvoiceToUser(invoice);
 
     logger.info("User {} createInvoice with request: {}", username, request.toString());
     return ResponseEntity.status(HttpStatus.CREATED).body(defaultResponse);
@@ -149,11 +153,24 @@ public class InvoiceController {
     defaultResponse.setMessage(SuccessMessage.EDIT_PAYMENT_SUCCESSFULLY);
     defaultResponse.setData(invoiceDto);
 
+    CombinedNotificationRequest notifyRequest = new CombinedNotificationRequest();
+    Contract contract = invoice.getContract();
+    Combined combined = contract.getCombined();
+    notifyRequest.setRecipient(invoice.getSender().getUsername());
+    notifyRequest.setRelatedResource(combined.getId());
+
     if (invoice.getIsPaid()) {
-      notificationBroadcast.broadcastSendAcceptInvoiceToUser(invoice);
+      notifyRequest.setMessage(
+          String.format(NotificationMessage.SEND_ACCEPT_INVOICE_NOTIFICATION, invoice.getRecipient().getCompanyCode()));
+      notifyRequest.setAction(EnumCombinedNotification.INVOICE_ACCEPTED.name());
+      notifyRequest.setType(EnumNotificationType.COMBINED.name());
     } else {
-      notificationBroadcast.broadcastSendRejectInvoiceToUser(invoice);
+      notifyRequest.setMessage(
+          String.format(NotificationMessage.SEND_REJECT_INVOICE_NOTIFICATION, invoice.getRecipient().getCompanyCode()));
+      notifyRequest.setAction(EnumCombinedNotification.INVOICE_REJECTED.name());
+      notifyRequest.setType(EnumNotificationType.COMBINED.name());
     }
+    notificationBroadcast.broadcastSendCombinedNotificationToUser(notifyRequest);
 
     logger.info("User {} editInvoice from id {} with request: {}", username, id, updates.toString());
     return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);

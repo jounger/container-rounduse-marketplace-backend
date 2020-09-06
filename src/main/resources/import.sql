@@ -29,6 +29,9 @@ INSERT INTO crum_db.forwarder (user_id) VALUES ('4');
 INSERT INTO crum_db.merchant (user_id) VALUES ('5');
 INSERT INTO crum_db.driver (driver_license,user_id,forwarder_id) VALUES ('292883943','6','4');
 
+#GEOLOCATION
+INSERT INTO crum_db.geolocation(id,created_at,latitude,longitude,updated_at,user_id) VALUES (1,CURDATE(),'','',CURDATE(),6)
+
 # PORT
 INSERT INTO crum_db.port (address,fullname,name_code,created_at,updated_at) VALUES ('Hai Phong, Viet Nam','Port Of Haiphong Joint Stock Company','HAIPHONGPORT',CURDATE(),CURDATE());
 
@@ -56,3 +59,8 @@ INSERT INTO crum_db.container_tractor(vehicle_id) VALUES (1);
 INSERT INTO crum_db.container_tractor(vehicle_id) VALUES (6);
 INSERT INTO crum_db.container_tractor(vehicle_id) VALUES (7);
 INSERT INTO crum_db.container_tractor(vehicle_id) VALUES (8);
+
+#GEOLOCATION
+INSERT INTO crum_db.geolocation(id,created_at,latitude,longitude,updated_at,user_id) VALUES (2,CURDATE(),'','',CURDATE(),45)
+INSERT INTO crum_db.geolocation(id,created_at,latitude,longitude,updated_at,user_id) VALUES (3,CURDATE(),'','',CURDATE(),46)
+INSERT INTO crum_db.geolocation(id,created_at,latitude,longitude,updated_at,user_id) VALUES (4,CURDATE(),'','',CURDATE(),47)

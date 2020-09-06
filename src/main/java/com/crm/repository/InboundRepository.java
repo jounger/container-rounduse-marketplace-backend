@@ -1,5 +1,6 @@
 package com.crm.repository;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -23,13 +24,6 @@ public interface InboundRepository extends JpaRepository<Inbound, Long>, JpaSpec
   @Query(value = "SELECT i FROM Inbound i LEFT JOIN i.billOfLading.containers c WHERE c.id = :id")
   Optional<Inbound> findInboundByContainer(@Param("id") Long id);
 
-  @Query(value = "SELECT i FROM Inbound i LEFT JOIN i.billOfLading.containers c " + "WHERE i.forwarder.id = :id "
-      + "AND (i.billOfLading.freeTime < :freeTime OR i.pickupTime > :pickupTime) " + "AND c.number = :number "
-      + "AND c.id != :containerId")
-  List<Inbound> findByFowarder(@Param("id") Long id, @Param("pickupTime") Date pickupTime,
-      @Param("freeTime") Date freeTime, @Param("number") String number,
-      @Param("containerId") Long containerId);
-
   /*
    * @param shippingLine is companyCode of ShippingLine Entity
    * 
@@ -40,13 +34,6 @@ public interface InboundRepository extends JpaRepository<Inbound, Long>, JpaSpec
   Page<Inbound> findByOutbound(@Param("shippingLine") String shippingLine, @Param("containerType") String containerType,
       Pageable pageable);
 
-  @Query(value = "FROM Inbound i LEFT JOIN i.billOfLading b LEFT JOIN b.containers c WHERE i.shippingLine.companyCode = :shippingLine"
-      + " AND i.containerType.name = :containerType" + " AND c.status IN :status" + " AND i.emptyTime < :packingTime"
-      + " AND i.billOfLading.freeTime > :cutOffTime")
-  Page<Inbound> findByOutbound(@Param("shippingLine") String shippingLine, @Param("containerType") String containerType,
-      @Param("status") List<String> status, @Param("packingTime") Date packingTime,
-      @Param("cutOffTime") Date cutOffTime, Pageable pageable);
-
   /*
    * @param shippingLine is companyCode of ShippingLine Entity
    * 
@@ -55,9 +42,13 @@ public interface InboundRepository extends JpaRepository<Inbound, Long>, JpaSpec
    * @param
    * 
    */
-  @Query(value = "SELECT i FROM Inbound i WHERE i.forwarder.username = :username AND i.shippingLine.companyCode = :shippingLine AND i.containerType.name = :containerType")
+  @Query(value = "SELECT i FROM Inbound i LEFT JOIN i.billOfLading b LEFT JOIN b.containers c WHERE i.forwarder.username = :username "
+      + "AND i.shippingLine.companyCode = :shippingLine " + "AND i.containerType.name = :containerType "
+      + "AND c.status IN :status " + "AND i.emptyTime < :packingTime " + "AND i.billOfLading.freeTime > :cutOffTime")
   Page<Inbound> findByOutboundAndForwarder(@Param("username") String username,
-      @Param("shippingLine") String shippingLine, @Param("containerType") String containerType, Pageable pageable);
+      @Param("shippingLine") String shippingLine, @Param("containerType") String containerType,
+      @Param("status") List<String> status, @Param("packingTime") LocalDateTime packingTime,
+      @Param("cutOffTime") LocalDateTime cutOffTime, Pageable pageable);
 
   @Query(value = "SELECT COUNT(i) FROM Inbound i WHERE i.createdAt > :startDate AND i.createdAt < :endDate")
   Integer countInbounds(@Param("startDate") Date startDate, @Param("endDate") Date endDate);

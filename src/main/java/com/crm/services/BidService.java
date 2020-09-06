@@ -37,6 +37,4 @@ public interface BidService {
 
   void editExpiredBids(Bid bid, String status);
 
-  List<Bid> updateExpiredBidFromList(List<Bid> bids);
-
 }

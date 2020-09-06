@@ -65,8 +65,8 @@ public interface BiddingDocumentRepository extends JpaRepository<BiddingDocument
 
   @Query(value = "SELECT COUNT(bd) FROM BiddingDocument bd"
       + " WHERE bd.createdAt > :startDate AND bd.createdAt < :endDate AND bd.status IN :statusList")
-  Integer countBiddingDocumentsByOperator(@Param("statusList") List<String> statusList, @Param("startDate") Date startDate,
-      @Param("endDate") Date endDate);
+  Integer countBiddingDocumentsByOperator(@Param("statusList") List<String> statusList,
+      @Param("startDate") Date startDate, @Param("endDate") Date endDate);
 
   @Query(value = "SELECT COUNT(bd) FROM BiddingDocument bd WHERE bd.offeree.username = :username"
       + " AND bd.createdAt > :startDate AND bd.createdAt < :endDate")
@@ -78,4 +78,7 @@ public interface BiddingDocumentRepository extends JpaRepository<BiddingDocument
       + " AND bd.createdAt > :startDate AND bd.createdAt < :endDate")
   Integer countBiddingDocuments(@Param("username") String username, @Param("status") String status,
       @Param("startDate") Date startDate, @Param("endDate") Date endDate);
+
+  @Query(value = "SELECT bd FROM BiddingDocument bd WHERE bd.status IN :statusList AND bd.bidClosing < :time")
+  List<BiddingDocument> findExpired(@Param("statusList") List<String> statusList, @Param("time") LocalDateTime time);
 }

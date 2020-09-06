@@ -1,7 +1,5 @@
 package com.crm.services.impl;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -18,15 +16,12 @@ import org.springframework.stereotype.Service;
 
 import com.crm.common.ErrorMessage;
 import com.crm.common.Tool;
-import com.crm.enums.EnumBidStatus;
-import com.crm.enums.EnumBiddingStatus;
 import com.crm.enums.EnumSupplyStatus;
 import com.crm.exception.DuplicateRecordException;
 import com.crm.exception.ForbiddenException;
 import com.crm.exception.InternalException;
 import com.crm.exception.NotFoundException;
 import com.crm.models.Bid;
-import com.crm.models.BiddingDocument;
 import com.crm.models.BillOfLading;
 import com.crm.models.Container;
 import com.crm.models.ContainerSemiTrailer;
@@ -35,13 +30,11 @@ import com.crm.models.Driver;
 import com.crm.payload.request.ContainerRequest;
 import com.crm.payload.request.PaginationRequest;
 import com.crm.repository.BidRepository;
-import com.crm.repository.BiddingDocumentRepository;
 import com.crm.repository.BillOfLadingRepository;
 import com.crm.repository.ContainerRepository;
 import com.crm.repository.ContainerSemiTrailerRepository;
 import com.crm.repository.ContainerTractorRepository;
 import com.crm.repository.DriverRepository;
-import com.crm.services.BiddingDocumentService;
 import com.crm.services.ContainerService;
 
 @Service
@@ -64,12 +57,6 @@ public class ContainerServiceImpl implements ContainerService {
 
   @Autowired
   private BidRepository bidRepository;
-
-  @Autowired
-  private BiddingDocumentRepository biddingDocumentRepository;
-
-  @Autowired
-  private BiddingDocumentService biddingDocumentService;
 
   @Autowired
   @Qualifier("cachedThreadPool")
@@ -429,33 +416,5 @@ public class ContainerServiceImpl implements ContainerService {
 
     List<Container> containers = containerRepository.findByBidAndStatus(id, status);
     return containers;
-  }
-
-  @Override
-  public List<Container> updateExpiredContainerFromList(List<Container> containers) {
-    List<Container> result = new ArrayList<Container>();
-    for (Container container : containers) {
-      if (!container.getBids().isEmpty()) {
-        Bid bid = (Bid) container.getBids().toArray()[container.getBids().size() - 1];
-        BiddingDocument biddingDocument = bid.getBiddingDocument();
-        String status = biddingDocument.getStatus();
-        boolean existsCombinedContainer = biddingDocumentRepository.existsCombinedBid(biddingDocument.getId());
-        if (biddingDocument.getBidClosing().isBefore(LocalDateTime.now())
-            && biddingDocument.getStatus().equals(EnumBiddingStatus.BIDDING.name())) {
-          if (!existsCombinedContainer) {
-            container.setStatus(EnumSupplyStatus.CREATED.name());
-            status = EnumBiddingStatus.EXPIRED.name();
-          } else if (existsCombinedContainer) {
-            status = EnumBiddingStatus.COMBINED.name();
-            if (bid.getStatus().equals(EnumBidStatus.PENDING.name())) {
-              container.setStatus(EnumSupplyStatus.COMBINED.name());
-            }
-          }
-          biddingDocumentService.updateExpiredBiddingDocuments(biddingDocument.getId(), status);
-        }
-      }
-      result.add(container);
-    }
-    return result;
   }
 }

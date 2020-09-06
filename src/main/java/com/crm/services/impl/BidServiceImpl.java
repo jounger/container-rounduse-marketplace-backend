@@ -48,7 +48,6 @@ import com.crm.repository.OutboundRepository;
 import com.crm.repository.SupplierRepository;
 import com.crm.repository.UserRepository;
 import com.crm.services.BidService;
-import com.crm.services.BiddingDocumentService;
 
 @Service
 public class BidServiceImpl implements BidService {
@@ -81,9 +80,6 @@ public class BidServiceImpl implements BidService {
 
   @Autowired
   private BiddingNotificationRepository biddingNotificationRepository;
-
-  @Autowired
-  private BiddingDocumentService biddingDocumentService;
 
   @Override
   public Bid createBid(Long bidDocId, String username, BidRequest request) {
@@ -551,36 +547,6 @@ public class BidServiceImpl implements BidService {
 
     bidRepository.save(bid);
 
-  }
-
-  @Override
-  public List<Bid> updateExpiredBidFromList(List<Bid> bids) {
-    List<Bid> result = new ArrayList<>();
-    for (Bid bid : bids) {
-      BiddingDocument biddingDocument = bid.getBiddingDocument();
-      String status = biddingDocument.getStatus();
-      boolean existsCombinedBid = biddingDocumentRepository.existsCombinedBid(biddingDocument.getId());
-      if (biddingDocument.getBidClosing().isBefore(LocalDateTime.now())
-          && biddingDocument.getStatus().equals(EnumBiddingStatus.BIDDING.name())) {
-        if (!existsCombinedBid) {
-          status = EnumBiddingStatus.EXPIRED.name();
-          bid.setStatus(EnumBidStatus.EXPIRED.name());
-        } else if (existsCombinedBid) {
-          status = EnumBiddingStatus.COMBINED.name();
-          if (bid.getStatus().equals(EnumBidStatus.PENDING.name())) {
-            bid.setStatus(EnumBidStatus.EXPIRED.name());
-          }
-        }
-        biddingDocumentService.updateExpiredBiddingDocuments(biddingDocument.getId(), status);
-      }
-      if (bid.getValidityPeriod().isBefore(LocalDateTime.now())
-          && bid.getStatus().equals(EnumBidStatus.PENDING.name())) {
-        bid.setStatus(EnumBidStatus.EXPIRED.name());
-        editExpiredBids(bid, EnumBidStatus.EXPIRED.name());
-      }
-      result.add(bid);
-    }
-    return result;
   }
 
   public boolean isBeforeFreezeTime(Bid bid) {

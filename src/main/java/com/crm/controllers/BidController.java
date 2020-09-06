@@ -1,7 +1,6 @@
 package com.crm.controllers;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -105,8 +104,7 @@ public class BidController {
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
     Bid bid = bidService.getBid(id, username);
-    List<Bid> result = bidService.updateExpiredBidFromList(Arrays.asList(bid));
-    BidDto bidDto = BidMapper.toBidDto(result.get(0));
+    BidDto bidDto = BidMapper.toBidDto(bid);
     return ResponseEntity.ok(bidDto);
   }
 
@@ -126,9 +124,8 @@ public class BidController {
     response.setTotalPages(pages.getTotalPages());
 
     List<Bid> bids = pages.getContent();
-    List<Bid> result = bidService.updateExpiredBidFromList(bids);
     List<BidDto> bidsDto = new ArrayList<>();
-    result.forEach(bid -> bidsDto.add(BidMapper.toBidDto(bid)));
+    bids.forEach(bid -> bidsDto.add(BidMapper.toBidDto(bid)));
     response.setContents(bidsDto);
 
     return ResponseEntity.ok(response);
@@ -148,9 +145,8 @@ public class BidController {
     response.setTotalPages(pages.getTotalPages());
 
     List<Bid> bids = pages.getContent();
-    List<Bid> result = bidService.updateExpiredBidFromList(bids);
     List<BidDto> bidsDto = new ArrayList<>();
-    result.forEach(bid -> bidsDto.add(BidMapper.toBidDto(bid)));
+    bids.forEach(bid -> bidsDto.add(BidMapper.toBidDto(bid)));
     response.setContents(bidsDto);
 
     return ResponseEntity.ok(response);
@@ -171,9 +167,8 @@ public class BidController {
     response.setTotalPages(pages.getTotalPages());
 
     List<Bid> bids = pages.getContent();
-    List<Bid> result = bidService.updateExpiredBidFromList(bids);
     List<BidDto> bidsDto = new ArrayList<>();
-    result.forEach(bid -> bidsDto.add(BidMapper.toBidDto(bid)));
+    bids.forEach(bid -> bidsDto.add(BidMapper.toBidDto(bid)));
     response.setContents(bidsDto);
 
     return ResponseEntity.ok(response);

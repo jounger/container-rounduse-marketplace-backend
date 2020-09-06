@@ -1,7 +1,6 @@
 package com.crm.controllers;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -52,9 +51,8 @@ public class ContainerController {
   @PreAuthorize("hasRole('FORWARDER') or hasRole('MERCHANT')")
   public ResponseEntity<?> getContainer(@PathVariable Long id) {
     Container container = containerService.getContainerById(id);
-    List<Container> result = containerService.updateExpiredContainerFromList(Arrays.asList(container));
     ContainerDto containerDto = new ContainerDto();
-    containerDto = ContainerMapper.toContainerDto(result.get(0));
+    containerDto = ContainerMapper.toContainerDto(container);
     return ResponseEntity.ok(containerDto);
   }
 
@@ -69,9 +67,8 @@ public class ContainerController {
     response.setTotalPages(pages.getTotalPages());
 
     List<Container> containers = pages.getContent();
-    List<Container> result = containerService.updateExpiredContainerFromList(containers);
     List<ContainerDto> containerDto = new ArrayList<>();
-    result.forEach(container -> containerDto.add(ContainerMapper.toContainerDto(container)));
+    containers.forEach(container -> containerDto.add(ContainerMapper.toContainerDto(container)));
     response.setContents(containerDto);
 
     return ResponseEntity.ok(response);
@@ -89,9 +86,8 @@ public class ContainerController {
     response.setTotalPages(pages.getTotalPages());
 
     List<Container> containers = pages.getContent();
-    List<Container> result = containerService.updateExpiredContainerFromList(containers);
     List<ContainerDto> containerDto = new ArrayList<>();
-    result.forEach(container -> containerDto.add(ContainerMapper.toContainerDto(container)));
+    containers.forEach(container -> containerDto.add(ContainerMapper.toContainerDto(container)));
     response.setContents(containerDto);
 
     return ResponseEntity.ok(response);
@@ -109,9 +105,8 @@ public class ContainerController {
     response.setTotalPages(pages.getTotalPages());
 
     List<Container> containers = pages.getContent();
-    List<Container> result = containerService.updateExpiredContainerFromList(containers);
     List<ContainerDto> containerDto = new ArrayList<>();
-    result.forEach(container -> containerDto.add(ContainerMapper.toContainerDto(container)));
+    containers.forEach(container -> containerDto.add(ContainerMapper.toContainerDto(container)));
     response.setContents(containerDto);
 
     return ResponseEntity.ok(response);

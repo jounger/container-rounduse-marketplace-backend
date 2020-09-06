@@ -11,7 +11,11 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.crm.common.ErrorMessage;
+import com.crm.common.NotificationMessage;
+import com.crm.enums.EnumBiddingNotification;
+import com.crm.enums.EnumCombinedNotification;
 import com.crm.enums.EnumContractDocumentStatus;
+import com.crm.enums.EnumNotificationType;
 import com.crm.enums.EnumShippingStatus;
 import com.crm.enums.EnumSupplyStatus;
 import com.crm.exception.ForbiddenException;
@@ -27,6 +31,8 @@ import com.crm.models.Merchant;
 import com.crm.models.Outbound;
 import com.crm.models.ShippingInfo;
 import com.crm.models.User;
+import com.crm.payload.request.BiddingNotificationRequest;
+import com.crm.payload.request.CombinedNotificationRequest;
 import com.crm.payload.request.PaginationRequest;
 import com.crm.payload.request.ShippingInfoRequest;
 import com.crm.repository.BidRepository;
@@ -109,11 +115,34 @@ public class ShippingInfoServiceImpl implements ShippingInfoService {
     });
 
     // CREATE NOTIFICATION
+    Combined combined = contract.getCombined();
+    Bid bidNew = combined.getBid();
+    Merchant offeree = bidNew.getBiddingDocument().getOfferee();
     if (contract.getRequired()) {
-      notificationBroadcast.broadcastCreateContractToForwarderWhenContractRequired(contract);
+      CombinedNotificationRequest notifyRequest = new CombinedNotificationRequest();
+      notifyRequest.setRecipient(bidNew.getBidder().getUsername());
+      notifyRequest.setRelatedResource(combined.getId());
+      notifyRequest.setMessage(
+          String.format(NotificationMessage.SEND_CONTRACT_REQUIREMENT_NOTIFICATION, offeree.getCompanyName()));
+      notifyRequest.setAction(EnumCombinedNotification.CONTRACT_ADD.name());
+      notifyRequest.setType(EnumNotificationType.COMBINED.name());
+
+      notificationBroadcast.broadcastSendCombinedNotificationToUser(notifyRequest);
     } else {
-      notificationBroadcast.broadcastCreateContractToForwarder(contract);
+      // Send Bidding Notification
+      BiddingNotificationRequest biddingNotificationRequest = new BiddingNotificationRequest();
+      biddingNotificationRequest.setRecipient(bidNew.getBidder().getUsername());
+      biddingNotificationRequest.setRelatedResource(bidNew.getBiddingDocument().getId());
+      biddingNotificationRequest.setMessage(
+          String.format(NotificationMessage.SEND_BID_ACCEPT_NOTIFICATION_TO_FORWARDER, offeree.getCompanyName()));
+      biddingNotificationRequest.setAction(EnumBiddingNotification.BID_ACCEPTED.name());
+      biddingNotificationRequest.setType(EnumNotificationType.BIDDING.name());
+      notificationBroadcast.broadcastSendBiddingNotificationToUser(biddingNotificationRequest);
+
+      // Send Bidding Notification to driver
       notificationBroadcast.broadcastCreateContractToDriver(contract);
+
+      // Send Combined Notification to shippingLine
       notificationBroadcast.broadcastCreateContractToShippingLine(contract);
     }
     // END NOTIFICATION
@@ -238,6 +267,27 @@ public class ShippingInfoServiceImpl implements ShippingInfoService {
     Page<ShippingInfo> shippingInfo = shippingInfoRepository.findShippingInfosActive(username, status, currentDate,
         page);
     return shippingInfo;
+  }
+
+  @Override
+  public ShippingInfo editStatusShippingInfoToExpided(Long id, String username, ShippingInfoRequest request) {
+    String status = request.getStatus();
+    ShippingInfo shippingInfo = shippingInfoRepository.findById(id)
+        .orElseThrow(() -> new NotFoundException(ErrorMessage.SHIPPING_INFO_NOT_FOUND));
+    Container container = shippingInfo.getContainer();
+    if (!(container.getDriver().getUsername().equals(username) || shippingInfoRepository.isForwarder(id, username))) {
+      throw new ForbiddenException(ErrorMessage.USER_ACCESS_DENIED);
+    }
+
+    EnumShippingStatus eStatus = EnumShippingStatus.findByName(status);
+    if (eStatus == null) {
+      throw new NotFoundException(ErrorMessage.SHIPPING_INFO_STATUS_NOT_FOUND);
+    }
+
+    shippingInfo.setStatus(eStatus.name());
+
+    ShippingInfo _shippingInfo = shippingInfoRepository.save(shippingInfo);
+    return _shippingInfo;
   }
 
 }

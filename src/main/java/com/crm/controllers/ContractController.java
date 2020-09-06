@@ -28,10 +28,18 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.crm.common.NotificationMessage;
 import com.crm.common.SuccessMessage;
+import com.crm.enums.EnumCombinedNotification;
+import com.crm.enums.EnumNotificationType;
+import com.crm.models.Bid;
+import com.crm.models.Combined;
 import com.crm.models.Contract;
+import com.crm.models.Forwarder;
+import com.crm.models.Merchant;
 import com.crm.models.dto.ContractDto;
 import com.crm.models.mapper.ContractMapper;
+import com.crm.payload.request.CombinedNotificationRequest;
 import com.crm.payload.request.ContractRequest;
 import com.crm.payload.request.PaginationRequest;
 import com.crm.payload.response.DefaultResponse;
@@ -135,7 +143,19 @@ public class ContractController {
     defaultResponse.setMessage(SuccessMessage.EDIT_CONTRACT_SUCCESSFULLY);
     defaultResponse.setData(contractDto);
 
-    notificationBroadcast.broadcastEditContractToForwarder(contract);
+    Combined combined = contract.getCombined();
+    Bid bidNew = combined.getBid();
+    CombinedNotificationRequest notifyRequest = new CombinedNotificationRequest();
+    Merchant offeree = bidNew.getBiddingDocument().getOfferee();
+    Forwarder bidder = bidNew.getBidder();
+
+    notifyRequest.setRecipient(bidder.getUsername());
+    notifyRequest.setRelatedResource(combined.getId());
+    notifyRequest
+        .setMessage(String.format(NotificationMessage.SEND_EDIT_CONTRACT_NOTIFICATION, offeree.getCompanyName()));
+    notifyRequest.setAction(EnumCombinedNotification.CONTRACT_EDITED.name());
+    notifyRequest.setType(EnumNotificationType.COMBINED.name());
+    notificationBroadcast.broadcastSendContractNotificationToUser(notifyRequest);
     logger.info("User {} editContract from id {} with request: {}", username, id, updates.toString());
     return ResponseEntity.status(HttpStatus.OK).body(defaultResponse);
   }

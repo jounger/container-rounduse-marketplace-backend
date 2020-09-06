@@ -20,7 +20,7 @@ public class ContractMapper {
 
     contractDto.setPrice(contract.getPrice());
 
-    contractDto.setFinesAgainstContractViolation(contract.getFinesAgainstContractViolations());
+    contractDto.setFinesAgainstContractViolations(contract.getFinesAgainstContractViolations());
 
     if (contract.getDiscount() != null) {
       contractDto.setDiscountCode(DiscountMapper.toDiscountDto(contract.getDiscount()));

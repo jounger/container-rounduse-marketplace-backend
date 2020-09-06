@@ -6,14 +6,15 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import com.crm.common.ErrorMessage;
@@ -39,6 +40,7 @@ import com.crm.repository.BiddingDocumentRepository;
 import com.crm.repository.CombinedRepository;
 import com.crm.repository.ContainerRepository;
 import com.crm.repository.InboundRepository;
+import com.crm.repository.InvoiceRepository;
 import com.crm.repository.MerchantRepository;
 import com.crm.repository.OutboundRepository;
 import com.crm.repository.UserRepository;
@@ -47,6 +49,8 @@ import com.crm.services.BiddingDocumentService;
 
 @Service
 public class BiddingDocumentServiceImpl implements BiddingDocumentService {
+
+  private static final Logger logger = LoggerFactory.getLogger(BiddingDocumentServiceImpl.class);
 
   @Autowired
   private BiddingDocumentRepository biddingDocumentRepository;
@@ -73,8 +77,7 @@ public class BiddingDocumentServiceImpl implements BiddingDocumentService {
   private InboundRepository inboundRepository;
 
   @Autowired
-  @Qualifier("cachedThreadPool")
-  private ExecutorService executorService;
+  private InvoiceRepository invoiceRepository;
 
   @Autowired
   private BidService bidService;
@@ -82,6 +85,12 @@ public class BiddingDocumentServiceImpl implements BiddingDocumentService {
   @Override
   public BiddingDocument createBiddingDocument(String username, BiddingDocumentRequest request) {
     BiddingDocument biddingDocument = new BiddingDocument();
+
+    LocalDateTime paymentTerm = LocalDateTime.now().minusDays(45);
+    Boolean invoices = invoiceRepository.checkInvoicePaymentDateAndIsPaid(username, paymentTerm);
+    if (!invoices) {
+      throw new InternalException(ErrorMessage.BIDDINGDOCUMENT_CANNOT_CREATE_INVOICE);
+    }
 
     Merchant merchant = merchantRepository.findByUsername(username)
         .orElseThrow(() -> new NotFoundException(ErrorMessage.BIDDINGDOCUMENT_NOT_FOUND));
@@ -201,6 +210,7 @@ public class BiddingDocumentServiceImpl implements BiddingDocumentService {
   public BiddingDocument editBiddingDocument(Long id, String username, Map<String, Object> updates) {
     BiddingDocument biddingDocument = biddingDocumentRepository.findById(id)
         .orElseThrow(() -> new NotFoundException(ErrorMessage.BIDDINGDOCUMENT_NOT_FOUND));
+    String oldStatus = biddingDocument.getStatus();
     if (!(biddingDocument.getOfferee().getUsername().equals(username)
         || biddingDocumentRepository.isBidderByBiddingDocument(id, username))) {
       throw new ForbiddenException(ErrorMessage.USER_ACCESS_DENIED);
@@ -219,6 +229,10 @@ public class BiddingDocumentServiceImpl implements BiddingDocumentService {
         throw new InternalException(ErrorMessage.BIDDINGDOCUMENT_INVALID_CLOSING_TIME);
       }
       biddingDocument.setBidClosing(bidClosingTime);
+      biddingDocument.setStatus(EnumBiddingStatus.BIDDING.name());
+      outbound = biddingDocument.getOutbound();
+      outbound.setStatus(EnumSupplyStatus.BIDDING.name());
+      outboundRepository.save(outbound);
     }
 
     String currency = String.valueOf(updates.get("currentOfPayment"));
@@ -243,7 +257,7 @@ public class BiddingDocumentServiceImpl implements BiddingDocumentService {
 
     String status = String.valueOf(updates.get("status"));
     EnumBiddingStatus eStatus = null;
-    if (updates.get("status") != null && !Tool.isBlank(status)
+    if (updates.get("status") != null && !Tool.isEqual(oldStatus, status)
         && (eStatus = EnumBiddingStatus.findByName(status)) != null) {
       biddingDocument.setStatus(eStatus.name());
       if (eStatus.name().equalsIgnoreCase(EnumBiddingStatus.CANCELED.name())) {
@@ -344,26 +358,26 @@ public class BiddingDocumentServiceImpl implements BiddingDocumentService {
     biddingDocumentRepository.save(biddingDocument);
   }
 
-  @Override
-  public List<BiddingDocument> updateExpiredBiddingDocumentFromList(List<BiddingDocument> biddingDocuments) {
-    List<BiddingDocument> result = new ArrayList<BiddingDocument>();
 
+  @Override
+  @Scheduled(fixedDelayString = "${fixedDelay.in.milliseconds}")
+  public void updateExpiredBiddingDocumentFromList() {
+    logger.info("Update expired bidding document by schedule START:");
+    List<String> statusList = Arrays.asList(EnumBiddingStatus.BIDDING.name(), EnumBiddingStatus.COMBINED.name());
+    LocalDateTime time = LocalDateTime.now();
+    List<BiddingDocument> biddingDocuments = biddingDocumentRepository.findExpired(statusList, time);
     for (BiddingDocument biddingDocument : biddingDocuments) {
       String status = biddingDocument.getStatus();
       boolean existsCombinedBid = biddingDocumentRepository.existsCombinedBid(biddingDocument.getId());
-      if (biddingDocument.getBidClosing().isBefore(LocalDateTime.now())
-          && biddingDocument.getStatus().equals(EnumBiddingStatus.BIDDING.name())) {
-        if (!existsCombinedBid) {
-          status = EnumBiddingStatus.EXPIRED.name();
-        } else if (existsCombinedBid) {
-          status = EnumBiddingStatus.COMBINED.name();
-        }
-        updateExpiredBiddingDocuments(biddingDocument.getId(), status);
-        biddingDocument.setStatus(status);
+      if (!existsCombinedBid) {
+        status = EnumBiddingStatus.EXPIRED.name();
+      } else if (existsCombinedBid) {
+        status = EnumBiddingStatus.COMBINED.name();
       }
-      result.add(biddingDocument);
+      updateExpiredBiddingDocuments(biddingDocument.getId(), status);
+      logger.info("Update expired bidding document with Id: {}", biddingDocument.getId());
     }
-    return result;
+    logger.info("Update expired bidding document by schedule END");
   }
 
 }

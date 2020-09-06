@@ -18,8 +18,6 @@ import com.crm.enums.EnumBidStatus;
 import com.crm.enums.EnumBiddingNotification;
 import com.crm.enums.EnumCombinedNotification;
 import com.crm.enums.EnumNotificationType;
-import com.crm.enums.EnumReportNotification;
-import com.crm.enums.EnumReportStatus;
 import com.crm.enums.EnumShippingNotification;
 import com.crm.enums.EnumSupplyStatus;
 import com.crm.models.Bid;
@@ -29,11 +27,8 @@ import com.crm.models.Combined;
 import com.crm.models.CombinedNotification;
 import com.crm.models.Container;
 import com.crm.models.Contract;
-import com.crm.models.Feedback;
 import com.crm.models.Forwarder;
-import com.crm.models.Invoice;
 import com.crm.models.Merchant;
-import com.crm.models.Report;
 import com.crm.models.ReportNotification;
 import com.crm.models.ShippingInfo;
 import com.crm.models.ShippingNotification;
@@ -107,29 +102,6 @@ public class NotificationBroadcast {
   @Autowired
   private ShippingWebSocketService shippingWebSocketService;
 
-  public void broadcastCreateBidToMerchant(Bid bid) {
-    BiddingNotificationRequest notifyRequest = new BiddingNotificationRequest();
-    Merchant offeree = bid.getBiddingDocument().getOfferee();
-
-    // Create new message notifications and save to Database
-    notifyRequest.setRecipient(offeree.getUsername());
-    notifyRequest.setRelatedResource(bid.getBiddingDocument().getId());
-    notifyRequest.setMessage(String.format(NotificationMessage.SEND_BID_TO_MERCHANT, bid.getBidder().getCompanyName()));
-    notifyRequest.setAction(EnumBiddingNotification.BID_ADDED.name());
-    notifyRequest.setType(EnumNotificationType.BIDDING.name());
-    BiddingNotification notification = biddingNotificationService.createBiddingNotification(notifyRequest);
-    BiddingNotificationDto notificationDto = BiddingNotificationMapper.toBiddingNotificationDto(notification);
-
-    // Send notification to merchant
-    executorService.submit(new Runnable() {
-      @Override
-      public void run() {
-        logger.info("notification : {}", notification.getId());
-        biddingWebSocketService.sendBiddingNotifyToUser(notificationDto);
-      }
-    });
-  }
-
   public void broadcastEditBidToMerchantOrForwarder(String status, Bid bidNew) {
     BiddingNotificationRequest notifyRequest = new BiddingNotificationRequest();
     Merchant offeree = bidNew.getBiddingDocument().getOfferee();
@@ -149,30 +121,6 @@ public class NotificationBroadcast {
       notifyRequest.setAction(EnumBiddingNotification.BID_REJECTED.name());
     }
 
-    notifyRequest.setType(EnumNotificationType.BIDDING.name());
-    BiddingNotification notification = biddingNotificationService.createBiddingNotification(notifyRequest);
-    BiddingNotificationDto notificationDto = BiddingNotificationMapper.toBiddingNotificationDto(notification);
-
-    // Send notification to merchant
-    logger.info("notification : {}", notification.getId());
-    executorService.submit(new Runnable() {
-      @Override
-      public void run() {
-        biddingWebSocketService.sendBiddingNotifyToUser(notificationDto);
-      }
-    });
-  }
-
-  public void broadcastRemoveBidToMerchant(Bid bid) {
-    BiddingNotificationRequest notifyRequest = new BiddingNotificationRequest();
-    Merchant offeree = bid.getBiddingDocument().getOfferee();
-
-    // Create new message notifications and save to Database
-    notifyRequest.setRecipient(offeree.getUsername());
-    notifyRequest.setRelatedResource(bid.getBiddingDocument().getId());
-    notifyRequest.setMessage(
-        String.format(NotificationMessage.SEND_BID_REMOVE_NOTIFICATION_TO_MERCHANT, bid.getBidder().getCompanyName()));
-    notifyRequest.setAction(EnumBiddingNotification.BID_EDITED.name());
     notifyRequest.setType(EnumNotificationType.BIDDING.name());
     BiddingNotification notification = biddingNotificationService.createBiddingNotification(notifyRequest);
     BiddingNotificationDto notificationDto = BiddingNotificationMapper.toBiddingNotificationDto(notification);
@@ -264,66 +212,11 @@ public class NotificationBroadcast {
     }
   }
 
-  public void broadcastCreateContractToForwarderWhenContractRequired(Contract contract) {
-    Combined combined = contract.getCombined();
-    Bid bidNew = combined.getBid();
-    Merchant offeree = bidNew.getBiddingDocument().getOfferee();
-//        List<Container> listContainerBid = containerService.getContainersByBidAndStatus(bidNew.getId(),
-//            EnumSupplyStatus.COMBINED.name());
-    CombinedNotificationRequest notifyRequest = new CombinedNotificationRequest();
-    notifyRequest.setRecipient(bidNew.getBidder().getUsername());
-    notifyRequest.setRelatedResource(combined.getId());
-    notifyRequest.setMessage(
-        String.format(NotificationMessage.SEND_CONTRACT_REQUIREMENT_NOTIFICATION, offeree.getCompanyName()));
-    notifyRequest.setAction(EnumCombinedNotification.CONTRACT_ADD.name());
-    notifyRequest.setType(EnumNotificationType.COMBINED.name());
-
-    CombinedNotification notification = combinedNotificationService.createCombinedNotification(notifyRequest);
-    CombinedNotificationDto combinedNotificationDto = CombinedNotificationMapper
-        .toCombinedNotificationDto(notification);
-
-    // Send notification to Forwarder
-    executorService.submit(new Runnable() {
-      @Override
-      public void run() {
-        logger.info("notification : {}", notification.getId());
-        combinedWebSocketService.sendCombinedNotifyToShippingLine(combinedNotificationDto);
-      }
-    });
-  }
-
-  public void broadcastCreateContractToForwarder(Contract contract) {
-    Combined combined = contract.getCombined();
-    Bid bidNew = combined.getBid();
-    Merchant offeree = bidNew.getBiddingDocument().getOfferee();
-//        List<Container> listContainerBid = containerService.getContainersByBidAndStatus(bidNew.getId(),
-//            EnumSupplyStatus.COMBINED.name());
-    BiddingNotificationRequest notifyRequest = new BiddingNotificationRequest();
-    notifyRequest.setRecipient(bidNew.getBidder().getUsername());
-    notifyRequest.setRelatedResource(bidNew.getBiddingDocument().getId());
-    notifyRequest.setMessage(
-        String.format(NotificationMessage.SEND_BID_ACCEPT_NOTIFICATION_TO_FORWARDER, offeree.getCompanyName()));
-    notifyRequest.setAction(EnumBiddingNotification.BID_ACCEPTED.name());
-    notifyRequest.setType(EnumNotificationType.BIDDING.name());
-    BiddingNotification notification = biddingNotificationService.createBiddingNotification(notifyRequest);
-    BiddingNotificationDto notificationDto = BiddingNotificationMapper.toBiddingNotificationDto(notification);
-
-    // Send notification to Forwarder
-    executorService.submit(new Runnable() {
-      @Override
-      public void run() {
-        logger.info("notification : {}", notificationDto.getId());
-        biddingWebSocketService.sendBiddingNotifyToUser(notificationDto);
-      }
-    });
-  }
-
   public void broadcastCreateContractToShippingLine(Contract contract) {
     Combined combined = contract.getCombined();
     Bid bidNew = combined.getBid();
     Merchant offeree = bidNew.getBiddingDocument().getOfferee();
-//        List<Container> listContainerBid = containerService.getContainersByBidAndStatus(bidNew.getId(),
-//            EnumSupplyStatus.COMBINED.name());
+
     Collection<Container> listContainerBid = bidNew.getContainers().stream()
         .filter(ex -> ex.getStatus().equals(EnumSupplyStatus.COMBINED.name())).collect(Collectors.toList());
 
@@ -351,46 +244,8 @@ public class NotificationBroadcast {
     });
   }
 
-  public void broadcastCreateContractDocumentToMerchant(Contract contract) {
-    Combined combined = contract.getCombined();
-    Bid bidNew = combined.getBid();
-    CombinedNotificationRequest notifyRequest = new CombinedNotificationRequest();
-    Merchant offeree = bidNew.getBiddingDocument().getOfferee();
-//        List<Container> listContainerBid = containerService.getContainersByBidAndStatus(bidNew.getId(),
-//            EnumSupplyStatus.COMBINED.name());
+  public void broadcastSendBiddingNotificationToUser(BiddingNotificationRequest notifyRequest) {
 
-    notifyRequest.setRecipient(offeree.getUsername());
-    notifyRequest.setRelatedResource(combined.getId());
-    notifyRequest.setMessage(
-        String.format(NotificationMessage.SEND_CREATE_EVIDENCE_NOTIFICATION, bidNew.getBidder().getCompanyName()));
-    notifyRequest.setAction(EnumCombinedNotification.CONTRACT_ADD.name());
-    notifyRequest.setType(EnumNotificationType.COMBINED.name());
-    CombinedNotification notification = combinedNotificationService.createCombinedNotification(notifyRequest);
-    CombinedNotificationDto notificationDto = CombinedNotificationMapper.toCombinedNotificationDto(notification);
-    // Send notification to Merchant
-    executorService.submit(new Runnable() {
-      @Override
-      public void run() {
-        logger.info("notification : {}", notification.getId());
-        contractDocumentWebSocketService.sendContractDocumentNotifyToUser(notificationDto);
-      }
-    });
-  }
-
-  public void broadcastAcceptContractDocumentToForwarder(Contract contract) {
-    Combined combined = contract.getCombined();
-    Bid bidNew = combined.getBid();
-    BiddingNotificationRequest notifyRequest = new BiddingNotificationRequest();
-    Merchant offeree = bidNew.getBiddingDocument().getOfferee();
-//        List<Container> listContainerBid = containerService.getContainersByBidAndStatus(bidNew.getId(),
-//            EnumSupplyStatus.COMBINED.name());
-
-    notifyRequest.setRecipient(bidNew.getBidder().getUsername());
-    notifyRequest.setRelatedResource(bidNew.getBiddingDocument().getId());
-    notifyRequest
-        .setMessage(String.format(NotificationMessage.SEND_ACCEPT_EVIDENCE_NOTIFICATION, offeree.getCompanyName()));
-    notifyRequest.setAction(EnumBiddingNotification.BID_ACCEPTED.name());
-    notifyRequest.setType(EnumNotificationType.BIDDING.name());
     BiddingNotification notification = biddingNotificationService.createBiddingNotification(notifyRequest);
     BiddingNotificationDto notificationDto = BiddingNotificationMapper.toBiddingNotificationDto(notification);
 
@@ -404,20 +259,8 @@ public class NotificationBroadcast {
     });
   }
 
-  public void broadcastRejectContractDocumentToForwarder(Contract contract) {
-    Combined combined = contract.getCombined();
-    Bid bidNew = combined.getBid();
-    CombinedNotificationRequest notifyRequest = new CombinedNotificationRequest();
-    Merchant offeree = bidNew.getBiddingDocument().getOfferee();
-//        List<Container> listContainerBid = containerService.getContainersByBidAndStatus(bidNew.getId(),
-//            EnumSupplyStatus.COMBINED.name());
+  public void broadcastSendContractNotificationToUser(CombinedNotificationRequest notifyRequest) {
 
-    notifyRequest.setRecipient(bidNew.getBidder().getUsername());
-    notifyRequest.setRelatedResource(combined.getId());
-    notifyRequest
-        .setMessage(String.format(NotificationMessage.SEND_REJECT_EVIDENCE_NOTIFICATION, offeree.getCompanyName()));
-    notifyRequest.setAction(EnumCombinedNotification.CONTRACT_REJECTED.name());
-    notifyRequest.setType(EnumNotificationType.COMBINED.name());
     CombinedNotification notification = combinedNotificationService.createCombinedNotification(notifyRequest);
     CombinedNotificationDto notificationDto = CombinedNotificationMapper.toCombinedNotificationDto(notification);
     // Send notification to Forwarder
@@ -430,48 +273,14 @@ public class NotificationBroadcast {
     });
   }
 
-  public void broadcastEditContractToForwarder(Contract contract) {
-    Combined combined = contract.getCombined();
-    Bid bidNew = combined.getBid();
-    CombinedNotificationRequest notifyRequest = new CombinedNotificationRequest();
-    Merchant offeree = bidNew.getBiddingDocument().getOfferee();
-    Forwarder bidder = bidNew.getBidder();
-
-    notifyRequest.setRecipient(bidder.getUsername());
-    notifyRequest.setRelatedResource(combined.getId());
-    notifyRequest
-        .setMessage(String.format(NotificationMessage.SEND_EDIT_CONTRACT_NOTIFICATION, offeree.getCompanyName()));
-    notifyRequest.setAction(EnumCombinedNotification.CONTRACT_EDITED.name());
-    notifyRequest.setType(EnumNotificationType.COMBINED.name());
-    CombinedNotification notification = combinedNotificationService.createCombinedNotification(notifyRequest);
-    CombinedNotificationDto notificationDto = CombinedNotificationMapper.toCombinedNotificationDto(notification);
-    // Send notification to Forwarder
-    executorService.submit(new Runnable() {
-      @Override
-      public void run() {
-        logger.info("notification : {}", notification.getId());
-        contractDocumentWebSocketService.sendContractDocumentNotifyToUser(notificationDto);
-      }
-    });
-  }
-
-  public void broadcastCreateReportToModerator(Report report) {
+  public void broadcastSendReportNotificationToModerator(ReportNotificationRequest notifyRequest) {
     String roleName = "ROLE_MODERATOR";
 
     List<User> moderators = userService.getUsersByRole(roleName);
     if (moderators.size() > 0) {
       List<ReportNotificationDto> notifications = new ArrayList<>();
       moderators.forEach(moderator -> {
-        ReportNotificationRequest notifyRequest = new ReportNotificationRequest();
-
-        // Create new message notifications and save to Database
         notifyRequest.setRecipient(moderator.getUsername());
-        notifyRequest.setTitle(report.getTitle());
-        notifyRequest.setRelatedResource(report.getId());
-        notifyRequest.setMessage(String.format(NotificationMessage.SEND_REPORT_NOTIFICATION_TO_MODERATOR,
-            report.getSender().getCompanyName()));
-        notifyRequest.setAction(EnumReportNotification.NEW.name());
-        notifyRequest.setType(EnumNotificationType.REPORT.name());
         ReportNotification notification = reportNotificationService.createReportNotification(notifyRequest);
         ReportNotificationDto notificationDto = ReportNotificationMapper.toReportNotificationDto(notification);
         notifications.add(notificationDto);
@@ -490,105 +299,8 @@ public class NotificationBroadcast {
     }
   }
 
-  public void broadcastUpdateReportToModerator(Report report) {
-    String roleName = "ROLE_MODERATOR";
+  public void broadcastCreateReportNotificationToUser(ReportNotificationRequest notifyRequest) {
 
-    List<User> moderators = userService.getUsersByRole(roleName);
-    if (moderators.size() > 0) {
-      List<ReportNotificationDto> notifications = new ArrayList<>();
-      moderators.forEach(moderator -> {
-        ReportNotificationRequest notifyRequest = new ReportNotificationRequest();
-
-        // Create new message notifications and save to Database
-        notifyRequest.setRecipient(moderator.getUsername());
-        notifyRequest.setTitle(report.getTitle());
-        notifyRequest.setRelatedResource(report.getId());
-        if (report.getStatus().equals(EnumReportStatus.RESOLVED.name())) {
-          notifyRequest.setMessage(String.format(NotificationMessage.SEND_REPORT_RESOLVED_NOTIFICATION, report.getId(),
-              report.getSender().getCompanyName()));
-          notifyRequest.setAction(EnumReportNotification.RESOLVED.name());
-        } else {
-          notifyRequest.setMessage(String.format(NotificationMessage.SEND_REPORT_UPDATE_STRING_NOTIFICATION,
-              report.getId(), report.getSender().getCompanyName()));
-          notifyRequest.setAction(EnumReportNotification.UPDATE.name());
-        }
-        notifyRequest.setType(EnumNotificationType.REPORT.name());
-        ReportNotification notification = reportNotificationService.createReportNotification(notifyRequest);
-        ReportNotificationDto notificationDto = ReportNotificationMapper.toReportNotificationDto(notification);
-        notifications.add(notificationDto);
-      });
-
-      executorService.submit(new Runnable() {
-        @Override
-        public void run() {
-          notifications.parallelStream().forEach(notification -> {
-            logger.info("notification : {}", notification.getId());
-            reportWebSocketService.sendReportNotifyToModeratorOrUser(notification);
-          });
-        }
-      });
-    }
-  }
-
-  public void broadcastUpdateReportToForwarder(Report report) {
-
-    ReportNotificationRequest notifyRequest = new ReportNotificationRequest();
-
-    // Create new message notifications and save to Database
-    notifyRequest.setRecipient(report.getSender().getUsername());
-    notifyRequest.setTitle(report.getTitle());
-    notifyRequest.setRelatedResource(report.getId());
-    notifyRequest.setMessage(
-        String.format(NotificationMessage.SEND_REPORT_NOTIFICATION_TO_FORWARDER, report.getId(), report.getStatus()));
-    notifyRequest.setAction(report.getStatus());
-    notifyRequest.setType(EnumNotificationType.REPORT.name());
-    ReportNotification notification = reportNotificationService.createReportNotification(notifyRequest);
-    ReportNotificationDto notificationDto = ReportNotificationMapper.toReportNotificationDto(notification);
-
-    executorService.submit(new Runnable() {
-      @Override
-      public void run() {
-        logger.info("notification : {}", notification.getId());
-        reportWebSocketService.sendReportNotifyToModeratorOrUser(notificationDto);
-      }
-    });
-  }
-
-  public void broadcastCreateFeedbackToUser(Feedback feedback) {
-    ReportNotificationRequest notifyRequest = new ReportNotificationRequest();
-
-    // Create new message notifications and save to Database
-    notifyRequest.setRecipient(feedback.getReport().getSender().getUsername());
-    notifyRequest.setTitle(feedback.getReport().getTitle());
-    notifyRequest.setRelatedResource(feedback.getReport().getId());
-    notifyRequest
-        .setMessage(String.format(NotificationMessage.SEND_FEEDBACK_NOTIFICATION, feedback.getSender().getUsername()));
-    notifyRequest.setAction(EnumReportNotification.FEEDBACK.name());
-    notifyRequest.setType(EnumNotificationType.REPORT.name());
-    ReportNotification notification = reportNotificationService.createReportNotification(notifyRequest);
-    ReportNotificationDto notificationDto = ReportNotificationMapper.toReportNotificationDto(notification);
-
-    // Send notification to forwarder
-    executorService.submit(new Runnable() {
-      @Override
-      public void run() {
-        logger.info("notification : {}", notification.getId());
-        reportWebSocketService.sendReportNotifyToModeratorOrUser(notificationDto);
-      }
-    });
-  }
-
-  public void broadcastCreateFeedbackToModerator(String name, Feedback feedback) {
-    ReportNotificationRequest notifyRequest = new ReportNotificationRequest();
-
-    // Create new message notifications and save to Database
-    notifyRequest.setRecipient(name);
-    notifyRequest.setTitle(feedback.getReport().getTitle());
-    notifyRequest.setRelatedResource(feedback.getReport().getId());
-    notifyRequest
-        .setMessage(String.format(NotificationMessage.SEND_FEEDBACK_NOTIFICATION, feedback.getSender().getUsername()));
-    notifyRequest.setAction(EnumReportNotification.FEEDBACK.name());
-    notifyRequest.setType(EnumNotificationType.REPORT.name());
     ReportNotification notification = reportNotificationService.createReportNotification(notifyRequest);
     ReportNotificationDto notificationDto = ReportNotificationMapper.toReportNotificationDto(notification);
 
@@ -602,16 +314,7 @@ public class NotificationBroadcast {
     });
   }
 
-  public void broadcastCreateInvoiceToUser(Invoice invoice) {
-    Contract contract = invoice.getContract();
-    Combined combined = contract.getCombined();
-    CombinedNotificationRequest notifyRequest = new CombinedNotificationRequest();
-    notifyRequest.setRecipient(invoice.getRecipient().getUsername());
-    notifyRequest.setRelatedResource(combined.getId());
-    notifyRequest.setMessage(
-        String.format(NotificationMessage.SEND_CREATE_INVOICE_NOTIFICATION, invoice.getSender().getCompanyCode()));
-    notifyRequest.setAction(EnumCombinedNotification.INVOICE_ADD.name());
-    notifyRequest.setType(EnumNotificationType.COMBINED.name());
+  public void broadcastSendCombinedNotificationToUser(CombinedNotificationRequest notifyRequest) {
 
     CombinedNotification notification = combinedNotificationService.createCombinedNotification(notifyRequest);
     CombinedNotificationDto notificationDto = CombinedNotificationMapper.toCombinedNotificationDto(notification);
@@ -626,52 +329,30 @@ public class NotificationBroadcast {
     });
   }
 
-  public void broadcastSendAcceptInvoiceToUser(Invoice invoice) {
-    Contract contract = invoice.getContract();
-    Combined combined = contract.getCombined();
-    CombinedNotificationRequest notifyRequest = new CombinedNotificationRequest();
-    notifyRequest.setRecipient(invoice.getSender().getUsername());
-    notifyRequest.setRelatedResource(combined.getId());
-    notifyRequest.setMessage(
-        String.format(NotificationMessage.SEND_ACCEPT_INVOICE_NOTIFICATION, invoice.getRecipient().getCompanyCode()));
-    notifyRequest.setAction(EnumCombinedNotification.INVOICE_ACCEPTED.name());
-    notifyRequest.setType(EnumNotificationType.COMBINED.name());
+  public void broadcastSendCombinedNotificationToDriver(Contract contract, CombinedNotificationRequest notifyRequest) {
+    Collection<ShippingInfo> shippingInfos = contract.getShippingInfos();
 
-    CombinedNotification notification = combinedNotificationService.createCombinedNotification(notifyRequest);
-    CombinedNotificationDto notificationDto = CombinedNotificationMapper.toCombinedNotificationDto(notification);
+    if (shippingInfos.size() > 0) {
+      List<CombinedNotificationDto> combinedNotificationDtos = new ArrayList<>();
+      shippingInfos.forEach(shippingInfo -> {
+        CombinedNotification notification = new CombinedNotification();
+        String shippingUserName = shippingInfo.getContainer().getDriver().getUsername();
+        notifyRequest.setRecipient(shippingUserName);
+        notification = combinedNotificationService.createCombinedNotification(notifyRequest);
+        CombinedNotificationDto notificationDto = CombinedNotificationMapper.toCombinedNotificationDto(notification);
+        combinedNotificationDtos.add(notificationDto);
+      });
 
-    // Send notification to User
-    executorService.submit(new Runnable() {
-      @Override
-      public void run() {
-        logger.info("notification : {}", notification.getId());
-        combinedWebSocketService.sendCombinedNotifyToShippingLine(notificationDto);
-      }
-    });
-  }
-
-  public void broadcastSendRejectInvoiceToUser(Invoice invoice) {
-    Contract contract = invoice.getContract();
-    Combined combined = contract.getCombined();
-    CombinedNotificationRequest notifyRequest = new CombinedNotificationRequest();
-    notifyRequest.setRecipient(invoice.getSender().getUsername());
-    notifyRequest.setRelatedResource(combined.getId());
-    notifyRequest.setMessage(
-        String.format(NotificationMessage.SEND_REJECT_INVOICE_NOTIFICATION, invoice.getRecipient().getCompanyCode()));
-    notifyRequest.setAction(EnumCombinedNotification.INVOICE_REJECTED.name());
-    notifyRequest.setType(EnumNotificationType.COMBINED.name());
-
-    CombinedNotification notification = combinedNotificationService.createCombinedNotification(notifyRequest);
-    CombinedNotificationDto notificationDto = CombinedNotificationMapper.toCombinedNotificationDto(notification);
-
-    // Send notification to User
-    executorService.submit(new Runnable() {
-      @Override
-      public void run() {
-        logger.info("notification : {}", notification.getId());
-        combinedWebSocketService.sendCombinedNotifyToShippingLine(notificationDto);
-      }
-    });
+      // Asynchronous send notification to Driver
+      executorService.submit(new Runnable() {
+        @Override
+        public void run() {
+          combinedNotificationDtos.parallelStream().forEach(combinedNotificationDto -> {
+            combinedWebSocketService.sendCombinedNotifyToShippingLine(combinedNotificationDto);
+          });
+        }
+      });
+    }
   }
 
 }

@@ -29,13 +29,17 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.crm.common.ErrorMessage;
+import com.crm.common.NotificationMessage;
 import com.crm.common.SuccessMessage;
+import com.crm.enums.EnumNotificationType;
+import com.crm.enums.EnumReportNotification;
 import com.crm.enums.EnumReportStatus;
 import com.crm.exception.ForbiddenException;
 import com.crm.models.Report;
 import com.crm.models.dto.ReportDto;
 import com.crm.models.mapper.ReportMapper;
 import com.crm.payload.request.PaginationRequest;
+import com.crm.payload.request.ReportNotificationRequest;
 import com.crm.payload.request.ReportRequest;
 import com.crm.payload.response.DefaultResponse;
 import com.crm.payload.response.PaginationResponse;
@@ -65,7 +69,16 @@ public class ReportController {
     ReportDto reportDto = ReportMapper.toReportDto(report);
 
     // CREATE NOTIFICATION
-    notificationBroadcast.broadcastCreateReportToModerator(report);
+    ReportNotificationRequest notifyRequest = new ReportNotificationRequest();
+
+    // Create new message notifications and save to Database
+    notifyRequest.setTitle(report.getTitle());
+    notifyRequest.setRelatedResource(report.getId());
+    notifyRequest.setMessage(
+        String.format(NotificationMessage.SEND_REPORT_NOTIFICATION_TO_MODERATOR, report.getSender().getCompanyName()));
+    notifyRequest.setAction(EnumReportNotification.NEW.name());
+    notifyRequest.setType(EnumNotificationType.REPORT.name());
+    notificationBroadcast.broadcastSendReportNotificationToModerator(notifyRequest);
     // END NOTIFICATION
 
     // Set default response body
@@ -149,10 +162,30 @@ public class ReportController {
     ReportDto reportDto = ReportMapper.toReportDto(editReport);
 
     // CREATE NOTIFICATION
+    ReportNotificationRequest notifyRequest = new ReportNotificationRequest();
+    notifyRequest.setTitle(editReport.getTitle());
+    notifyRequest.setRelatedResource(editReport.getId());
     if (status.equals(report.getStatus()) || report.getStatus().equals(EnumReportStatus.RESOLVED.name())) {
-      notificationBroadcast.broadcastUpdateReportToModerator(editReport);
+      // Create new message notifications and save to Database
+      if (editReport.getStatus().equals(EnumReportStatus.RESOLVED.name())) {
+        notifyRequest.setMessage(String.format(NotificationMessage.SEND_REPORT_RESOLVED_NOTIFICATION,
+            editReport.getId(), editReport.getSender().getCompanyName()));
+        notifyRequest.setAction(EnumReportNotification.RESOLVED.name());
+      } else {
+        notifyRequest.setMessage(String.format(NotificationMessage.SEND_REPORT_UPDATE_STRING_NOTIFICATION,
+            editReport.getId(), editReport.getSender().getCompanyName()));
+        notifyRequest.setAction(EnumReportNotification.UPDATE.name());
+      }
+      notifyRequest.setType(EnumNotificationType.REPORT.name());
+      notificationBroadcast.broadcastSendReportNotificationToModerator(notifyRequest);
     } else {
-      notificationBroadcast.broadcastUpdateReportToForwarder(editReport);
+      // Create new message notifications and save to Database
+      notifyRequest.setRecipient(editReport.getSender().getUsername());
+      notifyRequest.setMessage(String.format(NotificationMessage.SEND_REPORT_NOTIFICATION_TO_FORWARDER,
+          editReport.getId(), editReport.getStatus()));
+      notifyRequest.setAction(editReport.getStatus());
+      notifyRequest.setType(EnumNotificationType.REPORT.name());
+      notificationBroadcast.broadcastCreateReportNotificationToUser(notifyRequest);
     }
     // END NOTIFICATION
 

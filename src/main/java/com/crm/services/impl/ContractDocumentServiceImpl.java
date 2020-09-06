@@ -13,8 +13,12 @@ import org.springframework.stereotype.Service;
 
 import com.crm.common.Constant;
 import com.crm.common.ErrorMessage;
+import com.crm.common.NotificationMessage;
 import com.crm.common.Tool;
+import com.crm.enums.EnumBiddingNotification;
+import com.crm.enums.EnumCombinedNotification;
 import com.crm.enums.EnumContractDocumentStatus;
+import com.crm.enums.EnumNotificationType;
 import com.crm.enums.EnumShippingStatus;
 import com.crm.exception.ForbiddenException;
 import com.crm.exception.InternalException;
@@ -26,6 +30,8 @@ import com.crm.models.Contract;
 import com.crm.models.ContractDocument;
 import com.crm.models.Supplier;
 import com.crm.models.User;
+import com.crm.payload.request.BiddingNotificationRequest;
+import com.crm.payload.request.CombinedNotificationRequest;
 import com.crm.payload.request.ContractDocumentRequest;
 import com.crm.payload.request.PaginationRequest;
 import com.crm.repository.ContractDocumentRepository;
@@ -87,7 +93,16 @@ public class ContractDocumentServiceImpl implements ContractDocumentService {
     }
 
     ContractDocument _evidence = contractDocumentRepository.save(contractDocument);
-    notificationBroadcast.broadcastCreateContractDocumentToMerchant(contract);
+
+    CombinedNotificationRequest notifyRequest = new CombinedNotificationRequest();
+
+    notifyRequest.setRecipient(offeree.getUsername());
+    notifyRequest.setRelatedResource(combined.getId());
+    notifyRequest.setMessage(
+        String.format(NotificationMessage.SEND_CREATE_EVIDENCE_NOTIFICATION, bid.getBidder().getCompanyName()));
+    notifyRequest.setAction(EnumCombinedNotification.CONTRACT_ADD.name());
+    notifyRequest.setType(EnumNotificationType.COMBINED.name());
+    notificationBroadcast.broadcastSendContractNotificationToUser(notifyRequest);
     return _evidence;
   }
 
@@ -175,9 +190,25 @@ public class ContractDocumentServiceImpl implements ContractDocumentService {
     }
 
     if (contractDocument.getStatus().equals(EnumContractDocumentStatus.ACCEPTED.name())) {
-      notificationBroadcast.broadcastAcceptContractDocumentToForwarder(contract);
+      BiddingNotificationRequest notifyRequest = new BiddingNotificationRequest();
+
+      notifyRequest.setRecipient(bid.getBidder().getUsername());
+      notifyRequest.setRelatedResource(bid.getBiddingDocument().getId());
+      notifyRequest
+          .setMessage(String.format(NotificationMessage.SEND_ACCEPT_EVIDENCE_NOTIFICATION, offeree.getCompanyName()));
+      notifyRequest.setAction(EnumBiddingNotification.BID_ACCEPTED.name());
+      notifyRequest.setType(EnumNotificationType.BIDDING.name());
+      notificationBroadcast.broadcastSendBiddingNotificationToUser(notifyRequest);
     } else if (contractDocument.getStatus().equals(EnumContractDocumentStatus.REJECTED.name())) {
-      notificationBroadcast.broadcastRejectContractDocumentToForwarder(contract);
+      CombinedNotificationRequest notifyRequest = new CombinedNotificationRequest();
+
+      notifyRequest.setRecipient(bid.getBidder().getUsername());
+      notifyRequest.setRelatedResource(combined.getId());
+      notifyRequest
+          .setMessage(String.format(NotificationMessage.SEND_REJECT_EVIDENCE_NOTIFICATION, offeree.getCompanyName()));
+      notifyRequest.setAction(EnumCombinedNotification.CONTRACT_REJECTED.name());
+      notifyRequest.setType(EnumNotificationType.COMBINED.name());
+      notificationBroadcast.broadcastSendContractNotificationToUser(notifyRequest);
     }
 
     return _evidence;

@@ -29,5 +29,7 @@ public interface ShippingInfoService {
 
   ShippingInfo editShippingInfo(Long id, String username, ShippingInfoRequest request);
 
+  ShippingInfo editStatusShippingInfoToExpided(Long id, String username, ShippingInfoRequest request);
+
   void removeShippingInfo(Long id, String username);
 }

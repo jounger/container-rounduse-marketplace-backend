@@ -223,6 +223,10 @@ public class BiddingDocumentServiceImpl implements BiddingDocumentService {
         throw new InternalException(ErrorMessage.BIDDINGDOCUMENT_INVALID_CLOSING_TIME);
       }
       biddingDocument.setBidClosing(bidClosingTime);
+      biddingDocument.setStatus(EnumBiddingStatus.BIDDING.name());
+      outbound = biddingDocument.getOutbound();
+      outbound.setStatus(EnumSupplyStatus.BIDDING.name());
+      outboundRepository.save(outbound);
     }
 
     String currency = String.valueOf(updates.get("currentOfPayment"));

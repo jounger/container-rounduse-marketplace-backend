@@ -232,10 +232,12 @@ public class CombinedServiceImpl implements CombinedService {
 
       }
 
-      Double percent = 100D;
-      NumberFormat numberFormat = new DecimalFormat(Constant.CONTRACT_PAID_PERCENTAGE_FORMAT);
-      contract.setPaymentPercentage(Double.valueOf(numberFormat.format(percent)));
-      contractRepository.save(contract);
+      if (!contract.getRequired()) {
+        Double percent = 100D;
+        NumberFormat numberFormat = new DecimalFormat(Constant.CONTRACT_PAID_PERCENTAGE_FORMAT);
+        contract.setPaymentPercentage(Double.valueOf(numberFormat.format(percent)));
+        contractRepository.save(contract);
+      }
 
       Supplier merchant = contract.getSender();
       Supplier forwarder = combined.getBid().getBidder();

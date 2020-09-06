@@ -1,10 +1,10 @@
 package com.crm.services.impl;
 
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -12,6 +12,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import com.crm.common.Constant;
 import com.crm.common.ErrorMessage;
 import com.crm.common.NotificationMessage;
 import com.crm.common.Tool;
@@ -41,11 +42,12 @@ import com.crm.payload.request.InvoiceRequest;
 import com.crm.payload.request.PaginationRequest;
 import com.crm.payload.request.ShippingInfoRequest;
 import com.crm.repository.BidRepository;
+import com.crm.repository.BiddingDocumentRepository;
 import com.crm.repository.CombinedRepository;
+import com.crm.repository.ContainerRepository;
+import com.crm.repository.ContractRepository;
 import com.crm.repository.OutboundRepository;
 import com.crm.repository.UserRepository;
-import com.crm.services.BidService;
-import com.crm.services.BiddingDocumentService;
 import com.crm.services.CombinedService;
 import com.crm.services.ContractService;
 import com.crm.services.InvoiceService;
@@ -68,10 +70,13 @@ public class CombinedServiceImpl implements CombinedService {
   private OutboundRepository outboundRepository;
 
   @Autowired
-  private BidService bidService;
+  private ContainerRepository containerRepository;
 
   @Autowired
-  private BiddingDocumentService biddingDocumentService;
+  private BiddingDocumentRepository biddingDocumentRepository;
+
+  @Autowired
+  private ContractRepository contractRepository;
 
   @Autowired
   private ContractService contractService;
@@ -189,26 +194,48 @@ public class CombinedServiceImpl implements CombinedService {
       }
 
       combined.setIsCanceled(Boolean.valueOf(isCanceled));
-      Map<String, Object> updatesBid = new HashMap<>();
-      updatesBid.put("status", EnumBidStatus.REJECTED.name());
-      bidService.editBid(bid.getId(), username, updatesBid);
 
       BiddingDocument biddingDocument = bid.getBiddingDocument();
+      Outbound outbound = biddingDocument.getOutbound();
       if (biddingDocument.getBidClosing().isBefore(LocalDateTime.now())) {
-        Map<String, Object> updatesBiddingDocument = new HashMap<>();
-        updatesBiddingDocument.put("status", EnumBiddingStatus.EXPIRED.name());
-        biddingDocumentService.editBiddingDocument(biddingDocument.getId(), biddingDocument.getOfferee().getUsername(),
-            updatesBiddingDocument);
+        biddingDocument.setStatus(EnumBiddingStatus.EXPIRED.name());
+        outbound.setStatus(EnumSupplyStatus.CREATED.name());
+        outboundRepository.save(outbound);
+
+        biddingDocument.getBids().forEach(bidEdit -> {
+          if (bidEdit.getStatus().equals(EnumBidStatus.ACCEPTED.name())) {
+            bidEdit.setStatus(EnumBidStatus.REJECTED.name());
+            bidEdit.setDateOfDecision(LocalDateTime.now());
+            bidEdit.getContainers().forEach(container -> {
+              container.setStatus(EnumSupplyStatus.CREATED.name());
+              containerRepository.save(container);
+            });
+            bidRepository.save(bidEdit);
+          }
+        });
+        biddingDocumentRepository.save(biddingDocument);
       } else {
-        Map<String, Object> updatesBiddingDocument = new HashMap<>();
-        updatesBiddingDocument.put("status", EnumBiddingStatus.BIDDING.name());
-        biddingDocumentService.editBiddingDocument(biddingDocument.getId(), biddingDocument.getOfferee().getUsername(),
-            updatesBiddingDocument);
-        Outbound outbound = biddingDocument.getOutbound();
+
+        bid.setStatus(EnumBidStatus.REJECTED.name());
+        bid.setDateOfDecision(LocalDateTime.now());
+        bid.getContainers().forEach(container -> {
+          container.setStatus(EnumSupplyStatus.CREATED.name());
+          containerRepository.save(container);
+        });
+        bidRepository.save(bid);
+
+        biddingDocument.setStatus(EnumBiddingStatus.BIDDING.name());
+        biddingDocumentRepository.save(biddingDocument);
+
         outbound.setStatus(EnumSupplyStatus.BIDDING.name());
         outboundRepository.save(outbound);
 
       }
+
+      Double percent = 100D;
+      NumberFormat numberFormat = new DecimalFormat(Constant.CONTRACT_PAID_PERCENTAGE_FORMAT);
+      contract.setPaymentPercentage(Double.valueOf(numberFormat.format(percent)));
+      contractRepository.save(contract);
 
       Supplier merchant = contract.getSender();
       Supplier forwarder = combined.getBid().getBidder();

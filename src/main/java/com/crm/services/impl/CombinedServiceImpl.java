@@ -79,6 +79,9 @@ public class CombinedServiceImpl implements CombinedService {
   private ContractRepository contractRepository;
 
   @Autowired
+  private BiddingDocumentService biddingDocumentService;
+
+  @Autowired
   private ContractService contractService;
 
   @Autowired

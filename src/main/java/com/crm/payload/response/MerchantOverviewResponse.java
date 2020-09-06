@@ -17,11 +17,11 @@ public class MerchantOverviewResponse implements Serializable {
 
   private int outboundQty;
 
-  private int biddedOutboundQty;
+  private int biddingOutboundQty;
 
-  private int pendingOutboundQty;
+  private int combinedOutboundQty;
 
-  private int combinedOutbountQty;
+  private int deliveredOutbountQty;
 
   private int contractQty;
 

@@ -8,6 +8,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -29,7 +30,7 @@ public class OverviewController {
   private OverviewService overviewService;
 
   @GetMapping
-  public ResponseEntity<?> overview(@Valid OverviewRequest request) {
+  public ResponseEntity<?> overview(@Valid @RequestBody OverviewRequest request) {
     UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     String username = userDetails.getUsername();
     String role = userDetails.getAuthorities().iterator().next().getAuthority();

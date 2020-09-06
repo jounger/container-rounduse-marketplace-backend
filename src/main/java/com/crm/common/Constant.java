@@ -16,7 +16,7 @@ public class Constant {
   public static final String SEARCH_REGEX = "(\\w+?)(:|!|<|>|~)(\\w+?),";
 
   // BID_VALIDITY_PERIOD as bid.bidValidityPeriod
-  public static final long FREEZE_TIME = 5;
+  public static final long FREEZE_TIME = 1;
 
   public static final String EMPTY_STRING = "";
 

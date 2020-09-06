@@ -213,8 +213,37 @@ public class BiddingDocumentServiceImpl implements BiddingDocumentService {
     if (biddingDocument.getStatus().equalsIgnoreCase(EnumBiddingStatus.COMBINED.name())) {
       throw new InternalException(ErrorMessage.BIDDINGDOCUMENT_IS_IN_TRANSACTION);
     }
-
     Outbound outbound = biddingDocument.getOutbound();
+    LocalDateTime packingTime = outbound.getPackingTime();
+
+    String bidClosing = String.valueOf(updates.get("bidClosing"));
+    if (updates.get("bidClosing") != null && !Tool.isBlank(bidClosing)) {
+      LocalDateTime bidClosingTime = Tool.convertToLocalDateTime(bidClosing);
+      if (bidClosingTime.isBefore(LocalDateTime.now()) || bidClosingTime.isAfter(packingTime)) {
+        throw new InternalException(ErrorMessage.BIDDINGDOCUMENT_INVALID_CLOSING_TIME);
+      }
+      biddingDocument.setBidClosing(bidClosingTime);
+    }
+
+    String currency = String.valueOf(updates.get("currentOfPayment"));
+    if (updates.get("currentOfPayment") != null && !Tool.isEqual(biddingDocument.getCurrencyOfPayment(), currency)) {
+      EnumCurrency currencyOfPayment = EnumCurrency.findByName(currency);
+      if (currencyOfPayment == null) {
+        currencyOfPayment = EnumCurrency.VND;
+      }
+      biddingDocument.setCurrencyOfPayment(currencyOfPayment.name());
+    }
+
+    String packagePriceString = String.valueOf(updates.get("bidPackagePrice"));
+    if (updates.get("bidPackagePrice") != null
+        && !Tool.isEqual(biddingDocument.getBidPackagePrice(), packagePriceString)) {
+      biddingDocument.setBidPackagePrice(Double.parseDouble(packagePriceString));
+    }
+
+    String floorPriceString = String.valueOf(updates.get("bidFloorPrice"));
+    if (updates.get("bidFloorPrice") != null && !Tool.isEqual(biddingDocument.getBidFloorPrice(), floorPriceString)) {
+      biddingDocument.setBidFloorPrice(Double.parseDouble(floorPriceString));
+    }
 
     String status = String.valueOf(updates.get("status"));
     EnumBiddingStatus eStatus = null;
@@ -253,41 +282,6 @@ public class BiddingDocumentServiceImpl implements BiddingDocumentService {
           }
         });
       }
-    }
-
-    if (biddingDocument.getStatus().equalsIgnoreCase(EnumBiddingStatus.COMBINED.name())) {
-      throw new InternalException(ErrorMessage.BIDDINGDOCUMENT_IS_IN_TRANSACTION);
-    }
-
-    LocalDateTime packingTime = outbound.getPackingTime();
-
-    String bidClosing = String.valueOf(updates.get("bidClosing"));
-    if (updates.get("bidClosing") != null && !Tool.isBlank(bidClosing)) {
-      LocalDateTime bidClosingTime = Tool.convertToLocalDateTime(bidClosing);
-      if (bidClosingTime.isBefore(LocalDateTime.now()) || bidClosingTime.isAfter(packingTime)) {
-        throw new InternalException(ErrorMessage.BIDDINGDOCUMENT_INVALID_CLOSING_TIME);
-      }
-      biddingDocument.setBidClosing(bidClosingTime);
-    }
-
-    String currency = String.valueOf(updates.get("currentOfPayment"));
-    if (updates.get("currentOfPayment") != null && !Tool.isEqual(biddingDocument.getCurrencyOfPayment(), currency)) {
-      EnumCurrency currencyOfPayment = EnumCurrency.findByName(currency);
-      if (currencyOfPayment == null) {
-        currencyOfPayment = EnumCurrency.VND;
-      }
-      biddingDocument.setCurrencyOfPayment(currencyOfPayment.name());
-    }
-
-    String packagePriceString = String.valueOf(updates.get("bidPackagePrice"));
-    if (updates.get("bidPackagePrice") != null
-        && !Tool.isEqual(biddingDocument.getBidPackagePrice(), packagePriceString)) {
-      biddingDocument.setBidPackagePrice(Double.parseDouble(packagePriceString));
-    }
-
-    String floorPriceString = String.valueOf(updates.get("bidFloorPrice"));
-    if (updates.get("bidFloorPrice") != null && !Tool.isEqual(biddingDocument.getBidFloorPrice(), floorPriceString)) {
-      biddingDocument.setBidFloorPrice(Double.parseDouble(floorPriceString));
     }
 
     BiddingDocument _biddingDocument = biddingDocumentRepository.save(biddingDocument);

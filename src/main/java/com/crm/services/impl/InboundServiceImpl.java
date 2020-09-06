@@ -232,8 +232,8 @@ public class InboundServiceImpl implements InboundService {
         Container container = containerRepository.findById(containers.get(i).getId())
             .orElseThrow(() -> new NotFoundException(ErrorMessage.CONTAINER_NOT_FOUND));
 
-        boolean listContainer = containerRepository.findByNumber(billOfLading.getId(), username,
-            container.getNumber(), inbound.getPickupTime(), freeTime);
+        boolean listContainer = containerRepository.findByNumber(billOfLading.getId(), username, container.getNumber(),
+            inbound.getPickupTime(), freeTime);
         if (!listContainer) {
           throw new InternalException(ErrorMessage.CONTAINER_BUSY);
         }
@@ -326,8 +326,8 @@ public class InboundServiceImpl implements InboundService {
       containers.forEach(item -> {
 
         String containerNumber = item.getNumber();
-        boolean listContainer = containerRepository.findByNumber(billOfLading.getId(), username,
-            containerNumber, pickupTime, billOfLading.getFreeTime());
+        boolean listContainer = containerRepository.findByNumber(billOfLading.getId(), username, containerNumber,
+            pickupTime, billOfLading.getFreeTime());
         if (!listContainer) {
           throw new InternalException(ErrorMessage.CONTAINER_BUSY);
         }
@@ -403,8 +403,10 @@ public class InboundServiceImpl implements InboundService {
         Sort.by(Sort.Direction.DESC, "createdAt"));
     String shippingLine = outbound.getShippingLine().getCompanyCode();
     String containerType = outbound.getContainerType().getName();
-    Page<Inbound> pages = inboundRepository.findByOutboundAndForwarder(username, shippingLine, containerType,
-        pageRequest);
+    List<String> status = new ArrayList<String>();
+    status.add(EnumSupplyStatus.CREATED.name());
+    Page<Inbound> pages = inboundRepository.findByOutboundAndForwarder(username, shippingLine, containerType, status,
+        outbound.getPackingTime(), outbound.getBooking().getCutOffTime(), pageRequest);
     return pages;
   }
 

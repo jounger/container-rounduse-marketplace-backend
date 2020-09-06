@@ -252,8 +252,7 @@ public class BidServiceImpl implements BidService {
 
     String bidStatus = bid.getStatus();
     if (role.getName().equalsIgnoreCase("ROLE_FORWARDER") && !(bidStatus.equalsIgnoreCase(EnumBidStatus.PENDING.name())
-        || bidStatus.equalsIgnoreCase(EnumBidStatus.EXPIRED.name())
-        || bidStatus.equalsIgnoreCase(EnumBidStatus.ACCEPTED.name()))) {
+        || bidStatus.equalsIgnoreCase(EnumBidStatus.EXPIRED.name()))) {
       throw new InternalException(ErrorMessage.BID_INVALID_EDIT);
     }
     List<Container> containers = new ArrayList<>(bid.getContainers());

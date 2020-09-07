@@ -242,6 +242,9 @@ public class OverviewServiceImpl implements OverviewService {
     int newMemberQty = userRepository.countUserByOperator(startDate, endDate);
     response.setNewMemberQty(newMemberQty);
 
+    int totalMember = (int) userRepository.count();
+    response.setTotalMember(totalMember);
+
     statusList = Arrays.asList(EnumUserStatus.PENDING.name());
     int unapprovedRegistration = userRepository.countUserByOperator(startDate, endDate, statusList);
     response.setUnapprovedRegistration(unapprovedRegistration);

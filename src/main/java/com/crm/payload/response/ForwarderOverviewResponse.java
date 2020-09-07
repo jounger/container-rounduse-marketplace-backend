@@ -19,11 +19,11 @@ public class ForwarderOverviewResponse implements Serializable {
 
   private int containerQty;
 
-  private int biddedContainerQty;
-
-  private int pendingContainerQty;
+  private int biddingContainerQty;
 
   private int combinedContainerQty;
+
+  private int deliveredContainerQty;
 
   private int receivedContractQty;
 

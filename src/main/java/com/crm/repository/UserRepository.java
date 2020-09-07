@@ -36,4 +36,8 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
   @Query(value = "SELECT COUNT(u) FROM User u WHERE u.createdAt > :startDate AND u.createdAt < :endDate")
   Integer countUserByOperator(@Param("startDate") Date startDate, @Param("endDate") Date endDate);
 
+  @Query(value = "SELECT COUNT(u) FROM User u WHERE u.createdAt > :startDate AND u.createdAt < :endDate AND u.status IN :statusList")
+  Integer countUserByOperator(@Param("startDate") Date startDate, @Param("endDate") Date endDate,
+      @Param("statusList") List<String> statusList);
+
 }

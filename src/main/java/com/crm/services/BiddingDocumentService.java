@@ -1,6 +1,5 @@
 package com.crm.services;
 
-import java.util.List;
 import java.util.Map;
 
 import org.springframework.data.domain.Page;
@@ -32,6 +31,6 @@ public interface BiddingDocumentService {
 
   void updateExpiredBiddingDocuments(Long id, String status);
 
-  List<BiddingDocument> updateExpiredBiddingDocumentFromList(List<BiddingDocument> biddingDocuments);
+  void updateExpiredBiddingDocumentFromList();
 
 }

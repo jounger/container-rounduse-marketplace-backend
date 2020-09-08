@@ -251,19 +251,19 @@ public class InboundServiceImpl implements InboundService {
             .orElseThrow(() -> new NotFoundException(ErrorMessage.TRACTOR_NOT_FOUND));
 
         boolean containersByDriver = containerRepository.findByDriver(driver.getId(), username, inbound.getPickupTime(),
-            freeTime, billOfLading.getId());
+            freeTime, billOfLading.getId(), EnumSupplyStatus.DELIVERED.name());
         if (!containersByDriver) {
           throw new InternalException(ErrorMessage.DRIVER_BUSY);
         }
 
         boolean listContainerByTractor = containerRepository.findByTractor(containerTractor.getId(), username,
-            inbound.getPickupTime(), freeTime, billOfLading.getId());
+            inbound.getPickupTime(), freeTime, billOfLading.getId(), EnumSupplyStatus.DELIVERED.name());
         if (!listContainerByTractor) {
           throw new InternalException(ErrorMessage.TRACTOR_BUSY);
         }
 
         boolean listContainerByTrailer = containerRepository.findByTrailer(containerSemiTrailer.getId(), username,
-            inbound.getPickupTime(), freeTime, billOfLading.getId());
+            inbound.getPickupTime(), freeTime, billOfLading.getId(), EnumSupplyStatus.DELIVERED.name());
         if (!listContainerByTrailer) {
           throw new InternalException(ErrorMessage.TRAILER_BUSY);
         }
@@ -334,14 +334,14 @@ public class InboundServiceImpl implements InboundService {
 
         Long driverId = item.getDriver().getId();
         boolean listContainerByDriver = containerRepository.findByDriver(driverId, username, pickupTime,
-            billOfLading.getFreeTime(), billOfLading.getId());
+            billOfLading.getFreeTime(), billOfLading.getId(), EnumSupplyStatus.DELIVERED.name());
         if (!listContainerByDriver) {
           throw new InternalException(ErrorMessage.DRIVER_BUSY);
         }
 
         Long tractorId = item.getTractor().getId();
         boolean listContainerByTractor = containerRepository.findByTractor(tractorId, username, pickupTime,
-            billOfLading.getFreeTime(), billOfLading.getId());
+            billOfLading.getFreeTime(), billOfLading.getId(), EnumSupplyStatus.DELIVERED.name());
         if (!listContainerByTractor) {
           throw new InternalException(ErrorMessage.TRACTOR_BUSY);
 
@@ -349,7 +349,7 @@ public class InboundServiceImpl implements InboundService {
 
         Long trailerId = item.getTrailer().getId();
         boolean listContainerByTrailer = containerRepository.findByTrailer(trailerId, username, pickupTime,
-            billOfLading.getFreeTime(), billOfLading.getId());
+            billOfLading.getFreeTime(), billOfLading.getId(), EnumSupplyStatus.DELIVERED.name());
         if (!listContainerByTrailer) {
           throw new InternalException(ErrorMessage.TRAILER_BUSY);
 

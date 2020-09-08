@@ -11,12 +11,15 @@ import com.crm.common.Constant;
 import com.crm.common.ErrorMessage;
 import com.crm.common.Tool;
 import com.crm.enums.EnumShippingStatus;
+import com.crm.enums.EnumSupplyStatus;
 import com.crm.exception.ForbiddenException;
 import com.crm.exception.NotFoundException;
+import com.crm.models.Container;
 import com.crm.models.Merchant;
 import com.crm.models.QRToken;
 import com.crm.models.ShippingInfo;
 import com.crm.models.ShippingLine;
+import com.crm.repository.ContainerRepository;
 import com.crm.repository.DriverRepository;
 import com.crm.repository.QRTokenRepository;
 import com.crm.repository.ShippingInfoRepository;
@@ -33,6 +36,9 @@ public class QRTokenServiceImpl implements QRTokenService {
 
   @Autowired
   DriverRepository driverRepository;
+
+  @Autowired
+  ContainerRepository containerRepository;
 
   @Override
   public QRToken createQRToken(String username, Long id) {
@@ -81,7 +87,7 @@ public class QRTokenServiceImpl implements QRTokenService {
     QRToken qrToken = qrTokenRepository.findByToken(token)
         .orElseThrow(() -> new NotFoundException(ErrorMessage.QRTOKEN_NOT_FOUND));
     ShippingInfo shippingInfo = qrToken.getShippingInfo();
-
+    Container container = shippingInfo.getContainer();
     if (!shippingInfo.getContainer().getDriver().getUsername().equals(username)) {
       throw new ForbiddenException(ErrorMessage.USER_ACCESS_DENIED);
     }
@@ -93,9 +99,12 @@ public class QRTokenServiceImpl implements QRTokenService {
       shippingInfo.setStatus(EnumShippingStatus.SHIPPING.name());
     } else if (rawToken.startsWith(EnumShippingStatus.DELIVERED.name())) {
       shippingInfo.setStatus(EnumShippingStatus.DELIVERED.name());
+      container.setStatus(EnumSupplyStatus.DELIVERED.name());
     } else {
       throw new NotFoundException(ErrorMessage.SHIPPING_INFO_STATUS_NOT_FOUND);
     }
+
+    containerRepository.save(container);
 
     shippingInfoRepository.save(shippingInfo);
 

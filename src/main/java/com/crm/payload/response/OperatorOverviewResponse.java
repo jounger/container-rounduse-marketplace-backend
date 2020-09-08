@@ -59,6 +59,8 @@ public class OperatorOverviewResponse implements Serializable {
 
   private int pendingReportQty;
 
+  private int totalMember;
+
   private int newMemberQty;
 
   private int unapprovedRegistration;

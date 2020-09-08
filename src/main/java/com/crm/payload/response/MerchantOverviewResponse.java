@@ -23,6 +23,12 @@ public class MerchantOverviewResponse implements Serializable {
 
   private int deliveredOutbountQty;
 
+  private int biddingDocumentQty;
+
+  private int successfulBiddingDocumentQty;
+
+  private int failBiddingDocumentQty;
+
   private int contractQty;
 
   private int paidContractQty;

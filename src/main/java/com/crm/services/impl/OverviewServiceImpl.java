@@ -97,6 +97,19 @@ public class OverviewServiceImpl implements OverviewService {
     int deliveredOutbountQty = outboundRepository.countOutbounds(username, statusList, startDate, endDate);
     response.setDeliveredOutbountQty(deliveredOutbountQty);
 
+    int biddingDocumentQty = biddingDocumentRepository.countBiddingDocuments(username, startDate, endDate);
+    response.setBiddingDocumentQty(biddingDocumentQty);
+
+    statusList = Arrays.asList(EnumBiddingStatus.COMBINED.name());
+    int successfulBiddingDocumentQty = biddingDocumentRepository.countBiddingDocuments(username, statusList, startDate,
+        endDate);
+    response.setSuccessfulBiddingDocumentQty(successfulBiddingDocumentQty);
+
+    statusList = Arrays.asList(EnumBiddingStatus.CANCELED.name(), EnumBiddingStatus.EXPIRED.name());
+    int failBiddingDocumentQty = biddingDocumentRepository.countBiddingDocuments(username, statusList, startDate,
+        endDate);
+    response.setFailBiddingDocumentQty(failBiddingDocumentQty);
+
     int contractQty = contractRepository.countContracts(username, startDate, endDate);
     response.setContractQty(contractQty);
 
@@ -138,6 +151,18 @@ public class OverviewServiceImpl implements OverviewService {
     statusList = Arrays.asList(EnumSupplyStatus.DELIVERED.name());
     int deliveredContainerQty = containerRepository.countContainers(username, statusList, startDate, endDate);
     response.setDeliveredContainerQty(deliveredContainerQty);
+
+    int bidQty = bidRepository.countBids(username, startDate, endDate);
+    response.setBidQty(bidQty);
+
+    statusList = Arrays.asList(EnumBidStatus.ACCEPTED.name());
+    int successfulBidQty = bidRepository.countBids(username, statusList, startDate, endDate);
+    response.setSuccessfulBidQty(successfulBidQty);
+
+    statusList = Arrays.asList(EnumBidStatus.CANCELED.name(), EnumBidStatus.EXPIRED.name(),
+        EnumBidStatus.REJECTED.name());
+    int failBidQty = bidRepository.countBids(username, statusList, startDate, endDate);
+    response.setFailBidQty(failBidQty);
 
     int receivedContractQty = contractRepository.countContracts(username, startDate, endDate);
     response.setReceivedContractQty(receivedContractQty);
@@ -231,12 +256,15 @@ public class OverviewServiceImpl implements OverviewService {
     int unpaidContractQty = contractRepository.countUnpaidContractsByOperator(startDate, endDate);
     response.setUnpaidContractQty(unpaidContractQty);
 
+    int reportQty = (int) reportRepository.countReportByOperator(startDate, endDate);
+    response.setReportQty(reportQty);
+
     statusList = Arrays.asList(EnumReportStatus.PENDING.name(), EnumReportStatus.UPDATED.name());
-    int pendingReportQty = reportRepository.countReportByOperator(startDate, endDate);
+    int pendingReportQty = reportRepository.countReportByOperator(startDate, endDate, statusList);
     response.setPendingReportQty(pendingReportQty);
 
     statusList = Arrays.asList(EnumReportStatus.RESOLVED.name());
-    int resolvedReportQty = reportRepository.countReportByOperator(startDate, endDate);
+    int resolvedReportQty = reportRepository.countReportByOperator(startDate, endDate, statusList);
     response.setResolvedReportQty(resolvedReportQty);
 
     int newMemberQty = userRepository.countUserByOperator(startDate, endDate);

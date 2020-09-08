@@ -9,7 +9,9 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import com.crm.common.ErrorMessage;
 import com.crm.enums.EnumUserStatus;
+import com.crm.exception.ForbiddenException;
 import com.crm.models.User;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -93,7 +95,8 @@ public class UserDetailsImpl implements UserDetails {
   @Override
   public boolean isAccountNonLocked() {
     if (this.status.equals(EnumUserStatus.BANNED.name())) {
-      return false;
+      throw new ForbiddenException(ErrorMessage.BANNED_ACCOUNT);
+      //return false;
     }
     return true;
   }

@@ -151,6 +151,8 @@ public class SuccessMessage {
   public static final String EDIT_SUPPLIER_SUCCESSFULLY = "Cập nhật nhà cung cấp thành công";
   public static final String ACCEPT_SUPPLIER_SUCCESSFULLY = "Đơn đăng ký đã được chấp nhận";
   public static final String REJECT_SUPPLIER_SUCCESSFULLY = "Đơn đăng ký đã được từ chối";
+  public static final String BANNED_SUPPLIER_SUCCESSFULLY = "Khóa người dùng thành công";
+  public static final String UNBAN_SUPPLIER_SUCCESSFULLY = "Mở khóa người dùng thành công";
 
   // UserController
   public static final String EDIT_USER_SUCCESSFULLY = "Cập nhật người dùng thành công";

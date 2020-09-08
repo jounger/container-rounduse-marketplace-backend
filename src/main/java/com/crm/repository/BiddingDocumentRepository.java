@@ -76,7 +76,7 @@ public interface BiddingDocumentRepository extends JpaRepository<BiddingDocument
   @Query(value = "SELECT COUNT(bd) FROM BiddingDocument bd"
       + " WHERE bd.offeree.username = :username AND bd.status IN :statusList"
       + " AND bd.createdAt > :startDate AND bd.createdAt < :endDate")
-  Integer countBiddingDocuments(@Param("username") String username, @Param("status") String status,
+  Integer countBiddingDocuments(@Param("username") String username, @Param("statusList") List<String> statusList,
       @Param("startDate") Date startDate, @Param("endDate") Date endDate);
 
   @Query(value = "SELECT bd FROM BiddingDocument bd WHERE bd.status IN :statusList AND bd.bidClosing < :time")

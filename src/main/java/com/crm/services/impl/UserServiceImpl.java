@@ -223,10 +223,10 @@ public class UserServiceImpl implements UserService {
     // true = text/html
     helper.setText("<p>Chúng tôi biết được bạn đã quên mật khẩu tại CRuM. Xin lỗi vì sự bất tiện này!</p>" + "<p></p>"
         + "<p>Đừng lo lắng! Bạn có thể sử dụng đường dẫn dưới đây để cài lại mật khẩu của mình:</p>" + "<p></p>"
-        + "<a href=\'https://www.containerrounduse.com/reset-password/" + token
-        + "'>https://www.containerrounduse.com/reset-password/" + token + "</a>" + "<p></p>"
+        + "<a href=\'http://containerrounduse.com/reset-password/" + token
+        + "\'>http://containerrounduse.com/reset-password/" + token + "</a>" + "<p></p>"
         + "<p>Đường dẫn trên sẽ hết hạn trong vòng 3 tiếng nếu bạn không sử dụng. Để lấy đường dẫn đặt lại mật khẩu mới, "
-        + "hãy truy cập </p><a href=\\'https://www.containerrounduse.com/forgot-password'>https://www.containerrounduse.com/forgot-password</a>"
+        + "hãy truy cập </p><a href=\'http://containerrounduse.com/forgot-password\'>http://containerrounduse.com/forgot-password</a>"
         + "<p>Trân trọng,</p>" + "<p>Container Round User Inc</p>", true);
     // helper.addAttachment("my_photo.png", new ClassPathResource("android.png"));
 

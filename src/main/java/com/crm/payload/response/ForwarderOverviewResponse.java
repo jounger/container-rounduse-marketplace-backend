@@ -25,6 +25,12 @@ public class ForwarderOverviewResponse implements Serializable {
 
   private int deliveredContainerQty;
 
+  private int bidQty;
+
+  private int successfulBidQty;
+
+  private int failBidQty;
+
   private int receivedContractQty;
 
   private int getPaidContractQty;

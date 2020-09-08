@@ -143,17 +143,25 @@ public class SupplierController {
   @PreAuthorize("hasRole('MODERATOR')")
   @RequestMapping(value = "/register/{id}", method = RequestMethod.PATCH, consumes = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<?> reviewRegister(@PathVariable("id") Long id, @RequestBody Map<String, Object> updates) {
-    Supplier supplier = supplierService.editSupplier(updates, id);
+    Supplier supplier = supplierService.getSupplier(id);
+    String oldStatus = supplier.getStatus();
+    supplier = supplierService.editSupplier(updates, id);
     SupplierDto supplierDto = SupplierMapper.toSupplierDto(supplier);
 
     // Set default response body
     DefaultResponse<SupplierDto> defaultResponse = new DefaultResponse<>();
     String status = supplier.getStatus();
-    if (status.equals(EnumUserStatus.ACTIVE.name())) {
+    if (oldStatus.equals(EnumUserStatus.PENDING.name()) && status.equals(EnumUserStatus.ACTIVE.name())) {
       defaultResponse.setMessage(SuccessMessage.ACCEPT_SUPPLIER_SUCCESSFULLY);
+    }
+    if (oldStatus.equals(EnumUserStatus.BANNED.name()) && status.equals(EnumUserStatus.ACTIVE.name())) {
+      defaultResponse.setMessage(SuccessMessage.UNBAN_SUPPLIER_SUCCESSFULLY);
     }
     if (status.equals(EnumUserStatus.REJECTED.name())) {
       defaultResponse.setMessage(SuccessMessage.REJECT_SUPPLIER_SUCCESSFULLY);
+    }
+    if (status.equals(EnumUserStatus.BANNED.name())) {
+      defaultResponse.setMessage(SuccessMessage.BANNED_SUPPLIER_SUCCESSFULLY);
     }
     defaultResponse.setData(supplierDto);
     logger.info("Moderator does reviewRegister: {}", supplier.getUsername());

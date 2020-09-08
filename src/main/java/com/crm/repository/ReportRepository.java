@@ -1,6 +1,7 @@
 package com.crm.repository;
 
 import java.util.Date;
+import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -20,5 +21,9 @@ public interface ReportRepository extends JpaRepository<Report, Long>, JpaSpecif
 
   @Query(value = "SELECT COUNT(r) FROM Report r WHERE r.createdAt > :startDate AND r.createdAt < :endDate")
   Integer countReportByOperator(@Param("startDate") Date startDate, @Param("endDate") Date endDate);
+
+  @Query(value = "SELECT COUNT(r) FROM Report r WHERE r.createdAt > :startDate AND r.createdAt < :endDate AND r.status IN :statusList")
+  Integer countReportByOperator(@Param("startDate") Date startDate, @Param("endDate") Date endDate,
+      @Param("statusList") List<String> statusList);
 
 }

@@ -15,7 +15,11 @@ public class ShippingLineOverviewResponse implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
+  private Integer containerQty;
+
   private Integer biddingContainerQty;
 
   private Integer combinedContainerQty;
+
+  private Integer deliveredContainerQty;
 }

@@ -28,10 +28,14 @@ public interface OutboundRepository extends JpaRepository<Outbound, Long>, JpaSp
   @Query(value = "SELECT DISTINCT o FROM Outbound o LEFT JOIN o.biddingDocuments bd"
       + " LEFT JOIN bd.bids b LEFT JOIN b.combined c WHERE c.id = :id")
   Optional<Outbound> findByCombined(@Param("id") Long combinedId);
-  
-  @Query(value = "SELECT COUNT(o) FROM Outbound o"
-      + " WHERE o.createdAt > :startDate AND o.createdAt < :endDate")
+
+  @Query(value = "SELECT COUNT(o) FROM Outbound o" + " WHERE o.createdAt > :startDate AND o.createdAt < :endDate")
   Integer countOutbounds(@Param("startDate") Date startDate, @Param("endDate") Date endDate);
+
+  @Query(value = "SELECT COUNT(o) FROM Outbound o" + " WHERE o.status in :statusList"
+      + " AND o.createdAt > :startDate AND o.createdAt < :endDate")
+  Integer countOutbounds(@Param("statusList") List<String> statusList, @Param("startDate") Date startDate,
+      @Param("endDate") Date endDate);
 
   @Query(value = "SELECT COUNT(o) FROM Outbound o WHERE o.merchant.username = :username"
       + " AND o.createdAt > :startDate AND o.createdAt < :endDate")
